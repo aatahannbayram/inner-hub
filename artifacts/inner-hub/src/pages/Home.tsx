@@ -1,4 +1,5 @@
 import React from "react";
+import innerLogoUrl from "@assets/inner-linkedin-logo_400x400_1782915537865.png";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -279,21 +280,27 @@ export default function Home() {
         </section>
       </main>
 
-      <footer className="px-6 md:px-12 lg:px-[10%] py-16 border-t border-border/15 flex flex-col gap-12 text-muted-foreground font-mono text-[10px] uppercase tracking-widest">
-        <div className="flex flex-wrap gap-x-6 gap-y-2">
-          <span>inner.hub</span>
-          <span>·</span>
-          <span>inner.lab</span>
-          <span>·</span>
-          <span>inner.studio</span>
-          <span>·</span>
-          <span>inner.capital</span>
-          <span>·</span>
-          <span>inner.house</span>
-        </div>
-        <div className="flex items-end justify-between">
-          <span>© 2026 inner. İstanbul.</span>
-          <div className="w-[0.4em] h-[0.4em] bg-[var(--inner-green)]" aria-hidden="true" />
+      <footer className="bg-[var(--ink)] px-6 md:px-12 lg:px-[10%] py-20 flex flex-col gap-16">
+        <img
+          src={innerLogoUrl}
+          alt="inner"
+          className="w-20 h-20 object-contain"
+        />
+        <div className="flex flex-col gap-6">
+          <div className="flex flex-wrap gap-x-5 gap-y-2 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)] opacity-40">
+            <span>inner.hub</span>
+            <span>·</span>
+            <span>inner.lab</span>
+            <span>·</span>
+            <span>inner.studio</span>
+            <span>·</span>
+            <span>inner.capital</span>
+            <span>·</span>
+            <span>inner.house</span>
+          </div>
+          <div className="font-mono text-[10px] uppercase tracking-widest text-[var(--bone)] opacity-30">
+            © 2026 inner. İstanbul.
+          </div>
         </div>
       </footer>
     </div>
