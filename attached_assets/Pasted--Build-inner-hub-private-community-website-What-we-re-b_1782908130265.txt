@@ -1,0 +1,122 @@
+# Build: inner.hub — private community website
+
+## What we're building
+A restrained, editorial, invitation-only website for **inner.hub**, a private community for founders, investors, and researchers, based in İstanbul and founded in 2022. The site's job is not to sell — it's to signal. It should feel quiet, confident, and exclusive: the kind of page where the restraint itself is the message. Think the calm of Are.na, the editorial minimalism of early NTS Radio, and the composed typography of Anthropic's brand.
+
+The public site is intentionally minimal. The only interactive element is a quiet "request an invitation" form.
+
+## Tech stack (use exactly this)
+- **Next.js (App Router) + TypeScript**
+- **Tailwind CSS** for styling
+- A **server-side API route** for the invitation form
+- **Database**: use Replit's built-in Postgres (or SQLite if that's simpler to wire up) to store invitation requests
+- No heavy UI libraries. Keep dependencies minimal and the codebase clean.
+
+## Brand / design system (follow precisely)
+
+### Colors (define as CSS variables / Tailwind theme tokens)
+- **Ink** `#0A0A0A` — primary text and dark surfaces
+- **Bone** `#F4F1EC` — primary light background / paper
+- **Inner Green** `#18FF85` — the single accent. Use sparingly. This is the signal color; it should never read as decorative.
+
+Default the site to a **Bone background with Ink text** (light, paper-like). Green appears only in the signature mark and one or two precise accents.
+
+### Typography
+- **Fraunces** (serif) — display, headlines, large statements. Load from Google Fonts.
+- **Geist** (sans) — body and UI. Install via the `geist` npm package. If unavailable, fall back to **Inter Tight** from Google Fonts.
+- **JetBrains Mono** — labels, section numbers, metadata, form labels. Load from Google Fonts.
+
+Set a clear type scale: headlines large and confident in Fraunces; body calm and readable in Geist; all small metadata/labels in uppercase JetBrains Mono with generous letter-spacing.
+
+### The signature (this is the locked brand mark — get it exactly right)
+inner's signature is a **small filled square** in Inner Green (`#18FF85`), sitting on the **text baseline**. It is a **square, never a circle.**
+
+In the primary logo lockup, render the wordmark as: the word **inner** in lowercase, then the green square as the connective mark, then the sub-brand suffix **hub** — visually `inner` `■` `hub`, where `■` is the green square. The square should be roughly x-height sized (about 0.5em), solid Inner Green, baseline-aligned, with small optical spacing on each side.
+
+- In running body text, a normal period is fine — the green square is reserved for the logo lockup and deliberate accents.
+- Optional, very subtle: give the square a slow, gentle opacity pulse (a quiet signal / beacon) — a 3–4 second ease loop, barely noticeable. If it reads as gimmicky at all, make it static. Disable it when `prefers-reduced-motion` is set.
+
+## Layout & tone
+- Editorial, left-aligned, generous negative space. Wide margins. Let the page breathe.
+- Number sections in JetBrains Mono like an index: `01`, `02`, `03`…
+- Thin hairline rules (1px, low-opacity Ink) as dividers.
+- A single long scrolling page (not multiple routes). Smooth and restrained.
+- Motion: subtle fade / slide-up as sections enter the viewport. Slow and calm — nothing bouncy or flashy. Respect `prefers-reduced-motion`.
+- Fully responsive, mobile-first. It must feel just as composed on a phone.
+- Accessible: semantic HTML, strong contrast, keyboard-navigable form, visible focus states.
+
+## Page structure & copy (use this copy verbatim)
+
+**Header (minimal, static or lightly sticky):**
+- Left: the `inner■hub` lockup.
+- Right (JetBrains Mono, small): `BY INVITATION`
+
+**Hero (full viewport):**
+- Small mono line above: `İSTANBUL · EST. 2022 · BY INVITATION`
+- Large Fraunces statement:
+  > A private community for the people building what comes next.
+- Lots of space below; a single hairline and a quiet scroll cue.
+
+**01 — On inner:**
+- Mono label: `01 — ON INNER`
+- Body (Geist):
+  > inner.hub is a small, deliberate room. We bring together founders, investors, and researchers who take their work seriously — and each other's time just as seriously. No stage. No audience. Only company. What is said here stays here. Who is here is chosen with care.
+
+**Principles (four short lines — mono label + Fraunces phrase + one line of Geist each):**
+- `SMALL BY DESIGN` — We stay small so the room stays real.
+- `SIGNAL OVER NOISE` — We value depth over reach.
+- `DISCRETION` — What happens inside, stays inside.
+- `COMPANY, NOT AUDIENCE` — We gather as peers, never as performers.
+
+**02 — The gathering:**
+- Mono label: `02 — THE GATHERING`
+- Fraunces:
+  > The first inner.hub gathering. September 2026.
+- Geist:
+  > Thirty people. Two days. One room. By invitation only.
+
+**03 — Request an invitation (the only interactive section):**
+- Mono label: `03 — REQUEST AN INVITATION`
+- Fraunces heading:
+  > Request an invitation.
+- Geist sub:
+  > inner.hub is invitation-only. If you'd like to be considered, tell us a little about yourself. We read everything.
+- Form fields (labels in mono):
+  - `NAME` (text, required)
+  - `EMAIL` (email, required)
+  - `WHO YOU ARE / WHAT YOU'RE BUILDING` (short textarea, required)
+  - `LINK` (url, optional — LinkedIn or website)
+  - `WHO INTRODUCED YOU` (text, optional)
+  - A hidden honeypot field for spam (e.g. a visually-hidden `company` input that must stay empty).
+- Submit button (mono): `SEND`
+- On success, replace the form with a quiet confirmation (Fraunces):
+  > Received. If it's a fit, we'll be in touch.
+- Handle errors gracefully with a calm inline message.
+
+**Footer:**
+- The inner sub-brand system, listed quietly (mono, low emphasis):
+  `inner.hub  ·  inner.lab  ·  inner.studio  ·  inner.capital  ·  inner.house`
+- Line below: `© 2026 inner. İstanbul.`
+- A single green square accent placed here.
+
+## Backend (invitation form)
+- A POST endpoint (e.g. `/api/request`) that validates input server-side and stores each request in the database with a timestamp.
+- Reject any submission where the honeypot field is filled.
+- Add basic per-IP rate limiting if it's straightforward.
+- Add a simple protected admin view at `/requests` that lists submissions, gated behind a single passcode read from an environment variable (`ADMIN_PASSCODE`). Don't build full authentication — a passcode gate is enough.
+- Keep all secrets (the admin passcode, any database URL) in Replit's environment variables / secrets — never hardcoded in the source.
+
+## Details
+- Page `<title>`: `inner.hub`
+- Favicon: the green square on an Ink or Bone background.
+- Minimal, on-brand meta description and Open Graph tags so private link-shares preview cleanly (e.g. "A private community. By invitation.").
+
+## Definition of done
+- The page loads fast, looks composed on desktop and mobile, and feels quiet and premium.
+- Fonts render correctly (Fraunces, Geist / Inter Tight fallback, JetBrains Mono).
+- The green square signature is correct: a baseline-aligned square, Inner Green, in the logo lockup.
+- The invitation form validates, stores requests, shows the confirmation state, and blocks spam via the honeypot.
+- `/requests` lists stored submissions behind the passcode.
+- No console errors. Clean, commented, well-structured code.
+
+Build the whole thing, then show me a live preview.
