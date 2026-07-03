@@ -119,7 +119,7 @@ export default function Home() {
           <SectionLabel label="01 — On inner" meta="Est. 2022" />
           <FadeIn>
             <div className="max-w-[65ch] text-lg md:text-xl leading-[1.7] text-foreground/90">
-              inner.hub is a small, deliberate room. We bring together founders, investors, and researchers who take their work seriously — and each other's time just as seriously. No stage. No audience. Only company. What is said here stays here. Who is here is chosen with care.
+              inner.hub is where serious AI builders, founders, and investors share one room — and where the distance between local talent and global capital gets shorter. No stage. No audience. Only company. This is not a community for everyone. It is a room built deliberately, person by person.
             </div>
           </FadeIn>
         </section>
@@ -132,7 +132,7 @@ export default function Home() {
             {[
               {
                 label: "Small by design",
-                line: "We stay small so the room stays real.",
+                line: "We stay small so the circle stays real.",
               },
               {
                 label: "Signal over noise",
@@ -169,13 +169,13 @@ export default function Home() {
               Entry is by invitation. Always.
             </h2>
             <p className="max-w-[65ch] text-lg leading-[1.7] text-foreground/90 mb-20">
-              There is no membership tier, no waitlist counter, no public roster. Members are nominated from inside the room, considered carefully, and invited personally. We look for people who build, back, or study what comes next — and who understand that trust is the only currency that matters here.
+              There is no membership tier, no waitlist counter, no public roster. Members are nominated from inside the circle, considered carefully, and invited personally. We look for people who build, back, or study what comes next — and who understand that trust is the only currency that matters here.
             </p>
           </FadeIn>
 
           <div className="max-w-3xl">
             {[
-              { label: "Nomination", line: "Someone inside the room puts your name forward." },
+              { label: "Nomination", line: "Someone inside the circle puts your name forward." },
               { label: "Consideration", line: "We take our time. Fit matters more than fame." },
               { label: "Invitation", line: "If it's right, you'll hear from us directly." },
             ].map((item, i) => (
@@ -233,45 +233,9 @@ export default function Home() {
           </FadeIn>
         </section>
 
-        {/* 05 — The ecosystem */}
+        {/* 05 — Request an invitation */}
         <section id="section-05" className="px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15">
-          <SectionLabel label="05 — The ecosystem" meta="Five rooms" />
-          <FadeIn>
-            <h2 className="font-display font-serif italic text-4xl md:text-5xl max-w-2xl mb-8 text-balance">
-              hub is the first room of inner.
-            </h2>
-            <p className="max-w-[65ch] text-lg leading-[1.7] text-foreground/90 mb-20">
-              inner is built as a system of rooms — a lab for research, a studio for making, capital for backing, a house for gathering. hub opens first. The rest follow.
-            </p>
-          </FadeIn>
-
-          <div className="max-w-2xl">
-            {[
-              { name: "inner.hub", status: "Now", active: true },
-              { name: "inner.lab", status: "To follow", active: false },
-              { name: "inner.studio", status: "To follow", active: false },
-              { name: "inner.capital", status: "To follow", active: false },
-              { name: "inner.house", status: "To follow", active: false },
-            ].map((item, i) => (
-              <FadeIn key={item.name} delay={i * 0.05}>
-                <div className="group flex items-center justify-between py-5 border-t border-border/15 transition-colors hover:border-foreground/40 last:border-b last:hover:border-b-foreground/40">
-                  <span className="font-serif text-lg md:text-xl">{item.name}</span>
-                  <span
-                    className={`font-mono text-xs uppercase tracking-widest transition-transform duration-300 ${
-                      item.active ? "text-[var(--inner-green)]" : "text-muted-foreground group-hover:-translate-x-1"
-                    }`}
-                  >
-                    {item.status}
-                  </span>
-                </div>
-              </FadeIn>
-            ))}
-          </div>
-        </section>
-
-        {/* 06 — Request an invitation */}
-        <section id="section-06" className="px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15">
-          <SectionLabel label="06 — Request an invitation" meta="We read everything" />
+          <SectionLabel label="05 — Request an invitation" meta="We read everything" />
 
           {isSuccess ? (
             <div className="max-w-2xl py-12">
@@ -283,7 +247,7 @@ export default function Home() {
               <div className="max-w-2xl">
                 <h2 className="font-serif text-4xl md:text-5xl mb-6">Request an invitation.</h2>
                 <p className="text-lg text-muted-foreground mb-16 leading-[1.7]">
-                  The room is nomination-first, but good people arrive from unexpected directions. If you believe you belong here, tell us who you are. We read everything.
+                  The circle is nomination-first, but good people arrive from unexpected directions. If you believe you belong here, tell us who you are. We read everything.
                 </p>
 
                 <Form {...form}>
@@ -432,15 +396,7 @@ export default function Home() {
       <footer id="site-footer" className="bg-[var(--ink)] px-6 md:px-12 lg:px-[10%] pt-20 pb-6 flex flex-col gap-16 overflow-hidden">
         <div className="flex flex-col gap-6">
           <div className="flex flex-wrap gap-x-5 gap-y-2 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)] opacity-60">
-            <span>inner.hub</span>
-            <span>·</span>
-            <span>inner.lab</span>
-            <span>·</span>
-            <span>inner.studio</span>
-            <span>·</span>
-            <span>inner.capital</span>
-            <span>·</span>
-            <span>inner.house</span>
+            <span>The inner circle · İstanbul → Global · By invitation</span>
           </div>
           <div className="font-mono text-[10px] uppercase tracking-widest text-[var(--bone)] opacity-30">
             © 2026 inner. İstanbul.

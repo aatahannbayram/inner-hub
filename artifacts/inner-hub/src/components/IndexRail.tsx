@@ -6,7 +6,6 @@ const SECTIONS = [
   { id: "section-03", label: "03" },
   { id: "section-04", label: "04" },
   { id: "section-05", label: "05" },
-  { id: "section-06", label: "06" },
 ];
 
 export function IndexRail() {

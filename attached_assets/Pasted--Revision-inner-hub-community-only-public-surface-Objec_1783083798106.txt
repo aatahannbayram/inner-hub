@@ -1,0 +1,42 @@
+# Revision: inner.hub — community-only public surface
+
+## Objective
+The live site currently references the wider roadmap (studio, capital, "rooms", the ecosystem). Remove every trace of it. Publicly, inner.hub is **one thing: a private, invitation-only community** of AI-native builders, founders, and investors. No future phases, no unnamed rooms, no ecosystem language anywhere — visible text, alt text, aria labels, metadata, comments, and code identifiers included.
+
+Change ONLY what is listed below. Design system, fonts, grain, preloader, motion, the Ink interlude, the live clock, the index rail, the form, the backend, and all other copy stay exactly as they are.
+
+---
+
+## 1 — Delete entirely
+- **Section 05 — THE ECOSYSTEM**: the heading "hub is the first ring.", its body copy, the concentric-rings SVG diagram, its rotation animation, the legend (`hub — NOW · studio — NEXT · capital — LATER · — UNNAMED —`), and the accessible list version. Remove the component and any related code/assets.
+- Every occurrence of the words **studio**, **capital**, **ring(s)**, **room(s)**, **ecosystem**, and the unnamed dash pair **`— · —`** anywhere in the site (copy, footer, meta, alt/aria, HTML comments).
+
+## 2 — Replace (use this copy VERBATIM)
+
+**Section 01 — ON INNER** body becomes:
+> inner.hub is where serious AI builders, founders, and investors share one room — and where the distance between local talent and global capital gets shorter. No stage. No audience. Only company. This is not a community for everyone. It is a room built deliberately, person by person.
+
+**Section 03 — MEMBERSHIP**, the two-column mono pair: relabel `FOR CAPITAL` → `FOR INVESTORS` (line text unchanged: "See the builders before the world does.").
+
+**Footer**: the sub-brand line (`inner.hub · inner.studio · inner.capital · — · —`) becomes a single mono line:
+`THE INNER CIRCLE · İSTANBUL → GLOBAL · BY INVITATION`
+Keep the logo, the copyright line, and the monumental `inner■` wordmark exactly as they are.
+
+## 3 — Renumber
+With the ecosystem section gone, the page has five sections. Renumber labels, annotations, anchors, and the index rail to `01–05`:
+- `01 — ON INNER` · annotation `EST. 2022`
+- `02 — PRINCIPLES` · `FOUR LINES`
+- `03 — MEMBERSHIP` · `BY NOMINATION`
+- `04 — THE GATHERING` · `SEP 2026 · İSTANBUL`
+- `05 — REQUEST AN INVITATION` · `WE READ EVERYTHING`
+The index rail shows `01–05` and its active-section tracking still works.
+
+## 4 — Sanity keep-list (do not touch)
+Hero copy ("The inner circle for the people building what comes next." + sub), Principles, Membership steps, the Ink-interlude Gathering section with the 30 / 2 / 1 triptych, the form and its backend, `/requests`, the live İstanbul clock, grain, preloader, Lenis, reduced-motion behavior, SEO tags (title `inner.hub — the inner circle` and description are already community-only — keep).
+
+## Definition of done
+- Site-wide search for `studio`, `capital`, `ring`, `room`, `ecosystem`, `— · —` returns zero hits in rendered HTML and source (excluding the word "room" inside the approved 30/2/1 caption `ROOM` and the 01 body sentence above — these two stay).
+- Five sections, correctly renumbered; index rail matches; no dead anchors; no console errors.
+- View-source confirms all remaining copy is server-rendered and unchanged outside the edits above.
+
+Apply the revision, then show me a live preview.
