@@ -1,0 +1,175 @@
+# Build: inner.hub — the first room of the inner circle (v4, full specification)
+
+## Positioning (read this first — it drives every decision)
+inner.hub is **not a small community site**. It is the public face of the first room of an ambitious, deliberately-phased ecosystem ("the inner circle"): a private, invitation-only network of **AI-native app builders, founders, and investors**, started in İstanbul and aimed at the world. Future rooms (a studio, capital, and unnamed others) exist as visible-but-dim rings — teased, never explained. The site's tone is **quiet ambition**: selective like a private registry, confident like a fund, credible to developers. It must never sound like a meetup, a co-working space, or a marketing page.
+
+Reference feeling: the archival editorial restraint of the best minimal fund sites, the developer-native credibility of radically plain "registry" pages, and the slow, expensive calm of quiet-luxury brands. Every choice must pass one test: **does it make the page feel quieter, sharper, and more inevitable?**
+
+---
+
+## Tech stack (use exactly this)
+- **Next.js (App Router) + TypeScript + Tailwind CSS**
+- **All copy server-rendered** — every word must exist in view-source HTML. No client-only text rendering.
+- One long scrolling page; a hidden `/requests` admin route; a POST API route for the form.
+- **Database:** Replit Postgres (or SQLite if simpler) for invitation requests.
+- Allowed extra dependency: `lenis` (smooth scroll). No GSAP, no three.js, no UI kits.
+
+---
+
+## Brand system — "Quiet Signal" (locked)
+
+### Colors (Tailwind tokens / CSS variables)
+- **Ink** `#0A0A0A` — text on light; dark surfaces
+- **Bone** `#F4F1EC` — paper background
+- **Inner Green** `#18FF85` — the single sacred accent: logo square, `NOW` status, live elements, text selection. Never UI feedback, never decoration.
+- **Stone** `#6E6A63` — secondary text, archival annotations, dim states
+- Error only: muted terracotta `#B4553B` (form validation text exclusively)
+
+Text selection: Inner Green background, Ink text.
+
+### Typography
+- **Fraunces — load as a TRUE VARIABLE FONT** via `next/font/google` with `axes: ['opsz', 'SOFT', 'WONK']`. Set `font-optical-sizing: auto` globally. Display headlines use `font-style: italic` + `font-variation-settings: 'opsz' 144, 'WONK' 1, 'SOFT' 0` — at high optical size with WONK on, the italic shows flagged ball terminals (b, d, h, k, l) that match the logo's letterforms exactly. All major statements are Fraunces italic. Never force opsz 144 below ~40px.
+- **Geist** (npm `geist`; fallback Inter Tight from Google) — body, max 65ch, line-height 1.7.
+- **JetBrains Mono** — labels, numbers, metadata: always uppercase, 10–13px, letter-spacing 0.08–0.12em, `font-variant-numeric: tabular-nums`.
+- Type scale: hero `clamp(2.6rem, 7.5vw, 6rem)`; section headlines `clamp(1.75rem, 4vw, 3rem)`; display letter-spacing −0.01 to −0.02em; `text-wrap: balance` on all headlines.
+
+### Logo & the green square (exact rules)
+Canonical file **`inner-logo.png`** (italic serif "inner" + solid Inner Green **square** on the baseline as the period, on Ink) lives in `public/`. Use the PNG directly for favicon, OG image, and inside the Ink footer. It must never sit on Bone. On Bone, reproduce typographically: `inner` in Fraunces italic + a baseline-aligned solid green square (~0.5em) + `hub` → reads `inner■hub`. Square, never circle. In body text a normal period is fine. Optional: one slow opacity pulse on the logo square on hover only.
+
+---
+
+## Texture, motion & feel
+
+- **Paper grain:** fixed full-viewport SVG `feTurbulence` noise (fractalNoise, baseFrequency ≈ 0.65) as a data-URI overlay at 2.5–4% opacity, `mix-blend-mode: multiply` on Bone / `screen` on Ink, `pointer-events:none`, **static** (never animated). Bone must read as paper, Ink as matte card stock.
+- **One easing everywhere:** `cubic-bezier(0.16, 1, 0.3, 1)`, durations 600–900ms. Nothing bounces. No parallax, no 3D, no cursor-chasing.
+- **Lenis smooth scroll**, lerp ≈ 0.1; disabled under `prefers-reduced-motion` and on touch if it fights native feel.
+- **Reveals:** display headlines split by line, each line rises from an overflow mask (translateY 100%→0, 80–120ms stagger), triggered once at ~25% visibility via IntersectionObserver. Body/labels: fade + 16px rise. Section hairlines draw themselves (scaleX 0→1, origin left).
+- **Preloader**, first visit per session only (sessionStorage), ≤900ms total: Ink screen, centered green square pulses once (~500ms), then a single upward wipe reveals the hero, whose line-reveal then plays. Skipped entirely under reduced motion.
+- Every animated element has a reduced-motion fallback: fully visible, no transforms.
+
+---
+
+## Global elements
+
+- **Header** (light sticky, Bone backdrop-blur): left — typographic `inner■hub` lockup; right — a two-line mono block, right-aligned, ~11px:
+  `BY INVITATION`
+  `İSTANBUL 41.00°N 28.97°E · 14:32:07 TRT`
+  The clock ticks every second client-side (Europe/Istanbul, tabular-nums). This is the only living element in the header. On mobile drop the coordinates.
+- **Index rail** (desktop ≥1024px only): fixed vertical `01–06` in mono on the right edge, low opacity; current section full-opacity with a small green square that slides between numbers; each is an anchor link.
+- Layout: left-aligned editorial; content max-width ~1120px; side padding 24px mobile / 64px+ desktop; 120–200px between sections on desktop; hairlines 1px Ink @ ~14% opacity.
+- Each section's mono label row is two-ended on the top hairline: label left, **archival annotation right** (both mono ~11px, Stone).
+
+---
+
+## Page structure & copy (use copy VERBATIM)
+
+### Hero (full viewport)
+- Eyebrow (mono): `İSTANBUL → GLOBAL · EST. 2022 · BY INVITATION`
+- H1 (Fraunces italic, opsz 144, WONK 1):
+  > The inner circle for the people building what comes next.
+- Sub (Geist, one line):
+  > A private network of AI-native builders, founders, and investors. Started in İstanbul. Aimed everywhere.
+- Hairline + quiet mono `SCROLL` cue.
+
+### 01 — ON INNER · annotation `EST. 2022`
+> inner.hub is where serious AI builders, founders, and investors share one room — and where the distance between local talent and global capital gets shorter. No stage. No audience. Only company. This is not a community for everyone, and it is not only a community: it is the first room of an ecosystem being built deliberately, one door at a time.
+
+### 02 — PRINCIPLES · annotation `FOUR LINES`
+Four entries (mono label + one Geist line), hairline-separated list or 2×2 grid:
+- `SELECTIVE BY DESIGN` — Entry stays rare so the room stays sharp.
+- `SIGNAL OVER NOISE` — Depth over reach. Proof over promise.
+- `BUILDERS AT THE CENTER` — For people who ship, back, or study what's next.
+- `QUIET AMBITION` — We announce little and build a lot.
+
+### 03 — MEMBERSHIP · annotation `BY NOMINATION`
+- H (Fraunces italic): 
+  > Entry is by invitation. Always.
+- Body:
+  > There is no ticket, no tier, no public roster. Members are nominated from inside the circle, considered carefully, and invited personally. We look for AI-native app builders, founders with real products, investors with real conviction, and researchers ahead of the field — people who understand that trust is the only currency in this room.
+- Three-step index (mono label + one line, hairline-separated):
+  - `NOMINATION` — Someone inside the circle puts your name forward.
+  - `CONSIDERATION` — We take our time. Fit matters more than fame.
+  - `INVITATION` — If it's right, you'll hear from us directly.
+- Beneath, a quiet two-column mono pair (the only place the dual audience is addressed directly):
+  - `FOR BUILDERS` — Reach the people who fund and scale what you ship.
+  - `FOR CAPITAL` — See the builders before the world does.
+
+### 04 — THE GATHERING · annotation `SEP 2026 · İSTANBUL` — **the Ink interlude**
+Full-bleed **Ink section**: page background crossfades Bone→Ink on enter and back on exit (~600ms, no hard edges). Bone text. One static green square allowed.
+- H: 
+  > The first inner.hub gathering. İstanbul, September 2026.
+- Oversized numeric triptych in Fraunces italic (opsz 144): **30 / 2 / 1** with mono captions `PEOPLE` · `DAYS` · `ROOM`. This is the emotional center of the page.
+- Line (Geist): 
+  > The first of many.
+- Small mono, reduced opacity: `DETAILS ARE SHARED WITH INVITEES ONLY.`
+
+### 05 — THE ECOSYSTEM · annotation `ROOMS OPEN ONE BY ONE` — **the concentric diagram**
+- H (Fraunces italic): 
+  > hub is the first ring.
+- Body:
+  > inner is built as concentric rooms around its members — a studio for building, capital for backing, and rings we haven't named yet. Nothing is announced before it's real. The circle is already drawn.
+- **Diagram (the ecosystem signature):** an inline SVG of concentric rings centered on a small solid Inner Green square (the member):
+  - Ring 1 (innermost): Inner Green stroke, 1.25px — **hub**.
+  - Ring 2: Stone-dark stroke — **studio**.
+  - Ring 3: dimmer stroke — **capital**.
+  - Ring 4 (outermost): faint **dashed** stroke — unnamed.
+  - One 2.5px green dot sits on ring 1; the whole ring group rotates extremely slowly (CSS, ~140s linear infinite; static under reduced motion). Diagram ~440px on desktop, scales down gracefully; decorative `aria-hidden` with an adjacent text equivalent.
+- Legend under the diagram (mono, single row, wraps on mobile): `hub — NOW` (green) · `studio — NEXT` (Stone) · `capital — LATER` (Stone) · `— UNNAMED —` (Stone, low opacity). Also render this as a plain mono list in the DOM for accessibility/SEO.
+- Row hover (legend/list): hairline darkens, status nudges 4px left; `NOW` keeps its green.
+
+### 06 — REQUEST AN INVITATION · annotation `WE READ EVERYTHING`
+- H (Fraunces italic): 
+  > Request an invitation.
+- Sub:
+  > The circle is nomination-first, but good people arrive from unexpected directions. If you believe you belong here, tell us who you are.
+- Form (mono labels; minimal fields: transparent background, 1px bottom hairline, no boxes, no radius; on focus the hairline thickens to 2px full Ink and the label lifts slightly — never green):
+  - `NAME` — text, required
+  - `EMAIL` — email, required
+  - `WHO YOU ARE / WHAT YOU'RE BUILDING` — textarea 3–4 rows, required
+  - `LINK` — url, optional (product, GitHub, LinkedIn, or site)
+  - `WHO INTRODUCED YOU` — text, optional
+  - Hidden honeypot `company` (visually hidden, must stay empty)
+- Submit (mono): `SEND` — Ink fill, Bone text; on hover the label shifts 4px right as a small **Bone** square slides in from the button's left edge (green stays sacred); on submit label becomes `SENDING…`.
+- Success state replaces the form (Fraunces italic): 
+  > Received. If it's a fit, we'll be in touch.
+- Errors: inline under field, small mono, terracotta `#B4553B`. No alert boxes.
+
+### Footer — Ink, monumental
+- Background Ink; place `inner-logo.png` at modest size (~140px).
+- Sub-brand line (mono, Bone @60%): `inner.hub · inner.studio · inner.capital · — · —`  ← note: the last item is literally an unnamed dash pair, echoing the diagram.
+- `© 2026 inner. İstanbul.`
+- Bottom: a **giant typographic `inner■` wordmark** (Fraunces italic, Bone, green square) spanning the full content width via `clamp()`, baseline near the viewport's bottom edge, slightly cropped. The page ends on the signature.
+
+---
+
+## Interaction detail pass
+- Links: 1px underline draws left→right on hover (300ms, house easing).
+- Logo square: single slow pulse on hover, then rest.
+- Focus-visible: 2px Ink outline, 3px offset, everywhere. Keyboard: skip-to-content link, logical tab order; index rail and form fully navigable.
+- No sounds, no cursors, no easter eggs except: in the served HTML, include one quiet comment near the top: `<!-- signal > noise -->`.
+
+## Backend
+- `POST /api/request`: server-side validation (required, email format, URL format), store with timestamp. Honeypot-filled submissions return generic success and are dropped. Per-IP rate limit ~5/hour if straightforward.
+- `/requests`: newest-first list (date, name, email, text, link, introducer) behind a single passcode from env `ADMIN_PASSCODE`; `noindex`; no full auth system. All secrets in Replit Secrets.
+
+## SEO & metadata
+- `<title>`: `inner.hub — the inner circle`
+- Description: `A private, invitation-only network of AI-native builders, founders, and investors. Started in İstanbul. Aimed everywhere.`
+- OG/Twitter tags with `inner-logo.png`; favicon from the same; `lang="en"`; one `<h1>` (hero); all content crawlable in view-source.
+
+## Performance & accessibility bar
+- Lighthouse mobile: Performance ≥ 90, Accessibility ≥ 95. CLS ≈ 0 (`next/font`, reserved space, masked reveals).
+- Grain, Lenis, preloader stay lean; reduced-motion disables Lenis, preloader, rotation, and all transforms.
+- Contrast: Stone-on-Bone and dim-on-Ink text must still pass WCAG AA at their sizes; bump values if not.
+
+## Definition of done
+- Positioning reads as **ecosystem, not meetup**: hero + 01 + 05 carry the ambition; nothing says "small".
+- Fraunces renders as a variable font; hero visibly shows opsz-144 + WONK letterform character matching the logo.
+- Section 04 is a full-bleed Ink room with the 30/2/1 triptych and smooth background crossfades.
+- Section 05 shows the concentric-rings diagram with slow rotation, correct labels, and the unnamed dashed outer ring; footer sub-brand line ends with `— · —`.
+- Grain present (visible up close, invisible at a glance); preloader ≤900ms once per session; live İstanbul clock ticks; index rail tracks sections; archival annotations on every section label.
+- Form validates, stores, confirms in Fraunces, silently drops honeypot spam; `/requests` works behind the passcode.
+- Green appears ONLY as: logo squares, ring 1 + `NOW`, the ring dot, selection color, live-clock accent if used. Never as buttons, focus, or feedback.
+- Reduced motion honored everywhere; Lighthouse targets met; view-source contains all copy; no console errors.
+
+Build the whole thing, then show me a live preview.
