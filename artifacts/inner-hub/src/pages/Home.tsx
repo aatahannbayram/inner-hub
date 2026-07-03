@@ -395,6 +395,7 @@ export default function Home() {
 
       <footer id="site-footer" className="bg-[var(--ink)] px-6 md:px-12 lg:px-[10%] pt-20 pb-6 flex flex-col gap-16 overflow-hidden">
         <div className="flex flex-col gap-6">
+          <img src="/inner-logo.png" alt="inner" width={140} height={140} className="w-[140px] h-[140px]" />
           <div className="flex flex-wrap gap-x-5 gap-y-2 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)] opacity-60">
             <span>The inner circle · İstanbul → Global · By invitation</span>
           </div>
