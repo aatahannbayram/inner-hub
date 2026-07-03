@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Inter+Tight:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,SOFT,WONK,wght@0,9..144,0,0,300..900;1,9..144,0,1,300..900&family=Inter+Tight:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 @plugin "@tailwindcss/typography";
@@ -90,6 +90,7 @@
   --app-font-serif: 'Fraunces', Georgia, serif;
   --app-font-mono: 'JetBrains Mono', monospace;
   --radius: 0rem;
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .dark {
@@ -131,6 +132,27 @@
   body {
     @apply font-sans antialiased bg-background text-foreground;
   }
+  html {
+    scroll-behavior: smooth;
+    font-optical-sizing: auto;
+  }
+  ::selection {
+    background-color: var(--inner-green);
+    color: var(--ink);
+  }
+  :focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 3px;
+  }
+  section[id] {
+    scroll-margin-top: 100px;
+  }
+}
+
+.font-display {
+  font-optical-sizing: auto;
+  font-variation-settings: 'opsz' 144, 'WONK' 1, 'SOFT' 0;
+  letter-spacing: -0.015em;
 }
 
 @keyframes beacon {
@@ -142,8 +164,27 @@
   animation: beacon 4s ease-in-out infinite;
 }
 
+@keyframes preloader-pulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+.grain-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.035;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-beacon {
     animation: none;
+  }
+  html {
+    scroll-behavior: auto;
   }
 }

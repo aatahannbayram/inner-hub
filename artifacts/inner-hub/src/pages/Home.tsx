@@ -1,11 +1,14 @@
 import React from "react";
-import innerLogoUrl from "@assets/inner-linkedin-logo_400x400_1782915537865.png";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useSubmitRequest } from "@workspace/api-client-react";
 import { FadeIn } from "@/components/FadeIn";
 import { SignatureMark } from "@/components/SignatureMark";
+import { LiveClock } from "@/components/LiveClock";
+import { Grain } from "@/components/Grain";
+import { IndexRail } from "@/components/IndexRail";
+import { Preloader } from "@/components/Preloader";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -25,6 +28,17 @@ type FormValues = z.infer<typeof formSchema>;
 const fieldClass =
   "rounded-none border-0 border-b border-border bg-transparent px-0 py-4 focus-visible:ring-0 focus-visible:border-foreground focus-visible:border-b-2 transition-[border-width]";
 
+function SectionLabel({ label, meta }: { label: string; meta: string }) {
+  return (
+    <FadeIn>
+      <div className="flex items-baseline justify-between gap-6 pb-6 mb-16 border-b border-border/20 font-mono text-xs uppercase tracking-widest">
+        <span>{label}</span>
+        <span className="text-muted-foreground whitespace-nowrap">{meta}</span>
+      </div>
+    </FadeIn>
+  );
+}
+
 export default function Home() {
   const { mutate: submitRequest, isSuccess, isError, isPending } = useSubmitRequest();
 
@@ -40,6 +54,15 @@ export default function Home() {
     },
   });
 
+  React.useEffect(() => {
+    if (window.location.hash) {
+      const el = document.getElementById(window.location.hash.slice(1));
+      if (el) {
+        requestAnimationFrame(() => el.scrollIntoView({ block: "start" }));
+      }
+    }
+  }, []);
+
   const onSubmit = (data: FormValues) => {
     submitRequest({
       data: {
@@ -54,21 +77,31 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col selection:bg-[var(--inner-green)] selection:text-[var(--ink)]">
+    <div className="min-h-screen bg-background text-foreground flex flex-col">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[9999] focus:bg-foreground focus:text-background focus:px-4 focus:py-2 font-mono text-xs uppercase tracking-widest"
+      >
+        Skip to content
+      </a>
+      <Preloader />
+      <Grain />
+      <IndexRail />
+
       {/* Header */}
-      <header className="sticky top-0 z-50 px-6 py-8 md:px-12 lg:px-[10%] flex items-center justify-between bg-background/90 backdrop-blur-sm border-b border-border/20">
+      <header className="sticky top-0 z-50 px-6 py-6 md:px-12 lg:px-[10%] flex items-center justify-between bg-background/90 backdrop-blur-sm border-b border-border/20">
         <SignatureMark />
-        <span className="font-mono text-xs uppercase tracking-widest">By Invitation</span>
+        <LiveClock />
       </header>
 
-      <main className="flex-grow">
+      <main id="main-content" className="flex-grow">
         {/* Hero */}
         <section className="min-h-[85dvh] flex flex-col justify-center px-6 md:px-12 lg:px-[10%] pt-20 pb-32">
           <FadeIn>
             <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-8">
               İstanbul · Est. 2022 · By Invitation
             </div>
-            <h1 className="font-serif italic text-5xl md:text-7xl lg:text-8xl leading-[1.05] tracking-tight max-w-[15ch]">
+            <h1 className="font-display font-serif italic text-5xl md:text-7xl lg:text-8xl leading-[1.05] max-w-[15ch] text-balance">
               A private community for the people building what comes next.
             </h1>
           </FadeIn>
@@ -82,9 +115,9 @@ export default function Home() {
         </section>
 
         {/* 01 — On inner */}
-        <section className="px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15">
+        <section id="section-01" className="px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15">
+          <SectionLabel label="01 — On inner" meta="Est. 2022" />
           <FadeIn>
-            <div className="font-mono text-xs uppercase tracking-widest mb-16">01 — On inner</div>
             <div className="max-w-[65ch] text-lg md:text-xl leading-[1.7] text-foreground/90">
               inner.hub is a small, deliberate room. We bring together founders, investors, and researchers who take their work seriously — and each other's time just as seriously. No stage. No audience. Only company. What is said here stays here. Who is here is chosen with care.
             </div>
@@ -92,10 +125,8 @@ export default function Home() {
         </section>
 
         {/* 02 — Principles */}
-        <section className="px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15">
-          <FadeIn>
-            <div className="font-mono text-xs uppercase tracking-widest mb-16">02 — Principles</div>
-          </FadeIn>
+        <section id="section-02" className="px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15">
+          <SectionLabel label="02 — Principles" meta="Four lines" />
 
           <div className="grid grid-cols-1 md:grid-cols-2">
             {[
@@ -131,10 +162,10 @@ export default function Home() {
         </section>
 
         {/* 03 — Membership */}
-        <section className="px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15">
+        <section id="section-03" className="px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15">
+          <SectionLabel label="03 — Membership" meta="By nomination" />
           <FadeIn>
-            <div className="font-mono text-xs uppercase tracking-widest mb-16">03 — Membership</div>
-            <h2 className="font-serif text-4xl md:text-5xl max-w-2xl mb-8">
+            <h2 className="font-display font-serif italic text-4xl md:text-5xl max-w-2xl mb-8 text-balance">
               Entry is by invitation. Always.
             </h2>
             <p className="max-w-[65ch] text-lg leading-[1.7] text-foreground/90 mb-20">
@@ -160,27 +191,53 @@ export default function Home() {
           </div>
         </section>
 
-        {/* 04 — The gathering */}
-        <section className="px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15 bg-foreground text-background">
+        {/* 04 — The gathering (Ink interlude) */}
+        <section
+          id="section-04"
+          className="px-6 md:px-12 lg:px-[10%] py-32 md:py-48 border-t border-border/15 bg-[var(--ink)] text-[var(--bone)] transition-colors duration-700"
+        >
           <FadeIn>
-            <div className="font-mono text-xs uppercase tracking-widest mb-16 opacity-60">04 — The gathering</div>
-            <h2 className="font-serif text-4xl md:text-5xl lg:text-6xl max-w-2xl mb-8">
+            <div className="flex items-baseline justify-between gap-6 pb-6 mb-20 border-b border-white/15 font-mono text-xs uppercase tracking-widest opacity-60">
+              <span>04 — The gathering</span>
+              <span className="whitespace-nowrap">Sep 2026 · İstanbul</span>
+            </div>
+            <h2 className="font-display font-serif italic text-4xl md:text-5xl lg:text-6xl max-w-3xl mb-24 text-balance">
               The first inner.hub gathering. İstanbul, September 2026.
             </h2>
-            <p className="text-lg md:text-xl opacity-80 max-w-xl mb-6">
-              Thirty people. Two days. One room. By invitation only.
-            </p>
-            <div className="font-mono text-xs uppercase tracking-widest opacity-50">
+          </FadeIn>
+
+          <div className="grid grid-cols-3 gap-8 md:gap-16 max-w-3xl mb-24">
+            {[
+              { n: "30", label: "People" },
+              { n: "2", label: "Days" },
+              { n: "1", label: "Room" },
+            ].map((item, i) => (
+              <FadeIn key={item.label} delay={i * 0.1}>
+                <div className="flex flex-col items-start">
+                  <span className="font-display font-serif italic text-6xl md:text-8xl leading-none mb-4">
+                    {item.n}
+                  </span>
+                  <span className="font-mono text-[10px] uppercase tracking-widest opacity-50">
+                    {item.label}
+                  </span>
+                </div>
+              </FadeIn>
+            ))}
+          </div>
+
+          <FadeIn delay={0.2}>
+            <div className="flex items-center gap-3 font-mono text-xs uppercase tracking-widest opacity-50">
+              <span className="w-[6px] h-[6px] bg-[var(--inner-green)] flex-shrink-0" aria-hidden="true" />
               Details are shared with invitees only.
             </div>
           </FadeIn>
         </section>
 
         {/* 05 — The ecosystem */}
-        <section className="px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15">
+        <section id="section-05" className="px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15">
+          <SectionLabel label="05 — The ecosystem" meta="Five rooms" />
           <FadeIn>
-            <div className="font-mono text-xs uppercase tracking-widest mb-16">05 — The ecosystem</div>
-            <h2 className="font-serif text-4xl md:text-5xl max-w-2xl mb-8">
+            <h2 className="font-display font-serif italic text-4xl md:text-5xl max-w-2xl mb-8 text-balance">
               hub is the first room of inner.
             </h2>
             <p className="max-w-[65ch] text-lg leading-[1.7] text-foreground/90 mb-20">
@@ -197,10 +254,12 @@ export default function Home() {
               { name: "inner.house", status: "To follow", active: false },
             ].map((item, i) => (
               <FadeIn key={item.name} delay={i * 0.05}>
-                <div className="flex items-center justify-between py-5 border-t border-border/15 last:border-b">
+                <div className="group flex items-center justify-between py-5 border-t border-border/15 transition-colors hover:border-foreground/40 last:border-b last:hover:border-b-foreground/40">
                   <span className="font-serif text-lg md:text-xl">{item.name}</span>
                   <span
-                    className={`font-mono text-xs uppercase tracking-widest ${item.active ? "text-[var(--inner-green)]" : "text-muted-foreground"}`}
+                    className={`font-mono text-xs uppercase tracking-widest transition-transform duration-300 ${
+                      item.active ? "text-[var(--inner-green)]" : "text-muted-foreground group-hover:-translate-x-1"
+                    }`}
                   >
                     {item.status}
                   </span>
@@ -211,16 +270,16 @@ export default function Home() {
         </section>
 
         {/* 06 — Request an invitation */}
-        <section className="px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15">
-          <FadeIn>
-            <div className="font-mono text-xs uppercase tracking-widest mb-16">06 — Request an invitation</div>
+        <section id="section-06" className="px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15">
+          <SectionLabel label="06 — Request an invitation" meta="We read everything" />
 
-            {isSuccess ? (
-              <div className="max-w-2xl py-12">
-                <h2 className="font-serif italic text-4xl md:text-5xl mb-6">Received.</h2>
-                <p className="text-xl text-muted-foreground">If it's a fit, we'll be in touch.</p>
-              </div>
-            ) : (
+          {isSuccess ? (
+            <div className="max-w-2xl py-12">
+              <h2 className="font-display font-serif italic text-4xl md:text-5xl mb-6 text-balance">Received.</h2>
+              <p className="text-xl text-muted-foreground">If it's a fit, we'll be in touch.</p>
+            </div>
+          ) : (
+            <FadeIn>
               <div className="max-w-2xl">
                 <h2 className="font-serif text-4xl md:text-5xl mb-6">Request an invitation.</h2>
                 <p className="text-lg text-muted-foreground mb-16 leading-[1.7]">
@@ -350,26 +409,27 @@ export default function Home() {
                       <Button
                         type="submit"
                         disabled={isPending}
-                        className="rounded-none bg-foreground text-background border border-foreground hover:bg-background hover:text-foreground font-mono text-xs tracking-widest uppercase px-12 py-6 h-auto transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ink)]"
+                        className="group/btn relative overflow-hidden rounded-none bg-foreground text-background border border-foreground font-mono text-xs tracking-widest uppercase px-12 py-6 h-auto transition-colors duration-300"
                         data-testid="button-submit"
                       >
-                        {isPending ? "Sending..." : "Send"}
+                        <span
+                          aria-hidden="true"
+                          className="absolute left-0 top-0 h-full w-2 bg-background -translate-x-full transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/btn:translate-x-0"
+                        />
+                        <span className="relative inline-block transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/btn:translate-x-1">
+                          {isPending ? "Sending…" : "Send"}
+                        </span>
                       </Button>
                     </div>
                   </form>
                 </Form>
               </div>
-            )}
-          </FadeIn>
+            </FadeIn>
+          )}
         </section>
       </main>
 
-      <footer className="bg-[var(--ink)] px-6 md:px-12 lg:px-[10%] py-20 flex flex-col gap-16">
-        <img
-          src={innerLogoUrl}
-          alt="inner"
-          className="w-32 h-32 object-contain"
-        />
+      <footer id="site-footer" className="bg-[var(--ink)] px-6 md:px-12 lg:px-[10%] pt-20 pb-6 flex flex-col gap-16 overflow-hidden">
         <div className="flex flex-col gap-6">
           <div className="flex flex-wrap gap-x-5 gap-y-2 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)] opacity-60">
             <span>inner.hub</span>
@@ -386,6 +446,19 @@ export default function Home() {
             © 2026 inner. İstanbul.
           </div>
         </div>
+
+        <div
+          className="font-serif italic text-[var(--bone)] leading-none flex items-baseline gap-[0.1em] -mb-4 md:-mb-8"
+          style={{ fontSize: "clamp(4rem, 16vw, 13rem)" }}
+          aria-hidden="true"
+        >
+          <span>inner</span>
+          <span
+            className="inline-block bg-[var(--inner-green)] flex-shrink-0"
+            style={{ width: "0.5em", height: "0.5em", marginBottom: "0.06em" }}
+          />
+        </div>
+        <span className="sr-only">inner.</span>
       </footer>
     </div>
   );

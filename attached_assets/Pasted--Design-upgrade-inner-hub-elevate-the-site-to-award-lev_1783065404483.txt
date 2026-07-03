@@ -1,0 +1,121 @@
+# Design upgrade: inner.hub — elevate the site to award-level craft
+
+## Context
+The inner.hub website already exists (or is being built) to a defined spec: a one-page, editorial, invitation-only site on Next.js (App Router) + TypeScript + Tailwind, using the "Quiet Signal" system — Ink `#0A0A0A`, Bone `#F4F1EC`, Inner Green `#18FF85`; Fraunces display, Geist body (Inter Tight fallback), JetBrains Mono labels; six numbered sections (Hero, 01 On inner, 02 Principles, 03 Membership, 04 The Gathering, 05 The Ecosystem, 06 Request an Invitation) and an Ink footer carrying the `inner-logo.png` mark.
+
+**Keep all existing copy, section structure, form logic, backend, and brand tokens exactly as they are.** This brief is purely about elevating the design execution — typography, texture, motion, and micro-detail — from "clean" to "crafted."
+
+The reference feeling: the silent confidence of The Row, the slow intentionality of Aman, the archival-index editorial style (grids, tiny labels, catalog metadata), and the composed restraint of Anthropic. Every upgrade below must pass one test: **does it make the page feel quieter and more expensive, not louder?** If an effect draws attention to itself, remove it.
+
+---
+
+## Upgrade 1 — Fraunces as a true variable font (the single biggest typographic win)
+Stop using static Fraunces weights. Load Fraunces as a **variable font** with all four axes available (`wght` 100–900, `opsz` 9–144, `SOFT` 0–100, `WONK` 0–1) via `next/font/google` with `axes: ['opsz', 'SOFT', 'WONK']`.
+
+- Set `font-optical-sizing: auto` globally so the browser tunes contrast, x-height, and spacing to the rendered size.
+- **Display headlines** (hero + section headlines): force the display cut with `font-variation-settings: 'opsz' 144, 'WONK' 1, 'SOFT' 0` — high optical size for fine, high-contrast strokes, and WONK on so the characterful leaning letterforms appear. In the italic, WONK gives flagged ball terminals on b, d, h, k, l — which is exactly the letterform character of the `inner` logo. The word "hub" (b + h) will visibly echo the mark.
+- Keep the hero and all major statements in **Fraunces italic** to match the wordmark.
+- Small Fraunces usage (if any) stays at low optical size automatically — never force opsz 144 below ~40px.
+- Typographic finish: `text-wrap: balance` on all headlines; hanging punctuation on the hero if supported; `font-variant-numeric: tabular-nums` on all JetBrains Mono metadata; letter-spacing on Fraunces display slightly negative (−0.01em to −0.02em); body remains Geist at max 65ch.
+
+## Upgrade 2 — The Ink interlude (give the page a dramatic arc)
+Convert **Section 04 — The Gathering** into a **full-bleed Ink section**: Ink background, Bone text, the one place outside the footer where the page goes dark. Conceptually: the visitor walks out of the paper-white archive into the dark room where the gathering happens.
+
+- As the section enters the viewport, crossfade the page background from Bone to Ink smoothly (CSS transition on a background wrapper, ~600ms) and back to Bone on exit. No hard edges.
+- Inside, set an oversized numeric triptych in Fraunces italic (opsz 144): **30 / 2 / 1** with small mono captions beneath each — `PEOPLE`, `DAYS`, `ROOM`. This is the emotional center of the page.
+- The headline "The first inner.hub gathering. İstanbul, September 2026." sits above; `DETAILS ARE SHARED WITH INVITEES ONLY.` below in mono at reduced opacity.
+- One green square accent may appear here, static.
+
+## Upgrade 3 — Paper grain (kill the flat hex background)
+Add a **fixed, full-viewport film-grain overlay**: an inline SVG `feTurbulence` noise (fractalNoise, baseFrequency ~0.65, tileable) rendered once as a data-URI background, at **2.5–4% opacity**, `mix-blend-mode: multiply` over Bone and `screen` over Ink, `pointer-events: none`.
+
+- The grain is **static** — do not animate it (animated noise is a performance killer and reads as gimmick).
+- Result: Bone reads as paper, Ink reads as matte black card stock. This single texture is what separates "template" from "print object."
+
+## Upgrade 4 — Quiet preloader (first impression as ritual)
+A minimal entry sequence, **max 900ms total**, only on first visit per session (check `sessionStorage`):
+
+1. Full-viewport Ink screen with the Inner Green square centered (~14px), which pulses opacity once (0.3 → 1 → 0.3, ~500ms).
+2. The Ink screen exits with a single upward wipe (clip-path or translateY, 400ms, custom easing below), revealing the hero.
+3. The hero headline then plays its line-reveal (Upgrade 5).
+
+Skip entirely under `prefers-reduced-motion` and on repeat visits — the page must never feel gated.
+
+## Upgrade 5 — Motion system: slow, masked, expensive
+Define one easing and use it everywhere: `cubic-bezier(0.16, 1, 0.3, 1)` (expo-out). Durations 600–900ms. Nothing bounces, nothing springs.
+
+- **Smooth scroll**: add Lenis (the `lenis` npm package) with a gentle lerp (~0.1). Disable it entirely under `prefers-reduced-motion` and on touch devices if it degrades native feel.
+- **Headline reveals**: split display headlines by line; each line rises from behind an overflow mask (translateY 100% → 0), 80–120ms stagger, triggered once via IntersectionObserver at ~25% visibility.
+- **Body/labels**: simple fade + 16px rise, no stagger theatrics.
+- **Hairlines draw themselves**: section divider rules animate scaleX 0 → 1 (transform-origin left) when entering view.
+- Absolutely no parallax, no 3D, no cursor-chasing elements. Restraint is the aesthetic.
+- Every animation has a reduced-motion fallback: content simply visible, no transforms.
+
+## Upgrade 6 — Index rail (the archive's table of contents)
+A **fixed vertical index on the right edge, desktop only** (hidden < 1024px): the section numbers `01–06` stacked in JetBrains Mono at ~11px, low opacity.
+
+- The current section's number is full-opacity Ink with a small Inner Green square beside it; the square slides between numbers as the visitor scrolls (IntersectionObserver-driven).
+- Each number is a quiet anchor link (smooth-scrolls to its section).
+- This turns scrolling into browsing an archive index — navigation as brand.
+
+## Upgrade 7 — The live signal (one living element)
+In the header right slot, replace the static `BY INVITATION` with a two-line mono block, right-aligned, ~11px:
+
+```
+BY INVITATION
+İSTANBUL 41.00°N 28.97°E · 14:32:07 TRT
+```
+
+- The clock ticks every second, rendered client-side (`Europe/Istanbul` timezone, tabular-nums so digits don't shift).
+- This is the "quiet signal" made literal — the single living, precise element on an otherwise still page. Do not animate anything else in the header.
+- On mobile, show only `BY INVITATION` + the time (drop coordinates).
+
+## Upgrade 8 — Archival annotations (metadata as ornament)
+Each section's mono label row becomes a two-ended line: label left, a **meta annotation right**, both in JetBrains Mono ~11px, sitting on the section's top hairline:
+
+- `01 — ON INNER` ……… `EST. 2022`
+- `02 — PRINCIPLES` ……… `FOUR LINES`
+- `03 — MEMBERSHIP` ……… `BY NOMINATION`
+- `04 — THE GATHERING` ……… `SEP 2026 · İSTANBUL`
+- `05 — THE ECOSYSTEM` ……… `FIVE ROOMS`
+- `06 — REQUEST AN INVITATION` ……… `WE READ EVERYTHING`
+
+Flat text, no boxes, no icons. It should read like catalog cards in a library.
+
+## Upgrade 9 — Interaction detail pass
+- **Links**: 1px underline that draws left → right on hover (background-size trick or pseudo-element scaleX), 300ms, same easing.
+- **SEND button**: Ink fill; on hover the label shifts 4px right as a small Bone square (echoing the mark, but Bone — green stays sacred) slides in from the left edge of the button; on submit, label swaps to `SENDING…` then the confirmation state.
+- **Form fields**: bottom hairline thickens 1px → 2px and darkens to full Ink on focus; label rises slightly. No green focus rings — green is never feedback, only signature.
+- **Logo square**: on hover, one single slow opacity pulse, then rest.
+- **Ecosystem index rows**: on hover, the row's hairline darkens and the `TO FOLLOW` status nudges 4px left. `NOW` keeps its Inner Green.
+- **Text selection**: Inner Green background, Ink text (`::selection`).
+- Focus-visible states remain bold and obvious (2px Ink outline, offset 3px) — accessibility is part of the craft.
+
+## Upgrade 10 — Monumental footer wordmark
+At the very bottom of the Ink footer, set a **giant `inner■` wordmark** spanning the full content width (Fraunces italic, Bone, the green square as the period), sized via `clamp()` so it nearly touches both margins, with its baseline sitting close to the viewport bottom edge — slightly cropped is acceptable and desirable. Above it, the sub-brand line and copyright stay small and quiet. The page ends on the mark itself: the last thing seen is the signature.
+
+(Keep the `inner-logo.png` for favicon and OG image; the footer mark is typographic so it scales crisply.)
+
+---
+
+## Performance & accessibility bar (non-negotiable)
+- Lighthouse: Performance ≥ 90, Accessibility ≥ 95 on mobile.
+- CLS ≈ 0: `next/font` for all faces, explicit dimensions everywhere, no layout jumps from reveals (masks reserve space).
+- All content server-rendered and present in view-source; animations are enhancement only.
+- Every motion feature checks `prefers-reduced-motion` and degrades to static.
+- Lenis, the preloader, and the grain must not push JS beyond a lean bundle; no GSAP/three.js unless something above is impossible without it.
+- Keyboard: the index rail, form, and links fully navigable; logical tab order; skip-to-content link.
+
+## Definition of done
+- Fraunces renders as a variable font; hero visibly shows opsz-144 + WONK character matching the logo's letterforms.
+- Section 04 is a full-bleed Ink room with the 30 / 2 / 1 triptych and smooth background crossfades.
+- Grain is visible on close inspection, invisible at a glance — paper, not noise.
+- Preloader plays once per session, under 900ms, skipped on reduced motion.
+- All reveals use the single easing curve; nothing bounces; reduced-motion shows everything statically.
+- Index rail tracks sections on desktop; live İstanbul clock ticks in the header.
+- Section labels carry their right-aligned archival annotations.
+- Hover/focus states match the interaction spec; green appears only as signature (logo squares, `NOW`, selection), never as UI feedback.
+- Footer ends on the monumental `inner■` wordmark.
+- Lighthouse and accessibility targets met; no console errors.
+
+Apply everything above, then show me a live preview.

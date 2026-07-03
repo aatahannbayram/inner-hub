@@ -1,0 +1,2 @@
+- [Preloader/wipe transform residue](preloader-wipe-transform.md) — a `translateY(-100%)` exit wipe can leave a persistent 1px-ish bar; overshoot the transform and delay `visibility`.
+- [Verifying below-the-fold SPA sections via screenshot](spa-screenshot-deep-link.md) — screenshot tool only captures from viewport top; add a hash-based scrollIntoView-on-mount effect to jump to any section id for verification.
