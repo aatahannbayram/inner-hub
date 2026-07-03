@@ -10,7 +10,6 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { ArrowDown } from "lucide-react";
 
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -22,6 +21,9 @@ const formSchema = z.object({
 });
 
 type FormValues = z.infer<typeof formSchema>;
+
+const fieldClass =
+  "rounded-none border-0 border-b border-border bg-transparent px-0 py-4 focus-visible:ring-0 focus-visible:border-foreground focus-visible:border-b-2 transition-[border-width]";
 
 export default function Home() {
   const { mutate: submitRequest, isSuccess, isError, isPending } = useSubmitRequest();
@@ -52,7 +54,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col selection:bg-[var(--inner-green)] selection:text-ink">
+    <div className="min-h-screen bg-background text-foreground flex flex-col selection:bg-[var(--inner-green)] selection:text-[var(--ink)]">
       {/* Header */}
       <header className="sticky top-0 z-50 px-6 py-8 md:px-12 lg:px-[10%] flex items-center justify-between bg-background/90 backdrop-blur-sm border-b border-border/20">
         <SignatureMark />
@@ -66,81 +68,163 @@ export default function Home() {
             <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-8">
               İstanbul · Est. 2022 · By Invitation
             </div>
-            <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl leading-[1.05] tracking-tight max-w-[15ch]">
+            <h1 className="font-serif italic text-5xl md:text-7xl lg:text-8xl leading-[1.05] tracking-tight max-w-[15ch]">
               A private community for the people building what comes next.
             </h1>
           </FadeIn>
-          
+
           <FadeIn delay={0.4} className="mt-32">
             <div className="h-px w-full bg-border/20 mb-8" />
-            <div className="flex items-center text-muted-foreground font-mono text-xs uppercase tracking-widest gap-4">
-              <span>Scroll</span>
-              <ArrowDown className="w-3 h-3" />
+            <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
+              Scroll
             </div>
           </FadeIn>
         </section>
 
-        {/* Section 01 */}
+        {/* 01 — On inner */}
         <section className="px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15">
           <FadeIn>
             <div className="font-mono text-xs uppercase tracking-widest mb-16">01 — On inner</div>
-            <div className="max-w-2xl text-lg md:text-xl leading-relaxed text-foreground/90">
+            <div className="max-w-[65ch] text-lg md:text-xl leading-[1.7] text-foreground/90">
               inner.hub is a small, deliberate room. We bring together founders, investors, and researchers who take their work seriously — and each other's time just as seriously. No stage. No audience. Only company. What is said here stays here. Who is here is chosen with care.
             </div>
           </FadeIn>
+        </section>
 
-          <div className="mt-32 grid grid-cols-1 md:grid-cols-2 gap-16 md:gap-x-24 md:gap-y-20 max-w-5xl">
-            <FadeIn delay={0.1}>
-              <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-4">Small by design</div>
-              <h3 className="font-serif text-2xl mb-3">We stay small so the room stays real.</h3>
-              <p className="text-muted-foreground leading-relaxed">The intimacy of the space dictates the quality of the conversation.</p>
-            </FadeIn>
-            <FadeIn delay={0.2}>
-              <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-4">Signal over noise</div>
-              <h3 className="font-serif text-2xl mb-3">We value depth over reach.</h3>
-              <p className="text-muted-foreground leading-relaxed">Less content, more insight. Moving away from the infinite feed.</p>
-            </FadeIn>
-            <FadeIn delay={0.3}>
-              <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-4">Discretion</div>
-              <h3 className="font-serif text-2xl mb-3">What happens inside, stays inside.</h3>
-              <p className="text-muted-foreground leading-relaxed">A sanctuary for unpolished ideas and candid truths.</p>
-            </FadeIn>
-            <FadeIn delay={0.4}>
-              <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-4">Company, not audience</div>
-              <h3 className="font-serif text-2xl mb-3">We gather as peers, never as performers.</h3>
-              <p className="text-muted-foreground leading-relaxed">No pedestals. The person next to you is just as interesting as you are.</p>
-            </FadeIn>
+        {/* 02 — Principles */}
+        <section className="px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15">
+          <FadeIn>
+            <div className="font-mono text-xs uppercase tracking-widest mb-16">02 — Principles</div>
+          </FadeIn>
+
+          <div className="grid grid-cols-1 md:grid-cols-2">
+            {[
+              {
+                label: "Small by design",
+                line: "We stay small so the room stays real.",
+              },
+              {
+                label: "Signal over noise",
+                line: "We value depth over reach.",
+              },
+              {
+                label: "Discretion",
+                line: "What happens inside, stays inside.",
+              },
+              {
+                label: "Company, not audience",
+                line: "We gather as peers, never as performers.",
+              },
+            ].map((item, i) => (
+              <FadeIn key={item.label} delay={i * 0.1}>
+                <div
+                  className={`py-10 pr-8 border-t border-border/15 ${i % 2 === 0 ? "md:pr-16" : "md:pl-16"} ${i === 0 || i === 1 ? "md:border-t-0" : ""}`}
+                >
+                  <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-4">
+                    {item.label}
+                  </div>
+                  <p className="font-serif text-2xl">{item.line}</p>
+                </div>
+              </FadeIn>
+            ))}
           </div>
         </section>
 
-        {/* Section 02 */}
+        {/* 03 — Membership */}
+        <section className="px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15">
+          <FadeIn>
+            <div className="font-mono text-xs uppercase tracking-widest mb-16">03 — Membership</div>
+            <h2 className="font-serif text-4xl md:text-5xl max-w-2xl mb-8">
+              Entry is by invitation. Always.
+            </h2>
+            <p className="max-w-[65ch] text-lg leading-[1.7] text-foreground/90 mb-20">
+              There is no membership tier, no waitlist counter, no public roster. Members are nominated from inside the room, considered carefully, and invited personally. We look for people who build, back, or study what comes next — and who understand that trust is the only currency that matters here.
+            </p>
+          </FadeIn>
+
+          <div className="max-w-3xl">
+            {[
+              { label: "Nomination", line: "Someone inside the room puts your name forward." },
+              { label: "Consideration", line: "We take our time. Fit matters more than fame." },
+              { label: "Invitation", line: "If it's right, you'll hear from us directly." },
+            ].map((item, i) => (
+              <FadeIn key={item.label} delay={i * 0.1}>
+                <div className="flex flex-col md:flex-row md:items-baseline gap-2 md:gap-12 py-6 border-t border-border/15 last:border-b">
+                  <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground w-full md:w-48 flex-shrink-0">
+                    {item.label}
+                  </div>
+                  <p className="text-lg text-foreground/90">{item.line}</p>
+                </div>
+              </FadeIn>
+            ))}
+          </div>
+        </section>
+
+        {/* 04 — The gathering */}
         <section className="px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15 bg-foreground text-background">
           <FadeIn>
-            <div className="font-mono text-xs uppercase tracking-widest mb-16 opacity-60">02 — The gathering</div>
+            <div className="font-mono text-xs uppercase tracking-widest mb-16 opacity-60">04 — The gathering</div>
             <h2 className="font-serif text-4xl md:text-5xl lg:text-6xl max-w-2xl mb-8">
-              The first inner.hub gathering.<br />September 2026.
+              The first inner.hub gathering. İstanbul, September 2026.
             </h2>
-            <p className="text-lg md:text-xl opacity-80 max-w-xl">
+            <p className="text-lg md:text-xl opacity-80 max-w-xl mb-6">
               Thirty people. Two days. One room. By invitation only.
             </p>
+            <div className="font-mono text-xs uppercase tracking-widest opacity-50">
+              Details are shared with invitees only.
+            </div>
           </FadeIn>
         </section>
 
-        {/* Section 03 */}
+        {/* 05 — The ecosystem */}
         <section className="px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15">
           <FadeIn>
-            <div className="font-mono text-xs uppercase tracking-widest mb-16">03 — Request an invitation</div>
-            
+            <div className="font-mono text-xs uppercase tracking-widest mb-16">05 — The ecosystem</div>
+            <h2 className="font-serif text-4xl md:text-5xl max-w-2xl mb-8">
+              hub is the first room of inner.
+            </h2>
+            <p className="max-w-[65ch] text-lg leading-[1.7] text-foreground/90 mb-20">
+              inner is built as a system of rooms — a lab for research, a studio for making, capital for backing, a house for gathering. hub opens first. The rest follow.
+            </p>
+          </FadeIn>
+
+          <div className="max-w-2xl">
+            {[
+              { name: "inner.hub", status: "Now", active: true },
+              { name: "inner.lab", status: "To follow", active: false },
+              { name: "inner.studio", status: "To follow", active: false },
+              { name: "inner.capital", status: "To follow", active: false },
+              { name: "inner.house", status: "To follow", active: false },
+            ].map((item, i) => (
+              <FadeIn key={item.name} delay={i * 0.05}>
+                <div className="flex items-center justify-between py-5 border-t border-border/15 last:border-b">
+                  <span className="font-serif text-lg md:text-xl">{item.name}</span>
+                  <span
+                    className={`font-mono text-xs uppercase tracking-widest ${item.active ? "text-[var(--inner-green)]" : "text-muted-foreground"}`}
+                  >
+                    {item.status}
+                  </span>
+                </div>
+              </FadeIn>
+            ))}
+          </div>
+        </section>
+
+        {/* 06 — Request an invitation */}
+        <section className="px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15">
+          <FadeIn>
+            <div className="font-mono text-xs uppercase tracking-widest mb-16">06 — Request an invitation</div>
+
             {isSuccess ? (
               <div className="max-w-2xl py-12">
-                <h2 className="font-serif text-4xl md:text-5xl mb-6">Received.</h2>
+                <h2 className="font-serif italic text-4xl md:text-5xl mb-6">Received.</h2>
                 <p className="text-xl text-muted-foreground">If it's a fit, we'll be in touch.</p>
               </div>
             ) : (
               <div className="max-w-2xl">
                 <h2 className="font-serif text-4xl md:text-5xl mb-6">Request an invitation.</h2>
-                <p className="text-lg text-muted-foreground mb-16">
-                  inner.hub is invitation-only. If you'd like to be considered, tell us a little about yourself. We read everything.
+                <p className="text-lg text-muted-foreground mb-16 leading-[1.7]">
+                  The room is nomination-first, but good people arrive from unexpected directions. If you believe you belong here, tell us who you are. We read everything.
                 </p>
 
                 <Form {...form}>
@@ -152,14 +236,14 @@ export default function Home() {
                         <FormItem>
                           <FormLabel className="font-mono text-xs tracking-widest uppercase">Name</FormLabel>
                           <FormControl>
-                            <Input 
-                              placeholder="Your full name" 
-                              className="rounded-none border-0 border-b border-border bg-transparent px-0 py-4 focus-visible:ring-0 focus-visible:border-foreground" 
+                            <Input
+                              placeholder="Your full name"
+                              className={fieldClass}
                               data-testid="input-name"
-                              {...field} 
+                              {...field}
                             />
                           </FormControl>
-                          <FormMessage className="font-mono text-[10px] uppercase" />
+                          <FormMessage className="font-mono text-[10px] uppercase text-[var(--error)]" />
                         </FormItem>
                       )}
                     />
@@ -171,15 +255,15 @@ export default function Home() {
                         <FormItem>
                           <FormLabel className="font-mono text-xs tracking-widest uppercase">Email</FormLabel>
                           <FormControl>
-                            <Input 
+                            <Input
                               type="email"
-                              placeholder="you@example.com" 
-                              className="rounded-none border-0 border-b border-border bg-transparent px-0 py-4 focus-visible:ring-0 focus-visible:border-foreground" 
+                              placeholder="you@example.com"
+                              className={fieldClass}
                               data-testid="input-email"
-                              {...field} 
+                              {...field}
                             />
                           </FormControl>
-                          <FormMessage className="font-mono text-[10px] uppercase" />
+                          <FormMessage className="font-mono text-[10px] uppercase text-[var(--error)]" />
                         </FormItem>
                       )}
                     />
@@ -191,14 +275,14 @@ export default function Home() {
                         <FormItem>
                           <FormLabel className="font-mono text-xs tracking-widest uppercase">Who you are / What you're building</FormLabel>
                           <FormControl>
-                            <Textarea 
-                              placeholder="A brief note on your work and intent." 
-                              className="rounded-none border-0 border-b border-border bg-transparent px-0 py-4 min-h-[120px] focus-visible:ring-0 focus-visible:border-foreground resize-none" 
+                            <Textarea
+                              placeholder="A brief note on your work and intent."
+                              className={`${fieldClass} min-h-[120px] resize-none`}
                               data-testid="input-who-you-are"
-                              {...field} 
+                              {...field}
                             />
                           </FormControl>
-                          <FormMessage className="font-mono text-[10px] uppercase" />
+                          <FormMessage className="font-mono text-[10px] uppercase text-[var(--error)]" />
                         </FormItem>
                       )}
                     />
@@ -210,14 +294,14 @@ export default function Home() {
                         <FormItem>
                           <FormLabel className="font-mono text-xs tracking-widest uppercase text-muted-foreground">Link (Optional)</FormLabel>
                           <FormControl>
-                            <Input 
-                              placeholder="LinkedIn or website" 
-                              className="rounded-none border-0 border-b border-border bg-transparent px-0 py-4 focus-visible:ring-0 focus-visible:border-foreground text-muted-foreground" 
+                            <Input
+                              placeholder="LinkedIn or website"
+                              className={`${fieldClass} text-muted-foreground`}
                               data-testid="input-link"
-                              {...field} 
+                              {...field}
                             />
                           </FormControl>
-                          <FormMessage className="font-mono text-[10px] uppercase" />
+                          <FormMessage className="font-mono text-[10px] uppercase text-[var(--error)]" />
                         </FormItem>
                       )}
                     />
@@ -229,14 +313,14 @@ export default function Home() {
                         <FormItem>
                           <FormLabel className="font-mono text-xs tracking-widest uppercase text-muted-foreground">Who introduced you (Optional)</FormLabel>
                           <FormControl>
-                            <Input 
-                              placeholder="Name of your connection" 
-                              className="rounded-none border-0 border-b border-border bg-transparent px-0 py-4 focus-visible:ring-0 focus-visible:border-foreground text-muted-foreground" 
+                            <Input
+                              placeholder="Name of your connection"
+                              className={`${fieldClass} text-muted-foreground`}
                               data-testid="input-who-introduced"
-                              {...field} 
+                              {...field}
                             />
                           </FormControl>
-                          <FormMessage className="font-mono text-[10px] uppercase" />
+                          <FormMessage className="font-mono text-[10px] uppercase text-[var(--error)]" />
                         </FormItem>
                       )}
                     />
@@ -257,16 +341,16 @@ export default function Home() {
                     </div>
 
                     {isError && (
-                      <div className="text-destructive text-sm" data-testid="text-error">
+                      <div className="text-[var(--error)] font-mono text-xs uppercase tracking-widest" data-testid="text-error">
                         Something went wrong. Please try again.
                       </div>
                     )}
 
                     <div className="pt-8">
-                      <Button 
-                        type="submit" 
+                      <Button
+                        type="submit"
                         disabled={isPending}
-                        className="rounded-none bg-foreground text-background hover:bg-foreground/90 font-mono text-xs tracking-widest uppercase px-12 py-6 h-auto"
+                        className="rounded-none bg-foreground text-background border border-foreground hover:bg-background hover:text-foreground font-mono text-xs tracking-widest uppercase px-12 py-6 h-auto transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ink)]"
                         data-testid="button-submit"
                       >
                         {isPending ? "Sending..." : "Send"}
@@ -284,10 +368,10 @@ export default function Home() {
         <img
           src={innerLogoUrl}
           alt="inner"
-          className="w-20 h-20 object-contain"
+          className="w-32 h-32 object-contain"
         />
         <div className="flex flex-col gap-6">
-          <div className="flex flex-wrap gap-x-5 gap-y-2 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)] opacity-40">
+          <div className="flex flex-wrap gap-x-5 gap-y-2 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)] opacity-60">
             <span>inner.hub</span>
             <span>·</span>
             <span>inner.lab</span>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useListRequests, getListRequestsQueryKey } from "@workspace/api-client-react";
 import { format } from "date-fns";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -9,6 +9,20 @@ export default function Requests() {
   const [passcode, setPasscode] = useState(sessionStorage.getItem("inner_passcode") || "");
   const [inputVal, setInputVal] = useState("");
   const [hasAttempted, setHasAttempted] = useState(false);
+
+  useEffect(() => {
+    let meta = document.querySelector('meta[name="robots"]');
+    if (!meta) {
+      meta = document.createElement("meta");
+      meta.setAttribute("name", "robots");
+      document.head.appendChild(meta);
+    }
+    const previous = meta.getAttribute("content");
+    meta.setAttribute("content", "noindex, nofollow");
+    return () => {
+      if (previous) meta!.setAttribute("content", previous);
+    };
+  }, []);
 
   const { data: requests, isLoading, isError } = useListRequests(
     { passcode },

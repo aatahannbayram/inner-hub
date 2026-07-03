@@ -1,0 +1,176 @@
+# Build: inner.hub — private community website
+
+## What this is
+A restrained, editorial, invitation-only website for **inner.hub** — a private community for founders, investors, and researchers, based in İstanbul. The site's job is not to sell; it is to **signal**. It should feel quiet, confident, and exclusive — the kind of page where the restraint itself is the message. Reference points for tone: the calm of Are.na, the editorial minimalism of early NTS Radio, the composed typography of Anthropic's brand.
+
+The public site is intentionally minimal. One long scrolling page. The only interactive element is a quiet "request an invitation" form.
+
+---
+
+## Tech stack (use exactly this)
+- **Next.js (App Router) + TypeScript**
+- **Tailwind CSS** for styling
+- **Server-rendered content.** Every word of copy must be present in the server-rendered HTML — no client-only rendering of text content. (This site replaces a JavaScript-shell build that was invisible to search engines; do not repeat that mistake.)
+- A **server-side API route** for the invitation form
+- **Database**: Replit's built-in Postgres (or SQLite if simpler) to store invitation requests
+- No heavy UI libraries. Minimal dependencies. Clean, commented code.
+
+---
+
+## Brand system — "Quiet Signal" (follow precisely)
+
+### Colors (define as Tailwind theme tokens / CSS variables)
+- **Ink** `#0A0A0A` — primary text; dark surfaces
+- **Bone** `#F4F1EC` — primary background / paper
+- **Inner Green** `#18FF85` — the single accent. Used sparingly and precisely. It is a signal, never decoration.
+
+Default: **Bone background, Ink text.** Green appears only in the brand mark, the section-index accents, and one or two deliberate moments.
+
+Detail: set the browser text-selection color to Inner Green background with Ink text.
+
+### Typography
+- **Fraunces** (serif, Google Fonts) — display and headlines. Large statements are set in **Fraunces italic**.
+- **Geist** (sans, via the `geist` npm package) — body and UI. Fallback if unavailable: **Inter Tight** (Google Fonts).
+- **JetBrains Mono** (Google Fonts) — labels, section numbers, metadata, form labels. Always uppercase, small size, generous letter-spacing (~0.08–0.12em).
+
+Load all fonts with `next/font` (no layout shift, no FOUT). Type scale: hero headline `clamp(2.5rem, 7vw, 5.5rem)` in Fraunces; section headlines `clamp(1.75rem, 4vw, 3rem)`; body 1.0–1.125rem Geist with relaxed line-height (1.7); mono labels 0.75–0.8125rem.
+
+### Logo & signature (locked brand mark — get it exactly right)
+The canonical logo is the file **`inner-logo.png`** (400×400: the word "inner" in an italic serif, Bone-colored, followed by a small solid **Inner Green square sitting on the baseline as the period** — a **square, never a circle** — on an Ink background). Put it in `public/` and treat it as the single source of truth.
+
+- Use the PNG **directly** for: the favicon, the Open Graph / social-preview image, and the Ink-background footer.
+- The PNG has a solid Ink background, so it must **never** be placed on Bone sections — the black tile would clash. On Bone, reproduce the mark **typographically**, matching the PNG exactly:
+  - "inner" in **Fraunces italic**, lowercase, Ink.
+  - Immediately after: a solid Inner Green square resting on the baseline (~0.5–0.6em, tight optical spacing) — the period.
+  - For the inner.hub lockup, append **hub** after the square: it reads `inner` `■` `hub` ("inner.hub" with the green square as the dot).
+- The typographic lockup and the PNG must look identical in style, proportion, and baseline position, so the brand reads consistently across dark and light.
+- In running body text, a normal period is fine; the green square is reserved for the lockup and deliberate accents.
+- Optional: a very subtle opacity pulse on the square (a quiet beacon) — a 3–4s ease loop, barely noticeable. If it reads as gimmicky, make it static. Disable under `prefers-reduced-motion`.
+
+---
+
+## Layout & motion
+- Editorial, left-aligned, generous negative space. Content max-width ~1120px with wide side padding (24px mobile / 64px+ desktop). Let the page breathe — spacing between sections should feel almost excessive (120–200px on desktop).
+- Sections are numbered like an index, in JetBrains Mono: `01`, `02`, `03`…
+- Dividers: 1px hairlines in Ink at ~12–15% opacity.
+- One long scrolling page. No routes except the hidden admin view.
+- Motion: content fades / slides up ~16–24px as sections enter the viewport, 400–600ms ease-out, slight stagger. Calm, never bouncy. Fully disabled under `prefers-reduced-motion`.
+- Mobile-first and fully responsive; it must feel just as composed on a phone.
+- Accessible: semantic HTML landmarks, real heading hierarchy, strong contrast, keyboard-navigable form, visible focus states (2px Ink outline, offset).
+
+---
+
+## Page structure & copy (use this copy verbatim)
+
+### Header (minimal; static or lightly sticky with a Bone backdrop-blur)
+- Left: the `inner■hub` typographic lockup.
+- Right (mono, small): `BY INVITATION`
+
+### Hero (full viewport)
+- Small mono line above: `İSTANBUL · EST. 2022 · BY INVITATION`
+- Large Fraunces italic statement:
+  > A private community for the people building what comes next.
+- Generous space below; a single hairline and a quiet scroll cue (a small mono `SCROLL` or a thin vertical line — pick one, keep it subtle).
+
+### 01 — On inner
+- Mono label: `01 — ON INNER`
+- Body (Geist, comfortably measured — max ~65ch):
+  > inner.hub is a small, deliberate room. We bring together founders, investors, and researchers who take their work seriously — and each other's time just as seriously. No stage. No audience. Only company. What is said here stays here. Who is here is chosen with care.
+
+### 02 — Principles
+- Mono label: `02 — PRINCIPLES`
+- Four entries. Each: mono label + one Geist line. Lay them out as a quiet list or a 2×2 grid on desktop, separated by hairlines.
+  - `SMALL BY DESIGN` — We stay small so the room stays real.
+  - `SIGNAL OVER NOISE` — We value depth over reach.
+  - `DISCRETION` — What happens inside, stays inside.
+  - `COMPANY, NOT AUDIENCE` — We gather as peers, never as performers.
+
+### 03 — Membership
+- Mono label: `03 — MEMBERSHIP`
+- Fraunces headline:
+  > Entry is by invitation. Always.
+- Body (Geist):
+  > There is no membership tier, no waitlist counter, no public roster. Members are nominated from inside the room, considered carefully, and invited personally. We look for people who build, back, or study what comes next — and who understand that trust is the only currency that matters here.
+- Below, a quiet three-step index (mono label + one Geist line each, hairline-separated):
+  - `NOMINATION` — Someone inside the room puts your name forward.
+  - `CONSIDERATION` — We take our time. Fit matters more than fame.
+  - `INVITATION` — If it's right, you'll hear from us directly.
+
+### 04 — The gathering
+- Mono label: `04 — THE GATHERING`
+- Fraunces headline:
+  > The first inner.hub gathering. İstanbul, September 2026.
+- Geist:
+  > Thirty people. Two days. One room. By invitation only.
+- Small mono line below: `DETAILS ARE SHARED WITH INVITEES ONLY.`
+
+### 05 — The ecosystem
+- Mono label: `05 — THE ECOSYSTEM`
+- Fraunces headline:
+  > hub is the first room of inner.
+- Geist:
+  > inner is built as a system of rooms — a lab for research, a studio for making, capital for backing, a house for gathering. hub opens first. The rest follow.
+- A quiet mono index (right-aligned status column, hairlines between rows):
+  - `inner.hub` — `NOW`
+  - `inner.lab` — `TO FOLLOW`
+  - `inner.studio` — `TO FOLLOW`
+  - `inner.capital` — `TO FOLLOW`
+  - `inner.house` — `TO FOLLOW`
+- The `NOW` status may use Inner Green — one of the few permitted accent moments.
+
+### 06 — Request an invitation (the only interactive section)
+- Mono label: `06 — REQUEST AN INVITATION`
+- Fraunces headline:
+  > Request an invitation.
+- Geist sub:
+  > The room is nomination-first, but good people arrive from unexpected directions. If you believe you belong here, tell us who you are. We read everything.
+- Form (labels in mono, inputs styled as minimal fields: transparent background, 1px bottom hairline in Ink, no boxes, no rounded corners; focus state thickens the underline and shows the Ink outline):
+  - `NAME` — text, required
+  - `EMAIL` — email, required
+  - `WHO YOU ARE / WHAT YOU'RE BUILDING` — textarea (3–4 rows), required
+  - `LINK` — url, optional (LinkedIn or website)
+  - `WHO INTRODUCED YOU` — text, optional
+  - Hidden honeypot: a visually-hidden `company` input that must remain empty.
+- Submit button (mono): `SEND` — Ink background, Bone text; hover inverts or underlines. No green button.
+- On success, replace the form with a quiet confirmation in Fraunces italic:
+  > Received. If it's a fit, we'll be in touch.
+- Validation errors: calm inline messages under the field (small mono, a muted terracotta `#B4553B` — the only non-palette color, reserved strictly for errors). Never use alert boxes.
+
+### Footer (Ink background)
+- Background: **Ink**. Place the **`inner-logo.png`** here, where it sits natively on black. Modest size (~120–160px wide).
+- The sub-brand line (mono, low emphasis, Bone at ~60% opacity):
+  `inner.hub  ·  inner.lab  ·  inner.studio  ·  inner.capital  ·  inner.house`
+- Line below: `© 2026 inner. İstanbul.`
+
+---
+
+## Backend (invitation form)
+- POST endpoint (e.g. `/api/request`): server-side validation (required fields, email format, URL format if provided), then store in the database with a timestamp.
+- Reject any submission where the honeypot field is filled — return a generic success so bots learn nothing.
+- Basic per-IP rate limiting (e.g. max 5 submissions/hour) if straightforward.
+- Admin view at `/requests`: lists submissions (newest first: date, name, email, text, link, introducer), gated behind a single passcode read from the environment variable `ADMIN_PASSCODE`. A simple passcode form is enough — do not build full auth. Add `noindex` to this route.
+- All secrets (passcode, database URL) live in Replit's Secrets — never hardcoded.
+
+---
+
+## SEO & metadata
+- `<title>`: `inner.hub — a private community`
+- Meta description: `A private community for founders, investors, and researchers. İstanbul. By invitation.`
+- Open Graph + Twitter card tags; the OG image is `inner-logo.png`.
+- Favicon from `inner-logo.png`.
+- All copy server-rendered and crawlable; proper `lang="en"`; one `<h1>` (the hero statement).
+
+---
+
+## Definition of done
+- Loads fast; composed and quiet on both desktop and mobile; no layout shift from fonts.
+- Fraunces / Geist (or Inter Tight) / JetBrains Mono render correctly via `next/font`.
+- The brand mark is correct everywhere: PNG in the Ink footer, favicon, and OG image; the exact-match typographic `inner■hub` lockup on Bone sections (Fraunces italic + baseline Inner Green square — square, never circle).
+- All six sections present with the copy above, numbered, hairline-divided, generously spaced.
+- The form validates, stores to the database, shows the Fraunces confirmation, and silently drops honeypot spam.
+- `/requests` lists submissions behind the passcode and is noindexed.
+- Motion is subtle and fully respects `prefers-reduced-motion`.
+- View-source shows the full text content in the HTML.
+- No console errors. Clean, structured, commented code.
+
+Build the whole thing, then show me a live preview.

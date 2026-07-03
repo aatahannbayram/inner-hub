@@ -8,10 +8,10 @@ import { desc } from "drizzle-orm";
 
 const router: IRouter = Router();
 
-// Simple in-memory rate limiter: max 3 submissions per IP per 15 minutes
+// Simple in-memory rate limiter: max 5 submissions per IP per hour
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
-const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000;
-const RATE_LIMIT_MAX = 3;
+const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000;
+const RATE_LIMIT_MAX = 5;
 
 function getClientIp(req: Request): string {
   const forwarded = req.headers["x-forwarded-for"];
