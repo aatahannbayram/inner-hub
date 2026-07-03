@@ -5,6 +5,7 @@ import * as z from "zod";
 import { useSubmitRequest } from "@workspace/api-client-react";
 import { FadeIn } from "@/components/FadeIn";
 import { SignatureMark } from "@/components/SignatureMark";
+import { Lockup } from "@/components/Lockup";
 import { LiveClock } from "@/components/LiveClock";
 import { Grain } from "@/components/Grain";
 import { IndexRail } from "@/components/IndexRail";
@@ -99,7 +100,7 @@ export default function Home() {
         <section className="min-h-[85dvh] flex flex-col justify-center px-6 md:px-12 lg:px-[10%] pt-20 pb-32">
           <FadeIn>
             <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-8">
-              İstanbul · Est. 2022 · By Invitation
+              İstanbul → Global · Est. 2022
             </div>
             <h1 className="font-display font-serif italic text-5xl md:text-7xl lg:text-8xl leading-[1.05] max-w-[15ch] text-balance">
               A private community for the people building what comes next.
@@ -119,7 +120,7 @@ export default function Home() {
           <SectionLabel label="01 — On inner" meta="Est. 2022" />
           <FadeIn>
             <div className="max-w-[65ch] text-lg md:text-xl leading-[1.7] text-foreground/90">
-              inner.hub is where serious AI builders, founders, and investors share one room — and where the distance between local talent and global capital gets shorter. No stage. No audience. Only company. This is not a community for everyone. It is a room built deliberately, person by person.
+              inner.hub is where the people building this industry meet early — AI-native founders, builders, and investors who find each other here first, back each other first, and move faster together. No stage. No audience. Only peers. This is not a club. It is the beginning of something much bigger.
             </div>
           </FadeIn>
         </section>
@@ -131,8 +132,8 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-2">
             {[
               {
-                label: "Small by design",
-                line: "We stay small so the circle stays real.",
+                label: "Selective by design",
+                line: "Entry stays rare so the signal stays sharp.",
               },
               {
                 label: "Signal over noise",
@@ -166,10 +167,10 @@ export default function Home() {
           <SectionLabel label="03 — Membership" meta="By nomination" />
           <FadeIn>
             <h2 className="font-display font-serif italic text-4xl md:text-5xl max-w-2xl mb-8 text-balance">
-              Entry is by invitation. Always.
+              Entry is never open. Only offered.
             </h2>
             <p className="max-w-[65ch] text-lg leading-[1.7] text-foreground/90 mb-20">
-              There is no membership tier, no waitlist counter, no public roster. Members are nominated from inside the circle, considered carefully, and invited personally. We look for people who build, back, or study what comes next — and who understand that trust is the only currency that matters here.
+              There is no membership tier, no waitlist counter, no public roster. Members are nominated from inside the circle, considered carefully, and invited personally. We look for people who build, back, or study what comes next — and who understand that trust is the only currency in this circle.
             </p>
           </FadeIn>
 
@@ -177,7 +178,7 @@ export default function Home() {
             {[
               { label: "Nomination", line: "Someone inside the circle puts your name forward." },
               { label: "Consideration", line: "We take our time. Fit matters more than fame." },
-              { label: "Invitation", line: "If it's right, you'll hear from us directly." },
+              { label: "Decision", line: "If it's right, you'll hear from us directly." },
             ].map((item, i) => (
               <FadeIn key={item.label} delay={i * 0.1}>
                 <div className="flex flex-col md:flex-row md:items-baseline gap-2 md:gap-12 py-6 border-t border-border/15 last:border-b">
@@ -201,16 +202,19 @@ export default function Home() {
               <span>04 — The gathering</span>
               <span className="whitespace-nowrap">Sep 2026 · İstanbul</span>
             </div>
-            <h2 className="font-display font-serif italic text-4xl md:text-5xl lg:text-6xl max-w-3xl mb-24 text-balance">
+            <h2 className="font-display font-serif italic text-4xl md:text-5xl lg:text-6xl max-w-3xl mb-8 text-balance">
               The first inner.hub gathering. İstanbul, September 2026.
             </h2>
+            <p className="font-serif text-2xl md:text-3xl max-w-2xl mb-24 text-balance opacity-80">
+              Thirty people. Two days. One circle.
+            </p>
           </FadeIn>
 
           <div className="grid grid-cols-3 gap-8 md:gap-16 max-w-3xl mb-24">
             {[
               { n: "30", label: "People" },
               { n: "2", label: "Days" },
-              { n: "1", label: "Room" },
+              { n: "1", label: "Circle" },
             ].map((item, i) => (
               <FadeIn key={item.label} delay={i * 0.1}>
                 <div className="flex flex-col items-start">
@@ -233,9 +237,22 @@ export default function Home() {
           </FadeIn>
         </section>
 
-        {/* 05 — Request an invitation */}
+        {/* 05 — What's next */}
         <section id="section-05" className="px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15">
-          <SectionLabel label="05 — Request an invitation" meta="We read everything" />
+          <SectionLabel label="05 — What's next" meta="In time" />
+          <FadeIn>
+            <h2 className="font-display font-serif italic text-4xl md:text-5xl max-w-2xl mb-8 text-balance">
+              hub is where it starts.
+            </h2>
+            <p className="max-w-[65ch] text-lg leading-[1.7] text-foreground/90">
+              What begins as thirty people in İstanbul is built to compound — into the network this industry has been missing. We announce things only when they're real. There is more.
+            </p>
+          </FadeIn>
+        </section>
+
+        {/* 06 — Request an invitation */}
+        <section id="section-06" className="px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15">
+          <SectionLabel label="06 — Request an invitation" meta="We read everything" />
 
           {isSuccess ? (
             <div className="max-w-2xl py-12">
@@ -245,7 +262,7 @@ export default function Home() {
           ) : (
             <FadeIn>
               <div className="max-w-2xl">
-                <h2 className="font-serif text-4xl md:text-5xl mb-6">Request an invitation.</h2>
+                <h2 className="font-serif text-4xl md:text-5xl mb-6">Tell us who you are.</h2>
                 <p className="text-lg text-muted-foreground mb-16 leading-[1.7]">
                   The circle is nomination-first, but good people arrive from unexpected directions. If you believe you belong here, tell us who you are. We read everything.
                 </p>
@@ -397,23 +414,15 @@ export default function Home() {
         <div className="flex flex-col gap-6">
           <img src="/inner-logo.png" alt="inner" width={140} height={140} className="w-[140px] h-[140px]" />
           <div className="flex flex-wrap gap-x-5 gap-y-2 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)] opacity-60">
-            <span>The inner circle · İstanbul → Global · By invitation</span>
+            <span>The inner circle · İstanbul → Global</span>
           </div>
           <div className="font-mono text-[10px] uppercase tracking-widest text-[var(--bone)] opacity-30">
             © 2026 inner. İstanbul.
           </div>
         </div>
 
-        <div
-          className="font-serif italic text-[var(--bone)] leading-none flex items-baseline gap-[0.1em] -mb-4 md:-mb-8"
-          style={{ fontSize: "clamp(4rem, 16vw, 13rem)" }}
-          aria-hidden="true"
-        >
-          <span>inner</span>
-          <span
-            className="inline-block bg-[var(--inner-green)] flex-shrink-0"
-            style={{ width: "0.5em", height: "0.5em", marginBottom: "0.06em" }}
-          />
+        <div className="text-[var(--bone)] leading-none -mb-4 md:-mb-8" aria-hidden="true">
+          <Lockup showHub={false} fontSize="clamp(4rem, 16vw, 13rem)" />
         </div>
         <span className="sr-only">inner.</span>
       </footer>

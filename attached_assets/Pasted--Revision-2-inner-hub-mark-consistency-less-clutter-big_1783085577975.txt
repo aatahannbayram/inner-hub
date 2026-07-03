@@ -1,0 +1,69 @@
+# Revision 2: inner.hub — mark consistency, less clutter, bigger signal
+
+## Objective
+Three problems to fix, one vibe to set. (1) The brand mark renders inconsistently across the site and the old logo file is still in use. (2) "BY INVITATION" is repeated all over the page — it reads as insecurity, not confidence. (3) The "room" metaphor is retired. The overall feeling must shift from a cozy members' club to **the early days of something big**: a peer network where the people building this industry meet early and back each other — without ever naming future products or phases.
+
+---
+
+## 0 — Assets first
+I have uploaded a new file to `public/`: **`inner-logo-v2.png`** (corrected master). 
+- Replace every reference to the old `inner-logo.png` with `inner-logo-v2.png` (footer image, any remaining og fallback). Delete the old file from the project.
+- If `inner-logo-v2.png` is not present in `public/`, STOP and tell me — do not generate, recreate, or substitute a logo yourself.
+
+## 1 — One mark, one recipe (kill all variants)
+The site currently shows multiple ad-hoc versions of the wordmark. Consolidate to a **single shared Lockup component** used everywhere the typographic mark appears (header, monumental footer). Its exact CSS, no deviations:
+
+```
+font-family: 'Fraunces'; font-style: normal; font-weight: 100;
+font-variation-settings: 'opsz' 144, 'WONK' 1; letter-spacing: -0.015em;
+```
+
+- The mark is UPRIGHT (never italic). The green square (`#18FF85`, 90° corners, ~0.42em, baseline-set) is part of the component.
+- Delete every other inline recreation, weight, style, or square proportion. Allowed marks on the site, total: header lockup (typographic component) · footer `inner-logo-v2.png` at ~140px · monumental footer wordmark (same component, scaled) · favicon set (green square) · `inner-og.png` for social. Nothing else, nowhere else.
+
+## 2 — "BY INVITATION" appears exactly once
+Keep it only in the **header meta block** (above the live clock). Remove the phrase everywhere else: hero eyebrow, section copy, the gathering section, footer, form area, metadata straplines. After the change, a site-wide search for "INVITATION" returns exactly two hits: the header block and the section title "REQUEST AN INVITATION".
+
+## 3 — Retire the room (site-wide)
+Remove every use of "room"/"rooms". Specific replacements below; anything else that says room gets rewritten in the same spirit.
+
+## 4 — Copy revisions (use VERBATIM)
+
+**Hero eyebrow** → `İSTANBUL → GLOBAL · EST. 2022`
+(Hero headline and sub stay exactly as they are.)
+
+**01 — ON INNER** body →
+> inner.hub is where the people building this industry meet early — AI-native founders, builders, and investors who find each other here first, back each other first, and move faster together. No stage. No audience. Only peers. This is not a club. It is the beginning of something much bigger.
+
+**02 — PRINCIPLES**, first line only →
+- `SELECTIVE BY DESIGN` — Entry stays rare so the signal stays sharp.
+(Other three lines unchanged.)
+
+**03 — MEMBERSHIP** body, last sentence → "…people who understand that trust is the only currency in this circle."
+(Steps and the FOR BUILDERS / FOR INVESTORS pair unchanged.)
+
+**04 — THE GATHERING** (Ink interlude):
+- Sentence under the headline → 
+  > Thirty people. Two days. One circle.
+- Triptych captions → `PEOPLE` · `DAYS` · `CIRCLE`
+- Keep "The first of many." and the mono `DETAILS ARE SHARED WITH INVITEES ONLY.`
+
+**NEW 05 — WHAT'S NEXT** · annotation `IN TIME` (insert between The Gathering and the request form; same section anatomy — mono label row, Fraunces headline, one short body):
+- H: 
+  > hub is where it starts.
+- Body: 
+  > What begins as thirty people in İstanbul is built to compound — into the network this industry has been missing. We announce things only when they're real. There is more.
+- No diagrams, no lists, no names of anything future. One headline, one paragraph, generous space.
+
+**Footer** mono line → `THE INNER CIRCLE · İSTANBUL → GLOBAL`
+
+## 5 — Renumber
+Six sections now: `01 ON INNER · 02 PRINCIPLES · 03 MEMBERSHIP · 04 THE GATHERING · 05 WHAT'S NEXT · 06 REQUEST AN INVITATION`. Update labels, annotations (06 keeps `WE READ EVERYTHING`), anchors, and the index rail (01–06, tracking intact).
+
+## Definition of done
+- Footer shows the NEW logo file (hard-refresh proof: the square has 90° corners — the old file's are rounded). Old file deleted from the repo.
+- Exactly one typographic lockup recipe site-wide; no italic Fraunces anywhere; view the header and footer marks side by side — identical letterforms.
+- Site-wide search: "room" → 0 hits · "INVITATION" → exactly 2 hits (header block + section 06 title) · "studio/capital/ring/ecosystem" → still 0 hits.
+- Six sections, renumbered, rail synced; all copy above verbatim and server-rendered; no console errors; no layout shift.
+
+Apply everything, then show me a live preview.
