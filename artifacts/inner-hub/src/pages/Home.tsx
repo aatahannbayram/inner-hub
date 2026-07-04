@@ -128,7 +128,7 @@ export default function Home() {
           <SectionLabel label="01 · The idea" meta="Coming together" />
           <FadeIn>
             <div className="max-w-[65ch] text-lg md:text-xl leading-[1.7] text-foreground/90 mb-20">
-              We are not here to fix something. We are here to come together. The people building AI, backing it, and pushing it forward belong in one circle. That circle starts in İstanbul, and it starts early.
+              The people building AI, backing it, and pushing it forward belong in one circle. inner.hub brings them together. It starts in İstanbul, and it starts early.
             </div>
           </FadeIn>
           <FadeIn delay={0.15}>

@@ -1,0 +1,109 @@
+# Rebuild content: inner.hub v8 — coming together, drawn and written simply
+
+## Objective
+Full content replacement plus two small brand diagrams. Design system unchanged (colors, Fraunces Thin 100 upright WONK recipe, grain, motion, preloader, Ink interlude, live clock, index rail, form, backend). Headlines may be clever; body copy is plain, simple English. Short sentences. Use all copy VERBATIM.
+
+**Punctuation rule, site-wide:** the em dash and hyphen-as-punctuation are banned in all rendered text. No "—" anywhere: not in body copy, not in list rows, not in section labels. Sentences are split with periods or commas. The separator character everywhere (section labels, annotations, list rows, footer) is the middle dot `·`.
+
+## Locked rules (verify at the end)
+- One typographic lockup recipe site-wide: `font-family:'Fraunces'; font-style:normal; font-weight:100; font-variation-settings:'opsz' 144,'WONK' 1; letter-spacing:-0.015em`. Upright, never italic. Green square `#18FF85`, 90° corners, baseline-set.
+- Marks allowed, complete list: header `inner■hub` lockup · footer `inner-logo-v2.png` (~140px) · monumental footer `inner■` wordmark · favicon = green square only · `inner-og.png`. No i-badge, no tile badge anywhere.
+- Header right block: ONLY `İSTANBUL 41.00°N 28.97°E · 14:32:07 TRT` (live clock; time only on mobile).
+- Forbidden words in rendered output: room, studio, capital, ring, ecosystem, exclusive, elite, luxury, curated, community, nomination, problem, solve, fix.
+- "invitation"/"invite" appears ONLY in sections 04 and 07.
+- No meeting or format details anywhere except the first gathering (September 2026, 34 people). No frequencies, no dinners, no schedules.
+- Section label anatomy: `01 · THE IDEA` style, middle dots, no dashes. List rows: mono label in a left column, Geist text in a right column, separated by layout spacing, never by a dash character.
+
+## Architecture — seven sections
+`01 THE IDEA · 02 THE FIRST THIRTY-FOUR · 03 WHAT THIS IS · 04 ENTRY · 05 THE GATHERING · 06 WHAT'S NEXT · 07 REQUEST AN INVITATION`. Update anchors, annotations, and the index rail (01–07). Section 05 keeps the full-bleed Ink interlude.
+
+## Copy (VERBATIM)
+
+### Hero (full viewport)
+- Eyebrow (mono): `İSTANBUL → GLOBAL · EST. 2022`
+- H1 (Fraunces, large):
+  > The next wave already knows each other.
+- Sub (Geist):
+  > inner.hub is a private circle of AI founders, builders, and investors. People who meet early and support each other first.
+
+### 01 · THE IDEA · annotation `COMING TOGETHER`
+Body:
+> The people building AI, backing it, and pushing it forward belong in one circle. inner.hub brings them together. It starts in İstanbul, and it starts early.
+
+**Diagram A, under the body:** an inline SVG, wide and quiet (~560×200, scales down on mobile). Small Stone squares (3–4px, ~40% opacity) scattered near the left and right edges. Thin hairlines (Ink at ~15%) run from each square toward the center. At the center, a small circle outline (Ink at ~30%, 1px) holding a single Inner Green square (~8px). Decorative: `aria-hidden="true"` with a visually hidden text line "Many people, coming together into one circle." Static; may draw in once on reveal (600ms, house easing); no loops.
+
+### 02 · THE FIRST THIRTY-FOUR · annotation `FOUNDING SEATS`
+Intro line (Geist):
+> It starts with thirty-four people, chosen one by one:
+
+Three rows (mono label left, Geist line right):
+- `FOUNDERS` · People building AI companies.
+- `BUILDERS` · Engineers and researchers doing serious AI work.
+- `INVESTORS` · Angels and funds that invest early.
+
+Line (Geist, set apart):
+> Some of them are building projects you already know.
+
+Closing line (Geist):
+> These thirty-four are not just members. They are the founding members of inner.hub.
+
+### 03 · WHAT THIS IS · annotation `NOT A CLUB`
+Two short paragraphs (Geist):
+> Big things start here. New ideas are discussed here, tested here, and supported here, by people who can actually build them and fund them.
+
+> And this is not a members' club. There are no fees and no revenue goal. Nothing is sold here. inner.hub exists so that its people win.
+
+### 04 · ENTRY · annotation `BY INVITATION`
+- H (Fraunces):
+  > Entry is by invitation. Always.
+- Body:
+  > There are no tickets, no tiers, and no public list. Members are put forward from inside the circle, considered with care, and invited personally.
+- Three steps (mono label left, one line right):
+  - `YOUR NAME` · Someone inside the circle puts your name forward.
+  - `CONSIDERATION` · We take our time. Fit beats fame.
+  - `INVITATION` · If it is right, you hear from us directly.
+
+### 05 · THE GATHERING · annotation `SEP 2026 · İSTANBUL` · Ink interlude
+- H:
+  > The first inner.hub gathering. İstanbul, September 2026.
+- Triptych (Fraunces, oversized): **34 / 2 / 1** with mono captions `PEOPLE` · `DAYS` · `CIRCLE`
+- Line (Geist):
+  > Thirty-four people. Two days. One circle. The first of many.
+
+**Diagram B, beside or under the triptych:** an inline SVG (~320px, scales down). Thirty-four small squares (~7px each) placed evenly on an invisible circle of radius ~130. Thirty-three squares in Bone at ~85% opacity, one square in Inner Green. The group rotates extremely slowly (CSS, ~140s linear infinite; static under `prefers-reduced-motion`). Mono caption below: `34 · ONE CIRCLE`. Decorative: `aria-hidden="true"` with a visually hidden text line "Thirty-four squares forming one circle."
+
+- Nothing else in this section: no detail lines, no formats, no schedules.
+
+### 06 · WHAT'S NEXT · annotation `IN TIME`
+- H (Fraunces):
+  > hub is where it starts.
+- Body:
+  > We are building something bigger, step by step. We announce things when they are real. There is more.
+
+### 07 · REQUEST AN INVITATION · annotation `WE READ EVERYTHING`
+- H (Fraunces):
+  > Request an invitation.
+- Sub:
+  > Most people arrive by invitation, but good people also find us on their own. Tell us who you are and what you are building.
+- Form, fields and behavior unchanged: `NAME` · `EMAIL` · `WHO YOU ARE / WHAT YOU'RE BUILDING` · `LINK` (optional) · `WHO INTRODUCED YOU` (optional) · honeypot · `SEND`.
+- Success (Fraunces):
+  > Received. If it fits, we will be in touch.
+
+### Footer
+- Mono line: `BIG THINGS START HERE · İSTANBUL → GLOBAL`
+- `inner-logo-v2.png` at ~140px, `© 2026 inner. İstanbul.`, and the monumental `inner■` wordmark at the very bottom.
+
+## SEO
+- `<title>`: `inner.hub — the inner circle` (the title tag may keep its dash; it is metadata, not page copy)
+- Meta description: `A private circle of AI founders, builders, and investors. İstanbul → global. Big things start here.`
+- Favicon: green-square set only; `og:image`: `inner-og.png`.
+
+## Definition of done
+- Rendered page contains ZERO em dashes and zero hyphens used as punctuation (compound words like "world-class" are absent anyway; check with a page-text search for "—" and " - ").
+- Both diagrams render: Diagram A in 01 (convergence), Diagram B in 05 (34 squares, one green, slow rotation, reduced-motion static). Both `aria-hidden` with hidden text alternatives.
+- Seven sections in exact order; rail 01–07 tracking; middle-dot separators everywhere; copy verbatim.
+- Word tests: "invitation/invite" only in 04 and 07 · "nomination" 0 · "dinner/monthly/twice" 0 · "problem/solve/fix" 0 · "room/studio/capital/ring/ecosystem/community" 0 · "founding members" present · "no fees" and "no revenue goal" present · "projects you already know" present.
+- Body sentences stay short and plain; no idioms.
+- Lockup recipe identical header/footer; no italic Fraunces; view-source contains all copy; no console errors.
+
+Apply everything, then show me a live preview.
