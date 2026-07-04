@@ -92,7 +92,7 @@ export default function Home() {
       <IndexRail />
 
       {/* Header */}
-      <header className="sticky top-0 z-50 px-6 py-6 md:px-12 lg:px-[10%] flex items-center justify-between bg-background/90 backdrop-blur-sm border-b border-border/20">
+      <header className="sticky top-0 z-50 h-[60px] md:h-[72px] px-6 md:px-12 lg:px-[10%] flex items-center justify-between bg-background/90 backdrop-blur-sm border-b border-border/20">
         <SignatureMark />
         <LiveClock />
       </header>
