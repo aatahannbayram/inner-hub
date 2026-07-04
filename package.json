@@ -12,15 +12,5 @@
   "devDependencies": {
     "prettier": "^3.8.4",
     "typescript": "~5.9.3"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "esbuild",
-      "@tailwindcss/oxide",
-      "lightningcss",
-      "better-sqlite3",
-      "sharp",
-      "canvas"
-    ]
   }
 }
