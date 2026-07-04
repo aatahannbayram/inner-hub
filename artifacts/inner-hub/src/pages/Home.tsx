@@ -98,7 +98,7 @@ export default function Home() {
 
       <main id="main-content" className="flex-grow">
         {/* Hero */}
-        <section className="min-h-[85dvh] flex flex-col justify-center px-6 md:px-12 lg:px-[10%] pt-20 pb-32">
+        <section className="h-[100svh] flex flex-col justify-center px-6 md:px-12 lg:px-[10%]">
           <FadeIn>
             <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-8">
               İstanbul → Global · Est. 2022
@@ -112,13 +112,6 @@ export default function Home() {
             <p className="max-w-[50ch] text-lg md:text-xl text-foreground/80 leading-[1.6]">
               inner.hub is a private circle of founders, builders, and investors. People who meet early and support each other first.
             </p>
-          </FadeIn>
-
-          <FadeIn delay={0.4} className="mt-32">
-            <div className="h-px w-full bg-border/20 mb-8" />
-            <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
-              Scroll
-            </div>
           </FadeIn>
         </section>
 
