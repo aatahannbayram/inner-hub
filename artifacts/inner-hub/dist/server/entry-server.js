@@ -3,15 +3,15 @@ import { renderToString } from "react-dom/server";
 import { Link, Router } from "wouter";
 import { useMutation, QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import * as React from "react";
-import React__default, { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import * as TooltipPrimitive from "@radix-ui/react-tooltip";
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { Linkedin, Instagram } from "lucide-react";
+import { Zap, Users, TrendingUp, BookOpen, Radio, Fingerprint, Code2, Target, Linkedin, Instagram, ArrowRight } from "lucide-react";
 import { useFormContext, FormProvider, Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform, AnimatePresence, useInView } from "framer-motion";
 import { Slot } from "@radix-ui/react-slot";
 import * as LabelPrimitive from "@radix-ui/react-label";
 import { cva } from "class-variance-authority";
@@ -687,34 +687,176 @@ const formSchema = z.object({
   link: z.string().url("Must be a valid URL").optional().or(z.literal("")),
   whoIntroduced: z.string().optional(),
   company: z.string().optional()
-  // Honeypot
 });
 const fieldClass = "rounded-none border-0 border-b border-border bg-transparent px-0 py-4 focus-visible:ring-0 focus-visible:border-foreground focus-visible:border-b-2 transition-[border-width]";
+function Counter({ to, suffix = "" }) {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, margin: "-80px" });
+  const [val, setVal] = useState(0);
+  useEffect(() => {
+    if (!inView) return;
+    let start = 0;
+    const step = Math.ceil(to / 48);
+    const id = setInterval(() => {
+      start = Math.min(start + step, to);
+      setVal(start);
+      if (start >= to) clearInterval(id);
+    }, 20);
+    return () => clearInterval(id);
+  }, [inView, to]);
+  return /* @__PURE__ */ jsxs("span", { ref, children: [
+    val,
+    suffix
+  ] });
+}
 function SectionLabel({ label, meta }) {
   return /* @__PURE__ */ jsx(FadeIn, { children: /* @__PURE__ */ jsxs("div", { className: "flex items-baseline justify-between gap-6 pb-6 mb-16 border-b border-border/20 font-mono text-xs uppercase tracking-widest", children: [
     /* @__PURE__ */ jsx("span", { children: label }),
     /* @__PURE__ */ jsx("span", { className: "text-muted-foreground whitespace-nowrap", children: meta })
   ] }) });
 }
+const MODULES = [
+  {
+    id: "signal",
+    name: "inner·signal",
+    desc: "AI-powered deal and opportunity feed. The right signals, before anyone else sees them.",
+    icon: Zap,
+    tag: "AI Layer"
+  },
+  {
+    id: "match",
+    name: "inner·match",
+    desc: "Co-founder, mentor, and investor matching inside a closed circle. Trust-based connections.",
+    icon: Users,
+    tag: "Matching"
+  },
+  {
+    id: "capital",
+    name: "inner·capital",
+    desc: "Private deal flow and investment pipeline. SPVs, demo days, and co-investment opportunities.",
+    icon: TrendingUp,
+    tag: "Investments"
+  },
+  {
+    id: "vault",
+    name: "inner·vault",
+    desc: "Shared knowledge base. Pitch decks, market research, and documents — permissioned and searchable.",
+    icon: BookOpen,
+    tag: "Knowledge"
+  },
+  {
+    id: "pulse",
+    name: "inner·pulse",
+    desc: "Live ecosystem signal dashboard. What's moving, what's trending, what matters — inside only.",
+    icon: Radio,
+    tag: "Intelligence"
+  },
+  {
+    id: "id",
+    name: "inner·id",
+    desc: "Portable verified membership identity. Your inner.hub membership carries weight beyond the platform.",
+    icon: Fingerprint,
+    tag: "Identity"
+  },
+  {
+    id: "api",
+    name: "inner·api",
+    desc: "Platform API for integrations and partners. Build on top of the inner.hub infrastructure.",
+    icon: Code2,
+    tag: "Platform"
+  },
+  {
+    id: "bounty",
+    name: "inner·bounty",
+    desc: "Community task system. Companies post challenges, members solve them, platform facilitates.",
+    icon: Target,
+    tag: "Marketplace"
+  }
+];
+const MARQUEE_ITEMS = [
+  "inner·signal",
+  "inner·match",
+  "inner·capital",
+  "inner·vault",
+  "inner·pulse",
+  "inner·id",
+  "inner·api",
+  "inner·bounty"
+];
+function MarqueeStrip() {
+  const items = [...MARQUEE_ITEMS, ...MARQUEE_ITEMS];
+  return /* @__PURE__ */ jsx("div", { className: "overflow-hidden border-y border-border/15 py-4 bg-background", children: /* @__PURE__ */ jsx(
+    motion.div,
+    {
+      className: "flex gap-16 whitespace-nowrap",
+      animate: { x: ["0%", "-50%"] },
+      transition: { duration: 24, ease: "linear", repeat: Infinity },
+      children: items.map((item, i) => /* @__PURE__ */ jsxs("span", { className: "font-mono text-xs uppercase tracking-widest text-muted-foreground flex-shrink-0", children: [
+        item,
+        " ",
+        /* @__PURE__ */ jsx("span", { className: "text-[var(--inner-green)] ml-4", children: "·" })
+      ] }, i))
+    }
+  ) });
+}
+function ScrollProgress() {
+  const { scrollYProgress } = useScroll();
+  return /* @__PURE__ */ jsx(
+    motion.div,
+    {
+      className: "fixed top-0 left-0 right-0 h-[2px] bg-[var(--inner-green)] origin-left z-[9999]",
+      style: { scaleX: scrollYProgress }
+    }
+  );
+}
+function ModuleCard({ mod, index }) {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, margin: "-60px" });
+  const Icon = mod.icon;
+  return /* @__PURE__ */ jsxs(
+    motion.div,
+    {
+      ref,
+      initial: { opacity: 0, y: 32 },
+      animate: inView ? { opacity: 1, y: 0 } : {},
+      transition: { duration: 0.5, delay: index % 4 * 0.08, ease: [0.16, 1, 0.3, 1] },
+      className: "group border border-border/15 p-6 md:p-8 flex flex-col gap-4 hover:border-border/40 transition-colors duration-300 cursor-default",
+      children: [
+        /* @__PURE__ */ jsxs("div", { className: "flex items-start justify-between", children: [
+          /* @__PURE__ */ jsx("div", { className: "size-9 border border-border/20 flex items-center justify-center group-hover:border-[var(--inner-green)]/40 transition-colors duration-300", children: /* @__PURE__ */ jsx(Icon, { className: "size-4 text-muted-foreground group-hover:text-[var(--ink)] transition-colors duration-300", strokeWidth: 1.5 }) }),
+          /* @__PURE__ */ jsx("span", { className: "font-mono text-[9px] uppercase tracking-widest text-muted-foreground/50 border border-border/15 px-2 py-1", children: mod.tag })
+        ] }),
+        /* @__PURE__ */ jsxs("div", { children: [
+          /* @__PURE__ */ jsx("h3", { className: "font-serif italic text-xl mb-2 text-foreground/90 group-hover:text-foreground transition-colors duration-300", children: mod.name }),
+          /* @__PURE__ */ jsx("p", { className: "text-sm text-muted-foreground leading-relaxed", children: mod.desc })
+        ] }),
+        /* @__PURE__ */ jsxs("div", { className: "mt-auto pt-2 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300", children: [
+          /* @__PURE__ */ jsx("div", { className: "h-[1px] flex-1 bg-[var(--inner-green)]/30" }),
+          /* @__PURE__ */ jsx(ArrowRight, { className: "size-3 text-[var(--inner-green)]" })
+        ] })
+      ]
+    }
+  );
+}
+function StatItem({ n, label, suffix = "" }) {
+  return /* @__PURE__ */ jsxs("div", { className: "flex flex-col items-start", children: [
+    /* @__PURE__ */ jsx("span", { className: "font-display font-serif italic text-5xl md:text-7xl leading-none mb-3 text-[var(--bone)]", children: /* @__PURE__ */ jsx(Counter, { to: n, suffix }) }),
+    /* @__PURE__ */ jsx("span", { className: "font-mono text-[10px] uppercase tracking-widest opacity-40 text-[var(--bone)]", children: label })
+  ] });
+}
 function Home() {
   const { mutate: submitRequest2, isSuccess, isError, isPending } = useSubmitRequest();
+  const heroRef = useRef(null);
+  const { scrollY } = useScroll();
+  const heroY = useTransform(scrollY, [0, 600], [0, 120]);
   const form = useForm({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: "",
-      email: "",
-      whoYouAre: "",
-      link: "",
-      whoIntroduced: "",
-      company: ""
-    }
+    defaultValues: { name: "", email: "", whoYouAre: "", link: "", whoIntroduced: "", company: "" }
   });
-  React__default.useEffect(() => {
+  useEffect(() => {
     if (window.location.hash) {
       const el = document.getElementById(window.location.hash.slice(1));
-      if (el) {
-        requestAnimationFrame(() => el.scrollIntoView({ block: "start" }));
-      }
+      if (el) requestAnimationFrame(() => el.scrollIntoView({ block: "start" }));
     }
   }, []);
   const onSubmit = (data) => {
@@ -730,14 +872,8 @@ function Home() {
     });
   };
   return /* @__PURE__ */ jsxs("div", { className: "min-h-screen bg-background text-foreground flex flex-col", children: [
-    /* @__PURE__ */ jsx(
-      "a",
-      {
-        href: "#main-content",
-        className: "sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[9999] focus:bg-foreground focus:text-background focus:px-4 focus:py-2 font-mono text-xs uppercase tracking-widest",
-        children: "Skip to content"
-      }
-    ),
+    /* @__PURE__ */ jsx("a", { href: "#main-content", className: "sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[9999] focus:bg-foreground focus:text-background focus:px-4 focus:py-2 font-mono text-xs uppercase tracking-widest", children: "Skip to content" }),
+    /* @__PURE__ */ jsx(ScrollProgress, {}),
     /* @__PURE__ */ jsx(Preloader, {}),
     /* @__PURE__ */ jsx(Grain, {}),
     /* @__PURE__ */ jsx(IndexRail, {}),
@@ -746,13 +882,62 @@ function Home() {
       /* @__PURE__ */ jsx(LiveClock, {})
     ] }),
     /* @__PURE__ */ jsxs("main", { id: "main-content", className: "flex-grow", children: [
-      /* @__PURE__ */ jsxs("section", { className: "h-[100svh] flex flex-col justify-center px-6 md:px-12 lg:px-[10%]", children: [
-        /* @__PURE__ */ jsxs(FadeIn, { children: [
-          /* @__PURE__ */ jsx("div", { className: "font-mono text-xs uppercase tracking-widest text-muted-foreground mb-8", children: "İstanbul → Global · Est. 2022" }),
-          /* @__PURE__ */ jsx("h1", { className: "font-display font-serif italic text-5xl md:text-7xl lg:text-8xl leading-[1.05] max-w-[18ch] text-balance", children: "What comes next starts here." })
-        ] }),
-        /* @__PURE__ */ jsx(FadeIn, { delay: 0.2, className: "mt-12", children: /* @__PURE__ */ jsx("p", { className: "max-w-[50ch] text-lg md:text-xl text-foreground/80 leading-[1.6]", children: "inner.hub is a private circle of founders, builders, and investors. People who meet early and support each other first." }) })
+      /* @__PURE__ */ jsxs("section", { ref: heroRef, className: "h-[100svh] flex flex-col justify-center px-6 md:px-12 lg:px-[10%] relative overflow-hidden", children: [
+        /* @__PURE__ */ jsx(
+          motion.div,
+          {
+            className: "absolute inset-0 pointer-events-none",
+            style: { y: heroY },
+            children: /* @__PURE__ */ jsx("div", { className: "absolute top-1/2 right-[5%] -translate-y-1/2 size-[600px] rounded-full bg-[var(--inner-green)]/[0.025] blur-3xl" })
+          }
+        ),
+        /* @__PURE__ */ jsxs(
+          motion.div,
+          {
+            initial: { opacity: 0, y: 24 },
+            animate: { opacity: 1, y: 0 },
+            transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] },
+            children: [
+              /* @__PURE__ */ jsxs("div", { className: "font-mono text-xs uppercase tracking-widest text-muted-foreground mb-8 flex items-center gap-3", children: [
+                /* @__PURE__ */ jsx("span", { className: "size-1.5 rounded-full bg-[var(--inner-green)] animate-beacon" }),
+                "İstanbul → Global · Est. 2026"
+              ] }),
+              /* @__PURE__ */ jsx("h1", { className: "font-display font-serif italic text-5xl md:text-7xl lg:text-8xl leading-[1.05] max-w-[18ch] text-balance", children: "What comes next starts here." })
+            ]
+          }
+        ),
+        /* @__PURE__ */ jsx(
+          motion.div,
+          {
+            initial: { opacity: 0, y: 24 },
+            animate: { opacity: 1, y: 0 },
+            transition: { duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] },
+            className: "mt-12",
+            children: /* @__PURE__ */ jsx("p", { className: "max-w-[50ch] text-lg md:text-xl text-foreground/80 leading-[1.6]", children: "inner.hub is a private circle of founders, builders, and investors. People who meet early and support each other first." })
+          }
+        ),
+        /* @__PURE__ */ jsxs(
+          motion.div,
+          {
+            initial: { opacity: 0 },
+            animate: { opacity: 1 },
+            transition: { duration: 0.8, delay: 0.5 },
+            className: "absolute bottom-10 left-6 md:left-12 lg:left-[10%] flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground",
+            children: [
+              /* @__PURE__ */ jsx(
+                motion.div,
+                {
+                  animate: { y: [0, 6, 0] },
+                  transition: { duration: 2, repeat: Infinity, ease: "easeInOut" },
+                  children: "↓"
+                }
+              ),
+              /* @__PURE__ */ jsx("span", { children: "scroll" })
+            ]
+          }
+        )
       ] }),
+      /* @__PURE__ */ jsx(MarqueeStrip, {}),
       /* @__PURE__ */ jsxs("section", { id: "section-01", className: "px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15", children: [
         /* @__PURE__ */ jsx(SectionLabel, { label: "01 · The idea", meta: "Coming together" }),
         /* @__PURE__ */ jsx(FadeIn, { children: /* @__PURE__ */ jsx("div", { className: "max-w-[65ch] text-lg md:text-xl leading-[1.7] text-foreground/90", children: "AI is the center of this circle. Around it are the founders, builders, and investors pushing what comes next. inner.hub brings them together. It starts in İstanbul, and it starts early." }) })
@@ -768,22 +953,29 @@ function Home() {
           /* @__PURE__ */ jsx("div", { className: "font-mono text-xs uppercase tracking-widest text-muted-foreground w-full md:w-48 flex-shrink-0", children: item.label }),
           /* @__PURE__ */ jsx("p", { className: "text-lg text-foreground/90", children: item.line })
         ] }) }, item.label)) }),
-        /* @__PURE__ */ jsx(FadeIn, { delay: 0.15, children: /* @__PURE__ */ jsx("p", { className: "max-w-[65ch] text-lg leading-[1.7] text-foreground/90 mb-8", children: "Some of them are building projects you already know." }) }),
         /* @__PURE__ */ jsx(FadeIn, { delay: 0.2, children: /* @__PURE__ */ jsx("p", { className: "max-w-[65ch] text-lg leading-[1.7] text-foreground/90", children: "These thirty-four are not just members. They are the founding members of inner.hub." }) })
       ] }),
       /* @__PURE__ */ jsxs("section", { id: "section-03", className: "px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15", children: [
-        /* @__PURE__ */ jsx(SectionLabel, { label: "03 · What this is", meta: "The point" }),
+        /* @__PURE__ */ jsx(SectionLabel, { label: "03 · The platform", meta: "Eight tools" }),
+        /* @__PURE__ */ jsxs(FadeIn, { children: [
+          /* @__PURE__ */ jsx("h2", { className: "font-display font-serif italic text-4xl md:text-5xl max-w-2xl mb-4 text-balance", children: "Everything a closed circle needs." }),
+          /* @__PURE__ */ jsx("p", { className: "max-w-[55ch] text-lg text-foreground/70 leading-[1.7] mb-16", children: "Eight interconnected tools built for operators who move fast and think in systems." })
+        ] }),
+        /* @__PURE__ */ jsx("div", { className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-px bg-border/15", children: MODULES.map((mod, i) => /* @__PURE__ */ jsx("div", { className: "bg-background", children: /* @__PURE__ */ jsx(ModuleCard, { mod, index: i }) }, mod.id)) })
+      ] }),
+      /* @__PURE__ */ jsxs("section", { id: "section-04", className: "px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15", children: [
+        /* @__PURE__ */ jsx(SectionLabel, { label: "04 · What this is", meta: "The point" }),
         /* @__PURE__ */ jsx(FadeIn, { children: /* @__PURE__ */ jsx(
           "div",
           {
             className: "max-w-[46ch] text-foreground/90",
             style: { fontSize: "clamp(19px, 2.4vw, 26px)", lineHeight: 1.55 },
-            children: /* @__PURE__ */ jsx("p", { children: "Big things start here. New ideas are discussed here, tested here, and supported here, by people who can actually build them and fund them." })
+            children: /* @__PURE__ */ jsx("p", { children: "Big things start here. New ideas are discussed here, tested here, and supported here — by people who can actually build them and fund them." })
           }
         ) })
       ] }),
-      /* @__PURE__ */ jsxs("section", { id: "section-04", className: "px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15", children: [
-        /* @__PURE__ */ jsx(SectionLabel, { label: "04 · Entry", meta: "By invitation" }),
+      /* @__PURE__ */ jsxs("section", { id: "section-05", className: "px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15", children: [
+        /* @__PURE__ */ jsx(SectionLabel, { label: "05 · Entry", meta: "By invitation" }),
         /* @__PURE__ */ jsxs(FadeIn, { children: [
           /* @__PURE__ */ jsx("h2", { className: "font-display font-serif italic text-4xl md:text-5xl max-w-2xl mb-8 text-balance", children: "Entry is by invitation. Always." }),
           /* @__PURE__ */ jsx("p", { className: "max-w-[65ch] text-lg leading-[1.7] text-foreground/90 mb-20", children: "There are no tickets, no tiers, and no public list. Members are put forward from inside the circle, considered with care, and invited personally." })
@@ -800,33 +992,31 @@ function Home() {
       /* @__PURE__ */ jsxs(
         "section",
         {
-          id: "section-05",
-          className: "px-6 md:px-12 lg:px-[10%] py-32 md:py-48 border-t border-border/15 bg-[var(--ink)] text-[var(--bone)] transition-colors duration-700",
+          id: "section-06",
+          className: "px-6 md:px-12 lg:px-[10%] py-32 md:py-48 border-t border-border/15 bg-[var(--ink)] text-[var(--bone)] transition-colors duration-700 overflow-hidden relative",
           children: [
+            /* @__PURE__ */ jsx("div", { className: "absolute top-0 right-0 size-[500px] bg-[var(--inner-green)]/[0.03] blur-3xl pointer-events-none" }),
             /* @__PURE__ */ jsxs(FadeIn, { children: [
               /* @__PURE__ */ jsxs("div", { className: "flex items-baseline justify-between gap-6 pb-6 mb-20 border-b border-white/15 font-mono text-xs uppercase tracking-widest opacity-60", children: [
-                /* @__PURE__ */ jsx("span", { children: "05 · The gathering" }),
+                /* @__PURE__ */ jsx("span", { children: "06 · The gathering" }),
                 /* @__PURE__ */ jsx("span", { className: "whitespace-nowrap", children: "Sep 2026 · İstanbul" })
               ] }),
               /* @__PURE__ */ jsx("h2", { className: "font-display font-serif italic text-4xl md:text-5xl lg:text-6xl max-w-3xl mb-24 text-balance", children: "The first inner.hub gathering. İstanbul, September 2026." })
             ] }),
             /* @__PURE__ */ jsxs("div", { className: "flex flex-col lg:flex-row lg:items-center gap-16 mb-24", children: [
-              /* @__PURE__ */ jsx("div", { className: "grid grid-cols-3 gap-6 md:gap-10 min-w-0 lg:flex-1", children: [
-                { n: "34", label: "People" },
-                { n: "2", label: "Days" },
-                { n: "1", label: "Circle" }
-              ].map((item, i) => /* @__PURE__ */ jsx(FadeIn, { delay: i * 0.1, children: /* @__PURE__ */ jsxs("div", { className: "flex flex-col items-start", children: [
-                /* @__PURE__ */ jsx("span", { className: "font-display font-serif italic text-5xl md:text-7xl leading-none mb-4", children: item.n }),
-                /* @__PURE__ */ jsx("span", { className: "font-mono text-[10px] uppercase tracking-widest opacity-50", children: item.label })
-              ] }) }, item.label)) }),
+              /* @__PURE__ */ jsxs("div", { className: "grid grid-cols-3 gap-6 md:gap-10 min-w-0 lg:flex-1", children: [
+                /* @__PURE__ */ jsx(StatItem, { n: 34, label: "People" }),
+                /* @__PURE__ */ jsx(StatItem, { n: 2, label: "Days" }),
+                /* @__PURE__ */ jsx(StatItem, { n: 8, label: "Modules" })
+              ] }),
               /* @__PURE__ */ jsx(FadeIn, { delay: 0.2, className: "flex-shrink-0", children: /* @__PURE__ */ jsx(DiagramCircle, {}) })
             ] }),
             /* @__PURE__ */ jsx(FadeIn, { delay: 0.15, children: /* @__PURE__ */ jsx("p", { className: "font-serif text-2xl md:text-3xl max-w-2xl text-balance opacity-80", children: "Thirty-four people. Two days. One circle. The first of many." }) })
           ]
         }
       ),
-      /* @__PURE__ */ jsxs("section", { id: "section-06", className: "px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15", children: [
-        /* @__PURE__ */ jsx(SectionLabel, { label: "06 · What's next", meta: "In time" }),
+      /* @__PURE__ */ jsxs("section", { id: "section-07", className: "px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15", children: [
+        /* @__PURE__ */ jsx(SectionLabel, { label: "07 · What's next", meta: "In time" }),
         /* @__PURE__ */ jsxs(FadeIn, { children: [
           /* @__PURE__ */ jsx("h2", { className: "font-display font-serif italic text-4xl md:text-5xl max-w-2xl mb-8 text-balance", children: "hub is where it starts." }),
           /* @__PURE__ */ jsx(
@@ -839,9 +1029,24 @@ function Home() {
           )
         ] })
       ] }),
-      /* @__PURE__ */ jsxs("section", { id: "section-07", className: "px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15", children: [
-        /* @__PURE__ */ jsx(SectionLabel, { label: "07 · Request an invitation", meta: "We read everything" }),
-        isSuccess ? /* @__PURE__ */ jsx("div", { className: "max-w-2xl py-12", children: /* @__PURE__ */ jsx("h2", { className: "font-display font-serif italic text-4xl md:text-5xl mb-6 text-balance", children: "Received. If it fits, we will be in touch." }) }) : /* @__PURE__ */ jsx(FadeIn, { children: /* @__PURE__ */ jsxs("div", { className: "max-w-2xl", children: [
+      /* @__PURE__ */ jsxs("section", { id: "section-08", className: "px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15", children: [
+        /* @__PURE__ */ jsx(SectionLabel, { label: "08 · Request an invitation", meta: "We read everything" }),
+        /* @__PURE__ */ jsx(AnimatePresence, { mode: "wait", children: isSuccess ? /* @__PURE__ */ jsxs(
+          motion.div,
+          {
+            initial: { opacity: 0, y: 16 },
+            animate: { opacity: 1, y: 0 },
+            className: "max-w-2xl py-12",
+            children: [
+              /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3 mb-6", children: [
+                /* @__PURE__ */ jsx("div", { className: "size-2 rounded-full bg-[var(--inner-green)] animate-beacon" }),
+                /* @__PURE__ */ jsx("span", { className: "font-mono text-xs uppercase tracking-widest text-muted-foreground", children: "Received" })
+              ] }),
+              /* @__PURE__ */ jsx("h2", { className: "font-display font-serif italic text-4xl md:text-5xl text-balance", children: "If it fits, we will be in touch." })
+            ]
+          },
+          "success"
+        ) : /* @__PURE__ */ jsx(motion.div, { children: /* @__PURE__ */ jsx(FadeIn, { children: /* @__PURE__ */ jsxs("div", { className: "max-w-2xl", children: [
           /* @__PURE__ */ jsx("h2", { className: "font-display font-serif italic text-4xl md:text-5xl mb-6 text-balance", children: "Request an invitation." }),
           /* @__PURE__ */ jsx("p", { className: "text-lg text-muted-foreground mb-16 leading-[1.7]", children: "Most people arrive by invitation, but good people also find us on their own. Tell us who you are and what you are building." }),
           /* @__PURE__ */ jsx(Form, { ...form, children: /* @__PURE__ */ jsxs("form", { onSubmit: form.handleSubmit(onSubmit), className: "space-y-10", children: [
@@ -852,15 +1057,7 @@ function Home() {
                 name: "name",
                 render: ({ field }) => /* @__PURE__ */ jsxs(FormItem, { children: [
                   /* @__PURE__ */ jsx(FormLabel, { className: "font-mono text-xs tracking-widest uppercase", children: "Name" }),
-                  /* @__PURE__ */ jsx(FormControl, { children: /* @__PURE__ */ jsx(
-                    Input,
-                    {
-                      placeholder: "Your full name",
-                      className: fieldClass,
-                      "data-testid": "input-name",
-                      ...field
-                    }
-                  ) }),
+                  /* @__PURE__ */ jsx(FormControl, { children: /* @__PURE__ */ jsx(Input, { placeholder: "Your full name", className: fieldClass, "data-testid": "input-name", ...field }) }),
                   /* @__PURE__ */ jsx(FormMessage, { className: "font-mono text-[10px] uppercase text-[var(--error)]" })
                 ] })
               }
@@ -872,16 +1069,7 @@ function Home() {
                 name: "email",
                 render: ({ field }) => /* @__PURE__ */ jsxs(FormItem, { children: [
                   /* @__PURE__ */ jsx(FormLabel, { className: "font-mono text-xs tracking-widest uppercase", children: "Email" }),
-                  /* @__PURE__ */ jsx(FormControl, { children: /* @__PURE__ */ jsx(
-                    Input,
-                    {
-                      type: "email",
-                      placeholder: "you@example.com",
-                      className: fieldClass,
-                      "data-testid": "input-email",
-                      ...field
-                    }
-                  ) }),
+                  /* @__PURE__ */ jsx(FormControl, { children: /* @__PURE__ */ jsx(Input, { type: "email", placeholder: "you@example.com", className: fieldClass, "data-testid": "input-email", ...field }) }),
                   /* @__PURE__ */ jsx(FormMessage, { className: "font-mono text-[10px] uppercase text-[var(--error)]" })
                 ] })
               }
@@ -893,15 +1081,7 @@ function Home() {
                 name: "whoYouAre",
                 render: ({ field }) => /* @__PURE__ */ jsxs(FormItem, { children: [
                   /* @__PURE__ */ jsx(FormLabel, { className: "font-mono text-xs tracking-widest uppercase", children: "Who you are / What you're building" }),
-                  /* @__PURE__ */ jsx(FormControl, { children: /* @__PURE__ */ jsx(
-                    Textarea,
-                    {
-                      placeholder: "A brief note on your work and intent.",
-                      className: `${fieldClass} min-h-[120px] resize-none`,
-                      "data-testid": "input-who-you-are",
-                      ...field
-                    }
-                  ) }),
+                  /* @__PURE__ */ jsx(FormControl, { children: /* @__PURE__ */ jsx(Textarea, { placeholder: "A brief note on your work and intent.", className: `${fieldClass} min-h-[120px] resize-none`, "data-testid": "input-who-you-are", ...field }) }),
                   /* @__PURE__ */ jsx(FormMessage, { className: "font-mono text-[10px] uppercase text-[var(--error)]" })
                 ] })
               }
@@ -913,15 +1093,7 @@ function Home() {
                 name: "link",
                 render: ({ field }) => /* @__PURE__ */ jsxs(FormItem, { children: [
                   /* @__PURE__ */ jsx(FormLabel, { className: "font-mono text-xs tracking-widest uppercase text-muted-foreground", children: "Link (Optional)" }),
-                  /* @__PURE__ */ jsx(FormControl, { children: /* @__PURE__ */ jsx(
-                    Input,
-                    {
-                      placeholder: "LinkedIn or website",
-                      className: `${fieldClass} text-muted-foreground`,
-                      "data-testid": "input-link",
-                      ...field
-                    }
-                  ) }),
+                  /* @__PURE__ */ jsx(FormControl, { children: /* @__PURE__ */ jsx(Input, { placeholder: "LinkedIn or website", className: `${fieldClass} text-muted-foreground`, "data-testid": "input-link", ...field }) }),
                   /* @__PURE__ */ jsx(FormMessage, { className: "font-mono text-[10px] uppercase text-[var(--error)]" })
                 ] })
               }
@@ -933,15 +1105,7 @@ function Home() {
                 name: "whoIntroduced",
                 render: ({ field }) => /* @__PURE__ */ jsxs(FormItem, { children: [
                   /* @__PURE__ */ jsx(FormLabel, { className: "font-mono text-xs tracking-widest uppercase text-muted-foreground", children: "Who introduced you (Optional)" }),
-                  /* @__PURE__ */ jsx(FormControl, { children: /* @__PURE__ */ jsx(
-                    Input,
-                    {
-                      placeholder: "Name of your connection",
-                      className: `${fieldClass} text-muted-foreground`,
-                      "data-testid": "input-who-introduced",
-                      ...field
-                    }
-                  ) }),
+                  /* @__PURE__ */ jsx(FormControl, { children: /* @__PURE__ */ jsx(Input, { placeholder: "Name of your connection", className: `${fieldClass} text-muted-foreground`, "data-testid": "input-who-introduced", ...field }) }),
                   /* @__PURE__ */ jsx(FormMessage, { className: "font-mono text-[10px] uppercase text-[var(--error)]" })
                 ] })
               }
@@ -963,19 +1127,13 @@ function Home() {
                 className: "group/btn relative overflow-hidden rounded-none bg-foreground text-background border border-foreground font-mono text-xs tracking-widest uppercase px-12 py-6 h-auto transition-colors duration-300",
                 "data-testid": "button-submit",
                 children: [
-                  /* @__PURE__ */ jsx(
-                    "span",
-                    {
-                      "aria-hidden": "true",
-                      className: "absolute left-0 top-0 h-full w-2 bg-background -translate-x-full transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/btn:translate-x-0"
-                    }
-                  ),
+                  /* @__PURE__ */ jsx("span", { "aria-hidden": "true", className: "absolute left-0 top-0 h-full w-2 bg-background -translate-x-full transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/btn:translate-x-0" }),
                   /* @__PURE__ */ jsx("span", { className: "relative inline-block transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/btn:translate-x-1", children: isPending ? "Sending…" : "Send" })
                 ]
               }
             ) })
           ] }) })
-        ] }) })
+        ] }) }) }, "form") })
       ] })
     ] }),
     /* @__PURE__ */ jsxs("footer", { id: "site-footer", className: "bg-[var(--ink)] px-6 md:px-12 lg:px-[10%] pt-20 pb-6 flex flex-col gap-16 overflow-hidden", children: [
@@ -984,24 +1142,8 @@ function Home() {
         /* @__PURE__ */ jsxs("div", { className: "flex flex-col md:flex-row md:items-center md:justify-between gap-4", children: [
           /* @__PURE__ */ jsx("div", { className: "flex flex-wrap gap-x-5 gap-y-2 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)] opacity-60", children: /* @__PURE__ */ jsx("span", { children: "The next wave knows each other · İstanbul → Global" }) }),
           /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-center md:justify-end gap-5", children: [
-            /* @__PURE__ */ jsx(
-              "a",
-              {
-                href: "#",
-                "aria-label": "inner on LinkedIn",
-                className: "text-[var(--bone)] opacity-60 hover:opacity-100 transition-opacity duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
-                children: /* @__PURE__ */ jsx(Linkedin, { size: 20, strokeWidth: 1.5 })
-              }
-            ),
-            /* @__PURE__ */ jsx(
-              "a",
-              {
-                href: "#",
-                "aria-label": "inner on Instagram",
-                className: "text-[var(--bone)] opacity-60 hover:opacity-100 transition-opacity duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
-                children: /* @__PURE__ */ jsx(Instagram, { size: 20, strokeWidth: 1.5 })
-              }
-            )
+            /* @__PURE__ */ jsx("a", { href: "#", "aria-label": "inner on LinkedIn", className: "text-[var(--bone)] opacity-60 hover:opacity-100 transition-opacity duration-300", children: /* @__PURE__ */ jsx(Linkedin, { size: 20, strokeWidth: 1.5 }) }),
+            /* @__PURE__ */ jsx("a", { href: "#", "aria-label": "inner on Instagram", className: "text-[var(--bone)] opacity-60 hover:opacity-100 transition-opacity duration-300", children: /* @__PURE__ */ jsx(Instagram, { size: 20, strokeWidth: 1.5 }) })
           ] })
         ] }),
         /* @__PURE__ */ jsx("div", { className: "font-mono text-[10px] uppercase tracking-widest text-[var(--bone)] opacity-30", children: "© 2026 inner. İstanbul." })
