@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "..");
 
-const templatePath = path.join(root, "dist/public/index.html");
+const templatePath = path.join(root, "dist/index.html");
 const serverEntryPath = path.join(root, "dist/server/entry-server.js");
 
 const template = await readFile(templatePath, "utf-8");
