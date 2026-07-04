@@ -102,9 +102,15 @@ export default function Home() {
             <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-8">
               İstanbul → Global · Est. 2022
             </div>
-            <h1 className="font-display font-serif italic text-5xl md:text-7xl lg:text-8xl leading-[1.05] max-w-[15ch] text-balance">
-              A private community for the people building what comes next.
+            <h1 className="font-display font-serif italic text-5xl md:text-7xl lg:text-8xl leading-[1.05] max-w-[18ch] text-balance">
+              The next wave already knows each other.
             </h1>
+          </FadeIn>
+
+          <FadeIn delay={0.2} className="mt-12">
+            <p className="max-w-[50ch] text-lg md:text-xl text-foreground/80 leading-[1.6]">
+              inner.hub is a private circle where AI-native founders, builders, and investors meet early — and back each other first.
+            </p>
           </FadeIn>
 
           <FadeIn delay={0.4} className="mt-32">
@@ -115,70 +121,30 @@ export default function Home() {
           </FadeIn>
         </section>
 
-        {/* 01 — On inner */}
+        {/* 01 — The thesis */}
         <section id="section-01" className="px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15">
-          <SectionLabel label="01 — On inner" meta="Est. 2022" />
+          <SectionLabel label="01 — The thesis" meta="The distance" />
           <FadeIn>
             <div className="max-w-[65ch] text-lg md:text-xl leading-[1.7] text-foreground/90">
-              inner.hub is where the people building this industry meet early — AI-native founders, builders, and investors who find each other here first, back each other first, and move faster together. No stage. No audience. Only peers. This is not a club. It is the beginning of something much bigger.
+              Türkiye produces world-class AI talent. The capital and the networks live elsewhere. The gap isn't talent — it's who you know, and how early. inner.hub exists to close that distance: one circle, built in İstanbul, connected to the world.
             </div>
           </FadeIn>
         </section>
 
-        {/* 02 — Principles */}
+        {/* 02 — Who's inside */}
         <section id="section-02" className="px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15">
-          <SectionLabel label="02 — Principles" meta="Four lines" />
-
-          <div className="grid grid-cols-1 md:grid-cols-2">
-            {[
-              {
-                label: "Selective by design",
-                line: "Entry stays rare so the signal stays sharp.",
-              },
-              {
-                label: "Signal over noise",
-                line: "We value depth over reach.",
-              },
-              {
-                label: "Discretion",
-                line: "What happens inside, stays inside.",
-              },
-              {
-                label: "Company, not audience",
-                line: "We gather as peers, never as performers.",
-              },
-            ].map((item, i) => (
-              <FadeIn key={item.label} delay={i * 0.1}>
-                <div
-                  className={`py-10 pr-8 border-t border-border/15 ${i % 2 === 0 ? "md:pr-16" : "md:pl-16"} ${i === 0 || i === 1 ? "md:border-t-0" : ""}`}
-                >
-                  <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-4">
-                    {item.label}
-                  </div>
-                  <p className="font-serif text-2xl">{item.line}</p>
-                </div>
-              </FadeIn>
-            ))}
-          </div>
-        </section>
-
-        {/* 03 — Membership */}
-        <section id="section-03" className="px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15">
-          <SectionLabel label="03 — Membership" meta="By nomination" />
+          <SectionLabel label="02 — Who's inside" meta="Thirty-four seats to start" />
           <FadeIn>
-            <h2 className="font-display font-serif italic text-4xl md:text-5xl max-w-2xl mb-8 text-balance">
-              Entry is never open. Only offered.
-            </h2>
-            <p className="max-w-[65ch] text-lg leading-[1.7] text-foreground/90 mb-20">
-              There is no membership tier, no waitlist counter, no public roster. Members are nominated from inside the circle, considered carefully, and invited personally. We look for people who build, back, or study what comes next — and who understand that trust is the only currency in this circle.
+            <p className="max-w-[65ch] text-lg leading-[1.7] text-foreground/90 mb-16">
+              Every seat in the circle is chosen one by one. Three kinds of people hold them:
             </p>
           </FadeIn>
 
           <div className="max-w-3xl">
             {[
-              { label: "Nomination", line: "Someone inside the circle puts your name forward." },
-              { label: "Consideration", line: "We take our time. Fit matters more than fame." },
-              { label: "Decision", line: "If it's right, you'll hear from us directly." },
+              { label: "Founders", line: "Building AI-native companies, pre-seed to Series A." },
+              { label: "Builders", line: "Engineers and researchers shipping at the edge of the field." },
+              { label: "Investors", line: "Angels and funds that write early checks, not late congratulations." },
             ].map((item, i) => (
               <FadeIn key={item.label} delay={i * 0.1}>
                 <div className="flex flex-col md:flex-row md:items-baseline gap-2 md:gap-12 py-6 border-t border-border/15 last:border-b">
@@ -192,27 +158,81 @@ export default function Home() {
           </div>
         </section>
 
-        {/* 04 — The gathering (Ink interlude) */}
+        {/* 03 — Inside */}
+        <section id="section-03" className="px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15">
+          <SectionLabel label="03 — Inside" meta="What actually happens" />
+
+          <div className="max-w-3xl mb-16">
+            {[
+              { label: "The gathering", line: "Twice a year. Two days. Everyone in one place." },
+              { label: "Tables", line: "Monthly dinners of twelve in İstanbul. Small enough for real talk." },
+              { label: "First looks", line: "Members see each other's work before the market does." },
+              { label: "Introductions", line: "Made personally, made deliberately. No directories, no noise." },
+            ].map((item, i) => (
+              <FadeIn key={item.label} delay={i * 0.1}>
+                <div className="flex flex-col md:flex-row md:items-baseline gap-2 md:gap-12 py-6 border-t border-border/15 last:border-b">
+                  <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground w-full md:w-48 flex-shrink-0">
+                    {item.label}
+                  </div>
+                  <p className="text-lg text-foreground/90">{item.line}</p>
+                </div>
+              </FadeIn>
+            ))}
+          </div>
+
+          <FadeIn delay={0.2}>
+            <p className="font-serif text-2xl max-w-2xl">What is said inside stays inside.</p>
+          </FadeIn>
+        </section>
+
+        {/* 04 — Membership */}
+        <section id="section-04" className="px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15">
+          <SectionLabel label="04 — Membership" meta="By nomination" />
+          <FadeIn>
+            <h2 className="font-display font-serif italic text-4xl md:text-5xl max-w-2xl mb-8 text-balance">
+              Entry is by invitation. Always.
+            </h2>
+            <p className="max-w-[65ch] text-lg leading-[1.7] text-foreground/90 mb-20">
+              No tickets, no tiers, no public roster. Members are nominated from inside the circle, considered slowly, and invited personally. Trust is the only currency in this circle — and it compounds.
+            </p>
+          </FadeIn>
+
+          <div className="max-w-3xl">
+            {[
+              { label: "Nomination", line: "Someone inside the circle puts your name forward." },
+              { label: "Consideration", line: "We take our time. Fit beats fame." },
+              { label: "Invitation", line: "If it's right, you'll hear from us directly." },
+            ].map((item, i) => (
+              <FadeIn key={item.label} delay={i * 0.1}>
+                <div className="flex flex-col md:flex-row md:items-baseline gap-2 md:gap-12 py-6 border-t border-border/15 last:border-b">
+                  <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground w-full md:w-48 flex-shrink-0">
+                    {item.label}
+                  </div>
+                  <p className="text-lg text-foreground/90">{item.line}</p>
+                </div>
+              </FadeIn>
+            ))}
+          </div>
+        </section>
+
+        {/* 05 — The gathering (Ink interlude) */}
         <section
-          id="section-04"
+          id="section-05"
           className="px-6 md:px-12 lg:px-[10%] py-32 md:py-48 border-t border-border/15 bg-[var(--ink)] text-[var(--bone)] transition-colors duration-700"
         >
           <FadeIn>
             <div className="flex items-baseline justify-between gap-6 pb-6 mb-20 border-b border-white/15 font-mono text-xs uppercase tracking-widest opacity-60">
-              <span>04 — The gathering</span>
+              <span>05 — The gathering</span>
               <span className="whitespace-nowrap">Sep 2026 · İstanbul</span>
             </div>
-            <h2 className="font-display font-serif italic text-4xl md:text-5xl lg:text-6xl max-w-3xl mb-8 text-balance">
+            <h2 className="font-display font-serif italic text-4xl md:text-5xl lg:text-6xl max-w-3xl mb-24 text-balance">
               The first inner.hub gathering. İstanbul, September 2026.
             </h2>
-            <p className="font-serif text-2xl md:text-3xl max-w-2xl mb-24 text-balance opacity-80">
-              Thirty people. Two days. One circle.
-            </p>
           </FadeIn>
 
           <div className="grid grid-cols-3 gap-8 md:gap-16 max-w-3xl mb-24">
             {[
-              { n: "30", label: "People" },
+              { n: "34", label: "People" },
               { n: "2", label: "Days" },
               { n: "1", label: "Circle" },
             ].map((item, i) => (
@@ -229,6 +249,12 @@ export default function Home() {
             ))}
           </div>
 
+          <FadeIn delay={0.15}>
+            <p className="font-serif text-2xl md:text-3xl max-w-2xl mb-16 text-balance opacity-80">
+              Thirty-four people. Two days. One circle. The first of many.
+            </p>
+          </FadeIn>
+
           <FadeIn delay={0.2}>
             <div className="flex items-center gap-3 font-mono text-xs uppercase tracking-widest opacity-50">
               <span className="w-[6px] h-[6px] bg-[var(--inner-green)] flex-shrink-0" aria-hidden="true" />
@@ -237,22 +263,22 @@ export default function Home() {
           </FadeIn>
         </section>
 
-        {/* 05 — What's next */}
-        <section id="section-05" className="px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15">
-          <SectionLabel label="05 — What's next" meta="In time" />
+        {/* 06 — What's next */}
+        <section id="section-06" className="px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15">
+          <SectionLabel label="06 — What's next" meta="In time" />
           <FadeIn>
             <h2 className="font-display font-serif italic text-4xl md:text-5xl max-w-2xl mb-8 text-balance">
               hub is where it starts.
             </h2>
             <p className="max-w-[65ch] text-lg leading-[1.7] text-foreground/90">
-              What begins as thirty people in İstanbul is built to compound — into the network this industry has been missing. We announce things only when they're real. There is more.
+              What begins as thirty-four people is built to compound — into the network this industry has been missing. We announce things when they're real. There is more.
             </p>
           </FadeIn>
         </section>
 
-        {/* 06 — Request an invitation */}
-        <section id="section-06" className="px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15">
-          <SectionLabel label="06 — Request an invitation" meta="We read everything" />
+        {/* 07 — Request an invitation */}
+        <section id="section-07" className="px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15">
+          <SectionLabel label="07 — Request an invitation" meta="We read everything" />
 
           {isSuccess ? (
             <div className="max-w-2xl py-12">
@@ -262,9 +288,11 @@ export default function Home() {
           ) : (
             <FadeIn>
               <div className="max-w-2xl">
-                <h2 className="font-serif text-4xl md:text-5xl mb-6">Tell us who you are.</h2>
+                <h2 className="font-display font-serif italic text-4xl md:text-5xl mb-6 text-balance">
+                  Request an invitation.
+                </h2>
                 <p className="text-lg text-muted-foreground mb-16 leading-[1.7]">
-                  The circle is nomination-first, but good people arrive from unexpected directions. If you believe you belong here, tell us who you are. We read everything.
+                  Nomination comes first, but good people arrive from unexpected directions. Tell us what you're building, backing, or breaking.
                 </p>
 
                 <Form {...form}>
@@ -414,7 +442,7 @@ export default function Home() {
         <div className="flex flex-col gap-6">
           <img src="/inner-logo.png" alt="inner" width={140} height={140} className="w-[140px] h-[140px]" />
           <div className="flex flex-wrap gap-x-5 gap-y-2 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)] opacity-60">
-            <span>The inner circle · İstanbul → Global</span>
+            <span>Meet early · Back first · İstanbul → Global</span>
           </div>
           <div className="font-mono text-[10px] uppercase tracking-widest text-[var(--bone)] opacity-30">
             © 2026 inner. İstanbul.

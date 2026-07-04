@@ -22,7 +22,6 @@ export function LiveClock() {
 
   return (
     <div className="text-right font-mono text-[10px] uppercase tracking-widest leading-relaxed">
-      <div>By Invitation</div>
       <div className="hidden md:block tabular-nums text-muted-foreground">
         İstanbul 41.00°N 28.97°E · {time} TRT
       </div>

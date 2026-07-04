@@ -1,0 +1,101 @@
+# Rebuild content: inner.hub v6 — final voice and marks
+
+## Objective
+Full content replacement. The design system stays exactly as built (colors, grain, motion system, preloader, Ink interlude, live clock, index rail, form, backend). This prompt replaces **every word on the page**, sets the section architecture, and locks the mark usage. Use all copy VERBATIM — do not paraphrase, soften, or expand anything.
+
+## Locked rules (verify at the end)
+- **One typographic lockup recipe site-wide:** `font-family:'Fraunces'; font-style:normal; font-weight:100; font-variation-settings:'opsz' 144,'WONK' 1; letter-spacing:-0.015em`. Upright, never italic. The green square (`#18FF85`, 90° corners, ~0.42em, baseline-set) is part of the lockup component.
+- **Marks allowed on the site, complete list:** header typographic `inner■hub` lockup · footer `inner-logo-v2.png` at ~140px · monumental typographic `inner■` footer wordmark · favicon set = **the green square alone** · `inner-og.png` for social preview. **The "i" badge and the framed tile badge are NOT used anywhere** — remove them if present, including from favicons, avatars, loading states, and meta tags.
+- **Header right block contains ONLY the location and live clock** — `İSTANBUL 41.00°N 28.97°E · 14:32:07 TRT` (ticking, Europe/Istanbul, tabular-nums; time only on mobile). No "BY INVITATION" or any other strapline in the header.
+- Forbidden words anywhere in rendered output: room, studio, capital, ring, ecosystem, exclusive, elite, luxury, curated, community.
+- The word "invitation" appears exactly twice on the page: the section 04 headline and the section 07 title.
+- All copy server-rendered; Lighthouse and reduced-motion behavior unchanged.
+
+## Architecture — seven sections
+`01 THE THESIS · 02 WHO'S INSIDE · 03 INSIDE · 04 MEMBERSHIP · 05 THE GATHERING · 06 WHAT'S NEXT · 07 REQUEST AN INVITATION`. Update anchors, annotations, and the index rail (01–07). Section 05 keeps the full-bleed Ink interlude treatment. Section anatomy: mono label row (label left, annotation right on the hairline), Fraunces headline where specified, body in Geist at max 65ch.
+
+## Copy (VERBATIM)
+
+### Hero (full viewport)
+- Eyebrow (mono): `İSTANBUL → GLOBAL · EST. 2022`
+- H1 (Fraunces, lockup recipe, large):
+  > The next wave already knows each other.
+- Sub (Geist, one line):
+  > inner.hub is a private circle where AI-native founders, builders, and investors meet early — and back each other first.
+
+### 01 — THE THESIS · annotation `THE DISTANCE`
+Body:
+> Türkiye produces world-class AI talent. The capital and the networks live elsewhere. The gap isn't talent — it's who you know, and how early. inner.hub exists to close that distance: one circle, built in İstanbul, connected to the world.
+
+No data figures, no statistics, no source lines anywhere in this section.
+
+### 02 — WHO'S INSIDE · annotation `THIRTY-FOUR SEATS TO START`
+Intro line (Geist):
+> Every seat in the circle is chosen one by one. Three kinds of people hold them:
+
+Three entries (mono label + one Geist line, hairline-separated):
+- `FOUNDERS` — Building AI-native companies, pre-seed to Series A.
+- `BUILDERS` — Engineers and researchers shipping at the edge of the field.
+- `INVESTORS` — Angels and funds that write early checks, not late congratulations.
+
+### 03 — INSIDE · annotation `WHAT ACTUALLY HAPPENS`
+Four entries (same list anatomy):
+- `THE GATHERING` — Twice a year. Two days. Everyone in one place.
+- `TABLES` — Monthly dinners of twelve in İstanbul. Small enough for real talk.
+- `FIRST LOOKS` — Members see each other's work before the market does.
+- `INTRODUCTIONS` — Made personally, made deliberately. No directories, no noise.
+
+Closing line (Geist, set apart with space):
+> What is said inside stays inside.
+
+### 04 — MEMBERSHIP · annotation `BY NOMINATION`
+- H (Fraunces):
+  > Entry is by invitation. Always.
+- Body:
+  > No tickets, no tiers, no public roster. Members are nominated from inside the circle, considered slowly, and invited personally. Trust is the only currency in this circle — and it compounds.
+- Three steps (mono label + one line, hairline-separated):
+  - `NOMINATION` — Someone inside the circle puts your name forward.
+  - `CONSIDERATION` — We take our time. Fit beats fame.
+  - `INVITATION` — If it's right, you'll hear from us directly.
+
+### 05 — THE GATHERING · annotation `SEP 2026 · İSTANBUL` — Ink interlude
+- H:
+  > The first inner.hub gathering. İstanbul, September 2026.
+- Triptych (Fraunces, oversized): **34 / 2 / 1** with mono captions `PEOPLE` · `DAYS` · `CIRCLE`
+- Line (Geist):
+  > Thirty-four people. Two days. One circle. The first of many.
+- Mono, reduced opacity: `DETAILS ARE SHARED WITH INVITEES ONLY.`
+
+### 06 — WHAT'S NEXT · annotation `IN TIME`
+- H (Fraunces):
+  > hub is where it starts.
+- Body:
+  > What begins as thirty-four people is built to compound — into the network this industry has been missing. We announce things when they're real. There is more.
+- Nothing else: no lists, no diagrams. Generous space.
+
+### 07 — REQUEST AN INVITATION · annotation `WE READ EVERYTHING`
+- H (Fraunces):
+  > Request an invitation.
+- Sub:
+  > Nomination comes first, but good people arrive from unexpected directions. Tell us what you're building, backing, or breaking.
+- Form, fields and behavior unchanged: `NAME` · `EMAIL` · `WHO YOU ARE / WHAT YOU'RE BUILDING` · `LINK` (optional) · `WHO INTRODUCED YOU` (optional) · honeypot · `SEND`.
+- Success (Fraunces):
+  > Received. If it's a fit, we'll be in touch.
+
+### Footer
+- Mono line: `MEET EARLY · BACK FIRST · İSTANBUL → GLOBAL`
+- `inner-logo-v2.png` at ~140px, copyright line `© 2026 inner. İstanbul.`, and the monumental `inner■` wordmark at the very bottom.
+
+## SEO
+- `<title>`: `inner.hub — the inner circle`
+- Meta description: `A private circle where AI-native founders, builders, and investors meet early — and back each other first. İstanbul → global.`
+- Favicon links point to the green-square set only; `og:image` is `inner-og.png` (1200×630).
+
+## Definition of done
+- Header right shows only coordinates + ticking clock; no strapline.
+- Seven sections in exact order; rail 01–07 tracking; annotations match; copy verbatim including punctuation.
+- Word tests on rendered output: "invitation" exactly 2 (04 headline + 07 title) · "circle" present in hero, 01, 02, 04, 05 · "room / studio / capital / ring / ecosystem / community" 0 · no digits in section 01.
+- No i-badge or tile-badge asset referenced anywhere in the repo output (search for `badge` in public assets and markup → remove).
+- Lockup recipe identical in header and footer; no italic Fraunces; view-source contains all copy; no console errors; no layout shift.
+
+Apply everything, then show me a live preview.
