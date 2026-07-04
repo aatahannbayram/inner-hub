@@ -9,6 +9,8 @@ import { Lockup } from "@/components/Lockup";
 import { LiveClock } from "@/components/LiveClock";
 import { Grain } from "@/components/Grain";
 import { IndexRail } from "@/components/IndexRail";
+import { DiagramConverge } from "@/components/DiagramConverge";
+import { DiagramCircle } from "@/components/DiagramCircle";
 import { Preloader } from "@/components/Preloader";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -109,7 +111,7 @@ export default function Home() {
 
           <FadeIn delay={0.2} className="mt-12">
             <p className="max-w-[50ch] text-lg md:text-xl text-foreground/80 leading-[1.6]">
-              inner.hub is a private circle of AI founders, builders, and investors — people who meet early and support each other first.
+              inner.hub is a private circle of AI founders, builders, and investors. People who meet early and support each other first.
             </p>
           </FadeIn>
 
@@ -121,19 +123,22 @@ export default function Home() {
           </FadeIn>
         </section>
 
-        {/* 01 — The thesis */}
+        {/* 01 · The idea */}
         <section id="section-01" className="px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15">
-          <SectionLabel label="01 — The thesis" meta="The distance" />
+          <SectionLabel label="01 · The idea" meta="Coming together" />
           <FadeIn>
-            <div className="max-w-[65ch] text-lg md:text-xl leading-[1.7] text-foreground/90">
-              Türkiye has world-class AI talent. The money and the networks are somewhere else. The problem is not talent — it is access: who you know, and how early. inner.hub closes that distance. One circle, built in İstanbul, connected to the world.
+            <div className="max-w-[65ch] text-lg md:text-xl leading-[1.7] text-foreground/90 mb-20">
+              We are not here to fix something. We are here to come together. The people building AI, backing it, and pushing it forward belong in one circle. That circle starts in İstanbul, and it starts early.
             </div>
+          </FadeIn>
+          <FadeIn delay={0.15}>
+            <DiagramConverge />
           </FadeIn>
         </section>
 
-        {/* 02 — The first thirty-four */}
+        {/* 02 · The first thirty-four */}
         <section id="section-02" className="px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15">
-          <SectionLabel label="02 — The first thirty-four" meta="Founding seats" />
+          <SectionLabel label="02 · The first thirty-four" meta="Founding seats" />
           <FadeIn>
             <p className="max-w-[65ch] text-lg leading-[1.7] text-foreground/90 mb-16">
               It starts with thirty-four people, chosen one by one:
@@ -157,6 +162,12 @@ export default function Home() {
             ))}
           </div>
 
+          <FadeIn delay={0.15}>
+            <p className="max-w-[65ch] text-lg leading-[1.7] text-foreground/90 mb-8">
+              Some of them are building projects you already know.
+            </p>
+          </FadeIn>
+
           <FadeIn delay={0.2}>
             <p className="max-w-[65ch] text-lg leading-[1.7] text-foreground/90">
               These thirty-four are not just members. They are the founding members of inner.hub.
@@ -164,13 +175,13 @@ export default function Home() {
           </FadeIn>
         </section>
 
-        {/* 03 — What this is */}
+        {/* 03 · What this is */}
         <section id="section-03" className="px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15">
-          <SectionLabel label="03 — What this is" meta="Not a club" />
+          <SectionLabel label="03 · What this is" meta="Not a club" />
           <FadeIn>
             <div className="max-w-[65ch] text-lg leading-[1.7] text-foreground/90 space-y-8">
               <p>
-                Big things start here. New ideas are discussed here, tested here, and supported here — by people who can actually build them and fund them.
+                Big things start here. New ideas are discussed here, tested here, and supported here, by people who can actually build them and fund them.
               </p>
               <p>
                 And this is not a members' club. There are no fees and no revenue goal. Nothing is sold here. inner.hub exists so that its people win.
@@ -179,23 +190,23 @@ export default function Home() {
           </FadeIn>
         </section>
 
-        {/* 04 — Entry */}
+        {/* 04 · Entry */}
         <section id="section-04" className="px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15">
-          <SectionLabel label="04 — Entry" meta="By invitation" />
+          <SectionLabel label="04 · Entry" meta="By invitation" />
           <FadeIn>
             <h2 className="font-display font-serif italic text-4xl md:text-5xl max-w-2xl mb-8 text-balance">
               Entry is by invitation. Always.
             </h2>
             <p className="max-w-[65ch] text-lg leading-[1.7] text-foreground/90 mb-20">
-              There are no tickets and no tiers. If someone inside gives us your name — or you write to us below — we look carefully. If it fits, we invite you personally.
+              There are no tickets, no tiers, and no public list. Members are put forward from inside the circle, considered with care, and invited personally.
             </p>
           </FadeIn>
 
           <div className="max-w-3xl">
             {[
-              { label: "Name", line: "Someone inside gives us your name, or you write to us." },
-              { label: "Review", line: "We take our time." },
-              { label: "Invitation", line: "If it fits, you hear from us directly." },
+              { label: "Your name", line: "Someone inside the circle puts your name forward." },
+              { label: "Consideration", line: "We take our time. Fit beats fame." },
+              { label: "Invitation", line: "If it is right, you hear from us directly." },
             ].map((item, i) => (
               <FadeIn key={item.label} delay={i * 0.1}>
                 <div className="flex flex-col md:flex-row md:items-baseline gap-2 md:gap-12 py-6 border-t border-border/15 last:border-b">
@@ -209,14 +220,14 @@ export default function Home() {
           </div>
         </section>
 
-        {/* 05 — The gathering (Ink interlude) */}
+        {/* 05 · The gathering (Ink interlude) */}
         <section
           id="section-05"
           className="px-6 md:px-12 lg:px-[10%] py-32 md:py-48 border-t border-border/15 bg-[var(--ink)] text-[var(--bone)] transition-colors duration-700"
         >
           <FadeIn>
             <div className="flex items-baseline justify-between gap-6 pb-6 mb-20 border-b border-white/15 font-mono text-xs uppercase tracking-widest opacity-60">
-              <span>05 — The gathering</span>
+              <span>05 · The gathering</span>
               <span className="whitespace-nowrap">Sep 2026 · İstanbul</span>
             </div>
             <h2 className="font-display font-serif italic text-4xl md:text-5xl lg:text-6xl max-w-3xl mb-24 text-balance">
@@ -224,23 +235,29 @@ export default function Home() {
             </h2>
           </FadeIn>
 
-          <div className="grid grid-cols-3 gap-8 md:gap-16 max-w-3xl mb-24">
-            {[
-              { n: "34", label: "People" },
-              { n: "2", label: "Days" },
-              { n: "1", label: "Circle" },
-            ].map((item, i) => (
-              <FadeIn key={item.label} delay={i * 0.1}>
-                <div className="flex flex-col items-start">
-                  <span className="font-display font-serif italic text-6xl md:text-8xl leading-none mb-4">
-                    {item.n}
-                  </span>
-                  <span className="font-mono text-[10px] uppercase tracking-widest opacity-50">
-                    {item.label}
-                  </span>
-                </div>
-              </FadeIn>
-            ))}
+          <div className="flex flex-col lg:flex-row lg:items-center gap-16 mb-24">
+            <div className="grid grid-cols-3 gap-6 md:gap-10 min-w-0 lg:flex-1">
+              {[
+                { n: "34", label: "People" },
+                { n: "2", label: "Days" },
+                { n: "1", label: "Circle" },
+              ].map((item, i) => (
+                <FadeIn key={item.label} delay={i * 0.1}>
+                  <div className="flex flex-col items-start">
+                    <span className="font-display font-serif italic text-5xl md:text-7xl leading-none mb-4">
+                      {item.n}
+                    </span>
+                    <span className="font-mono text-[10px] uppercase tracking-widest opacity-50">
+                      {item.label}
+                    </span>
+                  </div>
+                </FadeIn>
+              ))}
+            </div>
+
+            <FadeIn delay={0.2} className="flex-shrink-0">
+              <DiagramCircle />
+            </FadeIn>
           </div>
 
           <FadeIn delay={0.15}>
@@ -250,9 +267,9 @@ export default function Home() {
           </FadeIn>
         </section>
 
-        {/* 06 — What's next */}
+        {/* 06 · What's next */}
         <section id="section-06" className="px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15">
-          <SectionLabel label="06 — What's next" meta="In time" />
+          <SectionLabel label="06 · What's next" meta="In time" />
           <FadeIn>
             <h2 className="font-display font-serif italic text-4xl md:text-5xl max-w-2xl mb-8 text-balance">
               hub is where it starts.
@@ -263,9 +280,9 @@ export default function Home() {
           </FadeIn>
         </section>
 
-        {/* 07 — Request an invitation */}
+        {/* 07 · Request an invitation */}
         <section id="section-07" className="px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15">
-          <SectionLabel label="07 — Request an invitation" meta="We read everything" />
+          <SectionLabel label="07 · Request an invitation" meta="We read everything" />
 
           {isSuccess ? (
             <div className="max-w-2xl py-12">
@@ -280,7 +297,7 @@ export default function Home() {
                   Request an invitation.
                 </h2>
                 <p className="text-lg text-muted-foreground mb-16 leading-[1.7]">
-                  Most people arrive by invitation — but good people also find us on their own. Tell us who you are and what you are building.
+                  Most people arrive by invitation, but good people also find us on their own. Tell us who you are and what you are building.
                 </p>
 
                 <Form {...form}>

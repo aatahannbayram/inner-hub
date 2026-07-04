@@ -169,6 +169,16 @@
   50% { opacity: 1; }
 }
 
+@keyframes diagram-circle-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-diagram-spin {
+  transform-origin: center;
+  animation: diagram-circle-spin 140s linear infinite;
+}
+
 .grain-overlay {
   position: fixed;
   inset: 0;
@@ -182,6 +192,9 @@
 
 @media (prefers-reduced-motion: reduce) {
   .animate-beacon {
+    animation: none;
+  }
+  .animate-diagram-spin {
     animation: none;
   }
   html {
