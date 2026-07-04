@@ -9,7 +9,6 @@ import { Lockup } from "@/components/Lockup";
 import { LiveClock } from "@/components/LiveClock";
 import { Grain } from "@/components/Grain";
 import { IndexRail } from "@/components/IndexRail";
-import { DiagramConverge } from "@/components/DiagramConverge";
 import { DiagramCircle } from "@/components/DiagramCircle";
 import { Preloader } from "@/components/Preloader";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -111,7 +110,7 @@ export default function Home() {
 
           <FadeIn delay={0.2} className="mt-12">
             <p className="max-w-[50ch] text-lg md:text-xl text-foreground/80 leading-[1.6]">
-              inner.hub is a private circle of AI founders, builders, and investors. People who meet early and support each other first.
+              inner.hub is a private circle of founders, builders, and investors. People who meet early and support each other first.
             </p>
           </FadeIn>
 
@@ -127,12 +126,9 @@ export default function Home() {
         <section id="section-01" className="px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15">
           <SectionLabel label="01 · The idea" meta="Coming together" />
           <FadeIn>
-            <div className="max-w-[65ch] text-lg md:text-xl leading-[1.7] text-foreground/90 mb-20">
-              The people building AI, backing it, and pushing it forward belong in one circle. inner.hub brings them together. It starts in İstanbul, and it starts early.
+            <div className="max-w-[65ch] text-lg md:text-xl leading-[1.7] text-foreground/90">
+              AI is the center of this circle. Around it are the founders, builders, and investors pushing what comes next. inner.hub brings them together. It starts in İstanbul, and it starts early.
             </div>
-          </FadeIn>
-          <FadeIn delay={0.15}>
-            <DiagramConverge />
           </FadeIn>
         </section>
 
@@ -147,9 +143,9 @@ export default function Home() {
 
           <div className="max-w-3xl mb-16">
             {[
-              { label: "Founders", line: "People building AI companies." },
+              { label: "Founders", line: "People building startups, in AI and beyond." },
               { label: "Builders", line: "Engineers and researchers doing serious AI work." },
-              { label: "Investors", line: "Angels and funds that invest early." },
+              { label: "Investors", line: "Angel investors and people from venture funds." },
             ].map((item, i) => (
               <FadeIn key={item.label} delay={i * 0.1}>
                 <div className="flex flex-col md:flex-row md:items-baseline gap-2 md:gap-12 py-6 border-t border-border/15 last:border-b">
@@ -177,14 +173,11 @@ export default function Home() {
 
         {/* 03 · What this is */}
         <section id="section-03" className="px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15">
-          <SectionLabel label="03 · What this is" meta="Not a club" />
+          <SectionLabel label="03 · What this is" meta="The point" />
           <FadeIn>
-            <div className="max-w-[65ch] text-lg leading-[1.7] text-foreground/90 space-y-8">
+            <div className="max-w-[65ch] text-lg leading-[1.7] text-foreground/90">
               <p>
                 Big things start here. New ideas are discussed here, tested here, and supported here, by people who can actually build them and fund them.
-              </p>
-              <p>
-                And this is not a members' club. There are no fees and no revenue goal. Nothing is sold here. inner.hub exists so that its people win.
               </p>
             </div>
           </FadeIn>
