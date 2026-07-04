@@ -1,4 +1,5 @@
 import React from "react";
+import { Linkedin, Instagram } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -104,7 +105,7 @@ export default function Home() {
               İstanbul → Global · Est. 2022
             </div>
             <h1 className="font-display font-serif italic text-5xl md:text-7xl lg:text-8xl leading-[1.05] max-w-[18ch] text-balance">
-              The next wave already knows each other.
+              What comes next starts here.
             </h1>
           </FadeIn>
 
@@ -168,7 +169,10 @@ export default function Home() {
         <section id="section-03" className="px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15">
           <SectionLabel label="03 · What this is" meta="The point" />
           <FadeIn>
-            <div className="max-w-[65ch] text-lg leading-[1.7] text-foreground/90">
+            <div
+              className="max-w-[46ch] text-foreground/90"
+              style={{ fontSize: "clamp(19px, 2.4vw, 26px)", lineHeight: 1.55 }}
+            >
               <p>
                 Big things start here. New ideas are discussed here, tested here, and supported here, by people who can actually build them and fund them.
               </p>
@@ -260,7 +264,10 @@ export default function Home() {
             <h2 className="font-display font-serif italic text-4xl md:text-5xl max-w-2xl mb-8 text-balance">
               hub is where it starts.
             </h2>
-            <p className="max-w-[65ch] text-lg leading-[1.7] text-foreground/90">
+            <p
+              className="max-w-[46ch] text-foreground/90"
+              style={{ fontSize: "clamp(19px, 2.4vw, 26px)", lineHeight: 1.55 }}
+            >
               We are building something bigger, step by step. We announce things when they are real. There is more.
             </p>
           </FadeIn>
@@ -432,8 +439,26 @@ export default function Home() {
       <footer id="site-footer" className="bg-[var(--ink)] px-6 md:px-12 lg:px-[10%] pt-20 pb-6 flex flex-col gap-16 overflow-hidden">
         <div className="flex flex-col gap-6">
           <img src="/inner-logo.png" alt="inner" width={140} height={140} className="w-[140px] h-[140px]" />
-          <div className="flex flex-wrap gap-x-5 gap-y-2 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)] opacity-60">
-            <span>Big things start here · İstanbul → Global</span>
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div className="flex flex-wrap gap-x-5 gap-y-2 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)] opacity-60">
+              <span>The next wave knows each other · İstanbul → Global</span>
+            </div>
+            <div className="flex items-center justify-center md:justify-end gap-5">
+              <a
+                href="#"
+                aria-label="inner on LinkedIn"
+                className="text-[var(--bone)] opacity-60 hover:opacity-100 transition-opacity duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]"
+              >
+                <Linkedin size={20} strokeWidth={1.5} />
+              </a>
+              <a
+                href="#"
+                aria-label="inner on Instagram"
+                className="text-[var(--bone)] opacity-60 hover:opacity-100 transition-opacity duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]"
+              >
+                <Instagram size={20} strokeWidth={1.5} />
+              </a>
+            </div>
           </div>
           <div className="font-mono text-[10px] uppercase tracking-widest text-[var(--bone)] opacity-30">
             © 2026 inner. İstanbul.
