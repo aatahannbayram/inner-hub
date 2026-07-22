@@ -31,12 +31,4 @@ catalog:
 autoInstallPeers: false
 
 onlyBuiltDependencies:
-  - '@swc/core'
-  - '@tailwindcss/oxide'
-  - better-sqlite3
-  - canvas
-  - esbuild
-  - lightningcss
-  - msw
-  - sharp
-  - unrs-resolver
+  - '*'
