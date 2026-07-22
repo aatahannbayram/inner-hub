@@ -2,7 +2,7 @@
   "name": "workspace",
   "version": "0.0.0",
   "license": "MIT",
-  "packageManager": "pnpm@9.11.0",
+  "packageManager": "pnpm@11.9.0",
   "scripts": {
     "build": "echo 'Pre-built static site'",
     "build:server": "pnpm --filter @workspace/api-server run build",
