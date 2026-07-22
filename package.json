@@ -5,6 +5,7 @@
   "packageManager": "pnpm@9.11.0",
   "scripts": {
     "build": "echo 'Pre-built static site'",
+    "build:server": "pnpm --filter @workspace/api-server run build",
     "typecheck:libs": "tsc --build",
     "typecheck": "pnpm run typecheck:libs && pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck"
   },
