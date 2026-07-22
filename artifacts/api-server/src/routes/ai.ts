@@ -1,5 +1,12 @@
 import { Router } from "express";
 import Anthropic from "@anthropic-ai/sdk";
+import {
+  buildSignalVisualPrompt,
+  getGenerationStatus,
+  HF_EFFICIENT,
+  isHiggsfieldConfigured,
+  submitImageGeneration,
+} from "../lib/higgsfield";
 
 const router = Router();
 
@@ -177,6 +184,80 @@ Kullanıcı tercihleri: ${preferences?.join(", ") ?? "belirtilmemiş"}
         ],
       });
     }
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ─── POST /api/ai/image ──────────────────────────────────────────────────────
+// Higgsfield text-to-image (kredi-tasarruflu: 720p, 1 görsel, cooldown)
+router.post("/image", async (req, res) => {
+  try {
+    if (!isHiggsfieldConfigured()) {
+      return res.status(503).json({
+        error: "Higgsfield yapılandırılmadı",
+        hint: "HF_API_KEY ve HF_API_SECRET ekleyin",
+      });
+    }
+
+    const { prompt, insight, force, cacheKey } = req.body as {
+      prompt?: string;
+      insight?: string;
+      force?: boolean;
+      cacheKey?: string;
+    };
+
+    const finalPrompt = insight?.trim()
+      ? buildSignalVisualPrompt(insight)
+      : prompt?.trim();
+
+    if (!finalPrompt) {
+      return res.status(400).json({ error: "prompt veya insight gerekli" });
+    }
+
+    const rateLimitKey = cacheKey ?? finalPrompt.slice(0, 120);
+
+    const result = await submitImageGeneration({
+      prompt: finalPrompt,
+      aspectRatio: HF_EFFICIENT.aspectRatio,
+      resolution: HF_EFFICIENT.resolution,
+      modelId: HF_EFFICIENT.modelId,
+      rateLimitKey,
+      force: Boolean(force),
+    });
+
+    res.json({
+      ...result,
+      meta: {
+        model: HF_EFFICIENT.modelId,
+        resolution: HF_EFFICIENT.resolution,
+        aspectRatio: HF_EFFICIENT.aspectRatio,
+        creditMode: "efficient",
+      },
+    });
+  } catch (err: any) {
+    const isCooldown = String(err.message).includes("Kredi koruması");
+    res.status(isCooldown ? 429 : 500).json({ error: err.message });
+  }
+});
+
+// ─── GET /api/ai/image/:requestId ────────────────────────────────────────────
+router.get("/image/:requestId", async (req, res) => {
+  try {
+    if (!isHiggsfieldConfigured()) {
+      return res.status(503).json({
+        error: "Higgsfield yapılandırılmadı",
+        hint: "HF_API_KEY ve HF_API_SECRET ekleyin",
+      });
+    }
+
+    const requestId = req.params.requestId;
+    if (!requestId) {
+      return res.status(400).json({ error: "requestId gerekli" });
+    }
+
+    const result = await getGenerationStatus(requestId);
+    res.json(result);
+  } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
 });

@@ -43,7 +43,10 @@ router.post("/checkout-session", async (req, res) => {
       cancelUrl?: string;
     };
 
-    const origin = req.headers.origin ?? "http://localhost:5173";
+    const origin =
+      req.headers.origin ??
+      process.env.APP_URL ??
+      "https://inner.digital";
     const success = successUrl ?? `${origin}/panel/payment/success`;
     const cancel = cancelUrl ?? `${origin}/panel/membership`;
 

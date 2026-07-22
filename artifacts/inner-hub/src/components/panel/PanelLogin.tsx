@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowRight } from "lucide-react";
+import { Lockup } from "@/components/Lockup";
 
 type PanelLoginProps = {
   onLogin: (user: { email: string; role: "member" | "admin"; name: string }) => void;
@@ -9,8 +9,8 @@ type PanelLoginProps = {
 
 // Dev credentials — backend auth entegrasyonunda API'ye taşınacak
 const DEV_USERS = [
-  { email: "admin@inner.co",  password: "inner2026", role: "admin"  as const, name: "Ata Han Bayram" },
-  { email: "member@inner.co", password: "inner2026", role: "member" as const, name: "Demo Üye" },
+  { email: "admin@inner.digital",  password: "inner2026", role: "admin"  as const, name: "Ata Han Bayram" },
+  { email: "member@inner.digital", password: "inner2026", role: "member" as const, name: "Demo Üye" },
 ];
 
 export function PanelLogin({ onLogin }: PanelLoginProps) {
@@ -20,7 +20,7 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
   const [loading, setLoading]   = useState(false);
 
   const fieldClass =
-    "w-full border-0 border-b border-[var(--ink)]/20 bg-transparent px-0 py-3 text-sm text-[var(--ink)] placeholder:text-[var(--ink)]/30 focus:outline-none focus:border-[var(--ink)] transition-colors";
+    "flex h-9 w-full rounded-none border-0 border-b border-border bg-transparent px-0 py-4 text-base md:text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-0 focus-visible:border-foreground focus-visible:border-b-2 transition-[border-width]";
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,53 +42,51 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[var(--bone)] px-6">
-      <div className="w-full max-w-sm">
-        {/* Brand */}
-        <div className="mb-12 flex items-baseline gap-0">
-          <span
-            className="font-serif text-2xl text-[var(--ink)]"
-            style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 100, letterSpacing: "-0.015em" }}
-          >
-            innerhub
-          </span>
-          <span className="inline-block size-[0.42em] translate-y-[0.06em] bg-[var(--inner-green)]" />
-        </div>
+    <div className="relative flex min-h-screen flex-col bg-background text-foreground">
+      <div className="grain-overlay" aria-hidden="true" />
 
-        {/* Header */}
-        <div className="mb-10">
-          <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40 mb-3">
-            Panel Girişi
+      <header className="relative z-10 flex h-[60px] items-center px-6 md:h-[72px] md:px-12 lg:px-[10%]">
+        <a href="/" className="inline-flex group focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-2">
+          <Lockup
+            className="text-foreground group-hover:opacity-80 transition-opacity"
+            fontSize="clamp(24px, 2.6vw, 34px)"
+          />
+        </a>
+      </header>
+
+      <main className="relative z-10 flex flex-1 items-center px-6 md:px-12 lg:px-[10%]">
+        <div className="w-full max-w-md">
+          <p className="mb-8 font-mono text-xs uppercase tracking-widest text-muted-foreground">
+            Panel · Members only
           </p>
-          <h1
-            className="font-serif text-3xl text-[var(--ink)]"
-            style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 100 }}
-          >
-            Devam etmek için giriş yap
-            <span className="inline-block size-[0.3em] translate-y-[0.06em] ml-[0.05em] bg-[var(--inner-green)]" />
-          </h1>
-        </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-8">
-          <div className="space-y-6">
-            <div>
-              <label className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/50">
-                E-posta
+          <h1 className="font-display font-serif italic text-4xl md:text-5xl leading-[1.1] text-balance mb-6">
+            Continue inside the circle.
+          </h1>
+
+          <p className="mb-12 max-w-[40ch] text-lg leading-[1.6] text-foreground/80">
+            Access is by invitation. Always.
+          </p>
+
+          <form onSubmit={handleSubmit} className="space-y-10">
+            <div className="space-y-2">
+              <label className="font-mono text-xs uppercase tracking-widest">
+                Email
               </label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="sen@inner.co"
+                placeholder="you@inner.digital"
                 className={fieldClass}
                 required
                 autoComplete="email"
               />
             </div>
-            <div>
-              <label className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/50">
-                Şifre
+
+            <div className="space-y-2">
+              <label className="font-mono text-xs uppercase tracking-widest">
+                Password
               </label>
               <input
                 type="password"
@@ -100,28 +98,31 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
                 autoComplete="current-password"
               />
             </div>
-          </div>
 
-          {error && (
-            <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--error)]">
-              {error}
-            </p>
-          )}
+            {error && (
+              <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--error)]">
+                {error}
+              </p>
+            )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="group relative flex w-full items-center justify-between overflow-hidden border border-[var(--ink)] bg-[var(--ink)] px-6 py-4 font-mono text-[11px] uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-80 disabled:opacity-50"
-          >
-            <span>{loading ? "Giriş yapılıyor…" : "Giriş Yap"}</span>
-            <ArrowRight className="size-3.5" />
-          </button>
-        </form>
-
-        <p className="mt-8 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/25 text-center">
-          Erişim sadece davet yoluyla · inner·hub
-        </p>
-      </div>
+            <div className="pt-2">
+              <button
+                type="submit"
+                disabled={loading}
+                className="group/btn relative inline-flex h-auto min-h-9 items-center justify-center overflow-hidden rounded-none border border-foreground bg-foreground px-12 py-6 font-mono text-xs uppercase tracking-widest text-background transition-colors duration-300 hover:opacity-90 disabled:opacity-50"
+              >
+                <span
+                  aria-hidden="true"
+                  className="absolute left-0 top-0 h-full w-2 -translate-x-full bg-background transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/btn:translate-x-0"
+                />
+                <span className="relative inline-block transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/btn:translate-x-1">
+                  {loading ? "Signing in…" : "Enter"}
+                </span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </main>
     </div>
   );
 }

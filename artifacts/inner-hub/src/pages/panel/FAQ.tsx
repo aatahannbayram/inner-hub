@@ -168,10 +168,10 @@ export default function FAQ() {
           Topluluk Chat'ten bize ulaş veya e-posta gönder.
         </p>
         <a
-          href="mailto:destek@inner.co"
+          href="mailto:destek@inner.digital"
           className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/40 underline underline-offset-2 hover:text-[var(--ink)] transition-colors"
         >
-          destek@inner.co
+          destek@inner.digital
         </a>
       </div>
 

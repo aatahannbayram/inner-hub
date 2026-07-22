@@ -36,6 +36,13 @@ yarn-error.log
 testem.log
 /typings
 
+# env (keep .env.example / .env.production template tracked)
+.env
+.env.local
+.env.*.local
+hostinger.env
+
+
 # System Files
 .DS_Store
 Thumbs.db

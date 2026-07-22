@@ -24,25 +24,25 @@ const IDENTITY = {
   tier: "Kurucu Üye",
   cohort: "#001",
   verified: true,
-  publicUrl: "inner.co/u/atahan",
+  publicUrl: "inner.digital/u/atahan",
   badges: ["Kurucu", "AI Builder", "Mentor", "Demo Day 2026"],
   skills: ["Ürün", "AI", "Topluluk", "B2B SaaS"],
   stats: { events: 12, courses: 4, contributions: 84, connections: 23 },
 };
 
 const EMBED_SNIPPETS = {
-  html: `<a href="https://inner.co/u/atahan" target="_blank">
-  <img src="https://inner.co/badge/atahan.svg"
+  html: `<a href="https://inner.digital/u/atahan" target="_blank">
+  <img src="https://inner.digital/badge/atahan.svg"
        alt="inner·hub Üyesi"
        height="28" />
 </a>`,
-  markdown: `[![inner·hub Üyesi](https://inner.co/badge/atahan.svg)](https://inner.co/u/atahan)`,
+  markdown: `[![inner·hub Üyesi](https://inner.digital/badge/atahan.svg)](https://inner.digital/u/atahan)`,
   json: `{
   "name": "Ata Han Bayram",
   "handle": "atahan",
   "tier": "Kurucu Üye",
   "verified": true,
-  "profile": "https://inner.co/u/atahan"
+  "profile": "https://inner.digital/u/atahan"
 }`,
 };
 

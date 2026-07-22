@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { TrendingUp, TrendingDown, Minus, Zap, Users, Loader2, RefreshCw, ArrowRight } from "lucide-react";
+import { TrendingUp, TrendingDown, Minus, Zap, Users, Loader2, RefreshCw, ArrowRight, ImageIcon } from "lucide-react";
 import { FadeIn } from "@/components/FadeIn";
 
 interface Theme {
@@ -109,10 +109,39 @@ function ScoreRing({ score }: { score: number }) {
   );
 }
 
+const CACHE_PREFIX = "inner_signal_visual:";
+
+function insightCacheKey(insight: string) {
+  return `${CACHE_PREFIX}${insight.slice(0, 160)}`;
+}
+
+function readCachedVisual(insight: string): string | null {
+  try {
+    const raw = sessionStorage.getItem(insightCacheKey(insight));
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as { url: string; at: number };
+    return parsed.url || null;
+  } catch {
+    return null;
+  }
+}
+
+function writeCachedVisual(insight: string, url: string) {
+  sessionStorage.setItem(
+    insightCacheKey(insight),
+    JSON.stringify({ url, at: Date.now() }),
+  );
+}
+
 export default function Signal() {
   const [data, setData] = useState<SignalData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [imageStatus, setImageStatus] = useState<string>("");
+  const [imageLoading, setImageLoading] = useState(false);
+  const [imageError, setImageError] = useState("");
+  const [fromCache, setFromCache] = useState(false);
 
   const fetchSignal = async () => {
     setLoading(true);
@@ -126,10 +155,87 @@ export default function Signal() {
       const json = await res.json();
       if (json.error) throw new Error(json.error);
       setData(json);
+      const cached = readCachedVisual(json.insight);
+      if (cached) {
+        setImageUrl(cached);
+        setFromCache(true);
+      } else {
+        setImageUrl(null);
+        setFromCache(false);
+      }
     } catch (e: any) {
       setError(e.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const pollImage = async (requestId: string) => {
+    for (let i = 0; i < 40; i++) {
+      await new Promise((r) => setTimeout(r, 2500));
+      const res = await fetch(`/api/ai/image/${requestId}`);
+      const json = await res.json();
+      if (json.error) throw new Error(json.error);
+      setImageStatus(json.status);
+      if (json.status === "completed") {
+        const url = json.images?.[0]?.url as string | undefined;
+        if (!url) throw new Error("Görsel URL bulunamadı");
+        setImageUrl(url);
+        return url;
+      }
+      if (json.status === "failed" || json.status === "nsfw" || json.status === "canceled") {
+        throw new Error(`Üretim başarısız: ${json.status}`);
+      }
+    }
+    throw new Error("Zaman aşımı — görsel henüz hazır değil");
+  };
+
+  const generateInsightImage = async (force = false) => {
+    if (!data?.insight) return;
+
+    if (imageUrl && !force) {
+      setImageError("Görsel hazır. Yeniden üretmek kredi harcar.");
+      return;
+    }
+
+    const ok = window.confirm(
+      force
+        ? "Yeniden üretim ~0.25–1 kredi harcar. Devam?"
+        : "Tek görsel üretilir (720p, kredi-tasarruflu). Devam?",
+    );
+    if (!ok) return;
+
+    setImageLoading(true);
+    setImageError("");
+    if (force) setImageUrl(null);
+    setFromCache(false);
+    setImageStatus("queued");
+    try {
+      const res = await fetch("/api/ai/image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          insight: data.insight,
+          cacheKey: insightCacheKey(data.insight),
+          force,
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok || json.error) throw new Error(json.error ?? "Üretim başlatılamadı");
+      let url: string | undefined = json.images?.[0]?.url;
+      if (json.status === "completed" && url) {
+        setImageUrl(url);
+        setImageStatus("completed");
+      } else {
+        if (!json.request_id) throw new Error("request_id alınamadı");
+        url = await pollImage(json.request_id);
+      }
+      if (url) writeCachedVisual(data.insight, url);
+    } catch (e: any) {
+      setImageError(e.message);
+    } finally {
+      setImageLoading(false);
+      setImageStatus("");
     }
   };
 
@@ -188,6 +294,56 @@ export default function Signal() {
               </span>
             </div>
             <p className="text-sm leading-relaxed text-[var(--ink)]/70">{data.insight}</p>
+            <div className="mt-4 flex flex-wrap items-center gap-3">
+              {!imageUrl ? (
+                <button
+                  onClick={() => generateInsightImage(false)}
+                  disabled={imageLoading}
+                  className="flex items-center gap-2 border border-[var(--ink)]/15 px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/50 transition-all hover:border-[var(--ink)]/40 hover:text-[var(--ink)] disabled:opacity-30"
+                >
+                  {imageLoading ? (
+                    <Loader2 className="size-3 animate-spin" />
+                  ) : (
+                    <ImageIcon className="size-3" />
+                  )}
+                  {imageLoading
+                    ? `Üretiliyor · ${imageStatus || "kuyruk"}`
+                    : "Görsel üret (1× · 720p)"}
+                </button>
+              ) : (
+                <button
+                  onClick={() => generateInsightImage(true)}
+                  disabled={imageLoading}
+                  className="flex items-center gap-2 border border-[var(--ink)]/10 px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/30 transition-all hover:border-[var(--ink)]/30 hover:text-[var(--ink)]/60 disabled:opacity-30"
+                >
+                  {imageLoading ? (
+                    <Loader2 className="size-3 animate-spin" />
+                  ) : (
+                    <RefreshCw className="size-3" />
+                  )}
+                  Yeniden üret (kredi harcar)
+                </button>
+              )}
+              {fromCache && imageUrl && (
+                <span className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/30">
+                  Önbellekten · kredi yok
+                </span>
+              )}
+              {imageError && (
+                <span className="font-mono text-[9px] uppercase tracking-widest text-[var(--error)]">
+                  {imageError}
+                </span>
+              )}
+            </div>
+            {imageUrl && (
+              <div className="mt-4 overflow-hidden border border-[var(--ink)]/10">
+                <img
+                  src={imageUrl}
+                  alt="Haftalık sinyal görseli"
+                  className="aspect-video w-full object-cover"
+                />
+              </div>
+            )}
           </div>
 
           {/* Weekly themes */}
@@ -257,7 +413,7 @@ export default function Signal() {
 
       <div className="border-t border-[var(--ink)]/[0.08] pt-4">
         <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/20">
-          inner·signal — claude claude-haiku-4-5-20251001 ile güçlendirilmiş · Haftalık güncellenir
+          inner·signal — Claude + Higgsfield · Haftalık güncellenir
         </p>
       </div>
     </div>

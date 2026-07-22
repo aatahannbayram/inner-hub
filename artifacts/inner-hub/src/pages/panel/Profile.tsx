@@ -333,7 +333,7 @@ export default function ProfilePage() {
             label="Kullanıcı adı"
             value={profile.handle}
             onChange={validateHandle}
-            prefix="inner.co/u/"
+            prefix="inner.digital/u/"
             placeholder="handle"
             mono
             maxLength={20}

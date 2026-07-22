@@ -124,7 +124,7 @@ The frontend runs at `http://localhost:5173`.
 
 **Dev credentials**
 ```
-Email:    admin@inner.co
+Email:    admin@inner.digital
 Password: inner2026
 ```
 
