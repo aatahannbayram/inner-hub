@@ -32,3 +32,6 @@ autoInstallPeers: false
 
 onlyBuiltDependencies:
   - '*'
+
+allowBuilds:
+  esbuild: true
