@@ -7,6 +7,7 @@ import NotFound from "@/pages/not-found";
 import Home from "@/pages/Home";
 import Requests from "@/pages/Requests";
 import { PanelShell, type PanelUser } from "@/components/panel/PanelShell";
+import { apiUrl } from "@/lib/api";
 import { PanelLogin } from "@/components/panel/PanelLogin";
 import Dashboard from "@/pages/panel/Dashboard";
 import Perks from "@/pages/panel/Perks";
@@ -85,22 +86,21 @@ function PanelApp() {
   const [checked, setChecked] = useState(false);
 
   useEffect(() => {
-    try {
-      const raw = sessionStorage.getItem("inner_session");
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (parsed?.email && parsed?.role) {
+    fetch(apiUrl("/api/auth/me"), { credentials: "include" })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.user) {
           setPanelUser({
-            name: parsed.name ?? parsed.email,
-            email: parsed.email,
-            role: parsed.role,
-            profileCompletionPct: 33,
-            notificationCount: 4,
+            name: data.user.name,
+            email: data.user.email,
+            role: data.user.role,
+            profileCompletionPct: data.user.profileCompletionPct ?? 0,
+            notificationCount: 0,
           });
         }
-      }
-    } catch {}
-    setChecked(true);
+      })
+      .catch(() => {})
+      .finally(() => setChecked(true));
   }, []);
 
   if (!checked) return null;
@@ -110,13 +110,13 @@ function PanelApp() {
       name: u.name,
       email: u.email,
       role: u.role,
-      profileCompletionPct: 33,
-      notificationCount: 4,
+      profileCompletionPct: 0,
+      notificationCount: 0,
     });
   };
 
   const handleLogout = () => {
-    sessionStorage.removeItem("inner_session");
+    fetch(apiUrl("/api/auth/logout"), { method: "POST", credentials: "include" }).catch(() => {});
     setPanelUser(null);
   };
 

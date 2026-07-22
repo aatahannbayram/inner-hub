@@ -11,7 +11,8 @@ import { Zap, Users, TrendingUp, BookOpen, Radio, Fingerprint, Code2, Target, Li
 import { useFormContext, FormProvider, Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { motion, useScroll, useTransform, AnimatePresence, useInView } from "framer-motion";
+import { useReducedMotion, motion, useScroll, useTransform, AnimatePresence, useInView } from "framer-motion";
+import Lenis from "lenis";
 import { Slot } from "@radix-ui/react-slot";
 import * as LabelPrimitive from "@radix-ui/react-label";
 import { cva } from "class-variance-authority";
@@ -270,13 +271,23 @@ const getSubmitRequestMutationOptions = (options) => {
 const useSubmitRequest = (options) => {
   return useMutation(getSubmitRequestMutationOptions());
 };
-function FadeIn({ children, className, delay = 0 }) {
+const ease = [0.16, 1, 0.3, 1];
+function FadeIn({
+  children,
+  className,
+  delay = 0
+}) {
+  const reduce = useReducedMotion();
+  if (reduce) {
+    return /* @__PURE__ */ jsx("div", { className, children });
+  }
   return /* @__PURE__ */ jsx(
     motion.div,
     {
       initial: { opacity: 0, y: 16 },
-      animate: { opacity: 1, y: 0 },
-      transition: { duration: 0.55, ease: [0.16, 1, 0.3, 1], delay },
+      whileInView: { opacity: 1, y: 0 },
+      viewport: { once: true, margin: "-40px" },
+      transition: { duration: 0.55, ease, delay },
       className,
       children
     }
@@ -492,6 +503,28 @@ function Preloader() {
       )
     }
   );
+}
+function useLenis(enabled = true) {
+  useEffect(() => {
+    if (!enabled || typeof window === "undefined") return;
+    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReduced) return;
+    const lenis = new Lenis({
+      duration: 1.05,
+      smoothWheel: true,
+      touchMultiplier: 1.4
+    });
+    let frame = 0;
+    const raf = (time) => {
+      lenis.raf(time);
+      frame = requestAnimationFrame(raf);
+    };
+    frame = requestAnimationFrame(raf);
+    return () => {
+      cancelAnimationFrame(frame);
+      lenis.destroy();
+    };
+  }, [enabled]);
 }
 const labelVariants = cva(
   "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
@@ -845,6 +878,7 @@ function StatItem({ n, label, suffix = "" }) {
   ] });
 }
 function Home() {
+  useLenis(true);
   const { mutate: submitRequest2, isSuccess, isError, isPending } = useSubmitRequest();
   const heroRef = useRef(null);
   const { scrollY } = useScroll();
@@ -879,7 +913,17 @@ function Home() {
     /* @__PURE__ */ jsx(IndexRail, {}),
     /* @__PURE__ */ jsxs("header", { className: "sticky top-0 z-50 h-[60px] md:h-[72px] px-6 md:px-12 lg:px-[10%] flex items-center justify-between bg-background/90 backdrop-blur-sm border-b border-border/20", children: [
       /* @__PURE__ */ jsx(SignatureMark, {}),
-      /* @__PURE__ */ jsx(LiveClock, {})
+      /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-6", children: [
+        /* @__PURE__ */ jsx(LiveClock, {}),
+        /* @__PURE__ */ jsx(
+          "a",
+          {
+            href: "/panel",
+            className: "font-mono text-xs uppercase tracking-widest text-foreground/80 hover:text-foreground transition-colors",
+            children: "Giriş Yap"
+          }
+        )
+      ] })
     ] }),
     /* @__PURE__ */ jsxs("main", { id: "main-content", className: "flex-grow", children: [
       /* @__PURE__ */ jsxs("section", { ref: heroRef, className: "h-[100svh] flex flex-col justify-center px-6 md:px-12 lg:px-[10%] relative overflow-hidden", children: [

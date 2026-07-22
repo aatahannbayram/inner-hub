@@ -15,8 +15,10 @@ export const usersTable = pgTable("users", {
   title: text("title"),
   company: text("company"),
   linkedin: text("linkedin"),
+  phone: text("phone"),
   profileCompletionPct: integer("profile_completion_pct").default(0).notNull(),
   passwordHash: text("password_hash"),
+  googleId: text("google_id").unique(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
