@@ -1,17 +1,17 @@
 import { jsx, jsxs } from "react/jsx-runtime";
 import { renderToString } from "react-dom/server";
-import { Link, Router } from "wouter";
+import { Router } from "wouter";
 import { useMutation, QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import * as React from "react";
 import { useState, useEffect, useRef } from "react";
 import * as TooltipPrimitive from "@radix-ui/react-tooltip";
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { Zap, Users, TrendingUp, BookOpen, Radio, Fingerprint, Code2, Target, Linkedin, Instagram, ArrowRight } from "lucide-react";
+import { ArrowRight, Zap, Users, TrendingUp, BookOpen, Radio, Fingerprint, Code2, Target, Linkedin, Instagram } from "lucide-react";
 import { useFormContext, FormProvider, Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useReducedMotion, motion, useScroll, useTransform, AnimatePresence, useInView } from "framer-motion";
+import { useReducedMotion, motion, useInView, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import Lenis from "lenis";
 import { Slot } from "@radix-ui/react-slot";
 import * as LabelPrimitive from "@radix-ui/react-label";
@@ -319,51 +319,6 @@ function Lockup({
     showHub && /* @__PURE__ */ jsx("span", { style: textStyle, children: "hub" })
   ] });
 }
-function SignatureMark() {
-  return /* @__PURE__ */ jsx(
-    Link,
-    {
-      href: "/",
-      className: "inline-flex group focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-2",
-      children: /* @__PURE__ */ jsx(
-        Lockup,
-        {
-          className: "text-foreground group-hover:opacity-80 transition-opacity",
-          fontSize: "clamp(24px, 2.6vw, 34px)"
-        }
-      )
-    }
-  );
-}
-function formatIstanbul(date) {
-  const parts = new Intl.DateTimeFormat("en-GB", {
-    timeZone: "Europe/Istanbul",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: false
-  }).formatToParts(date);
-  const get = (type) => parts.find((p) => p.type === type)?.value ?? "00";
-  return `${get("hour")}:${get("minute")}:${get("second")}`;
-}
-function LiveClock() {
-  const [time, setTime] = useState(() => formatIstanbul(/* @__PURE__ */ new Date()));
-  useEffect(() => {
-    const id = setInterval(() => setTime(formatIstanbul(/* @__PURE__ */ new Date())), 1e3);
-    return () => clearInterval(id);
-  }, []);
-  return /* @__PURE__ */ jsxs("div", { className: "text-right font-mono text-[10px] uppercase tracking-widest leading-relaxed", children: [
-    /* @__PURE__ */ jsxs("div", { className: "hidden md:block tabular-nums text-muted-foreground", children: [
-      "İstanbul 41.00°N 28.97°E · ",
-      time,
-      " TRT"
-    ] }),
-    /* @__PURE__ */ jsxs("div", { className: "md:hidden tabular-nums text-muted-foreground", children: [
-      time,
-      " TRT"
-    ] })
-  ] });
-}
 function Grain() {
   return /* @__PURE__ */ jsx("div", { className: "grain-overlay", "aria-hidden": "true" });
 }
@@ -503,6 +458,187 @@ function Preloader() {
       )
     }
   );
+}
+const LINKS = [
+  { label: "Platform", href: "#section-03" },
+  { label: "Gathering", href: "#section-06" },
+  { label: "Panel", href: "/panel" }
+];
+function FloatingNavbar() {
+  const [open, setOpen] = useState(false);
+  return /* @__PURE__ */ jsxs("div", { className: "absolute top-6 left-1/2 z-50 -translate-x-1/2", children: [
+    /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between gap-8 border border-[var(--ink)]/10 bg-[var(--bone)] px-5 py-3 shadow-lg", children: [
+      /* @__PURE__ */ jsx("a", { href: "/", className: "inline-flex", children: /* @__PURE__ */ jsx(Lockup, { className: "text-[var(--ink)]", fontSize: "18px" }) }),
+      /* @__PURE__ */ jsxs(
+        "button",
+        {
+          type: "button",
+          "aria-label": open ? "Menüyü kapat" : "Menüyü aç",
+          "aria-expanded": open,
+          onClick: () => setOpen((v) => !v),
+          className: "relative flex h-4 w-5 flex-col items-center justify-between",
+          children: [
+            /* @__PURE__ */ jsx(
+              "span",
+              {
+                className: "block h-[1.5px] w-full bg-[var(--ink)] transition-transform duration-300",
+                style: {
+                  transitionTimingFunction: "cubic-bezier(0.77,0,0.175,1)",
+                  transform: open ? "translateY(6.5px) rotate(45deg)" : "none"
+                }
+              }
+            ),
+            /* @__PURE__ */ jsx(
+              "span",
+              {
+                className: "block h-[1.5px] w-full bg-[var(--ink)] transition-transform duration-300",
+                style: {
+                  transitionTimingFunction: "cubic-bezier(0.77,0,0.175,1)",
+                  transform: open ? "translateY(-6.5px) rotate(-45deg)" : "none"
+                }
+              }
+            )
+          ]
+        }
+      )
+    ] }),
+    /* @__PURE__ */ jsx(
+      "div",
+      {
+        className: `absolute left-1/2 top-[calc(100%+10px)] w-56 -translate-x-1/2 border border-[var(--ink)]/10 bg-[var(--bone)] shadow-lg transition-all duration-300 ${open ? "translate-y-0 scale-100 opacity-100" : "pointer-events-none -translate-y-2 scale-95 opacity-0"}`,
+        children: LINKS.map((link) => /* @__PURE__ */ jsx(
+          "a",
+          {
+            href: link.href,
+            onClick: () => setOpen(false),
+            className: "block border-b border-[var(--ink)]/10 px-5 py-3 font-mono text-xs uppercase tracking-widest text-[var(--ink)]/70 transition-colors last:border-b-0 hover:text-[var(--ink)]",
+            children: link.label
+          },
+          link.label
+        ))
+      }
+    )
+  ] });
+}
+function FeatureCard({ feature, index, setRef }) {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, margin: "-15% 0px -15% 0px" });
+  return /* @__PURE__ */ jsxs(
+    "div",
+    {
+      ref: (el) => {
+        ref.current = el;
+        setRef(el);
+      },
+      "data-feature-index": index,
+      className: `border border-[var(--bone)]/15 bg-[var(--bone)]/[0.06] p-6 backdrop-blur-sm transition-all duration-700 ease-out md:p-10 ${inView ? "translate-x-0 opacity-100" : "translate-x-16 opacity-0"}`,
+      children: [
+        /* @__PURE__ */ jsx("p", { className: "mb-4 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)]/40", children: feature.tag }),
+        /* @__PURE__ */ jsx("h3", { className: "mb-6 font-serif text-xl italic text-[var(--bone)] md:text-2xl", children: feature.name }),
+        /* @__PURE__ */ jsx("div", { className: "mb-6 aspect-video overflow-hidden bg-black/30", children: feature.media.type === "video" ? /* @__PURE__ */ jsx(
+          "video",
+          {
+            src: feature.media.src,
+            autoPlay: true,
+            muted: true,
+            loop: true,
+            playsInline: true,
+            className: "size-full object-cover"
+          }
+        ) : /* @__PURE__ */ jsx("img", { src: feature.media.src, alt: feature.name, className: "size-full object-cover", loading: "lazy" }) }),
+        /* @__PURE__ */ jsx("p", { className: "text-sm leading-relaxed text-[var(--bone)]/60 md:text-base", children: feature.desc })
+      ]
+    }
+  );
+}
+function PlatformFeatures({
+  features,
+  restModules
+}) {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const cardRefs = useRef(/* @__PURE__ */ new Map());
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const idx = Number(entry.target.dataset.featureIndex);
+            setActiveIndex(idx);
+          }
+        });
+      },
+      { threshold: 0.6 }
+    );
+    cardRefs.current.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, [features.length]);
+  const scrollToCard = (index) => {
+    cardRefs.current.get(index)?.scrollIntoView({ behavior: "smooth", block: "center" });
+  };
+  return /* @__PURE__ */ jsx("div", { className: "bg-[var(--ink)] px-6 py-20 text-[var(--bone)] md:px-12 md:py-40 lg:px-[10%] lg:py-48", children: /* @__PURE__ */ jsxs("div", { className: "grid grid-cols-1 gap-16 lg:grid-cols-[400px_1fr] lg:gap-24 xl:grid-cols-[460px_1fr] xl:gap-48", children: [
+    /* @__PURE__ */ jsxs("div", { className: "lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col lg:justify-between lg:py-32", children: [
+      /* @__PURE__ */ jsxs("div", { children: [
+        /* @__PURE__ */ jsx("p", { className: "mb-4 font-mono text-xs uppercase tracking-widest text-[var(--bone)]/40", children: "03 · The platform" }),
+        /* @__PURE__ */ jsx("h2", { className: "font-display font-serif italic text-2xl leading-[1.2] sm:text-3xl lg:text-[46px]", children: "Built for the pace of a closed circle." })
+      ] }),
+      /* @__PURE__ */ jsx("div", { className: "mt-12 hidden flex-col gap-2 lg:flex", children: features.map((f, i) => /* @__PURE__ */ jsx(
+        "button",
+        {
+          type: "button",
+          onClick: () => scrollToCard(i),
+          className: `border px-4 py-3 text-left font-mono text-xs uppercase tracking-widest transition-colors ${activeIndex === i ? "border-[var(--bone)]/20 bg-[var(--bone)]/10 text-[var(--bone)]" : "border-transparent text-[var(--bone)]/40 hover:text-[var(--bone)]/70"}`,
+          children: f.name
+        },
+        f.id
+      )) }),
+      /* @__PURE__ */ jsxs("div", { className: "mt-12 hidden lg:block", children: [
+        /* @__PURE__ */ jsx("p", { className: "mb-4 text-sm text-[var(--bone)]/60", children: "Access is by invitation. Always." }),
+        /* @__PURE__ */ jsxs(
+          "a",
+          {
+            href: "#section-08",
+            className: "inline-flex items-center gap-2 border border-[var(--bone)] px-5 py-2.5 font-mono text-xs uppercase tracking-widest text-[var(--bone)] transition-colors hover:bg-[var(--bone)] hover:text-[var(--ink)]",
+            children: [
+              "Request an invitation ",
+              /* @__PURE__ */ jsx(ArrowRight, { className: "size-3" })
+            ]
+          }
+        )
+      ] })
+    ] }),
+    /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-6", children: [
+      features.map((f, i) => /* @__PURE__ */ jsx(
+        FeatureCard,
+        {
+          feature: f,
+          index: i,
+          setRef: (el) => {
+            if (el) cardRefs.current.set(i, el);
+            else cardRefs.current.delete(i);
+          }
+        },
+        f.id
+      )),
+      restModules.length > 0 && /* @__PURE__ */ jsxs("div", { className: "mt-6 border-t border-[var(--bone)]/15 pt-10", children: [
+        /* @__PURE__ */ jsxs("p", { className: "mb-6 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)]/40", children: [
+          "+",
+          restModules.length,
+          " more tools"
+        ] }),
+        /* @__PURE__ */ jsx("div", { className: "grid grid-cols-1 gap-px bg-[var(--bone)]/10 sm:grid-cols-2", children: restModules.map((mod) => {
+          const Icon = mod.icon;
+          return /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-3 bg-[var(--ink)] p-6", children: [
+            /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between", children: [
+              /* @__PURE__ */ jsx(Icon, { className: "size-4 text-[var(--bone)]/50", strokeWidth: 1.5 }),
+              /* @__PURE__ */ jsx("span", { className: "font-mono text-[9px] uppercase tracking-widest text-[var(--bone)]/30", children: mod.tag })
+            ] }),
+            /* @__PURE__ */ jsx("h4", { className: "font-serif italic text-lg text-[var(--bone)]/90", children: mod.name }),
+            /* @__PURE__ */ jsx("p", { className: "text-sm leading-relaxed text-[var(--bone)]/50", children: mod.desc })
+          ] }, mod.id);
+        }) })
+      ] })
+    ] })
+  ] }) });
 }
 function useLenis(enabled = true) {
   useEffect(() => {
@@ -806,6 +942,32 @@ const MODULES = [
     tag: "Marketplace"
   }
 ];
+const PLATFORM_FEATURES = [
+  {
+    id: "signal",
+    name: "inner·signal",
+    tag: "AI Layer",
+    desc: "AI-powered deal and opportunity feed. The right signals, before anyone else sees them.",
+    media: {
+      type: "video",
+      src: "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260406_094145_4a271a6c-3869-4f1c-8aa7-aeb0cb227994.mp4"
+    }
+  },
+  {
+    id: "match",
+    name: "inner·match",
+    tag: "Matching",
+    desc: "Co-founder, mentor, and investor matching inside a closed circle. Trust-based connections.",
+    media: { type: "image", src: "/editorial/circle-portrait.jpg" }
+  },
+  {
+    id: "capital",
+    name: "inner·capital",
+    tag: "Investments",
+    desc: "Private deal flow and investment pipeline. SPVs, demo days, and co-investment opportunities.",
+    media: { type: "image", src: "/editorial/circle-dusk.png" }
+  }
+];
 const MARQUEE_ITEMS = [
   "inner·signal",
   "inner·match",
@@ -818,7 +980,7 @@ const MARQUEE_ITEMS = [
 ];
 function MarqueeStrip() {
   const items = [...MARQUEE_ITEMS, ...MARQUEE_ITEMS];
-  return /* @__PURE__ */ jsx("div", { className: "overflow-hidden border-y border-border/15 py-4 bg-background", children: /* @__PURE__ */ jsx(
+  return /* @__PURE__ */ jsx("div", { className: "relative z-10 overflow-hidden border-y border-border/15 py-4 bg-background", children: /* @__PURE__ */ jsx(
     motion.div,
     {
       className: "flex gap-16 whitespace-nowrap",
@@ -839,35 +1001,6 @@ function ScrollProgress() {
     {
       className: "fixed top-0 left-0 right-0 h-[2px] bg-[var(--inner-green)] origin-left z-[9999]",
       style: { scaleX: scrollYProgress }
-    }
-  );
-}
-function ModuleCard({ mod, index }) {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-60px" });
-  const Icon = mod.icon;
-  return /* @__PURE__ */ jsxs(
-    motion.div,
-    {
-      ref,
-      initial: { opacity: 0, y: 32 },
-      animate: inView ? { opacity: 1, y: 0 } : {},
-      transition: { duration: 0.5, delay: index % 4 * 0.08, ease: [0.16, 1, 0.3, 1] },
-      className: "group border border-border/15 p-6 md:p-8 flex flex-col gap-4 hover:border-border/40 transition-colors duration-300 cursor-default",
-      children: [
-        /* @__PURE__ */ jsxs("div", { className: "flex items-start justify-between", children: [
-          /* @__PURE__ */ jsx("div", { className: "size-9 border border-border/20 flex items-center justify-center group-hover:border-[var(--inner-green)]/40 transition-colors duration-300", children: /* @__PURE__ */ jsx(Icon, { className: "size-4 text-muted-foreground group-hover:text-[var(--ink)] transition-colors duration-300", strokeWidth: 1.5 }) }),
-          /* @__PURE__ */ jsx("span", { className: "font-mono text-[9px] uppercase tracking-widest text-muted-foreground/50 border border-border/15 px-2 py-1", children: mod.tag })
-        ] }),
-        /* @__PURE__ */ jsxs("div", { children: [
-          /* @__PURE__ */ jsx("h3", { className: "font-serif italic text-xl mb-2 text-foreground/90 group-hover:text-foreground transition-colors duration-300", children: mod.name }),
-          /* @__PURE__ */ jsx("p", { className: "text-sm text-muted-foreground leading-relaxed", children: mod.desc })
-        ] }),
-        /* @__PURE__ */ jsxs("div", { className: "mt-auto pt-2 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300", children: [
-          /* @__PURE__ */ jsx("div", { className: "h-[1px] flex-1 bg-[var(--inner-green)]/30" }),
-          /* @__PURE__ */ jsx(ArrowRight, { className: "size-3 text-[var(--inner-green)]" })
-        ] })
-      ]
     }
   );
 }
@@ -911,22 +1044,9 @@ function Home() {
     /* @__PURE__ */ jsx(Preloader, {}),
     /* @__PURE__ */ jsx(Grain, {}),
     /* @__PURE__ */ jsx(IndexRail, {}),
-    /* @__PURE__ */ jsxs("header", { className: "sticky top-0 z-50 h-[60px] md:h-[72px] px-6 md:px-12 lg:px-[10%] flex items-center justify-between bg-background/90 backdrop-blur-sm border-b border-border/20", children: [
-      /* @__PURE__ */ jsx(SignatureMark, {}),
-      /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-6", children: [
-        /* @__PURE__ */ jsx(LiveClock, {}),
-        /* @__PURE__ */ jsx(
-          "a",
-          {
-            href: "/panel",
-            className: "font-mono text-xs uppercase tracking-widest text-foreground/80 hover:text-foreground transition-colors",
-            children: "Giriş Yap"
-          }
-        )
-      ] })
-    ] }),
     /* @__PURE__ */ jsxs("main", { id: "main-content", className: "flex-grow", children: [
-      /* @__PURE__ */ jsxs("section", { ref: heroRef, className: "h-[100svh] flex flex-col justify-end px-6 pb-16 md:px-12 md:pb-24 lg:px-[10%] relative overflow-hidden bg-black text-white", children: [
+      /* @__PURE__ */ jsxs("section", { ref: heroRef, className: "h-[100svh] mb-[-3rem] flex flex-col justify-end px-6 pb-16 md:px-12 md:pb-24 lg:px-[10%] relative overflow-hidden bg-black text-white", children: [
+        /* @__PURE__ */ jsx(FloatingNavbar, {}),
         /* @__PURE__ */ jsx(
           "video",
           {
@@ -986,6 +1106,27 @@ function Home() {
             children: /* @__PURE__ */ jsx("p", { className: "max-w-[50ch] text-lg md:text-xl text-white/70 leading-[1.6]", children: "inner.hub is a private circle of founders, builders, and investors. People who meet early and support each other first." })
           }
         ),
+        /* @__PURE__ */ jsx(
+          motion.div,
+          {
+            initial: { opacity: 0, y: 24 },
+            animate: { opacity: 1, y: 0 },
+            transition: { duration: 0.8, delay: 0.35, ease: [0.16, 1, 0.3, 1] },
+            className: "relative z-10 mt-8",
+            children: /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-4 border border-white/15 bg-black/25 py-1 pl-6 pr-1 backdrop-blur-md", children: [
+              /* @__PURE__ */ jsx("p", { className: "hidden text-sm font-medium text-white sm:block", children: "No tickets. No tiers. Just the circle, gently curated." }),
+              /* @__PURE__ */ jsx("p", { className: "text-sm font-medium text-white sm:hidden", children: "No tickets. No tiers." }),
+              /* @__PURE__ */ jsx(
+                "a",
+                {
+                  href: "#section-08",
+                  className: "whitespace-nowrap bg-white px-5 py-2.5 font-mono text-xs uppercase tracking-widest text-black transition-colors hover:bg-white/90",
+                  children: "Request an invitation"
+                }
+              )
+            ] })
+          }
+        ),
         /* @__PURE__ */ jsxs(
           motion.div,
           {
@@ -1041,14 +1182,7 @@ function Home() {
           ] }) })
         ] })
       ] }),
-      /* @__PURE__ */ jsxs("section", { id: "section-03", className: "px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15", children: [
-        /* @__PURE__ */ jsx(SectionLabel, { label: "03 · The platform", meta: "Eight tools" }),
-        /* @__PURE__ */ jsxs(FadeIn, { children: [
-          /* @__PURE__ */ jsx("h2", { className: "font-display font-serif italic text-4xl md:text-5xl max-w-2xl mb-4 text-balance", children: "Everything a closed circle needs." }),
-          /* @__PURE__ */ jsx("p", { className: "max-w-[55ch] text-lg text-foreground/70 leading-[1.7] mb-16", children: "Eight interconnected tools built for operators who move fast and think in systems." })
-        ] }),
-        /* @__PURE__ */ jsx("div", { className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-px bg-border/15", children: MODULES.map((mod, i) => /* @__PURE__ */ jsx("div", { className: "bg-background", children: /* @__PURE__ */ jsx(ModuleCard, { mod, index: i }) }, mod.id)) })
-      ] }),
+      /* @__PURE__ */ jsx("section", { id: "section-03", children: /* @__PURE__ */ jsx(PlatformFeatures, { features: PLATFORM_FEATURES, restModules: MODULES.slice(3) }) }),
       /* @__PURE__ */ jsxs("section", { id: "section-04", className: "px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15", children: [
         /* @__PURE__ */ jsx(SectionLabel, { label: "04 · What this is", meta: "The point" }),
         /* @__PURE__ */ jsx(FadeIn, { children: /* @__PURE__ */ jsx(

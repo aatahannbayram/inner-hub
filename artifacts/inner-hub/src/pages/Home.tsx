@@ -6,13 +6,13 @@ import * as z from "zod";
 import { motion, useInView, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { useSubmitRequest } from "@workspace/api-client-react";
 import { FadeIn } from "@/components/FadeIn";
-import { SignatureMark } from "@/components/SignatureMark";
 import { Lockup } from "@/components/Lockup";
-import { LiveClock } from "@/components/LiveClock";
 import { Grain } from "@/components/Grain";
 import { IndexRail } from "@/components/IndexRail";
 import { DiagramCircle } from "@/components/DiagramCircle";
 import { Preloader } from "@/components/Preloader";
+import { FloatingNavbar } from "@/components/FloatingNavbar";
+import { PlatformFeatures, type PlatformFeature } from "@/components/PlatformFeatures";
 import { useLenis } from "@/hooks/useLenis";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -126,6 +126,33 @@ const MODULES = [
   },
 ];
 
+const PLATFORM_FEATURES: PlatformFeature[] = [
+  {
+    id: "signal",
+    name: "inner·signal",
+    tag: "AI Layer",
+    desc: "AI-powered deal and opportunity feed. The right signals, before anyone else sees them.",
+    media: {
+      type: "video",
+      src: "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260406_094145_4a271a6c-3869-4f1c-8aa7-aeb0cb227994.mp4",
+    },
+  },
+  {
+    id: "match",
+    name: "inner·match",
+    tag: "Matching",
+    desc: "Co-founder, mentor, and investor matching inside a closed circle. Trust-based connections.",
+    media: { type: "image", src: "/editorial/circle-portrait.jpg" },
+  },
+  {
+    id: "capital",
+    name: "inner·capital",
+    tag: "Investments",
+    desc: "Private deal flow and investment pipeline. SPVs, demo days, and co-investment opportunities.",
+    media: { type: "image", src: "/editorial/circle-dusk.png" },
+  },
+];
+
 // ─── Marquee strip ────────────────────────────────────────────────────────────
 const MARQUEE_ITEMS = [
   "inner·signal", "inner·match", "inner·capital", "inner·vault",
@@ -135,7 +162,7 @@ const MARQUEE_ITEMS = [
 function MarqueeStrip() {
   const items = [...MARQUEE_ITEMS, ...MARQUEE_ITEMS];
   return (
-    <div className="overflow-hidden border-y border-border/15 py-4 bg-background">
+    <div className="relative z-10 overflow-hidden border-y border-border/15 py-4 bg-background">
       <motion.div
         className="flex gap-16 whitespace-nowrap"
         animate={{ x: ["0%", "-50%"] }}
@@ -159,42 +186,6 @@ function ScrollProgress() {
       className="fixed top-0 left-0 right-0 h-[2px] bg-[var(--inner-green)] origin-left z-[9999]"
       style={{ scaleX: scrollYProgress }}
     />
-  );
-}
-
-// ─── Module card ──────────────────────────────────────────────────────────────
-function ModuleCard({ mod, index }: { mod: typeof MODULES[0]; index: number }) {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-60px" });
-  const Icon = mod.icon;
-
-  return (
-    <motion.div
-      ref={ref}
-      initial={{ opacity: 0, y: 32 }}
-      animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.5, delay: (index % 4) * 0.08, ease: [0.16, 1, 0.3, 1] }}
-      className="group border border-border/15 p-6 md:p-8 flex flex-col gap-4 hover:border-border/40 transition-colors duration-300 cursor-default"
-    >
-      <div className="flex items-start justify-between">
-        <div className="size-9 border border-border/20 flex items-center justify-center group-hover:border-[var(--inner-green)]/40 transition-colors duration-300">
-          <Icon className="size-4 text-muted-foreground group-hover:text-[var(--ink)] transition-colors duration-300" strokeWidth={1.5} />
-        </div>
-        <span className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground/50 border border-border/15 px-2 py-1">
-          {mod.tag}
-        </span>
-      </div>
-      <div>
-        <h3 className="font-serif italic text-xl mb-2 text-foreground/90 group-hover:text-foreground transition-colors duration-300">
-          {mod.name}
-        </h3>
-        <p className="text-sm text-muted-foreground leading-relaxed">{mod.desc}</p>
-      </div>
-      <div className="mt-auto pt-2 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-        <div className="h-[1px] flex-1 bg-[var(--inner-green)]/30" />
-        <ArrowRight className="size-3 text-[var(--inner-green)]" />
-      </div>
-    </motion.div>
   );
 }
 
@@ -254,24 +245,11 @@ export default function Home() {
       <Grain />
       <IndexRail />
 
-      {/* Header */}
-      <header className="sticky top-0 z-50 h-[60px] md:h-[72px] px-6 md:px-12 lg:px-[10%] flex items-center justify-between bg-background/90 backdrop-blur-sm border-b border-border/20">
-        <SignatureMark />
-        <div className="flex items-center gap-6">
-          <LiveClock />
-          <a
-            href="/panel"
-            className="font-mono text-xs uppercase tracking-widest text-foreground/80 hover:text-foreground transition-colors"
-          >
-            Giriş Yap
-          </a>
-        </div>
-      </header>
-
       <main id="main-content" className="flex-grow">
 
         {/* ── Hero ── */}
-        <section ref={heroRef} className="h-[100svh] flex flex-col justify-end px-6 pb-16 md:px-12 md:pb-24 lg:px-[10%] relative overflow-hidden bg-black text-white">
+        <section ref={heroRef} className="h-[100svh] mb-[-3rem] flex flex-col justify-end px-6 pb-16 md:px-12 md:pb-24 lg:px-[10%] relative overflow-hidden bg-black text-white">
+          <FloatingNavbar />
           <video
             autoPlay
             muted
@@ -320,6 +298,26 @@ export default function Home() {
             <p className="max-w-[50ch] text-lg md:text-xl text-white/70 leading-[1.6]">
               inner.hub is a private circle of founders, builders, and investors. People who meet early and support each other first.
             </p>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.35, ease: [0.16, 1, 0.3, 1] }}
+            className="relative z-10 mt-8"
+          >
+            <div className="flex items-center gap-4 border border-white/15 bg-black/25 py-1 pl-6 pr-1 backdrop-blur-md">
+              <p className="hidden text-sm font-medium text-white sm:block">
+                No tickets. No tiers. Just the circle, gently curated.
+              </p>
+              <p className="text-sm font-medium text-white sm:hidden">No tickets. No tiers.</p>
+              <a
+                href="#section-08"
+                className="whitespace-nowrap bg-white px-5 py-2.5 font-mono text-xs uppercase tracking-widest text-black transition-colors hover:bg-white/90"
+              >
+                Request an invitation
+              </a>
+            </div>
           </motion.div>
 
           <motion.div
@@ -397,23 +395,8 @@ export default function Home() {
         </section>
 
         {/* ── 03 · The platform ── */}
-        <section id="section-03" className="px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15">
-          <SectionLabel label="03 · The platform" meta="Eight tools" />
-          <FadeIn>
-            <h2 className="font-display font-serif italic text-4xl md:text-5xl max-w-2xl mb-4 text-balance">
-              Everything a closed circle needs.
-            </h2>
-            <p className="max-w-[55ch] text-lg text-foreground/70 leading-[1.7] mb-16">
-              Eight interconnected tools built for operators who move fast and think in systems.
-            </p>
-          </FadeIn>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-px bg-border/15">
-            {MODULES.map((mod, i) => (
-              <div key={mod.id} className="bg-background">
-                <ModuleCard mod={mod} index={i} />
-              </div>
-            ))}
-          </div>
+        <section id="section-03">
+          <PlatformFeatures features={PLATFORM_FEATURES} restModules={MODULES.slice(3)} />
         </section>
 
         {/* ── 04 · What this is ── */}
