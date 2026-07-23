@@ -26,6 +26,29 @@ declare global {
   }
 }
 
+function GoogleGlyph() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+      <path
+        fill="#4285F4"
+        d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62Z"
+      />
+      <path
+        fill="#34A853"
+        d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.81.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.95v2.33A9 9 0 0 0 9 18Z"
+      />
+      <path
+        fill="#FBBC05"
+        d="M3.97 10.72A5.4 5.4 0 0 1 3.69 9c0-.6.1-1.18.28-1.72V4.95H.95A9 9 0 0 0 0 9c0 1.45.35 2.83.95 4.05l3.02-2.33Z"
+      />
+      <path
+        fill="#EA4335"
+        d="M9 3.58c1.32 0 2.51.46 3.44 1.35l2.59-2.59C13.46.89 11.43 0 9 0A9 9 0 0 0 .95 4.95l3.02 2.33C4.68 5.16 6.66 3.58 9 3.58Z"
+      />
+    </svg>
+  );
+}
+
 function loadGoogleScript(): Promise<void> {
   return new Promise((resolve, reject) => {
     if (window.google?.accounts?.id) return resolve();
@@ -65,6 +88,7 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
   const [inviteCode, setInviteCode] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [googleReady, setGoogleReady] = useState(false);
   const googleButtonRef = useRef<HTMLDivElement>(null);
   const inviteCodeRef = useRef(inviteCode);
   const modeRef = useRef(mode);
@@ -112,13 +136,15 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
           },
         });
         window.google.accounts.id.renderButton(googleButtonRef.current, {
+          type: "standard",
           theme: "outline",
           size: "large",
-          width: 320,
+          width: 400,
           text: mode === "register" ? "signup_with" : "signin_with",
         });
+        setGoogleReady(true);
       } catch {
-        // Google yapılandırılmamışsa buton sessizce gösterilmez.
+        // Google yapılandırılmamışsa özel buton gösterilmez.
       }
     }
 
@@ -178,9 +204,24 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
             Access is by invitation. Always.
           </p>
 
-          <div ref={googleButtonRef} className="mb-8" />
+          <div className={`group relative mb-6 h-11 w-full ${googleReady ? "visible" : "invisible"}`}>
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 flex items-center justify-center gap-3 border border-foreground/25 bg-background transition-all duration-300 group-hover:-translate-y-px group-hover:border-foreground/50 group-hover:shadow-[0_3px_0_0_var(--inner-green)]"
+            >
+              <GoogleGlyph />
+              <span className="font-mono text-xs uppercase tracking-widest">
+                {mode === "register" ? "Google ile kayıt ol" : "Google ile devam et"}
+              </span>
+            </div>
+            <div
+              ref={googleButtonRef}
+              className="absolute inset-0 overflow-hidden opacity-0"
+              aria-label={mode === "register" ? "Google ile kayıt ol" : "Google ile devam et"}
+            />
+          </div>
 
-          <div className="mb-8 flex items-center gap-4 text-muted-foreground">
+          <div className={`mb-8 flex items-center gap-4 text-muted-foreground ${googleReady ? "" : "hidden"}`}>
             <span className="h-px flex-1 bg-border" />
             <span className="font-mono text-[10px] uppercase tracking-widest">veya</span>
             <span className="h-px flex-1 bg-border" />
