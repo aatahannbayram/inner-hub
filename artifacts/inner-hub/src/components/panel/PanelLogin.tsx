@@ -178,7 +178,7 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
   };
 
   return (
-    <div className="relative flex min-h-screen flex-col overflow-hidden bg-black text-white">
+    <div className="relative flex h-screen flex-col overflow-hidden bg-black text-white">
       <video
         autoPlay
         muted
@@ -196,7 +196,7 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
         className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-b from-black/50 via-transparent to-transparent"
       />
 
-      <header className="relative z-10 flex h-[60px] items-center justify-between px-6 md:h-[72px] md:px-12 lg:px-[10%]">
+      <header className="sticky top-0 z-20 flex h-[60px] shrink-0 items-center justify-between px-6 md:h-[72px] md:px-12 lg:px-[10%]">
         <a
           href="/"
           className="animate-blur-fade-up inline-flex group focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-2"
@@ -216,7 +216,7 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
         </a>
       </header>
 
-      <main className="relative z-10 flex flex-1 items-end px-6 pb-12 md:px-12 md:pb-20 lg:px-[10%]">
+      <main className="relative z-10 flex min-h-0 flex-1 items-end overflow-y-auto px-6 pb-12 md:px-12 md:pb-20 lg:px-[10%]">
         <div className="w-full max-w-md">
           <p
             className="animate-blur-fade-up mb-6 font-mono text-xs uppercase tracking-widest text-white/60"

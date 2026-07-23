@@ -5,6 +5,7 @@ import {
   ListRequestsQueryParams,
 } from "@workspace/api-zod";
 import { desc } from "drizzle-orm";
+import { notifyNewInvitationRequest } from "../lib/mailer";
 
 const router: IRouter = Router();
 
@@ -53,13 +54,27 @@ router.post("/request", async (req, res) => {
     return;
   }
 
+  const trimmedName = name.trim();
+  const trimmedEmail = email.trim().toLowerCase();
+  const trimmedWhoYouAre = whoYouAre.trim();
+  const trimmedLink = link?.trim() || null;
+  const trimmedWhoIntroduced = whoIntroduced?.trim() || null;
+
   await db.insert(invitationRequestsTable).values({
-    name: name.trim(),
-    email: email.trim().toLowerCase(),
-    whoYouAre: whoYouAre.trim(),
-    link: link?.trim() || null,
-    whoIntroduced: whoIntroduced?.trim() || null,
+    name: trimmedName,
+    email: trimmedEmail,
+    whoYouAre: trimmedWhoYouAre,
+    link: trimmedLink,
+    whoIntroduced: trimmedWhoIntroduced,
     ipAddress: ip,
+  });
+
+  void notifyNewInvitationRequest({
+    name: trimmedName,
+    email: trimmedEmail,
+    whoYouAre: trimmedWhoYouAre,
+    link: trimmedLink,
+    whoIntroduced: trimmedWhoIntroduced,
   });
 
   res.status(201).json({ message: "Received." });

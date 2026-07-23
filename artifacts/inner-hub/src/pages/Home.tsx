@@ -271,20 +271,38 @@ export default function Home() {
       <main id="main-content" className="flex-grow">
 
         {/* ── Hero ── */}
-        <section ref={heroRef} className="h-[100svh] flex flex-col justify-center px-6 md:px-12 lg:px-[10%] relative overflow-hidden">
+        <section ref={heroRef} className="h-[100svh] flex flex-col justify-end px-6 pb-16 md:px-12 md:pb-24 lg:px-[10%] relative overflow-hidden bg-black text-white">
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
+            className="absolute inset-0 z-0 h-full w-full object-cover"
+            src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260406_094145_4a271a6c-3869-4f1c-8aa7-aeb0cb227994.mp4"
+          />
+          <div
+            aria-hidden="true"
+            className="bottom-blur-mask pointer-events-none absolute inset-0 z-[1] bg-black/20 backdrop-blur-xl"
+          />
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-b from-black/50 via-transparent to-transparent"
+          />
+
           <motion.div
-            className="absolute inset-0 pointer-events-none"
+            className="absolute inset-0 z-[1] pointer-events-none"
             style={{ y: heroY }}
           >
-            <div className="absolute top-1/2 right-[5%] -translate-y-1/2 size-[600px] rounded-full bg-[var(--inner-green)]/[0.025] blur-3xl" />
+            <div className="absolute top-1/2 right-[5%] -translate-y-1/2 size-[600px] rounded-full bg-[var(--inner-green)]/10 blur-3xl" />
           </motion.div>
 
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            className="relative z-10"
           >
-            <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-8 flex items-center gap-3">
+            <div className="font-mono text-xs uppercase tracking-widest text-white/60 mb-8 flex items-center gap-3">
               <span className="size-1.5 rounded-full bg-[var(--inner-green)] animate-beacon" />
               İstanbul → Global · Est. 2026
             </div>
@@ -297,9 +315,9 @@ export default function Home() {
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="mt-12"
+            className="relative z-10 mt-12"
           >
-            <p className="max-w-[50ch] text-lg md:text-xl text-foreground/80 leading-[1.6]">
+            <p className="max-w-[50ch] text-lg md:text-xl text-white/70 leading-[1.6]">
               inner.hub is a private circle of founders, builders, and investors. People who meet early and support each other first.
             </p>
           </motion.div>
@@ -308,7 +326,7 @@ export default function Home() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.5 }}
-            className="absolute bottom-10 left-6 md:left-12 lg:left-[10%] flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground"
+            className="absolute bottom-10 left-6 md:left-12 lg:left-[10%] z-10 flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-white/60"
           >
             <motion.div
               animate={{ y: [0, 6, 0] }}
@@ -336,30 +354,46 @@ export default function Home() {
         {/* ── 02 · The first thirty-four ── */}
         <section id="section-02" className="px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15">
           <SectionLabel label="02 · The first thirty-four" meta="Founding seats" />
-          <FadeIn>
-            <p className="max-w-[65ch] text-lg leading-[1.7] text-foreground/90 mb-16">
-              It starts with thirty-four people, chosen one by one:
-            </p>
-          </FadeIn>
-          <div className="max-w-3xl mb-16">
-            {[
-              { label: "Founders", line: "People building startups, in AI and beyond." },
-              { label: "Builders", line: "Engineers and researchers doing serious AI work." },
-              { label: "Investors", line: "Angel investors and people from venture funds." },
-            ].map((item, i) => (
-              <FadeIn key={item.label} delay={i * 0.1}>
-                <div className="flex flex-col md:flex-row md:items-baseline gap-2 md:gap-12 py-6 border-t border-border/15 last:border-b">
-                  <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground w-full md:w-48 flex-shrink-0">{item.label}</div>
-                  <p className="text-lg text-foreground/90">{item.line}</p>
-                </div>
+          <div className="grid grid-cols-1 md:grid-cols-[1fr_320px] gap-12 md:gap-16 items-start">
+            <div>
+              <FadeIn>
+                <p className="max-w-[65ch] text-lg leading-[1.7] text-foreground/90 mb-16">
+                  It starts with thirty-four people, chosen one by one:
+                </p>
               </FadeIn>
-            ))}
+              <div className="max-w-3xl mb-16">
+                {[
+                  { label: "Founders", line: "People building startups, in AI and beyond." },
+                  { label: "Builders", line: "Engineers and researchers doing serious AI work." },
+                  { label: "Investors", line: "Angel investors and people from venture funds." },
+                ].map((item, i) => (
+                  <FadeIn key={item.label} delay={i * 0.1}>
+                    <div className="flex flex-col md:flex-row md:items-baseline gap-2 md:gap-12 py-6 border-t border-border/15 last:border-b">
+                      <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground w-full md:w-48 flex-shrink-0">{item.label}</div>
+                      <p className="text-lg text-foreground/90">{item.line}</p>
+                    </div>
+                  </FadeIn>
+                ))}
+              </div>
+              <FadeIn delay={0.2}>
+                <p className="max-w-[65ch] text-lg leading-[1.7] text-foreground/90">
+                  These thirty-four are not just members. They are the founding members of inner.hub.
+                </p>
+              </FadeIn>
+            </div>
+
+            <FadeIn delay={0.15}>
+              <div className="relative aspect-[519/1002] overflow-hidden border border-border/15 bg-black">
+                <img
+                  src="/editorial/circle-portrait.jpg"
+                  alt="A founding member of the circle"
+                  className="size-full object-cover"
+                  loading="lazy"
+                />
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+              </div>
+            </FadeIn>
           </div>
-          <FadeIn delay={0.2}>
-            <p className="max-w-[65ch] text-lg leading-[1.7] text-foreground/90">
-              These thirty-four are not just members. They are the founding members of inner.hub.
-            </p>
-          </FadeIn>
         </section>
 
         {/* ── 03 · The platform ── */}

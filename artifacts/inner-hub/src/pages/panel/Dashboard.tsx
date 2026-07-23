@@ -6,6 +6,7 @@ import { EditorialCard } from "@/components/panel/EditorialCard";
 import { apiUrl } from "@/lib/api";
 
 const EDITORIAL_IMG = "/editorial/circle-dusk.png";
+const EDITORIAL_PORTRAIT = "/editorial/circle-portrait.jpg";
 
 const mockPerks = [
   { id: 1, brand: "Monolite", title: "Monolite İlk Ay Ücretsiz!", description: "Monolite ile sunumlarınızı, etkinliklerinizi ve eğitimlerinizi yönetin.", logoUrl: null },
@@ -27,7 +28,7 @@ const spotlightCards = [
     eyebrow: "Sep 2026 · İstanbul",
     description: "Otuz dört kişi. İki gün. Bir daire. İlk buluşma.",
     href: "/panel/events",
-    imageSrc: EDITORIAL_IMG,
+    imageSrc: EDITORIAL_PORTRAIT,
   },
   {
     title: "inner·vault",
