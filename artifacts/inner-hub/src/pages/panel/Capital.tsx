@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { FadeIn } from "@/components/FadeIn";
+import { AnimatedHeading } from "@/components/AnimatedHeading";
 import {
   TrendingUp,
   Users,
@@ -418,6 +419,76 @@ function SpvCard({ spv }: { spv: SPV }) {
   );
 }
 
+// ─── Hero ─────────────────────────────────────────────────────────────────────
+
+function scrollToId(id: string) {
+  document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function CapitalHero() {
+  return (
+    <div
+      className="relative -mx-4 -mt-6 overflow-hidden sm:-mx-6 lg:-mx-8 lg:-mt-8"
+      style={{ height: "min(70vh, 620px)", minHeight: 440 }}
+    >
+      <video
+        autoPlay
+        muted
+        loop
+        playsInline
+        className="absolute inset-0 h-full w-full object-cover"
+        src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260403_050628_c4e32401-fab4-4a27-b7a8-6e9291cd5959.mp4"
+      />
+
+      <div className="relative z-10 flex h-full flex-col justify-end px-6 pb-10 md:px-12 md:pb-14">
+        <div className="lg:grid lg:grid-cols-2 lg:items-end lg:gap-10">
+          <div>
+            <p className="mb-3 font-mono text-[10px] uppercase tracking-widest text-white/60 [text-shadow:0_1px_12px_rgba(0,0,0,0.6)]">
+              inner·capital
+            </p>
+            <AnimatedHeading
+              text={"Where conviction\nmeets capital."}
+              className="mb-4 font-display font-serif italic text-4xl leading-[1.1] text-white [text-shadow:0_2px_24px_rgba(0,0,0,0.55)] md:text-5xl lg:text-6xl"
+              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1" }}
+            />
+            <FadeIn delay={0.8}>
+              <p className="mb-6 max-w-[46ch] text-base text-white/75 [text-shadow:0_1px_12px_rgba(0,0,0,0.6)] md:text-lg">
+                Private deal flow, SPVs, and co-investment — curated inside the circle, invited by trust.
+              </p>
+            </FadeIn>
+            <FadeIn delay={1.2}>
+              <div className="flex flex-wrap gap-4">
+                <button
+                  onClick={() => scrollToId("deal-pipeline")}
+                  className="bg-white px-8 py-3 font-mono text-xs uppercase tracking-widest text-black transition-colors hover:bg-white/90"
+                >
+                  View Pipeline
+                </button>
+                <button
+                  onClick={() => scrollToId("open-spvs")}
+                  className="liquid-glass border border-white/20 px-8 py-3 font-mono text-xs uppercase tracking-widest text-white transition-colors hover:bg-white hover:text-black"
+                >
+                  View SPVs
+                </button>
+              </div>
+            </FadeIn>
+          </div>
+
+          <div className="mt-8 flex items-end justify-start lg:mt-0 lg:justify-end">
+            <FadeIn delay={1.4}>
+              <div className="liquid-glass border border-white/20 bg-black/40 px-6 py-3">
+                <span className="text-lg font-light text-white md:text-xl">
+                  Deal Flow. SPVs. Co-Investment.
+                </span>
+              </div>
+            </FadeIn>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function Capital() {
@@ -437,25 +508,12 @@ export default function Capital() {
 
   return (
     <div className="space-y-8 max-w-5xl">
-      {/* Header */}
+      {/* Hero */}
+      <CapitalHero />
+
+      {/* View toggle */}
       <FadeIn>
-        <div className="flex items-start justify-between">
-          <div>
-            <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40 mb-2">
-              inner·hub
-            </p>
-            <h1
-              className="font-serif font-display text-4xl md:text-5xl text-[var(--ink)]"
-              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 100 }}
-            >
-              inner·capital
-              <span className="inline-block size-[0.35em] translate-y-[0.08em] ml-[0.05em] bg-[var(--inner-green)]" />
-            </h1>
-            <p className="mt-2 text-sm text-[var(--ink)]/50 font-light">
-              Topluluk deal flow'u. Davet yoluyla görülür, güven bazlı yatırılır.
-            </p>
-          </div>
-          {/* View toggle */}
+        <div className="flex items-center justify-end">
           <div className="flex border border-[var(--ink)]/15">
             {(["pipeline", "liste"] as const).map((v) => (
               <button
@@ -503,6 +561,7 @@ export default function Capital() {
       </div>
 
       {/* Pipeline view */}
+      <div id="deal-pipeline" className="scroll-mt-6">
       {view === "pipeline" ? (
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {STAGES.map((stage) => {
@@ -566,9 +625,10 @@ export default function Capital() {
           })}
         </div>
       )}
+      </div>
 
       {/* SPV section */}
-      <section>
+      <section id="open-spvs" className="scroll-mt-6">
         <div className="mb-4 border-t border-[var(--ink)]/[0.08] pt-3">
           <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40">
             Açık SPV'ler
