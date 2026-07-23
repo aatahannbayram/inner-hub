@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/Home";
+import Invitation from "@/pages/Invitation";
 import Requests from "@/pages/Requests";
 import { PanelShell, type PanelUser } from "@/components/panel/PanelShell";
 import { apiUrl } from "@/lib/api";
@@ -131,8 +132,9 @@ function PanelApp() {
 function Router() {
   return (
     <Switch>
-      <Route path="/"         component={Home} />
-      <Route path="/requests" component={Requests} />
+      <Route path="/"           component={Home} />
+      <Route path="/invitation" component={Invitation} />
+      <Route path="/requests"   component={Requests} />
       <Route path="/panel"    component={PanelApp} />
       <Route path="/panel/:rest+" component={PanelApp} />
       <Route component={NotFound} />

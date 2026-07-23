@@ -1,10 +1,6 @@
-import React, { useEffect, useRef, useState } from "react";
-import { Linkedin, Instagram, ArrowRight, Zap, Users, TrendingUp, BookOpen, Radio, Fingerprint, Code2, Target } from "lucide-react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { motion, useInView, useScroll, useTransform, AnimatePresence } from "framer-motion";
-import { useSubmitRequest } from "@workspace/api-client-react";
+import { useEffect, useRef, useState } from "react";
+import { Linkedin, Instagram, Zap, Users, TrendingUp, BookOpen, Radio, Fingerprint, Code2, Target } from "lucide-react";
+import { motion, useInView, useScroll, useTransform } from "framer-motion";
 import { FadeIn } from "@/components/FadeIn";
 import { Lockup } from "@/components/Lockup";
 import { Grain } from "@/components/Grain";
@@ -14,24 +10,6 @@ import { Preloader } from "@/components/Preloader";
 import { FloatingNavbar } from "@/components/FloatingNavbar";
 import { PlatformFeatures, type PlatformFeature } from "@/components/PlatformFeatures";
 import { useLenis } from "@/hooks/useLenis";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-
-const formSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  email: z.string().email("Valid email is required"),
-  whoYouAre: z.string().min(1, "Please tell us who you are"),
-  link: z.string().url("Must be a valid URL").optional().or(z.literal("")),
-  whoIntroduced: z.string().optional(),
-  company: z.string().optional(),
-});
-
-type FormValues = z.infer<typeof formSchema>;
-
-const fieldClass =
-  "rounded-none border-0 border-b border-border bg-transparent px-0 py-4 focus-visible:ring-0 focus-visible:border-foreground focus-visible:border-b-2 transition-[border-width]";
 
 // ─── Animated counter ─────────────────────────────────────────────────────────
 function Counter({ to, suffix = "" }: { to: number; suffix?: string }) {
@@ -204,15 +182,9 @@ function StatItem({ n, label, suffix = "" }: { n: number; label: string; suffix?
 // ─── Main ─────────────────────────────────────────────────────────────────────
 export default function Home() {
   useLenis(true);
-  const { mutate: submitRequest, isSuccess, isError, isPending } = useSubmitRequest();
   const heroRef = useRef(null);
   const { scrollY } = useScroll();
   const heroY = useTransform(scrollY, [0, 600], [0, 120]);
-
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: { name: "", email: "", whoYouAre: "", link: "", whoIntroduced: "", company: "" },
-  });
 
   useEffect(() => {
     if (window.location.hash) {
@@ -220,19 +192,6 @@ export default function Home() {
       if (el) requestAnimationFrame(() => el.scrollIntoView({ block: "start" }));
     }
   }, []);
-
-  const onSubmit = (data: FormValues) => {
-    submitRequest({
-      data: {
-        name: data.name,
-        email: data.email,
-        whoYouAre: data.whoYouAre,
-        link: data.link || null,
-        whoIntroduced: data.whoIntroduced || null,
-        company: data.company || null,
-      },
-    });
-  };
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
@@ -312,7 +271,7 @@ export default function Home() {
               </p>
               <p className="text-sm font-medium text-white sm:hidden">No tickets. No tiers.</p>
               <a
-                href="#section-08"
+                href="/invitation"
                 className="whitespace-nowrap bg-white px-5 py-2.5 font-mono text-xs uppercase tracking-widest text-black transition-colors hover:bg-white/90"
               >
                 Request an invitation
@@ -492,143 +451,6 @@ export default function Home() {
           </FadeIn>
         </section>
 
-        {/* ── 08 · Request an invitation ── */}
-        <section id="section-08" className="px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15">
-          <SectionLabel label="08 · Request an invitation" meta="We read everything" />
-
-          <AnimatePresence mode="wait">
-            {isSuccess ? (
-              <motion.div
-                key="success"
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="max-w-2xl py-12"
-              >
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="size-2 rounded-full bg-[var(--inner-green)] animate-beacon" />
-                  <span className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Received</span>
-                </div>
-                <h2 className="font-display font-serif italic text-4xl md:text-5xl text-balance">
-                  If it fits, we will be in touch.
-                </h2>
-              </motion.div>
-            ) : (
-              <motion.div key="form">
-                <FadeIn>
-                  <div className="max-w-2xl">
-                    <h2 className="font-display font-serif italic text-4xl md:text-5xl mb-6 text-balance">
-                      Request an invitation.
-                    </h2>
-                    <p className="text-lg text-muted-foreground mb-16 leading-[1.7]">
-                      Most people arrive by invitation, but good people also find us on their own. Tell us who you are and what you are building.
-                    </p>
-
-                    <Form {...form}>
-                      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-10">
-                        <FormField
-                          control={form.control}
-                          name="name"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="font-mono text-xs tracking-widest uppercase">Name</FormLabel>
-                              <FormControl>
-                                <Input placeholder="Your full name" className={fieldClass} data-testid="input-name" {...field} />
-                              </FormControl>
-                              <FormMessage className="font-mono text-[10px] uppercase text-[var(--error)]" />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name="email"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="font-mono text-xs tracking-widest uppercase">Email</FormLabel>
-                              <FormControl>
-                                <Input type="email" placeholder="you@example.com" className={fieldClass} data-testid="input-email" {...field} />
-                              </FormControl>
-                              <FormMessage className="font-mono text-[10px] uppercase text-[var(--error)]" />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name="whoYouAre"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="font-mono text-xs tracking-widest uppercase">Who you are / What you're building</FormLabel>
-                              <FormControl>
-                                <Textarea placeholder="A brief note on your work and intent." className={`${fieldClass} min-h-[120px] resize-none`} data-testid="input-who-you-are" {...field} />
-                              </FormControl>
-                              <FormMessage className="font-mono text-[10px] uppercase text-[var(--error)]" />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name="link"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="font-mono text-xs tracking-widest uppercase text-muted-foreground">Link (Optional)</FormLabel>
-                              <FormControl>
-                                <Input placeholder="LinkedIn or website" className={`${fieldClass} text-muted-foreground`} data-testid="input-link" {...field} />
-                              </FormControl>
-                              <FormMessage className="font-mono text-[10px] uppercase text-[var(--error)]" />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name="whoIntroduced"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="font-mono text-xs tracking-widest uppercase text-muted-foreground">Who introduced you (Optional)</FormLabel>
-                              <FormControl>
-                                <Input placeholder="Name of your connection" className={`${fieldClass} text-muted-foreground`} data-testid="input-who-introduced" {...field} />
-                              </FormControl>
-                              <FormMessage className="font-mono text-[10px] uppercase text-[var(--error)]" />
-                            </FormItem>
-                          )}
-                        />
-                        <div className="sr-only" aria-hidden="true">
-                          <FormField
-                            control={form.control}
-                            name="company"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormControl>
-                                  <Input tabIndex={-1} autoComplete="off" {...field} />
-                                </FormControl>
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-                        {isError && (
-                          <div className="text-[var(--error)] font-mono text-xs uppercase tracking-widest" data-testid="text-error">
-                            Something went wrong. Please try again.
-                          </div>
-                        )}
-                        <div className="pt-8">
-                          <Button
-                            type="submit"
-                            disabled={isPending}
-                            className="group/btn relative overflow-hidden rounded-none bg-foreground text-background border border-foreground font-mono text-xs tracking-widest uppercase px-12 py-6 h-auto transition-colors duration-300"
-                            data-testid="button-submit"
-                          >
-                            <span aria-hidden="true" className="absolute left-0 top-0 h-full w-2 bg-background -translate-x-full transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/btn:translate-x-0" />
-                            <span className="relative inline-block transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/btn:translate-x-1">
-                              {isPending ? "Sending…" : "Send"}
-                            </span>
-                          </Button>
-                        </div>
-                      </form>
-                    </Form>
-                  </div>
-                </FadeIn>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </section>
       </main>
 
       {/* Footer */}

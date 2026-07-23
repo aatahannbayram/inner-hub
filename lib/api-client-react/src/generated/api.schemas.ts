@@ -9,10 +9,27 @@ export interface HealthStatus {
   status: string;
 }
 
+/**
+ * @nullable
+ */
+export type InvitationInputRole = typeof InvitationInputRole[keyof typeof InvitationInputRole] | null;
+
+
+export const InvitationInputRole = {
+  operator: 'operator',
+  investor: 'investor',
+  founder: 'founder',
+  company: 'company',
+} as const;
+
 export interface InvitationInput {
   /** @minLength 1 */
   name: string;
   email: string;
+  /** @nullable */
+  role?: InvitationInputRole;
+  /** @nullable */
+  linkedin?: string | null;
   /** @minLength 1 */
   whoYouAre: string;
   /** @nullable */
@@ -34,6 +51,10 @@ export interface InvitationRecord {
   id: number;
   name: string;
   email: string;
+  /** @nullable */
+  role?: string | null;
+  /** @nullable */
+  linkedin?: string | null;
   whoYouAre: string;
   /** @nullable */
   link?: string | null;

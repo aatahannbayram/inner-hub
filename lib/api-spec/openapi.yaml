@@ -106,6 +106,11 @@ components:
         email:
           type: string
           format: email
+        role:
+          type: ["string", "null"]
+          enum: ["operator", "investor", "founder", "company", null]
+        linkedin:
+          type: ["string", "null"]
         whoYouAre:
           type: string
           minLength: 1
@@ -138,6 +143,10 @@ components:
           type: string
         email:
           type: string
+        role:
+          type: ["string", "null"]
+        linkedin:
+          type: ["string", "null"]
         whoYouAre:
           type: string
         link:

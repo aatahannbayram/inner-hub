@@ -103,6 +103,8 @@ export default function Requests() {
                 <TableHead className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground h-12">Date</TableHead>
                 <TableHead className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground h-12">Name</TableHead>
                 <TableHead className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground h-12">Email</TableHead>
+                <TableHead className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground h-12">Role</TableHead>
+                <TableHead className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground h-12">LinkedIn</TableHead>
                 <TableHead className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground h-12 min-w-[300px]">Background</TableHead>
                 <TableHead className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground h-12">Link</TableHead>
                 <TableHead className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground h-12">Intro By</TableHead>
@@ -116,6 +118,14 @@ export default function Requests() {
                   </TableCell>
                   <TableCell className="font-medium align-top py-4">{req.name}</TableCell>
                   <TableCell className="align-top py-4 text-muted-foreground">{req.email}</TableCell>
+                  <TableCell className="align-top py-4 text-muted-foreground capitalize">{req.role || "-"}</TableCell>
+                  <TableCell className="align-top py-4">
+                    {req.linkedin ? (
+                      <a href={req.linkedin} target="_blank" rel="noreferrer" className="underline underline-offset-4 decoration-border hover:decoration-foreground transition-colors">
+                        LinkedIn
+                      </a>
+                    ) : "-"}
+                  </TableCell>
                   <TableCell className="align-top py-4 max-w-md whitespace-pre-wrap">{req.whoYouAre}</TableCell>
                   <TableCell className="align-top py-4">
                     {req.link ? (

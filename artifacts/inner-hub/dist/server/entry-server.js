@@ -1,21 +1,15 @@
 import { jsx, jsxs } from "react/jsx-runtime";
 import { renderToString } from "react-dom/server";
 import { Router } from "wouter";
-import { useMutation, QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import * as React from "react";
 import { useState, useEffect, useRef } from "react";
 import * as TooltipPrimitive from "@radix-ui/react-tooltip";
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { ArrowRight, Zap, Users, TrendingUp, BookOpen, Radio, Fingerprint, Code2, Target, Linkedin, Instagram } from "lucide-react";
-import { useFormContext, FormProvider, Controller, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { useReducedMotion, motion, useInView, useScroll, useTransform, AnimatePresence } from "framer-motion";
+import { useReducedMotion, motion, useInView, useScroll, useTransform } from "framer-motion";
 import Lenis from "lenis";
-import { Slot } from "@radix-ui/react-slot";
-import * as LabelPrimitive from "@radix-ui/react-label";
-import { cva } from "class-variance-authority";
 function cn(...inputs) {
   return twMerge(clsx(inputs));
 }
@@ -33,244 +27,6 @@ const TooltipContent = React.forwardRef(({ className, sideOffset = 4, ...props }
   }
 ) }));
 TooltipContent.displayName = TooltipPrimitive.Content.displayName;
-const NO_BODY_STATUS = /* @__PURE__ */ new Set([204, 205, 304]);
-const DEFAULT_JSON_ACCEPT = "application/json, application/problem+json";
-function isRequest(input) {
-  return typeof Request !== "undefined" && input instanceof Request;
-}
-function resolveMethod(input, explicitMethod) {
-  if (explicitMethod) return explicitMethod.toUpperCase();
-  if (isRequest(input)) return input.method.toUpperCase();
-  return "GET";
-}
-function isUrl(input) {
-  return typeof URL !== "undefined" && input instanceof URL;
-}
-function applyBaseUrl(input) {
-  return input;
-}
-function resolveUrl(input) {
-  if (typeof input === "string") return input;
-  if (isUrl(input)) return input.toString();
-  return input.url;
-}
-function mergeHeaders(...sources) {
-  const headers = new Headers();
-  for (const source of sources) {
-    if (!source) continue;
-    new Headers(source).forEach((value, key) => {
-      headers.set(key, value);
-    });
-  }
-  return headers;
-}
-function getMediaType(headers) {
-  const value = headers.get("content-type");
-  return value ? value.split(";", 1)[0].trim().toLowerCase() : null;
-}
-function isJsonMediaType(mediaType) {
-  return mediaType === "application/json" || Boolean(mediaType?.endsWith("+json"));
-}
-function isTextMediaType(mediaType) {
-  return Boolean(
-    mediaType && (mediaType.startsWith("text/") || mediaType === "application/xml" || mediaType === "text/xml" || mediaType.endsWith("+xml") || mediaType === "application/x-www-form-urlencoded")
-  );
-}
-function hasNoBody(response, method) {
-  if (method === "HEAD") return true;
-  if (NO_BODY_STATUS.has(response.status)) return true;
-  if (response.headers.get("content-length") === "0") return true;
-  if (response.body === null) return true;
-  return false;
-}
-function stripBom(text) {
-  return text.charCodeAt(0) === 65279 ? text.slice(1) : text;
-}
-function looksLikeJson(text) {
-  const trimmed = text.trimStart();
-  return trimmed.startsWith("{") || trimmed.startsWith("[");
-}
-function getStringField(value, key) {
-  if (!value || typeof value !== "object") return void 0;
-  const candidate = value[key];
-  if (typeof candidate !== "string") return void 0;
-  const trimmed = candidate.trim();
-  return trimmed === "" ? void 0 : trimmed;
-}
-function truncate(text, maxLength = 300) {
-  return text.length > maxLength ? `${text.slice(0, maxLength - 1)}…` : text;
-}
-function buildErrorMessage(response, data) {
-  const prefix = `HTTP ${response.status} ${response.statusText}`;
-  if (typeof data === "string") {
-    const text = data.trim();
-    return text ? `${prefix}: ${truncate(text)}` : prefix;
-  }
-  const title = getStringField(data, "title");
-  const detail = getStringField(data, "detail");
-  const message = getStringField(data, "message") ?? getStringField(data, "error_description") ?? getStringField(data, "error");
-  if (title && detail) return `${prefix}: ${title} — ${detail}`;
-  if (detail) return `${prefix}: ${detail}`;
-  if (message) return `${prefix}: ${message}`;
-  if (title) return `${prefix}: ${title}`;
-  return prefix;
-}
-class ApiError extends Error {
-  name = "ApiError";
-  status;
-  statusText;
-  data;
-  headers;
-  response;
-  method;
-  url;
-  constructor(response, data, requestInfo) {
-    super(buildErrorMessage(response, data));
-    Object.setPrototypeOf(this, new.target.prototype);
-    this.status = response.status;
-    this.statusText = response.statusText;
-    this.data = data;
-    this.headers = response.headers;
-    this.response = response;
-    this.method = requestInfo.method;
-    this.url = response.url || requestInfo.url;
-  }
-}
-class ResponseParseError extends Error {
-  name = "ResponseParseError";
-  status;
-  statusText;
-  headers;
-  response;
-  method;
-  url;
-  rawBody;
-  cause;
-  constructor(response, rawBody, cause, requestInfo) {
-    super(
-      `Failed to parse response from ${requestInfo.method} ${response.url || requestInfo.url} (${response.status} ${response.statusText}) as JSON`
-    );
-    Object.setPrototypeOf(this, new.target.prototype);
-    this.status = response.status;
-    this.statusText = response.statusText;
-    this.headers = response.headers;
-    this.response = response;
-    this.method = requestInfo.method;
-    this.url = response.url || requestInfo.url;
-    this.rawBody = rawBody;
-    this.cause = cause;
-  }
-}
-async function parseJsonBody(response, requestInfo) {
-  const raw = await response.text();
-  const normalized = stripBom(raw);
-  if (normalized.trim() === "") {
-    return null;
-  }
-  try {
-    return JSON.parse(normalized);
-  } catch (cause) {
-    throw new ResponseParseError(response, raw, cause, requestInfo);
-  }
-}
-async function parseErrorBody(response, method) {
-  if (hasNoBody(response, method)) {
-    return null;
-  }
-  const mediaType = getMediaType(response.headers);
-  if (mediaType && !isJsonMediaType(mediaType) && !isTextMediaType(mediaType)) {
-    return typeof response.blob === "function" ? response.blob() : response.text();
-  }
-  const raw = await response.text();
-  const normalized = stripBom(raw);
-  const trimmed = normalized.trim();
-  if (trimmed === "") {
-    return null;
-  }
-  if (isJsonMediaType(mediaType) || looksLikeJson(normalized)) {
-    try {
-      return JSON.parse(normalized);
-    } catch {
-      return raw;
-    }
-  }
-  return raw;
-}
-function inferResponseType(response) {
-  const mediaType = getMediaType(response.headers);
-  if (isJsonMediaType(mediaType)) return "json";
-  if (isTextMediaType(mediaType) || mediaType == null) return "text";
-  return "blob";
-}
-async function parseSuccessBody(response, responseType, requestInfo) {
-  if (hasNoBody(response, requestInfo.method)) {
-    return null;
-  }
-  const effectiveType = responseType === "auto" ? inferResponseType(response) : responseType;
-  switch (effectiveType) {
-    case "json":
-      return parseJsonBody(response, requestInfo);
-    case "text": {
-      const text = await response.text();
-      return text === "" ? null : text;
-    }
-    case "blob":
-      if (typeof response.blob !== "function") {
-        throw new TypeError(
-          'Blob responses are not supported in this runtime. Use responseType "json" or "text" instead.'
-        );
-      }
-      return response.blob();
-  }
-}
-async function customFetch(input, options = {}) {
-  input = applyBaseUrl(input);
-  const { responseType = "auto", headers: headersInit, ...init } = options;
-  const method = resolveMethod(input, init.method);
-  if (init.body != null && (method === "GET" || method === "HEAD")) {
-    throw new TypeError(`customFetch: ${method} requests cannot have a body.`);
-  }
-  const headers = mergeHeaders(isRequest(input) ? input.headers : void 0, headersInit);
-  if (typeof init.body === "string" && !headers.has("content-type") && looksLikeJson(init.body)) {
-    headers.set("content-type", "application/json");
-  }
-  if (responseType === "json" && !headers.has("accept")) {
-    headers.set("accept", DEFAULT_JSON_ACCEPT);
-  }
-  const requestInfo = { method, url: resolveUrl(input) };
-  const response = await fetch(input, { ...init, method, headers });
-  if (!response.ok) {
-    const errorData = await parseErrorBody(response, method);
-    throw new ApiError(response, errorData, requestInfo);
-  }
-  return await parseSuccessBody(response, responseType, requestInfo);
-}
-const getSubmitRequestUrl = () => {
-  return `/api/request`;
-};
-const submitRequest = async (invitationInput, options) => {
-  return customFetch(
-    getSubmitRequestUrl(),
-    {
-      ...options,
-      method: "POST",
-      headers: { "Content-Type": "application/json", ...options?.headers },
-      body: JSON.stringify(invitationInput)
-    }
-  );
-};
-const getSubmitRequestMutationOptions = (options) => {
-  const mutationKey = ["submitRequest"];
-  const { mutation: mutationOptions, request: requestOptions } = { mutation: { mutationKey }, request: void 0 };
-  const mutationFn = (props) => {
-    const { data } = props ?? {};
-    return submitRequest(data, requestOptions);
-  };
-  return { mutationFn, ...mutationOptions };
-};
-const useSubmitRequest = (options) => {
-  return useMutation(getSubmitRequestMutationOptions());
-};
 const ease = [0.16, 1, 0.3, 1];
 function FadeIn({
   children,
@@ -596,7 +352,7 @@ function PlatformFeatures({
         /* @__PURE__ */ jsxs(
           "a",
           {
-            href: "#section-08",
+            href: "/invitation",
             className: "inline-flex items-center gap-2 border border-[var(--bone)] px-5 py-2.5 font-mono text-xs uppercase tracking-widest text-[var(--bone)] transition-colors hover:bg-[var(--bone)] hover:text-[var(--ink)]",
             children: [
               "Request an invitation ",
@@ -662,202 +418,6 @@ function useLenis(enabled = true) {
     };
   }, [enabled]);
 }
-const labelVariants = cva(
-  "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-);
-const Label = React.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx(
-  LabelPrimitive.Root,
-  {
-    ref,
-    className: cn(labelVariants(), className),
-    ...props
-  }
-));
-Label.displayName = LabelPrimitive.Root.displayName;
-const Form = FormProvider;
-const FormFieldContext = React.createContext(null);
-const FormField = ({
-  ...props
-}) => {
-  return /* @__PURE__ */ jsx(FormFieldContext.Provider, { value: { name: props.name }, children: /* @__PURE__ */ jsx(Controller, { ...props }) });
-};
-const useFormField = () => {
-  const fieldContext = React.useContext(FormFieldContext);
-  const itemContext = React.useContext(FormItemContext);
-  const { getFieldState, formState } = useFormContext();
-  if (!fieldContext) {
-    throw new Error("useFormField should be used within <FormField>");
-  }
-  if (!itemContext) {
-    throw new Error("useFormField should be used within <FormItem>");
-  }
-  const fieldState = getFieldState(fieldContext.name, formState);
-  const { id } = itemContext;
-  return {
-    id,
-    name: fieldContext.name,
-    formItemId: `${id}-form-item`,
-    formDescriptionId: `${id}-form-item-description`,
-    formMessageId: `${id}-form-item-message`,
-    ...fieldState
-  };
-};
-const FormItemContext = React.createContext(null);
-const FormItem = React.forwardRef(({ className, ...props }, ref) => {
-  const id = React.useId();
-  return /* @__PURE__ */ jsx(FormItemContext.Provider, { value: { id }, children: /* @__PURE__ */ jsx("div", { ref, className: cn("space-y-2", className), ...props }) });
-});
-FormItem.displayName = "FormItem";
-const FormLabel = React.forwardRef(({ className, ...props }, ref) => {
-  const { error, formItemId } = useFormField();
-  return /* @__PURE__ */ jsx(
-    Label,
-    {
-      ref,
-      className: cn(error && "text-destructive", className),
-      htmlFor: formItemId,
-      ...props
-    }
-  );
-});
-FormLabel.displayName = "FormLabel";
-const FormControl = React.forwardRef(({ ...props }, ref) => {
-  const { error, formItemId, formDescriptionId, formMessageId } = useFormField();
-  return /* @__PURE__ */ jsx(
-    Slot,
-    {
-      ref,
-      id: formItemId,
-      "aria-describedby": !error ? `${formDescriptionId}` : `${formDescriptionId} ${formMessageId}`,
-      "aria-invalid": !!error,
-      ...props
-    }
-  );
-});
-FormControl.displayName = "FormControl";
-const FormDescription = React.forwardRef(({ className, ...props }, ref) => {
-  const { formDescriptionId } = useFormField();
-  return /* @__PURE__ */ jsx(
-    "p",
-    {
-      ref,
-      id: formDescriptionId,
-      className: cn("text-[0.8rem] text-muted-foreground", className),
-      ...props
-    }
-  );
-});
-FormDescription.displayName = "FormDescription";
-const FormMessage = React.forwardRef(({ className, children, ...props }, ref) => {
-  const { error, formMessageId } = useFormField();
-  const body = error ? String(error?.message ?? "") : children;
-  if (!body) {
-    return null;
-  }
-  return /* @__PURE__ */ jsx(
-    "p",
-    {
-      ref,
-      id: formMessageId,
-      className: cn("text-[0.8rem] font-medium text-destructive", className),
-      ...props,
-      children: body
-    }
-  );
-});
-FormMessage.displayName = "FormMessage";
-const Input = React.forwardRef(
-  ({ className, type, ...props }, ref) => {
-    return /* @__PURE__ */ jsx(
-      "input",
-      {
-        type,
-        className: cn(
-          "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
-          className
-        ),
-        ref,
-        ...props
-      }
-    );
-  }
-);
-Input.displayName = "Input";
-const Textarea = React.forwardRef(({ className, ...props }, ref) => {
-  return /* @__PURE__ */ jsx(
-    "textarea",
-    {
-      className: cn(
-        "flex min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
-        className
-      ),
-      ref,
-      ...props
-    }
-  );
-});
-Textarea.displayName = "Textarea";
-const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover-elevate active-elevate-2",
-  {
-    variants: {
-      variant: {
-        default: (
-          // @replit: no hover, and add primary border
-          "bg-primary text-primary-foreground border border-primary-border"
-        ),
-        destructive: "bg-destructive text-destructive-foreground shadow-sm border-destructive-border",
-        outline: (
-          // @replit Shows the background color of whatever card / sidebar / accent background it is inside of.
-          // Inherits the current text color. Uses shadow-xs. no shadow on active
-          // No hover state
-          " border [border-color:var(--button-outline)] shadow-xs active:shadow-none "
-        ),
-        secondary: (
-          // @replit border, no hover, no shadow, secondary border.
-          "border bg-secondary text-secondary-foreground border border-secondary-border "
-        ),
-        // @replit no hover, transparent border
-        ghost: "border border-transparent",
-        link: "text-primary underline-offset-4 hover:underline"
-      },
-      size: {
-        // @replit changed sizes
-        default: "min-h-9 px-4 py-2",
-        sm: "min-h-8 rounded-md px-3 text-xs",
-        lg: "min-h-10 rounded-md px-8",
-        icon: "h-9 w-9"
-      }
-    },
-    defaultVariants: {
-      variant: "default",
-      size: "default"
-    }
-  }
-);
-const Button = React.forwardRef(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
-    const Comp = asChild ? Slot : "button";
-    return /* @__PURE__ */ jsx(
-      Comp,
-      {
-        className: cn(buttonVariants({ variant, size, className })),
-        ref,
-        ...props
-      }
-    );
-  }
-);
-Button.displayName = "Button";
-const formSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  email: z.string().email("Valid email is required"),
-  whoYouAre: z.string().min(1, "Please tell us who you are"),
-  link: z.string().url("Must be a valid URL").optional().or(z.literal("")),
-  whoIntroduced: z.string().optional(),
-  company: z.string().optional()
-});
-const fieldClass = "rounded-none border-0 border-b border-border bg-transparent px-0 py-4 focus-visible:ring-0 focus-visible:border-foreground focus-visible:border-b-2 transition-[border-width]";
 function Counter({ to, suffix = "" }) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
@@ -1012,32 +572,15 @@ function StatItem({ n, label, suffix = "" }) {
 }
 function Home() {
   useLenis(true);
-  const { mutate: submitRequest2, isSuccess, isError, isPending } = useSubmitRequest();
   const heroRef = useRef(null);
   const { scrollY } = useScroll();
   const heroY = useTransform(scrollY, [0, 600], [0, 120]);
-  const form = useForm({
-    resolver: zodResolver(formSchema),
-    defaultValues: { name: "", email: "", whoYouAre: "", link: "", whoIntroduced: "", company: "" }
-  });
   useEffect(() => {
     if (window.location.hash) {
       const el = document.getElementById(window.location.hash.slice(1));
       if (el) requestAnimationFrame(() => el.scrollIntoView({ block: "start" }));
     }
   }, []);
-  const onSubmit = (data) => {
-    submitRequest2({
-      data: {
-        name: data.name,
-        email: data.email,
-        whoYouAre: data.whoYouAre,
-        link: data.link || null,
-        whoIntroduced: data.whoIntroduced || null,
-        company: data.company || null
-      }
-    });
-  };
   return /* @__PURE__ */ jsxs("div", { className: "min-h-screen bg-background text-foreground flex flex-col", children: [
     /* @__PURE__ */ jsx("a", { href: "#main-content", className: "sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[9999] focus:bg-foreground focus:text-background focus:px-4 focus:py-2 font-mono text-xs uppercase tracking-widest", children: "Skip to content" }),
     /* @__PURE__ */ jsx(ScrollProgress, {}),
@@ -1119,7 +662,7 @@ function Home() {
               /* @__PURE__ */ jsx(
                 "a",
                 {
-                  href: "#section-08",
+                  href: "/invitation",
                   className: "whitespace-nowrap bg-white px-5 py-2.5 font-mono text-xs uppercase tracking-widest text-black transition-colors hover:bg-white/90",
                   children: "Request an invitation"
                 }
@@ -1248,112 +791,6 @@ function Home() {
             }
           )
         ] })
-      ] }),
-      /* @__PURE__ */ jsxs("section", { id: "section-08", className: "px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15", children: [
-        /* @__PURE__ */ jsx(SectionLabel, { label: "08 · Request an invitation", meta: "We read everything" }),
-        /* @__PURE__ */ jsx(AnimatePresence, { mode: "wait", children: isSuccess ? /* @__PURE__ */ jsxs(
-          motion.div,
-          {
-            initial: { opacity: 0, y: 16 },
-            animate: { opacity: 1, y: 0 },
-            className: "max-w-2xl py-12",
-            children: [
-              /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3 mb-6", children: [
-                /* @__PURE__ */ jsx("div", { className: "size-2 rounded-full bg-[var(--inner-green)] animate-beacon" }),
-                /* @__PURE__ */ jsx("span", { className: "font-mono text-xs uppercase tracking-widest text-muted-foreground", children: "Received" })
-              ] }),
-              /* @__PURE__ */ jsx("h2", { className: "font-display font-serif italic text-4xl md:text-5xl text-balance", children: "If it fits, we will be in touch." })
-            ]
-          },
-          "success"
-        ) : /* @__PURE__ */ jsx(motion.div, { children: /* @__PURE__ */ jsx(FadeIn, { children: /* @__PURE__ */ jsxs("div", { className: "max-w-2xl", children: [
-          /* @__PURE__ */ jsx("h2", { className: "font-display font-serif italic text-4xl md:text-5xl mb-6 text-balance", children: "Request an invitation." }),
-          /* @__PURE__ */ jsx("p", { className: "text-lg text-muted-foreground mb-16 leading-[1.7]", children: "Most people arrive by invitation, but good people also find us on their own. Tell us who you are and what you are building." }),
-          /* @__PURE__ */ jsx(Form, { ...form, children: /* @__PURE__ */ jsxs("form", { onSubmit: form.handleSubmit(onSubmit), className: "space-y-10", children: [
-            /* @__PURE__ */ jsx(
-              FormField,
-              {
-                control: form.control,
-                name: "name",
-                render: ({ field }) => /* @__PURE__ */ jsxs(FormItem, { children: [
-                  /* @__PURE__ */ jsx(FormLabel, { className: "font-mono text-xs tracking-widest uppercase", children: "Name" }),
-                  /* @__PURE__ */ jsx(FormControl, { children: /* @__PURE__ */ jsx(Input, { placeholder: "Your full name", className: fieldClass, "data-testid": "input-name", ...field }) }),
-                  /* @__PURE__ */ jsx(FormMessage, { className: "font-mono text-[10px] uppercase text-[var(--error)]" })
-                ] })
-              }
-            ),
-            /* @__PURE__ */ jsx(
-              FormField,
-              {
-                control: form.control,
-                name: "email",
-                render: ({ field }) => /* @__PURE__ */ jsxs(FormItem, { children: [
-                  /* @__PURE__ */ jsx(FormLabel, { className: "font-mono text-xs tracking-widest uppercase", children: "Email" }),
-                  /* @__PURE__ */ jsx(FormControl, { children: /* @__PURE__ */ jsx(Input, { type: "email", placeholder: "you@example.com", className: fieldClass, "data-testid": "input-email", ...field }) }),
-                  /* @__PURE__ */ jsx(FormMessage, { className: "font-mono text-[10px] uppercase text-[var(--error)]" })
-                ] })
-              }
-            ),
-            /* @__PURE__ */ jsx(
-              FormField,
-              {
-                control: form.control,
-                name: "whoYouAre",
-                render: ({ field }) => /* @__PURE__ */ jsxs(FormItem, { children: [
-                  /* @__PURE__ */ jsx(FormLabel, { className: "font-mono text-xs tracking-widest uppercase", children: "Who you are / What you're building" }),
-                  /* @__PURE__ */ jsx(FormControl, { children: /* @__PURE__ */ jsx(Textarea, { placeholder: "A brief note on your work and intent.", className: `${fieldClass} min-h-[120px] resize-none`, "data-testid": "input-who-you-are", ...field }) }),
-                  /* @__PURE__ */ jsx(FormMessage, { className: "font-mono text-[10px] uppercase text-[var(--error)]" })
-                ] })
-              }
-            ),
-            /* @__PURE__ */ jsx(
-              FormField,
-              {
-                control: form.control,
-                name: "link",
-                render: ({ field }) => /* @__PURE__ */ jsxs(FormItem, { children: [
-                  /* @__PURE__ */ jsx(FormLabel, { className: "font-mono text-xs tracking-widest uppercase text-muted-foreground", children: "Link (Optional)" }),
-                  /* @__PURE__ */ jsx(FormControl, { children: /* @__PURE__ */ jsx(Input, { placeholder: "LinkedIn or website", className: `${fieldClass} text-muted-foreground`, "data-testid": "input-link", ...field }) }),
-                  /* @__PURE__ */ jsx(FormMessage, { className: "font-mono text-[10px] uppercase text-[var(--error)]" })
-                ] })
-              }
-            ),
-            /* @__PURE__ */ jsx(
-              FormField,
-              {
-                control: form.control,
-                name: "whoIntroduced",
-                render: ({ field }) => /* @__PURE__ */ jsxs(FormItem, { children: [
-                  /* @__PURE__ */ jsx(FormLabel, { className: "font-mono text-xs tracking-widest uppercase text-muted-foreground", children: "Who introduced you (Optional)" }),
-                  /* @__PURE__ */ jsx(FormControl, { children: /* @__PURE__ */ jsx(Input, { placeholder: "Name of your connection", className: `${fieldClass} text-muted-foreground`, "data-testid": "input-who-introduced", ...field }) }),
-                  /* @__PURE__ */ jsx(FormMessage, { className: "font-mono text-[10px] uppercase text-[var(--error)]" })
-                ] })
-              }
-            ),
-            /* @__PURE__ */ jsx("div", { className: "sr-only", "aria-hidden": "true", children: /* @__PURE__ */ jsx(
-              FormField,
-              {
-                control: form.control,
-                name: "company",
-                render: ({ field }) => /* @__PURE__ */ jsx(FormItem, { children: /* @__PURE__ */ jsx(FormControl, { children: /* @__PURE__ */ jsx(Input, { tabIndex: -1, autoComplete: "off", ...field }) }) })
-              }
-            ) }),
-            isError && /* @__PURE__ */ jsx("div", { className: "text-[var(--error)] font-mono text-xs uppercase tracking-widest", "data-testid": "text-error", children: "Something went wrong. Please try again." }),
-            /* @__PURE__ */ jsx("div", { className: "pt-8", children: /* @__PURE__ */ jsxs(
-              Button,
-              {
-                type: "submit",
-                disabled: isPending,
-                className: "group/btn relative overflow-hidden rounded-none bg-foreground text-background border border-foreground font-mono text-xs tracking-widest uppercase px-12 py-6 h-auto transition-colors duration-300",
-                "data-testid": "button-submit",
-                children: [
-                  /* @__PURE__ */ jsx("span", { "aria-hidden": "true", className: "absolute left-0 top-0 h-full w-2 bg-background -translate-x-full transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/btn:translate-x-0" }),
-                  /* @__PURE__ */ jsx("span", { className: "relative inline-block transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/btn:translate-x-1", children: isPending ? "Sending…" : "Send" })
-                ]
-              }
-            ) })
-          ] }) })
-        ] }) }) }, "form") })
       ] })
     ] }),
     /* @__PURE__ */ jsxs("footer", { id: "site-footer", className: "bg-[var(--ink)] px-6 md:px-12 lg:px-[10%] pt-20 pb-6 flex flex-col gap-16 overflow-hidden", children: [

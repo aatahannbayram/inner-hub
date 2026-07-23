@@ -10,6 +10,10 @@ export interface InvitationRecord {
   id: number;
   name: string;
   email: string;
+  /** @nullable */
+  role?: string | null;
+  /** @nullable */
+  linkedin?: string | null;
   whoYouAre: string;
   /** @nullable */
   link?: string | null;

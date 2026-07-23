@@ -25,9 +25,18 @@ function getTransporter(): Transporter | null {
 type NewInvitationRequest = {
   name: string;
   email: string;
+  role?: string | null;
+  linkedin?: string | null;
   whoYouAre: string;
   link?: string | null;
   whoIntroduced?: string | null;
+};
+
+const ROLE_LABELS: Record<string, string> = {
+  operator: "Operator",
+  investor: "Yatırımcı",
+  founder: "Girişimci",
+  company: "Şirket",
 };
 
 export async function notifyNewInvitationRequest(req: NewInvitationRequest) {
@@ -41,6 +50,8 @@ export async function notifyNewInvitationRequest(req: NewInvitationRequest) {
   const lines = [
     `İsim: ${req.name}`,
     `Email: ${req.email}`,
+    req.role ? `Kimlik: ${ROLE_LABELS[req.role] ?? req.role}` : null,
+    req.linkedin ? `LinkedIn: ${req.linkedin}` : null,
     `Kim: ${req.whoYouAre}`,
     req.link ? `Link: ${req.link}` : null,
     req.whoIntroduced ? `Kim tanıttı: ${req.whoIntroduced}` : null,

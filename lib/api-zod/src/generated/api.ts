@@ -27,6 +27,8 @@ export const HealthCheckResponse = zod.object({
 export const SubmitRequestBody = zod.object({
   "name": zod.string().min(1),
   "email": zod.string().email(),
+  "role": zod.union([zod.literal('operator'),zod.literal('investor'),zod.literal('founder'),zod.literal('company'),zod.literal(null)]).nullish(),
+  "linkedin": zod.string().nullish(),
   "whoYouAre": zod.string().min(1),
   "link": zod.string().nullish(),
   "whoIntroduced": zod.string().nullish(),
@@ -49,6 +51,8 @@ export const ListRequestsResponseItem = zod.object({
   "id": zod.number(),
   "name": zod.string(),
   "email": zod.string(),
+  "role": zod.string().nullish(),
+  "linkedin": zod.string().nullish(),
   "whoYouAre": zod.string(),
   "link": zod.string().nullish(),
   "whoIntroduced": zod.string().nullish(),

@@ -9,6 +9,7 @@
 export * from './errorResponse';
 export * from './healthStatus';
 export * from './invitationInput';
+export * from './invitationInputRole';
 export * from './invitationRecord';
 export * from './invitationResponse';
 export * from './listRequestsParams';

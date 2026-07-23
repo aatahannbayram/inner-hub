@@ -111,7 +111,7 @@ export function PlatformFeatures({
           <div className="mt-12 hidden lg:block">
             <p className="mb-4 text-sm text-[var(--bone)]/60">Access is by invitation. Always.</p>
             <a
-              href="#section-08"
+              href="/invitation"
               className="inline-flex items-center gap-2 border border-[var(--bone)] px-5 py-2.5 font-mono text-xs uppercase tracking-widest text-[var(--bone)] transition-colors hover:bg-[var(--bone)] hover:text-[var(--ink)]"
             >
               Request an invitation <ArrowRight className="size-3" />

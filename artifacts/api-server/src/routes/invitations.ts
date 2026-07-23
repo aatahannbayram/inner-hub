@@ -39,7 +39,7 @@ router.post("/request", async (req, res) => {
     return;
   }
 
-  const { name, email, whoYouAre, link, whoIntroduced, company } = parsed.data;
+  const { name, email, role, linkedin, whoYouAre, link, whoIntroduced, company } = parsed.data;
 
   // Honeypot check
   if (company && company.trim().length > 0) {
@@ -56,6 +56,8 @@ router.post("/request", async (req, res) => {
 
   const trimmedName = name.trim();
   const trimmedEmail = email.trim().toLowerCase();
+  const trimmedRole = role ?? null;
+  const trimmedLinkedin = linkedin?.trim() || null;
   const trimmedWhoYouAre = whoYouAre.trim();
   const trimmedLink = link?.trim() || null;
   const trimmedWhoIntroduced = whoIntroduced?.trim() || null;
@@ -63,6 +65,8 @@ router.post("/request", async (req, res) => {
   await db.insert(invitationRequestsTable).values({
     name: trimmedName,
     email: trimmedEmail,
+    role: trimmedRole,
+    linkedin: trimmedLinkedin,
     whoYouAre: trimmedWhoYouAre,
     link: trimmedLink,
     whoIntroduced: trimmedWhoIntroduced,
@@ -72,6 +76,8 @@ router.post("/request", async (req, res) => {
   void notifyNewInvitationRequest({
     name: trimmedName,
     email: trimmedEmail,
+    role: trimmedRole,
+    linkedin: trimmedLinkedin,
     whoYouAre: trimmedWhoYouAre,
     link: trimmedLink,
     whoIntroduced: trimmedWhoIntroduced,

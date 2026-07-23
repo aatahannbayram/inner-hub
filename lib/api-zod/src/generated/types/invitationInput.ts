@@ -5,11 +5,16 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { InvitationInputRole } from './invitationInputRole';
 
 export interface InvitationInput {
   /** @minLength 1 */
   name: string;
   email: string;
+  /** @nullable */
+  role?: InvitationInputRole;
+  /** @nullable */
+  linkedin?: string | null;
   /** @minLength 1 */
   whoYouAre: string;
   /** @nullable */

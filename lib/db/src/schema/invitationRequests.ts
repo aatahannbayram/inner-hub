@@ -6,6 +6,8 @@ export const invitationRequestsTable = pgTable("invitation_requests", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   email: text("email").notNull(),
+  role: text("role"),
+  linkedin: text("linkedin"),
   whoYouAre: text("who_you_are").notNull(),
   link: text("link"),
   whoIntroduced: text("who_introduced"),
