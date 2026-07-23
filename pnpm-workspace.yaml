@@ -30,8 +30,5 @@ catalog:
 
 autoInstallPeers: false
 
-onlyBuiltDependencies:
-  - '*'
-
 allowBuilds:
-  esbuild: true
+  esbuild: false
