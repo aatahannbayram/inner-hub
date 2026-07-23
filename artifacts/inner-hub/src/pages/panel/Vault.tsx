@@ -15,6 +15,21 @@ import {
   Tag,
   Clock,
 } from "lucide-react";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerDescription,
+} from "@/components/ui/drawer";
+import { motion } from "framer-motion";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -222,74 +237,75 @@ function DocCard({ doc }: { doc: VaultDoc }) {
   );
 }
 
-// ─── Upload modal ──────────────────────────────────────────────────────────────
+// ─── Upload drawer (vaul) ─────────────────────────────────────────────────────
 
-function UploadPrompt({ onClose }: { onClose: () => void }) {
+function UploadPrompt({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [access, setAccess] = useState<AccessLevel>("topluluk");
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--ink)]/30" onClick={onClose}>
-      <div
-        className="w-full max-w-md border border-[var(--ink)]/15 bg-[var(--bone)] p-7 shadow-2xl"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <p className="mb-1 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/30">inner·vault</p>
-        <h3
-          className="mb-5 font-serif text-2xl text-[var(--ink)]"
-          style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 100 }}
-        >
-          Belge Paylaş
-        </h3>
+    <Drawer open={open} onOpenChange={(v) => !v && onClose()} shouldScaleBackground={false}>
+      <DrawerContent className="rounded-none border-[var(--ink)]/15 bg-[var(--bone)]">
+        <DrawerHeader className="px-6 pt-2 text-left">
+          <p className="mb-1 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/30">inner·vault</p>
+          <DrawerTitle
+            className="font-serif text-2xl font-normal text-[var(--ink)]"
+            style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 100 }}
+          >
+            Belge Paylaş
+          </DrawerTitle>
+          <DrawerDescription className="text-[var(--ink)]/45">
+            PDF, PPTX veya Markdown — maks 50MB
+          </DrawerDescription>
+        </DrawerHeader>
 
-        {/* Drop zone */}
-        <div className="mb-4 flex flex-col items-center justify-center border border-dashed border-[var(--ink)]/20 py-8 text-center">
-          <Upload className="mb-2 size-5 text-[var(--ink)]/25" />
-          <p className="text-sm text-[var(--ink)]/40">PDF, PPTX veya Markdown bırak</p>
-          <p className="mt-0.5 font-mono text-[9px] text-[var(--ink)]/20">Maks 50MB</p>
-        </div>
+        <div className="px-6 pb-8">
+          <div className="mb-4 flex flex-col items-center justify-center border border-dashed border-[var(--ink)]/20 py-8 text-center">
+            <Upload className="mb-2 size-5 text-[var(--ink)]/25" />
+            <p className="text-sm text-[var(--ink)]/40">Dosyayı buraya bırak</p>
+          </div>
 
-        {/* Access level */}
-        <div className="mb-4">
-          <p className="mb-2 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/30">Erişim Seviyesi</p>
+          <div className="mb-4">
+            <p className="mb-2 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/30">Erişim Seviyesi</p>
+            <div className="flex gap-2">
+              {(["özel", "topluluk", "davetli"] as AccessLevel[]).map((a) => {
+                const cfg = ACCESS_CONFIG[a];
+                const Icon = cfg.icon;
+                return (
+                  <button
+                    key={a}
+                    onClick={() => setAccess(a)}
+                    className={[
+                      "flex flex-1 flex-col items-center gap-1 border py-2.5 transition-all",
+                      access === a
+                        ? "border-[var(--ink)] bg-[var(--ink)]/[0.04]"
+                        : "border-[var(--ink)]/10 hover:border-[var(--ink)]/25",
+                    ].join(" ")}
+                  >
+                    <Icon className={`size-3.5 ${cfg.color}`} />
+                    <span className="font-mono text-[8px] uppercase tracking-widest text-[var(--ink)]/40">{cfg.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           <div className="flex gap-2">
-            {(["özel", "topluluk", "davetli"] as AccessLevel[]).map((a) => {
-              const cfg = ACCESS_CONFIG[a];
-              const Icon = cfg.icon;
-              return (
-                <button
-                  key={a}
-                  onClick={() => setAccess(a)}
-                  className={[
-                    "flex flex-1 flex-col items-center gap-1 border py-2.5 transition-all",
-                    access === a
-                      ? "border-[var(--ink)] bg-[var(--ink)]/[0.04]"
-                      : "border-[var(--ink)]/10 hover:border-[var(--ink)]/25",
-                  ].join(" ")}
-                >
-                  <Icon className={`size-3.5 ${cfg.color}`} />
-                  <span className="font-mono text-[8px] uppercase tracking-widest text-[var(--ink)]/40">{cfg.label}</span>
-                </button>
-              );
-            })}
+            <button
+              onClick={onClose}
+              className="flex-1 border border-[var(--ink)]/15 py-2.5 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/40 transition-all hover:border-[var(--ink)]/30 hover:text-[var(--ink)]"
+            >
+              İptal
+            </button>
+            <button
+              onClick={onClose}
+              className="flex flex-1 items-center justify-between border border-[var(--ink)] bg-[var(--ink)] px-4 py-2.5 font-mono text-[9px] uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-80"
+            >
+              <span>Yükle</span>
+              <ChevronRight className="size-3" />
+            </button>
           </div>
         </div>
-
-        <div className="flex gap-2">
-          <button
-            onClick={onClose}
-            className="flex-1 border border-[var(--ink)]/15 py-2.5 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/40 transition-all hover:border-[var(--ink)]/30 hover:text-[var(--ink)]"
-          >
-            İptal
-          </button>
-          <button
-            onClick={onClose}
-            className="flex flex-1 items-center justify-between border border-[var(--ink)] bg-[var(--ink)] px-4 py-2.5 font-mono text-[9px] uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-80"
-          >
-            <span>Yükle</span>
-            <ChevronRight className="size-3" />
-          </button>
-        </div>
-      </div>
-    </div>
+      </DrawerContent>
+    </Drawer>
   );
 }
 
@@ -363,6 +379,62 @@ export default function Vault() {
         ))}
       </div>
 
+      {/* Featured strip — Embla */}
+      <FadeIn delay={0.06}>
+        <div className="space-y-3">
+          <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40">
+            Öne çıkan
+          </p>
+          <Carousel opts={{ align: "start", loop: false }} className="w-full">
+            <CarouselContent className="-ml-3">
+              {DOCS.slice(0, 5).map((doc, i) => {
+                const Icon = TYPE_ICONS[doc.type];
+                return (
+                  <CarouselItem key={doc.id} className="basis-[78%] pl-3 sm:basis-[45%] md:basis-[38%]">
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: i * 0.05, duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+                      className="group relative h-40 overflow-hidden border border-[var(--ink)]/[0.08] bg-[var(--ink)]"
+                    >
+                      <div
+                        className="absolute inset-0 opacity-90 transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.03]"
+                        style={{
+                          background:
+                            i % 2 === 0
+                              ? "radial-gradient(circle at 20% 20%, rgba(24,255,133,0.18), transparent 45%), linear-gradient(135deg, #0A0A0A, #1a1a1a)"
+                              : "radial-gradient(circle at 80% 30%, rgba(244,241,236,0.12), transparent 40%), linear-gradient(160deg, #111, #0A0A0A)",
+                        }}
+                      />
+                      <div className="relative flex h-full flex-col justify-between p-4">
+                        <div className="flex items-center gap-2">
+                          <Icon className="size-3.5 text-[var(--bone)]/50" />
+                          <span className="font-mono text-[8px] uppercase tracking-widest text-[var(--bone)]/40">
+                            {doc.type}
+                          </span>
+                        </div>
+                        <div>
+                          <p className="line-clamp-2 font-serif text-lg leading-snug text-[var(--bone)]"
+                            style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 100 }}
+                          >
+                            {doc.title}
+                          </p>
+                          <p className="mt-1 font-mono text-[8px] uppercase tracking-widest text-[var(--bone)]/35">
+                            {doc.author}
+                          </p>
+                        </div>
+                      </div>
+                    </motion.div>
+                  </CarouselItem>
+                );
+              })}
+            </CarouselContent>
+            <CarouselPrevious className="left-0 hidden border-[var(--ink)]/15 bg-[var(--bone)] sm:flex" />
+            <CarouselNext className="right-0 hidden border-[var(--ink)]/15 bg-[var(--bone)] sm:flex" />
+          </Carousel>
+        </div>
+      </FadeIn>
+
       {/* Search + filter row */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="relative flex-1">
@@ -422,7 +494,7 @@ export default function Vault() {
         </p>
       </div>
 
-      {showUpload && <UploadPrompt onClose={() => setShowUpload(false)} />}
+      <UploadPrompt open={showUpload} onClose={() => setShowUpload(false)} />
     </div>
   );
 }

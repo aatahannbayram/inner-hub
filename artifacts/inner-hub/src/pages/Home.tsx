@@ -13,6 +13,7 @@ import { Grain } from "@/components/Grain";
 import { IndexRail } from "@/components/IndexRail";
 import { DiagramCircle } from "@/components/DiagramCircle";
 import { Preloader } from "@/components/Preloader";
+import { useLenis } from "@/hooks/useLenis";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -211,6 +212,7 @@ function StatItem({ n, label, suffix = "" }: { n: number; label: string; suffix?
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 export default function Home() {
+  useLenis(true);
   const { mutate: submitRequest, isSuccess, isError, isPending } = useSubmitRequest();
   const heroRef = useRef(null);
   const { scrollY } = useScroll();
@@ -255,7 +257,15 @@ export default function Home() {
       {/* Header */}
       <header className="sticky top-0 z-50 h-[60px] md:h-[72px] px-6 md:px-12 lg:px-[10%] flex items-center justify-between bg-background/90 backdrop-blur-sm border-b border-border/20">
         <SignatureMark />
-        <LiveClock />
+        <div className="flex items-center gap-6">
+          <LiveClock />
+          <a
+            href="/panel"
+            className="font-mono text-xs uppercase tracking-widest text-foreground/80 hover:text-foreground transition-colors"
+          >
+            Giriş Yap
+          </a>
+        </div>
       </header>
 
       <main id="main-content" className="flex-grow">

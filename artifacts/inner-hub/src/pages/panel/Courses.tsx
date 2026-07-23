@@ -1,6 +1,7 @@
-import { useState } from "react";
-import { ChevronDown, ChevronRight, BookOpen, CheckCircle2, Circle, Lock, Play } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ChevronDown, ChevronRight, BookOpen, CheckCircle2, Lock, Play } from "lucide-react";
 import { FadeIn } from "@/components/FadeIn";
+import { apiUrl } from "@/lib/api";
 
 interface Lesson {
   id: number;
@@ -31,105 +32,29 @@ interface Course {
   modules: Module[];
 }
 
-const COURSES: Course[] = [
-  {
-    id: 1,
-    title: "HR Teknolojileri 101",
-    description: "İnsan kaynakları süreçlerini dijitalleştirin. HRIS, ATS, performans yönetimi ve çalışan deneyimi platformlarını kavrayın.",
-    instructor: "Ayşe Kaya",
-    instructorTitle: "HR Tech Lead, Getir",
-    progressPct: 40,
-    totalLessons: 12,
-    completedLessons: 5,
-    totalDuration: "4s 30d",
-    isEnrolled: true,
-    tag: "Teknoloji",
-    modules: [
-      {
-        id: 1,
-        title: "HR'ın Dijital Dönüşümü",
-        lessons: [
-          { id: 1, title: "Dijital HR nedir?", duration: "12d", isCompleted: true, isLocked: false },
-          { id: 2, title: "HRIS seçim kriterleri", duration: "18d", isCompleted: true, isLocked: false },
-          { id: 3, title: "Vaka çalışması: Getir", duration: "22d", isCompleted: false, isLocked: false },
-        ],
-      },
-      {
-        id: 2,
-        title: "İşe Alım Teknolojileri",
-        lessons: [
-          { id: 4, title: "ATS platformları karşılaştırması", duration: "15d", isCompleted: true, isLocked: false },
-          { id: 5, title: "AI ile CV tarama", duration: "20d", isCompleted: true, isLocked: false },
-          { id: 6, title: "Aday deneyimi tasarımı", duration: "25d", isCompleted: false, isLocked: false },
-        ],
-      },
-      {
-        id: 3,
-        title: "Performans Yönetimi",
-        lessons: [
-          { id: 7, title: "OKR vs KPI", duration: "14d", isCompleted: false, isLocked: false },
-          { id: 8, title: "Sürekli geri bildirim sistemleri", duration: "18d", isCompleted: false, isLocked: true },
-          { id: 9, title: "360° değerlendirme araçları", duration: "21d", isCompleted: false, isLocked: true },
-        ],
-      },
-    ],
-  },
-  {
-    id: 2,
-    title: "Yapay Zeka ile İK Yönetimi",
-    description: "GPT, ML ve otomasyon araçlarıyla İK süreçlerinizi geleceğe hazırlayın. Araç seçimi, etik kullanım ve ROI hesaplaması.",
-    instructor: "Mert Demir",
-    instructorTitle: "AI Product Manager, Insider",
-    progressPct: 0,
-    totalLessons: 10,
+function mapApiCourse(row: {
+  id: number;
+  title: string;
+  description?: string;
+  term?: number;
+  progressPct?: number;
+  isEnrolled?: boolean;
+}): Course {
+  return {
+    id: row.id,
+    title: row.title,
+    description: row.description ?? "",
+    instructor: "inner·hub",
+    instructorTitle: row.term ? `Dönem ${row.term}` : "Eğitim",
+    progressPct: row.progressPct ?? 0,
+    totalLessons: 0,
     completedLessons: 0,
-    totalDuration: "3s 45d",
-    isEnrolled: true,
-    tag: "Yapay Zeka",
-    modules: [
-      {
-        id: 4,
-        title: "Yapay Zeka Temelleri",
-        lessons: [
-          { id: 10, title: "LLM'leri anlamak", duration: "20d", isCompleted: false, isLocked: false },
-          { id: 11, title: "Prompt engineering giriş", duration: "25d", isCompleted: false, isLocked: false },
-          { id: 12, title: "AI araçları haritası", duration: "15d", isCompleted: false, isLocked: false },
-        ],
-      },
-      {
-        id: 5,
-        title: "İK'da AI Uygulamaları",
-        lessons: [
-          { id: 13, title: "CV analizi otomasyonu", duration: "22d", isCompleted: false, isLocked: true },
-          { id: 14, title: "Chatbot ile onboarding", duration: "18d", isCompleted: false, isLocked: true },
-        ],
-      },
-    ],
-  },
-  {
-    id: 3,
-    title: "Founder'dan Lidere",
-    description: "Startup'ı büyütürken kendinizi büyütün. Yetki devri, kültür inşası, ilk 50 çalışan ve liderlik stilleri.",
-    instructor: "Zeynep Arslan",
-    instructorTitle: "Co-founder, Hipo",
-    progressPct: 0,
-    totalLessons: 8,
-    completedLessons: 0,
-    totalDuration: "2s 50d",
-    isEnrolled: false,
-    tag: "Liderlik",
-    modules: [
-      {
-        id: 6,
-        title: "Liderlik Temelleri",
-        lessons: [
-          { id: 15, title: "Founder trap: ne zaman bırakırsın?", duration: "18d", isCompleted: false, isLocked: true },
-          { id: 16, title: "İlk 10 çalışan", duration: "22d", isCompleted: false, isLocked: true },
-        ],
-      },
-    ],
-  },
-];
+    totalDuration: "—",
+    isEnrolled: row.isEnrolled ?? false,
+    tag: "Kurs",
+    modules: [],
+  };
+}
 
 function LessonRow({ lesson }: { lesson: Lesson }) {
   return (
@@ -284,9 +209,15 @@ function CourseCard({ course }: { course: Course }) {
       {/* Curriculum accordion */}
       {expanded && (
         <div className="border-t border-[var(--ink)]/[0.08]">
-          {course.modules.map((mod, i) => (
-            <ModuleAccordion key={mod.id} module={mod} defaultOpen={i === 0} />
-          ))}
+          {course.modules.length === 0 ? (
+            <p className="px-4 py-3 font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/30">
+              Müfredat yakında yayınlanacak.
+            </p>
+          ) : (
+            course.modules.map((mod, i) => (
+              <ModuleAccordion key={mod.id} module={mod} defaultOpen={i === 0} />
+            ))
+          )}
         </div>
       )}
     </div>
@@ -295,12 +226,39 @@ function CourseCard({ course }: { course: Course }) {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function CoursesPage() {
-  const enrolled = COURSES.filter((c) => c.isEnrolled);
-  const available = COURSES.filter((c) => !c.isEnrolled);
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      setError("");
+      try {
+        const res = await fetch(apiUrl("/api/courses"), { credentials: "include" });
+        const json = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(json.error ?? "Kurslar yüklenemedi");
+        if (!cancelled) setCourses((json.courses ?? []).map(mapApiCourse));
+      } catch (e: unknown) {
+        if (!cancelled) {
+          setError(e instanceof Error ? e.message : "Kurslar yüklenemedi");
+          setCourses([]);
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const enrolled = courses.filter((c) => c.isEnrolled);
+  const available = courses.filter((c) => !c.isEnrolled);
 
   return (
     <div className="space-y-8 max-w-3xl">
-      {/* Header */}
       <FadeIn>
         <div>
           <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40 mb-2">
@@ -319,7 +277,22 @@ export default function CoursesPage() {
         </div>
       </FadeIn>
 
-      {/* Enrolled courses */}
+      {loading && (
+        <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40">
+          Yükleniyor…
+        </p>
+      )}
+      {error && (
+        <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--error)]">
+          {error}
+        </p>
+      )}
+      {!loading && !error && courses.length === 0 && (
+        <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40">
+          Henüz yayınlanmış kurs yok.
+        </p>
+      )}
+
       {enrolled.length > 0 && (
         <FadeIn delay={0.05}>
           <section>
@@ -340,7 +313,6 @@ export default function CoursesPage() {
         </FadeIn>
       )}
 
-      {/* Available courses */}
       {available.length > 0 && (
         <FadeIn delay={0.1}>
           <section>

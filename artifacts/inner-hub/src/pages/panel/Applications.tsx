@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FadeIn } from "@/components/FadeIn";
 import { Check, X, ChevronRight, Clock, Search, SlidersHorizontal } from "lucide-react";
 
@@ -138,14 +138,22 @@ function DetailPanel({
   onApprove: () => void;
   onReject: () => void;
 }) {
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, []);
+
   return (
     <>
       <div
-        className="fixed inset-0 bg-[var(--ink)]/20 z-20"
+        className="fixed inset-0 z-40 bg-[var(--ink)]/20"
         onClick={onClose}
       />
       <div
-        className="fixed right-0 top-0 bottom-0 w-full max-w-sm bg-[var(--bone)] border-l border-[var(--ink)]/10 z-30 flex flex-col overflow-y-auto"
+        className="fixed bottom-0 right-0 top-0 z-50 flex w-full max-w-sm flex-col overflow-y-auto border-l border-[var(--ink)]/10 bg-[var(--bone)]"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-[var(--ink)]/[0.08] px-5 py-4">

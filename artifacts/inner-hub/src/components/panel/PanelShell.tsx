@@ -6,6 +6,7 @@ import { LogOut, Menu, X, Bell, ChevronLeft, ChevronRight, Sparkles, CalendarDay
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { PanelNav } from "./PanelNav";
+import { PanelPageTransition } from "./PanelPageTransition";
 
 // ─── Notifications ────────────────────────────────────────────────────────────
 
@@ -257,7 +258,7 @@ function DesktopSidebar({ user, onLogout }: { user: PanelUser; onLogout?: () => 
   return (
     <aside
       className={cn(
-        "relative hidden flex-col border-r border-[var(--ink)]/[0.08] bg-[var(--bone)] transition-all duration-300 ease-expo lg:flex",
+        "relative hidden h-full shrink-0 flex-col border-r border-[var(--ink)]/[0.08] bg-[var(--bone)] transition-all duration-300 ease-expo lg:flex",
         collapsed ? "w-[60px]" : "w-[220px]",
       )}
     >
@@ -292,7 +293,7 @@ function DesktopSidebar({ user, onLogout }: { user: PanelUser; onLogout?: () => 
       <button
         type="button"
         onClick={toggle}
-        className="absolute -right-3 top-[72px] flex size-6 items-center justify-center rounded-full border border-[var(--ink)]/[0.08] bg-[var(--bone)] text-[var(--ink)]/40 shadow-sm transition-colors hover:text-[var(--ink)]"
+        className="absolute -right-3 top-[72px] z-10 flex size-6 items-center justify-center border border-[var(--ink)]/[0.08] bg-[var(--bone)] text-[var(--ink)]/40 transition-colors hover:text-[var(--ink)]"
         aria-label={collapsed ? "Sidebar'ı genişlet" : "Sidebar'ı daralt"}
       >
         {collapsed ? <ChevronRight className="size-3" /> : <ChevronLeft className="size-3" />}
@@ -369,7 +370,7 @@ function ShellInner({ user, children, onLogout }: PanelShellProps) {
   const [notifCount, setNotifCount] = useState(user.notificationCount ?? 0);
 
   return (
-    <div className="flex min-h-screen bg-[var(--bone)] text-[var(--ink)]">
+    <div className="flex h-svh overflow-hidden bg-[var(--bone)] text-[var(--ink)]">
       <DesktopSidebar user={user} onLogout={onLogout} />
       <MobileDrawer
         open={mobileOpen}
@@ -378,9 +379,9 @@ function ShellInner({ user, children, onLogout }: PanelShellProps) {
         onLogout={onLogout}
       />
 
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         {/* Top bar */}
-        <header className="sticky top-0 z-40 flex h-[60px] items-center justify-between border-b border-[var(--ink)]/[0.08] bg-[var(--bone)]/90 px-4 backdrop-blur-md sm:px-6">
+        <header className="z-40 flex h-[60px] shrink-0 items-center justify-between border-b border-[var(--ink)]/[0.08] bg-[var(--bone)]/90 px-4 backdrop-blur-md sm:px-6">
           <button
             type="button"
             onClick={() => setMobileOpen(true)}
@@ -411,7 +412,7 @@ function ShellInner({ user, children, onLogout }: PanelShellProps) {
             >
               <Bell className="size-4" />
               {notifCount > 0 && (
-                <span className="absolute -right-1 -top-1 flex size-3.5 items-center justify-center rounded-full bg-[var(--ink)] font-mono text-[8px] text-[var(--bone)]">
+                <span className="absolute -right-1 -top-1 flex size-3.5 items-center justify-center bg-[var(--ink)] font-mono text-[8px] text-[var(--bone)]">
                   {notifCount}
                 </span>
               )}
@@ -429,19 +430,19 @@ function ShellInner({ user, children, onLogout }: PanelShellProps) {
               <img
                 src={user.avatarUrl}
                 alt={user.name}
-                className="size-7 rounded-full object-cover"
+                className="size-7 object-cover"
               />
             ) : (
-              <div className="flex size-7 items-center justify-center rounded-full bg-[var(--ink)] font-mono text-[10px] uppercase text-[var(--bone)]">
+              <div className="flex size-7 items-center justify-center bg-[var(--ink)] font-mono text-[10px] uppercase text-[var(--bone)]">
                 {user.name.slice(0, 2)}
               </div>
             )}
           </div>
         </header>
 
-        {/* Main content */}
-        <main className="min-w-0 flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
-          {children}
+        {/* Main content — tek scroll container */}
+        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+          <PanelPageTransition>{children}</PanelPageTransition>
         </main>
       </div>
     </div>

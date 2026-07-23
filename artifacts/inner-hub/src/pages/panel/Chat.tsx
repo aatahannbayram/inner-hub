@@ -244,13 +244,16 @@ export default function ChatPage() {
   const [activeChannel, setActiveChannel] = useState("genel");
   const [draft, setDraft] = useState("");
   const [messages, setMessages] = useState(MESSAGES_BY_CHANNEL);
+  const messagesRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const channel = CHANNELS.find((c) => c.id === activeChannel)!;
   const channelMessages = messages[activeChannel] ?? [];
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    const el = messagesRef.current;
+    if (!el) return;
+    el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
   }, [activeChannel, channelMessages.length]);
 
   const handleSend = () => {
@@ -272,7 +275,7 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="-mx-4 -my-6 flex h-[calc(100vh-60px)] sm:-mx-6 lg:-mx-8 lg:-my-8">
+    <div className="-mx-4 -my-6 flex h-[calc(100svh-60px)] min-h-0 sm:-mx-6 lg:-mx-8 lg:-my-8">
       {/* Channel sidebar */}
       <aside className="hidden w-[220px] shrink-0 flex-col border-r border-[var(--ink)]/[0.08] bg-[var(--bone)] md:flex">
         <div className="border-b border-[var(--ink)]/[0.08] px-4 py-3">
@@ -327,7 +330,7 @@ export default function ChatPage() {
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto py-4">
+        <div ref={messagesRef} className="flex-1 overflow-y-auto py-4">
           {channelMessages.length === 0 ? (
             <div className="flex h-full items-center justify-center">
               <div className="text-center">

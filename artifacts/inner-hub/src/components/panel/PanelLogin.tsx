@@ -102,7 +102,7 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
   }, [mode]);
 
   const fieldClass =
-    "flex h-9 w-full rounded-none border-0 border-b border-border bg-transparent px-0 py-4 text-base md:text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-0 focus-visible:border-foreground focus-visible:border-b-2 transition-[border-width]";
+    "flex h-9 w-full rounded-none border-0 border-b border-white/25 bg-transparent px-0 py-4 text-base md:text-sm text-white shadow-sm placeholder:text-white/40 focus-visible:outline-none focus-visible:ring-0 focus-visible:border-white focus-visible:border-b-2 transition-[border-width]";
 
   useEffect(() => {
     let cancelled = false;
@@ -178,39 +178,77 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
   };
 
   return (
-    <div className="relative flex min-h-screen flex-col bg-background text-foreground">
-      <div className="grain-overlay" aria-hidden="true" />
+    <div className="relative flex min-h-screen flex-col overflow-hidden bg-black text-white">
+      <video
+        autoPlay
+        muted
+        loop
+        playsInline
+        className="absolute inset-0 z-0 h-full w-full object-cover"
+        src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260406_094145_4a271a6c-3869-4f1c-8aa7-aeb0cb227994.mp4"
+      />
+      <div
+        aria-hidden="true"
+        className="bottom-blur-mask pointer-events-none absolute inset-0 z-[1] bg-black/20 backdrop-blur-xl"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-b from-black/50 via-transparent to-transparent"
+      />
 
-      <header className="relative z-10 flex h-[60px] items-center px-6 md:h-[72px] md:px-12 lg:px-[10%]">
-        <a href="/" className="inline-flex group focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-2">
+      <header className="relative z-10 flex h-[60px] items-center justify-between px-6 md:h-[72px] md:px-12 lg:px-[10%]">
+        <a
+          href="/"
+          className="animate-blur-fade-up inline-flex group focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-2"
+          style={{ animationDelay: "0ms" }}
+        >
           <Lockup
-            className="text-foreground group-hover:opacity-80 transition-opacity"
+            className="text-white group-hover:opacity-80 transition-opacity"
             fontSize="clamp(24px, 2.6vw, 34px)"
           />
         </a>
+        <a
+          href="/"
+          className="animate-blur-fade-up font-mono text-[11px] uppercase tracking-widest text-white/60 transition-colors hover:text-white"
+          style={{ animationDelay: "150ms" }}
+        >
+          Ana sayfa
+        </a>
       </header>
 
-      <main className="relative z-10 flex flex-1 items-center px-6 md:px-12 lg:px-[10%]">
+      <main className="relative z-10 flex flex-1 items-end px-6 pb-12 md:px-12 md:pb-20 lg:px-[10%]">
         <div className="w-full max-w-md">
-          <p className="mb-8 font-mono text-xs uppercase tracking-widest text-muted-foreground">
+          <p
+            className="animate-blur-fade-up mb-6 font-mono text-xs uppercase tracking-widest text-white/60"
+            style={{ animationDelay: "200ms" }}
+          >
             Panel · Members only
           </p>
 
-          <h1 className="font-display font-serif italic text-4xl md:text-5xl leading-[1.1] text-balance mb-6">
+          <h1
+            className="animate-blur-fade-up font-display font-serif italic text-4xl md:text-5xl leading-[1.1] text-balance mb-4"
+            style={{ animationDelay: "300ms" }}
+          >
             Continue inside the circle.
           </h1>
 
-          <p className="mb-10 max-w-[40ch] text-lg leading-[1.6] text-foreground/80">
+          <p
+            className="animate-blur-fade-up mb-8 max-w-[40ch] text-lg leading-[1.6] text-white/70"
+            style={{ animationDelay: "400ms" }}
+          >
             Access is by invitation. Always.
           </p>
 
-          <div className={`group relative mb-6 h-11 w-full ${googleReady ? "visible" : "invisible"}`}>
+          <div
+            className={`liquid-glass group relative mb-4 h-11 w-full animate-blur-fade-up ${googleReady ? "visible" : "invisible"}`}
+            style={{ animationDelay: "500ms" }}
+          >
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute inset-0 flex items-center justify-center gap-3 border border-foreground/25 bg-background transition-all duration-300 group-hover:-translate-y-px group-hover:border-foreground/50 group-hover:shadow-[0_3px_0_0_var(--inner-green)]"
+              className="pointer-events-none absolute inset-0 flex items-center justify-center gap-3 border border-white/20 transition-all duration-300 group-hover:-translate-y-px group-hover:border-white/40 group-hover:shadow-[0_3px_0_0_var(--inner-green)]"
             >
               <GoogleGlyph />
-              <span className="font-mono text-xs uppercase tracking-widest">
+              <span className="font-mono text-xs uppercase tracking-widest text-white">
                 {mode === "register" ? "Google ile kayıt ol" : "Google ile devam et"}
               </span>
             </div>
@@ -221,17 +259,25 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
             />
           </div>
 
-          <div className={`mb-8 flex items-center gap-4 text-muted-foreground ${googleReady ? "" : "hidden"}`}>
-            <span className="h-px flex-1 bg-border" />
+          <div
+            className={`animate-blur-fade-up mb-6 flex items-center gap-4 text-white/40 ${googleReady ? "" : "hidden"}`}
+            style={{ animationDelay: "550ms" }}
+          >
+            <span className="h-px flex-1 bg-white/20" />
             <span className="font-mono text-[10px] uppercase tracking-widest">veya</span>
-            <span className="h-px flex-1 bg-border" />
+            <span className="h-px flex-1 bg-white/20" />
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-8">
+          <form onSubmit={handleSubmit} className="space-y-6">
             {mode === "register" && (
               <>
-                <div className="space-y-2">
-                  <label className="font-mono text-xs uppercase tracking-widest">Davet kodu</label>
+                <div
+                  className="animate-blur-fade-up space-y-2"
+                  style={{ animationDelay: "600ms" }}
+                >
+                  <label className="font-mono text-xs uppercase tracking-widest text-white/70">
+                    Davet kodu
+                  </label>
                   <input
                     type="text"
                     value={inviteCode}
@@ -242,8 +288,13 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
                     autoComplete="off"
                   />
                 </div>
-                <div className="space-y-2">
-                  <label className="font-mono text-xs uppercase tracking-widest">Ad Soyad</label>
+                <div
+                  className="animate-blur-fade-up space-y-2"
+                  style={{ animationDelay: "650ms" }}
+                >
+                  <label className="font-mono text-xs uppercase tracking-widest text-white/70">
+                    Ad Soyad
+                  </label>
                   <input
                     type="text"
                     value={name}
@@ -257,8 +308,10 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
               </>
             )}
 
-            <div className="space-y-2">
-              <label className="font-mono text-xs uppercase tracking-widest">Email</label>
+            <div className="animate-blur-fade-up space-y-2" style={{ animationDelay: "600ms" }}>
+              <label className="font-mono text-xs uppercase tracking-widest text-white/70">
+                Email
+              </label>
               <input
                 type="email"
                 value={email}
@@ -270,8 +323,10 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
               />
             </div>
 
-            <div className="space-y-2">
-              <label className="font-mono text-xs uppercase tracking-widest">Şifre</label>
+            <div className="animate-blur-fade-up space-y-2" style={{ animationDelay: "650ms" }}>
+              <label className="font-mono text-xs uppercase tracking-widest text-white/70">
+                Şifre
+              </label>
               <input
                 type="password"
                 value={password}
@@ -290,15 +345,18 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
               </p>
             )}
 
-            <div className="flex items-center justify-between gap-6 pt-2">
+            <div
+              className="animate-blur-fade-up flex items-center justify-between gap-6 pt-2"
+              style={{ animationDelay: "700ms" }}
+            >
               <button
                 type="submit"
                 disabled={loading}
-                className="group/btn relative inline-flex h-auto min-h-9 items-center justify-center overflow-hidden rounded-none border border-foreground bg-foreground px-12 py-6 font-mono text-xs uppercase tracking-widest text-background transition-colors duration-300 hover:opacity-90 disabled:opacity-50"
+                className="group/btn relative inline-flex h-auto min-h-9 items-center justify-center overflow-hidden rounded-none border border-white bg-white px-12 py-6 font-mono text-xs uppercase tracking-widest text-black transition-colors duration-300 hover:opacity-90 disabled:opacity-50"
               >
                 <span
                   aria-hidden="true"
-                  className="absolute left-0 top-0 h-full w-2 -translate-x-full bg-background transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/btn:translate-x-0"
+                  className="absolute left-0 top-0 h-full w-2 -translate-x-full bg-black transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/btn:translate-x-0"
                 />
                 <span className="relative inline-block transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/btn:translate-x-1">
                   {loading ? "..." : mode === "login" ? "Enter" : "Hesap oluştur"}
@@ -311,7 +369,7 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
                   setMode(mode === "login" ? "register" : "login");
                   setError("");
                 }}
-                className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
+                className="font-mono text-[11px] uppercase tracking-widest text-white/60 hover:text-white transition-colors"
               >
                 {mode === "login" ? "Hesabın yok mu?" : "Zaten üye misin?"}
               </button>

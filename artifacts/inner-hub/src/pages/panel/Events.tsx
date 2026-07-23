@@ -1,6 +1,7 @@
-import { useState } from "react";
-import { CalendarDays, MapPin, Clock, Users, ChevronRight, CheckCircle2, Circle } from "lucide-react";
+import { useEffect, useState } from "react";
+import { MapPin, Clock, Users, ChevronRight, CheckCircle2 } from "lucide-react";
 import { FadeIn } from "@/components/FadeIn";
+import { apiUrl } from "@/lib/api";
 
 type ViewMode = "liste" | "takvim";
 
@@ -18,73 +19,37 @@ interface Event {
   isPast: boolean;
 }
 
-const EVENTS: Event[] = [
-  {
-    id: 1,
-    title: "AI & Girişimcilik Zirvesi",
-    description: "Türkiye'nin önde gelen yapay zeka girişimcileri ve yatırımcılarıyla networking ve panel oturumları. inner·hub üyelerine ayrılmış oturumlar dahil.",
-    startAt: "2026-09-15T10:00:00",
-    endAt: "2026-09-15T18:00:00",
-    location: "Nidakule Levent, İstanbul",
-    type: "gathering",
-    capacity: 120,
-    registered: 87,
-    isRegistered: true,
-    isPast: false,
-  },
-  {
-    id: 2,
-    title: "Networking Kahvaltısı — Ağustos",
-    description: "Her ayın ilk Salısı: küçük grup, derin konuşmalar. Bu ayki tema: B2B satış ve uluslararasılaşma.",
-    startAt: "2026-08-05T09:00:00",
-    endAt: "2026-08-05T11:00:00",
-    location: "Online (Zoom)",
-    type: "online",
-    capacity: 30,
-    registered: 22,
+function inferType(title: string, location: string): Event["type"] {
+  const hay = `${title} ${location}`.toLowerCase();
+  if (hay.includes("online") || hay.includes("zoom")) return "online";
+  if (hay.includes("workshop")) return "workshop";
+  return "gathering";
+}
+
+function mapApiEvent(row: {
+  id: number;
+  title: string;
+  description?: string;
+  location?: string;
+  startAt: string;
+  endAt: string;
+  isPast?: boolean;
+}): Event {
+  const location = row.location ?? "";
+  return {
+    id: row.id,
+    title: row.title,
+    description: row.description ?? "",
+    startAt: row.startAt,
+    endAt: row.endAt,
+    location,
+    type: inferType(row.title, location),
+    capacity: 0,
+    registered: 0,
     isRegistered: false,
-    isPast: false,
-  },
-  {
-    id: 3,
-    title: "Fundraising Workshop",
-    description: "Seed ve Series A yatırım süreçleri, pitch deck hazırlığı ve yatırımcı görüşme teknikleri. Sınırlı katılım.",
-    startAt: "2026-08-20T14:00:00",
-    endAt: "2026-08-20T17:00:00",
-    location: "Kolektif House Maslak",
-    type: "workshop",
-    capacity: 20,
-    registered: 18,
-    isRegistered: false,
-    isPast: false,
-  },
-  {
-    id: 4,
-    title: "Demo Day — Kohort 1",
-    description: "1. kohort girişimlerinin yatırımcılara ve topluluk üyelerine sunum günü. 8 startup, 3 dakikalık pitch + Q&A.",
-    startAt: "2026-07-10T16:00:00",
-    endAt: "2026-07-10T19:00:00",
-    location: "İstanbul",
-    type: "gathering",
-    capacity: 60,
-    registered: 60,
-    isRegistered: true,
-    isPast: true,
-  },
-  {
-    id: 5,
-    title: "Founder Dinner",
-    description: "Kapalı davet. Ayın kurucu buluşması — 12 kişilik masa, moderatörsüz serbest sohbet.",
-    startAt: "2026-06-25T19:30:00",
-    endAt: "2026-06-25T22:30:00",
-    location: "Özel mekan, İstanbul",
-    type: "gathering",
-    capacity: 12,
-    registered: 12,
-    isRegistered: true,
-    isPast: true,
-  },
-];
+    isPast: row.isPast ?? new Date(row.startAt).getTime() < Date.now(),
+  };
+}
 
 const TYPE_LABELS: Record<Event["type"], string> = {
   gathering: "Buluşma",
@@ -171,17 +136,19 @@ function EventCard({ event }: { event: Event }) {
           </span>
           <span className="flex items-center gap-1 font-mono text-[9px] uppercase tracking-widest">
             <MapPin className="size-3" />
-            {event.location}
+            {event.location || "Konum yakında"}
           </span>
-          <span className="flex items-center gap-1 font-mono text-[9px] uppercase tracking-widest">
-            <Users className="size-3" />
-            {event.registered}/{event.capacity}
-          </span>
+          {event.capacity > 0 && (
+            <span className="flex items-center gap-1 font-mono text-[9px] uppercase tracking-widest">
+              <Users className="size-3" />
+              {event.registered}/{event.capacity}
+            </span>
+          )}
         </div>
 
         {!event.isPast && (
           <div className="mt-1">
-            {isFull ? (
+            {event.capacity > 0 && isFull ? (
               <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/30">
                 Kontenjan dolu
               </span>
@@ -301,9 +268,38 @@ function CalendarView({ events }: { events: Event[] }) {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function Events() {
   const [view, setView] = useState<ViewMode>("liste");
+  const [events, setEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const upcoming = EVENTS.filter((e) => !e.isPast);
-  const past = EVENTS.filter((e) => e.isPast);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      setError("");
+      try {
+        const res = await fetch(apiUrl("/api/events"), { credentials: "include" });
+        const json = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(json.error ?? "Etkinlikler yüklenemedi");
+        if (!cancelled) {
+          setEvents((json.events ?? []).map(mapApiEvent));
+        }
+      } catch (e: unknown) {
+        if (!cancelled) {
+          setError(e instanceof Error ? e.message : "Etkinlikler yüklenemedi");
+          setEvents([]);
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const upcoming = events.filter((e) => !e.isPast);
+  const past = events.filter((e) => e.isPast);
 
   return (
     <div className="space-y-8 max-w-5xl">
@@ -346,7 +342,23 @@ export default function Events() {
         </div>
       </FadeIn>
 
-      {view === "liste" ? (
+      {loading && (
+        <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40">
+          Yükleniyor…
+        </p>
+      )}
+      {error && (
+        <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--error)]">
+          {error}
+        </p>
+      )}
+      {!loading && !error && events.length === 0 && (
+        <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40">
+          Henüz yayınlanmış etkinlik yok.
+        </p>
+      )}
+
+      {!loading && !error && events.length > 0 && view === "liste" ? (
         <>
           {/* Upcoming */}
           <FadeIn delay={0.05}>
@@ -360,9 +372,13 @@ export default function Events() {
                 </span>
               </div>
               <div className="space-y-2">
-                {upcoming.map((e) => (
-                  <EventCard key={e.id} event={e} />
-                ))}
+                {upcoming.length === 0 ? (
+                  <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/30">
+                    Yaklaşan etkinlik yok.
+                  </p>
+                ) : (
+                  upcoming.map((e) => <EventCard key={e.id} event={e} />)
+                )}
               </div>
             </section>
           </FadeIn>
@@ -385,18 +401,20 @@ export default function Events() {
             </FadeIn>
           )}
         </>
-      ) : (
+      ) : null}
+
+      {!loading && !error && events.length > 0 && view === "takvim" ? (
         <FadeIn delay={0.05}>
           <section>
             <div className="mb-3 border-t border-[var(--ink)]/[0.08] pt-3">
               <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40">
-                Temmuz 2026
+                Takvim
               </p>
             </div>
-            <CalendarView events={EVENTS} />
+            <CalendarView events={events} />
           </section>
         </FadeIn>
-      )}
+      ) : null}
     </div>
   );
 }

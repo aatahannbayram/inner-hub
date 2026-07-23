@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search, Linkedin, Briefcase, ArrowRight, Tag, CheckCircle2, MessageSquare, UserPlus, X } from "lucide-react";
 import { FadeIn } from "@/components/FadeIn";
 import { cn } from "@/lib/utils";
@@ -259,11 +259,19 @@ const MEMBER_EXPERTISE: Record<number, { verified: boolean; tier: string; member
 function MemberDetailPanel({ member, onClose }: { member: Member; onClose: () => void }) {
   const ext = MEMBER_EXPERTISE[member.id];
 
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, []);
+
   return (
     <>
-      <div className="fixed inset-0 bg-[var(--ink)]/20 z-20" onClick={onClose} />
+      <div className="fixed inset-0 z-40 bg-[var(--ink)]/20" onClick={onClose} />
       <div
-        className="fixed right-0 top-0 bottom-0 w-full max-w-sm bg-[var(--bone)] border-l border-[var(--ink)]/10 z-30 flex flex-col overflow-y-auto"
+        className="fixed bottom-0 right-0 top-0 z-50 flex w-full max-w-sm flex-col overflow-y-auto border-l border-[var(--ink)]/10 bg-[var(--bone)]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
