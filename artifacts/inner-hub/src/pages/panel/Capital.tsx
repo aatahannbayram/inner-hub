@@ -215,27 +215,30 @@ function DealCard({ deal, onClick }: { deal: Deal; onClick: () => void }) {
       </div>
 
       {/* Metrics row */}
-      <div className="mb-3 flex items-center gap-3">
-        <div>
+      <div className="mb-3 flex items-center gap-2 min-w-0">
+        <div className="min-w-0">
           <p className="font-mono text-[8px] uppercase tracking-widest text-[var(--ink)]/25">Hedef</p>
-          <p className="font-mono text-[11px] text-[var(--ink)]">{deal.raise}</p>
+          <p className="truncate font-mono text-[11px] text-[var(--ink)]">{deal.raise}</p>
         </div>
-        <div className="h-8 w-px bg-[var(--ink)]/[0.06]" />
-        <div>
+        <div className="h-8 w-px shrink-0 bg-[var(--ink)]/[0.06]" />
+        <div className="min-w-0">
           <p className="font-mono text-[8px] uppercase tracking-widest text-[var(--ink)]/25">Değerleme</p>
-          <p className="font-mono text-[11px] text-[var(--ink)]">{deal.valuation}</p>
+          <p className="truncate font-mono text-[11px] text-[var(--ink)]">{deal.valuation}</p>
         </div>
-        <div className="h-8 w-px bg-[var(--ink)]/[0.06]" />
-        <div>
+        <div className="h-8 w-px shrink-0 bg-[var(--ink)]/[0.06]" />
+        <div className="min-w-0">
           <p className="font-mono text-[8px] uppercase tracking-widest text-[var(--ink)]/25">Tur</p>
-          <p className="font-mono text-[11px] text-[var(--ink)]">{deal.round}</p>
+          <p className="truncate font-mono text-[11px] text-[var(--ink)]">{deal.round}</p>
         </div>
-        <div className="ml-auto flex items-center gap-1">
-          <div className="h-1 w-12 bg-[var(--ink)]/[0.06]">
-            <div className="h-full bg-[var(--inner-green)]" style={{ width: `${deal.score}%` }} />
-          </div>
-          <span className="font-mono text-[9px] text-[var(--ink)]/40">{deal.score}</span>
+      </div>
+
+      {/* Score row */}
+      <div className="mb-3 flex items-center gap-2">
+        <span className="font-mono text-[8px] uppercase tracking-widest text-[var(--ink)]/25 shrink-0">Skor</span>
+        <div className="h-1 flex-1 bg-[var(--ink)]/[0.06]">
+          <div className="h-full bg-[var(--inner-green)]" style={{ width: `${deal.score}%` }} />
         </div>
+        <span className="font-mono text-[9px] text-[var(--ink)]/40 shrink-0">{deal.score}</span>
       </div>
 
       {/* Tags + meta */}
