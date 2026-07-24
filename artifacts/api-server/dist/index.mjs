@@ -112933,7 +112933,7 @@ var router3 = (0, import_express3.Router)();
 function getStripe() {
   const key = process.env.STRIPE_SECRET_KEY;
   if (!key) throw new Error("STRIPE_SECRET_KEY ortam de\u011Fi\u015Fkeni tan\u0131ml\u0131 de\u011Fil");
-  return new stripe_esm_node_default(key, { apiVersion: "2025-06-30.basil" });
+  return new stripe_esm_node_default(key, { apiVersion: "2026-06-24.dahlia" });
 }
 var PLANS = {
   annual: {
@@ -113007,10 +113007,10 @@ router3.post("/checkout-session", async (req, res) => {
       return res.status(400).json({ error: "Ge\xE7ersiz istek parametreleri" });
     }
     const session = await stripe.checkout.sessions.create(sessionParams);
-    res.json({ url: session.url, sessionId: session.id });
+    return res.json({ url: session.url, sessionId: session.id });
   } catch (err) {
     const status = err.message?.includes("ortam de\u011Fi\u015Fkeni") ? 503 : 500;
-    res.status(status).json({ error: err.message });
+    return res.status(status).json({ error: err.message });
   }
 });
 router3.post(
@@ -113048,20 +113048,20 @@ router3.post(
         break;
       }
     }
-    res.json({ received: true });
+    return res.json({ received: true });
   }
 );
 router3.get("/session/:id", async (req, res) => {
   try {
     const stripe = getStripe();
     const session = await stripe.checkout.sessions.retrieve(req.params.id);
-    res.json({
+    return res.json({
       status: session.payment_status,
       customerEmail: session.customer_details?.email,
       metadata: session.metadata
     });
   } catch (err) {
-    res.status(404).json({ error: "Oturum bulunamad\u0131" });
+    return res.status(404).json({ error: "Oturum bulunamad\u0131" });
   }
 });
 var payments_default = router3;
@@ -113214,7 +113214,7 @@ weeklyThemes i\xE7in 3 tema, connections i\xE7in 2 ki\u015Fi \xF6neri sun. T\xFC
     const jsonMatch = raw.match(/\{[\s\S]*\}/);
     if (!jsonMatch) throw new Error("Ge\xE7ersiz AI yan\u0131t\u0131");
     const parsed = JSON.parse(jsonMatch[0]);
-    res.json(parsed);
+    return res.json(parsed);
   } catch (err) {
     const isConfig2 = err.message?.includes("API_KEY") || err.message?.includes("ortam");
     if (isConfig2) {
@@ -113231,7 +113231,7 @@ weeklyThemes i\xE7in 3 tema, connections i\xE7in 2 ki\u015Fi \xF6neri sun. T\xFC
         insight: "Bu hafta toplulukta AI ara\xE7 adoptasyonu \xF6ne \xE7\u0131k\u0131yor. Deneyimleri sistematik payla\u015Fmak i\xE7in #ai-tools kanal\u0131nda haftal\u0131k 'Arac\u0131n Anatomisi' format\u0131 \xF6nerilir."
       });
     }
-    res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: err.message });
   }
 });
 router4.post("/match", async (req, res) => {
@@ -113269,7 +113269,7 @@ Kullan\u0131c\u0131 tercihleri: ${preferences?.join(", ") ?? "belirtilmemi\u015F
     const jsonMatch = raw.match(/\{[\s\S]*\}/);
     if (!jsonMatch) throw new Error("Ge\xE7ersiz AI yan\u0131t\u0131");
     const parsed = JSON.parse(jsonMatch[0]);
-    res.json(parsed);
+    return res.json(parsed);
   } catch (err) {
     const isConfig2 = err.message?.includes("API_KEY") || err.message?.includes("ortam");
     if (isConfig2) {
@@ -113310,7 +113310,7 @@ Kullan\u0131c\u0131 tercihleri: ${preferences?.join(", ") ?? "belirtilmemi\u015F
         ]
       });
     }
-    res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: err.message });
   }
 });
 router4.post("/image", async (req, res) => {
@@ -113335,7 +113335,7 @@ router4.post("/image", async (req, res) => {
       rateLimitKey,
       force: Boolean(force)
     });
-    res.json({
+    return res.json({
       ...result,
       meta: {
         model: HF_EFFICIENT.modelId,
@@ -113346,7 +113346,7 @@ router4.post("/image", async (req, res) => {
     });
   } catch (err) {
     const isCooldown = String(err.message).includes("Kredi korumas\u0131");
-    res.status(isCooldown ? 429 : 500).json({ error: err.message });
+    return res.status(isCooldown ? 429 : 500).json({ error: err.message });
   }
 });
 router4.get("/image/:requestId", async (req, res) => {
@@ -113362,9 +113362,9 @@ router4.get("/image/:requestId", async (req, res) => {
       return res.status(400).json({ error: "requestId gerekli" });
     }
     const result = await getGenerationStatus(requestId);
-    res.json(result);
+    return res.json(result);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: err.message });
   }
 });
 var ai_default = router4;

@@ -3,7 +3,7 @@ import { renderToString } from "react-dom/server";
 import { Router } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import * as React from "react";
-import { useState, useEffect, useRef } from "react";
+import { useRef, Fragment, useState, useEffect } from "react";
 import * as TooltipPrimitive from "@radix-ui/react-tooltip";
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
@@ -48,6 +48,74 @@ function FadeIn({
       children
     }
   );
+}
+const EASE = [0.16, 1, 0.3, 1];
+function WordsPullUp({
+  text,
+  className,
+  delay = 0
+}) {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, margin: "-80px" });
+  const reduce = useReducedMotion();
+  const words = text.split(" ");
+  if (reduce) {
+    return /* @__PURE__ */ jsx("h2", { className, children: text });
+  }
+  return /* @__PURE__ */ jsx("h2", { ref, className, children: words.map((word, i) => /* @__PURE__ */ jsx("span", { className: "inline-block overflow-hidden pb-1 pr-1 mr-[0.2em] last:mr-0 align-top", children: /* @__PURE__ */ jsx(
+    motion.span,
+    {
+      className: "inline-block",
+      initial: { y: "100%", opacity: 0 },
+      animate: inView ? { y: 0, opacity: 1 } : { y: "100%", opacity: 0 },
+      transition: { duration: 0.6, ease: EASE, delay: delay + i * 0.08 },
+      children: word
+    }
+  ) }, i)) });
+}
+function RevealChar({
+  char,
+  progress,
+  range
+}) {
+  const opacity = useTransform(progress, range, [0.2, 1]);
+  return /* @__PURE__ */ jsx(motion.span, { style: { opacity }, children: char });
+}
+function ScrollTextReveal({
+  text,
+  className,
+  style
+}) {
+  const ref = useRef(null);
+  const reduce = useReducedMotion();
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start 0.85", "end 0.35"] });
+  if (reduce) {
+    return /* @__PURE__ */ jsx("p", { className, style, children: text });
+  }
+  const words = text.split(" ");
+  const total = text.length;
+  let charIndex = 0;
+  return /* @__PURE__ */ jsx("p", { ref, className, style, children: words.map((word, wi) => {
+    const wordEl = /* @__PURE__ */ jsx("span", { className: "inline-block", children: word.split("").map((char) => {
+      const i = charIndex;
+      charIndex += 1;
+      return /* @__PURE__ */ jsx(
+        RevealChar,
+        {
+          char,
+          progress: scrollYProgress,
+          range: [i / total - 0.08, i / total + 0.04]
+        },
+        i
+      );
+    }) });
+    const isLast = wi === words.length - 1;
+    if (!isLast) charIndex += 1;
+    return /* @__PURE__ */ jsxs(Fragment, { children: [
+      wordEl,
+      !isLast ? " " : null
+    ] }, wi);
+  }) });
 }
 function Lockup({
   className = "",
@@ -396,6 +464,275 @@ function PlatformFeatures({
     ] })
   ] }) });
 }
+const STANDARD_CHARS = " .:-=+*#%@";
+function hash(x, y) {
+  const s = Math.sin(x * 127.1 + y * 311.7) * 43758.5453;
+  return s - Math.floor(s);
+}
+function applyContrastBrightness(lum, brightness, contrast) {
+  const factor = contrast / 100;
+  const v = (lum - 0.5) * factor + 0.5 + brightness / 100;
+  return Math.min(1, Math.max(0, v));
+}
+function ProceduralPortrait({
+  src,
+  config,
+  className
+}) {
+  const canvasRef = useRef(null);
+  const containerRef = useRef(null);
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const container = containerRef.current;
+    if (!canvas || !container) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    let raf = 0;
+    let disposed = false;
+    let luminance = null;
+    let cols = 0;
+    let rows = 0;
+    let dpr = Math.min(window.devicePixelRatio || 1, 2);
+    let cssW = 0;
+    let cssH = 0;
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.src = src;
+    const {
+      renderMode,
+      bgMode,
+      bgColor = "#0A0A0A",
+      bgBlur = 12,
+      bgOpacity = 60,
+      cellSize,
+      coverage,
+      invert = false,
+      charSet = STANDARD_CHARS,
+      brightness = 0,
+      contrast = 100,
+      saturation = 100,
+      grayscale = 0,
+      tint = "#18FF85",
+      tintOpacity = 0,
+      overlayBlend = "screen",
+      color = "#18FF85",
+      pfx = {},
+      animStyle = "flicker",
+      animSpeed = 60,
+      animIntensity = 50
+    } = config;
+    const sampleLuminance = () => {
+      const sampleCanvas = document.createElement("canvas");
+      sampleCanvas.width = cols;
+      sampleCanvas.height = rows;
+      const sctx = sampleCanvas.getContext("2d");
+      if (!sctx) return;
+      const imgRatio = img.naturalWidth / img.naturalHeight;
+      const canvasRatio = cssW / cssH;
+      let dw = cssW;
+      let dh = cssH;
+      let dx = 0;
+      let dy = 0;
+      if (imgRatio > canvasRatio) {
+        dh = cssH;
+        dw = cssH * imgRatio;
+        dx = (cssW - dw) / 2;
+      } else {
+        dw = cssW;
+        dh = cssW / imgRatio;
+        dy = (cssH - dh) / 2;
+      }
+      sctx.drawImage(img, dx * (cols / cssW), dy * (rows / cssH), dw * (cols / cssW), dh * (rows / cssH));
+      const data = sctx.getImageData(0, 0, cols, rows).data;
+      luminance = new Float32Array(cols * rows);
+      for (let i = 0; i < cols * rows; i++) {
+        const r = data[i * 4] / 255;
+        const g = data[i * 4 + 1] / 255;
+        const b = data[i * 4 + 2] / 255;
+        let lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+        lum = applyContrastBrightness(lum, brightness, contrast);
+        luminance[i] = invert ? 1 - lum : lum;
+      }
+    };
+    const resize = () => {
+      const rect = container.getBoundingClientRect();
+      cssW = rect.width;
+      cssH = rect.height;
+      canvas.width = cssW * dpr;
+      canvas.height = cssH * dpr;
+      canvas.style.width = `${cssW}px`;
+      canvas.style.height = `${cssH}px`;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      cols = Math.max(1, Math.ceil(cssW / cellSize));
+      rows = Math.max(1, Math.ceil(cssH / cellSize));
+      if (img.complete && img.naturalWidth > 0) sampleLuminance();
+    };
+    const drawBackground = () => {
+      ctx.save();
+      ctx.filter = `saturate(${saturation}%) grayscale(${grayscale}%)`;
+      if (bgMode === "solid") {
+        ctx.filter = "none";
+        ctx.fillStyle = bgColor;
+        ctx.fillRect(0, 0, cssW, cssH);
+      } else {
+        const imgRatio = img.naturalWidth / img.naturalHeight;
+        const canvasRatio = cssW / cssH;
+        let dw = cssW;
+        let dh = cssH;
+        let dx = 0;
+        let dy = 0;
+        if (imgRatio > canvasRatio) {
+          dh = cssH;
+          dw = cssH * imgRatio;
+          dx = (cssW - dw) / 2;
+        } else {
+          dw = cssW;
+          dh = cssW / imgRatio;
+          dy = (cssH - dh) / 2;
+        }
+        ctx.filter += ` blur(${bgBlur}px)`;
+        ctx.globalAlpha = bgOpacity / 100;
+        ctx.drawImage(img, dx, dy, dw, dh);
+        ctx.globalAlpha = 1;
+      }
+      ctx.restore();
+    };
+    const drawCharacters = (t) => {
+      if (!luminance) return;
+      ctx.save();
+      ctx.font = `${Math.round(cellSize * 0.95)}px "SF Mono", ui-monospace, monospace`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      const ramp = charSet;
+      for (let y = 0; y < rows; y++) {
+        for (let x = 0; x < cols; x++) {
+          const cellSeed = hash(x, y);
+          if (cellSeed * 100 > coverage) continue;
+          const lum = luminance[y * cols + x];
+          const flicker = animStyle === "flicker" ? 1 - animIntensity / 100 * 0.35 * (0.5 + 0.5 * Math.sin(t * (animSpeed / 20) + cellSeed * 12)) : 1;
+          const idx = Math.min(ramp.length - 1, Math.floor(lum * flicker * (ramp.length - 1)));
+          const ch = ramp[idx];
+          if (ch === " ") continue;
+          ctx.globalAlpha = Math.min(1, lum * flicker + 0.08);
+          ctx.fillStyle = color;
+          ctx.fillText(ch, x * cellSize + cellSize / 2, y * cellSize + cellSize / 2);
+        }
+      }
+      ctx.restore();
+    };
+    const drawContour = (t) => {
+      if (!luminance) return;
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1.2;
+      ctx.lineJoin = "round";
+      ctx.lineCap = "round";
+      const amplitude = cellSize * 0.9;
+      const waveAmp = animStyle === "wave" ? animIntensity / 100 * cellSize * 0.5 : 0;
+      const waveFreq = animSpeed / 4e3;
+      const sampleStep = Math.max(2, Math.floor(cellSize / 6));
+      for (let ry = 0; ry < rows; ry++) {
+        const rowSeed = hash(ry, 7.3);
+        if (rowSeed * 100 > coverage) continue;
+        ctx.beginPath();
+        let first = true;
+        for (let px = 0; px <= cssW; px += sampleStep) {
+          const gx = Math.min(cols - 1, Math.floor(px / cellSize));
+          const lum = luminance[ry * cols + gx];
+          const wave = Math.sin(px * 0.012 + t * waveFreq * 60 + ry * 0.6) * waveAmp;
+          const baseY = ry * cellSize + cellSize / 2;
+          const py = baseY - (lum - 0.5) * amplitude + wave;
+          if (first) {
+            ctx.moveTo(px, py);
+            first = false;
+          } else {
+            ctx.lineTo(px, py);
+          }
+        }
+        ctx.globalAlpha = 0.3 + 0.4 * hash(ry, 2.1);
+        ctx.stroke();
+      }
+      ctx.restore();
+    };
+    const drawTint = () => {
+      if (!tintOpacity) return;
+      ctx.save();
+      ctx.globalCompositeOperation = overlayBlend;
+      ctx.globalAlpha = tintOpacity / 100;
+      ctx.fillStyle = tint;
+      ctx.fillRect(0, 0, cssW, cssH);
+      ctx.restore();
+    };
+    const drawVignette = () => {
+      const v = pfx.vignette;
+      if (!v?.enabled) return;
+      ctx.save();
+      const grad = ctx.createRadialGradient(
+        cssW / 2,
+        cssH / 2,
+        Math.min(cssW, cssH) * 0.25,
+        cssW / 2,
+        cssH / 2,
+        Math.max(cssW, cssH) * 0.75
+      );
+      grad.addColorStop(0, "rgba(0,0,0,0)");
+      grad.addColorStop(1, `rgba(0,0,0,${v.intensity / 100})`);
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, cssW, cssH);
+      ctx.restore();
+    };
+    const drawScanLines = () => {
+      const s = pfx.scanLines;
+      if (!s?.enabled) return;
+      ctx.save();
+      ctx.globalAlpha = s.intensity / 100;
+      ctx.fillStyle = "#000000";
+      for (let y = 0; y < cssH; y += 3) {
+        ctx.fillRect(0, y, cssW, 1);
+      }
+      ctx.restore();
+    };
+    const drawBloom = () => {
+      const b = pfx.bloom;
+      if (!b?.enabled) return;
+      ctx.save();
+      ctx.filter = "blur(6px)";
+      ctx.globalCompositeOperation = "screen";
+      ctx.globalAlpha = b.intensity / 100;
+      ctx.drawImage(canvas, 0, 0, canvas.width, canvas.height, 0, 0, cssW, cssH);
+      ctx.restore();
+    };
+    const render2 = (t) => {
+      if (disposed) return;
+      ctx.clearRect(0, 0, cssW, cssH);
+      drawBackground();
+      if (renderMode === "characters") drawCharacters(t / 1e3);
+      else drawContour(t / 1e3);
+      drawTint();
+      drawBloom();
+      drawVignette();
+      drawScanLines();
+      raf = requestAnimationFrame(render2);
+    };
+    const onResize = () => resize();
+    img.onload = () => {
+      resize();
+      raf = requestAnimationFrame(render2);
+    };
+    if (img.complete && img.naturalWidth > 0) {
+      resize();
+      raf = requestAnimationFrame(render2);
+    }
+    const ro = new ResizeObserver(onResize);
+    ro.observe(container);
+    return () => {
+      disposed = true;
+      cancelAnimationFrame(raf);
+      ro.disconnect();
+    };
+  }, [src]);
+  return /* @__PURE__ */ jsx("div", { ref: containerRef, className, children: /* @__PURE__ */ jsx("canvas", { ref: canvasRef, className: "block h-full w-full" }) });
+}
 function useLenis(enabled = true) {
   useEffect(() => {
     if (!enabled || typeof window === "undefined") return;
@@ -418,6 +755,31 @@ function useLenis(enabled = true) {
     };
   }, [enabled]);
 }
+const PHOSPHOR_CONFIG = {
+  renderMode: "characters",
+  bgMode: "solid",
+  bgColor: "#000000",
+  cellSize: 9,
+  coverage: 100,
+  invert: false,
+  charSet: " .:-=+*#%@",
+  brightness: 0,
+  contrast: 115,
+  saturation: 100,
+  grayscale: 0,
+  tint: "#33ff99",
+  tintOpacity: 18,
+  overlayBlend: "screen",
+  color: "#18FF85",
+  pfx: {
+    vignette: { enabled: true, intensity: 50 },
+    scanLines: { enabled: true, intensity: 45 },
+    bloom: { enabled: true, intensity: 25 }
+  },
+  animStyle: "flicker",
+  animSpeed: 100,
+  animIntensity: 60
+};
 function Counter({ to, suffix = "" }) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
@@ -518,7 +880,10 @@ const PLATFORM_FEATURES = [
     name: "inner·match",
     tag: "Matching",
     desc: "Co-founder, mentor, and investor matching inside a closed circle. Trust-based connections.",
-    media: { type: "image", src: "/editorial/circle-portrait.jpg" }
+    media: {
+      type: "video",
+      src: "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260508_215831_c6a8989c-d716-4d8d-8745-e972a2eec711.mp4"
+    }
   },
   {
     id: "capital",
@@ -716,44 +1081,77 @@ function Home() {
           ] }),
           /* @__PURE__ */ jsx(FadeIn, { delay: 0.15, children: /* @__PURE__ */ jsxs("div", { className: "relative aspect-[519/1002] overflow-hidden border border-border/15 bg-black", children: [
             /* @__PURE__ */ jsx(
-              "img",
+              ProceduralPortrait,
               {
                 src: "/editorial/circle-portrait.jpg",
-                alt: "A founding member of the circle",
-                className: "size-full object-cover",
-                loading: "lazy"
+                config: PHOSPHOR_CONFIG,
+                className: "size-full"
               }
             ),
-            /* @__PURE__ */ jsx("div", { className: "pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" })
+            /* @__PURE__ */ jsx("div", { className: "pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/50 via-transparent to-transparent" }),
+            /* @__PURE__ */ jsx("p", { className: "pointer-events-none absolute bottom-4 left-4 font-mono text-[9px] uppercase tracking-widest text-[#18FF85]/70", children: "Signal · Founding member" })
           ] }) })
         ] })
       ] }),
       /* @__PURE__ */ jsx("section", { id: "section-03", children: /* @__PURE__ */ jsx(PlatformFeatures, { features: PLATFORM_FEATURES, restModules: MODULES.slice(3) }) }),
-      /* @__PURE__ */ jsxs("section", { id: "section-04", className: "px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15", children: [
-        /* @__PURE__ */ jsx(SectionLabel, { label: "04 · What this is", meta: "The point" }),
-        /* @__PURE__ */ jsx(FadeIn, { children: /* @__PURE__ */ jsx(
-          "div",
-          {
-            className: "max-w-[46ch] text-foreground/90",
-            style: { fontSize: "clamp(19px, 2.4vw, 26px)", lineHeight: 1.55 },
-            children: /* @__PURE__ */ jsx("p", { children: "Big things start here. New ideas are discussed here, tested here, and supported here — by people who can actually build them and fund them." })
-          }
-        ) })
-      ] }),
-      /* @__PURE__ */ jsxs("section", { id: "section-05", className: "px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15", children: [
-        /* @__PURE__ */ jsx(SectionLabel, { label: "05 · Entry", meta: "By invitation" }),
-        /* @__PURE__ */ jsxs(FadeIn, { children: [
-          /* @__PURE__ */ jsx("h2", { className: "font-display font-serif italic text-4xl md:text-5xl max-w-2xl mb-8 text-balance", children: "Entry is by invitation. Always." }),
-          /* @__PURE__ */ jsx("p", { className: "max-w-[65ch] text-lg leading-[1.7] text-foreground/90 mb-20", children: "There are no tickets, no tiers, and no public list. Members are put forward from inside the circle, considered with care, and invited personally." })
+      /* @__PURE__ */ jsxs("div", { className: "relative overflow-hidden bg-black border-t border-border/15", children: [
+        /* @__PURE__ */ jsxs("div", { className: "absolute inset-x-0 top-0 h-[85vh] md:h-[95vh] z-0", "aria-hidden": "true", children: [
+          /* @__PURE__ */ jsx(
+            "video",
+            {
+              autoPlay: true,
+              muted: true,
+              loop: true,
+              playsInline: true,
+              className: "h-full w-full object-cover",
+              src: "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260406_133058_0504132a-0cf3-4450-a370-8ea3b05c95d4.mp4"
+            }
+          ),
+          /* @__PURE__ */ jsx("div", { className: "pointer-events-none absolute inset-0 bg-gradient-to-b from-black/55 via-black/60 to-black" })
         ] }),
-        /* @__PURE__ */ jsx("div", { className: "max-w-3xl", children: [
-          { label: "Your name", line: "Someone inside the circle puts your name forward." },
-          { label: "Consideration", line: "We take our time. Fit beats fame." },
-          { label: "Invitation", line: "If it is right, you hear from us directly." }
-        ].map((item, i) => /* @__PURE__ */ jsx(FadeIn, { delay: i * 0.1, children: /* @__PURE__ */ jsxs("div", { className: "flex flex-col md:flex-row md:items-baseline gap-2 md:gap-12 py-6 border-t border-border/15 last:border-b", children: [
-          /* @__PURE__ */ jsx("div", { className: "font-mono text-xs uppercase tracking-widest text-muted-foreground w-full md:w-48 flex-shrink-0", children: item.label }),
-          /* @__PURE__ */ jsx("p", { className: "text-lg text-foreground/90", children: item.line })
-        ] }) }, item.label)) })
+        /* @__PURE__ */ jsxs("section", { id: "section-04", className: "relative z-10 px-6 md:px-12 lg:px-[10%] pt-28 md:pt-36 pb-24", children: [
+          /* @__PURE__ */ jsxs("div", { className: "flex items-baseline justify-between gap-6 pb-6 mb-16 border-b border-white/15 font-mono text-xs uppercase tracking-widest text-white/50", children: [
+            /* @__PURE__ */ jsx("span", { children: "04 · What this is" }),
+            /* @__PURE__ */ jsx("span", { className: "whitespace-nowrap", children: "The point" })
+          ] }),
+          /* @__PURE__ */ jsx(
+            WordsPullUp,
+            {
+              text: "Big things start here.",
+              className: "font-display font-serif italic text-4xl md:text-5xl lg:text-6xl text-[var(--bone)] max-w-3xl mb-10 text-balance"
+            }
+          ),
+          /* @__PURE__ */ jsx(
+            ScrollTextReveal,
+            {
+              text: "New ideas are discussed here, tested here, and supported here — by people who can actually build them and fund them.",
+              className: "max-w-[46ch] text-[var(--bone)]",
+              style: { fontSize: "clamp(19px, 2.4vw, 26px)", lineHeight: 1.55, opacity: 0.85 }
+            }
+          )
+        ] }),
+        /* @__PURE__ */ jsxs("section", { id: "section-05", className: "relative z-10 px-6 md:px-12 lg:px-[10%] pt-8 pb-32 md:pb-48", children: [
+          /* @__PURE__ */ jsxs("div", { className: "flex items-baseline justify-between gap-6 pb-6 mb-16 border-b border-white/15 font-mono text-xs uppercase tracking-widest text-white/50", children: [
+            /* @__PURE__ */ jsx("span", { children: "05 · Entry" }),
+            /* @__PURE__ */ jsx("span", { className: "whitespace-nowrap", children: "By invitation" })
+          ] }),
+          /* @__PURE__ */ jsx(
+            WordsPullUp,
+            {
+              text: "Entry is by invitation. Always.",
+              className: "font-display font-serif italic text-4xl md:text-5xl max-w-2xl mb-8 text-balance text-[var(--bone)]"
+            }
+          ),
+          /* @__PURE__ */ jsx(FadeIn, { delay: 0.2, children: /* @__PURE__ */ jsx("p", { className: "max-w-[65ch] text-lg leading-[1.7] text-[var(--bone)]/80 mb-20", children: "There are no tickets, no tiers, and no public list. Members are put forward from inside the circle, considered with care, and invited personally." }) }),
+          /* @__PURE__ */ jsx("div", { className: "max-w-3xl", children: [
+            { label: "Your name", line: "Someone inside the circle puts your name forward." },
+            { label: "Consideration", line: "We take our time. Fit beats fame." },
+            { label: "Invitation", line: "If it is right, you hear from us directly." }
+          ].map((item, i) => /* @__PURE__ */ jsx(FadeIn, { delay: i * 0.1, children: /* @__PURE__ */ jsxs("div", { className: "flex flex-col md:flex-row md:items-baseline gap-2 md:gap-12 py-6 border-t border-white/15 last:border-b", children: [
+            /* @__PURE__ */ jsx("div", { className: "font-mono text-xs uppercase tracking-widest text-white/50 w-full md:w-48 flex-shrink-0", children: item.label }),
+            /* @__PURE__ */ jsx("p", { className: "text-lg text-[var(--bone)]/90", children: item.line })
+          ] }) }, item.label)) })
+        ] })
       ] }),
       /* @__PURE__ */ jsxs(
         "section",
@@ -762,13 +1160,17 @@ function Home() {
           className: "px-6 md:px-12 lg:px-[10%] py-32 md:py-48 border-t border-border/15 bg-[var(--ink)] text-[var(--bone)] transition-colors duration-700 overflow-hidden relative",
           children: [
             /* @__PURE__ */ jsx("div", { className: "absolute top-0 right-0 size-[500px] bg-[var(--inner-green)]/[0.03] blur-3xl pointer-events-none" }),
-            /* @__PURE__ */ jsxs(FadeIn, { children: [
-              /* @__PURE__ */ jsxs("div", { className: "flex items-baseline justify-between gap-6 pb-6 mb-20 border-b border-white/15 font-mono text-xs uppercase tracking-widest opacity-60", children: [
-                /* @__PURE__ */ jsx("span", { children: "06 · The gathering" }),
-                /* @__PURE__ */ jsx("span", { className: "whitespace-nowrap", children: "Sep 2026 · İstanbul" })
-              ] }),
-              /* @__PURE__ */ jsx("h2", { className: "font-display font-serif italic text-4xl md:text-5xl lg:text-6xl max-w-3xl mb-24 text-balance", children: "The first inner.hub gathering. İstanbul, September 2026." })
-            ] }),
+            /* @__PURE__ */ jsx(FadeIn, { children: /* @__PURE__ */ jsxs("div", { className: "flex items-baseline justify-between gap-6 pb-6 mb-20 border-b border-white/15 font-mono text-xs uppercase tracking-widest opacity-60", children: [
+              /* @__PURE__ */ jsx("span", { children: "06 · The gathering" }),
+              /* @__PURE__ */ jsx("span", { className: "whitespace-nowrap", children: "Sep 2026 · İstanbul" })
+            ] }) }),
+            /* @__PURE__ */ jsx(
+              WordsPullUp,
+              {
+                text: "The first inner.hub gathering. İstanbul, September 2026.",
+                className: "font-display font-serif italic text-4xl md:text-5xl lg:text-6xl max-w-3xl mb-24 text-balance"
+              }
+            ),
             /* @__PURE__ */ jsxs("div", { className: "flex flex-col lg:flex-row lg:items-center gap-16 mb-24", children: [
               /* @__PURE__ */ jsxs("div", { className: "grid grid-cols-3 gap-6 md:gap-10 min-w-0 lg:flex-1", children: [
                 /* @__PURE__ */ jsx(StatItem, { n: 34, label: "People" }),
@@ -783,17 +1185,21 @@ function Home() {
       ),
       /* @__PURE__ */ jsxs("section", { id: "section-07", className: "px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15", children: [
         /* @__PURE__ */ jsx(SectionLabel, { label: "07 · What's next", meta: "In time" }),
-        /* @__PURE__ */ jsxs(FadeIn, { children: [
-          /* @__PURE__ */ jsx("h2", { className: "font-display font-serif italic text-4xl md:text-5xl max-w-2xl mb-8 text-balance", children: "hub is where it starts." }),
-          /* @__PURE__ */ jsx(
-            "p",
-            {
-              className: "max-w-[46ch] text-foreground/90",
-              style: { fontSize: "clamp(19px, 2.4vw, 26px)", lineHeight: 1.55 },
-              children: "We are building something bigger, step by step. We announce things when they are real. There is more."
-            }
-          )
-        ] })
+        /* @__PURE__ */ jsx(
+          WordsPullUp,
+          {
+            text: "hub is where it starts.",
+            className: "font-display font-serif italic text-4xl md:text-5xl max-w-2xl mb-8 text-balance"
+          }
+        ),
+        /* @__PURE__ */ jsx(FadeIn, { delay: 0.2, children: /* @__PURE__ */ jsx(
+          "p",
+          {
+            className: "max-w-[46ch] text-foreground/90",
+            style: { fontSize: "clamp(19px, 2.4vw, 26px)", lineHeight: 1.55 },
+            children: "We are building something bigger, step by step. We announce things when they are real. There is more."
+          }
+        ) })
       ] })
     ] }),
     /* @__PURE__ */ jsxs("footer", { id: "site-footer", className: "bg-[var(--ink)] px-6 md:px-12 lg:px-[10%] pt-20 pb-6 flex flex-col gap-16 overflow-hidden", children: [
