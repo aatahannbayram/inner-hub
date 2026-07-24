@@ -10,6 +10,33 @@ import {
   Hash,
   ArrowUp,
 } from "lucide-react";
+import { ProceduralPortrait, type PortraitConfig } from "@/components/panel/ProceduralPortrait";
+
+const PHOSPHOR_CONFIG: PortraitConfig = {
+  renderMode: "characters",
+  bgMode: "solid",
+  bgColor: "#0A0A0A",
+  cellSize: 10,
+  coverage: 100,
+  invert: false,
+  charSet: " .:-=+*#%@",
+  brightness: 0,
+  contrast: 115,
+  saturation: 100,
+  grayscale: 0,
+  tint: "#33ff99",
+  tintOpacity: 18,
+  overlayBlend: "screen",
+  color: "#18FF85",
+  pfx: {
+    vignette: { enabled: true, intensity: 50 },
+    scanLines: { enabled: true, intensity: 45 },
+    bloom: { enabled: true, intensity: 25 },
+  },
+  animStyle: "flicker",
+  animSpeed: 100,
+  animIntensity: 60,
+};
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -184,6 +211,25 @@ export default function Pulse() {
           <div className="flex items-center gap-2 border border-[var(--inner-green)]/30 bg-[var(--inner-green)]/5 px-3 py-2">
             <Radio className="size-3 text-[var(--inner-green)]" />
             <span className="font-mono text-[9px] uppercase tracking-widest text-[var(--inner-green)]">Canlı</span>
+          </div>
+        </div>
+      </FadeIn>
+
+      {/* Phosphor portrait — the community's pulse, rendered as a live signal */}
+      <FadeIn delay={0.03}>
+        <div className="relative overflow-hidden border border-[var(--ink)]/[0.08]">
+          <ProceduralPortrait
+            src="/editorial/circle-portrait.jpg"
+            config={PHOSPHOR_CONFIG}
+            className="aspect-[21/9] w-full md:aspect-[24/9]"
+          />
+          <div className="pointer-events-none absolute inset-0 flex flex-col justify-end p-6 md:p-8">
+            <p className="mb-1 font-mono text-[9px] uppercase tracking-widest text-[var(--inner-green)]/70">
+              Phosphor · canlı sinyal
+            </p>
+            <p className="max-w-[26ch] font-serif text-2xl text-[var(--bone)] md:text-3xl" style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 100 }}>
+              Daire her an nefes alıyor.
+            </p>
           </div>
         </div>
       </FadeIn>

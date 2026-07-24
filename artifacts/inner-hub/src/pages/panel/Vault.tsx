@@ -15,6 +15,7 @@ import {
   Tag,
   Clock,
 } from "lucide-react";
+import { ProceduralPortrait, type PortraitConfig } from "@/components/panel/ProceduralPortrait";
 import {
   Carousel,
   CarouselContent,
@@ -30,6 +31,27 @@ import {
   DrawerDescription,
 } from "@/components/ui/drawer";
 import { motion } from "framer-motion";
+
+const D60_HERO_CONFIG: PortraitConfig = {
+  renderMode: "contour",
+  bgMode: "blur",
+  bgBlur: 12,
+  bgOpacity: 46,
+  cellSize: 34,
+  coverage: 64,
+  invert: true,
+  saturation: 100,
+  grayscale: 0,
+  tintOpacity: 0,
+  color: "#0A0A0A",
+  pfx: {
+    vignette: { enabled: true, intensity: 38 },
+    bloom: { enabled: true, intensity: 25 },
+  },
+  animStyle: "wave",
+  animSpeed: 100,
+  animIntensity: 60,
+};
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -357,6 +379,25 @@ export default function Vault() {
             <Upload className="size-3.5" />
             Paylaş
           </button>
+        </div>
+      </FadeIn>
+
+      {/* D60-hero portrait — topographic contour rendering of the archive's depth */}
+      <FadeIn delay={0.03}>
+        <div className="relative overflow-hidden border border-[var(--ink)]/[0.08] bg-[var(--bone)]">
+          <ProceduralPortrait
+            src="/editorial/circle-portrait.jpg"
+            config={D60_HERO_CONFIG}
+            className="aspect-[21/9] w-full md:aspect-[24/9]"
+          />
+          <div className="pointer-events-none absolute inset-0 flex flex-col justify-end p-6 md:p-8">
+            <p className="mb-1 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/40">
+              D60 · arşivin haritası
+            </p>
+            <p className="max-w-[26ch] font-serif text-2xl text-[var(--ink)] md:text-3xl" style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 100 }}>
+              Her belge, dairenin bir katmanı.
+            </p>
+          </div>
         </div>
       </FadeIn>
 

@@ -4,6 +4,18 @@ import { Link } from "wouter";
 import { FadeIn } from "@/components/FadeIn";
 import { EditorialCard } from "@/components/panel/EditorialCard";
 import { apiUrl } from "@/lib/api";
+import { useScrubVideo } from "@/hooks/useScrubVideo";
+import { useTypewriter } from "@/hooks/useTypewriter";
+
+const DASHBOARD_VIDEO_SRC =
+  "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260530_042513_df96a13b-6155-4f6e-8b93-c9dee66fba08.mp4";
+
+const QUICK_NAV = [
+  { label: "inner·signal'i gör", href: "/panel/signal" },
+  { label: "inner·match'e git", href: "/panel/match" },
+  { label: "inner·capital'i incele", href: "/panel/capital" },
+  { label: "Etkinlikleri gör", href: "/panel/events" },
+];
 
 const EDITORIAL_IMG = "/editorial/circle-dusk.png";
 const EDITORIAL_PORTRAIT = "/editorial/circle-portrait.jpg";
@@ -77,6 +89,80 @@ function PerkCard({ perk }: { perk: typeof mockPerks[0] }) {
 type DashCourse = { id: number; title: string; progressPct: number };
 type DashEvent = { id: number; title: string };
 
+// ─── Hero ─────────────────────────────────────────────────────────────────────
+
+function DashboardHero({ userName }: { userName: string }) {
+  const scrubVideoRef = useScrubVideo();
+  const { displayed: typedGreeting, done: typedDone } = useTypewriter(
+    `Selam, ${userName}. Daire hareketli. Peki bugün ne inşa ediyoruz?`,
+  );
+
+  return (
+    <div
+      className="relative -mx-4 -mt-6 overflow-hidden sm:-mx-6 lg:-mx-8 lg:-mt-8"
+      style={{ height: "min(70vh, 620px)", minHeight: 440 }}
+    >
+      <video
+        ref={scrubVideoRef}
+        muted
+        playsInline
+        preload="auto"
+        className="absolute inset-0 h-full w-full object-cover"
+        style={{ objectPosition: "70% center" }}
+        src={DASHBOARD_VIDEO_SRC}
+      />
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[var(--ink)]/40" />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[var(--ink)]/85 via-[var(--ink)]/25 to-transparent"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[var(--ink)]/55 via-transparent to-transparent"
+      />
+
+      <div className="relative z-10 flex h-full flex-col justify-end px-6 pb-10 md:px-12 md:pb-14">
+        <p
+          aria-hidden="true"
+          className="select-none mb-4 max-w-[46ch] font-serif italic leading-[1.3] text-white/35"
+          style={{ fontSize: "clamp(16px, 2.2vw, 22px)", filter: "blur(3px)" }}
+        >
+          İyi seçilenler burada buluşur,
+          <br />
+          {userName}, bugün de aralarındasın.
+        </p>
+        <p
+          className="mb-6 max-w-[42ch] text-white [text-shadow:0_2px_20px_rgba(0,0,0,0.5)]"
+          style={{ fontSize: "clamp(22px, 3.4vw, 34px)", lineHeight: 1.25, minHeight: 44 }}
+        >
+          {typedGreeting}
+          {!typedDone && (
+            <span className="animate-blink ml-[2px] inline-block h-[0.9em] w-[2px] bg-white align-middle" />
+          )}
+        </p>
+
+        <div className="flex flex-wrap gap-y-2">
+          {QUICK_NAV.map((item) => (
+            <Link key={item.href} href={item.href}>
+              <a className="mx-[0.2em] mb-[0.4em] inline-flex items-center justify-center whitespace-nowrap rounded-full border border-black/10 bg-white px-4 py-[0.5em] font-mono text-[11px] uppercase tracking-widest text-black transition-colors duration-200 hover:bg-black hover:text-white sm:px-5 sm:text-[12px]">
+                {item.label}
+              </a>
+            </Link>
+          ))}
+          <Link href="/panel/profile">
+            <a className="mx-[0.2em] mb-[0.4em] inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full border border-white bg-transparent px-4 py-[0.5em] font-mono text-[11px] uppercase tracking-widest text-white transition-colors duration-200 hover:bg-white hover:text-black sm:px-5 sm:text-[12px]">
+              Profilini tamamla
+              <ArrowRight className="size-3" />
+            </a>
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Main page ────────────────────────────────────────────────────────────────
+
 export default function Dashboard({ userName = "Ata" }: { userName?: string }) {
   const [courses, setCourses] = useState<DashCourse[]>([]);
   const [events, setEvents] = useState<DashEvent[]>([]);
@@ -120,45 +206,7 @@ export default function Dashboard({ userName = "Ata" }: { userName?: string }) {
 
   return (
     <div className="space-y-10 max-w-5xl">
-      <FadeIn>
-        <div>
-          <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40 mb-2">
-            inner·hub
-          </p>
-          <h1
-            className="font-serif font-display text-4xl md:text-5xl text-[var(--ink)]"
-            style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 100 }}
-          >
-            Hoş geldin, {userName}
-            <span className="inline-block size-[0.35em] translate-y-[0.08em] ml-[0.05em] bg-[var(--inner-green)]" />
-          </h1>
-          <p className="mt-2 text-sm text-[var(--ink)]/50 font-light">
-            inner·hub yolculuğundaki güncel durumun.
-          </p>
-        </div>
-      </FadeIn>
-
-      <FadeIn delay={0.04}>
-        <div className="relative overflow-hidden border border-[var(--ink)]/[0.08]">
-          <img
-            src={EDITORIAL_IMG}
-            alt="inner·hub editorial"
-            className="aspect-[21/9] w-full object-cover md:aspect-[24/9]"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-[var(--ink)]/75 via-[var(--ink)]/35 to-transparent" />
-          <div className="absolute inset-0 flex flex-col justify-end p-6 md:p-8">
-            <p className="mb-2 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)]/50">
-              The circle · İstanbul
-            </p>
-            <p
-              className="max-w-[18ch] font-serif text-3xl text-[var(--bone)] md:text-4xl"
-              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 100 }}
-            >
-              What comes next starts here.
-            </p>
-          </div>
-        </div>
-      </FadeIn>
+      <DashboardHero userName={userName} />
 
       <FadeIn delay={0.06}>
         <section>
@@ -168,8 +216,8 @@ export default function Dashboard({ userName = "Ata" }: { userName?: string }) {
             </p>
           </div>
           <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-            {spotlightCards.map((card) => (
-              <EditorialCard key={card.href} {...card} tone="light" cta="Aç" />
+            {spotlightCards.map((card, i) => (
+              <EditorialCard key={card.href} {...card} tone="light" cta="Aç" index={i + 1} />
             ))}
           </div>
         </section>

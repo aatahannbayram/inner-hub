@@ -11,7 +11,34 @@ import { DiagramCircle } from "@/components/DiagramCircle";
 import { Preloader } from "@/components/Preloader";
 import { FloatingNavbar } from "@/components/FloatingNavbar";
 import { PlatformFeatures, type PlatformFeature } from "@/components/PlatformFeatures";
+import { ProceduralPortrait, type PortraitConfig } from "@/components/panel/ProceduralPortrait";
 import { useLenis } from "@/hooks/useLenis";
+
+const PHOSPHOR_CONFIG: PortraitConfig = {
+  renderMode: "characters",
+  bgMode: "solid",
+  bgColor: "#000000",
+  cellSize: 9,
+  coverage: 100,
+  invert: false,
+  charSet: " .:-=+*#%@",
+  brightness: 0,
+  contrast: 115,
+  saturation: 100,
+  grayscale: 0,
+  tint: "#33ff99",
+  tintOpacity: 18,
+  overlayBlend: "screen",
+  color: "#18FF85",
+  pfx: {
+    vignette: { enabled: true, intensity: 50 },
+    scanLines: { enabled: true, intensity: 45 },
+    bloom: { enabled: true, intensity: 25 },
+  },
+  animStyle: "flicker",
+  animSpeed: 100,
+  animIntensity: 60,
+};
 
 // ─── Animated counter ─────────────────────────────────────────────────────────
 function Counter({ to, suffix = "" }: { to: number; suffix?: string }) {
@@ -349,13 +376,15 @@ export default function Home() {
 
             <FadeIn delay={0.15}>
               <div className="relative aspect-[519/1002] overflow-hidden border border-border/15 bg-black">
-                <img
+                <ProceduralPortrait
                   src="/editorial/circle-portrait.jpg"
-                  alt="A founding member of the circle"
-                  className="size-full object-cover"
-                  loading="lazy"
+                  config={PHOSPHOR_CONFIG}
+                  className="size-full"
                 />
-                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+                <p className="pointer-events-none absolute bottom-4 left-4 font-mono text-[9px] uppercase tracking-widest text-[#18FF85]/70">
+                  Signal · Founding member
+                </p>
               </div>
             </FadeIn>
           </div>

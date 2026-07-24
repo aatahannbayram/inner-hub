@@ -17,6 +17,8 @@ type EditorialCardProps = {
   className?: string;
   /** Visual-only frame without CTA */
   mediaOnly?: boolean;
+  /** 1-based position in a set — renders as a small editorial index mark */
+  index?: number;
 };
 
 /**
@@ -34,6 +36,7 @@ export function EditorialCard({
   tone = "light",
   className,
   mediaOnly = false,
+  index,
 }: EditorialCardProps) {
   const dark = tone === "dark";
   const reduce = useReducedMotion();
@@ -45,13 +48,19 @@ export function EditorialCard({
       viewport={{ once: true, margin: "-24px" }}
       transition={{ duration: reduce ? 0 : 0.5, ease: [0.16, 1, 0.3, 1] }}
       className={cn(
-        "group flex h-full flex-col overflow-hidden border transition-colors duration-300",
+        "group relative flex h-full flex-col overflow-hidden border transition-colors duration-300",
         dark
           ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--bone)] hover:border-[var(--ink)]"
           : "border-[var(--ink)]/[0.08] bg-[var(--bone)] text-[var(--ink)] hover:border-[var(--ink)]/25",
         className,
       )}
     >
+      {/* Top accent — draws in on hover, the one recurring "signature" mark across the panel */}
+      <span
+        aria-hidden="true"
+        className="absolute inset-x-0 top-0 z-10 h-[2px] origin-left scale-x-0 bg-[var(--inner-green)] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-x-100"
+      />
+
       {imageSrc && (
         <div className="relative aspect-[16/10] overflow-hidden">
           <img
@@ -68,6 +77,17 @@ export function EditorialCard({
                 : "bg-gradient-to-t from-[var(--bone)]/40 via-transparent to-transparent",
             )}
           />
+          {typeof index === "number" && (
+            <span
+              className={cn(
+                "absolute right-3 top-3 font-mono text-[10px] tabular-nums tracking-widest",
+                dark ? "text-[var(--bone)]/50" : "text-[var(--bone)]",
+              )}
+              style={{ textShadow: "0 1px 8px rgba(0,0,0,0.5)" }}
+            >
+              {String(index).padStart(2, "0")}
+            </span>
+          )}
         </div>
       )}
 
@@ -84,7 +104,7 @@ export function EditorialCard({
             </p>
           )}
           <h3
-            className="font-serif text-xl leading-snug"
+            className="font-serif text-2xl italic leading-snug"
             style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 100 }}
           >
             {title}
@@ -102,11 +122,14 @@ export function EditorialCard({
           {href && (
             <span
               className={cn(
-                "mt-auto flex items-center gap-1.5 pt-3 font-mono text-[10px] uppercase tracking-widest transition-opacity",
-                dark ? "text-[var(--bone)]/70 group-hover:text-[var(--bone)]" : "text-[var(--ink)]/50 group-hover:text-[var(--ink)]",
+                "mt-auto flex items-center gap-1.5 pt-3 font-mono text-[10px] uppercase tracking-widest transition-all",
+                dark
+                  ? "text-[var(--bone)]/70 group-hover:text-[var(--inner-green)]"
+                  : "text-[var(--ink)]/50 group-hover:text-[var(--inner-green)]",
               )}
             >
-              {cta} <ArrowRight className="size-3" />
+              {cta}
+              <ArrowRight className="size-3 transition-transform duration-300 group-hover:translate-x-1" />
             </span>
           )}
         </div>

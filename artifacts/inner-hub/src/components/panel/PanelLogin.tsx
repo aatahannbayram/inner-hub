@@ -3,6 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 import { Lockup } from "@/components/Lockup";
 import { apiUrl } from "@/lib/api";
+import { useScrubVideo } from "@/hooks/useScrubVideo";
+import { useTypewriter } from "@/hooks/useTypewriter";
+
+const LOGIN_VIDEO_SRC =
+  "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260530_042513_df96a13b-6155-4f6e-8b93-c9dee66fba08.mp4";
 
 type SessionUser = { email: string; role: "member" | "admin"; name: string };
 
@@ -89,9 +94,24 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [googleReady, setGoogleReady] = useState(false);
+  const [emailCopied, setEmailCopied] = useState(false);
   const googleButtonRef = useRef<HTMLDivElement>(null);
   const inviteCodeRef = useRef(inviteCode);
   const modeRef = useRef(mode);
+  const scrubVideoRef = useScrubVideo();
+  const { displayed: typedIntro, done: typedDone } = useTypewriter(
+    "Girişimciler, yatırımcılar ve kuranlar için kapalı bir daire. Şimdi, sırada ne var?",
+  );
+
+  const copySupportEmail = async () => {
+    try {
+      await navigator.clipboard.writeText("destek@inner.digital");
+      setEmailCopied(true);
+      window.setTimeout(() => setEmailCopied(false), 1600);
+    } catch {
+      setEmailCopied(false);
+    }
+  };
 
   useEffect(() => {
     inviteCodeRef.current = inviteCode;
@@ -180,12 +200,13 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
   return (
     <div className="relative flex h-screen flex-col overflow-hidden bg-black text-white">
       <video
-        autoPlay
+        ref={scrubVideoRef}
         muted
-        loop
         playsInline
+        preload="auto"
         className="absolute inset-0 z-0 h-full w-full object-cover"
-        src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260406_094145_4a271a6c-3869-4f1c-8aa7-aeb0cb227994.mp4"
+        style={{ objectPosition: "70% center" }}
+        src={LOGIN_VIDEO_SRC}
       />
       <div
         aria-hidden="true"
@@ -215,6 +236,41 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
           Ana sayfa
         </a>
       </header>
+
+      {/* Ambient intro copy — floats above the scrub-video, independent of the pinned login form below */}
+      <div className="pointer-events-none absolute left-6 top-24 z-10 hidden max-w-md md:left-12 md:top-28 md:block lg:left-[10%] lg:top-32">
+        <div>
+          <p
+            aria-hidden="true"
+            className="select-none mb-5 font-serif italic leading-[1.3] text-white/40"
+            style={{ fontSize: "clamp(18px, 2.4vw, 26px)", filter: "blur(3px)" }}
+          >
+            Sana özel bir davet,
+            <br />
+            inner·hub'ın dairesine hoş geldin.
+          </p>
+          <p
+            className="text-white"
+            style={{ fontSize: "clamp(18px, 2.4vw, 26px)", lineHeight: 1.35, minHeight: 54 }}
+          >
+            {typedIntro}
+            {!typedDone && (
+              <span className="animate-blink ml-[2px] inline-block h-[1.1em] w-[2px] bg-white align-middle" />
+            )}
+          </p>
+          <button
+            type="button"
+            onClick={copySupportEmail}
+            className="pointer-events-auto mt-6 inline-flex items-center gap-2 rounded-full border border-white/40 px-5 py-2.5 font-mono text-[11px] uppercase tracking-widest text-white transition-colors duration-200 hover:bg-white hover:text-black"
+          >
+            {emailCopied ? "Kopyalandı" : "Bize ulaş: destek@inner.digital"}
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <rect x="8" y="8" width="13" height="13" rx="1.5" stroke="currentColor" strokeWidth="1.6" />
+              <rect x="3" y="3" width="13" height="13" rx="1.5" stroke="currentColor" strokeWidth="1.6" />
+            </svg>
+          </button>
+        </div>
+      </div>
 
       <main className="relative z-10 flex min-h-0 flex-1 items-end overflow-y-auto px-6 pb-12 md:px-12 md:pb-20 lg:px-[10%]">
         <div className="w-full max-w-md">
