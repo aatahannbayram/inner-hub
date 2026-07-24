@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { Linkedin, Instagram, Zap, Users, TrendingUp, BookOpen, Radio, Fingerprint, Code2, Target } from "lucide-react";
 import { motion, useInView, useScroll, useTransform } from "framer-motion";
 import { FadeIn } from "@/components/FadeIn";
+import { WordsPullUp } from "@/components/WordsPullUp";
+import { ScrollTextReveal } from "@/components/ScrollTextReveal";
 import { Lockup } from "@/components/Lockup";
 import { Grain } from "@/components/Grain";
 import { IndexRail } from "@/components/IndexRail";
@@ -361,47 +363,68 @@ export default function Home() {
           <PlatformFeatures features={PLATFORM_FEATURES} restModules={MODULES.slice(3)} />
         </section>
 
-        {/* ── 04 · What this is ── */}
-        <section id="section-04" className="px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15">
-          <SectionLabel label="04 · What this is" meta="The point" />
-          <FadeIn>
-            <div
-              className="max-w-[46ch] text-foreground/90"
-              style={{ fontSize: "clamp(19px, 2.4vw, 26px)", lineHeight: 1.55 }}
-            >
-              <p>
-                Big things start here. New ideas are discussed here, tested here, and supported here — by people who can actually build them and fund them.
-              </p>
-            </div>
-          </FadeIn>
-        </section>
-
-        {/* ── 05 · Entry ── */}
-        <section id="section-05" className="px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15">
-          <SectionLabel label="05 · Entry" meta="By invitation" />
-          <FadeIn>
-            <h2 className="font-display font-serif italic text-4xl md:text-5xl max-w-2xl mb-8 text-balance">
-              Entry is by invitation. Always.
-            </h2>
-            <p className="max-w-[65ch] text-lg leading-[1.7] text-foreground/90 mb-20">
-              There are no tickets, no tiers, and no public list. Members are put forward from inside the circle, considered with care, and invited personally.
-            </p>
-          </FadeIn>
-          <div className="max-w-3xl">
-            {[
-              { label: "Your name", line: "Someone inside the circle puts your name forward." },
-              { label: "Consideration", line: "We take our time. Fit beats fame." },
-              { label: "Invitation", line: "If it is right, you hear from us directly." },
-            ].map((item, i) => (
-              <FadeIn key={item.label} delay={i * 0.1}>
-                <div className="flex flex-col md:flex-row md:items-baseline gap-2 md:gap-12 py-6 border-t border-border/15 last:border-b">
-                  <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground w-full md:w-48 flex-shrink-0">{item.label}</div>
-                  <p className="text-lg text-foreground/90">{item.line}</p>
-                </div>
-              </FadeIn>
-            ))}
+        {/* ── 04–05 · What this is → Entry (one continuous dark, video-anchored span) ── */}
+        <div className="relative overflow-hidden bg-black border-t border-border/15">
+          <div className="absolute inset-x-0 top-0 h-[85vh] md:h-[95vh] z-0" aria-hidden="true">
+            <video
+              autoPlay
+              muted
+              loop
+              playsInline
+              className="h-full w-full object-cover"
+              src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260406_133058_0504132a-0cf3-4450-a370-8ea3b05c95d4.mp4"
+            />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/55 via-black/60 to-black" />
           </div>
-        </section>
+
+          {/* 04 · What this is */}
+          <section id="section-04" className="relative z-10 px-6 md:px-12 lg:px-[10%] pt-28 md:pt-36 pb-24">
+            <div className="flex items-baseline justify-between gap-6 pb-6 mb-16 border-b border-white/15 font-mono text-xs uppercase tracking-widest text-white/50">
+              <span>04 · What this is</span>
+              <span className="whitespace-nowrap">The point</span>
+            </div>
+            <WordsPullUp
+              text="Big things start here."
+              className="font-display font-serif italic text-4xl md:text-5xl lg:text-6xl text-[var(--bone)] max-w-3xl mb-10 text-balance"
+            />
+            <ScrollTextReveal
+              text="New ideas are discussed here, tested here, and supported here — by people who can actually build them and fund them."
+              className="max-w-[46ch] text-[var(--bone)]"
+              style={{ fontSize: "clamp(19px, 2.4vw, 26px)", lineHeight: 1.55, opacity: 0.85 }}
+            />
+          </section>
+
+          {/* 05 · Entry */}
+          <section id="section-05" className="relative z-10 px-6 md:px-12 lg:px-[10%] pt-8 pb-32 md:pb-48">
+            <div className="flex items-baseline justify-between gap-6 pb-6 mb-16 border-b border-white/15 font-mono text-xs uppercase tracking-widest text-white/50">
+              <span>05 · Entry</span>
+              <span className="whitespace-nowrap">By invitation</span>
+            </div>
+            <WordsPullUp
+              text="Entry is by invitation. Always."
+              className="font-display font-serif italic text-4xl md:text-5xl max-w-2xl mb-8 text-balance text-[var(--bone)]"
+            />
+            <FadeIn delay={0.2}>
+              <p className="max-w-[65ch] text-lg leading-[1.7] text-[var(--bone)]/80 mb-20">
+                There are no tickets, no tiers, and no public list. Members are put forward from inside the circle, considered with care, and invited personally.
+              </p>
+            </FadeIn>
+            <div className="max-w-3xl">
+              {[
+                { label: "Your name", line: "Someone inside the circle puts your name forward." },
+                { label: "Consideration", line: "We take our time. Fit beats fame." },
+                { label: "Invitation", line: "If it is right, you hear from us directly." },
+              ].map((item, i) => (
+                <FadeIn key={item.label} delay={i * 0.1}>
+                  <div className="flex flex-col md:flex-row md:items-baseline gap-2 md:gap-12 py-6 border-t border-white/15 last:border-b">
+                    <div className="font-mono text-xs uppercase tracking-widest text-white/50 w-full md:w-48 flex-shrink-0">{item.label}</div>
+                    <p className="text-lg text-[var(--bone)]/90">{item.line}</p>
+                  </div>
+                </FadeIn>
+              ))}
+            </div>
+          </section>
+        </div>
 
         {/* ── 06 · The gathering (ink) ── */}
         <section
@@ -415,10 +438,11 @@ export default function Home() {
               <span>06 · The gathering</span>
               <span className="whitespace-nowrap">Sep 2026 · İstanbul</span>
             </div>
-            <h2 className="font-display font-serif italic text-4xl md:text-5xl lg:text-6xl max-w-3xl mb-24 text-balance">
-              The first inner.hub gathering. İstanbul, September 2026.
-            </h2>
           </FadeIn>
+          <WordsPullUp
+            text="The first inner.hub gathering. İstanbul, September 2026."
+            className="font-display font-serif italic text-4xl md:text-5xl lg:text-6xl max-w-3xl mb-24 text-balance"
+          />
 
           <div className="flex flex-col lg:flex-row lg:items-center gap-16 mb-24">
             <div className="grid grid-cols-3 gap-6 md:gap-10 min-w-0 lg:flex-1">
@@ -441,10 +465,11 @@ export default function Home() {
         {/* ── 07 · What's next ── */}
         <section id="section-07" className="px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15">
           <SectionLabel label="07 · What's next" meta="In time" />
-          <FadeIn>
-            <h2 className="font-display font-serif italic text-4xl md:text-5xl max-w-2xl mb-8 text-balance">
-              hub is where it starts.
-            </h2>
+          <WordsPullUp
+            text="hub is where it starts."
+            className="font-display font-serif italic text-4xl md:text-5xl max-w-2xl mb-8 text-balance"
+          />
+          <FadeIn delay={0.2}>
             <p
               className="max-w-[46ch] text-foreground/90"
               style={{ fontSize: "clamp(19px, 2.4vw, 26px)", lineHeight: 1.55 }}
