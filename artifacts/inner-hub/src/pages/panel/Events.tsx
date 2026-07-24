@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { MapPin, Clock, Users, ChevronRight, CheckCircle2 } from "lucide-react";
+import { MapPin, Clock, Users, ChevronRight, CheckCircle2, CalendarDays, Sparkles } from "lucide-react";
 import { FadeIn } from "@/components/FadeIn";
+import { AnimatedHeading } from "@/components/AnimatedHeading";
 import { apiUrl } from "@/lib/api";
 
 type ViewMode = "liste" | "takvim";
@@ -89,12 +90,18 @@ function EventCard({ event }: { event: Event }) {
   return (
     <div
       className={[
-        "flex gap-5 border p-5 transition-all duration-200",
+        "group relative flex gap-5 overflow-hidden border p-5 transition-all duration-200",
         event.isPast
           ? "border-[var(--ink)]/[0.06] opacity-60"
           : "border-[var(--ink)]/[0.08] hover:border-[var(--ink)]/20",
       ].join(" ")}
     >
+      {!event.isPast && (
+        <span
+          aria-hidden="true"
+          className="absolute inset-y-0 left-0 w-[2px] origin-top scale-y-0 bg-[var(--inner-green)] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-y-100"
+        />
+      )}
       {/* Date column */}
       <div className="flex w-14 shrink-0 flex-col items-center justify-start border border-[var(--ink)]/[0.08] p-2 text-center">
         <span className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/40">
@@ -265,6 +272,114 @@ function CalendarView({ events }: { events: Event[] }) {
   );
 }
 
+// ─── Hero ─────────────────────────────────────────────────────────────────────
+
+function scrollToId(id: string) {
+  document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function EventsHero() {
+  return (
+    <div
+      className="relative -mx-4 -mt-6 overflow-hidden sm:-mx-6 lg:-mx-8 lg:-mt-8"
+      style={{ height: "min(70vh, 620px)", minHeight: 440 }}
+    >
+      <video
+        autoPlay
+        muted
+        loop
+        playsInline
+        className="absolute inset-0 h-full w-full object-cover"
+        src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260403_050628_c4e32401-fab4-4a27-b7a8-6e9291cd5959.mp4"
+      />
+      <div
+        aria-hidden="true"
+        className="bottom-blur-mask pointer-events-none absolute inset-0 z-[1] bg-black/20 backdrop-blur-xl"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-b from-black/50 via-transparent to-transparent"
+      />
+
+      <div className="relative z-10 flex h-full flex-col justify-end px-6 pb-10 md:px-12 md:pb-14">
+        <div className="lg:grid lg:grid-cols-2 lg:items-end lg:gap-10">
+          <div>
+            <p className="mb-3 font-mono text-[10px] uppercase tracking-widest text-white/60 [text-shadow:0_1px_12px_rgba(0,0,0,0.6)]">
+              Etkinlikler
+            </p>
+            <AnimatedHeading
+              text={"Where the circle\ngathers in person."}
+              className="mb-4 font-display font-serif italic text-4xl leading-[1.1] text-white [text-shadow:0_2px_24px_rgba(0,0,0,0.55)] md:text-5xl lg:text-6xl"
+              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1" }}
+            />
+            <FadeIn delay={0.8}>
+              <p className="mb-6 max-w-[46ch] text-base text-white/75 [text-shadow:0_1px_12px_rgba(0,0,0,0.6)] md:text-lg">
+                Topluluk buluşmaları, workshoplar ve networking — dairenin içinde, güvenle kurulan bağlar.
+              </p>
+            </FadeIn>
+            <FadeIn delay={1.2}>
+              <div className="flex flex-wrap gap-4">
+                <button
+                  onClick={() => scrollToId("events-upcoming")}
+                  className="group inline-flex items-center gap-2 bg-white px-8 py-3 font-mono text-xs uppercase tracking-widest text-black transition-colors hover:bg-white/90"
+                >
+                  Yaklaşanları Gör
+                  <ChevronRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
+                </button>
+                <button
+                  onClick={() => scrollToId("events-calendar-toggle")}
+                  className="liquid-glass group inline-flex items-center gap-2 border border-white/20 px-8 py-3 font-mono text-xs uppercase tracking-widest text-white transition-colors hover:bg-white hover:text-black"
+                >
+                  Takvimi Aç
+                  <ChevronRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
+                </button>
+              </div>
+            </FadeIn>
+          </div>
+
+          <div className="mt-8 flex items-end justify-start lg:mt-0 lg:justify-end">
+            <FadeIn delay={1.4}>
+              <div className="liquid-glass border border-white/20 bg-black/40 px-6 py-3">
+                <span className="text-lg font-light text-white md:text-xl">
+                  Buluşmalar. Workshoplar. Networking.
+                </span>
+              </div>
+            </FadeIn>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function EventsStat({
+  label,
+  value,
+  sub,
+  icon: Icon,
+}: {
+  label: string;
+  value: string;
+  sub: string;
+  icon: React.ComponentType<{ className?: string }>;
+}) {
+  return (
+    <div className="border border-[var(--ink)]/[0.08] p-4">
+      <div className="mb-2 flex items-center justify-between">
+        <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/35">{label}</p>
+        <Icon className="size-3.5 text-[var(--ink)]/20" />
+      </div>
+      <p
+        className="font-serif text-2xl text-[var(--ink)]"
+        style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 100 }}
+      >
+        {value}
+      </p>
+      <p className="mt-1 font-mono text-[9px] text-[var(--ink)]/30">{sub}</p>
+    </div>
+  );
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function Events() {
   const [view, setView] = useState<ViewMode>("liste");
@@ -300,30 +415,36 @@ export default function Events() {
 
   const upcoming = events.filter((e) => !e.isPast);
   const past = events.filter((e) => e.isPast);
+  const now = new Date();
+  const thisMonth = events.filter((e) => {
+    const d = new Date(e.startAt);
+    return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+  }).length;
+  const registeredCount = events.filter((e) => e.isRegistered).length;
 
   return (
     <div className="space-y-8 max-w-5xl">
-      {/* Header */}
-      <FadeIn>
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40 mb-2">
-              inner·hub
-            </p>
-            <h1
-              className="font-serif font-display text-4xl md:text-5xl text-[var(--ink)]"
-              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 100 }}
-            >
-              Etkinlikler
-              <span className="inline-block size-[0.35em] translate-y-[0.08em] ml-[0.05em] bg-[var(--inner-green)]" />
-            </h1>
-            <p className="mt-2 text-sm text-[var(--ink)]/50 font-light">
-              Topluluk buluşmaları, workshoplar ve networking etkinlikleri.
-            </p>
-          </div>
+      {/* Hero */}
+      <EventsHero />
 
-          {/* View toggle */}
-          <div className="flex border border-[var(--ink)]/15">
+      {!loading && !error && events.length > 0 && (
+        <FadeIn delay={0.02}>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <EventsStat label="Yaklaşan" value={String(upcoming.length)} sub="planlanan etkinlik" icon={CalendarDays} />
+            <EventsStat label="Bu Ay" value={String(thisMonth)} sub="takvimde" icon={Sparkles} />
+            <EventsStat label="Kayıtlısın" value={String(registeredCount)} sub="etkinlikte" icon={CheckCircle2} />
+            <EventsStat label="Geçmiş" value={String(past.length)} sub="tamamlandı" icon={Clock} />
+          </div>
+        </FadeIn>
+      )}
+
+      {/* View toggle */}
+      <FadeIn delay={0.03}>
+        <div className="flex items-center justify-between gap-4">
+          <p className="text-sm text-[var(--ink)]/50 font-light">
+            Topluluk buluşmaları, workshoplar ve networking etkinlikleri.
+          </p>
+          <div id="events-calendar-toggle" className="flex shrink-0 scroll-mt-6 border border-[var(--ink)]/15">
             {(["liste", "takvim"] as ViewMode[]).map((v) => (
               <button
                 key={v}
@@ -362,7 +483,7 @@ export default function Events() {
         <>
           {/* Upcoming */}
           <FadeIn delay={0.05}>
-            <section>
+            <section id="events-upcoming" className="scroll-mt-6">
               <div className="mb-3 flex items-center gap-3 border-t border-[var(--ink)]/[0.08] pt-3">
                 <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40">
                   Yaklaşan Etkinlikler

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { ChevronDown, ChevronRight, BookOpen, CheckCircle2, Lock, Play } from "lucide-react";
+import { ChevronDown, ChevronRight, BookOpen, CheckCircle2, Lock, Play, GraduationCap, TrendingUp } from "lucide-react";
 import { FadeIn } from "@/components/FadeIn";
+import { AnimatedHeading } from "@/components/AnimatedHeading";
 import { apiUrl } from "@/lib/api";
 
 interface Lesson {
@@ -112,7 +113,11 @@ function CourseCard({ course }: { course: Course }) {
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <div className="border border-[var(--ink)]/[0.08] transition-all duration-200 hover:border-[var(--ink)]/15">
+    <div className="group relative overflow-hidden border border-[var(--ink)]/[0.08] transition-all duration-200 hover:border-[var(--ink)]/15">
+      <span
+        aria-hidden="true"
+        className="absolute inset-x-0 top-0 z-10 h-[2px] origin-left scale-x-0 bg-[var(--inner-green)] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-x-100"
+      />
       {/* Card header */}
       <div className="p-5">
         <div className="flex items-start justify-between gap-4">
@@ -224,6 +229,114 @@ function CourseCard({ course }: { course: Course }) {
   );
 }
 
+// ─── Hero ─────────────────────────────────────────────────────────────────────
+
+function scrollToId(id: string) {
+  document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function CoursesHero() {
+  return (
+    <div
+      className="relative -mx-4 -mt-6 overflow-hidden sm:-mx-6 lg:-mx-8 lg:-mt-8"
+      style={{ height: "min(70vh, 620px)", minHeight: 440 }}
+    >
+      <video
+        autoPlay
+        muted
+        loop
+        playsInline
+        className="absolute inset-0 h-full w-full object-cover"
+        src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260406_094145_4a271a6c-3869-4f1c-8aa7-aeb0cb227994.mp4"
+      />
+      <div
+        aria-hidden="true"
+        className="bottom-blur-mask pointer-events-none absolute inset-0 z-[1] bg-black/20 backdrop-blur-xl"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-b from-black/50 via-transparent to-transparent"
+      />
+
+      <div className="relative z-10 flex h-full flex-col justify-end px-6 pb-10 md:px-12 md:pb-14">
+        <div className="lg:grid lg:grid-cols-2 lg:items-end lg:gap-10">
+          <div>
+            <p className="mb-3 font-mono text-[10px] uppercase tracking-widest text-white/60 [text-shadow:0_1px_12px_rgba(0,0,0,0.6)]">
+              Kurslarım
+            </p>
+            <AnimatedHeading
+              text={"Where knowledge\nmeets momentum."}
+              className="mb-4 font-display font-serif italic text-4xl leading-[1.1] text-white [text-shadow:0_2px_24px_rgba(0,0,0,0.55)] md:text-5xl lg:text-6xl"
+              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1" }}
+            />
+            <FadeIn delay={0.8}>
+              <p className="mb-6 max-w-[46ch] text-base text-white/75 [text-shadow:0_1px_12px_rgba(0,0,0,0.6)] md:text-lg">
+                inner·hub eğitim içerikleri — kendi hızında, kendi zamanında, dairenin bilgisiyle.
+              </p>
+            </FadeIn>
+            <FadeIn delay={1.2}>
+              <div className="flex flex-wrap gap-4">
+                <button
+                  onClick={() => scrollToId("courses-enrolled")}
+                  className="group inline-flex items-center gap-2 bg-white px-8 py-3 font-mono text-xs uppercase tracking-widest text-black transition-colors hover:bg-white/90"
+                >
+                  Devam Et
+                  <ChevronRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
+                </button>
+                <button
+                  onClick={() => scrollToId("courses-available")}
+                  className="liquid-glass group inline-flex items-center gap-2 border border-white/20 px-8 py-3 font-mono text-xs uppercase tracking-widest text-white transition-colors hover:bg-white hover:text-black"
+                >
+                  Kursları Keşfet
+                  <ChevronRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
+                </button>
+              </div>
+            </FadeIn>
+          </div>
+
+          <div className="mt-8 flex items-end justify-start lg:mt-0 lg:justify-end">
+            <FadeIn delay={1.4}>
+              <div className="liquid-glass border border-white/20 bg-black/40 px-6 py-3">
+                <span className="text-lg font-light text-white md:text-xl">
+                  Kendi Hızında. Kendi Zamanında.
+                </span>
+              </div>
+            </FadeIn>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CoursesStat({
+  label,
+  value,
+  sub,
+  icon: Icon,
+}: {
+  label: string;
+  value: string;
+  sub: string;
+  icon: React.ComponentType<{ className?: string }>;
+}) {
+  return (
+    <div className="border border-[var(--ink)]/[0.08] p-4">
+      <div className="mb-2 flex items-center justify-between">
+        <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/35">{label}</p>
+        <Icon className="size-3.5 text-[var(--ink)]/20" />
+      </div>
+      <p
+        className="font-serif text-2xl text-[var(--ink)]"
+        style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 100 }}
+      >
+        {value}
+      </p>
+      <p className="mt-1 font-mono text-[9px] text-[var(--ink)]/30">{sub}</p>
+    </div>
+  );
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function CoursesPage() {
   const [courses, setCourses] = useState<Course[]>([]);
@@ -256,26 +369,26 @@ export default function CoursesPage() {
 
   const enrolled = courses.filter((c) => c.isEnrolled);
   const available = courses.filter((c) => !c.isEnrolled);
+  const avgProgress =
+    enrolled.length > 0
+      ? Math.round(enrolled.reduce((sum, c) => sum + c.progressPct, 0) / enrolled.length)
+      : null;
 
   return (
-    <div className="space-y-8 max-w-3xl">
-      <FadeIn>
-        <div>
-          <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40 mb-2">
-            inner·hub
-          </p>
-          <h1
-            className="font-serif font-display text-4xl md:text-5xl text-[var(--ink)]"
-            style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 100 }}
-          >
-            Kurslarım
-            <span className="inline-block size-[0.35em] translate-y-[0.08em] ml-[0.05em] bg-[var(--inner-green)]" />
-          </h1>
-          <p className="mt-2 text-sm text-[var(--ink)]/50 font-light">
-            inner·hub eğitim içerikleri — kendi hızında, kendi zamanında.
-          </p>
-        </div>
-      </FadeIn>
+    <div className="space-y-8 max-w-4xl">
+      {/* Hero */}
+      <CoursesHero />
+
+      {!loading && !error && courses.length > 0 && (
+        <FadeIn delay={0.02}>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <CoursesStat label="Kayıtlı Kurs" value={String(enrolled.length)} sub="devam ediyor" icon={GraduationCap} />
+            <CoursesStat label="Ort. İlerleme" value={avgProgress !== null ? `%${avgProgress}` : "—"} sub="kayıtlı kurslarda" icon={TrendingUp} />
+            <CoursesStat label="Diğer Kurslar" value={String(available.length)} sub="keşfedilmeyi bekliyor" icon={BookOpen} />
+            <CoursesStat label="Toplam" value={String(courses.length)} sub="inner·hub kataloğu" icon={Play} />
+          </div>
+        </FadeIn>
+      )}
 
       {loading && (
         <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40">
@@ -295,7 +408,7 @@ export default function CoursesPage() {
 
       {enrolled.length > 0 && (
         <FadeIn delay={0.05}>
-          <section>
+          <section id="courses-enrolled" className="scroll-mt-6">
             <div className="mb-3 flex items-center gap-3 border-t border-[var(--ink)]/[0.08] pt-3">
               <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40">
                 Kayıtlı Kurslarım
@@ -315,7 +428,7 @@ export default function CoursesPage() {
 
       {available.length > 0 && (
         <FadeIn delay={0.1}>
-          <section>
+          <section id="courses-available" className="scroll-mt-6">
             <div className="mb-3 border-t border-[var(--ink)]/[0.08] pt-3">
               <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40">
                 Diğer Kurslar
