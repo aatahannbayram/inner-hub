@@ -122,7 +122,10 @@ const PLATFORM_FEATURES: PlatformFeature[] = [
     name: "inner·match",
     tag: "Matching",
     desc: "Co-founder, mentor, and investor matching inside a closed circle. Trust-based connections.",
-    media: { type: "image", src: "/editorial/circle-portrait.jpg" },
+    media: {
+      type: "video",
+      src: "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260508_215831_c6a8989c-d716-4d8d-8745-e972a2eec711.mp4",
+    },
   },
   {
     id: "capital",

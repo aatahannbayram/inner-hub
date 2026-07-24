@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Loader2, RefreshCw, Sparkles, ArrowRight, Check } from "lucide-react";
 import { FadeIn } from "@/components/FadeIn";
+import { AnimatedHeading } from "@/components/AnimatedHeading";
 
 interface Match {
   name: string;
@@ -131,6 +132,89 @@ function MatchCard({ match, index }: { match: Match; index: number }) {
   );
 }
 
+// ─── Hero ─────────────────────────────────────────────────────────────────────
+
+function scrollToId(id: string) {
+  document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function MatchHero() {
+  return (
+    <div
+      className="relative -mx-4 -mt-6 overflow-hidden sm:-mx-6 lg:-mx-8 lg:-mt-8"
+      style={{ height: "min(70vh, 620px)", minHeight: 440 }}
+    >
+      <video
+        autoPlay
+        muted
+        loop
+        playsInline
+        className="absolute inset-0 h-full w-full object-cover"
+        src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260508_215831_c6a8989c-d716-4d8d-8745-e972a2eec711.mp4"
+      />
+
+      {/* Video is bright/white — scrim needed for text legibility */}
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-[1] bg-[var(--ink)]/40" />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-t from-[var(--ink)]/85 via-[var(--ink)]/25 to-transparent"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-r from-[var(--ink)]/60 via-transparent to-transparent"
+      />
+
+      <div className="relative z-10 flex h-full flex-col justify-end px-6 pb-10 md:px-12 md:pb-14">
+        <div className="lg:grid lg:grid-cols-2 lg:items-end lg:gap-10">
+          <div>
+            <p className="mb-3 font-mono text-[10px] uppercase tracking-widest text-white/60 [text-shadow:0_1px_12px_rgba(0,0,0,0.6)]">
+              inner·match
+            </p>
+            <AnimatedHeading
+              text={"Where trust\nfinds its people."}
+              className="mb-4 font-display font-serif italic text-4xl leading-[1.1] text-white [text-shadow:0_2px_24px_rgba(0,0,0,0.55)] md:text-5xl lg:text-6xl"
+              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1" }}
+            />
+            <FadeIn delay={0.8}>
+              <p className="mb-6 max-w-[46ch] text-base text-white/75 [text-shadow:0_1px_12px_rgba(0,0,0,0.6)] md:text-lg">
+                Co-founder, mentor, and investor matching — curated inside the circle, guided by trust.
+              </p>
+            </FadeIn>
+            <FadeIn delay={1.2}>
+              <div className="flex flex-wrap gap-4">
+                <button
+                  onClick={() => scrollToId("match-results")}
+                  className="bg-white px-8 py-3 font-mono text-xs uppercase tracking-widest text-black transition-colors hover:bg-white/90"
+                >
+                  View Matches
+                </button>
+                <button
+                  onClick={() => scrollToId("match-preferences")}
+                  className="liquid-glass border border-white/20 px-8 py-3 font-mono text-xs uppercase tracking-widest text-white transition-colors hover:bg-white hover:text-black"
+                >
+                  Set Preferences
+                </button>
+              </div>
+            </FadeIn>
+          </div>
+
+          <div className="mt-8 flex items-end justify-start lg:mt-0 lg:justify-end">
+            <FadeIn delay={1.4}>
+              <div className="liquid-glass border border-white/20 bg-black/40 px-6 py-3">
+                <span className="text-lg font-light text-white md:text-xl">
+                  Co-founders. Mentors. Investors.
+                </span>
+              </div>
+            </FadeIn>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Main page ────────────────────────────────────────────────────────────────
+
 export default function Match() {
   const [data, setData] = useState<MatchData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -168,28 +252,19 @@ export default function Match() {
 
   return (
     <div className="space-y-8 max-w-4xl">
-      {/* Header */}
+      {/* Hero */}
+      <MatchHero />
+
+      {/* Utility row */}
       <FadeIn>
-        <div className="flex items-start justify-between">
-          <div>
-            <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40 mb-2">
-              inner·hub AI
-            </p>
-            <h1
-              className="font-serif font-display text-4xl md:text-5xl text-[var(--ink)]"
-              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 100 }}
-            >
-              inner·match
-              <span className="inline-block size-[0.35em] translate-y-[0.08em] ml-[0.05em] bg-[var(--inner-green)]" />
-            </h1>
-            <p className="mt-2 text-sm text-[var(--ink)]/50 font-light">
-              Topluluktaki en uyumlu bağlantıların AI ile seçilmiş listesi.
-            </p>
-          </div>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-[var(--ink)]/50 font-light">
+            Topluluktaki en uyumlu bağlantıların AI ile seçilmiş listesi.
+          </p>
           <button
             onClick={fetchMatches}
             disabled={loading}
-            className="flex items-center gap-2 border border-[var(--ink)]/15 px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40 transition-all hover:border-[var(--ink)]/40 hover:text-[var(--ink)] disabled:opacity-30"
+            className="flex shrink-0 items-center gap-2 border border-[var(--ink)]/15 px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40 transition-all hover:border-[var(--ink)]/40 hover:text-[var(--ink)] disabled:opacity-30"
           >
             <RefreshCw className={`size-3 ${loading ? "animate-spin" : ""}`} />
             Yenile
@@ -198,7 +273,7 @@ export default function Match() {
       </FadeIn>
 
       {/* Preference filter */}
-      <div>
+      <div id="match-preferences" className="scroll-mt-6">
         <p className="mb-3 font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/30">
           Arıyor olduğun
         </p>
@@ -244,7 +319,7 @@ export default function Match() {
         </div>
       ) : data?.matches ? (
         <>
-          <div>
+          <div id="match-results" className="scroll-mt-6">
             <div className="mb-4 border-t border-[var(--ink)]/[0.08] pt-3 flex items-center justify-between">
               <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40">
                 {data.matches.length} Eşleşme Bulundu
