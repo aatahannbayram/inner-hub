@@ -77,7 +77,7 @@ weeklyThemes için 3 tema, connections için 2 kişi öneri sun. Türkçe yaz.`;
     if (!jsonMatch) throw new Error("Geçersiz AI yanıtı");
 
     const parsed = JSON.parse(jsonMatch[0]);
-    res.json(parsed);
+    return res.json(parsed);
   } catch (err: any) {
     const isConfig = err.message?.includes("API_KEY") || err.message?.includes("ortam");
     if (isConfig) {
@@ -95,7 +95,7 @@ weeklyThemes için 3 tema, connections için 2 kişi öneri sun. Türkçe yaz.`;
         insight: "Bu hafta toplulukta AI araç adoptasyonu öne çıkıyor. Deneyimleri sistematik paylaşmak için #ai-tools kanalında haftalık 'Aracın Anatomisi' formatı önerilir.",
       });
     }
-    res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: err.message });
   }
 });
 
@@ -143,7 +143,7 @@ Kullanıcı tercihleri: ${preferences?.join(", ") ?? "belirtilmemiş"}
     if (!jsonMatch) throw new Error("Geçersiz AI yanıtı");
 
     const parsed = JSON.parse(jsonMatch[0]);
-    res.json(parsed);
+    return res.json(parsed);
   } catch (err: any) {
     const isConfig = err.message?.includes("API_KEY") || err.message?.includes("ortam");
     if (isConfig) {
@@ -184,7 +184,7 @@ Kullanıcı tercihleri: ${preferences?.join(", ") ?? "belirtilmemiş"}
         ],
       });
     }
-    res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: err.message });
   }
 });
 
@@ -225,7 +225,7 @@ router.post("/image", async (req, res) => {
       force: Boolean(force),
     });
 
-    res.json({
+    return res.json({
       ...result,
       meta: {
         model: HF_EFFICIENT.modelId,
@@ -236,7 +236,7 @@ router.post("/image", async (req, res) => {
     });
   } catch (err: any) {
     const isCooldown = String(err.message).includes("Kredi koruması");
-    res.status(isCooldown ? 429 : 500).json({ error: err.message });
+    return res.status(isCooldown ? 429 : 500).json({ error: err.message });
   }
 });
 
@@ -256,9 +256,9 @@ router.get("/image/:requestId", async (req, res) => {
     }
 
     const result = await getGenerationStatus(requestId);
-    res.json(result);
+    return res.json(result);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: err.message });
   }
 });
 

@@ -6,7 +6,7 @@ const router = Router();
 function getStripe(): Stripe {
   const key = process.env.STRIPE_SECRET_KEY;
   if (!key) throw new Error("STRIPE_SECRET_KEY ortam değişkeni tanımlı değil");
-  return new Stripe(key, { apiVersion: "2025-06-30.basil" });
+  return new Stripe(key, { apiVersion: "2026-06-24.dahlia" });
 }
 
 // ─── Fiyat tablosu ────────────────────────────────────────────────────────────
@@ -103,10 +103,10 @@ router.post("/checkout-session", async (req, res) => {
     }
 
     const session = await stripe.checkout.sessions.create(sessionParams);
-    res.json({ url: session.url, sessionId: session.id });
+    return res.json({ url: session.url, sessionId: session.id });
   } catch (err: any) {
     const status = err.message?.includes("ortam değişkeni") ? 503 : 500;
-    res.status(status).json({ error: err.message });
+    return res.status(status).json({ error: err.message });
   }
 });
 
@@ -154,7 +154,7 @@ router.post(
       }
     }
 
-    res.json({ received: true });
+    return res.json({ received: true });
   },
 );
 
@@ -163,13 +163,13 @@ router.get("/session/:id", async (req, res) => {
   try {
     const stripe = getStripe();
     const session = await stripe.checkout.sessions.retrieve(req.params.id);
-    res.json({
+    return res.json({
       status: session.payment_status,
       customerEmail: session.customer_details?.email,
       metadata: session.metadata,
     });
   } catch (err: any) {
-    res.status(404).json({ error: "Oturum bulunamadı" });
+    return res.status(404).json({ error: "Oturum bulunamadı" });
   }
 });
 

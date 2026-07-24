@@ -198,7 +198,7 @@ export default function Settings() {
       <Section icon={Palette} title="Görünüm" sub="Platform arayüz tercihleri">
         <div className="border border-[var(--ink)]/[0.08] px-4">
           <SettingRow label="Tema" sub="Renk modu">
-            <RadioGroup
+            <RadioGroup<Theme>
               options={[
                 { value: "light", label: "Açık" },
                 { value: "dark", label: "Koyu" },
@@ -218,7 +218,7 @@ export default function Settings() {
       <Section icon={Globe} title="Dil" sub="Platform arayüz dili">
         <div className="border border-[var(--ink)]/[0.08] px-4">
           <SettingRow label="Arayüz dili">
-            <RadioGroup
+            <RadioGroup<Lang>
               options={[
                 { value: "tr", label: "Türkçe" },
                 { value: "en", label: "English" },

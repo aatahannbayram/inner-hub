@@ -181,7 +181,7 @@ function SidebarFooter({
   collapsed,
   onLogout,
 }: {
-  user: PanelUser;
+  user: PanelUser & { profileCompletionPct: number };
   collapsed: boolean;
   onLogout?: () => void;
 }) {
