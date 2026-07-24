@@ -5,6 +5,7 @@ import {
   Minus,
   Zap,
   Users,
+  Target,
   Loader2,
   RefreshCw,
   ArrowRight,
@@ -54,18 +55,21 @@ const MOMENTUM_CONFIG = {
     label: "Yükselen",
     tone: "border-[var(--ink)] bg-[var(--ink)] text-[var(--bone)]",
     row: "border-[var(--ink)]/[0.12]",
+    accent: "var(--inner-green)",
   },
   orta: {
     icon: Minus,
     label: "Stabil",
     tone: "border-[var(--ink)]/15 text-[var(--ink)]/55",
     row: "border-[var(--ink)]/[0.08]",
+    accent: "rgba(10,10,10,0.18)",
   },
   düşük: {
     icon: TrendingDown,
     label: "Düşen",
     tone: "border-[var(--error)]/30 text-[var(--error)]",
     row: "border-[var(--error)]/20",
+    accent: "var(--error)",
   },
 } as const;
 
@@ -159,6 +163,34 @@ function ScoreRing({ score }: { score: number }) {
       <span className="absolute inset-0 flex items-center justify-center font-mono text-[10px] tabular-nums text-[var(--ink)]">
         {score}
       </span>
+    </div>
+  );
+}
+
+function SignalStat({
+  label,
+  value,
+  sub,
+  icon: Icon,
+}: {
+  label: string;
+  value: string;
+  sub: string;
+  icon: React.ComponentType<{ className?: string }>;
+}) {
+  return (
+    <div className="border border-[var(--ink)]/[0.08] p-4">
+      <div className="mb-2 flex items-center justify-between">
+        <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/35">{label}</p>
+        <Icon className="size-3.5 text-[var(--ink)]/20" />
+      </div>
+      <p
+        className="font-serif text-2xl text-[var(--ink)]"
+        style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 100 }}
+      >
+        {value}
+      </p>
+      <p className="mt-1 font-mono text-[9px] text-[var(--ink)]/30">{sub}</p>
     </div>
   );
 }
@@ -354,6 +386,12 @@ export default function Signal() {
     { id: "activity", label: "Aktivite" },
   ];
 
+  const risingCount = data?.weeklyThemes.filter((t) => t.momentum === "yüksek").length ?? 0;
+  const avgMatchScore =
+    data && data.connections.length > 0
+      ? Math.round(data.connections.reduce((sum, c) => sum + c.matchScore, 0) / data.connections.length)
+      : null;
+
   return (
     <div className="mx-auto max-w-4xl space-y-8">
       <FadeIn>
@@ -395,6 +433,22 @@ export default function Signal() {
           </button>
         </div>
       </FadeIn>
+
+      {!loading && data && (
+        <FadeIn delay={0.02}>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <SignalStat label="Aktif Sinyal" value={String(data.weeklyThemes.length)} sub="haftalık tema" icon={Zap} />
+            <SignalStat label="Yükselen" value={String(risingCount)} sub="momentum yüksek" icon={TrendingUp} />
+            <SignalStat label="Bağlantı" value={String(data.connections.length)} sub="bu hafta önerilen" icon={Users} />
+            <SignalStat
+              label="Ort. Uyum"
+              value={avgMatchScore !== null ? String(avgMatchScore) : "—"}
+              sub="eşleşme skoru"
+              icon={Target}
+            />
+          </div>
+        </FadeIn>
+      )}
 
       {!loading && data && (
         <FadeIn delay={0.03}>
@@ -451,72 +505,89 @@ export default function Signal() {
           <FadeIn delay={0.04}>
             <section id="signal-insight" className="scroll-mt-4">
               <div className="relative overflow-hidden border border-[var(--ink)] bg-[var(--ink)] p-6 text-[var(--bone)] md:p-8">
-                <div className="mb-4 flex flex-wrap items-center gap-2">
-                  <Zap className="size-3.5 text-[var(--inner-green)]" />
-                  <span className="font-mono text-[9px] uppercase tracking-widest text-[var(--bone)]/45">
-                    Bu haftanın içgörüsü
-                  </span>
-                  <span className="ml-auto size-3 bg-[var(--inner-green)]" aria-hidden />
-                </div>
-                <p
-                  className="max-w-[38ch] font-serif text-2xl leading-snug md:text-3xl"
-                  style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 100 }}
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0 opacity-[0.05]"
+                  style={{
+                    backgroundImage: "radial-gradient(circle at 1px 1px, var(--bone) 1px, transparent 0)",
+                    backgroundSize: "16px 16px",
+                  }}
+                />
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute -right-3 -top-10 select-none font-serif text-[10rem] italic leading-none text-[var(--bone)]/[0.06] md:text-[13rem]"
                 >
-                  {data.insight}
-                </p>
+                  &rdquo;
+                </span>
 
-                <div className="mt-6 flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    onClick={copyInsight}
-                    className="inline-flex items-center gap-2 border border-[var(--bone)]/25 px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)]/80 transition-colors hover:border-[var(--bone)]/50 hover:text-[var(--bone)]"
+                <div className="relative z-10">
+                  <div className="mb-4 flex flex-wrap items-center gap-2">
+                    <Zap className="size-3.5 text-[var(--inner-green)]" />
+                    <span className="font-mono text-[9px] uppercase tracking-widest text-[var(--bone)]/45">
+                      Bu haftanın içgörüsü
+                    </span>
+                    <span className="ml-auto size-3 bg-[var(--inner-green)]" aria-hidden />
+                  </div>
+                  <p
+                    className="max-w-[38ch] font-serif text-2xl leading-snug md:text-3xl"
+                    style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 100 }}
                   >
-                    {copied ? <Check className="size-3" /> : <Copy className="size-3" />}
-                    {copied ? "Kopyalandı" : "İçgörüyü kopyala"}
-                  </button>
-                  <Link href="/panel/chat">
-                    <a className="inline-flex items-center gap-2 border border-[var(--bone)]/25 px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)]/80 transition-colors hover:border-[var(--bone)]/50 hover:text-[var(--bone)]">
-                      <MessageSquare className="size-3" /> Chat’te aç
-                    </a>
-                  </Link>
-                  {!imageUrl ? (
+                    {data.insight}
+                  </p>
+
+                  <div className="mt-6 flex flex-wrap gap-2">
                     <button
                       type="button"
-                      onClick={() => generateInsightImage(false)}
-                      disabled={imageLoading}
-                      className="inline-flex items-center gap-2 border border-[var(--bone)] bg-[var(--bone)] px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-[var(--ink)] transition-opacity hover:opacity-90 disabled:opacity-40"
+                      onClick={copyInsight}
+                      className="inline-flex items-center gap-2 border border-[var(--bone)]/25 px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)]/80 transition-colors hover:border-[var(--bone)]/50 hover:text-[var(--bone)]"
                     >
-                      {imageLoading ? (
-                        <Loader2 className="size-3 animate-spin" />
-                      ) : (
-                        <ImageIcon className="size-3" />
-                      )}
-                      {imageLoading
-                        ? `Üretiliyor · ${imageStatus || "kuyruk"}`
-                        : "Görsel üret · 720p"}
+                      {copied ? <Check className="size-3" /> : <Copy className="size-3" />}
+                      {copied ? "Kopyalandı" : "İçgörüyü kopyala"}
                     </button>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => generateInsightImage(true)}
-                      disabled={imageLoading}
-                      className="inline-flex items-center gap-2 border border-[var(--bone)]/20 px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)]/45 transition-colors hover:text-[var(--bone)]/80 disabled:opacity-40"
-                    >
-                      {imageLoading ? (
-                        <Loader2 className="size-3 animate-spin" />
-                      ) : (
-                        <RefreshCw className="size-3" />
-                      )}
-                      Yeniden üret
-                    </button>
+                    <Link href="/panel/chat">
+                      <a className="inline-flex items-center gap-2 border border-[var(--bone)]/25 px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)]/80 transition-colors hover:border-[var(--bone)]/50 hover:text-[var(--bone)]">
+                        <MessageSquare className="size-3" /> Chat’te aç
+                      </a>
+                    </Link>
+                    {!imageUrl ? (
+                      <button
+                        type="button"
+                        onClick={() => generateInsightImage(false)}
+                        disabled={imageLoading}
+                        className="inline-flex items-center gap-2 border border-[var(--bone)] bg-[var(--bone)] px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-[var(--ink)] transition-opacity hover:opacity-90 disabled:opacity-40"
+                      >
+                        {imageLoading ? (
+                          <Loader2 className="size-3 animate-spin" />
+                        ) : (
+                          <ImageIcon className="size-3" />
+                        )}
+                        {imageLoading
+                          ? `Üretiliyor · ${imageStatus || "kuyruk"}`
+                          : "Görsel üret · 720p"}
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => generateInsightImage(true)}
+                        disabled={imageLoading}
+                        className="inline-flex items-center gap-2 border border-[var(--bone)]/20 px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)]/45 transition-colors hover:text-[var(--bone)]/80 disabled:opacity-40"
+                      >
+                        {imageLoading ? (
+                          <Loader2 className="size-3 animate-spin" />
+                        ) : (
+                          <RefreshCw className="size-3" />
+                        )}
+                        Yeniden üret
+                      </button>
+                    )}
+                  </div>
+
+                  {(fromCache || imageError) && (
+                    <p className="mt-3 font-mono text-[9px] uppercase tracking-widest text-[var(--bone)]/40">
+                      {imageError || (fromCache ? "Görsel önbellekten · ekstra kredi yok" : null)}
+                    </p>
                   )}
                 </div>
-
-                {(fromCache || imageError) && (
-                  <p className="mt-3 font-mono text-[9px] uppercase tracking-widest text-[var(--bone)]/40">
-                    {imageError || (fromCache ? "Görsel önbellekten · ekstra kredi yok" : null)}
-                  </p>
-                )}
               </div>
 
               {imageUrl && (
@@ -599,7 +670,8 @@ export default function Signal() {
                   return (
                     <div
                       key={i}
-                      className={`flex gap-4 border bg-[var(--bone)] p-4 transition-colors hover:border-[var(--ink)]/25 ${cfg.row}`}
+                      className={`flex gap-4 border border-l-[3px] bg-[var(--bone)] p-4 transition-colors hover:border-[var(--ink)]/25 ${cfg.row}`}
+                      style={{ borderLeftColor: cfg.accent }}
                     >
                       <div className="flex w-[4.5rem] shrink-0 flex-col items-start gap-1.5">
                         <span
