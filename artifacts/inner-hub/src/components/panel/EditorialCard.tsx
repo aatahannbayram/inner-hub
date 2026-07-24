@@ -4,6 +4,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { Link } from "wouter";
 import { cn } from "@/lib/utils";
+import { ProceduralPortrait, type PortraitConfig } from "@/components/panel/ProceduralPortrait";
 
 type EditorialCardProps = {
   title: string;
@@ -13,6 +14,10 @@ type EditorialCardProps = {
   cta?: string;
   imageSrc?: string;
   imageAlt?: string;
+  /** Autoplaying muted loop video — takes priority over imageSrc/portrait */
+  videoSrc?: string;
+  /** Live Canvas2D procedural portrait (Phosphor/D60-hero) — takes priority over imageSrc */
+  portrait?: { src: string; config: PortraitConfig };
   tone?: "light" | "dark";
   className?: string;
   /** Visual-only frame without CTA */
@@ -33,6 +38,8 @@ export function EditorialCard({
   cta = "İncele",
   imageSrc,
   imageAlt = "",
+  videoSrc,
+  portrait,
   tone = "light",
   className,
   mediaOnly = false,
@@ -40,6 +47,7 @@ export function EditorialCard({
 }: EditorialCardProps) {
   const dark = tone === "dark";
   const reduce = useReducedMotion();
+  const hasMedia = Boolean(videoSrc || portrait || imageSrc);
 
   const body = (
     <motion.article
@@ -61,14 +69,27 @@ export function EditorialCard({
         className="absolute inset-x-0 top-0 z-10 h-[2px] origin-left scale-x-0 bg-[var(--inner-green)] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-x-100"
       />
 
-      {imageSrc && (
+      {hasMedia && (
         <div className="relative aspect-[16/10] overflow-hidden">
-          <img
-            src={imageSrc}
-            alt={imageAlt || title}
-            className="size-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.03]"
-            loading="lazy"
-          />
+          {videoSrc ? (
+            <video
+              autoPlay
+              muted
+              loop
+              playsInline
+              className="size-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.03]"
+              src={videoSrc}
+            />
+          ) : portrait ? (
+            <ProceduralPortrait src={portrait.src} config={portrait.config} className="size-full" />
+          ) : (
+            <img
+              src={imageSrc}
+              alt={imageAlt || title}
+              className="size-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.03]"
+              loading="lazy"
+            />
+          )}
           <div
             className={cn(
               "pointer-events-none absolute inset-0",

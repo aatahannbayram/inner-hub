@@ -76,32 +76,31 @@ function NavLink({
       : location.startsWith(item.href);
 
   return (
-    <Link href={item.href}>
-      <a
+    <Link
+      href={item.href}
+      className={cn(
+        "group flex items-center gap-3 rounded-none px-3 py-2.5 text-sm transition-colors duration-150",
+        isActive
+          ? "bg-[var(--ink)] text-[var(--bone)]"
+          : "text-[var(--ink)]/60 hover:bg-[var(--ink)]/[0.06] hover:text-[var(--ink)]",
+        collapsed && "justify-center px-2",
+      )}
+      title={collapsed ? item.label : undefined}
+    >
+      <item.icon
         className={cn(
-          "group flex items-center gap-3 rounded-none px-3 py-2.5 text-sm transition-colors duration-150",
-          isActive
-            ? "bg-[var(--ink)] text-[var(--bone)]"
-            : "text-[var(--ink)]/60 hover:bg-[var(--ink)]/[0.06] hover:text-[var(--ink)]",
-          collapsed && "justify-center px-2",
+          "size-4 shrink-0",
+          isActive ? "opacity-100" : "opacity-60 group-hover:opacity-100",
         )}
-        title={collapsed ? item.label : undefined}
-      >
-        <item.icon
-          className={cn(
-            "size-4 shrink-0",
-            isActive ? "opacity-100" : "opacity-60 group-hover:opacity-100",
-          )}
-        />
-        {!collapsed && (
-          <span className="truncate font-light tracking-wide">{item.label}</span>
-        )}
-        {!collapsed && item.badge ? (
-          <span className="ml-auto font-mono text-[10px] tabular-nums">
-            {item.badge}
-          </span>
-        ) : null}
-      </a>
+      />
+      {!collapsed && (
+        <span className="truncate font-light tracking-wide">{item.label}</span>
+      )}
+      {!collapsed && item.badge ? (
+        <span className="ml-auto font-mono text-[10px] tabular-nums">
+          {item.badge}
+        </span>
+      ) : null}
     </Link>
   );
 }

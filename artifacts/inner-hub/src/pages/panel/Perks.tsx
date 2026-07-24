@@ -5,10 +5,15 @@ import {
   Check,
   Copy,
   ExternalLink,
+  Gift,
+  Layers,
   Search,
+  Sparkles,
   X,
 } from "lucide-react";
 import { FadeIn } from "@/components/FadeIn";
+import { AnimatedHeading } from "@/components/AnimatedHeading";
+import { avatarColor } from "@/lib/avatarColor";
 
 type Category = "Tümü" | "Yazılım" | "Finans" | "Yaşam" | "Eğitim";
 
@@ -152,8 +157,12 @@ function loadSaved(): number[] {
 
 function BrandMark({ brand }: { brand: string }) {
   const initials = brand.replace(/[^a-zA-ZğüşıöçĞÜŞİÖÇ0-9]/g, "").slice(0, 2).toUpperCase();
+  const color = avatarColor(brand);
   return (
-    <div className="flex size-12 shrink-0 items-center justify-center border border-[var(--ink)] bg-[var(--ink)] text-[var(--bone)]">
+    <div
+      className="flex size-12 shrink-0 items-center justify-center border text-[var(--bone)]"
+      style={{ backgroundColor: color, borderColor: color }}
+    >
       <span className="font-mono text-[11px] uppercase tracking-widest">{initials}</span>
     </div>
   );
@@ -365,6 +374,115 @@ function PerkDetail({
   );
 }
 
+// ─── Hero ─────────────────────────────────────────────────────────────────────
+
+function scrollToId(id: string) {
+  document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function PerksHero() {
+  return (
+    <div
+      className="relative -mx-4 -mt-6 overflow-hidden sm:-mx-6 lg:-mx-8 lg:-mt-8"
+      style={{ height: "min(70vh, 620px)", minHeight: 440 }}
+    >
+      <video
+        autoPlay
+        muted
+        loop
+        playsInline
+        className="absolute inset-0 h-full w-full object-cover"
+        src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260530_042513_df96a13b-6155-4f6e-8b93-c9dee66fba08.mp4"
+      />
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-[1] bg-[var(--ink)]/40" />
+      <div
+        aria-hidden="true"
+        className="bottom-blur-mask pointer-events-none absolute inset-0 z-[1] bg-black/20 backdrop-blur-xl"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-b from-black/50 via-transparent to-transparent"
+      />
+
+      <div className="relative z-10 flex h-full flex-col justify-end px-6 pb-10 md:px-12 md:pb-14">
+        <div className="lg:grid lg:grid-cols-2 lg:items-end lg:gap-10">
+          <div>
+            <p className="mb-3 font-mono text-[10px] uppercase tracking-widest text-white/60 [text-shadow:0_1px_12px_rgba(0,0,0,0.6)]">
+              Ayrıcalıklar
+            </p>
+            <AnimatedHeading
+              text={"Perks worth\nbeing inside for."}
+              className="mb-4 font-display font-serif italic text-4xl leading-[1.1] text-white [text-shadow:0_2px_24px_rgba(0,0,0,0.55)] md:text-5xl lg:text-6xl"
+              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1" }}
+            />
+            <FadeIn delay={0.8}>
+              <p className="mb-6 max-w-[46ch] text-base text-white/75 [text-shadow:0_1px_12px_rgba(0,0,0,0.6)] md:text-lg">
+                Program katılımcılarına özel yazılım, finans ve yaşam fırsatları. Kodu al, partnerde kullan.
+              </p>
+            </FadeIn>
+            <FadeIn delay={1.2}>
+              <div className="flex flex-wrap gap-4">
+                <button
+                  onClick={() => scrollToId("perks-featured")}
+                  className="group inline-flex items-center gap-2 bg-white px-8 py-3 font-mono text-xs uppercase tracking-widest text-black transition-colors hover:bg-white/90"
+                >
+                  Öne Çıkanlar
+                  <ArrowRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
+                </button>
+                <button
+                  onClick={() => scrollToId("perks-all")}
+                  className="liquid-glass group inline-flex items-center gap-2 border border-white/20 px-8 py-3 font-mono text-xs uppercase tracking-widest text-white transition-colors hover:bg-white hover:text-black"
+                >
+                  Tüm Fırsatlar
+                  <ArrowRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
+                </button>
+              </div>
+            </FadeIn>
+          </div>
+
+          <div className="mt-8 flex items-end justify-start lg:mt-0 lg:justify-end">
+            <FadeIn delay={1.4}>
+              <div className="liquid-glass border border-white/20 bg-black/40 px-6 py-3">
+                <span className="text-lg font-light text-white md:text-xl">
+                  Yazılım. Finans. Yaşam.
+                </span>
+              </div>
+            </FadeIn>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PerksStat({
+  label,
+  value,
+  sub,
+  icon: Icon,
+}: {
+  label: string;
+  value: string;
+  sub: string;
+  icon: React.ComponentType<{ className?: string }>;
+}) {
+  return (
+    <div className="border border-[var(--ink)]/[0.08] p-4">
+      <div className="mb-2 flex items-center justify-between">
+        <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/35">{label}</p>
+        <Icon className="size-3.5 text-[var(--ink)]/20" />
+      </div>
+      <p
+        className="font-serif text-2xl text-[var(--ink)]"
+        style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 100 }}
+      >
+        {value}
+      </p>
+      <p className="mt-1 font-mono text-[9px] text-[var(--ink)]/30">{sub}</p>
+    </div>
+  );
+}
+
 export default function Perks() {
   const [active, setActive] = useState<Category>("Tümü");
   const [query, setQuery] = useState("");
@@ -411,21 +529,15 @@ export default function Perks() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-8">
-      <FadeIn>
-        <div>
-          <p className="mb-2 font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40">
-            inner·hub
-          </p>
-          <h1
-            className="font-serif font-display text-4xl text-[var(--ink)] md:text-5xl"
-            style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 100 }}
-          >
-            Ayrıcalıklar
-            <span className="ml-[0.05em] inline-block size-[0.35em] translate-y-[0.08em] bg-[var(--inner-green)]" />
-          </h1>
-          <p className="mt-2 max-w-[48ch] text-sm font-light text-[var(--ink)]/50">
-            Program katılımcılarına özel yazılım, finans ve yaşam fırsatları. Kodu al, partnerde kullan.
-          </p>
+      {/* Hero */}
+      <PerksHero />
+
+      <FadeIn delay={0.01}>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <PerksStat label="Toplam Fırsat" value={String(PERKS.length)} sub="aktif ayrıcalık" icon={Gift} />
+          <PerksStat label="Öne Çıkan" value={String(featured.length)} sub="bu dönem" icon={Sparkles} />
+          <PerksStat label="Kategori" value={String(CATEGORIES.length - 1)} sub="yazılım, finans, yaşam…" icon={Layers} />
+          <PerksStat label="Kaydettiğin" value={String(savedIds.length)} sub="favorilerinde" icon={Check} />
         </div>
       </FadeIn>
 
@@ -449,7 +561,7 @@ export default function Perks() {
 
       {featured.length > 0 && active === "Tümü" && !query && !showSavedOnly && (
         <FadeIn delay={0.05}>
-          <section>
+          <section id="perks-featured" className="scroll-mt-6">
             <div className="mb-3 flex items-baseline justify-between border-t border-[var(--ink)]/[0.08] pt-3">
               <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40">
                 Öne çıkan
@@ -536,6 +648,7 @@ export default function Perks() {
       </FadeIn>
 
       <FadeIn delay={0.08}>
+        <div id="perks-all" className="scroll-mt-6" />
         {filtered.length === 0 ? (
           <div className="border border-[var(--ink)]/[0.08] px-6 py-14 text-center">
             <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40">

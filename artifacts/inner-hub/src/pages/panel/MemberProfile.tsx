@@ -188,10 +188,11 @@ export default function MemberProfile() {
   if (!member) {
     return (
       <div className="space-y-4">
-        <Link href="/panel/members">
-          <a className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/30 hover:text-[var(--ink)] transition-colors">
-            <ArrowLeft className="size-3" /> Katılımcılar
-          </a>
+        <Link
+          href="/panel/members"
+          className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/30 hover:text-[var(--ink)] transition-colors"
+        >
+          <ArrowLeft className="size-3" /> Katılımcılar
         </Link>
         <p className="text-sm text-[var(--ink)]/40">Üye bulunamadı.</p>
       </div>
@@ -201,10 +202,11 @@ export default function MemberProfile() {
   return (
     <div className="space-y-8 max-w-xl">
       {/* Back */}
-      <Link href="/panel/members">
-        <a className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/30 hover:text-[var(--ink)] transition-colors">
-          <ArrowLeft className="size-3" /> Katılımcılar
-        </a>
+      <Link
+        href="/panel/members"
+        className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/30 hover:text-[var(--ink)] transition-colors"
+      >
+        <ArrowLeft className="size-3" /> Katılımcılar
       </Link>
 
       {/* Profile card */}

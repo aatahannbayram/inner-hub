@@ -4,11 +4,39 @@ import { Link } from "wouter";
 import { FadeIn } from "@/components/FadeIn";
 import { EditorialCard } from "@/components/panel/EditorialCard";
 import { apiUrl } from "@/lib/api";
+import { avatarColor } from "@/lib/avatarColor";
 import { useScrubVideo } from "@/hooks/useScrubVideo";
 import { useTypewriter } from "@/hooks/useTypewriter";
+import type { PortraitConfig } from "@/components/panel/ProceduralPortrait";
 
 const DASHBOARD_VIDEO_SRC =
   "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260530_042513_df96a13b-6155-4f6e-8b93-c9dee66fba08.mp4";
+
+const SIGNAL_CARD_VIDEO =
+  "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260406_094145_4a271a6c-3869-4f1c-8aa7-aeb0cb227994.mp4";
+const GATHERING_CARD_VIDEO =
+  "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260403_050628_c4e32401-fab4-4a27-b7a8-6e9291cd5959.mp4";
+
+const VAULT_CARD_PORTRAIT: PortraitConfig = {
+  renderMode: "contour",
+  bgMode: "blur",
+  bgBlur: 12,
+  bgOpacity: 46,
+  cellSize: 26,
+  coverage: 64,
+  invert: true,
+  saturation: 100,
+  grayscale: 0,
+  tintOpacity: 0,
+  color: "#0A0A0A",
+  pfx: {
+    vignette: { enabled: true, intensity: 38 },
+    bloom: { enabled: true, intensity: 25 },
+  },
+  animStyle: "wave",
+  animSpeed: 100,
+  animIntensity: 60,
+};
 
 const QUICK_NAV = [
   { label: "inner·signal'i gör", href: "/panel/signal" },
@@ -17,7 +45,6 @@ const QUICK_NAV = [
   { label: "Etkinlikleri gör", href: "/panel/events" },
 ];
 
-const EDITORIAL_IMG = "/editorial/circle-dusk.png";
 const EDITORIAL_PORTRAIT = "/editorial/circle-portrait.jpg";
 
 const mockPerks = [
@@ -33,21 +60,21 @@ const spotlightCards = [
     eyebrow: "Bu hafta",
     description: "Topluluk hafızasından çıkan sinyaller ve bağlantı önerileri.",
     href: "/panel/signal",
-    imageSrc: EDITORIAL_IMG,
+    videoSrc: SIGNAL_CARD_VIDEO,
   },
   {
     title: "Eylül Gathering",
     eyebrow: "Sep 2026 · İstanbul",
     description: "Otuz dört kişi. İki gün. Bir daire. İlk buluşma.",
     href: "/panel/events",
-    imageSrc: EDITORIAL_PORTRAIT,
+    videoSrc: GATHERING_CARD_VIDEO,
   },
   {
     title: "inner·vault",
     eyebrow: "Bilgi tabanı",
     description: "Pitch deck’ler, araştırmalar ve notlar — yalnızca daire içinde.",
     href: "/panel/vault",
-    imageSrc: EDITORIAL_IMG,
+    portrait: { src: EDITORIAL_PORTRAIT, config: VAULT_CARD_PORTRAIT },
   },
 ];
 
@@ -66,13 +93,21 @@ function StatCard({ label, value, icon: Icon }: { label: string; value: string |
 }
 
 function PerkCard({ perk }: { perk: typeof mockPerks[0] }) {
+  const color = avatarColor(perk.brand);
   return (
-    <div className="flex flex-col border border-[var(--ink)]/[0.08] p-5 transition-colors duration-200 hover:border-[var(--ink)]/20">
-      <div className="mb-4 flex size-12 items-center justify-center border border-[var(--ink)]/[0.08] bg-[var(--bone)]">
+    <div className="group relative flex flex-col overflow-hidden border border-[var(--ink)]/[0.08] p-5 transition-colors duration-200 hover:border-[var(--ink)]/20">
+      <span
+        aria-hidden="true"
+        className="absolute inset-x-0 top-0 z-10 h-[2px] origin-left scale-x-0 bg-[var(--inner-green)] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-x-100"
+      />
+      <div
+        className="mb-4 flex size-12 items-center justify-center border text-[var(--bone)]"
+        style={{ backgroundColor: color, borderColor: color }}
+      >
         {perk.logoUrl ? (
           <img src={perk.logoUrl} alt={perk.brand} className="size-8 object-contain" />
         ) : (
-          <span className="font-mono text-[10px] uppercase tracking-wide text-[var(--ink)]/40">
+          <span className="font-mono text-[10px] uppercase tracking-wide">
             {perk.brand.slice(0, 2)}
           </span>
         )}
@@ -143,17 +178,20 @@ function DashboardHero({ userName }: { userName: string }) {
 
         <div className="flex flex-wrap gap-y-2">
           {QUICK_NAV.map((item) => (
-            <Link key={item.href} href={item.href}>
-              <a className="mx-[0.2em] mb-[0.4em] inline-flex items-center justify-center whitespace-nowrap rounded-full border border-black/10 bg-white px-4 py-[0.5em] font-mono text-[11px] uppercase tracking-widest text-black transition-colors duration-200 hover:bg-black hover:text-white sm:px-5 sm:text-[12px]">
-                {item.label}
-              </a>
+            <Link
+              key={item.href}
+              href={item.href}
+              className="mx-[0.2em] mb-[0.4em] inline-flex items-center justify-center whitespace-nowrap rounded-full border border-black/10 bg-white px-4 py-[0.5em] font-mono text-[11px] uppercase tracking-widest text-black transition-colors duration-200 hover:bg-black hover:text-white sm:px-5 sm:text-[12px]"
+            >
+              {item.label}
             </Link>
           ))}
-          <Link href="/panel/profile">
-            <a className="mx-[0.2em] mb-[0.4em] inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full border border-white bg-transparent px-4 py-[0.5em] font-mono text-[11px] uppercase tracking-widest text-white transition-colors duration-200 hover:bg-white hover:text-black sm:px-5 sm:text-[12px]">
-              Profilini tamamla
-              <ArrowRight className="size-3" />
-            </a>
+          <Link
+            href="/panel/profile"
+            className="mx-[0.2em] mb-[0.4em] inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full border border-white bg-transparent px-4 py-[0.5em] font-mono text-[11px] uppercase tracking-widest text-white transition-colors duration-200 hover:bg-white hover:text-black sm:px-5 sm:text-[12px]"
+          >
+            Profilini tamamla
+            <ArrowRight className="size-3" />
           </Link>
         </div>
       </div>
@@ -233,10 +271,11 @@ export default function Dashboard({ userName = "Ata" }: { userName?: string }) {
               <p className="text-lg font-light text-[var(--bone)]">2. Kursa Kayıt Ol</p>
               <p className="text-sm text-[var(--bone)]/50">inner·hub — 2. dönem başvuruları açık</p>
             </div>
-            <Link href="/panel/applications">
-              <a className="inline-flex shrink-0 items-center gap-2 border border-[var(--bone)]/20 bg-[var(--bone)] px-5 py-2.5 font-mono text-[11px] uppercase tracking-widest text-[var(--ink)] transition-opacity hover:opacity-80">
-                Başvur <ArrowRight className="size-3.5" />
-              </a>
+            <Link
+              href="/panel/applications"
+              className="inline-flex shrink-0 items-center gap-2 border border-[var(--bone)]/20 bg-[var(--bone)] px-5 py-2.5 font-mono text-[11px] uppercase tracking-widest text-[var(--ink)] transition-opacity hover:opacity-80"
+            >
+              Başvur <ArrowRight className="size-3.5" />
             </Link>
           </div>
         </div>
@@ -255,10 +294,11 @@ export default function Dashboard({ userName = "Ata" }: { userName?: string }) {
           <section>
             <div className="mb-4 flex items-baseline justify-between border-t border-[var(--ink)]/[0.08] pt-3">
               <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40">Kurslarım</p>
-              <Link href="/panel/courses">
-                <a className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40 transition-colors hover:text-[var(--ink)]">
-                  Tümü →
-                </a>
+              <Link
+                href="/panel/courses"
+                className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40 transition-colors hover:text-[var(--ink)]"
+              >
+                Tümü →
               </Link>
             </div>
             <div className="space-y-2">
@@ -285,10 +325,11 @@ export default function Dashboard({ userName = "Ata" }: { userName?: string }) {
               <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40">Ayrıcalıklar</p>
               <p className="mt-0.5 text-xs text-[var(--ink)]/30">Program katılımcılarına özel fırsatlar</p>
             </div>
-            <Link href="/panel/perks">
-              <a className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40 transition-colors hover:text-[var(--ink)]">
-                Tümü →
-              </a>
+            <Link
+              href="/panel/perks"
+              className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40 transition-colors hover:text-[var(--ink)]"
+            >
+              Tümü →
             </Link>
           </div>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">

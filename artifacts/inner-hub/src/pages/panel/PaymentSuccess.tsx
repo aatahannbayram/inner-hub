@@ -57,10 +57,11 @@ export default function PaymentSuccess() {
         <p className="text-sm text-[var(--ink)]/50 mb-6">
           Lütfen destek ekibiyle iletişime geçin.
         </p>
-        <Link href="/panel/membership">
-          <a className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/50 hover:text-[var(--ink)] transition-colors">
-            ← Üyelik sayfasına dön
-          </a>
+        <Link
+          href="/panel/membership"
+          className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/50 hover:text-[var(--ink)] transition-colors"
+        >
+          ← Üyelik sayfasına dön
         </Link>
       </div>
     );
@@ -152,15 +153,17 @@ export default function PaymentSuccess() {
 
       {/* Actions */}
       <div className="flex gap-3">
-        <Link href="/panel">
-          <a className="flex items-center gap-2 border border-[var(--ink)] bg-[var(--ink)] px-5 py-3 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-80">
-            Panele Git <ArrowRight className="size-3.5" />
-          </a>
+        <Link
+          href="/panel"
+          className="flex items-center gap-2 border border-[var(--ink)] bg-[var(--ink)] px-5 py-3 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-80"
+        >
+          Panele Git <ArrowRight className="size-3.5" />
         </Link>
-        <Link href="/panel/events">
-          <a className="flex items-center gap-2 border border-[var(--ink)]/15 px-5 py-3 font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/50 transition-all hover:border-[var(--ink)]/40 hover:text-[var(--ink)]">
-            Etkinlikler
-          </a>
+        <Link
+          href="/panel/events"
+          className="flex items-center gap-2 border border-[var(--ink)]/15 px-5 py-3 font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/50 transition-all hover:border-[var(--ink)]/40 hover:text-[var(--ink)]"
+        >
+          Etkinlikler
         </Link>
       </div>
     </div>

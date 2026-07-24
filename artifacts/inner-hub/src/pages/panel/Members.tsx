@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
-import { Search, Linkedin, Briefcase, ArrowRight, Tag, CheckCircle2, MessageSquare, UserPlus, X } from "lucide-react";
+import { Search, Linkedin, Briefcase, ArrowRight, Tag, CheckCircle2, MessageSquare, UserPlus, X, Users2 } from "lucide-react";
 import { FadeIn } from "@/components/FadeIn";
+import { AnimatedHeading } from "@/components/AnimatedHeading";
 import { cn } from "@/lib/utils";
+import { avatarColor } from "@/lib/avatarColor";
 
 type Tab = "uyeler" | "talent";
 
@@ -187,7 +189,10 @@ function MemberCard({ member, onSelect }: { member: Member; onSelect: (m: Member
       {/* Header */}
       <div className="mb-3 flex items-start gap-3">
         <div className="relative">
-          <div className="flex size-10 items-center justify-center bg-[var(--ink)] font-mono text-[11px] uppercase text-[var(--bone)]">
+          <div
+            className="flex size-10 items-center justify-center font-mono text-[11px] uppercase text-[var(--bone)]"
+            style={{ backgroundColor: avatarColor(member.name) }}
+          >
             {member.initials}
           </div>
           {member.isAvailable && (
@@ -287,7 +292,10 @@ function MemberDetailPanel({ member, onClose }: { member: Member; onClose: () =>
           {/* Identity */}
           <div className="flex items-start gap-3">
             <div className="relative shrink-0">
-              <div className="flex size-12 items-center justify-center bg-[var(--ink)] font-mono text-sm text-[var(--bone)]">
+              <div
+                className="flex size-12 items-center justify-center font-mono text-sm text-[var(--bone)]"
+                style={{ backgroundColor: avatarColor(member.name) }}
+              >
                 {member.initials}
               </div>
               {member.isAvailable && (
@@ -375,12 +383,124 @@ function MemberDetailPanel({ member, onClose }: { member: Member; onClose: () =>
   );
 }
 
+// ─── Hero ─────────────────────────────────────────────────────────────────────
+
+function scrollToId(id: string) {
+  document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function MembersHero({ onTalentClick }: { onTalentClick: () => void }) {
+  return (
+    <div
+      className="relative -mx-4 -mt-6 overflow-hidden sm:-mx-6 lg:-mx-8 lg:-mt-8"
+      style={{ height: "min(70vh, 620px)", minHeight: 440 }}
+    >
+      <video
+        autoPlay
+        muted
+        loop
+        playsInline
+        className="absolute inset-0 h-full w-full object-cover"
+        src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260406_133058_0504132a-0cf3-4450-a370-8ea3b05c95d4.mp4"
+      />
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-[1] bg-[var(--ink)]/40" />
+      <div
+        aria-hidden="true"
+        className="bottom-blur-mask pointer-events-none absolute inset-0 z-[1] bg-black/20 backdrop-blur-xl"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-b from-black/50 via-transparent to-transparent"
+      />
+
+      <div className="relative z-10 flex h-full flex-col justify-end px-6 pb-10 md:px-12 md:pb-14">
+        <div className="lg:grid lg:grid-cols-2 lg:items-end lg:gap-10">
+          <div>
+            <p className="mb-3 font-mono text-[10px] uppercase tracking-widest text-white/60 [text-shadow:0_1px_12px_rgba(0,0,0,0.6)]">
+              Katılımcılar
+            </p>
+            <AnimatedHeading
+              text={"Where builders\nfind each other."}
+              className="mb-4 font-display font-serif italic text-4xl leading-[1.1] text-white [text-shadow:0_2px_24px_rgba(0,0,0,0.55)] md:text-5xl lg:text-6xl"
+              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1" }}
+            />
+            <FadeIn delay={0.8}>
+              <p className="mb-6 max-w-[46ch] text-base text-white/75 [text-shadow:0_1px_12px_rgba(0,0,0,0.6)] md:text-lg">
+                Kurucular, mühendisler, yatırımcılar — daire içinde birbirini bulur ve büyür.
+              </p>
+            </FadeIn>
+            <FadeIn delay={1.2}>
+              <div className="flex flex-wrap gap-4">
+                <button
+                  onClick={() => scrollToId("members-grid")}
+                  className="group inline-flex items-center gap-2 bg-white px-8 py-3 font-mono text-xs uppercase tracking-widest text-black transition-colors hover:bg-white/90"
+                >
+                  Üyeleri Gör
+                  <ArrowRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
+                </button>
+                <button
+                  onClick={onTalentClick}
+                  className="liquid-glass group inline-flex items-center gap-2 border border-white/20 px-8 py-3 font-mono text-xs uppercase tracking-widest text-white transition-colors hover:bg-white hover:text-black"
+                >
+                  Talent Board
+                  <ArrowRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
+                </button>
+              </div>
+            </FadeIn>
+          </div>
+
+          <div className="mt-8 flex items-end justify-start lg:mt-0 lg:justify-end">
+            <FadeIn delay={1.4}>
+              <div className="liquid-glass border border-white/20 bg-black/40 px-6 py-3">
+                <span className="text-lg font-light text-white md:text-xl">
+                  Kurucular. Mühendisler. Yatırımcılar.
+                </span>
+              </div>
+            </FadeIn>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MembersStat({
+  label,
+  value,
+  sub,
+  icon: Icon,
+}: {
+  label: string;
+  value: string;
+  sub: string;
+  icon: React.ComponentType<{ className?: string }>;
+}) {
+  return (
+    <div className="border border-[var(--ink)]/[0.08] p-4">
+      <div className="mb-2 flex items-center justify-between">
+        <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/35">{label}</p>
+        <Icon className="size-3.5 text-[var(--ink)]/20" />
+      </div>
+      <p
+        className="font-serif text-2xl text-[var(--ink)]"
+        style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 100 }}
+      >
+        {value}
+      </p>
+      <p className="mt-1 font-mono text-[9px] text-[var(--ink)]/30">{sub}</p>
+    </div>
+  );
+}
+
 function TalentCard({ post }: { post: TalentPost }) {
   return (
     <div className="border border-[var(--ink)]/[0.08] p-5 transition-all duration-200 hover:border-[var(--ink)]/20">
       <div className="mb-3 flex items-start justify-between gap-3">
         <div className="flex items-center gap-2.5">
-          <div className="flex size-8 shrink-0 items-center justify-center bg-[var(--ink)] font-mono text-[10px] uppercase text-[var(--bone)]">
+          <div
+            className="flex size-8 shrink-0 items-center justify-center font-mono text-[10px] uppercase text-[var(--bone)]"
+            style={{ backgroundColor: avatarColor(post.postedBy) }}
+          >
             {post.postedByInitials}
           </div>
           <div>
@@ -446,23 +566,27 @@ export default function Members() {
 
   return (
     <div className="space-y-8 max-w-5xl">
-      {/* Header */}
-      <FadeIn>
-        <div>
-          <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40 mb-2">
-            inner·hub
-          </p>
-          <h1
-            className="font-serif font-display text-4xl md:text-5xl text-[var(--ink)]"
-            style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 100 }}
-          >
-            Katılımcılar
-            <span className="inline-block size-[0.35em] translate-y-[0.08em] ml-[0.05em] bg-[var(--inner-green)]" />
-          </h1>
-          <p className="mt-2 text-sm text-[var(--ink)]/50 font-light">
-            Topluluk üyeleri ve iş birliği fırsatları.
-          </p>
+      {/* Hero */}
+      <MembersHero onTalentClick={() => { setTab("talent"); requestAnimationFrame(() => scrollToId("members-talent")); }} />
+
+      <FadeIn delay={0.02}>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <MembersStat label="Toplam Üye" value={String(MEMBERS.length)} sub="dairenin içinde" icon={Users2} />
+          <MembersStat label="Çevrimiçi" value={String(MEMBERS.filter((m) => m.isAvailable).length)} sub="şu anda aktif" icon={Users2} />
+          <MembersStat label="Talent İlanı" value={String(TALENT_POSTS.length)} sub="açık pozisyon" icon={Tag} />
+          <MembersStat
+            label="Kurucu Üye"
+            value={String(Object.values(MEMBER_EXPERTISE).filter((e) => e.tier === "Kurucu Üye").length)}
+            sub="ilk otuz dörtten"
+            icon={CheckCircle2}
+          />
         </div>
+      </FadeIn>
+
+      <FadeIn delay={0.03}>
+        <p className="text-sm text-[var(--ink)]/50 font-light">
+          Topluluk üyeleri ve iş birliği fırsatları.
+        </p>
       </FadeIn>
 
       {/* Tabs + Search */}
@@ -509,7 +633,7 @@ export default function Members() {
       </FadeIn>
 
       {/* Content */}
-      <div>
+      <div id={tab === "uyeler" ? "members-grid" : "members-talent"} className="scroll-mt-6">
         {tab === "uyeler" ? (
           <div>
             {/* Online indicator */}

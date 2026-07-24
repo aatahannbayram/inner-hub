@@ -19,6 +19,7 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Link } from "wouter";
 import { FadeIn } from "@/components/FadeIn";
 import { apiUrl } from "@/lib/api";
+import { avatarColor } from "@/lib/avatarColor";
 
 interface Theme {
   topic: string;
@@ -544,10 +545,11 @@ export default function Signal() {
                       {copied ? <Check className="size-3" /> : <Copy className="size-3" />}
                       {copied ? "Kopyalandı" : "İçgörüyü kopyala"}
                     </button>
-                    <Link href="/panel/chat">
-                      <a className="inline-flex items-center gap-2 border border-[var(--bone)]/25 px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)]/80 transition-colors hover:border-[var(--bone)]/50 hover:text-[var(--bone)]">
-                        <MessageSquare className="size-3" /> Chat’te aç
-                      </a>
+                    <Link
+                      href="/panel/chat"
+                      className="inline-flex items-center gap-2 border border-[var(--bone)]/25 px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)]/80 transition-colors hover:border-[var(--bone)]/50 hover:text-[var(--bone)]"
+                    >
+                      <MessageSquare className="size-3" /> Chat’te aç
                     </Link>
                     {!imageUrl ? (
                       <button
@@ -687,10 +689,11 @@ export default function Signal() {
                       <div className="min-w-0 flex-1">
                         <p className="mb-1 text-sm font-medium text-[var(--ink)]">{theme.topic}</p>
                         <p className="text-xs leading-relaxed text-[var(--ink)]/50">{theme.summary}</p>
-                        <Link href="/panel/chat">
-                          <a className="mt-3 inline-flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/40 transition-colors hover:text-[var(--ink)]">
-                            Konuyu chat’te takip et <ArrowRight className="size-2.5" />
-                          </a>
+                        <Link
+                          href="/panel/chat"
+                          className="mt-3 inline-flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/40 transition-colors hover:text-[var(--ink)]"
+                        >
+                          Konuyu chat’te takip et <ArrowRight className="size-2.5" />
                         </Link>
                       </div>
                     </div>
@@ -710,10 +713,11 @@ export default function Signal() {
                     Bu hafta tanış
                   </p>
                 </div>
-                <Link href="/panel/match">
-                  <a className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/35 transition-colors hover:text-[var(--ink)]">
-                    Match →
-                  </a>
+                <Link
+                  href="/panel/match"
+                  className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/35 transition-colors hover:text-[var(--ink)]"
+                >
+                  Match →
                 </Link>
               </div>
               {data.connections.length === 0 ? (
@@ -727,7 +731,10 @@ export default function Signal() {
                       key={i}
                       className="flex items-start gap-4 border border-[var(--ink)]/[0.08] p-4 transition-colors hover:border-[var(--ink)]/25"
                     >
-                      <div className="flex size-10 shrink-0 items-center justify-center bg-[var(--ink)] font-mono text-[11px] uppercase text-[var(--bone)]">
+                      <div
+                        className="flex size-10 shrink-0 items-center justify-center font-mono text-[11px] uppercase text-[var(--bone)]"
+                        style={{ backgroundColor: avatarColor(conn.name) }}
+                      >
                         {conn.name
                           .split(" ")
                           .map((n) => n[0])
@@ -740,10 +747,11 @@ export default function Signal() {
                           <ScoreRing score={conn.matchScore} />
                         </div>
                         <p className="text-xs leading-relaxed text-[var(--ink)]/50">{conn.reason}</p>
-                        <Link href="/panel/match">
-                          <a className="mt-3 inline-flex items-center gap-1.5 border border-[var(--ink)] bg-[var(--ink)] px-3 py-1.5 font-mono text-[9px] uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-85">
-                            Tanışma talebi <ArrowRight className="size-2.5" />
-                          </a>
+                        <Link
+                          href="/panel/match"
+                          className="mt-3 inline-flex items-center gap-1.5 border border-[var(--ink)] bg-[var(--ink)] px-3 py-1.5 font-mono text-[9px] uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-85"
+                        >
+                          Tanışma talebi <ArrowRight className="size-2.5" />
                         </Link>
                       </div>
                     </div>

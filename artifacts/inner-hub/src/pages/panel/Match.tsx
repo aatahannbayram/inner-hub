@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Loader2, RefreshCw, Sparkles, ArrowRight, Check } from "lucide-react";
 import { FadeIn } from "@/components/FadeIn";
 import { AnimatedHeading } from "@/components/AnimatedHeading";
+import { avatarColor } from "@/lib/avatarColor";
 
 interface Match {
   name: string;
@@ -52,7 +53,10 @@ function MatchCard({ match, index }: { match: Match; index: number }) {
       {/* Header */}
       <div className="mb-4 flex items-start gap-4">
         <div className="relative shrink-0">
-          <div className="flex size-12 items-center justify-center bg-[var(--ink)] font-mono text-[13px] uppercase text-[var(--bone)]">
+          <div
+            className="flex size-12 items-center justify-center font-mono text-[13px] uppercase text-[var(--bone)]"
+            style={{ backgroundColor: avatarColor(match.name) }}
+          >
             {initials}
           </div>
           <div className="absolute -right-0.5 -top-0.5 flex size-4 items-center justify-center bg-[var(--bone)] border border-[var(--ink)]/10">
