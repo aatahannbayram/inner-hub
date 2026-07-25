@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ChevronDown, ChevronRight, BookOpen, CheckCircle2, Lock, Play, GraduationCap, TrendingUp } from "lucide-react";
 import { FadeIn } from "@/components/FadeIn";
 import { AnimatedHeading } from "@/components/AnimatedHeading";
-import { apiUrl } from "@/lib/api";
+import { useApiQuery } from "@/hooks/useApiQuery";
 import { StatCardSkeleton, CourseCardSkeleton, LoadingBlock, ErrorState } from "@/components/panel/Skeletons";
 
 interface Lesson {
@@ -34,14 +34,16 @@ interface Course {
   modules: Module[];
 }
 
-function mapApiCourse(row: {
+interface RawCourse {
   id: number;
   title: string;
   description?: string;
   term?: number;
   progressPct?: number;
   isEnrolled?: boolean;
-}): Course {
+}
+
+function mapApiCourse(row: RawCourse): Course {
   return {
     id: row.id,
     title: row.title,
@@ -346,34 +348,12 @@ function CoursesStat({
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function CoursesPage() {
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [retryKey, setRetryKey] = useState(0);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      setLoading(true);
-      setError("");
-      try {
-        const res = await fetch(apiUrl("/api/courses"), { credentials: "include" });
-        const json = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error(json.error ?? "Kurslar yüklenemedi");
-        if (!cancelled) setCourses((json.courses ?? []).map(mapApiCourse));
-      } catch (e: unknown) {
-        if (!cancelled) {
-          setError(e instanceof Error ? e.message : "Kurslar yüklenemedi");
-          setCourses([]);
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [retryKey]);
+  const { data, isLoading, isError, error, refetch } = useApiQuery<{ courses: RawCourse[] }>(
+    ["courses"],
+    "/api/courses",
+  );
+  const courses = (data?.courses ?? []).map(mapApiCourse);
+  const loading = isLoading;
 
   const enrolled = courses.filter((c) => c.isEnrolled);
   const available = courses.filter((c) => !c.isEnrolled);
@@ -387,7 +367,7 @@ export default function CoursesPage() {
       {/* Hero */}
       <CoursesHero hasEnrolled={enrolled.length > 0} />
 
-      {!loading && !error && courses.length > 0 && (
+      {!loading && !isError && courses.length > 0 && (
         <FadeIn delay={0.02}>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <CoursesStat label="Kayıtlı Kurs" value={String(enrolled.length)} sub="devam ediyor" icon={GraduationCap} />
@@ -411,8 +391,13 @@ export default function CoursesPage() {
           </div>
         </LoadingBlock>
       )}
-      {error && <ErrorState message={error} onRetry={() => setRetryKey((k) => k + 1)} />}
-      {!loading && !error && courses.length === 0 && (
+      {isError && (
+        <ErrorState
+          message={error instanceof Error ? error.message : "Kurslar yüklenemedi"}
+          onRetry={() => refetch()}
+        />
+      )}
+      {!loading && !isError && courses.length === 0 && (
         <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)]">
           Henüz yayınlanmış kurs yok.
         </p>
