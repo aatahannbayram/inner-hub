@@ -194,6 +194,29 @@ Doğru davranış canlı olarak yeniden test edildi (1-2sn bekleme sonrası ekra
 
 Sonuç: `PublicProfile.tsx`'te düzeltilmesi gereken bir şey yok — dev'de rotayı ilk açtığınızda 1-2sn içinde normal şekilde beliriyor. Özür: önceki rapor yanlıştı, gereksiz iş yaratmasın diye düzeltildi.
 
+### Yeni bug — sidebar'da iki menü öğesi aynı anda aktif görünüyor
+
+`/panel/membership` (Üyelik) sayfasındayken sidebar'da **hem "Katılımcılar" hem "Üyelik"** aynı anda siyah/aktif render ediyor (canlı browser'da doğrulandı, ekran görüntüsü alındı).
+
+**Kök neden** — `components/panel/PanelNav.tsx:96-99`:
+```ts
+const isActive =
+  item.href === "/panel"
+    ? location === "/panel"
+    : location.startsWith(item.href);
+```
+`"/panel/membership".startsWith("/panel/members")` → `true`, çünkü `/panel/members` string olarak `/panel/membership`'in bir prefix'i. `NAV_ITEMS` içindeki tüm href'ler tarandı (script ile), tek çakışma bu ikili — başka route çifti prefix ilişkisinde değil.
+
+**Önerilen tek satır fix:**
+```ts
+const isActive =
+  item.href === "/panel"
+    ? location === "/panel"
+    : location === item.href || location.startsWith(item.href + "/");
+```
+
+`PanelNav.tsx` Claude'un yasaklı dosyası olduğu için dokunulmadı — Cursor uygulayabilir.
+
 ---
 
 *Son güncelleme: Cursor agent — 2026-07-25, HEAD `782c493`.*
