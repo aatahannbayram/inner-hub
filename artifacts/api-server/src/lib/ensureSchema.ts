@@ -99,3 +99,18 @@ export async function ensureTalentSchema() {
     )
   `);
 }
+
+/** inner·api anahtarları — plaintext hiçbir zaman saklanmaz, yalnızca hash. */
+export async function ensureApiKeysSchema() {
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS api_keys (
+      id serial PRIMARY KEY,
+      user_id integer NOT NULL REFERENCES users(id),
+      name text NOT NULL,
+      key_prefix text NOT NULL,
+      key_hash text NOT NULL,
+      created_at timestamp NOT NULL DEFAULT now(),
+      last_used_at timestamp
+    )
+  `);
+}

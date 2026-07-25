@@ -16,6 +16,7 @@ import pulseRouter from "./pulse";
 import publicIdRouter from "./publicId";
 import analyticsRouter from "./analytics";
 import talentRouter from "./talent";
+import apiKeysRouter from "./apiKeys";
 
 const router: IRouter = Router();
 
@@ -36,5 +37,6 @@ router.use(pulseRouter);
 router.use(publicIdRouter);
 router.use(analyticsRouter);
 router.use(talentRouter);
+router.use(apiKeysRouter);
 
 export default router;

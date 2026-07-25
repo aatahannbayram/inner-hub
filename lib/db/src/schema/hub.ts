@@ -250,3 +250,16 @@ export const sessionsTable = pgTable("sessions", {
 });
 
 export type Session = typeof sessionsTable.$inferSelect;
+
+// ─── INNER·API ANAHTARLARI ────────────────────────────────────────────────────
+export const apiKeysTable = pgTable("api_keys", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => usersTable.id).notNull(),
+  name: text("name").notNull(),
+  keyPrefix: text("key_prefix").notNull(),
+  keyHash: text("key_hash").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  lastUsedAt: timestamp("last_used_at"),
+});
+
+export type ApiKey = typeof apiKeysTable.$inferSelect;
