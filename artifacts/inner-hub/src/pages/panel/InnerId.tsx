@@ -84,7 +84,7 @@ function IdCard() {
               {IDENTITY.name}
             </span>
             {IDENTITY.verified && (
-              <CheckCircle2 className="size-4 text-[var(--inner-green)] shrink-0" />
+              <CheckCircle2 className="size-4 text-[var(--success-ink)] shrink-0" />
             )}
           </div>
 
@@ -111,7 +111,7 @@ function IdCard() {
           <div className="flex size-16 items-center justify-center border border-[var(--bone)]/15 bg-[var(--bone)]/5">
             <QrCode className="size-8 text-[var(--bone)]/42" />
           </div>
-          <span className="border border-[var(--inner-green)]/40 bg-[var(--inner-green)]/10 px-2.5 py-1 font-mono text-[8px] uppercase tracking-widest text-[var(--inner-green)]">
+          <span className="border border-[var(--inner-green)]/40 bg-[var(--inner-green)]/10 px-2.5 py-1 font-mono text-[8px] uppercase tracking-widest text-[var(--success-ink)]">
             {IDENTITY.tier}
           </span>
         </div>
@@ -300,9 +300,9 @@ export default function InnerId() {
 
       {/* Verification info */}
       <div className="flex items-start gap-3 border border-[var(--inner-green)]/20 bg-[var(--inner-green)]/5 p-4">
-        <Shield className="size-4 shrink-0 text-[var(--inner-green)] mt-0.5" />
+        <Shield className="size-4 shrink-0 text-[var(--success-ink)] mt-0.5" />
         <div>
-          <p className="mb-0.5 font-mono text-[9px] uppercase tracking-widest text-[var(--inner-green)]">
+          <p className="mb-0.5 font-mono text-[9px] uppercase tracking-widest text-[var(--success-ink)]">
             Kimlik Doğrulandı
           </p>
           <p className="text-sm leading-relaxed text-[var(--ink-muted)]">

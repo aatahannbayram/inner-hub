@@ -183,7 +183,7 @@ function MarqueeStrip() {
       >
         {items.map((item, i) => (
           <span key={i} className="font-mono text-xs uppercase tracking-widest text-muted-foreground flex-shrink-0">
-            {item} <span className="text-[var(--inner-green)] ml-4">·</span>
+            {item} <span className="text-[var(--success-ink)] ml-4">·</span>
           </span>
         ))}
       </motion.div>

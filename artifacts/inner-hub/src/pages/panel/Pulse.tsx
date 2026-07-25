@@ -107,7 +107,7 @@ const TOP_CONTRIBUTORS: TopContributor[] = [
 const CAT_COLORS: Record<Trend["category"], string> = {
   teknoloji: "text-[var(--ink)] bg-[var(--ink)]/[0.06] border-[var(--ink)]/10",
   iş: "text-[var(--ink-body)] bg-[var(--ink)]/[0.03] border-[var(--ink)]/8",
-  yatırım: "text-[var(--inner-green)] bg-[var(--inner-green)]/8 border-[var(--inner-green)]/20",
+  yatırım: "text-[var(--success-ink)] bg-[var(--inner-green)]/8 border-[var(--inner-green)]/20",
   kültür: "text-[var(--ink-body)] bg-transparent border-[var(--ink)]/[0.06]",
 };
 
@@ -127,7 +127,7 @@ function TrendRow({ trend, rank, maxMentions }: { trend: Trend; rank: number; ma
   const isUp = trend.delta > 0;
   const isFlat = trend.delta === 0;
   const DeltaIcon = isFlat ? Minus : isUp ? TrendingUp : TrendingDown;
-  const deltaColor = isFlat ? "text-[var(--ink-muted)]" : isUp ? "text-[var(--inner-green)]" : "text-[var(--error)]";
+  const deltaColor = isFlat ? "text-[var(--ink-muted)]" : isUp ? "text-[var(--success-ink)]" : "text-[var(--error-ink)]";
 
   return (
     <div className="flex items-center gap-4 py-2.5 border-b border-[var(--ink)]/[0.05] last:border-0">
@@ -210,8 +210,8 @@ export default function Pulse() {
             </p>
           </div>
           <div className="flex items-center gap-2 border border-[var(--inner-green)]/30 bg-[var(--inner-green)]/5 px-3 py-2">
-            <Radio className="size-3 text-[var(--inner-green)]" />
-            <span className="font-mono text-[9px] uppercase tracking-widest text-[var(--inner-green)]">Canlı</span>
+            <Radio className="size-3 text-[var(--success-ink)]" />
+            <span className="font-mono text-[9px] uppercase tracking-widest text-[var(--success-ink)]">Canlı</span>
           </div>
         </div>
       </FadeIn>
@@ -225,7 +225,7 @@ export default function Pulse() {
             className="aspect-[21/9] w-full md:aspect-[24/9]"
           />
           <div className="pointer-events-none absolute inset-0 flex flex-col justify-end p-6 md:p-8">
-            <p className="mb-1 font-mono text-[9px] uppercase tracking-widest text-[var(--inner-green)]/70">
+            <p className="mb-1 font-mono text-[9px] uppercase tracking-widest text-[var(--success-ink)]/70">
               Phosphor · canlı sinyal
             </p>
             <p className="max-w-[26ch] font-serif text-2xl text-[var(--bone)] md:text-3xl" style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 300 }}>

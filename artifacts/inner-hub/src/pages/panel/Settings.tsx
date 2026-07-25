@@ -96,7 +96,7 @@ function RadioGroup<T extends string>({
               : "border-[var(--ink)]/10 text-[var(--ink-muted)] hover:text-[var(--ink)]",
           ].join(" ")}
         >
-          {opt.label}
+          {opt.label === "English" ? <span lang="en">{opt.label}</span> : opt.label}
         </button>
       ))}
     </div>
@@ -251,8 +251,8 @@ export default function Settings() {
       {/* Danger zone */}
       <div className="border border-[var(--error)]/20 p-5">
         <div className="mb-3 flex items-center gap-2">
-          <AlertTriangle className="size-3.5 text-[var(--error)]/60" />
-          <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--error)]/60">Tehlikeli Alan</p>
+          <AlertTriangle className="size-3.5 text-[var(--error-ink)]" />
+          <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--error-ink)]">Tehlikeli Alan</p>
         </div>
         <div className="space-y-3">
           <div className="flex items-center justify-between gap-4">
@@ -260,7 +260,7 @@ export default function Settings() {
               <p className="text-sm text-[var(--ink)] font-light">Hesabı askıya al</p>
               <p className="font-mono text-[9px] text-[var(--ink-muted)]">Üyeliğini geçici olarak durdur</p>
             </div>
-            <button className="border border-[var(--error)]/20 px-4 py-2 font-mono text-[9px] uppercase tracking-widest text-[var(--error)]/50 hover:border-[var(--error)]/40 hover:text-[var(--error)] transition-colors">
+            <button className="border border-[var(--error)]/20 px-4 py-2 font-mono text-[9px] uppercase tracking-widest text-[var(--error-ink)] hover:border-[var(--error)]/40 hover:text-[var(--error-ink)] transition-colors">
               Askıya Al
             </button>
           </div>

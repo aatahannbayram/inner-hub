@@ -240,7 +240,7 @@ export default function Invitation() {
                   </div>
 
                   {isError && (
-                    <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--error)]">
+                    <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--error-ink)]">
                       Bir şeyler ters gitti. Tekrar dene.
                     </p>
                   )}

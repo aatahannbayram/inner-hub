@@ -396,7 +396,7 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
             </div>
 
             {error && (
-              <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--error)]">
+              <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--error-ink)]">
                 {error}
               </p>
             )}

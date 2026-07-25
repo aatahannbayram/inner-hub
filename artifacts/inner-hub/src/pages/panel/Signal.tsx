@@ -69,7 +69,7 @@ const MOMENTUM_CONFIG = {
   düşük: {
     icon: TrendingDown,
     label: "Düşen",
-    tone: "border-[var(--error)]/30 text-[var(--error)]",
+    tone: "border-[var(--error)]/30 text-[var(--error-ink)]",
     row: "border-[var(--error)]/20",
     accent: "var(--error)",
   },
@@ -489,7 +489,7 @@ export default function Signal() {
         </div>
       ) : error ? (
         <div className="border border-[var(--error)]/25 bg-[var(--error)]/[0.04] p-6">
-          <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--error)]">
+          <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--error-ink)]">
             Sinyal alınamadı
           </p>
           <p className="mt-2 text-sm text-[var(--ink-body)]">{error}</p>

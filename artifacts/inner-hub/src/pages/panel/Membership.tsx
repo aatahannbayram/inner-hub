@@ -206,7 +206,7 @@ function PlanCard({ plan }: { plan: Plan }) {
 
       {/* Error */}
       {error && (
-        <p className="mb-3 font-mono text-[10px] uppercase tracking-widest text-[var(--error)]">
+        <p className="mb-3 font-mono text-[10px] uppercase tracking-widest text-[var(--error-ink)]">
           {error}
         </p>
       )}
@@ -310,7 +310,7 @@ export default function Membership() {
             </div>
           </div>
           {ticketError && (
-            <p className="mt-2 font-mono text-[10px] uppercase tracking-widest text-[var(--error)]">
+            <p className="mt-2 font-mono text-[10px] uppercase tracking-widest text-[var(--error-ink)]">
               {ticketError}
             </p>
           )}

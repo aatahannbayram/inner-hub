@@ -145,8 +145,8 @@ export function EditorialCard({
               className={cn(
                 "mt-auto flex items-center gap-1.5 pt-3 font-mono text-[10px] uppercase tracking-widest transition-all",
                 dark
-                  ? "text-[var(--bone)]/70 group-hover:text-[var(--inner-green)]"
-                  : "text-[var(--ink-muted)] group-hover:text-[var(--inner-green)]",
+                  ? "text-[var(--bone)]/70 group-hover:text-[var(--success-ink)]"
+                  : "text-[var(--ink-muted)] group-hover:text-[var(--success-ink)]",
               )}
             >
               {cta}

@@ -51,7 +51,7 @@ export default function PaymentSuccess() {
   if (status === "error") {
     return (
       <div className="mx-auto max-w-md py-16 text-center">
-        <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--error)] mb-4">
+        <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--error-ink)] mb-4">
           Ödeme doğrulanamadı
         </p>
         <p className="text-sm text-[var(--ink-muted)] mb-6">
@@ -71,7 +71,7 @@ export default function PaymentSuccess() {
     <div className="mx-auto max-w-lg py-16">
       {/* Icon */}
       <div className="mb-8 flex size-14 items-center justify-center border border-[var(--inner-green)]/30 bg-[var(--inner-green)]/10">
-        <CheckCircle2 className="size-7 text-[var(--inner-green)]" />
+        <CheckCircle2 className="size-7 text-[var(--success-ink)]" />
       </div>
 
       {/* Heading */}
@@ -110,7 +110,7 @@ export default function PaymentSuccess() {
         )}
         <div className="flex items-center justify-between border-t border-[var(--ink)]/[0.06] pt-3">
           <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)]">Durum</span>
-          <span className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-[var(--inner-green)]">
+          <span className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-[var(--success-ink)]">
             <span className="size-1.5 rounded-full bg-[var(--inner-green)]" />
             Aktif
           </span>

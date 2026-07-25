@@ -226,7 +226,7 @@ export default function MemberProfile() {
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-xl text-[var(--ink)] font-light">{member.name}</h1>
-                {member.verified && <CheckCircle2 className="size-4 text-[var(--inner-green)] shrink-0" />}
+                {member.verified && <CheckCircle2 className="size-4 text-[var(--success-ink)] shrink-0" />}
               </div>
               <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)]">
                 {member.title}

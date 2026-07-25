@@ -160,7 +160,7 @@ function EventCard({ event }: { event: Event }) {
                 Kontenjan dolu
               </span>
             ) : event.isRegistered ? (
-              <button className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)] hover:text-[var(--error)] transition-colors">
+              <button className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)] hover:text-[var(--error-ink)] transition-colors">
                 Kaydı İptal Et
               </button>
             ) : (
@@ -469,7 +469,7 @@ export default function Events() {
         </p>
       )}
       {error && (
-        <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--error)]">
+        <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--error-ink)]">
           {error}
         </p>
       )}

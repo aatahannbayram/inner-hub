@@ -66,7 +66,7 @@ function LessonRow({ lesson }: { lesson: Lesson }) {
       ].join(" ")}
     >
       {lesson.isCompleted ? (
-        <CheckCircle2 className="size-3.5 shrink-0 text-[var(--inner-green)]" />
+        <CheckCircle2 className="size-3.5 shrink-0 text-[var(--success-ink)]" />
       ) : lesson.isLocked ? (
         <Lock className="size-3.5 shrink-0 text-[var(--ink-muted)]" />
       ) : (
@@ -402,7 +402,7 @@ export default function CoursesPage() {
         </p>
       )}
       {error && (
-        <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--error)]">
+        <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--error-ink)]">
           {error}
         </p>
       )}

@@ -186,9 +186,9 @@ const TYPE_ICONS: Record<DocType, React.ComponentType<{ className?: string }>> =
 };
 
 const ACCESS_CONFIG: Record<AccessLevel, { icon: React.ComponentType<{ className?: string }>; label: string; color: string }> = {
-  özel: { icon: Lock, label: "Özel", color: "text-[var(--error)]" },
+  özel: { icon: Lock, label: "Özel", color: "text-[var(--error-ink)]" },
   topluluk: { icon: Users, label: "Topluluk", color: "text-[var(--ink-body)]" },
-  davetli: { icon: Globe, label: "Davetli", color: "text-[var(--inner-green)]" },
+  davetli: { icon: Globe, label: "Davetli", color: "text-[var(--success-ink)]" },
 };
 
 const DOC_TYPES: (DocType | "Tümü")[] = ["Tümü", "Pitch Deck", "Araştırma", "Not", "Şablon", "Kod", "Rapor"];
@@ -234,7 +234,7 @@ function DocCard({ doc }: { doc: VaultDoc }) {
           </span>
         ))}
         {doc.mine && (
-          <span className="border border-[var(--inner-green)]/25 bg-[var(--inner-green)]/5 px-1.5 py-0.5 font-mono text-[8px] text-[var(--inner-green)]">
+          <span className="border border-[var(--inner-green)]/25 bg-[var(--inner-green)]/5 px-1.5 py-0.5 font-mono text-[8px] text-[var(--success-ink)]">
             benim
           </span>
         )}

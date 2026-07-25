@@ -347,7 +347,7 @@ export default function ProfilePage() {
             maxLength={20}
           />
           {handleError && (
-            <p className="mt-1 flex items-center gap-1.5 font-mono text-[9px] text-[var(--error)]">
+            <p className="mt-1 flex items-center gap-1.5 font-mono text-[9px] text-[var(--error-ink)]">
               <AlertCircle className="size-3" /> {handleError}
             </p>
           )}

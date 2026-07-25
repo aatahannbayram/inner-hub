@@ -295,7 +295,7 @@ function MemberDetailPanel({ member, onClose }: { member: Member; onClose: () =>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1.5">
                 <p className="text-base text-[var(--ink)] font-light">{member.name}</p>
-                {ext?.verified && <CheckCircle2 className="size-3.5 text-[var(--inner-green)] shrink-0" />}
+                {ext?.verified && <CheckCircle2 className="size-3.5 text-[var(--success-ink)] shrink-0" />}
               </div>
               <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink-body)]">{member.title}</p>
               <div className="flex items-center gap-1 mt-0.5">

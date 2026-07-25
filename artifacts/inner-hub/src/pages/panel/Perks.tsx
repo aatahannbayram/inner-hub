@@ -215,7 +215,7 @@ function PerkCard({
           İncele <ArrowRight className="size-3 transition-transform group-hover:translate-x-0.5" />
         </span>
         {saved ? (
-          <span className="font-mono text-[9px] uppercase tracking-widest text-[var(--inner-green)]">
+          <span className="font-mono text-[9px] uppercase tracking-widest text-[var(--success-ink)]">
             Kaydedildi
           </span>
         ) : perk.code ? (

@@ -20,7 +20,7 @@ interface MatchData {
 const TYPE_CONFIG: Record<Match["matchType"], { color: string; bg: string; border: string }> = {
   "Co-founder": { color: "text-[var(--ink)]", bg: "bg-[var(--ink)]/[0.06]", border: "border-[var(--ink)]/15" },
   "Mentor": { color: "text-[var(--ink-body)]", bg: "bg-[var(--ink)]/[0.04]", border: "border-[var(--ink)]/10" },
-  "Yatırımcı": { color: "text-[var(--inner-green)]", bg: "bg-[var(--inner-green)]/10", border: "border-[var(--inner-green)]/25" },
+  "Yatırımcı": { color: "text-[var(--success-ink)]", bg: "bg-[var(--inner-green)]/10", border: "border-[var(--inner-green)]/25" },
   "İş birliği": { color: "text-[var(--ink-muted)]", bg: "bg-[var(--ink)]/[0.04]", border: "border-[var(--ink)]/10" },
 };
 
@@ -55,7 +55,7 @@ function MatchCard({ match, index }: { match: Match; index: number }) {
         <div className="relative shrink-0">
           <PersonAvatar name={match.name} initials={initials} className="size-16 font-serif text-2xl italic" />
           <div className="absolute -right-1 -top-1 flex size-5 items-center justify-center bg-[var(--bone)] border border-[var(--ink)]/10">
-            <Sparkles className="size-3 text-[var(--inner-green)]" />
+            <Sparkles className="size-3 text-[var(--success-ink)]" />
           </div>
         </div>
         <div className="flex-1 min-w-0">
@@ -115,13 +115,13 @@ function MatchCard({ match, index }: { match: Match; index: number }) {
           className={[
             "flex w-full items-center justify-between border px-4 py-2.5 font-mono text-[10px] uppercase tracking-widest transition-all",
             introduced
-              ? "border-[var(--inner-green)]/30 bg-[var(--inner-green)]/5 text-[var(--inner-green)] cursor-default"
+              ? "border-[var(--inner-green)]/30 bg-[var(--inner-green)]/5 text-[var(--success-ink)] cursor-default"
               : "border-[var(--ink)]/15 text-[var(--ink-body)] hover:border-[var(--ink)] hover:text-[var(--ink)]",
           ].join(" ")}
         >
           <span>{introduced ? "Tanışma Talebi Gönderildi" : "Tanıştır"}</span>
           {introduced ? (
-            <Check className="size-3 text-[var(--inner-green)]" />
+            <Check className="size-3 text-[var(--success-ink)]" />
           ) : (
             <ArrowRight className="size-3" />
           )}
@@ -299,7 +299,7 @@ export default function Match() {
           {preferences.length > 0 && (
             <button
               onClick={fetchMatches}
-              className="border border-[var(--inner-green)]/30 bg-[var(--inner-green)]/5 px-3 py-1.5 font-mono text-[9px] uppercase tracking-widest text-[var(--inner-green)] transition-all hover:bg-[var(--inner-green)]/10"
+              className="border border-[var(--inner-green)]/30 bg-[var(--inner-green)]/5 px-3 py-1.5 font-mono text-[9px] uppercase tracking-widest text-[var(--success-ink)] transition-all hover:bg-[var(--inner-green)]/10"
             >
               Filtrele →
             </button>
@@ -316,7 +316,7 @@ export default function Match() {
         </div>
       ) : error ? (
         <div className="border border-[var(--error)]/20 bg-[var(--error)]/5 p-4">
-          <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--error)]">{error}</p>
+          <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--error-ink)]">{error}</p>
         </div>
       ) : data?.matches ? (
         <>

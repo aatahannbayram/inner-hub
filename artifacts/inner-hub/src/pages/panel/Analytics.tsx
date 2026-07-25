@@ -74,7 +74,7 @@ function StatCard({
   icon: React.ComponentType<{ className?: string }>;
 }) {
   const trendColor =
-    trend === "up" ? "text-[var(--inner-green)]" : trend === "down" ? "text-[var(--error)]" : "text-[var(--ink-muted)]";
+    trend === "up" ? "text-[var(--success-ink)]" : trend === "down" ? "text-[var(--error-ink)]" : "text-[var(--ink-muted)]";
 
   return (
     <div className="border border-[var(--ink)]/[0.08] p-5">
@@ -262,7 +262,7 @@ export default function Analytics() {
             >
               34
             </span>
-            <span className="font-mono text-[10px] text-[var(--inner-green)]">+6 bu ay</span>
+            <span className="font-mono text-[10px] text-[var(--success-ink)]">+6 bu ay</span>
           </div>
           <BarChart data={MEMBER_GROWTH} labelKey="month" valueKey="total" />
         </div>
@@ -278,7 +278,7 @@ export default function Analytics() {
             >
               <CurrencyValue value="₺14.700" />
             </span>
-            <span className="font-mono text-[10px] text-[var(--inner-green)]">+%29 önceki aya göre</span>
+            <span className="font-mono text-[10px] text-[var(--success-ink)]">+%29 önceki aya göre</span>
           </div>
           <BarChart
             data={REVENUE}

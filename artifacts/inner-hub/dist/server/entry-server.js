@@ -917,7 +917,7 @@ function MarqueeStrip() {
       children: items.map((item, i) => /* @__PURE__ */ jsxs("span", { className: "font-mono text-xs uppercase tracking-widest text-muted-foreground flex-shrink-0", children: [
         item,
         " ",
-        /* @__PURE__ */ jsx("span", { className: "text-[var(--inner-green)] ml-4", children: "·" })
+        /* @__PURE__ */ jsx("span", { className: "text-[var(--success-ink)] ml-4", children: "·" })
       ] }, i))
     }
   ) });

@@ -107,8 +107,8 @@ const MOCK: Application[] = [
 
 const STATUS_CONFIG: Record<AppStatus, { label: string; color: string; bg: string }> = {
   beklemede:   { label: "Beklemede",  color: "text-[var(--ink-muted)]",          bg: "bg-[var(--ink)]/[0.06]" },
-  onaylandı:   { label: "Onaylandı",  color: "text-[var(--inner-green)]",     bg: "bg-[var(--inner-green)]/10" },
-  reddedildi:  { label: "Reddedildi", color: "text-[var(--error)]",           bg: "bg-[var(--error)]/10" },
+  onaylandı:   { label: "Onaylandı",  color: "text-[var(--success-ink)]",     bg: "bg-[var(--inner-green)]/10" },
+  reddedildi:  { label: "Reddedildi", color: "text-[var(--error-ink)]",           bg: "bg-[var(--error)]/10" },
 };
 
 // ─── Status badge ─────────────────────────────────────────────────────────────
@@ -216,13 +216,13 @@ function DetailPanel({
           <div className="border-t border-[var(--ink)]/[0.08] flex">
             <button
               onClick={onReject}
-              className="flex-1 border-r border-[var(--ink)]/[0.08] py-3.5 font-mono text-[9px] uppercase tracking-widest text-[var(--ink-body)] hover:bg-[var(--error)]/5 hover:text-[var(--error)] transition-colors"
+              className="flex-1 border-r border-[var(--ink)]/[0.08] py-3.5 font-mono text-[9px] uppercase tracking-widest text-[var(--ink-body)] hover:bg-[var(--error)]/5 hover:text-[var(--error-ink)] transition-colors"
             >
               Reddet
             </button>
             <button
               onClick={onApprove}
-              className="flex-1 py-3.5 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)] hover:bg-[var(--inner-green)]/10 hover:text-[var(--inner-green)] transition-colors"
+              className="flex-1 py-3.5 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)] hover:bg-[var(--inner-green)]/10 hover:text-[var(--success-ink)] transition-colors"
             >
               Onayla
             </button>
@@ -297,8 +297,8 @@ export default function ApplicationsPage() {
       <div className="grid grid-cols-3 gap-2">
         {[
           { label: "Beklemede", val: counts.Beklemede, color: "text-[var(--ink)]" },
-          { label: "Onaylandı", val: counts.Onaylandı, color: "text-[var(--inner-green)]" },
-          { label: "Reddedildi", val: counts.Reddedildi, color: "text-[var(--error)]" },
+          { label: "Onaylandı", val: counts.Onaylandı, color: "text-[var(--success-ink)]" },
+          { label: "Reddedildi", val: counts.Reddedildi, color: "text-[var(--error-ink)]" },
         ].map((s) => (
           <div key={s.label} className="border border-[var(--ink)]/[0.08] p-4">
             <p className="font-mono text-[8px] uppercase tracking-widest text-[var(--ink-muted)]">{s.label}</p>

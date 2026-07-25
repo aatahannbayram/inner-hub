@@ -239,7 +239,7 @@ export default function InnerApi() {
             </button>
             <button
               onClick={rotateKey}
-              className="p-1.5 text-[var(--ink-muted)] hover:text-[var(--error)] transition-colors"
+              className="p-1.5 text-[var(--ink-muted)] hover:text-[var(--error-ink)] transition-colors"
               title="Anahtarı yenile"
             >
               <RefreshCw className={`size-3.5 ${rotating ? "animate-spin" : ""}`} />
