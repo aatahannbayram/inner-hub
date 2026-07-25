@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { FadeIn } from "@/components/FadeIn";
 import { AmbientCardBackground } from "@/components/panel/AmbientCardBackground";
 import {
@@ -7,65 +8,105 @@ import {
   ExternalLink,
   Shield,
   QrCode,
-  Code2,
   Globe,
   Github,
   Linkedin,
   ChevronRight,
+  Check,
+  X,
+  Link2,
 } from "lucide-react";
-import { DemoPreviewBanner } from "@/components/panel/DemoPreviewBanner";
+import { Link } from "wouter";
+import { useApiQuery } from "@/hooks/useApiQuery";
+import { apiUrl } from "@/lib/api";
+import { ErrorState, LoadingBlock } from "@/components/panel/Skeletons";
 
-// ─── Mock identity data ───────────────────────────────────────────────────────
-
-const IDENTITY = {
-  name: "Ata Han Bayram",
-  handle: "atahan",
-  role: "Kurucu",
-  company: "inner·hub",
-  memberSince: "Ocak 2026",
-  tier: "Kurucu Üye",
-  cohort: "#001",
-  verified: true,
-  publicUrl: "inner.digital/u/atahan",
-  badges: ["Kurucu", "AI Builder", "Mentor", "Demo Day 2026"],
-  skills: ["Ürün", "AI", "Topluluk", "B2B SaaS"],
-  stats: { events: 12, courses: 4, contributions: 84, connections: 23 },
+type ApiUser = {
+  id: number;
+  name: string;
+  email: string;
+  role: "member" | "admin";
+  title?: string | null;
+  company?: string | null;
+  bio?: string | null;
+  handle?: string | null;
+  linkedin?: string | null;
+  github?: string | null;
+  website?: string | null;
+  twitter?: string | null;
+  skills?: string[];
+  visibility?: string | null;
+  profileCompletionPct?: number;
+  createdAt?: string;
 };
 
-const EMBED_SNIPPETS = {
-  html: `<a href="https://inner.digital/u/atahan" target="_blank">
-  <img src="https://inner.digital/badge/atahan.svg"
-       alt="inner·hub Üyesi"
-       height="28" />
+type LinkKey = "linkedin" | "github" | "website";
+
+function stripPrefix(value: string, prefixes: string[]): string {
+  let v = value.trim();
+  for (const p of prefixes) {
+    if (v.toLowerCase().startsWith(p.toLowerCase())) v = v.slice(p.length);
+  }
+  return v.replace(/^\/+/, "");
+}
+
+function handleFromUser(user: ApiUser): string {
+  if (user.handle?.trim()) return user.handle.trim().toLowerCase();
+  return (user.email.split("@")[0] || "uye").toLowerCase().replace(/[^a-z0-9_]/g, "").slice(0, 20);
+}
+
+function memberSince(iso?: string): string {
+  if (!iso) return "—";
+  return new Date(iso).toLocaleDateString("tr-TR", { month: "long", year: "numeric" });
+}
+
+function buildSnippets(handle: string, name: string) {
+  const profile = `https://inner.digital/u/${handle}`;
+  const badge = `https://inner.digital/badge/${handle}.svg`;
+  return {
+    html: `<a href="${profile}" target="_blank" rel="noopener">
+  <img src="${badge}" alt="inner·hub Üyesi" height="28" />
 </a>`,
-  markdown: `[![inner·hub Üyesi](https://inner.digital/badge/atahan.svg)](https://inner.digital/u/atahan)`,
-  json: `{
-  "name": "Ata Han Bayram",
-  "handle": "atahan",
-  "tier": "Kurucu Üye",
+    markdown: `[![inner·hub Üyesi](${badge})](${profile})`,
+    json: `{
+  "name": ${JSON.stringify(name)},
+  "handle": ${JSON.stringify(handle)},
   "verified": true,
-  "profile": "https://inner.digital/u/atahan"
+  "profile": ${JSON.stringify(profile)}
 }`,
-};
+  } as const;
+}
 
-type SnippetTab = keyof typeof EMBED_SNIPPETS;
+type SnippetTab = "html" | "markdown" | "json";
 
-// ─── ID Card ─────────────────────────────────────────────────────────────────
+function IdCard({
+  user,
+  handle,
+  skills,
+}: {
+  user: ApiUser;
+  handle: string;
+  skills: string[];
+}) {
+  const tier = user.role === "admin" ? "Kurucu Üye" : "Üye";
+  const badges = [
+    user.role === "admin" ? "Kurucu" : "Üye",
+    ...(user.title ? [user.title] : []),
+    ...skills.slice(0, 2),
+  ].filter(Boolean);
 
-function IdCard() {
   return (
     <div className="relative overflow-hidden border border-[var(--ink)]/15 bg-[var(--ink)] p-6 text-[var(--bone)]">
       <AmbientCardBackground />
-      {/* Subtle grid pattern */}
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.04]"
         style={{
-          backgroundImage: "repeating-linear-gradient(0deg,transparent,transparent 23px,var(--bone) 23px,var(--bone) 24px),repeating-linear-gradient(90deg,transparent,transparent 23px,var(--bone) 23px,var(--bone) 24px)",
+          backgroundImage:
+            "repeating-linear-gradient(0deg,transparent,transparent 23px,var(--bone) 23px,var(--bone) 24px),repeating-linear-gradient(90deg,transparent,transparent 23px,var(--bone) 23px,var(--bone) 24px)",
         }}
       />
 
       <div className="relative flex items-start justify-between gap-4">
-        {/* Left — identity info */}
         <div className="flex-1">
           <div className="mb-4 flex items-center gap-2">
             <span className="font-mono text-label uppercase tracking-widest text-[var(--bone)]/47">
@@ -73,7 +114,7 @@ function IdCard() {
             </span>
             <span className="font-mono text-label text-[var(--bone)]/37">·</span>
             <span className="font-mono text-label uppercase tracking-widest text-[var(--bone)]/47">
-              {IDENTITY.cohort}
+              #{String(user.id).padStart(3, "0")}
             </span>
           </div>
 
@@ -82,20 +123,20 @@ function IdCard() {
               className="font-serif text-3xl text-[var(--bone)]"
               style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
             >
-              {IDENTITY.name}
+              {user.name}
             </span>
-            {IDENTITY.verified && (
-              <CheckCircle2 className="size-4 text-[var(--success-ink)] shrink-0" />
-            )}
+            <CheckCircle2 className="size-4 shrink-0 text-[var(--success-ink)]" />
           </div>
 
           <p className="mb-4 font-mono text-caption text-[var(--bone)]/57">
-            @{IDENTITY.handle} · {IDENTITY.role}, {IDENTITY.company}
+            @{handle}
+            {user.title || user.company
+              ? ` · ${[user.title, user.company].filter(Boolean).join(", ")}`
+              : ""}
           </p>
 
-          {/* Badges */}
           <div className="flex flex-wrap gap-1.5">
-            {IDENTITY.badges.map((b) => (
+            {badges.map((b) => (
               <span
                 key={b}
                 className="border border-[var(--bone)]/15 px-2 py-0.5 font-mono text-label uppercase tracking-widest text-[var(--bone)]/50"
@@ -106,58 +147,54 @@ function IdCard() {
           </div>
         </div>
 
-        {/* Right — QR placeholder + tier */}
-        <div className="flex flex-col items-end gap-3 shrink-0">
-          {/* QR mock */}
+        <div className="flex shrink-0 flex-col items-end gap-3">
           <div className="flex size-16 items-center justify-center border border-[var(--bone)]/15 bg-[var(--bone)]/5">
             <QrCode className="size-8 text-[var(--bone)]/42" />
           </div>
           <span className="border border-[var(--inner-green)]/40 bg-[var(--inner-green)]/10 px-2.5 py-1 font-mono text-label uppercase tracking-widest text-[var(--success-ink)]">
-            {IDENTITY.tier}
+            {tier}
           </span>
         </div>
       </div>
 
-      {/* Bottom row */}
       <div className="relative mt-5 flex items-center justify-between border-t border-[var(--bone)]/[0.08] pt-4">
-        <div className="flex items-center gap-4">
-          {Object.entries(IDENTITY.stats).map(([k, v]) => (
-            <div key={k}>
-              <p className="font-mono text-label uppercase tracking-widest text-[var(--bone)]/42">{k}</p>
-              <p className="font-mono text-sm text-[var(--bone)]/70">{v}</p>
-            </div>
-          ))}
+        <div>
+          <p className="font-mono text-label uppercase tracking-widest text-[var(--bone)]/42">
+            Profil tamamlanma
+          </p>
+          <p className="font-mono text-sm text-[var(--bone)]/70">%{user.profileCompletionPct ?? 0}</p>
         </div>
-        <p className="font-mono text-label text-[var(--bone)]/37">
-          Üye: {IDENTITY.memberSince}
-        </p>
+        <p className="font-mono text-label text-[var(--bone)]/37">Üye: {memberSince(user.createdAt)}</p>
       </div>
     </div>
   );
 }
 
-// ─── Embed snippet ────────────────────────────────────────────────────────────
-
-function EmbedSection() {
+function EmbedSection({ handle, name }: { handle: string; name: string }) {
+  const snippets = useMemo(() => buildSnippets(handle, name), [handle, name]);
   const [tab, setTab] = useState<SnippetTab>("html");
   const [copied, setCopied] = useState(false);
 
-  const copy = () => {
-    navigator.clipboard.writeText(EMBED_SNIPPETS[tab]);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(snippets[tab]);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      /* ignore */
+    }
   };
 
   return (
     <div className="border border-[var(--ink)]/[0.08]">
-      {/* Tab bar */}
       <div className="flex border-b border-[var(--ink)]/[0.08]">
-        {(Object.keys(EMBED_SNIPPETS) as SnippetTab[]).map((t) => (
+        {(Object.keys(snippets) as SnippetTab[]).map((t) => (
           <button
             key={t}
+            type="button"
             onClick={() => setTab(t)}
             className={[
-              "px-4 py-2.5 font-mono text-label uppercase tracking-widest transition-colors border-r border-[var(--ink)]/[0.08] last:border-0",
+              "border-r border-[var(--ink)]/[0.08] px-4 py-2.5 font-mono text-label uppercase tracking-widest transition-colors last:border-0",
               tab === t
                 ? "bg-[var(--ink)] text-[var(--bone)]"
                 : "text-[var(--ink-muted)] hover:text-[var(--ink)]",
@@ -167,128 +204,385 @@ function EmbedSection() {
           </button>
         ))}
         <button
-          onClick={copy}
+          type="button"
+          onClick={() => void copy()}
           className="ml-auto flex items-center gap-1.5 px-4 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)] transition-colors hover:text-[var(--ink)]"
         >
           <Copy className="size-3" />
           {copied ? "Kopyalandı" : "Kopyala"}
         </button>
       </div>
-      {/* Code */}
-      <pre className="overflow-x-auto p-4 font-mono text-caption leading-relaxed text-[var(--ink-body)] bg-[var(--ink)]/[0.02]">
-        {EMBED_SNIPPETS[tab]}
+      <pre className="overflow-x-auto bg-[var(--ink)]/[0.02] p-4 font-mono text-caption leading-relaxed text-[var(--ink-body)]">
+        {snippets[tab]}
       </pre>
     </div>
   );
 }
 
-// ─── Platform links ───────────────────────────────────────────────────────────
-
-function PlatformLink({ icon: Icon, label, desc, href, brandColor }: {
+function PlatformBindRow({
+  icon: Icon,
+  label,
+  desc,
+  brandColor,
+  prefix,
+  value,
+  placeholder,
+  connected,
+  onSave,
+  onUnlink,
+}: {
   icon: React.ComponentType<{ className?: string }>;
   label: string;
   desc: string;
-  href: string;
   brandColor?: string;
+  prefix: string;
+  value: string;
+  placeholder: string;
+  connected: boolean;
+  onSave: (v: string) => Promise<void>;
+  onUnlink: () => Promise<void>;
 }) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(value);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setDraft(value);
+  }, [value]);
+
+  const save = async () => {
+    setBusy(true);
+    setError(null);
+    try {
+      await onSave(draft.trim());
+      setEditing(false);
+    } catch (e: any) {
+      setError(e.message ?? "Kaydedilemedi");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const unlink = async () => {
+    setBusy(true);
+    setError(null);
+    try {
+      await onUnlink();
+      setEditing(false);
+    } catch (e: any) {
+      setError(e.message ?? "Kaldırılamadı");
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
-    <div className="flex items-center gap-4 border border-[var(--ink)]/[0.08] p-4 transition-all hover:border-[var(--ink)]/20">
-      <div
-        className={
-          brandColor
-            ? "flex size-9 shrink-0 items-center justify-center border"
-            : "flex size-9 shrink-0 items-center justify-center border border-[var(--ink)]/10"
-        }
-        style={brandColor ? { backgroundColor: brandColor, borderColor: brandColor } : undefined}
-      >
-        <Icon className={brandColor ? "size-4 text-white" : "size-4 text-[var(--ink-body)]"} />
+    <div className="border border-[var(--ink)]/[0.08] p-4 transition-all hover:border-[var(--ink)]/20">
+      <div className="flex items-center gap-4">
+        <div
+          className={
+            brandColor
+              ? "flex size-9 shrink-0 items-center justify-center border"
+              : "flex size-9 shrink-0 items-center justify-center border border-[var(--ink)]/10"
+          }
+          style={brandColor ? { backgroundColor: brandColor, borderColor: brandColor } : undefined}
+        >
+          <Icon className={brandColor ? "size-4 text-white" : "size-4 text-[var(--ink-body)]"} />
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <p className="text-sm text-[var(--ink)]">{label}</p>
+            {connected && (
+              <span className="border border-[var(--inner-green)]/30 bg-[var(--inner-green)]/10 px-1.5 py-0.5 font-mono text-label uppercase tracking-widest text-[var(--success-ink)]">
+                Bağlı
+              </span>
+            )}
+          </div>
+          <p className="font-mono text-label text-[var(--ink-muted)]">
+            {connected ? `${prefix}${value}` : desc}
+          </p>
+        </div>
+        {!editing && (
+          <button
+            type="button"
+            onClick={() => {
+              setDraft(value);
+              setEditing(true);
+              setError(null);
+            }}
+            className="flex shrink-0 items-center gap-1.5 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)] transition-colors hover:text-[var(--ink)]"
+          >
+            {connected ? "Düzenle" : "Bağla"} <ChevronRight className="size-3" />
+          </button>
+        )}
       </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm text-[var(--ink)]">{label}</p>
-        <p className="font-mono text-label text-[var(--ink-muted)]">{desc}</p>
-      </div>
-      <button className="flex items-center gap-1.5 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)] hover:text-[var(--ink)] transition-colors shrink-0">
-        Bağla <ChevronRight className="size-3" />
-      </button>
+
+      {editing && (
+        <div className="mt-3 space-y-2 border-t border-[var(--ink)]/[0.06] pt-3">
+          <div className="flex items-stretch border border-[var(--ink)]/[0.08] focus-within:border-[var(--ink)]/30">
+            <span className="flex items-center border-r border-[var(--ink)]/[0.08] bg-[var(--ink)]/[0.03] px-3 font-mono text-label text-[var(--ink-body)]">
+              {prefix}
+            </span>
+            <input
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              placeholder={placeholder}
+              className="flex-1 bg-transparent px-3 py-2 font-mono text-caption text-[var(--ink)] outline-none"
+              autoFocus
+            />
+          </div>
+          {error && (
+            <p className="font-mono text-label text-[var(--error-ink)]" role="alert">
+              {error}
+            </p>
+          )}
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              disabled={busy || !draft.trim()}
+              onClick={() => void save()}
+              className="flex items-center gap-1.5 border border-[var(--ink)] bg-[var(--ink)] px-3 py-1.5 font-mono text-label uppercase tracking-widest text-[var(--bone)] disabled:opacity-40"
+            >
+              <Check className="size-3" /> {busy ? "Kaydediliyor…" : "Kaydet"}
+            </button>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => setEditing(false)}
+              className="flex items-center gap-1.5 border border-[var(--ink)]/15 px-3 py-1.5 font-mono text-label uppercase tracking-widest text-[var(--ink-body)]"
+            >
+              <X className="size-3" /> İptal
+            </button>
+            {connected && (
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => void unlink()}
+                className="ml-auto font-mono text-label uppercase tracking-widest text-[var(--error-ink)]"
+              >
+                Bağlantıyı kaldır
+              </button>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-// ─── Main page ────────────────────────────────────────────────────────────────
-
 export default function InnerId() {
-  const [publicUrl] = useState(IDENTITY.publicUrl);
+  const queryClient = useQueryClient();
+  const { data, isLoading, isError, error, refetch } = useApiQuery<{ user: ApiUser }>(
+    ["auth-me"],
+    "/api/auth/me",
+  );
+  const user = data?.user;
+  const [copiedUrl, setCopiedUrl] = useState(false);
+
+  const handle = user ? handleFromUser(user) : "";
+  const skills = Array.isArray(user?.skills) ? user!.skills! : [];
+  const linkedin = stripPrefix(user?.linkedin ?? "", ["https://", "http://", "www.", "linkedin.com/in/"]);
+  const github = stripPrefix(user?.github ?? "", ["https://", "http://", "www.", "github.com/"]);
+  const website = stripPrefix(user?.website ?? "", ["https://", "http://"]);
+  const publicUrl = handle ? `inner.digital/u/${handle}` : "inner.digital/u/…";
+
+  const patchLinks = async (patch: Partial<Record<LinkKey, string | null>>) => {
+    if (!user) return;
+    const parts = user.name.trim().split(/\s+/).filter(Boolean);
+    const res = await fetch(apiUrl("/api/auth/me"), {
+      method: "PATCH",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        firstName: parts[0] ?? user.name,
+        lastName: parts.slice(1).join(" "),
+        handle: user.handle ?? handle,
+        title: user.title ?? "",
+        company: user.company ?? "",
+        bio: user.bio ?? "",
+        skills,
+        linkedin: patch.linkedin !== undefined ? patch.linkedin ?? "" : linkedin,
+        github: patch.github !== undefined ? patch.github ?? "" : github,
+        website: patch.website !== undefined ? patch.website ?? "" : website,
+        twitter: stripPrefix(user.twitter ?? "", ["https://", "http://", "www.", "x.com/", "twitter.com/"]),
+        visibility:
+          user.visibility === "public" || user.visibility === "private" || user.visibility === "members"
+            ? user.visibility
+            : "members",
+      }),
+    });
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(json.error ?? "Kaydedilemedi");
+    await queryClient.invalidateQueries({ queryKey: ["auth-me"] });
+    window.dispatchEvent(new CustomEvent("inner-profile-updated", { detail: json.user }));
+  };
+
+  if (isLoading && !user) {
+    return (
+      <div className="max-w-2xl">
+        <LoadingBlock label="inner·id yükleniyor" />
+      </div>
+    );
+  }
+
+  if (isError || !user) {
+    return (
+      <div className="max-w-2xl">
+        <ErrorState
+          message={error instanceof Error ? error.message : "Kimlik yüklenemedi"}
+          onRetry={() => refetch()}
+        />
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-8 max-w-2xl">
-      {/* Header */}
+    <div className="max-w-2xl space-y-8">
       <FadeIn>
-        <div>
-          <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)] mb-2">
-            <span lang="en">inner·hub</span>
-          </p>
-          <h1
-            className="font-serif font-display text-4xl md:text-5xl text-[var(--ink)]"
-            style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="mb-2 font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
+              <span lang="en">inner·hub</span>
+            </p>
+            <h1
+              className="font-serif font-display text-4xl text-[var(--ink)] md:text-5xl"
+              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
+            >
+              inner·id
+              <span className="ml-[0.05em] inline-block size-[0.35em] translate-y-[0.08em] bg-[var(--inner-green)]" />
+            </h1>
+            <p className="mt-2 text-sm font-light text-[var(--ink-muted)]">
+              Doğrulanmış kimliğin. Platform bağlarını buradan yönet.
+            </p>
+          </div>
+          <Link
+            href="/panel/profile"
+            className="flex items-center gap-1.5 border border-[var(--ink)]/15 px-3 py-2 font-mono text-label uppercase tracking-widest text-[var(--ink-body)] transition-colors hover:border-[var(--ink)]/40 hover:text-[var(--ink)]"
           >
-            inner·id
-            <span className="inline-block size-[0.35em] translate-y-[0.08em] ml-[0.05em] bg-[var(--inner-green)]" />
-          </h1>
-          <p className="mt-2 text-sm text-[var(--ink-muted)] font-light">
-            Doğrulanmış kimliğin. inner·hub dışında da geçerli.
-          </p>
+            <Link2 className="size-3" /> Profil
+          </Link>
         </div>
       </FadeIn>
 
-      <DemoPreviewBanner surface="inner·id" />
+      <IdCard user={user} handle={handle} skills={skills} />
 
-      {/* ID Card */}
-      <IdCard />
-
-      {/* Public profile URL */}
       <div>
         <p className="mb-2 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
           Herkese Açık Profil
         </p>
         <div className="flex items-center gap-2 border border-[var(--ink)]/[0.08] px-4 py-3">
-          <Globe className="size-3.5 text-[var(--ink-subtle)] shrink-0" />
+          <Globe className="size-3.5 shrink-0 text-[var(--ink-subtle)]" />
           <span className="flex-1 font-mono text-caption text-[var(--ink-body)]">{publicUrl}</span>
-          <button className="flex items-center gap-1.5 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)] hover:text-[var(--ink)] transition-colors">
-            <ExternalLink className="size-3" /> Görüntüle
+          <button
+            type="button"
+            onClick={async () => {
+              try {
+                await navigator.clipboard.writeText(`https://${publicUrl}`);
+                setCopiedUrl(true);
+                setTimeout(() => setCopiedUrl(false), 2000);
+              } catch {
+                /* ignore */
+              }
+            }}
+            className="flex items-center gap-1.5 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)] transition-colors hover:text-[var(--ink)]"
+          >
+            <Copy className="size-3" /> {copiedUrl ? "Kopyalandı" : "Kopyala"}
           </button>
+          <a
+            href={`https://${publicUrl}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)] transition-colors hover:text-[var(--ink)]"
+          >
+            <ExternalLink className="size-3" /> Görüntüle
+          </a>
         </div>
+        {!user.handle && (
+          <p className="mt-2 font-mono text-label text-[var(--ink-muted)]">
+            Kalıcı handle için{" "}
+            <Link href="/panel/profile" className="underline underline-offset-2">
+              Profil
+            </Link>{" "}
+            sayfasından kullanıcı adı belirle.
+          </p>
+        )}
       </div>
 
-      {/* Skills */}
       <div>
         <p className="mb-2 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
           Uzmanlıklar
         </p>
-        <div className="flex flex-wrap gap-2">
-          {IDENTITY.skills.map((s) => (
-            <span key={s} className="border border-[var(--ink)]/10 px-3 py-1.5 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
-              {s}
-            </span>
-          ))}
-        </div>
+        {skills.length === 0 ? (
+          <p className="font-mono text-label text-[var(--ink-muted)]">
+            Henüz uzmanlık yok.{" "}
+            <Link href="/panel/profile" className="underline underline-offset-2">
+              Profilde ekle
+            </Link>
+            .
+          </p>
+        ) : (
+          <div className="flex flex-wrap gap-2">
+            {skills.map((s) => (
+              <span
+                key={s}
+                className="border border-[var(--ink)]/10 px-3 py-1.5 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]"
+              >
+                {s}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* Platform integrations */}
       <section>
         <div className="mb-3 border-t border-[var(--ink)]/[0.08] pt-3">
           <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
             Platform Bağlantıları
           </p>
-          <p className="mt-0.5 text-xs text-[var(--ink-muted)]">inner·id rozetini platformlarda göster</p>
+          <p className="mt-0.5 text-xs text-[var(--ink-muted)]">
+            LinkedIn, GitHub ve site hesabını inner·id’ye bağla
+          </p>
         </div>
         <div className="space-y-2">
-          <PlatformLink icon={Linkedin} label="LinkedIn" desc="Profilinde inner·hub üyeliğini doğrulat" href="#" brandColor="#0A66C2" />
-          <PlatformLink icon={Github} label="GitHub" desc="README'ne rozet ekle, profili verify et" href="#" brandColor="#181717" />
-          <PlatformLink icon={Globe} label="Kişisel Site" desc="HTML embed kodu ile siteye entegre et" href="#" />
+          <PlatformBindRow
+            icon={Linkedin}
+            label="LinkedIn"
+            desc="Profilinde inner·hub üyeliğini doğrulat"
+            brandColor="#0A66C2"
+            prefix="linkedin.com/in/"
+            placeholder="profiladin"
+            value={linkedin}
+            connected={!!linkedin}
+            onSave={(v) => patchLinks({ linkedin: stripPrefix(v, ["linkedin.com/in/", "https://", "http://"]) })}
+            onUnlink={() => patchLinks({ linkedin: "" })}
+          />
+          <PlatformBindRow
+            icon={Github}
+            label="GitHub"
+            desc="README'ne rozet ekle, profili verify et"
+            brandColor="#181717"
+            prefix="github.com/"
+            placeholder="kullaniciadi"
+            value={github}
+            connected={!!github}
+            onSave={(v) => patchLinks({ github: stripPrefix(v, ["github.com/", "https://", "http://"]) })}
+            onUnlink={() => patchLinks({ github: "" })}
+          />
+          <PlatformBindRow
+            icon={Globe}
+            label="Kişisel Site"
+            desc="HTML embed kodu ile siteye entegre et"
+            prefix="https://"
+            placeholder="siteadresin.com"
+            value={website}
+            connected={!!website}
+            onSave={(v) => patchLinks({ website: stripPrefix(v, ["https://", "http://"]) })}
+            onUnlink={() => patchLinks({ website: "" })}
+          />
         </div>
       </section>
 
-      {/* Embed widget */}
       <section>
         <div className="mb-3 border-t border-[var(--ink)]/[0.08] pt-3">
           <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
@@ -298,26 +592,26 @@ export default function InnerId() {
             Platformuna göre snippet'i seç ve kopyala
           </p>
         </div>
-        <EmbedSection />
+        <EmbedSection handle={handle} name={user.name} />
       </section>
 
-      {/* Verification info */}
       <div className="flex items-start gap-3 border border-[var(--inner-green)]/20 bg-[var(--inner-green)]/5 p-4">
-        <Shield className="size-4 shrink-0 text-[var(--success-ink)] mt-0.5" />
+        <Shield className="mt-0.5 size-4 shrink-0 text-[var(--success-ink)]" />
         <div>
           <p className="mb-0.5 font-mono text-label uppercase tracking-widest text-[var(--success-ink)]">
             Kimlik Doğrulandı
           </p>
           <p className="text-sm leading-relaxed text-[var(--ink-muted)]">
-            inner·id, inner·hub ekibi tarafından manuel olarak doğrulanmış bir kimlik belgesidir.
-            Partnerler, API üzerinden üyeliği anlık olarak teyit edebilir.
+            inner·id, davetli üyelik oturumuna bağlıdır. Platform bağlantıları profil kaydında saklanır;
+            rozet snippet’leri handle’ına göre üretilir.
           </p>
         </div>
       </div>
 
       <div className="border-t border-[var(--ink)]/[0.08] pt-4">
         <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)]">
-          <span lang="en">inner·id</span> — taşınabilir kimlik · davet bazlı · <span lang="en">inner·hub</span> ekosistemi
+          <span lang="en">inner·id</span> — taşınabilir kimlik · davet bazlı ·{" "}
+          <span lang="en">inner·hub</span> ekosistemi
         </p>
       </div>
     </div>
