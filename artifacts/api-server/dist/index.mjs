@@ -20655,27 +20655,27 @@ var require_router = __commonJS({
     var slice = Array.prototype.slice;
     var flatten = Array.prototype.flat;
     var methods = METHODS.map((method) => method.toLowerCase());
-    module.exports = Router8;
+    module.exports = Router9;
     module.exports.Route = Route;
-    function Router8(options) {
-      if (!(this instanceof Router8)) {
-        return new Router8(options);
+    function Router9(options) {
+      if (!(this instanceof Router9)) {
+        return new Router9(options);
       }
       const opts = options || {};
-      function router8(req, res, next) {
-        router8.handle(req, res, next);
+      function router9(req, res, next) {
+        router9.handle(req, res, next);
       }
-      Object.setPrototypeOf(router8, this);
-      router8.caseSensitive = opts.caseSensitive;
-      router8.mergeParams = opts.mergeParams;
-      router8.params = {};
-      router8.strict = opts.strict;
-      router8.stack = [];
-      return router8;
+      Object.setPrototypeOf(router9, this);
+      router9.caseSensitive = opts.caseSensitive;
+      router9.mergeParams = opts.mergeParams;
+      router9.params = {};
+      router9.strict = opts.strict;
+      router9.stack = [];
+      return router9;
     }
-    Router8.prototype = function() {
+    Router9.prototype = function() {
     };
-    Router8.prototype.param = function param(name, fn) {
+    Router9.prototype.param = function param(name, fn) {
       if (!name) {
         throw new TypeError("argument name is required");
       }
@@ -20695,7 +20695,7 @@ var require_router = __commonJS({
       params.push(fn);
       return this;
     };
-    Router8.prototype.handle = function handle(req, res, callback) {
+    Router9.prototype.handle = function handle(req, res, callback) {
       if (!callback) {
         throw new TypeError("argument callback is required");
       }
@@ -20822,7 +20822,7 @@ var require_router = __commonJS({
         }
       }
     };
-    Router8.prototype.use = function use(handler) {
+    Router9.prototype.use = function use(handler) {
       let offset = 0;
       let path6 = "/";
       if (typeof handler !== "function") {
@@ -20855,7 +20855,7 @@ var require_router = __commonJS({
       }
       return this;
     };
-    Router8.prototype.route = function route(path6) {
+    Router9.prototype.route = function route(path6) {
       const route2 = new Route(path6);
       const layer = new Layer(path6, {
         sensitive: this.caseSensitive,
@@ -20870,7 +20870,7 @@ var require_router = __commonJS({
       return route2;
     };
     methods.concat("all").forEach(function(method) {
-      Router8.prototype[method] = function(path6) {
+      Router9.prototype[method] = function(path6) {
         const route = this.route(path6);
         route[method].apply(route, slice.call(arguments, 1));
         return this;
@@ -21053,13 +21053,13 @@ var require_application = __commonJS({
     var compileTrust = require_utils3().compileTrust;
     var resolve4 = __require("node:path").resolve;
     var once = require_once();
-    var Router8 = require_router();
+    var Router9 = require_router();
     var slice = Array.prototype.slice;
     var flatten = Array.prototype.flat;
     var app2 = exports = module.exports = {};
     var trustProxyDefaultSymbol = "@@symbol:trust_proxy_default";
     app2.init = function init() {
-      var router8 = null;
+      var router9 = null;
       this.cache = /* @__PURE__ */ Object.create(null);
       this.engines = /* @__PURE__ */ Object.create(null);
       this.settings = /* @__PURE__ */ Object.create(null);
@@ -21068,13 +21068,13 @@ var require_application = __commonJS({
         configurable: true,
         enumerable: true,
         get: function getrouter() {
-          if (router8 === null) {
-            router8 = new Router8({
+          if (router9 === null) {
+            router9 = new Router9({
               caseSensitive: this.enabled("case sensitive routing"),
               strict: this.enabled("strict routing")
             });
           }
-          return router8;
+          return router9;
         }
       });
     };
@@ -21145,15 +21145,15 @@ var require_application = __commonJS({
       if (fns.length === 0) {
         throw new TypeError("app.use() requires a middleware function");
       }
-      var router8 = this.router;
+      var router9 = this.router;
       fns.forEach(function(fn2) {
         if (!fn2 || !fn2.handle || !fn2.set) {
-          return router8.use(path6, fn2);
+          return router9.use(path6, fn2);
         }
         debug(".use app under %s", path6);
         fn2.mountpath = path6;
         fn2.parent = this;
-        router8.use(path6, function mounted_app(req, res, next) {
+        router9.use(path6, function mounted_app(req, res, next) {
           var orig = req.app;
           fn2.handle(req, res, function(err) {
             Object.setPrototypeOf(req, orig.request);
@@ -23726,7 +23726,7 @@ var require_express = __commonJS({
     var EventEmitter2 = __require("node:events").EventEmitter;
     var mixin = require_merge_descriptors();
     var proto = require_application();
-    var Router8 = require_router();
+    var Router9 = require_router();
     var req = require_request();
     var res = require_response();
     exports = module.exports = createApplication;
@@ -23748,8 +23748,8 @@ var require_express = __commonJS({
     exports.application = proto;
     exports.request = req;
     exports.response = res;
-    exports.Route = Router8.Route;
-    exports.Router = Router8;
+    exports.Route = Router9.Route;
+    exports.Router = Router9;
     exports.json = bodyParser.json;
     exports.raw = bodyParser.raw;
     exports.static = require_serve_static();
@@ -72759,14 +72759,14 @@ var require_src6 = __commonJS({
 });
 
 // src/app.ts
-var import_express8 = __toESM(require_express2(), 1);
+var import_express9 = __toESM(require_express2(), 1);
 var import_cors = __toESM(require_lib3(), 1);
 var import_cookie_parser = __toESM(require_cookie_parser(), 1);
 var import_pino_http = __toESM(require_logger(), 1);
 import path5 from "node:path";
 
 // src/routes/index.ts
-var import_express7 = __toESM(require_express2(), 1);
+var import_express8 = __toESM(require_express2(), 1);
 
 // src/routes/health.ts
 var import_express = __toESM(require_express2(), 1);
@@ -113420,6 +113420,17 @@ function requireAuth(req, res, next) {
   }
   next();
 }
+function requireAdmin(req, res, next) {
+  if (!req.user) {
+    res.status(401).json({ error: "Not authenticated" });
+    return;
+  }
+  if (req.user.role !== "admin") {
+    res.status(403).json({ error: "Admin access required" });
+    return;
+  }
+  next();
+}
 
 // src/routes/auth.ts
 var router5 = (0, import_express5.Router)();
@@ -113577,6 +113588,7 @@ async function ensureDemoContent() {
         title: "Networking Kahvalt\u0131s\u0131 \u2014 A\u011Fustos",
         description: "K\xFC\xE7\xFCk grup, derin konu\u015Fmalar. Tema: B2B sat\u0131\u015F ve uluslararas\u0131la\u015Fma.",
         location: "Online (Zoom)",
+        // UI'da lang="en" ile uppercase; TR İ bozulmasın
         startAt: /* @__PURE__ */ new Date("2026-08-05T09:00:00"),
         endAt: /* @__PURE__ */ new Date("2026-08-05T11:00:00"),
         isPublished: true
@@ -113653,18 +113665,132 @@ router6.get("/courses", requireAuth, async (_req, res) => {
 });
 var catalog_default = router6;
 
-// src/routes/index.ts
+// src/routes/applications.ts
+var import_express7 = __toESM(require_express2(), 1);
 var router7 = (0, import_express7.Router)();
-router7.use(health_default);
-router7.use(invitations_default);
-router7.use("/payments", payments_default);
-router7.use("/ai", ai_default);
-router7.use("/auth", auth_default);
-router7.use(catalog_default);
-var routes_default = router7;
+function toUiStatus(status) {
+  if (status === "approved") return "onayland\u0131";
+  if (status === "rejected") return "reddedildi";
+  return "beklemede";
+}
+function toDbStatus(status) {
+  if (status === "onayland\u0131" || status === "approved") return "approved";
+  if (status === "reddedildi" || status === "rejected") return "rejected";
+  if (status === "beklemede" || status === "pending") return "pending";
+  return null;
+}
+async function ensureInvitationColumns() {
+  await db.execute(sql`ALTER TABLE invitation_requests ADD COLUMN IF NOT EXISTS role text`);
+  await db.execute(sql`ALTER TABLE invitation_requests ADD COLUMN IF NOT EXISTS linkedin text`);
+}
+async function ensureDemoInvites() {
+  if (process.env.NODE_ENV === "production") return;
+  const [row] = await db.select({ id: invitationRequestsTable.id }).from(invitationRequestsTable).limit(1);
+  if (row) return;
+  await db.insert(invitationRequestsTable).values([
+    {
+      name: "Alara Demir",
+      email: "alara@techstart.io",
+      role: "CEO",
+      linkedin: "linkedin.com/in/alarademir",
+      whoYouAre: "AI ve topluluk kesi\u015Fiminde \xE7al\u0131\u015F\u0131yorum. inner\xB7hub kurucular\u0131yla fikir payla\u015Fmak istiyorum.",
+      whoIntroduced: "Ata Han Bayram",
+      link: null,
+      ipAddress: "127.0.0.1"
+    },
+    {
+      name: "Baran \u015Eahin",
+      email: "baran@buildco.io",
+      role: "CTO",
+      linkedin: "linkedin.com/in/baransahin",
+      whoYouAre: "Teknik kurucular i\xE7in kaliteli bir topluluk ar\u0131yorum.",
+      whoIntroduced: null,
+      link: null,
+      ipAddress: "127.0.0.1"
+    }
+  ]);
+}
+router7.get("/applications", requireAdmin, async (_req, res) => {
+  try {
+    await ensureInvitationColumns();
+    await ensureDemoInvites();
+    const requests = await db.select().from(invitationRequestsTable).orderBy(desc(invitationRequestsTable.createdAt));
+    const reviews = await db.select().from(applicationsTable);
+    const byInvite = new Map(
+      reviews.filter((r) => r.invitationRequestId != null).map((r) => [r.invitationRequestId, r])
+    );
+    res.json({
+      applications: requests.map((r) => {
+        const review = byInvite.get(r.id);
+        return {
+          id: r.id,
+          name: r.name,
+          email: r.email,
+          role: r.role ?? "\u2014",
+          company: "",
+          why: r.whoYouAre,
+          referrer: r.whoIntroduced,
+          appliedAt: r.createdAt.toISOString().slice(0, 10),
+          status: toUiStatus(review?.status ?? "pending"),
+          linkedinUrl: r.linkedin ?? "",
+          tags: r.role ? [r.role] : [],
+          reviewNote: review?.reviewNote ?? null
+        };
+      })
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message ?? "Ba\u015Fvurular y\xFCklenemedi" });
+  }
+});
+router7.patch("/applications/:id", requireAdmin, async (req, res) => {
+  try {
+    const invitationRequestId = Number(req.params.id);
+    if (!Number.isFinite(invitationRequestId)) {
+      res.status(400).json({ error: "Ge\xE7ersiz id" });
+      return;
+    }
+    const next = toDbStatus(String(req.body?.status ?? ""));
+    if (!next) {
+      res.status(400).json({ error: "Ge\xE7ersiz status" });
+      return;
+    }
+    const [invite] = await db.select({ id: invitationRequestsTable.id }).from(invitationRequestsTable).where(eq(invitationRequestsTable.id, invitationRequestId)).limit(1);
+    if (!invite) {
+      res.status(404).json({ error: "Ba\u015Fvuru bulunamad\u0131" });
+      return;
+    }
+    const [existing] = await db.select().from(applicationsTable).where(eq(applicationsTable.invitationRequestId, invitationRequestId)).limit(1);
+    const reviewedAt = next === "pending" ? null : /* @__PURE__ */ new Date();
+    if (existing) {
+      await db.update(applicationsTable).set({ status: next, reviewedAt }).where(eq(applicationsTable.id, existing.id));
+    } else {
+      await db.insert(applicationsTable).values({
+        invitationRequestId,
+        status: next,
+        reviewedAt,
+        term: 1
+      });
+    }
+    res.json({ id: invitationRequestId, status: toUiStatus(next) });
+  } catch (err) {
+    res.status(500).json({ error: err.message ?? "Durum g\xFCncellenemedi" });
+  }
+});
+var applications_default = router7;
+
+// src/routes/index.ts
+var router8 = (0, import_express8.Router)();
+router8.use(health_default);
+router8.use(invitations_default);
+router8.use("/payments", payments_default);
+router8.use("/ai", ai_default);
+router8.use("/auth", auth_default);
+router8.use(catalog_default);
+router8.use(applications_default);
+var routes_default = router8;
 
 // src/app.ts
-var app = (0, import_express8.default)();
+var app = (0, import_express9.default)();
 app.use(
   (0, import_pino_http.default)({
     logger,
@@ -113691,13 +113817,13 @@ app.use(
     credentials: true
   })
 );
-app.use(import_express8.default.json());
-app.use(import_express8.default.urlencoded({ extended: true }));
+app.use(import_express9.default.json());
+app.use(import_express9.default.urlencoded({ extended: true }));
 app.use((0, import_cookie_parser.default)());
 app.use(attachUser);
 app.use("/api", routes_default);
 var frontendDist = path5.join(__dirname, "..", "..", "inner-hub", "dist");
-app.use(import_express8.default.static(frontendDist));
+app.use(import_express9.default.static(frontendDist));
 app.get(/^(?!\/api).*/, (_req, res) => {
   res.sendFile(path5.join(frontendDist, "index.html"));
 });

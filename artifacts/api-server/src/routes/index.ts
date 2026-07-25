@@ -5,6 +5,7 @@ import paymentsRouter from "./payments";
 import aiRouter from "./ai";
 import authRouter from "./auth";
 import catalogRouter from "./catalog";
+import applicationsRouter from "./applications";
 
 const router: IRouter = Router();
 
@@ -14,5 +15,6 @@ router.use("/payments", paymentsRouter);
 router.use("/ai", aiRouter);
 router.use("/auth", authRouter);
 router.use(catalogRouter);
+router.use(applicationsRouter);
 
 export default router;
