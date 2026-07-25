@@ -233,14 +233,14 @@ function MatchHero() {
                   onClick={() => scrollToId("match-results")}
                   className="group inline-flex items-center gap-2 bg-white px-8 py-3 font-mono text-xs uppercase tracking-widest text-black transition-colors hover:bg-white/90"
                 >
-                  View Matches
+                  <span lang="en">View Matches</span>
                   <ArrowRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
                 </button>
                 <button
                   onClick={() => scrollToId("match-preferences")}
                   className="liquid-glass group inline-flex items-center gap-2 border border-white/20 px-8 py-3 font-mono text-xs uppercase tracking-widest text-white transition-colors hover:bg-white hover:text-black"
                 >
-                  Set Preferences
+                  <span lang="en">Set Preferences</span>
                   <ArrowRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
                 </button>
               </div>
