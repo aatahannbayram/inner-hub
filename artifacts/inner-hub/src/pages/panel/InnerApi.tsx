@@ -1,34 +1,35 @@
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { FadeIn } from "@/components/FadeIn";
 import { AsciiField } from "@/components/AsciiField";
 import { CurrencyValue } from "@/components/panel/CurrencyValue";
 import { AmbientCardBackground } from "@/components/panel/AmbientCardBackground";
 import {
   Copy,
-  RefreshCw,
+  Check,
+  Trash2,
   CheckCircle2,
   AlertCircle,
   Code2,
   ArrowUpRight,
-  Eye,
-  EyeOff,
+  Plus,
+  KeyRound,
 } from "lucide-react";
-import { DemoPreviewBanner } from "@/components/panel/DemoPreviewBanner";
+import { useApiQuery } from "@/hooks/useApiQuery";
+import { apiUrl } from "@/lib/api";
+import { LoadingBlock, ErrorState } from "@/components/panel/Skeletons";
 
-// ─── Mock data ────────────────────────────────────────────────────────────────
+// ─── API tipleri ────────────────────────────────────────────────────────────
 
-const API_KEY = "ihub_live_sk_xK9mP2qR7nL4vJ8wT1sY3dF6cA0bE5gH";
-const API_KEY_MASKED = "ihub_live_sk_xK9m••••••••••••••••••••••••3dF6cA0bE5gH";
+interface ApiKeyRow {
+  id: number;
+  name: string;
+  prefix: string;
+  createdAt: string;
+  lastUsedAt: string | null;
+}
 
-const USAGE_DATA = [
-  { day: "Pzt", requests: 420 },
-  { day: "Sal", requests: 680 },
-  { day: "Çar", requests: 510 },
-  { day: "Per", requests: 890 },
-  { day: "Cum", requests: 740 },
-  { day: "Cmt", requests: 320 },
-  { day: "Paz", requests: 210 },
-];
+// ─── Dokümantasyon — sabit içerik, kullanıcıya özel veri değil ────────────────
 
 const ENDPOINTS = [
   {
@@ -82,7 +83,7 @@ const PLANS = [
     period: "",
     requests: "1.000 / ay",
     features: ["Temel üye sorgusu", "Kimlik doğrulama", "E-posta desteği"],
-    current: false,
+    recommended: false,
   },
   {
     name: "Builder",
@@ -90,7 +91,7 @@ const PLANS = [
     period: "/ ay",
     requests: "50.000 / ay",
     features: ["Tüm endpoint'ler", "inner·match API", "Webhook desteği", "Öncelikli destek"],
-    current: true,
+    recommended: true,
   },
   {
     name: "Scale",
@@ -98,39 +99,112 @@ const PLANS = [
     period: "/ ay",
     requests: "Sınırsız",
     features: ["White-label", "Özel SLA", "Dedicated destek", "inner·pulse ham veri"],
-    current: false,
+    recommended: false,
   },
 ];
 
-const STATS = [
-  { label: "Bu Ay İstek", value: "12,480", sub: "50K limitin %25'i" },
-  { label: "Ortalama Gecikme", value: "87ms", sub: "son 7 gün" },
-  { label: "Başarı Oranı", value: "%99.7", sub: "son 30 gün" },
-  { label: "Aktif Webhook", value: "3", sub: "endpoint dinliyor" },
-];
+function formatDate(iso: string): string {
+  return new Date(iso).toLocaleDateString("tr-TR", { day: "numeric", month: "short", year: "numeric" });
+}
 
-// ─── Usage bar chart ──────────────────────────────────────────────────────────
+// ─── Anahtar oluşturma — plaintext yalnızca bu anda görünür ───────────────────
 
-function UsageChart() {
-  const max = Math.max(...USAGE_DATA.map((d) => d.requests));
+function NewKeyReveal({ plaintext, onDone }: { plaintext: string; onDone: () => void }) {
+  const [copied, setCopied] = useState(false);
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(plaintext);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      /* ignore */
+    }
+  };
+
   return (
-    <div>
-      <div className="mb-2 flex items-end gap-1.5 h-16">
-        {USAGE_DATA.map((d) => (
-          <div key={d.day} className="flex flex-1 flex-col items-center gap-1">
-            <div
-              className="w-full bg-[var(--ink)] transition-all"
-              style={{ height: `${(d.requests / max) * 52}px`, opacity: 0.15 + (d.requests / max) * 0.5 }}
-              title={`${d.requests} istek`}
-            />
-          </div>
-        ))}
+    <div className="border border-[var(--inner-green)]/30 bg-[var(--inner-green)]/5 p-4">
+      <p className="font-mono text-label font-semibold uppercase tracking-widest text-[var(--success-ink)]">
+        Yeni anahtar oluşturuldu
+      </p>
+      <p className="mt-1 text-xs font-medium text-[var(--ink-muted)]">
+        Bu anahtar bir daha gösterilmeyecek — şimdi kopyala ve güvenli bir yere kaydet.
+      </p>
+      <div className="mt-3 flex items-center gap-2 border border-[var(--ink)]/[0.08] bg-[var(--bone)] px-3 py-2.5">
+        <code className="flex-1 overflow-x-auto font-mono text-label font-medium text-[var(--ink-strong)] whitespace-nowrap">
+          {plaintext}
+        </code>
+        <button
+          onClick={() => void copy()}
+          className="flex shrink-0 items-center gap-1.5 font-mono text-label font-semibold uppercase tracking-widest text-[var(--ink-body)] hover:text-[var(--ink)] transition-colors"
+        >
+          {copied ? <Check className="size-3.5 text-[var(--success-ink)]" /> : <Copy className="size-3.5" />}
+          {copied ? "Kopyalandı" : "Kopyala"}
+        </button>
       </div>
-      <div className="flex gap-1.5">
-        {USAGE_DATA.map((d) => (
-          <span key={d.day} className="flex-1 text-center font-mono text-label font-medium text-[var(--ink-muted)]">{d.day}</span>
-        ))}
+      <button
+        onClick={onDone}
+        className="mt-3 font-mono text-label font-semibold uppercase tracking-widest text-[var(--ink-muted)] hover:text-[var(--ink)] transition-colors"
+      >
+        Kapat
+      </button>
+    </div>
+  );
+}
+
+// ─── Tek anahtar satırı ────────────────────────────────────────────────────────
+
+function ApiKeyRowView({ apiKey, onDeleted }: { apiKey: ApiKeyRow; onDeleted: () => void }) {
+  const [confirming, setConfirming] = useState(false);
+  const [busy, setBusy] = useState(false);
+
+  const remove = async () => {
+    setBusy(true);
+    try {
+      const res = await fetch(apiUrl(`/api/api-keys/${apiKey.id}`), { method: "DELETE", credentials: "include" });
+      if (!res.ok) throw new Error("Silinemedi");
+      onDeleted();
+    } catch {
+      setBusy(false);
+      setConfirming(false);
+    }
+  };
+
+  return (
+    <div className="flex items-center gap-3 border border-[var(--ink)]/[0.08] px-4 py-3">
+      <KeyRound className="size-3.5 shrink-0 text-[var(--ink-subtle)]" />
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm text-[var(--ink)]">{apiKey.name}</p>
+        <p className="font-mono text-label font-medium text-[var(--ink-muted)]">
+          <span lang="en">{apiKey.prefix}</span> · oluşturuldu {formatDate(apiKey.createdAt)}
+          {apiKey.lastUsedAt && ` · son kullanım ${formatDate(apiKey.lastUsedAt)}`}
+        </p>
       </div>
+      {confirming ? (
+        <div className="flex shrink-0 items-center gap-2">
+          <button
+            disabled={busy}
+            onClick={() => void remove()}
+            className="font-mono text-label font-semibold uppercase tracking-widest text-[var(--error-ink)] disabled:opacity-40"
+          >
+            {busy ? "Siliniyor…" : "Emin misin?"}
+          </button>
+          <button
+            disabled={busy}
+            onClick={() => setConfirming(false)}
+            className="font-mono text-label font-medium uppercase tracking-widest text-[var(--ink-muted)]"
+          >
+            Vazgeç
+          </button>
+        </div>
+      ) : (
+        <button
+          onClick={() => setConfirming(true)}
+          className="shrink-0 p-1.5 text-[var(--ink-muted)] hover:text-[var(--error-ink)] transition-colors"
+          title="Anahtarı sil"
+        >
+          <Trash2 className="size-3.5" />
+        </button>
+      )}
     </div>
   );
 }
@@ -138,30 +212,41 @@ function UsageChart() {
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function InnerApi() {
-  const [showKey, setShowKey] = useState(false);
-  const [copied, setCopied] = useState(false);
-  const [rotating, setRotating] = useState(false);
+  const queryClient = useQueryClient();
+  const { data, isLoading, isError, error, refetch } = useApiQuery<{ keys: ApiKeyRow[] }>(
+    ["api-keys"],
+    "/api/api-keys",
+  );
+  const [newKeyName, setNewKeyName] = useState("");
+  const [creating, setCreating] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
+  const [revealedKey, setRevealedKey] = useState<string | null>(null);
 
-  const copyKey = () => {
-    navigator.clipboard.writeText(API_KEY);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  const createKey = async () => {
+    const name = newKeyName.trim();
+    if (!name) return;
+    setCreating(true);
+    setCreateError(null);
+    try {
+      const res = await fetch(apiUrl("/api/api-keys"), {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json.error ?? "Anahtar oluşturulamadı");
+      setRevealedKey(json.key);
+      setNewKeyName("");
+      await queryClient.invalidateQueries({ queryKey: ["api-keys"] });
+    } catch (e) {
+      setCreateError(e instanceof Error ? e.message : "Anahtar oluşturulamadı");
+    } finally {
+      setCreating(false);
+    }
   };
 
-  const rotateKey = () => {
-    setRotating(true);
-    setTimeout(() => setRotating(false), 1500);
-  };
-
-  const METHOD_COLORS: Record<string, string> = {
-    GET: "text-[var(--success-ink)] border-[var(--inner-green)]/30 bg-[var(--inner-green)]/8",
-    POST: "text-amber-700 border-amber-300/50 bg-amber-50/60",
-  };
-
-  const STATUS_COLORS: Record<string, string> = {
-    stable: "text-[var(--ink-body)] border-[var(--ink)]/15",
-    beta: "text-amber-700 border-amber-300/50",
-  };
+  const keys = data?.keys ?? [];
 
   return (
     <div className="space-y-8 max-w-4xl">
@@ -196,78 +281,59 @@ export default function InnerApi() {
         </div>
       </FadeIn>
 
-      <DemoPreviewBanner surface="inner·api" />
-
-      {/* Stats */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        {STATS.map((s) => (
-          <div key={s.label} className="border border-[var(--ink)]/[0.08] p-4">
-            <p className="font-mono text-label font-medium uppercase tracking-widest text-[var(--ink-muted)]">{s.label}</p>
-            <p
-              className="mt-1 font-serif text-xl text-[var(--ink)] sm:text-2xl"
-              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
-            >
-              {s.value}
-            </p>
-            <p className="mt-0.5 font-mono text-label font-medium text-[var(--ink-muted)]">{s.sub}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* API Key */}
+      {/* API Keys */}
       <section>
         <div className="mb-3 border-t border-[var(--ink)]/[0.08] pt-3">
-          <p className="font-mono text-label font-semibold uppercase tracking-widest text-[var(--ink-body)]">API Anahtarı</p>
-          <p className="mt-0.5 text-xs font-medium text-[var(--ink-muted)]">Anahtarı güvende tut — kimseyle paylaşma</p>
+          <p className="font-mono text-label font-semibold uppercase tracking-widest text-[var(--ink-body)]">API Anahtarların</p>
+          <p className="mt-0.5 text-xs font-medium text-[var(--ink-muted)]">Anahtarları güvende tut — kimseyle paylaşma</p>
         </div>
-        <div className="flex items-center gap-2 border border-[var(--ink)]/[0.08] bg-[var(--ink)]/[0.02] px-4 py-3">
-          <Code2 className="size-3.5 shrink-0 text-[var(--ink-subtle)]" />
-          <code className="flex-1 font-mono text-label font-medium text-[var(--ink-body)] truncate">
-            {showKey ? API_KEY : API_KEY_MASKED}
-          </code>
-          <div className="flex items-center gap-1 shrink-0">
-            <button
-              onClick={() => setShowKey((v) => !v)}
-              className="p-1.5 text-[var(--ink-muted)] hover:text-[var(--ink)] transition-colors"
-              title={showKey ? "Gizle" : "Göster"}
-            >
-              {showKey ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
-            </button>
-            <button
-              onClick={copyKey}
-              className="flex items-center gap-1 p-1.5 font-mono text-label font-medium uppercase tracking-widest text-[var(--ink-muted)] hover:text-[var(--ink)] transition-colors"
-            >
-              <Copy className="size-3.5" />
-              {copied ? "Kopyalandı" : "Kopyala"}
-            </button>
-            <button
-              onClick={rotateKey}
-              className="p-1.5 text-[var(--ink-muted)] hover:text-[var(--error-ink)] transition-colors"
-              title="Anahtarı yenile"
-            >
-              <RefreshCw className={`size-3.5 ${rotating ? "animate-spin" : ""}`} />
-            </button>
-          </div>
-        </div>
-        {rotating && (
-          <p className="mt-2 font-mono text-label font-semibold uppercase tracking-widest text-amber-700">
-            Eski anahtar 5 dakika içinde devre dışı kalacak
-          </p>
-        )}
-      </section>
 
-      {/* Usage chart */}
-      <section className="border border-[var(--ink)]/[0.08] p-5">
-        <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <p className="font-mono text-label font-semibold uppercase tracking-widest text-[var(--ink-body)]">Bu Hafta Kullanım</p>
-          <div className="flex items-center gap-1.5">
-            <div className="h-1 w-16 bg-[var(--ink)]/[0.06]">
-              <div className="h-full bg-[var(--inner-green)]" style={{ width: "25%" }} />
+        {isLoading && <LoadingBlock label="Anahtarlar yükleniyor" />}
+        {isError && (
+          <ErrorState message={error instanceof Error ? error.message : "Anahtarlar yüklenemedi"} onRetry={() => refetch()} />
+        )}
+
+        {!isLoading && !isError && (
+          <div className="space-y-3">
+            {revealedKey && <NewKeyReveal plaintext={revealedKey} onDone={() => setRevealedKey(null)} />}
+
+            {keys.length === 0 && !revealedKey && (
+              <p className="border border-[var(--ink)]/[0.08] px-4 py-3 text-sm text-[var(--ink-muted)]">
+                Henüz bir API anahtarın yok.
+              </p>
+            )}
+
+            {keys.map((k) => (
+              <ApiKeyRowView
+                key={k.id}
+                apiKey={k}
+                onDeleted={() => void queryClient.invalidateQueries({ queryKey: ["api-keys"] })}
+              />
+            ))}
+
+            <div className="flex items-center gap-2 border border-dashed border-[var(--ink)]/15 px-4 py-3">
+              <input
+                value={newKeyName}
+                onChange={(e) => setNewKeyName(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && void createKey()}
+                placeholder="Anahtar adı (ör. prod-server)"
+                className="flex-1 bg-transparent font-mono text-caption text-[var(--ink)] outline-none placeholder:text-[var(--ink-subtle)]"
+              />
+              <button
+                disabled={creating || !newKeyName.trim()}
+                onClick={() => void createKey()}
+                className="flex shrink-0 items-center gap-1.5 border border-[var(--ink)] bg-[var(--ink)] px-3 py-1.5 font-mono text-label font-semibold uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-80 disabled:opacity-40"
+              >
+                <Plus className="size-3" /> {creating ? "Oluşturuluyor…" : "Yeni Anahtar"}
+              </button>
             </div>
-            <span className="font-mono text-label font-medium text-[var(--ink-body)]">12.480 / 50.000</span>
+            {createError && (
+              <p className="font-mono text-label text-[var(--error-ink)]" role="alert">
+                {createError}
+              </p>
+            )}
           </div>
-        </div>
-        <UsageChart />
+        )}
       </section>
 
       {/* Endpoints */}
@@ -282,10 +348,22 @@ export default function InnerApi() {
               className="border border-[var(--ink)]/[0.06] px-4 py-3 transition-colors hover:border-[var(--ink)]/15"
             >
               <div className="mb-1.5 flex flex-wrap items-center gap-2">
-                <span className={`border px-2 py-0.5 font-mono text-label font-semibold uppercase tracking-widest ${METHOD_COLORS[ep.method]}`}>
+                <span
+                  className={`border px-2 py-0.5 font-mono text-label font-semibold uppercase tracking-widest ${
+                    ep.method === "GET"
+                      ? "text-[var(--success-ink)] border-[var(--inner-green)]/30 bg-[var(--inner-green)]/8"
+                      : "text-amber-700 border-amber-300/50 bg-amber-50/60"
+                  }`}
+                >
                   {ep.method}
                 </span>
-                <span className={`border px-1.5 py-0.5 font-mono text-label font-semibold uppercase tracking-widest ${STATUS_COLORS[ep.status]}`}>
+                <span
+                  className={`border px-1.5 py-0.5 font-mono text-label font-semibold uppercase tracking-widest ${
+                    ep.status === "stable"
+                      ? "text-[var(--ink-body)] border-[var(--ink)]/15"
+                      : "text-amber-700 border-amber-300/50"
+                  }`}
+                >
                   {ep.status}
                 </span>
                 <span className="ml-auto font-mono text-label font-medium text-[var(--ink-muted)] shrink-0">{ep.rate}</span>
@@ -308,12 +386,12 @@ export default function InnerApi() {
               key={plan.name}
               className={[
                 "relative overflow-hidden border p-5 transition-all",
-                plan.current
+                plan.recommended
                   ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--bone)]"
                   : "border-[var(--ink)]/[0.08] hover:border-[var(--ink)]/20",
               ].join(" ")}
             >
-              {plan.current && (
+              {plan.recommended && (
                 <>
                   <AsciiField tone="dark" cell={12} />
                   <AmbientCardBackground />
@@ -321,48 +399,51 @@ export default function InnerApi() {
               )}
               <div className="relative z-10">
                 <div className="mb-1 flex items-center justify-between">
-                  <p className={`font-mono text-label font-semibold uppercase tracking-widest ${plan.current ? "text-[var(--bone)]/60" : "text-[var(--ink-body)]"}`}>
+                  <p className={`font-mono text-label font-semibold uppercase tracking-widest ${plan.recommended ? "text-[var(--bone)]/60" : "text-[var(--ink-body)]"}`}>
                     <span lang="en">{plan.name}</span>
                   </p>
-                  {plan.current && (
+                  {plan.recommended && (
                     <span className="border border-[var(--inner-green)]/40 px-1.5 py-0.5 font-mono text-label font-semibold uppercase tracking-widest text-[var(--success-ink)]">
-                      Mevcut
+                      Önerilen
                     </span>
                   )}
                 </div>
                 <div className="mb-3 flex items-baseline gap-1">
                   <span
-                    className={`font-serif text-2xl ${plan.current ? "text-[var(--bone)]" : "text-[var(--ink)]"}`}
+                    className={`font-serif text-2xl ${plan.recommended ? "text-[var(--bone)]" : "text-[var(--ink)]"}`}
                     style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
                   >
                     <CurrencyValue value={plan.price} />
                   </span>
                   {plan.period && (
-                    <span className={`font-mono text-label font-medium ${plan.current ? "text-[var(--bone)]/55" : "text-[var(--ink-muted)]"}`}>
+                    <span className={`font-mono text-label font-medium ${plan.recommended ? "text-[var(--bone)]/55" : "text-[var(--ink-muted)]"}`}>
                       {plan.period}
                     </span>
                   )}
                 </div>
-                <p className={`mb-3 font-mono text-label font-medium ${plan.current ? "text-[var(--bone)]/65" : "text-[var(--ink-body)]"}`}>
+                <p className={`mb-3 font-mono text-label font-medium ${plan.recommended ? "text-[var(--bone)]/65" : "text-[var(--ink-body)]"}`}>
                   {plan.requests} istek
                 </p>
                 <ul className="mb-4 space-y-1.5">
                   {plan.features.map((f) => (
                     <li key={f} className="flex items-start gap-2">
-                      <CheckCircle2 className={`mt-0.5 size-3 shrink-0 ${plan.current ? "text-[var(--success-ink)]" : "text-[var(--ink-muted)]"}`} />
-                      <span className={`text-xs font-medium ${plan.current ? "text-[var(--bone)]/70" : "text-[var(--ink-body)]"}`}>{f}</span>
+                      <CheckCircle2 className={`mt-0.5 size-3 shrink-0 ${plan.recommended ? "text-[var(--success-ink)]" : "text-[var(--ink-muted)]"}`} />
+                      <span className={`text-xs font-medium ${plan.recommended ? "text-[var(--bone)]/70" : "text-[var(--ink-body)]"}`}>{f}</span>
                     </li>
                   ))}
                 </ul>
-                {!plan.current && (
-                  <button className={[
+                <a
+                  href="mailto:destek@inner.digital?subject=inner·api%20plan%20talebi"
+                  className={[
                     "flex w-full items-center justify-between border px-3 py-2 font-mono text-label font-semibold uppercase tracking-widest transition-all",
-                    "border-[var(--ink)]/15 text-[var(--ink-body)] hover:border-[var(--ink)] hover:text-[var(--ink)]",
-                  ].join(" ")}>
-                    <span>{plan.name === "Starter" ? "Downgrade" : "Upgrade"}</span>
-                    <ArrowUpRight className="size-3" />
-                  </button>
-                )}
+                    plan.recommended
+                      ? "border-[var(--bone)]/25 text-[var(--bone)]/70 hover:border-[var(--bone)]/50 hover:text-[var(--bone)]"
+                      : "border-[var(--ink)]/15 text-[var(--ink-body)] hover:border-[var(--ink)] hover:text-[var(--ink)]",
+                  ].join(" ")}
+                >
+                  <span>Destekle İletişime Geç</span>
+                  <ArrowUpRight className="size-3" />
+                </a>
               </div>
             </div>
           ))}
@@ -373,14 +454,14 @@ export default function InnerApi() {
       <div className="flex items-start gap-3 border border-[var(--ink)]/[0.08] p-4">
         <AlertCircle className="size-4 shrink-0 text-[var(--ink-muted)] mt-0.5" />
         <p className="text-sm leading-relaxed font-medium text-[var(--ink-body)]">
-          inner·api beta aşamasındadır. Breaking change'ler versiyonlanır ve 30 gün önceden bildirilir.
-          Üretim kullanımı için Builder veya Scale planı önerilir.
+          inner·api beta aşamasındadır. Anahtar oluşturma ve silme canlı çalışır; kullanım/rate-limit takibi ve
+          faturalandırma henüz bağlanmadı — plan yükseltmesi için destek ekibiyle iletişime geç.
         </p>
       </div>
 
       <div className="border-t border-[var(--ink)]/[0.08] pt-4">
         <p className="font-mono text-label font-medium uppercase tracking-widest text-[var(--ink-subtle)]">
-          <span lang="en">inner·api</span> v1 — REST · JSON · Bearer Auth · Rate limited · <span lang="en">inner·hub</span> ekosistemi
+          <span lang="en">inner·api</span> v1 — REST · JSON · Bearer Auth · <span lang="en">inner·hub</span> ekosistemi
         </p>
       </div>
     </div>
