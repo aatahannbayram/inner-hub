@@ -20655,27 +20655,27 @@ var require_router = __commonJS({
     var slice = Array.prototype.slice;
     var flatten = Array.prototype.flat;
     var methods = METHODS.map((method) => method.toLowerCase());
-    module.exports = Router13;
+    module.exports = Router16;
     module.exports.Route = Route;
-    function Router13(options) {
-      if (!(this instanceof Router13)) {
-        return new Router13(options);
+    function Router16(options) {
+      if (!(this instanceof Router16)) {
+        return new Router16(options);
       }
       const opts = options || {};
-      function router13(req, res, next) {
-        router13.handle(req, res, next);
+      function router16(req, res, next) {
+        router16.handle(req, res, next);
       }
-      Object.setPrototypeOf(router13, this);
-      router13.caseSensitive = opts.caseSensitive;
-      router13.mergeParams = opts.mergeParams;
-      router13.params = {};
-      router13.strict = opts.strict;
-      router13.stack = [];
-      return router13;
+      Object.setPrototypeOf(router16, this);
+      router16.caseSensitive = opts.caseSensitive;
+      router16.mergeParams = opts.mergeParams;
+      router16.params = {};
+      router16.strict = opts.strict;
+      router16.stack = [];
+      return router16;
     }
-    Router13.prototype = function() {
+    Router16.prototype = function() {
     };
-    Router13.prototype.param = function param(name, fn) {
+    Router16.prototype.param = function param(name, fn) {
       if (!name) {
         throw new TypeError("argument name is required");
       }
@@ -20695,7 +20695,7 @@ var require_router = __commonJS({
       params.push(fn);
       return this;
     };
-    Router13.prototype.handle = function handle(req, res, callback) {
+    Router16.prototype.handle = function handle(req, res, callback) {
       if (!callback) {
         throw new TypeError("argument callback is required");
       }
@@ -20822,7 +20822,7 @@ var require_router = __commonJS({
         }
       }
     };
-    Router13.prototype.use = function use(handler) {
+    Router16.prototype.use = function use(handler) {
       let offset = 0;
       let path6 = "/";
       if (typeof handler !== "function") {
@@ -20855,7 +20855,7 @@ var require_router = __commonJS({
       }
       return this;
     };
-    Router13.prototype.route = function route(path6) {
+    Router16.prototype.route = function route(path6) {
       const route2 = new Route(path6);
       const layer = new Layer(path6, {
         sensitive: this.caseSensitive,
@@ -20870,7 +20870,7 @@ var require_router = __commonJS({
       return route2;
     };
     methods.concat("all").forEach(function(method) {
-      Router13.prototype[method] = function(path6) {
+      Router16.prototype[method] = function(path6) {
         const route = this.route(path6);
         route[method].apply(route, slice.call(arguments, 1));
         return this;
@@ -21053,13 +21053,13 @@ var require_application = __commonJS({
     var compileTrust = require_utils3().compileTrust;
     var resolve4 = __require("node:path").resolve;
     var once = require_once();
-    var Router13 = require_router();
+    var Router16 = require_router();
     var slice = Array.prototype.slice;
     var flatten = Array.prototype.flat;
     var app2 = exports = module.exports = {};
     var trustProxyDefaultSymbol = "@@symbol:trust_proxy_default";
     app2.init = function init() {
-      var router13 = null;
+      var router16 = null;
       this.cache = /* @__PURE__ */ Object.create(null);
       this.engines = /* @__PURE__ */ Object.create(null);
       this.settings = /* @__PURE__ */ Object.create(null);
@@ -21068,13 +21068,13 @@ var require_application = __commonJS({
         configurable: true,
         enumerable: true,
         get: function getrouter() {
-          if (router13 === null) {
-            router13 = new Router13({
+          if (router16 === null) {
+            router16 = new Router16({
               caseSensitive: this.enabled("case sensitive routing"),
               strict: this.enabled("strict routing")
             });
           }
-          return router13;
+          return router16;
         }
       });
     };
@@ -21145,15 +21145,15 @@ var require_application = __commonJS({
       if (fns.length === 0) {
         throw new TypeError("app.use() requires a middleware function");
       }
-      var router13 = this.router;
+      var router16 = this.router;
       fns.forEach(function(fn2) {
         if (!fn2 || !fn2.handle || !fn2.set) {
-          return router13.use(path6, fn2);
+          return router16.use(path6, fn2);
         }
         debug(".use app under %s", path6);
         fn2.mountpath = path6;
         fn2.parent = this;
-        router13.use(path6, function mounted_app(req, res, next) {
+        router16.use(path6, function mounted_app(req, res, next) {
           var orig = req.app;
           fn2.handle(req, res, function(err) {
             Object.setPrototypeOf(req, orig.request);
@@ -23726,7 +23726,7 @@ var require_express = __commonJS({
     var EventEmitter2 = __require("node:events").EventEmitter;
     var mixin = require_merge_descriptors();
     var proto = require_application();
-    var Router13 = require_router();
+    var Router16 = require_router();
     var req = require_request();
     var res = require_response();
     exports = module.exports = createApplication;
@@ -23748,8 +23748,8 @@ var require_express = __commonJS({
     exports.application = proto;
     exports.request = req;
     exports.response = res;
-    exports.Route = Router13.Route;
-    exports.Router = Router13;
+    exports.Route = Router16.Route;
+    exports.Router = Router16;
     exports.json = bodyParser.json;
     exports.raw = bodyParser.raw;
     exports.static = require_serve_static();
@@ -72759,14 +72759,14 @@ var require_src6 = __commonJS({
 });
 
 // src/app.ts
-var import_express13 = __toESM(require_express2(), 1);
+var import_express16 = __toESM(require_express2(), 1);
 var import_cors = __toESM(require_lib3(), 1);
 var import_cookie_parser = __toESM(require_cookie_parser(), 1);
 var import_pino_http = __toESM(require_logger(), 1);
 import path5 from "node:path";
 
 // src/routes/index.ts
-var import_express12 = __toESM(require_express2(), 1);
+var import_express15 = __toESM(require_express2(), 1);
 
 // src/routes/health.ts
 var import_express = __toESM(require_express2(), 1);
@@ -83707,6 +83707,8 @@ var schema_exports = {};
 __export(schema_exports, {
   applicationStatusEnum: () => applicationStatusEnum,
   applicationsTable: () => applicationsTable,
+  capitalDealsTable: () => capitalDealsTable,
+  capitalSpvsTable: () => capitalSpvsTable,
   channelsTable: () => channelsTable,
   coursesTable: () => coursesTable,
   enrollmentsTable: () => enrollmentsTable,
@@ -83736,7 +83738,8 @@ __export(schema_exports, {
   selectPerkSchema: () => selectPerkSchema,
   selectUserSchema: () => selectUserSchema,
   sessionsTable: () => sessionsTable,
-  usersTable: () => usersTable
+  usersTable: () => usersTable,
+  vaultDocumentsTable: () => vaultDocumentsTable
 });
 
 // ../../node_modules/.pnpm/zod@3.25.76/node_modules/zod/v4/classic/external.js
@@ -95318,6 +95321,47 @@ var introductionRequestsTable = pgTable("introduction_requests", {
   reason: text("reason"),
   score: integer("score"),
   status: text("status").default("pending").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull()
+});
+var vaultDocumentsTable = pgTable("vault_documents", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => usersTable.id).notNull(),
+  title: text("title").notNull(),
+  docType: text("doc_type").notNull(),
+  access: text("access").default("topluluk").notNull(),
+  excerpt: text("excerpt"),
+  tags: text("tags"),
+  pages: integer("pages"),
+  views: integer("views").default(0).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull()
+});
+var capitalDealsTable = pgTable("capital_deals", {
+  id: serial("id").primaryKey(),
+  company: text("company").notNull(),
+  tagline: text("tagline"),
+  stage: text("stage").notNull(),
+  sector: text("sector").notNull(),
+  raise: text("raise"),
+  valuation: text("valuation"),
+  founders: text("founders"),
+  leadInvestor: text("lead_investor"),
+  round: text("round"),
+  score: integer("score").default(0).notNull(),
+  tags: text("tags"),
+  hasSpv: boolean("has_spv").default(false).notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull()
+});
+var capitalSpvsTable = pgTable("capital_spvs", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  target: text("target").notNull(),
+  raised: text("raised").notNull(),
+  pct: integer("pct").default(0).notNull(),
+  participants: integer("participants").default(0).notNull(),
+  closing: text("closing"),
+  sector: text("sector"),
   createdAt: timestamp("created_at").defaultNow().notNull()
 });
 var sessionsTable = pgTable("sessions", {
@@ -113490,6 +113534,55 @@ async function ensureMatchAndFaqSchema() {
   await db.execute(sql`ALTER TABLE faq ADD COLUMN IF NOT EXISTS category text`);
   await db.execute(sql`UPDATE faq SET category = 'Genel' WHERE category IS NULL`);
 }
+async function ensureVaultCapitalSchema() {
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS vault_documents (
+      id serial PRIMARY KEY,
+      user_id integer NOT NULL REFERENCES users(id),
+      title text NOT NULL,
+      doc_type text NOT NULL,
+      access text NOT NULL DEFAULT 'topluluk',
+      excerpt text,
+      tags text,
+      pages integer,
+      views integer NOT NULL DEFAULT 0,
+      created_at timestamp NOT NULL DEFAULT now(),
+      updated_at timestamp NOT NULL DEFAULT now()
+    )
+  `);
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS capital_deals (
+      id serial PRIMARY KEY,
+      company text NOT NULL,
+      tagline text,
+      stage text NOT NULL,
+      sector text NOT NULL,
+      raise text,
+      valuation text,
+      founders text,
+      lead_investor text,
+      round text,
+      score integer NOT NULL DEFAULT 0,
+      tags text,
+      has_spv boolean NOT NULL DEFAULT false,
+      updated_at timestamp NOT NULL DEFAULT now(),
+      created_at timestamp NOT NULL DEFAULT now()
+    )
+  `);
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS capital_spvs (
+      id serial PRIMARY KEY,
+      name text NOT NULL,
+      target text NOT NULL,
+      raised text NOT NULL,
+      pct integer NOT NULL DEFAULT 0,
+      participants integer NOT NULL DEFAULT 0,
+      closing text,
+      sector text,
+      created_at timestamp NOT NULL DEFAULT now()
+    )
+  `);
+}
 
 // src/routes/auth.ts
 var router5 = (0, import_express5.Router)();
@@ -114649,23 +114742,406 @@ router11.get("/match/introductions", requireAuth, async (req, res) => {
 });
 var match_default = router11;
 
-// src/routes/index.ts
+// src/routes/vault.ts
+var import_express12 = __toESM(require_express2(), 1);
 var router12 = (0, import_express12.Router)();
-router12.use(health_default);
-router12.use(invitations_default);
-router12.use("/payments", payments_default);
-router12.use("/ai", ai_default);
-router12.use("/auth", auth_default);
-router12.use(catalog_default);
-router12.use(applications_default);
-router12.use(community_default);
-router12.use(chat_default);
-router12.use(notifications_default);
-router12.use(match_default);
-var routes_default = router12;
+function parseTags(raw) {
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) return parsed.filter((t) => typeof t === "string").slice(0, 12);
+  } catch {
+  }
+  return raw.split(",").map((t) => t.trim()).filter(Boolean).slice(0, 12);
+}
+function daysAgo(d) {
+  return Math.max(0, Math.floor((Date.now() - d.getTime()) / 864e5));
+}
+async function ensureVaultSeed(adminUserId) {
+  const [row] = await db.select({ id: vaultDocumentsTable.id }).from(vaultDocumentsTable).limit(1);
+  if (row) return;
+  await db.insert(vaultDocumentsTable).values([
+    {
+      userId: adminUserId,
+      title: "Pre-seed Yat\u0131r\u0131mc\u0131 Pitch Deck \u2014 inner\xB7hub",
+      docType: "Pitch Deck",
+      access: "davetli",
+      excerpt: "inner\xB7hub'\u0131n 2026 yat\u0131r\u0131m turu i\xE7in haz\u0131rlanan pitch deck \xF6zeti. Problem, \xE7\xF6z\xFCm, GTM ve finansallar.",
+      tags: JSON.stringify(["yat\u0131r\u0131m", "topluluk", "SaaS"]),
+      pages: 18,
+      views: 24
+    },
+    {
+      userId: adminUserId,
+      title: "T\xFCrkiye B2B SaaS Pazar Analizi Q2 2026",
+      docType: "Ara\u015Ft\u0131rma",
+      access: "topluluk",
+      excerpt: "T\xFCrkiye B2B SaaS ekosisteminde b\xFCy\xFCme trendleri ve rekabet haritas\u0131 \xF6zeti.",
+      tags: JSON.stringify(["pazar", "B2B", "SaaS"]),
+      pages: 22,
+      views: 41
+    },
+    {
+      userId: adminUserId,
+      title: "The Mom Test \u2014 Okuma Notlar\u0131",
+      docType: "Not",
+      access: "topluluk",
+      excerpt: "M\xFC\u015Fteri g\xF6r\xFC\u015Fmesi i\xE7in actionable framework notlar\u0131.",
+      tags: JSON.stringify(["kitap", "\xFCr\xFCn"]),
+      views: 67
+    },
+    {
+      userId: adminUserId,
+      title: "AWS Activate Ba\u015Fvuru \u015Eablonu",
+      docType: "\u015Eablon",
+      access: "topluluk",
+      excerpt: "AWS Activate ba\u015Fvurusu i\xE7in doldurulmu\u015F \u015Fablon \xF6zeti.",
+      tags: JSON.stringify(["AWS", "kredi"]),
+      pages: 4,
+      views: 89
+    }
+  ]);
+}
+router12.get("/vault", requireAuth, async (req, res) => {
+  try {
+    await ensureVaultCapitalSchema();
+    const userId = req.user.id;
+    let adminId = userId;
+    const [admin] = await db.select({ id: usersTable.id }).from(usersTable).where(eq(usersTable.role, "admin")).limit(1);
+    if (admin) adminId = admin.id;
+    await ensureVaultSeed(adminId);
+    const rows = await db.select({
+      doc: vaultDocumentsTable,
+      authorName: usersTable.name
+    }).from(vaultDocumentsTable).innerJoin(usersTable, eq(vaultDocumentsTable.userId, usersTable.id)).orderBy(desc(vaultDocumentsTable.updatedAt));
+    const documents = rows.filter((r) => r.doc.access !== "\xF6zel" || r.doc.userId === userId).map((r) => ({
+      id: r.doc.id,
+      title: r.doc.title,
+      type: r.doc.docType,
+      access: r.doc.access,
+      author: r.authorName,
+      tags: parseTags(r.doc.tags),
+      excerpt: r.doc.excerpt ?? "",
+      updatedDays: daysAgo(r.doc.updatedAt),
+      pages: r.doc.pages ?? void 0,
+      views: r.doc.views,
+      mine: r.doc.userId === userId
+    }));
+    res.json({ documents });
+  } catch (err) {
+    res.status(500).json({ error: err.message ?? "Vault y\xFCklenemedi" });
+  }
+});
+router12.post("/vault", requireAuth, async (req, res) => {
+  try {
+    await ensureVaultCapitalSchema();
+    const userId = req.user.id;
+    const title = typeof req.body?.title === "string" ? req.body.title.trim().slice(0, 200) : "";
+    const docType = typeof req.body?.type === "string" ? req.body.type.trim().slice(0, 40) : "Not";
+    const access2 = req.body?.access === "\xF6zel" || req.body?.access === "davetli" || req.body?.access === "topluluk" ? req.body.access : "topluluk";
+    const excerpt = typeof req.body?.excerpt === "string" ? req.body.excerpt.trim().slice(0, 500) : "";
+    const tags = Array.isArray(req.body?.tags) ? req.body.tags.filter((t) => typeof t === "string").slice(0, 12) : [];
+    if (!title) {
+      res.status(400).json({ error: "Ba\u015Fl\u0131k zorunlu" });
+      return;
+    }
+    const [inserted] = await db.insert(vaultDocumentsTable).values({
+      userId,
+      title,
+      docType,
+      access: access2,
+      excerpt: excerpt || null,
+      tags: JSON.stringify(tags),
+      views: 0,
+      updatedAt: /* @__PURE__ */ new Date()
+    }).returning();
+    res.status(201).json({
+      document: {
+        id: inserted.id,
+        title: inserted.title,
+        type: inserted.docType,
+        access: inserted.access,
+        author: req.user.name,
+        tags,
+        excerpt: inserted.excerpt ?? "",
+        updatedDays: 0,
+        views: 0,
+        mine: true
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message ?? "Belge kaydedilemedi" });
+  }
+});
+var vault_default = router12;
+
+// src/routes/capital.ts
+var import_express13 = __toESM(require_express2(), 1);
+var router13 = (0, import_express13.Router)();
+function parseList(raw) {
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) return parsed.filter((t) => typeof t === "string");
+  } catch {
+  }
+  return raw.split(",").map((t) => t.trim()).filter(Boolean);
+}
+function daysAgo2(d) {
+  return Math.max(0, Math.floor((Date.now() - d.getTime()) / 864e5));
+}
+async function ensureCapitalSeed() {
+  const [deal] = await db.select({ id: capitalDealsTable.id }).from(capitalDealsTable).limit(1);
+  if (!deal) {
+    await db.insert(capitalDealsTable).values([
+      {
+        company: "Hipo",
+        tagline: "B2B SaaS i\u015Fe al\u0131m platformu",
+        stage: "Term Sheet",
+        sector: "B2B SaaS",
+        raise: "$500K",
+        valuation: "$3.2M",
+        founders: JSON.stringify(["Zeynep Arslan", "Mert Demir"]),
+        leadInvestor: "Berk Y\u0131lmaz",
+        round: "Pre-seed",
+        score: 91,
+        tags: JSON.stringify(["revenue", "10+ m\xFC\u015Fteri"]),
+        hasSpv: true
+      },
+      {
+        company: "Dopigo",
+        tagline: "DevOps otomasyon altyap\u0131s\u0131",
+        stage: "Due Diligence",
+        sector: "DeepTech",
+        raise: "$1.2M",
+        valuation: "$6M",
+        founders: JSON.stringify(["Selin \xC7elik"]),
+        round: "Seed",
+        score: 84,
+        tags: JSON.stringify(["teknik", "a\xE7\u0131k kaynak"])
+      },
+      {
+        company: "Pazarama AI",
+        tagline: "E-ticaret i\xE7in AI b\xFCy\xFCme motoru",
+        stage: "Pitch",
+        sector: "AI/ML",
+        raise: "$300K",
+        valuation: "$1.8M",
+        founders: JSON.stringify(["Ozan K\u0131rm\u0131z\u0131"]),
+        round: "Pre-seed",
+        score: 76,
+        tags: JSON.stringify(["traction", "MVP haz\u0131r"])
+      },
+      {
+        company: "PayCore",
+        tagline: "KOB\u0130'ler i\xE7in g\xF6m\xFCl\xFC finans altyap\u0131s\u0131",
+        stage: "Due Diligence",
+        sector: "Fintech",
+        raise: "$800K",
+        valuation: "$4.5M",
+        founders: JSON.stringify(["Deniz Alp", "Ay\u015Fe Kaya"]),
+        round: "Seed",
+        score: 88,
+        tags: JSON.stringify(["lisansl\u0131", "B2B"])
+      },
+      {
+        company: "TalentOS",
+        tagline: "AI destekli performans y\xF6netim sistemi",
+        stage: "Kapand\u0131",
+        sector: "HR Tech",
+        raise: "$250K",
+        valuation: "$1.5M",
+        founders: JSON.stringify(["Ay\u015Fe Kaya"]),
+        leadInvestor: "Berk Y\u0131lmaz",
+        round: "Pre-seed",
+        score: 95,
+        tags: JSON.stringify(["kapal\u0131", "inner portf\xF6y"]),
+        hasSpv: true
+      },
+      {
+        company: "NeuralRoute",
+        tagline: "Lojistik i\xE7in route optimizasyon AI",
+        stage: "Pitch",
+        sector: "AI/ML",
+        raise: "$600K",
+        valuation: "$3M",
+        founders: JSON.stringify(["Yeni kurucu"]),
+        round: "Seed",
+        score: 71,
+        tags: JSON.stringify(["erken", "prototip"])
+      }
+    ]);
+  }
+  const [spv] = await db.select({ id: capitalSpvsTable.id }).from(capitalSpvsTable).limit(1);
+  if (!spv) {
+    await db.insert(capitalSpvsTable).values([
+      {
+        name: "inner\xB7capital SPV #1 \u2014 TalentOS",
+        target: "\u20BA750K",
+        raised: "\u20BA680K",
+        pct: 91,
+        participants: 8,
+        closing: "15 Tem 2026",
+        sector: "HR Tech"
+      },
+      {
+        name: "inner\xB7capital SPV #2 \u2014 Hipo",
+        target: "\u20BA1.5M",
+        raised: "\u20BA420K",
+        pct: 28,
+        participants: 4,
+        closing: "30 A\u011Fu 2026",
+        sector: "B2B SaaS"
+      }
+    ]);
+  }
+}
+router13.get("/capital", requireAuth, async (_req, res) => {
+  try {
+    await ensureVaultCapitalSchema();
+    await ensureCapitalSeed();
+    const deals = await db.select().from(capitalDealsTable).orderBy(desc(capitalDealsTable.score));
+    const spvs = await db.select().from(capitalSpvsTable).orderBy(desc(capitalSpvsTable.pct));
+    res.json({
+      deals: deals.map((d) => ({
+        id: d.id,
+        company: d.company,
+        tagline: d.tagline ?? "",
+        stage: d.stage,
+        sector: d.sector,
+        raise: d.raise ?? "",
+        valuation: d.valuation ?? "",
+        founders: parseList(d.founders),
+        leadInvestor: d.leadInvestor ?? void 0,
+        round: d.round ?? "",
+        score: d.score,
+        tags: parseList(d.tags),
+        updatedDays: daysAgo2(d.updatedAt),
+        spv: d.hasSpv
+      })),
+      spvs: spvs.map((s) => ({
+        id: s.id,
+        name: s.name,
+        target: s.target,
+        raised: s.raised,
+        pct: s.pct,
+        participants: s.participants,
+        closing: s.closing ?? "",
+        sector: s.sector ?? ""
+      }))
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message ?? "Capital y\xFCklenemedi" });
+  }
+});
+var capital_default = router13;
+
+// src/routes/pulse.ts
+var import_express14 = __toESM(require_express2(), 1);
+var router14 = (0, import_express14.Router)();
+var TOPIC_RULES = [
+  { topic: "Claude / AI", category: "teknoloji", keywords: ["claude", "gpt", "openai", "llm", "ai"] },
+  { topic: "Cursor", category: "teknoloji", keywords: ["cursor"] },
+  { topic: "Yat\u0131r\u0131m / Seed", category: "yat\u0131r\u0131m", keywords: ["seed", "pre-seed", "yat\u0131r\u0131m", "investor", "valuation"] },
+  { topic: "AWS / Altyap\u0131", category: "i\u015F", keywords: ["aws", "activate", "infra"] },
+  { topic: "\xDCr\xFCn / Mom Test", category: "k\xFClt\xFCr", keywords: ["mom test", "m\xFC\u015Fteri", "\xFCr\xFCn"] },
+  { topic: "SaaS", category: "i\u015F", keywords: ["saas", "churn", "arr", "mrr"] }
+];
+router14.get("/pulse", requireAuth, async (_req, res) => {
+  try {
+    const now = Date.now();
+    const weekAgo = new Date(now - 7 * 864e5);
+    const twoWeeksAgo = new Date(now - 14 * 864e5);
+    const channels = await db.select().from(channelsTable);
+    const channelStats = await Promise.all(
+      channels.map(async (ch) => {
+        const [{ n: messages }] = await db.select({ n: count() }).from(messagesTable).where(eq(messagesTable.channelId, ch.id));
+        const weekMsgs = await db.select({ body: messagesTable.body }).from(messagesTable).where(and(eq(messagesTable.channelId, ch.id), gte(messagesTable.createdAt, weekAgo))).limit(200);
+        const active = await db.selectDistinct({ userId: messagesTable.userId }).from(messagesTable).where(and(eq(messagesTable.channelId, ch.id), gte(messagesTable.createdAt, weekAgo)));
+        return {
+          name: ch.name,
+          messages: Number(messages),
+          activeMembers: active.length,
+          trending: weekMsgs[0]?.body?.slice(0, 48) || "hen\xFCz mesaj yok"
+        };
+      })
+    );
+    channelStats.sort((a, b) => b.messages - a.messages);
+    const [{ n: weekMessageCount }] = await db.select({ n: count() }).from(messagesTable).where(gte(messagesTable.createdAt, weekAgo));
+    const [{ n: memberCount }] = await db.select({ n: count() }).from(usersTable);
+    const contributors = await db.select({
+      name: usersTable.name,
+      contributions: count()
+    }).from(messagesTable).innerJoin(usersTable, eq(messagesTable.userId, usersTable.id)).where(gte(messagesTable.createdAt, weekAgo)).groupBy(usersTable.id, usersTable.name).orderBy(desc(count())).limit(5);
+    const weekBodies = await db.select({ body: messagesTable.body, createdAt: messagesTable.createdAt }).from(messagesTable).where(gte(messagesTable.createdAt, twoWeeksAgo)).limit(500);
+    const thisWeekText = weekBodies.filter((m) => m.createdAt >= weekAgo).map((m) => m.body.toLowerCase()).join("\n");
+    const lastWeekText = weekBodies.filter((m) => m.createdAt < weekAgo).map((m) => m.body.toLowerCase()).join("\n");
+    const trends = TOPIC_RULES.map((rule) => {
+      const mentions = rule.keywords.reduce((sum, kw) => {
+        const re = new RegExp(kw.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi");
+        return sum + (thisWeekText.match(re)?.length ?? 0);
+      }, 0);
+      const prev = rule.keywords.reduce((sum, kw) => {
+        const re = new RegExp(kw.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi");
+        return sum + (lastWeekText.match(re)?.length ?? 0);
+      }, 0);
+      const delta = prev === 0 ? mentions > 0 ? 100 : 0 : Math.round((mentions - prev) / prev * 100);
+      return { topic: rule.topic, mentions, delta, category: rule.category };
+    }).filter((t) => t.mentions > 0).sort((a, b) => b.mentions - a.mentions);
+    const weekly = [];
+    for (let i = 3; i >= 0; i--) {
+      const start = new Date(now - (i + 1) * 7 * 864e5);
+      const end = new Date(now - i * 7 * 864e5);
+      const [{ n }] = await db.select({ n: count() }).from(messagesTable).where(and(gte(messagesTable.createdAt, start), sql`${messagesTable.createdAt} < ${end}`));
+      const labels = ["3H", "2H", "GH", "Bu"];
+      weekly.push({ label: labels[3 - i], activity: Number(n) });
+    }
+    const maxAct = Math.max(1, ...weekly.map((w) => w.activity));
+    const weeklyNorm = weekly.map((w) => ({
+      label: w.label,
+      activity: Math.max(8, Math.round(w.activity / maxAct * 100)),
+      raw: w.activity
+    }));
+    res.json({
+      totalMessages: Number(weekMessageCount),
+      activeMembers: Number(memberCount),
+      weeklyActivity: weeklyNorm[3]?.activity ?? 0,
+      trends,
+      channels: channelStats.slice(0, 6),
+      weekly: weeklyNorm.map(({ label, activity }) => ({ label, activity })),
+      topContributors: contributors.map((c) => ({
+        name: c.name,
+        contributions: Number(c.contributions),
+        streak: Math.min(30, Number(c.contributions))
+      })),
+      empty: Number(weekMessageCount) === 0 && trends.length === 0
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message ?? "Pulse y\xFCklenemedi" });
+  }
+});
+var pulse_default = router14;
+
+// src/routes/index.ts
+var router15 = (0, import_express15.Router)();
+router15.use(health_default);
+router15.use(invitations_default);
+router15.use("/payments", payments_default);
+router15.use("/ai", ai_default);
+router15.use("/auth", auth_default);
+router15.use(catalog_default);
+router15.use(applications_default);
+router15.use(community_default);
+router15.use(chat_default);
+router15.use(notifications_default);
+router15.use(match_default);
+router15.use(vault_default);
+router15.use(capital_default);
+router15.use(pulse_default);
+var routes_default = router15;
 
 // src/app.ts
-var app = (0, import_express13.default)();
+var app = (0, import_express16.default)();
 app.use(
   (0, import_pino_http.default)({
     logger,
@@ -114692,13 +115168,13 @@ app.use(
     credentials: true
   })
 );
-app.use(import_express13.default.json());
-app.use(import_express13.default.urlencoded({ extended: true }));
+app.use(import_express16.default.json());
+app.use(import_express16.default.urlencoded({ extended: true }));
 app.use((0, import_cookie_parser.default)());
 app.use(attachUser);
 app.use("/api", routes_default);
 var frontendDist = path5.join(__dirname, "..", "..", "inner-hub", "dist");
-app.use(import_express13.default.static(frontendDist));
+app.use(import_express16.default.static(frontendDist));
 app.get(/^(?!\/api).*/, (_req, res) => {
   res.sendFile(path5.join(frontendDist, "index.html"));
 });
@@ -114715,7 +115191,11 @@ var port = Number(rawPort);
 if (Number.isNaN(port) || port <= 0) {
   throw new Error(`Invalid PORT value: "${rawPort}"`);
 }
-Promise.all([ensureUserProfileColumns(), ensureMatchAndFaqSchema()]).catch((err) => {
+Promise.all([
+  ensureUserProfileColumns(),
+  ensureMatchAndFaqSchema(),
+  ensureVaultCapitalSchema()
+]).catch((err) => {
   logger.warn({ err }, "Schema ensure failed (will retry on demand)");
 }).finally(() => {
   app_default.listen(port, (err) => {

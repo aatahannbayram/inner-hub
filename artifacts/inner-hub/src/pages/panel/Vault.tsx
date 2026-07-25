@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { FadeIn } from "@/components/FadeIn";
 import {
   Search,
@@ -16,8 +17,10 @@ import {
   Clock,
 } from "lucide-react";
 import { ProceduralPortrait, type PortraitConfig } from "@/components/panel/ProceduralPortrait";
-import { DemoPreviewBanner } from "@/components/panel/DemoPreviewBanner";
 import { toLowerTR } from "@/lib/tr";
+import { useApiQuery } from "@/hooks/useApiQuery";
+import { apiUrl } from "@/lib/api";
+import { ErrorState, LoadingBlock } from "@/components/panel/Skeletons";
 import {
   Carousel,
   CarouselContent,
@@ -74,108 +77,6 @@ interface VaultDoc {
   mine?: boolean;
 }
 
-// ─── Mock data ─────────────────────────────────────────────────────────────────
-
-const DOCS: VaultDoc[] = [
-  {
-    id: 1,
-    title: "Pre-seed Yatırımcı Pitch Deck — inner·hub",
-    type: "Pitch Deck",
-    access: "davetli",
-    author: "Ata Han Bayram",
-    tags: ["yatırım", "topluluk", "SaaS"],
-    excerpt: "inner·hub'ın 2026 yatırım turu için hazırlanan 18 sayfalık pitch deck. Problem, çözüm, GTM, finansallar.",
-    updatedDays: 3,
-    pages: 18,
-    views: 24,
-    mine: true,
-  },
-  {
-    id: 2,
-    title: "Türkiye B2B SaaS Pazar Analizi Q2 2026",
-    type: "Araştırma",
-    access: "topluluk",
-    author: "Zeynep Arslan",
-    tags: ["pazar", "B2B", "SaaS", "Türkiye"],
-    excerpt: "Türkiye B2B SaaS ekosisteminde büyüme trendleri, rekabet haritası ve yatırım aktivitesi. 34 şirket analizi.",
-    updatedDays: 7,
-    pages: 22,
-    views: 41,
-  },
-  {
-    id: 3,
-    title: "The Mom Test — Okuma Notları",
-    type: "Not",
-    access: "topluluk",
-    author: "Mert Demir",
-    tags: ["kitap", "müşteri görüşmesi", "ürün"],
-    excerpt: "Rob Fitzpatrick'in The Mom Test kitabından inner·hub topluluğu için özet notlar ve actionable framework.",
-    updatedDays: 14,
-    views: 67,
-    mine: false,
-  },
-  {
-    id: 4,
-    title: "AWS Activate Başvuru Şablonu",
-    type: "Şablon",
-    access: "topluluk",
-    author: "Selin Çelik",
-    tags: ["AWS", "kredi", "altyapı"],
-    excerpt: "AWS Activate için doldurulmuş başvuru şablonu. $25K kredi başvurusunda başarıyla kullanıldı.",
-    updatedDays: 21,
-    pages: 4,
-    views: 89,
-  },
-  {
-    id: 5,
-    title: "inner·hub API v1 Endpoint Dokümantasyonu",
-    type: "Kod",
-    access: "davetli",
-    author: "Ata Han Bayram",
-    tags: ["API", "teknik", "entegrasyon"],
-    excerpt: "inner·hub platform API'sinin tüm endpoint'leri, auth akışı ve örnek request/response yapıları.",
-    updatedDays: 1,
-    views: 12,
-    mine: true,
-  },
-  {
-    id: 6,
-    title: "Kurucu Zirvesi 2026 — Özet Rapor",
-    type: "Rapor",
-    access: "topluluk",
-    author: "Ata Han Bayram",
-    tags: ["zirve", "networking", "AI"],
-    excerpt: "Eylül 2026 Kurucu Zirvesi'nin katılımcı geri bildirimleri, öne çıkan konuşmalar ve aksiyon maddeleri.",
-    updatedDays: 0,
-    pages: 11,
-    views: 33,
-  },
-  {
-    id: 7,
-    title: "YC Application — Başarılı Örnek (Anonim)",
-    type: "Şablon",
-    access: "davetli",
-    author: "Anonim Üye",
-    tags: ["YC", "başvuru", "kurucu"],
-    excerpt: "YC W25 batch'ine kabul edilen bir topluluğumuz üyesinin izniyle paylaşılan başvuru metni.",
-    updatedDays: 45,
-    pages: 6,
-    views: 112,
-  },
-  {
-    id: 8,
-    title: "Fintech Regülasyon Rehberi — Türkiye 2026",
-    type: "Araştırma",
-    access: "topluluk",
-    author: "Deniz Alp",
-    tags: ["fintech", "regülasyon", "BDDK", "hukuk"],
-    excerpt: "Türkiye'de fintech şirketleri için BDDK, SPK ve MASAK yükümlülüklerinin pratik özeti.",
-    updatedDays: 10,
-    pages: 28,
-    views: 55,
-  },
-];
-
 // ─── Config ───────────────────────────────────────────────────────────────────
 
 const TYPE_ICONS: Record<DocType, React.ComponentType<{ className?: string }>> = {
@@ -198,8 +99,8 @@ const DOC_TYPES: (DocType | "Tümü")[] = ["Tümü", "Pitch Deck", "Araştırma"
 // ─── Doc card ─────────────────────────────────────────────────────────────────
 
 function DocCard({ doc }: { doc: VaultDoc }) {
-  const TypeIcon = TYPE_ICONS[doc.type];
-  const acc = ACCESS_CONFIG[doc.access];
+  const TypeIcon = TYPE_ICONS[doc.type] ?? FileText;
+  const acc = ACCESS_CONFIG[doc.access] ?? ACCESS_CONFIG.topluluk;
   const AccIcon = acc.icon;
 
   return (
@@ -263,8 +164,46 @@ function DocCard({ doc }: { doc: VaultDoc }) {
 
 // ─── Upload drawer (vaul) ─────────────────────────────────────────────────────
 
-function UploadPrompt({ open, onClose }: { open: boolean; onClose: () => void }) {
+function UploadPrompt({
+  open,
+  onClose,
+  onCreated,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onCreated: () => void;
+}) {
   const [access, setAccess] = useState<AccessLevel>("topluluk");
+  const [title, setTitle] = useState("");
+  const [excerpt, setExcerpt] = useState("");
+  const [docType, setDocType] = useState<DocType>("Not");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const submit = async () => {
+    if (!title.trim() || busy) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await fetch(apiUrl("/api/vault"), {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: title.trim(), excerpt: excerpt.trim(), type: docType, access }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json.error ?? "Kaydedilemedi");
+      setTitle("");
+      setExcerpt("");
+      onCreated();
+      onClose();
+    } catch (e: any) {
+      setError(e.message ?? "Kaydedilemedi");
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
     <Drawer open={open} onOpenChange={(v) => !v && onClose()} shouldScaleBackground={false}>
       <DrawerContent className="rounded-none border-[var(--ink)]/15 bg-[var(--bone)]">
@@ -277,17 +216,41 @@ function UploadPrompt({ open, onClose }: { open: boolean; onClose: () => void })
             Belge Paylaş
           </DrawerTitle>
           <DrawerDescription className="text-[var(--ink-body)]">
-            PDF, PPTX veya Markdown — maks 50MB
+            Önce metadata kaydı — dosya yükleme yakında
           </DrawerDescription>
         </DrawerHeader>
 
-        <div className="px-6 pb-8">
-          <div className="mb-4 flex flex-col items-center justify-center border border-dashed border-[var(--ink)]/20 py-8 text-center">
-            <Upload className="mb-2 size-5 text-[var(--ink-subtle)]" />
-            <p className="text-sm text-[var(--ink-body)]">Dosyayı buraya bırak</p>
+        <div className="space-y-4 px-6 pb-8">
+          <input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Başlık"
+            className="w-full border border-[var(--ink)]/[0.08] bg-transparent px-3 py-2.5 text-sm outline-none focus:border-[var(--ink)]/30"
+          />
+          <textarea
+            value={excerpt}
+            onChange={(e) => setExcerpt(e.target.value)}
+            placeholder="Kısa özet"
+            rows={3}
+            className="w-full resize-none border border-[var(--ink)]/[0.08] bg-transparent px-3 py-2.5 text-sm outline-none focus:border-[var(--ink)]/30"
+          />
+          <div className="flex flex-wrap gap-1.5">
+            {DOC_TYPES.filter((t): t is DocType => t !== "Tümü").map((t) => (
+              <button
+                key={t}
+                type="button"
+                onClick={() => setDocType(t)}
+                className={[
+                  "border px-2.5 py-1 font-mono text-label uppercase tracking-widest",
+                  docType === t ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--bone)]" : "border-[var(--ink)]/10 text-[var(--ink-muted)]",
+                ].join(" ")}
+              >
+                {t}
+              </button>
+            ))}
           </div>
 
-          <div className="mb-4">
+          <div>
             <p className="mb-2 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">Erişim Seviyesi</p>
             <div className="flex gap-2">
               {(["özel", "topluluk", "davetli"] as AccessLevel[]).map((a) => {
@@ -296,6 +259,7 @@ function UploadPrompt({ open, onClose }: { open: boolean; onClose: () => void })
                 return (
                   <button
                     key={a}
+                    type="button"
                     onClick={() => setAccess(a)}
                     className={[
                       "flex flex-1 flex-col items-center gap-1 border py-2.5 transition-all",
@@ -312,18 +276,25 @@ function UploadPrompt({ open, onClose }: { open: boolean; onClose: () => void })
             </div>
           </div>
 
+          {error && (
+            <p className="font-mono text-label text-[var(--error-ink)]" role="alert">{error}</p>
+          )}
+
           <div className="flex gap-2">
             <button
+              type="button"
               onClick={onClose}
               className="flex-1 border border-[var(--ink)]/15 py-2.5 font-mono text-label uppercase tracking-widest text-[var(--ink-body)] transition-all hover:border-[var(--ink)]/30 hover:text-[var(--ink)]"
             >
               İptal
             </button>
             <button
-              onClick={onClose}
-              className="flex flex-1 items-center justify-between border border-[var(--ink)] bg-[var(--ink)] px-4 py-2.5 font-mono text-label uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-80"
+              type="button"
+              disabled={busy || !title.trim()}
+              onClick={() => void submit()}
+              className="flex flex-1 items-center justify-between border border-[var(--ink)] bg-[var(--ink)] px-4 py-2.5 font-mono text-label uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-80 disabled:opacity-40"
             >
-              <span>Yükle</span>
+              <span>{busy ? "Kaydediliyor…" : "Kaydet"}</span>
               <ChevronRight className="size-3" />
             </button>
           </div>
@@ -336,11 +307,17 @@ function UploadPrompt({ open, onClose }: { open: boolean; onClose: () => void })
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function Vault() {
+  const queryClient = useQueryClient();
   const [query, setQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState<DocType | "Tümü">("Tümü");
   const [showUpload, setShowUpload] = useState(false);
+  const { data, isLoading, isError, error, refetch } = useApiQuery<{ documents: VaultDoc[] }>(
+    ["vault"],
+    "/api/vault",
+  );
+  const docs = data?.documents ?? [];
 
-  const filtered = DOCS.filter((d) => {
+  const filtered = docs.filter((d) => {
     const matchType = typeFilter === "Tümü" || d.type === typeFilter;
     const q = toLowerTR(query);
     const matchQuery =
@@ -351,9 +328,9 @@ export default function Vault() {
     return matchType && matchQuery;
   });
 
-  const myDocs = DOCS.filter((d) => d.mine).length;
-  const totalDocs = DOCS.length;
-  const totalViews = DOCS.reduce((s, d) => s + d.views, 0);
+  const myDocs = docs.filter((d) => d.mine).length;
+  const totalDocs = docs.length;
+  const totalViews = docs.reduce((s, d) => s + d.views, 0);
 
   return (
     <div className="space-y-8 max-w-4xl">
@@ -385,7 +362,13 @@ export default function Vault() {
         </div>
       </FadeIn>
 
-      <DemoPreviewBanner surface="inner·vault" />
+      {isLoading && docs.length === 0 && <LoadingBlock label="Vault yükleniyor" />}
+      {isError && (
+        <ErrorState
+          message={error instanceof Error ? error.message : "Vault yüklenemedi"}
+          onRetry={() => refetch()}
+        />
+      )}
 
       {/* D60-hero portrait — topographic contour rendering of the archive's depth */}
       <FadeIn delay={0.03}>
@@ -426,6 +409,7 @@ export default function Vault() {
       </div>
 
       {/* Featured strip — Embla */}
+      {docs.length > 0 && (
       <FadeIn delay={0.06}>
         <div className="space-y-3">
           <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
@@ -433,8 +417,8 @@ export default function Vault() {
           </p>
           <Carousel opts={{ align: "start", loop: false }} className="w-full">
             <CarouselContent className="-ml-3">
-              {DOCS.slice(0, 5).map((doc, i) => {
-                const Icon = TYPE_ICONS[doc.type];
+              {docs.slice(0, 5).map((doc, i) => {
+                const Icon = TYPE_ICONS[doc.type] ?? FileText;
                 return (
                   <CarouselItem key={doc.id} className="basis-[78%] pl-3 sm:basis-[45%] md:basis-[38%]">
                     <motion.div
@@ -480,6 +464,7 @@ export default function Vault() {
           </Carousel>
         </div>
       </FadeIn>
+      )}
 
       {/* Search + filter row */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -497,35 +482,41 @@ export default function Vault() {
           {DOC_TYPES.map((t) => (
             <button
               key={t}
+              type="button"
               onClick={() => setTypeFilter(t)}
               className={[
-                "border px-2.5 py-1.5 font-mono text-label uppercase tracking-widest transition-all",
+                "border px-2.5 py-1 font-mono text-label uppercase tracking-widest transition-all",
                 typeFilter === t
                   ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--bone)]"
-                  : "border-[var(--ink)]/10 text-[var(--ink-muted)] hover:border-[var(--ink)]/25 hover:text-[var(--ink)]",
+                  : "border-[var(--ink)]/10 text-[var(--ink-muted)] hover:border-[var(--ink)]/30",
               ].join(" ")}
             >
-              {t === "Pitch Deck" ? <span lang="en">{t}</span> : t}
+              {t}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Doc grid */}
-      <div>
-        {filtered.length === 0 ? (
-          <div className="border border-dashed border-[var(--ink)]/10 py-12 text-center">
-            <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)]">Sonuç bulunamadı</p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {filtered.map((doc) => <DocCard key={doc.id} doc={doc} />)}
-          </div>
-        )}
+      <div className="grid gap-3 sm:grid-cols-2">
+        {filtered.map((doc) => (
+          <DocCard key={doc.id} doc={doc} />
+        ))}
       </div>
+      {!isLoading && !isError && filtered.length === 0 && (
+        <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
+          Belge bulunamadı.
+        </p>
+      )}
 
-      {/* Access legend */}
-      <div className="border-t border-[var(--ink)]/[0.08] pt-4 flex items-center gap-5 flex-wrap">
+      <UploadPrompt
+        open={showUpload}
+        onClose={() => setShowUpload(false)}
+        onCreated={() => {
+          void queryClient.invalidateQueries({ queryKey: ["vault"] });
+        }}
+      />
+
+      <div className="flex flex-wrap items-center gap-5 border-t border-[var(--ink)]/[0.08] pt-4">
         {(Object.entries(ACCESS_CONFIG) as [AccessLevel, typeof ACCESS_CONFIG[AccessLevel]][]).map(([key, cfg]) => {
           const Icon = cfg.icon;
           return (
@@ -539,8 +530,6 @@ export default function Vault() {
           <span lang="en">inner·vault</span> — yalnızca üyeler erişebilir
         </p>
       </div>
-
-      <UploadPrompt open={showUpload} onClose={() => setShowUpload(false)} />
     </div>
   );
 }

@@ -12,7 +12,8 @@ import {
 } from "lucide-react";
 import { ProceduralPortrait, type PortraitConfig } from "@/components/panel/ProceduralPortrait";
 import { PersonAvatar } from "@/components/panel/PersonAvatar";
-import { DemoPreviewBanner } from "@/components/panel/DemoPreviewBanner";
+import { useApiQuery } from "@/hooks/useApiQuery";
+import { LoadingBlock, ErrorState } from "@/components/panel/Skeletons";
 
 const PHOSPHOR_CONFIG: PortraitConfig = {
   renderMode: "characters",
@@ -67,43 +68,16 @@ interface TopContributor {
   streak: number;
 }
 
-// ─── Mock data ─────────────────────────────────────────────────────────────────
-
-const TRENDS: Trend[] = [
-  { topic: "Claude 4 Opus", mentions: 47, delta: 85, category: "teknoloji" },
-  { topic: "Cursor AI", mentions: 39, delta: 62, category: "teknoloji" },
-  { topic: "Pre-seed valuations", mentions: 28, delta: 34, category: "yatırım" },
-  { topic: "B2B SaaS churn", mentions: 24, delta: 18, category: "iş" },
-  { topic: "Runway Gen-3", mentions: 21, delta: 71, category: "teknoloji" },
-  { topic: "AWS Activate", mentions: 19, delta: -8, category: "iş" },
-  { topic: "The Mom Test", mentions: 17, delta: 12, category: "kültür" },
-  { topic: "YC W26 başvuruları", mentions: 15, delta: 44, category: "yatırım" },
-  { topic: "Bolt.new", mentions: 14, delta: -15, category: "teknoloji" },
-  { topic: "Demo Day hazırlık", mentions: 12, delta: 5, category: "iş" },
-];
-
-const CHANNELS: ChannelStat[] = [
-  { name: "ai-tools", messages: 312, activeMembers: 22, trending: "Claude 4 Opus" },
-  { name: "girisimler", messages: 187, activeMembers: 18, trending: "Pre-seed valuations" },
-  { name: "genel", messages: 143, activeMembers: 30, trending: "Zirve hazırlığı" },
-  { name: "tavsiyeler", messages: 96, activeMembers: 15, trending: "The Mom Test" },
-  { name: "yatirim", messages: 74, activeMembers: 9, trending: "YC W26" },
-];
-
-const WEEKLY: WeeklySnapshot[] = [
-  { label: "3H", activity: 68 },
-  { label: "2H", activity: 81 },
-  { label: "GH", activity: 74 },
-  { label: "Bu", activity: 97 },
-];
-
-const TOP_CONTRIBUTORS: TopContributor[] = [
-  { name: "Zeynep Arslan", contributions: 84, streak: 14 },
-  { name: "Mert Demir", contributions: 71, streak: 9 },
-  { name: "Selin Çelik", contributions: 58, streak: 21 },
-  { name: "Ozan Kırmızı", contributions: 47, streak: 5 },
-  { name: "Berk Yılmaz", contributions: 39, streak: 7 },
-];
+interface PulseResponse {
+  totalMessages: number;
+  activeMembers: number;
+  weeklyActivity: number;
+  trends: Trend[];
+  channels: ChannelStat[];
+  weekly: WeeklySnapshot[];
+  topContributors: TopContributor[];
+  empty?: boolean;
+}
 
 const CAT_COLORS: Record<Trend["category"], string> = {
   teknoloji: "text-[var(--ink)] bg-[var(--ink)]/[0.06] border-[var(--ink)]/10",
@@ -140,7 +114,7 @@ function TrendRow({ trend, rank, maxMentions }: { trend: Trend; rank: number; ma
             {trend.category}
           </span>
         </div>
-        <MiniBar pct={(trend.mentions / maxMentions) * 100} color={isUp ? "var(--inner-green)" : "var(--ink)"} />
+        <MiniBar pct={maxMentions > 0 ? (trend.mentions / maxMentions) * 100 : 0} color={isUp ? "var(--inner-green)" : "var(--ink)"} />
       </div>
       <div className="flex shrink-0 items-center gap-1">
         <DeltaIcon className={`size-3 ${deltaColor}`} />
@@ -155,11 +129,16 @@ function TrendRow({ trend, rank, maxMentions }: { trend: Trend; rank: number; ma
 
 // ─── Activity columns ─────────────────────────────────────────────────────────
 
-function ActivityColumns() {
-  const max = Math.max(...WEEKLY.map((w) => w.activity));
+function ActivityColumns({ weekly }: { weekly: WeeklySnapshot[] }) {
+  if (weekly.length === 0) {
+    return (
+      <p className="font-mono text-label text-[var(--ink-subtle)] py-6 text-center">Henüz aktivite yok</p>
+    );
+  }
+  const max = Math.max(...weekly.map((w) => w.activity), 1);
   return (
     <div className="flex items-end gap-2 h-20">
-      {WEEKLY.map((w) => (
+      {weekly.map((w) => (
         <div key={w.label} className="flex flex-1 flex-col items-center gap-1">
           <div
             className="w-full transition-all"
@@ -176,19 +155,42 @@ function ActivityColumns() {
   );
 }
 
+function weeklyChangeText(weekly: WeeklySnapshot[]): string | null {
+  if (weekly.length < 2) return null;
+  const prev = weekly[weekly.length - 2].activity;
+  const curr = weekly[weekly.length - 1].activity;
+  if (prev === 0) return curr > 0 ? "Bu hafta ilk aktivite" : null;
+  const pct = Math.round(((curr - prev) / prev) * 100);
+  if (pct === 0) return "Geçen haftayla aynı seviye";
+  return `Bu hafta %${Math.abs(pct)} ${pct > 0 ? "artış" : "azalış"}`;
+}
+
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function Pulse() {
   const [catFilter, setCatFilter] = useState<Trend["category"] | "Tümü">("Tümü");
 
-  const filtered = catFilter === "Tümü"
-    ? TRENDS
-    : TRENDS.filter((t) => t.category === catFilter);
+  const { data, isLoading, isError, error, refetch, isSuccess } = useApiQuery<PulseResponse>(
+    ["pulse"],
+    "/api/pulse",
+  );
 
-  const maxMentions = Math.max(...filtered.map((t) => t.mentions));
-  const totalMessages = CHANNELS.reduce((s, c) => s + c.messages, 0);
-  const activeMembers = 34;
-  const weeklyActivity = WEEKLY[WEEKLY.length - 1].activity;
+  const trends = data?.trends ?? [];
+  const channels = data?.channels ?? [];
+  const weekly = data?.weekly ?? [];
+  const topContributors = data?.topContributors ?? [];
+
+  const filtered = catFilter === "Tümü"
+    ? trends
+    : trends.filter((t) => t.category === catFilter);
+
+  const maxMentions = filtered.length > 0 ? Math.max(...filtered.map((t) => t.mentions)) : 1;
+  const totalMessages = data?.totalMessages ?? 0;
+  const activeMembers = data?.activeMembers ?? 0;
+  const weeklyActivity = data?.weeklyActivity ?? 0;
+  const showEmpty = isSuccess && (data?.empty || trends.length === 0);
+  const topMax = topContributors[0]?.contributions ?? 1;
+  const weekChange = weeklyChangeText(weekly);
 
   return (
     <div className="space-y-8 max-w-4xl">
@@ -211,13 +213,29 @@ export default function Pulse() {
             </p>
           </div>
           <div className="flex items-center gap-2 border border-[var(--ink)]/15 bg-[var(--ink)]/[0.03] px-3 py-2">
-            <Radio className="size-3 text-[var(--ink-muted)]" />
-            <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">Önizleme</span>
+            <Radio className={`size-3 ${isSuccess ? "text-[var(--success-ink)]" : "text-[var(--ink-muted)]"}`} />
+            <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
+              {isSuccess ? "Canlı" : "…"}
+            </span>
           </div>
         </div>
       </FadeIn>
 
-      <DemoPreviewBanner surface="inner·pulse" />
+      {isLoading && !data && (
+        <LoadingBlock label="Pulse yükleniyor">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="h-20 animate-pulse border border-[var(--ink)]/[0.06] bg-[var(--ink)]/[0.03]" />
+            ))}
+          </div>
+        </LoadingBlock>
+      )}
+      {isError && (
+        <ErrorState
+          message={error instanceof Error ? error.message : "Pulse yüklenemedi"}
+          onRetry={() => refetch()}
+        />
+      )}
 
       {/* Phosphor portrait — the community's pulse, rendered as a live signal */}
       <FadeIn delay={0.03}>
@@ -238,130 +256,159 @@ export default function Pulse() {
         </div>
       </FadeIn>
 
-      {/* Top stats */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        {[
-          { label: "Bu Hafta Mesaj", value: totalMessages, icon: MessageSquare, sub: "5 kanalda" },
-          { label: "Aktif Üye", value: activeMembers, icon: Users, sub: "toplulukta" },
-          { label: "Trend Konu", value: TRENDS.length, icon: TrendingUp, sub: "takip ediliyor" },
-          { label: "Aktivite Skoru", value: weeklyActivity, icon: ArrowUp, sub: "bu hafta" },
-        ].map((s) => (
-          <div key={s.label} className="border border-[var(--ink)]/[0.08] p-4">
-            <div className="mb-2 flex items-center justify-between">
-              <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)]">{s.label}</p>
-              <s.icon className="size-3 text-[var(--ink-subtle)]" />
-            </div>
-            <p
-              className="font-serif text-2xl text-[var(--ink)]"
-              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
-            >
-              {s.value}
-            </p>
-            <p className="mt-0.5 font-mono text-label text-[var(--ink-subtle)]">{s.sub}</p>
-          </div>
-        ))}
-      </div>
+      {showEmpty && (
+        <div className="border border-dashed border-[var(--ink)]/15 p-8 text-center">
+          <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)] mb-2">
+            Henüz nabız verisi yok
+          </p>
+          <p className="text-sm text-[var(--ink-body)] max-w-md mx-auto">
+            Bu hafta kanallarda henüz yeterli mesaj yok. Sohbet başladıkça trendler ve aktivite burada görünecek.
+          </p>
+        </div>
+      )}
 
-      {/* Two-column layout */}
-      <div className="grid gap-6 lg:grid-cols-[1fr_280px]">
-        {/* Trends */}
-        <section>
-          <div className="mb-4 border-t border-[var(--ink)]/[0.08] pt-3 flex items-center justify-between">
-            <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
-              Trending Konular
-            </p>
-            <div className="flex gap-1.5">
-              {(["Tümü", "teknoloji", "iş", "yatırım", "kültür"] as const).map((c) => (
-                <button
-                  key={c}
-                  onClick={() => setCatFilter(c)}
-                  className={[
-                    "border px-2 py-0.5 font-mono text-label uppercase tracking-widest transition-all",
-                    catFilter === c
-                      ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--bone)]"
-                      : "border-[var(--ink)]/10 text-[var(--ink-muted)] hover:border-[var(--ink)]/25",
-                  ].join(" ")}
+      {!showEmpty && isSuccess && (
+        <>
+          {/* Top stats */}
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {[
+              { label: "Bu Hafta Mesaj", value: totalMessages, icon: MessageSquare, sub: `${channels.length} kanalda` },
+              { label: "Aktif Üye", value: activeMembers, icon: Users, sub: "toplulukta" },
+              { label: "Trend Konu", value: trends.length, icon: TrendingUp, sub: "takip ediliyor" },
+              { label: "Aktivite Skoru", value: weeklyActivity, icon: ArrowUp, sub: "bu hafta" },
+            ].map((s) => (
+              <div key={s.label} className="border border-[var(--ink)]/[0.08] p-4">
+                <div className="mb-2 flex items-center justify-between">
+                  <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)]">{s.label}</p>
+                  <s.icon className="size-3 text-[var(--ink-subtle)]" />
+                </div>
+                <p
+                  className="font-serif text-2xl text-[var(--ink)]"
+                  style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
                 >
-                  {c}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div>
-            {filtered.map((trend, i) => (
-              <TrendRow key={trend.topic} trend={trend} rank={i + 1} maxMentions={maxMentions} />
+                  {s.value}
+                </p>
+                <p className="mt-0.5 font-mono text-label text-[var(--ink-subtle)]">{s.sub}</p>
+              </div>
             ))}
           </div>
-        </section>
 
-        {/* Right sidebar */}
-        <div className="space-y-6">
-          {/* Weekly activity */}
-          <section className="border border-[var(--ink)]/[0.08] p-4">
-            <p className="mb-4 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
-              Haftalık Aktivite
-            </p>
-            <ActivityColumns />
-            <p className="mt-3 font-mono text-label text-[var(--ink-subtle)]">
-              Bu hafta %{Math.round(((WEEKLY[3].activity - WEEKLY[2].activity) / WEEKLY[2].activity) * 100)} artış
-            </p>
-          </section>
-
-          {/* Top channels */}
-          <section>
-            <p className="mb-3 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
-              En Aktif Kanallar
-            </p>
-            <div className="space-y-2">
-              {CHANNELS.map((ch, i) => (
-                <div key={ch.name} className="flex items-center gap-3 py-1.5 border-b border-[var(--ink)]/[0.05] last:border-0">
-                  <span className="font-mono text-label text-[var(--ink-subtle)] w-3">{i + 1}</span>
-                  <Hash className="size-3 text-[var(--ink-subtle)] shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs text-[var(--ink-strong)] truncate">{ch.name}</p>
-                    <p className="font-mono text-label text-[var(--ink-subtle)] truncate">{ch.trending}</p>
-                  </div>
-                  <span className="shrink-0 font-mono text-label text-[var(--ink-body)]">{ch.messages}</span>
+          {/* Two-column layout */}
+          <div className="grid gap-6 lg:grid-cols-[1fr_280px]">
+            {/* Trends */}
+            <section>
+              <div className="mb-4 border-t border-[var(--ink)]/[0.08] pt-3 flex items-center justify-between">
+                <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
+                  Trending Konular
+                </p>
+                <div className="flex gap-1.5">
+                  {(["Tümü", "teknoloji", "iş", "yatırım", "kültür"] as const).map((c) => (
+                    <button
+                      key={c}
+                      onClick={() => setCatFilter(c)}
+                      className={[
+                        "border px-2 py-0.5 font-mono text-label uppercase tracking-widest transition-all",
+                        catFilter === c
+                          ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--bone)]"
+                          : "border-[var(--ink)]/10 text-[var(--ink-muted)] hover:border-[var(--ink)]/25",
+                      ].join(" ")}
+                    >
+                      {c}
+                    </button>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </section>
+              </div>
+              <div>
+                {filtered.length === 0 ? (
+                  <p className="font-mono text-label text-[var(--ink-subtle)] py-4">Bu kategoride trend yok</p>
+                ) : (
+                  filtered.map((trend, i) => (
+                    <TrendRow key={trend.topic} trend={trend} rank={i + 1} maxMentions={maxMentions} />
+                  ))
+                )}
+              </div>
+            </section>
 
-          {/* Top contributors */}
-          <section>
-            <p className="mb-3 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
-              Bu Hafta Öne Çıkanlar
-            </p>
-            <div className="space-y-2">
-              {TOP_CONTRIBUTORS.map((c, i) => (
-                <div key={c.name} className="flex items-center gap-3">
-                  <PersonAvatar
-                    name={c.name}
-                    initials={c.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
-                    className="size-6 text-label"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs text-[var(--ink-strong)] truncate">{c.name}</p>
-                    <div className="mt-0.5 h-0.5 bg-[var(--ink)]/[0.06]">
-                      <div
-                        className="h-full"
-                        style={{
-                          width: `${(c.contributions / TOP_CONTRIBUTORS[0].contributions) * 100}%`,
-                          background: i === 0 ? "var(--inner-green)" : "var(--ink)",
-                          opacity: i === 0 ? 1 : 0.3,
-                        }}
-                      />
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1 shrink-0">
-                    <span className="font-mono text-label text-[var(--ink-muted)]">{c.streak}g</span>
-                  </div>
+            {/* Right sidebar */}
+            <div className="space-y-6">
+              {/* Weekly activity */}
+              <section className="border border-[var(--ink)]/[0.08] p-4">
+                <p className="mb-4 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
+                  Haftalık Aktivite
+                </p>
+                <ActivityColumns weekly={weekly} />
+                {weekChange && (
+                  <p className="mt-3 font-mono text-label text-[var(--ink-subtle)]">
+                    {weekChange}
+                  </p>
+                )}
+              </section>
+
+              {/* Top channels */}
+              <section>
+                <p className="mb-3 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
+                  En Aktif Kanallar
+                </p>
+                <div className="space-y-2">
+                  {channels.length === 0 ? (
+                    <p className="font-mono text-label text-[var(--ink-subtle)]">Kanal verisi yok</p>
+                  ) : (
+                    channels.map((ch, i) => (
+                      <div key={ch.name} className="flex items-center gap-3 py-1.5 border-b border-[var(--ink)]/[0.05] last:border-0">
+                        <span className="font-mono text-label text-[var(--ink-subtle)] w-3">{i + 1}</span>
+                        <Hash className="size-3 text-[var(--ink-subtle)] shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs text-[var(--ink-strong)] truncate">{ch.name}</p>
+                          <p className="font-mono text-label text-[var(--ink-subtle)] truncate">{ch.trending}</p>
+                        </div>
+                        <span className="shrink-0 font-mono text-label text-[var(--ink-body)]">{ch.messages}</span>
+                      </div>
+                    ))
+                  )}
                 </div>
-              ))}
+              </section>
+
+              {/* Top contributors */}
+              <section>
+                <p className="mb-3 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
+                  Bu Hafta Öne Çıkanlar
+                </p>
+                <div className="space-y-2">
+                  {topContributors.length === 0 ? (
+                    <p className="font-mono text-label text-[var(--ink-subtle)]">Henüz katkı yok</p>
+                  ) : (
+                    topContributors.map((c, i) => (
+                      <div key={c.name} className="flex items-center gap-3">
+                        <PersonAvatar
+                          name={c.name}
+                          initials={c.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
+                          className="size-6 text-label"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs text-[var(--ink-strong)] truncate">{c.name}</p>
+                          <div className="mt-0.5 h-0.5 bg-[var(--ink)]/[0.06]">
+                            <div
+                              className="h-full"
+                              style={{
+                                width: `${(c.contributions / topMax) * 100}%`,
+                                background: i === 0 ? "var(--inner-green)" : "var(--ink)",
+                                opacity: i === 0 ? 1 : 0.3,
+                              }}
+                            />
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1 shrink-0">
+                          <span className="font-mono text-label text-[var(--ink-muted)]">{c.streak}g</span>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </section>
             </div>
-          </section>
-        </div>
-      </div>
+          </div>
+        </>
+      )}
 
       {/* Footer */}
       <div className="border-t border-[var(--ink)]/[0.08] pt-4">

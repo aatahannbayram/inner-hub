@@ -1,6 +1,6 @@
 import app from "./app";
 import { logger } from "./lib/logger";
-import { ensureUserProfileColumns, ensureMatchAndFaqSchema } from "./lib/ensureSchema";
+import { ensureUserProfileColumns, ensureMatchAndFaqSchema, ensureVaultCapitalSchema } from "./lib/ensureSchema";
 
 const rawPort = process.env["PORT"];
 
@@ -16,7 +16,11 @@ if (Number.isNaN(port) || port <= 0) {
   throw new Error(`Invalid PORT value: "${rawPort}"`);
 }
 
-Promise.all([ensureUserProfileColumns(), ensureMatchAndFaqSchema()])
+Promise.all([
+  ensureUserProfileColumns(),
+  ensureMatchAndFaqSchema(),
+  ensureVaultCapitalSchema(),
+])
   .catch((err) => {
     logger.warn({ err }, "Schema ensure failed (will retry on demand)");
   })

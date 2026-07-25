@@ -3,7 +3,8 @@ import { FadeIn } from "@/components/FadeIn";
 import { AnimatedHeading } from "@/components/AnimatedHeading";
 import { PersonAvatar } from "@/components/panel/PersonAvatar";
 import { HeroVideo } from "@/components/HeroVideo";
-import { DemoPreviewBanner } from "@/components/panel/DemoPreviewBanner";
+import { useApiQuery } from "@/hooks/useApiQuery";
+import { LoadingBlock, ErrorState, StatCardSkeleton } from "@/components/panel/Skeletons";
 import {
   TrendingUp,
   Users,
@@ -49,121 +50,30 @@ interface SPV {
   sector: Sector;
 }
 
-// ─── Mock data ────────────────────────────────────────────────────────────────
+type CapitalResponse = { deals: Deal[]; spvs: SPV[] };
 
-const DEALS: Deal[] = [
-  {
-    id: 1,
-    company: "Hipo",
-    tagline: "B2B SaaS işe alım platformu",
-    stage: "Term Sheet",
-    sector: "B2B SaaS",
-    raise: "$500K",
-    valuation: "$3.2M",
-    founders: ["Zeynep Arslan", "Mert Demir"],
-    leadInvestor: "Berk Yılmaz",
-    round: "Pre-seed",
-    score: 91,
-    tags: ["revenue", "10+ müşteri"],
-    updatedDays: 2,
-    spv: true,
-  },
-  {
-    id: 2,
-    company: "Dopigo",
-    tagline: "DevOps otomasyon altyapısı",
-    stage: "Due Diligence",
-    sector: "DeepTech",
-    raise: "$1.2M",
-    valuation: "$6M",
-    founders: ["Selin Çelik"],
-    round: "Seed",
-    score: 84,
-    tags: ["teknik", "açık kaynak"],
-    updatedDays: 5,
-  },
-  {
-    id: 3,
-    company: "Pazarama AI",
-    tagline: "E-ticaret için AI büyüme motoru",
-    stage: "Pitch",
-    sector: "AI/ML",
-    raise: "$300K",
-    valuation: "$1.8M",
-    founders: ["Ozan Kırmızı"],
-    round: "Pre-seed",
-    score: 76,
-    tags: ["traction", "MVP hazır"],
-    updatedDays: 1,
-  },
-  {
-    id: 4,
-    company: "PayCore",
-    tagline: "KOBİ'ler için gömülü finans altyapısı",
-    stage: "Due Diligence",
-    sector: "Fintech",
-    raise: "$800K",
-    valuation: "$4.5M",
-    founders: ["Deniz Alp", "Ayşe Kaya"],
-    round: "Seed",
-    score: 88,
-    tags: ["lisanslı", "B2B"],
-    updatedDays: 3,
-  },
-  {
-    id: 5,
-    company: "TalentOS",
-    tagline: "AI destekli performans yönetim sistemi",
-    stage: "Kapandı",
-    sector: "HR Tech",
-    raise: "$250K",
-    valuation: "$1.5M",
-    founders: ["Ayşe Kaya"],
-    leadInvestor: "Berk Yılmaz",
-    round: "Pre-seed",
-    score: 95,
-    tags: ["kapalı", "inner portföy"],
-    updatedDays: 14,
-    spv: true,
-  },
-  {
-    id: 6,
-    company: "NeuralRoute",
-    tagline: "Lojistik için route optimizasyon AI",
-    stage: "Pitch",
-    sector: "AI/ML",
-    raise: "$600K",
-    valuation: "$3M",
-    founders: ["Yeni kurucu"],
-    round: "Seed",
-    score: 71,
-    tags: ["erken", "prototip"],
-    updatedDays: 0,
-  },
-];
+function parseRaiseUsd(raise: string): number | null {
+  const m = raise.replace(/,/g, "").trim().match(/^\$?\s*([\d.]+)\s*([KkMm])?/);
+  if (!m) return null;
+  let n = parseFloat(m[1]);
+  const suffix = m[2]?.toUpperCase();
+  if (suffix === "K") n *= 1_000;
+  else if (suffix === "M") n *= 1_000_000;
+  return Number.isFinite(n) ? n : null;
+}
 
-const SPVS: SPV[] = [
-  {
-    id: 1,
-    name: "inner·capital SPV #1 — TalentOS",
-    target: "₺750K",
-    raised: "₺680K",
-    pct: 91,
-    participants: 8,
-    closing: "15 Tem 2026",
-    sector: "HR Tech",
-  },
-  {
-    id: 2,
-    name: "inner·capital SPV #2 — Hipo",
-    target: "₺1.5M",
-    raised: "₺420K",
-    pct: 28,
-    participants: 4,
-    closing: "30 Ağu 2026",
-    sector: "B2B SaaS",
-  },
-];
+function formatTotalRaise(deals: Deal[]): string {
+  const active = deals.filter((d) => d.stage !== "Kapandı");
+  const amounts = active.map((d) => parseRaiseUsd(d.raise)).filter((n): n is number => n != null);
+  if (amounts.length === 0) return "—";
+  const sum = amounts.reduce((a, b) => a + b, 0);
+  if (sum >= 1_000_000) {
+    const m = sum / 1_000_000;
+    return `$${m % 1 === 0 ? m.toFixed(0) : m.toFixed(2).replace(/0+$/, "").replace(/\.$/, "")}M`;
+  }
+  if (sum >= 1_000) return `$${Math.round(sum / 1_000)}K`;
+  return `$${Math.round(sum)}`;
+}
 
 const STAGES: Stage[] = ["Pitch", "Due Diligence", "Term Sheet", "Kapandı"];
 
@@ -502,21 +412,43 @@ export default function Capital() {
   const [sectorFilter, setSectorFilter] = useState<Sector | "Tümü">("Tümü");
   const [view, setView] = useState<"pipeline" | "liste">("pipeline");
 
+  const { data, isLoading, isError, error, refetch } = useApiQuery<CapitalResponse>(
+    ["capital"],
+    "/api/capital",
+  );
+  const deals = data?.deals ?? [];
+  const spvs = data?.spvs ?? [];
+
   const sectors: (Sector | "Tümü")[] = ["Tümü", "AI/ML", "B2B SaaS", "Fintech", "HR Tech", "DeepTech", "E-ticaret"];
 
   const filtered = sectorFilter === "Tümü"
-    ? DEALS
-    : DEALS.filter((d) => d.sector === sectorFilter);
+    ? deals
+    : deals.filter((d) => d.sector === sectorFilter);
 
-  const totalRaise = "$3.65M";
-  const activeDeals = DEALS.filter((d) => d.stage !== "Kapandı").length;
-  const closedDeals = DEALS.filter((d) => d.stage === "Kapandı").length;
+  const totalRaise = formatTotalRaise(deals);
+  const activeDeals = deals.filter((d) => d.stage !== "Kapandı").length;
+  const closedDeals = deals.filter((d) => d.stage === "Kapandı").length;
 
   return (
     <div className="space-y-8 max-w-5xl">
       {/* Hero */}
       <CapitalHero />
-      <DemoPreviewBanner surface="inner·capital" />
+
+      {isLoading && deals.length === 0 && (
+        <LoadingBlock label="Deal flow yükleniyor">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <StatCardSkeleton key={i} />
+            ))}
+          </div>
+        </LoadingBlock>
+      )}
+      {isError && (
+        <ErrorState
+          message={error instanceof Error ? error.message : "Capital yüklenemedi"}
+          onRetry={() => refetch()}
+        />
+      )}
 
       {/* View toggle */}
       <FadeIn>
@@ -545,7 +477,7 @@ export default function Capital() {
         <StatCard label="Aktif Deal" value={String(activeDeals)} sub="pipeline'da" icon={TrendingUp} />
         <StatCard label="Toplam Hedef" value={totalRaise} sub="aktif turlar" icon={DollarSign} />
         <StatCard label="Kapanan" value={String(closedDeals)} sub="inner portföyü" icon={Building2} />
-        <StatCard label="SPV" value={String(SPVS.length)} sub="açık yatırım aracı" icon={Users} />
+        <StatCard label="SPV" value={String(spvs.length)} sub="açık yatırım aracı" icon={Users} />
       </div>
 
       {/* Sector filter */}
@@ -643,7 +575,7 @@ export default function Capital() {
           <p className="mt-0.5 text-xs text-[var(--ink-muted)]">Özel amaçlı araçlarla toplu yatırım katılımı</p>
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
-          {SPVS.map((spv) => <SpvCard key={spv.id} spv={spv} />)}
+          {spvs.map((spv) => <SpvCard key={spv.id} spv={spv} />)}
         </div>
       </section>
 

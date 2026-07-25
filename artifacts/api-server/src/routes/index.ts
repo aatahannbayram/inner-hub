@@ -10,6 +10,9 @@ import communityRouter from "./community";
 import chatRouter from "./chat";
 import notificationsRouter from "./notifications";
 import matchRouter from "./match";
+import vaultRouter from "./vault";
+import capitalRouter from "./capital";
+import pulseRouter from "./pulse";
 
 const router: IRouter = Router();
 
@@ -24,5 +27,8 @@ router.use(communityRouter);
 router.use(chatRouter);
 router.use(notificationsRouter);
 router.use(matchRouter);
+router.use(vaultRouter);
+router.use(capitalRouter);
+router.use(pulseRouter);
 
 export default router;

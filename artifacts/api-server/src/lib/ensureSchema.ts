@@ -29,3 +29,54 @@ export async function ensureMatchAndFaqSchema() {
   await db.execute(sql`ALTER TABLE faq ADD COLUMN IF NOT EXISTS category text`);
   await db.execute(sql`UPDATE faq SET category = 'Genel' WHERE category IS NULL`);
 }
+
+/** Vault + Capital tabloları. */
+export async function ensureVaultCapitalSchema() {
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS vault_documents (
+      id serial PRIMARY KEY,
+      user_id integer NOT NULL REFERENCES users(id),
+      title text NOT NULL,
+      doc_type text NOT NULL,
+      access text NOT NULL DEFAULT 'topluluk',
+      excerpt text,
+      tags text,
+      pages integer,
+      views integer NOT NULL DEFAULT 0,
+      created_at timestamp NOT NULL DEFAULT now(),
+      updated_at timestamp NOT NULL DEFAULT now()
+    )
+  `);
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS capital_deals (
+      id serial PRIMARY KEY,
+      company text NOT NULL,
+      tagline text,
+      stage text NOT NULL,
+      sector text NOT NULL,
+      raise text,
+      valuation text,
+      founders text,
+      lead_investor text,
+      round text,
+      score integer NOT NULL DEFAULT 0,
+      tags text,
+      has_spv boolean NOT NULL DEFAULT false,
+      updated_at timestamp NOT NULL DEFAULT now(),
+      created_at timestamp NOT NULL DEFAULT now()
+    )
+  `);
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS capital_spvs (
+      id serial PRIMARY KEY,
+      name text NOT NULL,
+      target text NOT NULL,
+      raised text NOT NULL,
+      pct integer NOT NULL DEFAULT 0,
+      participants integer NOT NULL DEFAULT 0,
+      closing text,
+      sector text,
+      created_at timestamp NOT NULL DEFAULT now()
+    )
+  `);
+}

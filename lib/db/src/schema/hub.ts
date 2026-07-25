@@ -173,6 +173,57 @@ export const introductionRequestsTable = pgTable("introduction_requests", {
 
 export type IntroductionRequest = typeof introductionRequestsTable.$inferSelect;
 
+// ─── VAULT ────────────────────────────────────────────────────────────────────
+export const vaultDocumentsTable = pgTable("vault_documents", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => usersTable.id).notNull(),
+  title: text("title").notNull(),
+  docType: text("doc_type").notNull(),
+  access: text("access").default("topluluk").notNull(),
+  excerpt: text("excerpt"),
+  tags: text("tags"),
+  pages: integer("pages"),
+  views: integer("views").default(0).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export type VaultDocument = typeof vaultDocumentsTable.$inferSelect;
+
+// ─── CAPITAL ──────────────────────────────────────────────────────────────────
+export const capitalDealsTable = pgTable("capital_deals", {
+  id: serial("id").primaryKey(),
+  company: text("company").notNull(),
+  tagline: text("tagline"),
+  stage: text("stage").notNull(),
+  sector: text("sector").notNull(),
+  raise: text("raise"),
+  valuation: text("valuation"),
+  founders: text("founders"),
+  leadInvestor: text("lead_investor"),
+  round: text("round"),
+  score: integer("score").default(0).notNull(),
+  tags: text("tags"),
+  hasSpv: boolean("has_spv").default(false).notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const capitalSpvsTable = pgTable("capital_spvs", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  target: text("target").notNull(),
+  raised: text("raised").notNull(),
+  pct: integer("pct").default(0).notNull(),
+  participants: integer("participants").default(0).notNull(),
+  closing: text("closing"),
+  sector: text("sector"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export type CapitalDeal = typeof capitalDealsTable.$inferSelect;
+export type CapitalSpv = typeof capitalSpvsTable.$inferSelect;
+
 // ─── SESSIONS (auth) ──────────────────────────────────────────────────────────
 export const sessionsTable = pgTable("sessions", {
   id: text("id").primaryKey(),
