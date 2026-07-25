@@ -37,6 +37,13 @@ app.use(
     credentials: true,
   }),
 );
+// Vault binary upload — json parser'dan önce raw body
+app.use((req, res, next) => {
+  if (req.method === "PUT" && /^\/api\/vault\/\d+\/file$/.test(req.path)) {
+    return express.raw({ type: () => true, limit: "12mb" })(req, res, next);
+  }
+  next();
+});
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());

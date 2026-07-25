@@ -184,6 +184,10 @@ export const vaultDocumentsTable = pgTable("vault_documents", {
   tags: text("tags"),
   pages: integer("pages"),
   views: integer("views").default(0).notNull(),
+  fileKey: text("file_key"),
+  fileName: text("file_name"),
+  mimeType: text("mime_type"),
+  sizeBytes: integer("size_bytes"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

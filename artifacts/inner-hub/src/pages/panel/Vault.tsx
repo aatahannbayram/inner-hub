@@ -15,6 +15,8 @@ import {
   ChevronRight,
   Tag,
   Clock,
+  Download,
+  Paperclip,
 } from "lucide-react";
 import { ProceduralPortrait, type PortraitConfig } from "@/components/panel/ProceduralPortrait";
 import { toLowerTR } from "@/lib/tr";
@@ -75,6 +77,35 @@ interface VaultDoc {
   pages?: number;
   views: number;
   mine?: boolean;
+  hasFile?: boolean;
+  fileName?: string | null;
+  sizeBytes?: number | null;
+}
+
+const MAX_UPLOAD_BYTES = 12 * 1024 * 1024;
+
+function formatBytes(n: number | null | undefined): string {
+  if (!n || n <= 0) return "";
+  if (n < 1024) return `${n} B`;
+  if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
+  return `${(n / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+async function downloadVaultFile(doc: VaultDoc) {
+  const res = await fetch(apiUrl(`/api/vault/${doc.id}/file`), { credentials: "include" });
+  if (!res.ok) {
+    const json = await res.json().catch(() => ({}));
+    throw new Error(json.error ?? "İndirme başarısız");
+  }
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = doc.fileName || `vault-${doc.id}`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
 }
 
 // ─── Config ───────────────────────────────────────────────────────────────────
@@ -102,17 +133,33 @@ function DocCard({ doc }: { doc: VaultDoc }) {
   const TypeIcon = TYPE_ICONS[doc.type] ?? FileText;
   const acc = ACCESS_CONFIG[doc.access] ?? ACCESS_CONFIG.topluluk;
   const AccIcon = acc.icon;
+  const [dlBusy, setDlBusy] = useState(false);
+  const [dlError, setDlError] = useState<string | null>(null);
+
+  const onDownload = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!doc.hasFile || dlBusy) return;
+    setDlBusy(true);
+    setDlError(null);
+    try {
+      await downloadVaultFile(doc);
+    } catch (err: any) {
+      setDlError(err.message ?? "İndirme başarısız");
+    } finally {
+      setDlBusy(false);
+    }
+  };
 
   return (
-    <div className="group cursor-pointer border border-[var(--ink)]/[0.08] p-5 transition-all hover:border-[var(--ink)]/20">
-      {/* Top row */}
+    <div className="group border border-[var(--ink)]/[0.08] p-5 transition-all hover:border-[var(--ink)]/20">
       <div className="mb-3 flex items-start justify-between gap-3">
         <div className="flex items-start gap-3">
           <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center border border-[var(--ink)]/[0.08] bg-[var(--ink)]/[0.03]">
             <TypeIcon className="size-3.5 text-[var(--ink-muted)]" />
           </div>
           <div>
-            <p className="text-sm font-medium leading-snug text-[var(--ink)] group-hover:underline decoration-[var(--ink)]/20 underline-offset-2">
+            <p className="text-sm font-medium leading-snug text-[var(--ink)]">
               {doc.title}
             </p>
             <p className="mt-0.5 font-mono text-label text-[var(--ink-muted)]">
@@ -126,10 +173,8 @@ function DocCard({ doc }: { doc: VaultDoc }) {
         </div>
       </div>
 
-      {/* Excerpt */}
       <p className="mb-3 text-sm leading-relaxed text-[var(--ink-body)] line-clamp-2">{doc.excerpt}</p>
 
-      {/* Tags */}
       <div className="mb-3 flex flex-wrap gap-1">
         {doc.tags.map((t) => (
           <span key={t} className="flex items-center gap-1 border border-[var(--ink)]/[0.07] px-1.5 py-0.5 font-mono text-label text-[var(--ink-muted)]">
@@ -141,23 +186,43 @@ function DocCard({ doc }: { doc: VaultDoc }) {
             benim
           </span>
         )}
+        {doc.hasFile && (
+          <span className="flex items-center gap-1 border border-[var(--ink)]/10 px-1.5 py-0.5 font-mono text-label text-[var(--ink-muted)]">
+            <Paperclip className="size-2" />
+            {doc.fileName ? doc.fileName.slice(0, 28) : "dosya"}
+            {doc.sizeBytes ? ` · ${formatBytes(doc.sizeBytes)}` : ""}
+          </span>
+        )}
       </div>
 
-      {/* Footer meta */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-3">
           {doc.pages && (
             <span className="font-mono text-label text-[var(--ink-subtle)]">{doc.pages} sayfa</span>
           )}
           <span className="font-mono text-label text-[var(--ink-subtle)]">{doc.views} görüntülenme</span>
+          <div className="flex items-center gap-1 text-[var(--ink-subtle)]">
+            <Clock className="size-2.5" />
+            <span className="font-mono text-label">
+              {doc.updatedDays === 0 ? "bugün" : `${doc.updatedDays}g önce`}
+            </span>
+          </div>
         </div>
-        <div className="flex items-center gap-1 text-[var(--ink-subtle)]">
-          <Clock className="size-2.5" />
-          <span className="font-mono text-label">
-            {doc.updatedDays === 0 ? "bugün" : `${doc.updatedDays}g önce`}
-          </span>
-        </div>
+        {doc.hasFile && (
+          <button
+            type="button"
+            onClick={(e) => void onDownload(e)}
+            disabled={dlBusy}
+            className="flex items-center gap-1.5 border border-[var(--ink)]/15 px-2.5 py-1.5 font-mono text-label uppercase tracking-widest text-[var(--ink-body)] transition-colors hover:border-[var(--ink)]/35 hover:text-[var(--ink)] disabled:opacity-40"
+          >
+            <Download className="size-3" />
+            {dlBusy ? "…" : "İndir"}
+          </button>
+        )}
       </div>
+      {dlError && (
+        <p className="mt-2 font-mono text-label text-[var(--error-ink)]" role="alert">{dlError}</p>
+      )}
     </div>
   );
 }
@@ -177,11 +242,16 @@ function UploadPrompt({
   const [title, setTitle] = useState("");
   const [excerpt, setExcerpt] = useState("");
   const [docType, setDocType] = useState<DocType>("Not");
+  const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const submit = async () => {
     if (!title.trim() || busy) return;
+    if (file && file.size > MAX_UPLOAD_BYTES) {
+      setError("Dosya en fazla 12 MB olabilir");
+      return;
+    }
     setBusy(true);
     setError(null);
     try {
@@ -193,8 +263,25 @@ function UploadPrompt({
       });
       const json = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(json.error ?? "Kaydedilemedi");
+
+      const docId = json.document?.id as number | undefined;
+      if (file && docId) {
+        const up = await fetch(apiUrl(`/api/vault/${docId}/file`), {
+          method: "PUT",
+          credentials: "include",
+          headers: {
+            "Content-Type": file.type || "application/octet-stream",
+            "X-Filename": encodeURIComponent(file.name),
+          },
+          body: file,
+        });
+        const upJson = await up.json().catch(() => ({}));
+        if (!up.ok) throw new Error(upJson.error ?? "Dosya yüklenemedi");
+      }
+
       setTitle("");
       setExcerpt("");
+      setFile(null);
       onCreated();
       onClose();
     } catch (e: any) {
@@ -216,7 +303,7 @@ function UploadPrompt({
             Belge Paylaş
           </DrawerTitle>
           <DrawerDescription className="text-[var(--ink-body)]">
-            Önce metadata kaydı — dosya yükleme yakında
+            Metadata + isteğe bağlı dosya (PDF, Office, görsel — en fazla 12 MB)
           </DrawerDescription>
         </DrawerHeader>
 
@@ -234,6 +321,19 @@ function UploadPrompt({
             rows={3}
             className="w-full resize-none border border-[var(--ink)]/[0.08] bg-transparent px-3 py-2.5 text-sm outline-none focus:border-[var(--ink)]/30"
           />
+          <label className="flex cursor-pointer flex-col gap-1 border border-dashed border-[var(--ink)]/20 px-3 py-3 transition-colors hover:border-[var(--ink)]/40">
+            <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
+              Dosya (opsiyonel)
+            </span>
+            <span className="text-sm text-[var(--ink-body)]">
+              {file ? `${file.name} · ${formatBytes(file.size)}` : "PDF, DOCX, PPTX, PNG… seç"}
+            </span>
+            <input
+              type="file"
+              className="sr-only"
+              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+            />
+          </label>
           <div className="flex flex-wrap gap-1.5">
             {DOC_TYPES.filter((t): t is DocType => t !== "Tümü").map((t) => (
               <button
