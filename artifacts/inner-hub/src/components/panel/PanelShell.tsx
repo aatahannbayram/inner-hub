@@ -155,7 +155,7 @@ function BrandMark({ collapsed }: { collapsed: boolean }) {
       <div className="flex size-8 items-center justify-center">
         <span
           className="font-serif text-lg leading-none text-[var(--ink)]"
-          style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 100 }}
+          style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
         >
           i<LogoSquare size="size-[0.38em]" translate="translate-y-[0.08em]" />
         </span>
@@ -166,7 +166,7 @@ function BrandMark({ collapsed }: { collapsed: boolean }) {
     <div className="flex items-baseline gap-0 leading-none">
       <span
         className="font-serif text-xl text-[var(--ink)]"
-        style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 100, letterSpacing: "-0.015em" }}
+        style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300, letterSpacing: "-0.015em" }}
       >
         innerhub
       </span>

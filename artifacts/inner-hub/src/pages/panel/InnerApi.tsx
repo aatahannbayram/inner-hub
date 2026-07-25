@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { FadeIn } from "@/components/FadeIn";
+import { CurrencyValue } from "@/components/panel/CurrencyValue";
 import {
   Copy,
   RefreshCw,
@@ -173,7 +174,7 @@ export default function InnerApi() {
             </p>
             <h1
               className="font-serif font-display text-4xl md:text-5xl text-[var(--ink)]"
-              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 100 }}
+              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
             >
               inner·api
               <span className="inline-block size-[0.35em] translate-y-[0.08em] ml-[0.05em] bg-[var(--inner-green)]" />
@@ -198,7 +199,7 @@ export default function InnerApi() {
             <p className="font-mono text-[8px] uppercase tracking-widest text-[var(--ink)]/25">{s.label}</p>
             <p
               className="mt-1 font-serif text-2xl text-[var(--ink)]"
-              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 100 }}
+              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
             >
               {s.value}
             </p>
@@ -319,9 +320,9 @@ export default function InnerApi() {
               <div className="mb-3 flex items-baseline gap-1">
                 <span
                   className={`font-serif text-2xl ${plan.current ? "text-[var(--bone)]" : "text-[var(--ink)]"}`}
-                  style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 100 }}
+                  style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
                 >
-                  {plan.price}
+                  <CurrencyValue value={plan.price} />
                 </span>
                 {plan.period && (
                   <span className={`font-mono text-[9px] ${plan.current ? "text-[var(--bone)]/30" : "text-[var(--ink)]/30"}`}>
@@ -357,7 +358,7 @@ export default function InnerApi() {
       {/* Warning note */}
       <div className="flex items-start gap-3 border border-[var(--ink)]/[0.08] p-4">
         <AlertCircle className="size-4 shrink-0 text-[var(--ink)]/25 mt-0.5" />
-        <p className="text-xs leading-relaxed text-[var(--ink)]/40">
+        <p className="text-sm leading-relaxed text-[var(--ink)]/40">
           inner·api beta aşamasındadır. Breaking change'ler versiyonlanır ve 30 gün önceden bildirilir.
           Üretim kullanımı için Builder veya Scale planı önerilir.
         </p>

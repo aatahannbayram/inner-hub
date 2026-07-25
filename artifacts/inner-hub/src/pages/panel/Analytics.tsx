@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { FadeIn } from "@/components/FadeIn";
+import { CurrencyValue } from "@/components/panel/CurrencyValue";
 import { TrendingUp, TrendingDown, Minus, Users, CreditCard, Activity, Zap } from "lucide-react";
 
 // ─── Mock data ─────────────────────────────────────────────────────────────────
@@ -66,7 +67,7 @@ function StatCard({
   icon: Icon,
 }: {
   label: string;
-  value: string;
+  value: React.ReactNode;
   sub: string;
   trend: Trend;
   delta: string;
@@ -83,7 +84,7 @@ function StatCard({
       </div>
       <p
         className="mb-1 font-serif text-3xl text-[var(--ink)]"
-        style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 100 }}
+        style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
       >
         {value}
       </p>
@@ -202,7 +203,7 @@ export default function Analytics() {
             </p>
             <h1
               className="font-serif font-display text-4xl md:text-5xl text-[var(--ink)]"
-              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 100 }}
+              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
             >
               analitik
               <span className="inline-block size-[0.35em] translate-y-[0.08em] ml-[0.05em] bg-[var(--inner-green)]" />
@@ -227,7 +228,7 @@ export default function Analytics() {
         />
         <StatCard
           label="Aylık Gelir"
-          value="₺14.7K"
+          value={<CurrencyValue value="₺14.7K" />}
           sub="MRR"
           trend="up"
           delta="+%29"
@@ -257,7 +258,7 @@ export default function Analytics() {
           <div className="mb-4 flex items-baseline gap-3">
             <span
               className="font-serif text-4xl text-[var(--ink)]"
-              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 100 }}
+              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
             >
               34
             </span>
@@ -273,9 +274,9 @@ export default function Analytics() {
           <div className="mb-4 flex items-baseline gap-3">
             <span
               className="font-serif text-4xl text-[var(--ink)]"
-              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 100 }}
+              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
             >
-              ₺14.700
+              <CurrencyValue value="₺14.700" />
             </span>
             <span className="font-mono text-[10px] text-[var(--inner-green)]">+%29 önceki aya göre</span>
           </div>

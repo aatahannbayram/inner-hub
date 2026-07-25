@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { FadeIn } from "@/components/FadeIn";
 import { AnimatedHeading } from "@/components/AnimatedHeading";
+import { AmbientCardBackground } from "@/components/panel/AmbientCardBackground";
 import { avatarColor } from "@/lib/avatarColor";
 
 type Category = "Tümü" | "Yazılım" | "Finans" | "Yaşam" | "Eğitim";
@@ -205,7 +206,7 @@ function PerkCard({
       <p className="mb-2 text-sm font-medium leading-snug text-[var(--ink)] group-hover:underline decoration-[var(--ink)]/20 underline-offset-4">
         {perk.title}
       </p>
-      <p className="mb-5 flex-1 text-xs leading-relaxed text-[var(--ink)]/50 line-clamp-3">
+      <p className="mb-5 flex-1 text-sm leading-relaxed text-[var(--ink)]/50 line-clamp-3">
         {perk.description}
       </p>
 
@@ -305,7 +306,7 @@ function PerkDetail({
               <h2
                 id="perk-detail-title"
                 className="mt-1 font-serif text-2xl leading-snug text-[var(--ink)]"
-                style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 100 }}
+                style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 300 }}
               >
                 {perk.title}
               </h2>
@@ -474,7 +475,7 @@ function PerksStat({
       </div>
       <p
         className="font-serif text-2xl text-[var(--ink)]"
-        style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 100 }}
+        style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
       >
         {value}
       </p>
@@ -553,7 +554,7 @@ export default function Perks() {
                 {s.step}
               </p>
               <p className="text-sm text-[var(--ink)]">{s.title}</p>
-              <p className="mt-1 text-xs leading-relaxed text-[var(--ink)]/45">{s.body}</p>
+              <p className="mt-1 text-sm leading-relaxed text-[var(--ink)]/45">{s.body}</p>
             </div>
           ))}
         </div>
@@ -575,21 +576,22 @@ export default function Perks() {
                   onClick={() => setSelected(perk)}
                   className="group relative flex min-h-[160px] flex-col justify-between overflow-hidden border border-[var(--ink)] bg-[var(--ink)] p-5 text-left text-[var(--bone)] transition-opacity hover:opacity-95 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--ink)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bone)]"
                 >
-                  <div>
+                  <AmbientCardBackground />
+                  <div className="relative z-10">
                     <p className="mb-2 font-mono text-[9px] uppercase tracking-widest text-[var(--bone)]/40">
                       {perk.brand} · {perk.badge}
                     </p>
                     <h2
                       className="max-w-[18ch] font-serif text-2xl leading-snug md:text-3xl"
-                      style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 100 }}
+                      style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 300 }}
                     >
                       {perk.title}
                     </h2>
                   </div>
-                  <span className="mt-4 inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)]/70 transition-colors group-hover:text-[var(--bone)]">
+                  <span className="relative z-10 mt-4 inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)]/70 transition-colors group-hover:text-[var(--bone)]">
                     Detayı aç <ArrowRight className="size-3" />
                   </span>
-                  <span className="pointer-events-none absolute bottom-3 right-3 size-8 bg-[var(--inner-green)]" />
+                  <span className="pointer-events-none absolute bottom-3 right-3 z-10 size-8 bg-[var(--inner-green)]" />
                 </button>
               ))}
             </div>

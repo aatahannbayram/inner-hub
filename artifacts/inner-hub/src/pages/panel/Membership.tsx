@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Check, ArrowRight, Zap, Star, Crown } from "lucide-react";
 import { FadeIn } from "@/components/FadeIn";
+import { CurrencyValue } from "@/components/panel/CurrencyValue";
 
 interface Plan {
   id: "annual" | "founder";
@@ -155,9 +156,9 @@ function PlanCard({ plan }: { plan: Plan }) {
               "font-serif text-4xl",
               plan.highlighted ? "text-[var(--bone)]" : "text-[var(--ink)]",
             ].join(" ")}
-            style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 100 }}
+            style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
           >
-            {plan.price}
+            <CurrencyValue value={plan.price} />
           </span>
           <span
             className={[
@@ -251,7 +252,7 @@ export default function Membership() {
           </p>
           <h1
             className="font-serif font-display text-4xl md:text-5xl text-[var(--ink)]"
-            style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 100 }}
+            style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
           >
             Üyelik
             <span className="inline-block size-[0.35em] translate-y-[0.08em] ml-[0.05em] bg-[var(--inner-green)]" />
@@ -290,9 +291,9 @@ export default function Membership() {
             <div className="flex items-center gap-4 shrink-0">
               <span
                 className="font-serif text-2xl text-[var(--ink)]"
-                style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 100 }}
+                style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
               >
-                {EVENT_TICKET.price}
+                <CurrencyValue value={EVENT_TICKET.price} />
               </span>
               <button
                 onClick={handleEventTicket}

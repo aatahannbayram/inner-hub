@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Send, Hash, Volume2, Pin, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { avatarColor } from "@/lib/avatarColor";
 
 interface Message {
   id: number;
@@ -197,16 +198,14 @@ const MESSAGES_BY_CHANNEL: Record<string, Message[]> = {
   ],
 };
 
-function Avatar({ initials, role, size = "sm" }: { initials: string; role: "admin" | "member"; size?: "sm" | "md" }) {
+function Avatar({ name, initials, role, size = "sm" }: { name: string; initials: string; role: "admin" | "member"; size?: "sm" | "md" }) {
   return (
     <div
       className={cn(
-        "flex shrink-0 items-center justify-center font-mono uppercase",
-        role === "admin"
-          ? "bg-[var(--ink)] text-[var(--bone)]"
-          : "bg-[var(--ink)]/10 text-[var(--ink)]",
+        "flex shrink-0 items-center justify-center font-mono uppercase text-[var(--bone)]",
         size === "sm" ? "size-7 text-[9px]" : "size-8 text-[10px]",
       )}
+      style={{ backgroundColor: role === "admin" ? "var(--ink)" : avatarColor(name) }}
     >
       {initials}
     </div>
@@ -219,7 +218,7 @@ function MessageBubble({ msg, prevAuthorId }: { msg: Message; prevAuthorId?: num
   return (
     <div className="group flex gap-3 px-4 py-1 hover:bg-[var(--ink)]/[0.02] transition-colors">
       <div className="mt-0.5 w-7 shrink-0">
-        {showHeader && <Avatar initials={msg.authorInitials} role={msg.authorRole} />}
+        {showHeader && <Avatar name={msg.authorName} initials={msg.authorInitials} role={msg.authorRole} />}
       </div>
       <div className="min-w-0 flex-1">
         {showHeader && (

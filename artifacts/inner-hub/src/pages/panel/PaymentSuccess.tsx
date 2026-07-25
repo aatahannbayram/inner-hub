@@ -80,7 +80,7 @@ export default function PaymentSuccess() {
       </p>
       <h1
         className="font-serif text-4xl text-[var(--ink)] mb-4"
-        style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 100 }}
+        style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
       >
         {type === "event" ? "Biletini aldın" : "Hoş geldin"}{" "}
         <span className="inline-block size-[0.35em] translate-y-[0.08em] bg-[var(--inner-green)]" />

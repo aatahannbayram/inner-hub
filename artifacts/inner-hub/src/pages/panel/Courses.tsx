@@ -134,7 +134,7 @@ function CourseCard({ course }: { course: Course }) {
             </div>
             <h3
               className="font-serif text-xl text-[var(--ink)] leading-snug"
-              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 100 }}
+              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
             >
               {course.title}
             </h3>
@@ -328,7 +328,7 @@ function CoursesStat({
       </div>
       <p
         className="font-serif text-2xl text-[var(--ink)]"
-        style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 100 }}
+        style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
       >
         {value}
       </p>

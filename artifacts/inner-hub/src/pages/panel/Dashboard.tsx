@@ -3,6 +3,7 @@ import { ArrowRight, BookOpen, CalendarDays, Gift } from "lucide-react";
 import { Link } from "wouter";
 import { FadeIn } from "@/components/FadeIn";
 import { EditorialCard } from "@/components/panel/EditorialCard";
+import { AmbientCardBackground } from "@/components/panel/AmbientCardBackground";
 import { apiUrl } from "@/lib/api";
 import { avatarColor } from "@/lib/avatarColor";
 import { useScrubVideo } from "@/hooks/useScrubVideo";
@@ -113,7 +114,7 @@ function PerkCard({ perk }: { perk: typeof mockPerks[0] }) {
         )}
       </div>
       <p className="mb-1 text-sm font-medium leading-snug text-[var(--ink)]">{perk.title}</p>
-      <p className="mb-4 flex-1 text-xs leading-relaxed text-[var(--ink)]/50 line-clamp-2">{perk.description}</p>
+      <p className="mb-4 flex-1 text-sm leading-relaxed text-[var(--ink)]/50 line-clamp-2">{perk.description}</p>
       <button className="flex items-center gap-1 font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/60 transition-colors hover:text-[var(--ink)]">
         Detayları gör <ArrowRight className="size-3" />
       </button>
@@ -263,6 +264,7 @@ export default function Dashboard({ userName = "Ata" }: { userName?: string }) {
 
       <FadeIn delay={0.08}>
         <div className="relative overflow-hidden border border-[var(--ink)]/[0.08] bg-[var(--ink)] p-6 text-[var(--bone)]">
+          <AmbientCardBackground />
           <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="mb-1 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)]/40">

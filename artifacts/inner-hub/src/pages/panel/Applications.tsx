@@ -282,7 +282,7 @@ export default function ApplicationsPage() {
           </p>
           <h1
             className="font-serif font-display text-4xl md:text-5xl text-[var(--ink)]"
-            style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 100 }}
+            style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
           >
             başvurular
             <span className="inline-block size-[0.35em] translate-y-[0.08em] ml-[0.05em] bg-[var(--inner-green)]" />
@@ -303,7 +303,7 @@ export default function ApplicationsPage() {
           <div key={s.label} className="border border-[var(--ink)]/[0.08] p-4">
             <p className="font-mono text-[8px] uppercase tracking-widest text-[var(--ink)]/30">{s.label}</p>
             <p className={`mt-1 font-serif text-2xl ${s.color}`}
-              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 100 }}>
+              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}>
               {s.val}
             </p>
           </div>

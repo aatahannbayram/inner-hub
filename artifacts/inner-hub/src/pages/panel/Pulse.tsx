@@ -200,7 +200,7 @@ export default function Pulse() {
             </p>
             <h1
               className="font-serif font-display text-4xl md:text-5xl text-[var(--ink)]"
-              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 100 }}
+              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
             >
               inner·pulse
               <span className="inline-block size-[0.35em] translate-y-[0.08em] ml-[0.05em] bg-[var(--inner-green)]" />
@@ -228,7 +228,7 @@ export default function Pulse() {
             <p className="mb-1 font-mono text-[9px] uppercase tracking-widest text-[var(--inner-green)]/70">
               Phosphor · canlı sinyal
             </p>
-            <p className="max-w-[26ch] font-serif text-2xl text-[var(--bone)] md:text-3xl" style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 100 }}>
+            <p className="max-w-[26ch] font-serif text-2xl text-[var(--bone)] md:text-3xl" style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 300 }}>
               Daire her an nefes alıyor.
             </p>
           </div>
@@ -250,7 +250,7 @@ export default function Pulse() {
             </div>
             <p
               className="font-serif text-2xl text-[var(--ink)]"
-              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 100 }}
+              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
             >
               {s.value}
             </p>

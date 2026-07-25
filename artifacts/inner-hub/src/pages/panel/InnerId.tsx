@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { FadeIn } from "@/components/FadeIn";
+import { AmbientCardBackground } from "@/components/panel/AmbientCardBackground";
 import {
   CheckCircle2,
   Copy,
@@ -53,6 +54,7 @@ type SnippetTab = keyof typeof EMBED_SNIPPETS;
 function IdCard() {
   return (
     <div className="relative overflow-hidden border border-[var(--ink)]/15 bg-[var(--ink)] p-6 text-[var(--bone)]">
+      <AmbientCardBackground />
       {/* Subtle grid pattern */}
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.04]"
@@ -77,7 +79,7 @@ function IdCard() {
           <div className="mb-1 flex items-center gap-2">
             <span
               className="font-serif text-3xl text-[var(--bone)]"
-              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 100 }}
+              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
             >
               {IDENTITY.name}
             </span>
@@ -218,7 +220,7 @@ export default function InnerId() {
           </p>
           <h1
             className="font-serif font-display text-4xl md:text-5xl text-[var(--ink)]"
-            style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 100 }}
+            style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
           >
             inner·id
             <span className="inline-block size-[0.35em] translate-y-[0.08em] ml-[0.05em] bg-[var(--inner-green)]" />
@@ -295,7 +297,7 @@ export default function InnerId() {
           <p className="mb-0.5 font-mono text-[9px] uppercase tracking-widest text-[var(--inner-green)]">
             Kimlik Doğrulandı
           </p>
-          <p className="text-xs leading-relaxed text-[var(--ink)]/50">
+          <p className="text-sm leading-relaxed text-[var(--ink)]/50">
             inner·id, inner·hub ekibi tarafından manuel olarak doğrulanmış bir kimlik belgesidir.
             Partnerler, API üzerinden üyeliği anlık olarak teyit edebilir.
           </p>

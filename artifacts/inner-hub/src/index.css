@@ -231,6 +231,16 @@
   animation: blink 1s step-end infinite;
 }
 
+@keyframes ambient-drift-a {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(6%, 8%) scale(1.1); }
+}
+
+@keyframes ambient-drift-b {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-8%, -6%) scale(1.08); }
+}
+
 @keyframes logo-ping {
   0%   { transform: scale(1);   opacity: 0.55; }
   80%  { transform: scale(2.6); opacity: 0; }

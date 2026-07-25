@@ -212,7 +212,7 @@ function MemberCard({ member, onSelect }: { member: Member; onSelect: (m: Member
       </div>
 
       {/* Bio */}
-      <p className="mb-3 flex-1 text-xs leading-relaxed text-[var(--ink)]/50 line-clamp-2">{member.bio}</p>
+      <p className="mb-3 flex-1 text-sm leading-relaxed text-[var(--ink)]/50 line-clamp-2">{member.bio}</p>
 
       {/* Tags */}
       <div className="mb-3 flex flex-wrap gap-1">
@@ -483,7 +483,7 @@ function MembersStat({
       </div>
       <p
         className="font-serif text-2xl text-[var(--ink)]"
-        style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 100 }}
+        style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
       >
         {value}
       </p>
@@ -523,7 +523,7 @@ function TalentCard({ post }: { post: TalentPost }) {
       </div>
 
       <p className="mb-1.5 text-sm font-medium leading-snug text-[var(--ink)]">{post.role}</p>
-      <p className="mb-3 text-xs leading-relaxed text-[var(--ink)]/50">{post.description}</p>
+      <p className="mb-3 text-sm leading-relaxed text-[var(--ink)]/50">{post.description}</p>
 
       <div className="mb-4 flex flex-wrap gap-1">
         {post.tags.map((tag) => (

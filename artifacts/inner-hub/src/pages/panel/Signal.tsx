@@ -18,6 +18,7 @@ import {
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Link } from "wouter";
 import { FadeIn } from "@/components/FadeIn";
+import { AmbientCardBackground } from "@/components/panel/AmbientCardBackground";
 import { apiUrl } from "@/lib/api";
 import { avatarColor } from "@/lib/avatarColor";
 
@@ -187,7 +188,7 @@ function SignalStat({
       </div>
       <p
         className="font-serif text-2xl text-[var(--ink)]"
-        style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 100 }}
+        style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
       >
         {value}
       </p>
@@ -403,7 +404,7 @@ export default function Signal() {
             </p>
             <h1
               className="font-serif font-display text-4xl text-[var(--ink)] md:text-5xl"
-              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 100 }}
+              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
             >
               inner·signal
               <span className="ml-[0.05em] inline-block size-[0.35em] translate-y-[0.08em] bg-[var(--inner-green)]" />
@@ -506,14 +507,7 @@ export default function Signal() {
           <FadeIn delay={0.04}>
             <section id="signal-insight" className="scroll-mt-4">
               <div className="relative overflow-hidden border border-[var(--ink)] bg-[var(--ink)] p-6 text-[var(--bone)] md:p-8">
-                <div
-                  aria-hidden
-                  className="pointer-events-none absolute inset-0 opacity-[0.05]"
-                  style={{
-                    backgroundImage: "radial-gradient(circle at 1px 1px, var(--bone) 1px, transparent 0)",
-                    backgroundSize: "16px 16px",
-                  }}
-                />
+                <AmbientCardBackground />
                 <span
                   aria-hidden
                   className="pointer-events-none absolute -right-3 -top-10 select-none font-serif text-[10rem] italic leading-none text-[var(--bone)]/[0.06] md:text-[13rem]"
@@ -531,7 +525,7 @@ export default function Signal() {
                   </div>
                   <p
                     className="max-w-[38ch] font-serif text-2xl leading-snug md:text-3xl"
-                    style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 100 }}
+                    style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 300 }}
                   >
                     {data.insight}
                   </p>
@@ -688,7 +682,7 @@ export default function Signal() {
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="mb-1 text-sm font-medium text-[var(--ink)]">{theme.topic}</p>
-                        <p className="text-xs leading-relaxed text-[var(--ink)]/50">{theme.summary}</p>
+                        <p className="text-sm leading-relaxed text-[var(--ink)]/50">{theme.summary}</p>
                         <Link
                           href="/panel/chat"
                           className="mt-3 inline-flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/40 transition-colors hover:text-[var(--ink)]"
@@ -746,7 +740,7 @@ export default function Signal() {
                           <p className="text-sm font-medium text-[var(--ink)]">{conn.name}</p>
                           <ScoreRing score={conn.matchScore} />
                         </div>
-                        <p className="text-xs leading-relaxed text-[var(--ink)]/50">{conn.reason}</p>
+                        <p className="text-sm leading-relaxed text-[var(--ink)]/50">{conn.reason}</p>
                         <Link
                           href="/panel/match"
                           className="mt-3 inline-flex items-center gap-1.5 border border-[var(--ink)] bg-[var(--ink)] px-3 py-1.5 font-mono text-[9px] uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-85"

@@ -92,7 +92,7 @@ function MatchCard({ match, index }: { match: Match; index: number }) {
         <p className="mb-1.5 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/30">
           Neden uyumlu?
         </p>
-        <p className="text-xs leading-relaxed text-[var(--ink)]/55">{match.why}</p>
+        <p className="text-sm leading-relaxed text-[var(--ink)]/55">{match.why}</p>
       </div>
 
       {/* Common ground */}

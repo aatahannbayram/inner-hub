@@ -224,7 +224,7 @@ function DocCard({ doc }: { doc: VaultDoc }) {
       </div>
 
       {/* Excerpt */}
-      <p className="mb-3 text-xs leading-relaxed text-[var(--ink)]/45 line-clamp-2">{doc.excerpt}</p>
+      <p className="mb-3 text-sm leading-relaxed text-[var(--ink)]/45 line-clamp-2">{doc.excerpt}</p>
 
       {/* Tags */}
       <div className="mb-3 flex flex-wrap gap-1">
@@ -270,7 +270,7 @@ function UploadPrompt({ open, onClose }: { open: boolean; onClose: () => void })
           <p className="mb-1 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/30">inner·vault</p>
           <DrawerTitle
             className="font-serif text-2xl font-normal text-[var(--ink)]"
-            style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 100 }}
+            style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
           >
             Belge Paylaş
           </DrawerTitle>
@@ -363,7 +363,7 @@ export default function Vault() {
             </p>
             <h1
               className="font-serif font-display text-4xl md:text-5xl text-[var(--ink)]"
-              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 100 }}
+              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
             >
               inner·vault
               <span className="inline-block size-[0.35em] translate-y-[0.08em] ml-[0.05em] bg-[var(--inner-green)]" />
@@ -394,7 +394,7 @@ export default function Vault() {
             <p className="mb-1 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/40">
               D60 · arşivin haritası
             </p>
-            <p className="max-w-[26ch] font-serif text-2xl text-[var(--ink)] md:text-3xl" style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 100 }}>
+            <p className="max-w-[26ch] font-serif text-2xl text-[var(--ink)] md:text-3xl" style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 300 }}>
               Her belge, dairenin bir katmanı.
             </p>
           </div>
@@ -412,7 +412,7 @@ export default function Vault() {
             <p className="font-mono text-[8px] uppercase tracking-widest text-[var(--ink)]/25">{s.label}</p>
             <p
               className="mt-1 font-serif text-2xl text-[var(--ink)]"
-              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 100 }}
+              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
             >
               {s.value}
             </p>
@@ -456,7 +456,7 @@ export default function Vault() {
                         </div>
                         <div>
                           <p className="line-clamp-2 font-serif text-lg leading-snug text-[var(--bone)]"
-                            style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 100 }}
+                            style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 300 }}
                           >
                             {doc.title}
                           </p>

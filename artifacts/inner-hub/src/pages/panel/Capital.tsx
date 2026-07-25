@@ -183,7 +183,7 @@ function StatCard({ label, value, sub, icon: Icon }: { label: string; value: str
       </div>
       <p
         className="font-serif text-3xl text-[var(--ink)]"
-        style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 100 }}
+        style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
       >
         {value}
       </p>
@@ -287,7 +287,7 @@ function DealDetail({ deal, onClose }: { deal: Deal; onClose: () => void }) {
         </div>
         <h2
           className="font-serif text-3xl text-[var(--ink)] mb-1"
-          style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 100 }}
+          style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
         >
           {deal.company}
         </h2>

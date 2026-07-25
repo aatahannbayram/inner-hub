@@ -109,7 +109,7 @@ function EventCard({ event }: { event: Event }) {
         </span>
         <span
           className="font-serif text-3xl leading-none text-[var(--ink)]"
-          style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 100 }}
+          style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
         >
           {formatDay(event.startAt)}
         </span>
@@ -134,7 +134,7 @@ function EventCard({ event }: { event: Event }) {
           )}
         </div>
 
-        <p className="text-xs leading-relaxed text-[var(--ink)]/50 line-clamp-2">{event.description}</p>
+        <p className="text-sm leading-relaxed text-[var(--ink)]/50 line-clamp-2">{event.description}</p>
 
         <div className="flex flex-wrap items-center gap-3 text-[var(--ink)]/40">
           <span className="flex items-center gap-1 font-mono text-[9px] uppercase tracking-widest">
@@ -371,7 +371,7 @@ function EventsStat({
       </div>
       <p
         className="font-serif text-2xl text-[var(--ink)]"
-        style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 100 }}
+        style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
       >
         {value}
       </p>
