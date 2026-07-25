@@ -7,6 +7,7 @@ import authRouter from "./auth";
 import catalogRouter from "./catalog";
 import applicationsRouter from "./applications";
 import communityRouter from "./community";
+import chatRouter from "./chat";
 
 const router: IRouter = Router();
 
@@ -18,5 +19,6 @@ router.use("/auth", authRouter);
 router.use(catalogRouter);
 router.use(applicationsRouter);
 router.use(communityRouter);
+router.use(chatRouter);
 
 export default router;

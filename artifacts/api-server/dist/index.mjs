@@ -20655,27 +20655,27 @@ var require_router = __commonJS({
     var slice = Array.prototype.slice;
     var flatten = Array.prototype.flat;
     var methods = METHODS.map((method) => method.toLowerCase());
-    module.exports = Router10;
+    module.exports = Router11;
     module.exports.Route = Route;
-    function Router10(options) {
-      if (!(this instanceof Router10)) {
-        return new Router10(options);
+    function Router11(options) {
+      if (!(this instanceof Router11)) {
+        return new Router11(options);
       }
       const opts = options || {};
-      function router10(req, res, next) {
-        router10.handle(req, res, next);
+      function router11(req, res, next) {
+        router11.handle(req, res, next);
       }
-      Object.setPrototypeOf(router10, this);
-      router10.caseSensitive = opts.caseSensitive;
-      router10.mergeParams = opts.mergeParams;
-      router10.params = {};
-      router10.strict = opts.strict;
-      router10.stack = [];
-      return router10;
+      Object.setPrototypeOf(router11, this);
+      router11.caseSensitive = opts.caseSensitive;
+      router11.mergeParams = opts.mergeParams;
+      router11.params = {};
+      router11.strict = opts.strict;
+      router11.stack = [];
+      return router11;
     }
-    Router10.prototype = function() {
+    Router11.prototype = function() {
     };
-    Router10.prototype.param = function param(name, fn) {
+    Router11.prototype.param = function param(name, fn) {
       if (!name) {
         throw new TypeError("argument name is required");
       }
@@ -20695,7 +20695,7 @@ var require_router = __commonJS({
       params.push(fn);
       return this;
     };
-    Router10.prototype.handle = function handle(req, res, callback) {
+    Router11.prototype.handle = function handle(req, res, callback) {
       if (!callback) {
         throw new TypeError("argument callback is required");
       }
@@ -20822,7 +20822,7 @@ var require_router = __commonJS({
         }
       }
     };
-    Router10.prototype.use = function use(handler) {
+    Router11.prototype.use = function use(handler) {
       let offset = 0;
       let path6 = "/";
       if (typeof handler !== "function") {
@@ -20855,7 +20855,7 @@ var require_router = __commonJS({
       }
       return this;
     };
-    Router10.prototype.route = function route(path6) {
+    Router11.prototype.route = function route(path6) {
       const route2 = new Route(path6);
       const layer = new Layer(path6, {
         sensitive: this.caseSensitive,
@@ -20870,7 +20870,7 @@ var require_router = __commonJS({
       return route2;
     };
     methods.concat("all").forEach(function(method) {
-      Router10.prototype[method] = function(path6) {
+      Router11.prototype[method] = function(path6) {
         const route = this.route(path6);
         route[method].apply(route, slice.call(arguments, 1));
         return this;
@@ -21053,13 +21053,13 @@ var require_application = __commonJS({
     var compileTrust = require_utils3().compileTrust;
     var resolve4 = __require("node:path").resolve;
     var once = require_once();
-    var Router10 = require_router();
+    var Router11 = require_router();
     var slice = Array.prototype.slice;
     var flatten = Array.prototype.flat;
     var app2 = exports = module.exports = {};
     var trustProxyDefaultSymbol = "@@symbol:trust_proxy_default";
     app2.init = function init() {
-      var router10 = null;
+      var router11 = null;
       this.cache = /* @__PURE__ */ Object.create(null);
       this.engines = /* @__PURE__ */ Object.create(null);
       this.settings = /* @__PURE__ */ Object.create(null);
@@ -21068,13 +21068,13 @@ var require_application = __commonJS({
         configurable: true,
         enumerable: true,
         get: function getrouter() {
-          if (router10 === null) {
-            router10 = new Router10({
+          if (router11 === null) {
+            router11 = new Router11({
               caseSensitive: this.enabled("case sensitive routing"),
               strict: this.enabled("strict routing")
             });
           }
-          return router10;
+          return router11;
         }
       });
     };
@@ -21145,15 +21145,15 @@ var require_application = __commonJS({
       if (fns.length === 0) {
         throw new TypeError("app.use() requires a middleware function");
       }
-      var router10 = this.router;
+      var router11 = this.router;
       fns.forEach(function(fn2) {
         if (!fn2 || !fn2.handle || !fn2.set) {
-          return router10.use(path6, fn2);
+          return router11.use(path6, fn2);
         }
         debug(".use app under %s", path6);
         fn2.mountpath = path6;
         fn2.parent = this;
-        router10.use(path6, function mounted_app(req, res, next) {
+        router11.use(path6, function mounted_app(req, res, next) {
           var orig = req.app;
           fn2.handle(req, res, function(err) {
             Object.setPrototypeOf(req, orig.request);
@@ -23726,7 +23726,7 @@ var require_express = __commonJS({
     var EventEmitter2 = __require("node:events").EventEmitter;
     var mixin = require_merge_descriptors();
     var proto = require_application();
-    var Router10 = require_router();
+    var Router11 = require_router();
     var req = require_request();
     var res = require_response();
     exports = module.exports = createApplication;
@@ -23748,8 +23748,8 @@ var require_express = __commonJS({
     exports.application = proto;
     exports.request = req;
     exports.response = res;
-    exports.Route = Router10.Route;
-    exports.Router = Router10;
+    exports.Route = Router11.Route;
+    exports.Router = Router11;
     exports.json = bodyParser.json;
     exports.raw = bodyParser.raw;
     exports.static = require_serve_static();
@@ -72759,14 +72759,14 @@ var require_src6 = __commonJS({
 });
 
 // src/app.ts
-var import_express10 = __toESM(require_express2(), 1);
+var import_express11 = __toESM(require_express2(), 1);
 var import_cors = __toESM(require_lib3(), 1);
 var import_cookie_parser = __toESM(require_cookie_parser(), 1);
 var import_pino_http = __toESM(require_logger(), 1);
 import path5 from "node:path";
 
 // src/routes/index.ts
-var import_express9 = __toESM(require_express2(), 1);
+var import_express10 = __toESM(require_express2(), 1);
 
 // src/routes/health.ts
 var import_express = __toESM(require_express2(), 1);
@@ -114072,20 +114072,141 @@ router8.get("/members", requireAuth, async (_req, res) => {
 });
 var community_default = router8;
 
-// src/routes/index.ts
+// src/routes/chat.ts
+var import_express9 = __toESM(require_express2(), 1);
 var router9 = (0, import_express9.Router)();
-router9.use(health_default);
-router9.use(invitations_default);
-router9.use("/payments", payments_default);
-router9.use("/ai", ai_default);
-router9.use("/auth", auth_default);
-router9.use(catalog_default);
-router9.use(applications_default);
-router9.use(community_default);
-var routes_default = router9;
+var DEFAULT_CHANNELS = [
+  { name: "genel", description: "Genel topluluk sohbeti", isPublic: true },
+  { name: "duyurular", description: "\xD6nemli duyurular ve haberler", isPublic: true },
+  { name: "girisimler", description: "Startup haberleri ve milestone payla\u015F\u0131mlar\u0131", isPublic: true },
+  { name: "ai-tools", description: "Yapay zeka ara\xE7lar\u0131 ve denemeler", isPublic: true },
+  { name: "jobs", description: "\u0130\u015F ve staj f\u0131rsatlar\u0131", isPublic: true },
+  { name: "tavsiyeler", description: "Kitap, podcast, ara\xE7 \xF6nerileri", isPublic: true }
+];
+async function ensureChannelsSeed() {
+  const [row] = await db.select({ id: channelsTable.id }).from(channelsTable).limit(1);
+  if (row) return;
+  await db.insert(channelsTable).values([...DEFAULT_CHANNELS]);
+}
+function initialsFromName2(name, email3) {
+  const base = (name?.trim() || email3.split("@")[0] || "?").trim();
+  const parts = base.split(/\s+/).filter(Boolean);
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  }
+  return base.slice(0, 2).toUpperCase();
+}
+function formatTs(d) {
+  return d.toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" });
+}
+router9.get("/channels", requireAuth, async (_req, res) => {
+  try {
+    await ensureChannelsSeed();
+    const rows = await db.select().from(channelsTable).orderBy(asc(channelsTable.id));
+    res.json({
+      channels: rows.map((c) => ({
+        id: c.id,
+        name: c.name,
+        description: c.description ?? "",
+        isPublic: c.isPublic,
+        type: c.name === "duyurular" ? "announcement" : "text"
+      }))
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message ?? "Kanallar y\xFCklenemedi" });
+  }
+});
+router9.get("/channels/:id/messages", requireAuth, async (req, res) => {
+  try {
+    const channelId = Number(req.params.id);
+    if (!Number.isFinite(channelId)) {
+      res.status(400).json({ error: "Ge\xE7ersiz kanal" });
+      return;
+    }
+    const [channel] = await db.select().from(channelsTable).where(eq(channelsTable.id, channelId)).limit(1);
+    if (!channel) {
+      res.status(404).json({ error: "Kanal bulunamad\u0131" });
+      return;
+    }
+    const rows = await db.select({
+      id: messagesTable.id,
+      body: messagesTable.body,
+      createdAt: messagesTable.createdAt,
+      userId: usersTable.id,
+      userName: usersTable.name,
+      userEmail: usersTable.email,
+      userRole: usersTable.role
+    }).from(messagesTable).innerJoin(usersTable, eq(messagesTable.userId, usersTable.id)).where(eq(messagesTable.channelId, channelId)).orderBy(asc(messagesTable.createdAt));
+    res.json({
+      channelId,
+      messages: rows.map((m) => ({
+        id: m.id,
+        body: m.body,
+        createdAt: m.createdAt.toISOString(),
+        timestamp: formatTs(m.createdAt),
+        authorUserId: m.userId,
+        authorName: m.userName?.trim() || m.userEmail.split("@")[0],
+        authorInitials: initialsFromName2(m.userName, m.userEmail),
+        authorRole: m.userRole === "admin" ? "admin" : "member"
+      }))
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message ?? "Mesajlar y\xFCklenemedi" });
+  }
+});
+router9.post("/channels/:id/messages", requireAuth, async (req, res) => {
+  try {
+    const channelId = Number(req.params.id);
+    const userId = req.user.id;
+    const body = typeof req.body?.body === "string" ? req.body.body.trim() : "";
+    if (!Number.isFinite(channelId)) {
+      res.status(400).json({ error: "Ge\xE7ersiz kanal" });
+      return;
+    }
+    if (!body || body.length > 4e3) {
+      res.status(400).json({ error: "Mesaj 1\u20134000 karakter olmal\u0131" });
+      return;
+    }
+    const [channel] = await db.select().from(channelsTable).where(eq(channelsTable.id, channelId)).limit(1);
+    if (!channel) {
+      res.status(404).json({ error: "Kanal bulunamad\u0131" });
+      return;
+    }
+    const [inserted] = await db.insert(messagesTable).values({ channelId, userId, body }).returning();
+    const user = req.user;
+    res.status(201).json({
+      message: {
+        id: inserted.id,
+        body: inserted.body,
+        createdAt: inserted.createdAt.toISOString(),
+        timestamp: formatTs(inserted.createdAt),
+        authorUserId: user.id,
+        authorName: user.name?.trim() || user.email.split("@")[0],
+        authorInitials: initialsFromName2(user.name, user.email),
+        authorRole: user.role === "admin" ? "admin" : "member"
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message ?? "Mesaj g\xF6nderilemedi" });
+  }
+});
+var chat_default = router9;
+
+// src/routes/index.ts
+var router10 = (0, import_express10.Router)();
+router10.use(health_default);
+router10.use(invitations_default);
+router10.use("/payments", payments_default);
+router10.use("/ai", ai_default);
+router10.use("/auth", auth_default);
+router10.use(catalog_default);
+router10.use(applications_default);
+router10.use(community_default);
+router10.use(chat_default);
+var routes_default = router10;
 
 // src/app.ts
-var app = (0, import_express10.default)();
+var app = (0, import_express11.default)();
 app.use(
   (0, import_pino_http.default)({
     logger,
@@ -114112,13 +114233,13 @@ app.use(
     credentials: true
   })
 );
-app.use(import_express10.default.json());
-app.use(import_express10.default.urlencoded({ extended: true }));
+app.use(import_express11.default.json());
+app.use(import_express11.default.urlencoded({ extended: true }));
 app.use((0, import_cookie_parser.default)());
 app.use(attachUser);
 app.use("/api", routes_default);
 var frontendDist = path5.join(__dirname, "..", "..", "inner-hub", "dist");
-app.use(import_express10.default.static(frontendDist));
+app.use(import_express11.default.static(frontendDist));
 app.get(/^(?!\/api).*/, (_req, res) => {
   res.sendFile(path5.join(frontendDist, "index.html"));
 });

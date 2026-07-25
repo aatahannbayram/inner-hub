@@ -1,43 +1,55 @@
 import { useState, useRef, useEffect } from "react";
-import { Send, Hash, Volume2, Pin, Search, Sparkles } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { Send, Hash, Volume2, Search, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AmbientCardBackground } from "@/components/panel/AmbientCardBackground";
 import { PersonAvatar } from "@/components/panel/PersonAvatar";
-import { DemoPreviewBanner } from "@/components/panel/DemoPreviewBanner";
+import { useApiQuery } from "@/hooks/useApiQuery";
+import { apiUrl } from "@/lib/api";
+import { LoadingBlock, ErrorState } from "@/components/panel/Skeletons";
 
 const CHANNEL_SUGGESTIONS: Record<string, string[]> = {
-  genel: ["Ben de AWS Activate'e başvurdum 🙋", "Zirve için elimden geleni yaparım", "Harika gidiyor 🎉"],
-  duyurular: ["Başvuru linkini paylaşır mısın?", "Tarihi takvime ekledim"],
+  genel: ["Merhaba herkese 👋", "Bu hafta ne çalışıyorsunuz?", "Bir etkinlik önerim var"],
+  duyurular: ["Tarihi takvime ekledim", "Detay paylaşır mısınız?"],
   girisimler: ["Tebrikler! 🚀", "Nasıl başardınız, detay verir misiniz?"],
-  "ai-tools": ["Cursor ile deneyimim de benzer", "Bu formatı denemek isterim"],
+  "ai-tools": ["Bunu denemek isterim", "Prompt paylaşır mısınız?"],
   jobs: ["İlgileniyorum, DM atabilir miyim?"],
   tavsiyeler: ["Listeme ekledim, teşekkürler", "Bir de şunu öneririm:"],
 };
 
-const CHANNEL_DIGEST: Record<string, string> = {
-  genel: "Eylül Zirvesi planlaması hızlanıyor. AWS Activate deneyimleri paylaşılıyor, 2-3 hafta içinde dönüş bekleniyor.",
-  duyurular: "2. dönem başvuruları açıldı. Ağustos başında bir workshop planlanıyor.",
-  girisimler: "Hipo 50. müşterisine ulaştı. AWS Activate başvuruları toplulukta gündemde.",
-  "ai-tools": "Claude 4 Opus ve Cursor AI kombinasyonu hızla yaygınlaşıyor — üyeler %40 verim artışı raporluyor.",
-  jobs: "Şu anda açık ilan yok. Talent Board'da 5 aktif fırsat var.",
-  tavsiyeler: "'The Mom Test' ve Acquired podcast bu hafta en çok önerilenler.",
-};
+interface ApiChannel {
+  id: number;
+  name: string;
+  description: string;
+  isPublic: boolean;
+  type: "text" | "announcement";
+}
 
-function AiDigest({ channelId, channelLabel }: { channelId: string; channelLabel: string }) {
+interface ApiMessage {
+  id: number;
+  body: string;
+  createdAt: string;
+  timestamp: string;
+  authorUserId: number;
+  authorName: string;
+  authorInitials: string;
+  authorRole: "admin" | "member";
+}
+
+function AiDigestEmpty({ channelLabel }: { channelLabel: string }) {
   return (
-    <div className="relative mx-4 mb-4 overflow-hidden border border-[var(--ink)] bg-[var(--ink)] p-4 text-[var(--bone)]">
+    <div className="relative mx-4 mb-4 overflow-hidden border border-[var(--ink)]/[0.12] bg-[var(--ink)]/[0.03] p-4">
       <AmbientCardBackground />
       <div className="relative z-10 flex items-start gap-3">
-        <div className="relative flex size-7 shrink-0 items-center justify-center border border-[var(--inner-green)]/40 bg-[var(--inner-green)]/10">
-          <Sparkles className="size-3.5 text-[var(--success-ink)]" />
-          <span className="absolute -right-1 -top-1 size-1.5 animate-beacon rounded-full bg-[var(--inner-green)]" />
+        <div className="relative flex size-7 shrink-0 items-center justify-center border border-[var(--ink)]/15 bg-[var(--bone)]">
+          <Sparkles className="size-3.5 text-[var(--ink-body)]" />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="mb-1 font-mono text-label uppercase tracking-widest text-[var(--success-ink)]/80">
+          <p className="mb-1 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
             AI Özet · #{channelLabel}
           </p>
-          <p className="text-sm leading-relaxed text-[var(--bone)]/80">
-            {CHANNEL_DIGEST[channelId] ?? "Bu kanalda henüz özetlenecek yeterli aktivite yok."}
+          <p className="text-sm leading-relaxed text-[var(--ink-body)]">
+            Yeterli mesaj birikince kanal özeti burada görünecek.
           </p>
         </div>
       </div>
@@ -45,405 +57,286 @@ function AiDigest({ channelId, channelLabel }: { channelId: string; channelLabel
   );
 }
 
-interface Message {
-  id: number;
-  authorName: string;
-  authorInitials: string;
-  authorRole: "admin" | "member";
-  content: string;
-  timestamp: string;
-  isPinned?: boolean;
-}
-
-interface Channel {
-  id: string;
-  label: string;
-  description: string;
-  unread: number;
-  type: "text" | "announcement";
-}
-
-const CHANNELS: Channel[] = [
-  { id: "genel", label: "genel", description: "Genel topluluk sohbeti", unread: 3, type: "text" },
-  { id: "duyurular", label: "duyurular", description: "Önemli duyurular ve haberler", unread: 1, type: "announcement" },
-  { id: "girisimler", label: "girişimler", description: "Startup haberleri ve milestone paylaşımları", unread: 0, type: "text" },
-  { id: "ai-tools", label: "ai-tools", description: "Yapay zeka araçları ve denemeler", unread: 7, type: "text" },
-  { id: "jobs", label: "jobs", description: "İş ve staj fırsatları", unread: 0, type: "text" },
-  { id: "tavsiyeler", label: "tavsiyeler", description: "Kitap, podcast, araç önerileri", unread: 2, type: "text" },
-];
-
-const MESSAGES_BY_CHANNEL: Record<string, Message[]> = {
-  genel: [
-    {
-      id: 1,
-      authorName: "Ata Han Bayram",
-      authorInitials: "AT",
-      authorRole: "admin",
-      content: "inner·hub'a hoş geldiniz 👋 Bu platformu birlikte inşa ediyoruz — geri bildirimlerinizi bekliyorum.",
-      timestamp: "09:00",
-      isPinned: true,
-    },
-    {
-      id: 2,
-      authorName: "Zeynep Arslan",
-      authorInitials: "ZA",
-      authorRole: "member",
-      content: "Harika bir başlangıç! Geçen hafta AWS Activate kredinizi kullanan oldu mu? Ben başvurdum, henüz dönüş yok.",
-      timestamp: "10:14",
-    },
-    {
-      id: 3,
-      authorName: "Mert Demir",
-      authorInitials: "MD",
-      authorRole: "member",
-      content: "Ben de başvurdum @Zeynep. 2-3 haftada dönüyorlar genelde. Startup programından geliyorsanız daha hızlı.",
-      timestamp: "10:22",
-    },
-    {
-      id: 4,
-      authorName: "Ayşe Kaya",
-      authorInitials: "AK",
-      authorRole: "member",
-      content: "AI & Girişimcilik Zirvesi için heyecanlıyım. Eylül öncesi bir hazırlık session'ı yapabilir miyiz?",
-      timestamp: "11:05",
-    },
-    {
-      id: 5,
-      authorName: "Mert Demir",
-      authorInitials: "MD",
-      authorRole: "member",
-      content: "+1. Pitch deck review çok işe yarar özellikle yatırımcı kısmı için.",
-      timestamp: "11:09",
-    },
-    {
-      id: 6,
-      authorName: "Ata Han Bayram",
-      authorInitials: "AT",
-      authorRole: "admin",
-      content: "Harika fikir — Ağustos başında bir workshop planlayabiliriz. Etkinlikler sekmesine ekliyorum.",
-      timestamp: "11:31",
-    },
-    {
-      id: 7,
-      authorName: "Zeynep Arslan",
-      authorInitials: "ZA",
-      authorRole: "member",
-      content: "Biz de Hipo'dan 2 kişi katılabiliriz. Co-founder olarak pitch deneyimi paylaşabiliriz.",
-      timestamp: "11:45",
-    },
-  ],
-  duyurular: [
-    {
-      id: 1,
-      authorName: "Ata Han Bayram",
-      authorInitials: "AT",
-      authorRole: "admin",
-      content: "🎉 inner·hub paneli canlıya geçti! Tüm sayfalar hazır — ayrıcalıklar, etkinlikler ve kurs içerikleri erişime açık.",
-      timestamp: "08:00",
-      isPinned: true,
-    },
-    {
-      id: 2,
-      authorName: "Ata Han Bayram",
-      authorInitials: "AT",
-      authorRole: "admin",
-      content: "📅 Networking Kahvaltısı — 5 Ağustos, Online. Kayıt için Etkinlikler sayfasına bakın.",
-      timestamp: "08:05",
-    },
-  ],
-  "ai-tools": [
-    {
-      id: 1,
-      authorName: "Mert Demir",
-      authorInitials: "MD",
-      authorRole: "member",
-      content: "Claude 4 Opus ile bir haftalık deney yaptım. Kod üretimi konusunda GPT-4o'dan belirgin şekilde iyi.",
-      timestamp: "09:30",
-    },
-    {
-      id: 2,
-      authorName: "Ayşe Kaya",
-      authorInitials: "AK",
-      authorRole: "member",
-      content: "Cursor + Claude kombinasyonu ile proje sürem %40 düştü. Kim denemek isterse elimde prompts var.",
-      timestamp: "10:00",
-    },
-    {
-      id: 3,
-      authorName: "Zeynep Arslan",
-      authorInitials: "ZA",
-      authorRole: "member",
-      content: "Runway Gen-3 video üretimi için denedim — presenter video için mükemmel ama avatar kalitesi hâlâ sınırlı.",
-      timestamp: "10:45",
-    },
-    {
-      id: 4,
-      authorName: "Mert Demir",
-      authorInitials: "MD",
-      authorRole: "member",
-      content: "Perplexity Pro şirket araştırması için vazgeçilmez oldu. Deal flow analizi yaparken saatler kazandırıyor.",
-      timestamp: "11:20",
-    },
-    {
-      id: 5,
-      authorName: "Ayşe Kaya",
-      authorInitials: "AK",
-      authorRole: "member",
-      content: "Bir de Bolt.new deneyin — prototip hızı inanılmaz. inner·hub gibi bir panel 2 saatte çıkıyor 😄",
-      timestamp: "11:55",
-    },
-    {
-      id: 6,
-      authorName: "Mert Demir",
-      authorInitials: "MD",
-      authorRole: "member",
-      content: "Bence bu kanalı haftada bir kez 'Haftanın AI Aracı' formatında özetlersek daha değerli olur. Ne düşünürsünüz?",
-      timestamp: "14:10",
-    },
-    {
-      id: 7,
-      authorName: "Zeynep Arslan",
-      authorInitials: "ZA",
-      authorRole: "member",
-      content: "+1! Digest formatı harika olur. Ben ilk haftayı üstlenebilirim.",
-      timestamp: "14:33",
-    },
-  ],
-  girisimler: [
-    {
-      id: 1,
-      authorName: "Zeynep Arslan",
-      authorInitials: "ZA",
-      authorRole: "member",
-      content: "Hipo olarak bu ay 50. müşteriyi geçtik 🎉 B2B SaaS için önemli bir milestone. Sonraki hedef ARR $500K.",
-      timestamp: "10:00",
-    },
-  ],
-  jobs: [],
-  tavsiyeler: [
-    {
-      id: 1,
-      authorName: "Ayşe Kaya",
-      authorInitials: "AK",
-      authorRole: "member",
-      content: "Bu hafta bitirdiğim kitap: 'The Mom Test' — müşteri görüşmesi yapmak isteyen herkese zorunlu okuma.",
-      timestamp: "09:15",
-    },
-    {
-      id: 2,
-      authorName: "Mert Demir",
-      authorInitials: "MD",
-      authorRole: "member",
-      content: "Podcast: Acquired — Stripe ve Nvidia bölümleri. Şirket inşasına dair en derin analizler burada.",
-      timestamp: "11:00",
-    },
-  ],
-};
-
-function Avatar({ name, initials, size = "sm" }: { name: string; initials: string; role: "admin" | "member"; size?: "sm" | "md" }) {
-  return (
-    <PersonAvatar
-      name={name}
-      initials={initials}
-      className={size === "sm" ? "size-7 text-label" : "size-8 text-label"}
-    />
-  );
-}
-
-function MessageBubble({ msg, prevAuthorId }: { msg: Message; prevAuthorId?: number }) {
-  const showHeader = prevAuthorId !== msg.id;
+function MessageBubble({
+  msg,
+  prevAuthorUserId,
+}: {
+  msg: ApiMessage;
+  prevAuthorUserId?: number;
+}) {
+  const showHeader = prevAuthorUserId !== msg.authorUserId;
 
   return (
-    <div className="group flex gap-3 px-4 py-1 hover:bg-[var(--ink)]/[0.02] transition-colors">
+    <div className="group flex gap-3 px-4 py-1 transition-colors hover:bg-[var(--ink)]/[0.02]">
       <div className="mt-0.5 w-7 shrink-0">
-        {showHeader && <Avatar name={msg.authorName} initials={msg.authorInitials} role={msg.authorRole} />}
+        {showHeader && (
+          <PersonAvatar
+            name={msg.authorName}
+            initials={msg.authorInitials}
+            className="size-7 text-label"
+          />
+        )}
       </div>
       <div className="min-w-0 flex-1">
         {showHeader && (
           <div className="mb-0.5 flex items-baseline gap-2">
             <span className="text-sm font-medium text-[var(--ink)]">{msg.authorName}</span>
             {msg.authorRole === "admin" && (
-              <span className="font-mono text-label uppercase tracking-widest text-[var(--success-ink)] border border-[var(--inner-green)]/30 px-1">
+              <span className="border border-[var(--inner-green)]/30 px-1 font-mono text-label uppercase tracking-widest text-[var(--success-ink)]">
                 Admin
               </span>
             )}
             <span className="font-mono text-label text-[var(--ink-muted)]">{msg.timestamp}</span>
-            {msg.isPinned && <Pin className="size-2.5 text-[var(--ink-muted)]" />}
           </div>
         )}
-        <p className="text-sm leading-relaxed text-[var(--ink-strong)]">{msg.content}</p>
+        <p className="text-sm leading-relaxed text-[var(--ink-strong)] whitespace-pre-wrap">{msg.body}</p>
       </div>
     </div>
   );
 }
 
 export default function ChatPage() {
-  const [activeChannel, setActiveChannel] = useState("genel");
+  const queryClient = useQueryClient();
+  const [activeChannelId, setActiveChannelId] = useState<number | null>(null);
   const [draft, setDraft] = useState("");
-  const [messages, setMessages] = useState(MESSAGES_BY_CHANNEL);
+  const [sending, setSending] = useState(false);
+  const [sendError, setSendError] = useState<string | null>(null);
   const messagesRef = useRef<HTMLDivElement>(null);
-  const bottomRef = useRef<HTMLDivElement>(null);
 
-  const channel = CHANNELS.find((c) => c.id === activeChannel)!;
-  const channelMessages = messages[activeChannel] ?? [];
+  const {
+    data: channelsData,
+    isLoading: channelsLoading,
+    isError: channelsError,
+    error: channelsErr,
+    refetch: refetchChannels,
+  } = useApiQuery<{ channels: ApiChannel[] }>(["channels"], "/api/channels");
+
+  const channels = channelsData?.channels ?? [];
+  const channel = channels.find((c) => c.id === activeChannelId) ?? channels[0] ?? null;
+  const resolvedChannelId = channel?.id ?? null;
+
+  useEffect(() => {
+    if (activeChannelId == null && channels[0]) {
+      setActiveChannelId(channels[0].id);
+    }
+  }, [channels, activeChannelId]);
+
+  const {
+    data: messagesData,
+    isLoading: messagesLoading,
+    isError: messagesError,
+    error: messagesErr,
+    refetch: refetchMessages,
+  } = useApiQuery<{ messages: ApiMessage[] }>(
+    ["channel-messages", resolvedChannelId],
+    `/api/channels/${resolvedChannelId}/messages`,
+    { enabled: resolvedChannelId != null },
+  );
+
+  const channelMessages = messagesData?.messages ?? [];
+  const suggestions = channel ? (CHANNEL_SUGGESTIONS[channel.name] ?? []) : [];
 
   useEffect(() => {
     const el = messagesRef.current;
     if (!el) return;
     el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
-  }, [activeChannel, channelMessages.length]);
+  }, [resolvedChannelId, channelMessages.length]);
 
-  const handleSend = () => {
+  const handleSend = async () => {
     const text = draft.trim();
-    if (!text) return;
-    const newMsg: Message = {
-      id: Date.now(),
-      authorName: "Ata Han Bayram",
-      authorInitials: "AT",
-      authorRole: "admin",
-      content: text,
-      timestamp: new Date().toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" }),
-    };
-    setMessages((prev) => ({
-      ...prev,
-      [activeChannel]: [...(prev[activeChannel] ?? []), newMsg],
-    }));
-    setDraft("");
-    // Demo: local only — banner zaten uyarıyor
+    if (!text || resolvedChannelId == null || sending) return;
+    setSending(true);
+    setSendError(null);
+    try {
+      const res = await fetch(apiUrl(`/api/channels/${resolvedChannelId}/messages`), {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ body: text }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json.error ?? "Mesaj gönderilemedi");
+      setDraft("");
+      await queryClient.invalidateQueries({ queryKey: ["channel-messages", resolvedChannelId] });
+    } catch (e: any) {
+      setSendError(e.message ?? "Mesaj gönderilemedi");
+    } finally {
+      setSending(false);
+    }
   };
+
+  if (channelsLoading && channels.length === 0) {
+    return (
+      <div className="p-6">
+        <LoadingBlock label="Kanallar yükleniyor" />
+      </div>
+    );
+  }
+
+  if (channelsError) {
+    return (
+      <div className="p-6">
+        <ErrorState
+          message={channelsErr instanceof Error ? channelsErr.message : "Kanallar yüklenemedi"}
+          onRetry={() => refetchChannels()}
+        />
+      </div>
+    );
+  }
+
+  if (!channel) {
+    return (
+      <div className="p-6">
+        <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
+          Henüz kanal yok.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="-mx-4 -my-6 flex h-[calc(100svh-60px)] min-h-0 flex-col sm:-mx-6 lg:-mx-8 lg:-my-8">
-      <div className="shrink-0 px-4 pt-3 sm:px-6 lg:px-8">
-        <DemoPreviewBanner surface="Topluluk chat" />
-      </div>
       <div className="flex min-h-0 flex-1">
-      {/* Channel sidebar */}
-      <aside className="hidden w-[220px] shrink-0 flex-col border-r border-[var(--ink)]/[0.08] bg-[var(--bone)] md:flex">
-        <div className="border-b border-[var(--ink)]/[0.08] px-4 py-3">
-          <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">Kanallar</p>
-        </div>
-        <div className="flex-1 overflow-y-auto py-2">
-          {CHANNELS.map((ch) => (
-            <button
-              key={ch.id}
-              onClick={() => setActiveChannel(ch.id)}
-              className={cn(
-                "flex w-full items-center gap-2 px-3 py-2 text-left transition-colors",
-                activeChannel === ch.id
-                  ? "bg-[var(--ink)] text-[var(--bone)]"
-                  : "text-[var(--ink-muted)] hover:bg-[var(--ink)]/[0.04] hover:text-[var(--ink)]",
-              )}
-            >
-              {ch.type === "announcement" ? (
-                <Volume2 className="size-3 shrink-0" />
+        <aside className="hidden w-[220px] shrink-0 flex-col border-r border-[var(--ink)]/[0.08] bg-[var(--bone)] md:flex">
+          <div className="border-b border-[var(--ink)]/[0.08] px-4 py-3">
+            <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">Kanallar</p>
+          </div>
+          <div className="flex-1 overflow-y-auto py-2">
+            {channels.map((ch) => (
+              <button
+                key={ch.id}
+                type="button"
+                onClick={() => setActiveChannelId(ch.id)}
+                className={cn(
+                  "flex w-full items-center gap-2 px-3 py-2 text-left transition-colors",
+                  resolvedChannelId === ch.id
+                    ? "bg-[var(--ink)] text-[var(--bone)]"
+                    : "text-[var(--ink-muted)] hover:bg-[var(--ink)]/[0.04] hover:text-[var(--ink)]",
+                )}
+              >
+                {ch.type === "announcement" ? (
+                  <Volume2 className="size-3 shrink-0" />
+                ) : (
+                  <Hash className="size-3 shrink-0" />
+                )}
+                <span className="flex-1 truncate font-mono text-caption">{ch.name}</span>
+              </button>
+            ))}
+          </div>
+        </aside>
+
+        <div className="flex min-w-0 flex-1 flex-col">
+          <div className="flex h-[52px] items-center justify-between border-b border-[var(--ink)]/[0.08] px-4">
+            <div className="flex items-center gap-2">
+              {channel.type === "announcement" ? (
+                <Volume2 className="size-4 text-[var(--ink-body)]" />
               ) : (
-                <Hash className="size-3 shrink-0" />
+                <Hash className="size-4 text-[var(--ink-body)]" />
               )}
-              <span className="flex-1 truncate font-mono text-caption">{ch.label}</span>
-              {ch.unread > 0 && activeChannel !== ch.id && (
-                <span className="flex size-4 items-center justify-center bg-[var(--ink)] font-mono text-label text-[var(--bone)]">
-                  {ch.unread}
-                </span>
-              )}
-            </button>
-          ))}
-        </div>
-      </aside>
-
-      {/* Main chat area */}
-      <div className="flex min-w-0 flex-1 flex-col">
-        {/* Channel header */}
-        <div className="flex h-[52px] items-center justify-between border-b border-[var(--ink)]/[0.08] px-4">
-          <div className="flex items-center gap-2">
-            {channel.type === "announcement" ? (
-              <Volume2 className="size-4 text-[var(--ink-body)]" />
-            ) : (
-              <Hash className="size-4 text-[var(--ink-body)]" />
-            )}
-            <span className="font-mono text-sm text-[var(--ink)]">{channel.label}</span>
-            <span className="hidden font-mono text-label text-[var(--ink-muted)] sm:block">
-              — {channel.description}
-            </span>
-          </div>
-          <button className="text-[var(--ink-muted)] hover:text-[var(--ink)] transition-colors">
-            <Search className="size-4" />
-          </button>
-        </div>
-
-        {/* Messages */}
-        <div ref={messagesRef} className="flex-1 overflow-y-auto py-4">
-          <AiDigest channelId={activeChannel} channelLabel={channel.label} />
-          {channelMessages.length === 0 ? (
-            <div className="flex h-full items-center justify-center">
-              <div className="text-center">
-                <Hash className="mx-auto mb-3 size-8 text-[var(--ink-subtle)]" />
-                <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
-                  #{channel.label} henüz boş
-                </p>
-                <p className="mt-1 text-sm text-[var(--ink-muted)]">İlk mesajı sen gönder.</p>
-              </div>
+              <span className="font-mono text-sm text-[var(--ink)]">{channel.name}</span>
+              <span className="hidden font-mono text-label text-[var(--ink-muted)] sm:block">
+                — {channel.description}
+              </span>
             </div>
-          ) : (
-            <div className="space-y-1">
-              {channelMessages.map((msg, i) => (
-                <MessageBubble
-                  key={msg.id}
-                  msg={msg}
-                  prevAuthorId={i > 0 ? channelMessages[i - 1].id : undefined}
-                />
-              ))}
-              <div ref={bottomRef} />
-            </div>
-          )}
-        </div>
-
-        {/* Input */}
-        <div className="border-t border-[var(--ink)]/[0.08] p-4">
-          {(CHANNEL_SUGGESTIONS[activeChannel]?.length ?? 0) > 0 && (
-            <div className="mb-2 flex flex-wrap items-center gap-1.5">
-              <Sparkles className="size-3 shrink-0 text-[var(--success-ink)]/70" />
-              {CHANNEL_SUGGESTIONS[activeChannel].map((s) => (
-                <button
-                  key={s}
-                  type="button"
-                  onClick={() => setDraft(s)}
-                  className="border border-[var(--ink)]/12 px-2.5 py-1 font-mono text-label text-[var(--ink-muted)] transition-colors hover:border-[var(--inner-green)]/40 hover:text-[var(--ink)]"
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
-          )}
-          <div className="flex items-end gap-3 border border-[var(--ink)]/15 bg-[var(--bone)] p-3 focus-within:border-[var(--ink)]/40 transition-colors">
-            <textarea
-              value={draft}
-              onChange={(e) => setDraft(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSend();
-                }
-              }}
-              placeholder={`#${channel.label} kanalına mesaj gönder…`}
-              rows={1}
-              className="flex-1 resize-none bg-transparent font-sans text-sm text-[var(--ink)] placeholder:text-[var(--ink-muted)] focus:outline-none"
-              style={{ lineHeight: "1.5" }}
-            />
             <button
-              onClick={handleSend}
-              disabled={!draft.trim()}
-              className="flex size-8 shrink-0 items-center justify-center bg-[var(--ink)] text-[var(--bone)] transition-opacity hover:opacity-80 disabled:opacity-25"
-              aria-label="Gönder"
+              type="button"
+              className="text-[var(--ink-muted)] transition-colors hover:text-[var(--ink)]"
+              aria-label="Ara"
             >
-              <Send className="size-3.5" />
+              <Search className="size-4" />
             </button>
           </div>
-          <p className="mt-1.5 font-mono text-label text-[var(--ink-subtle)]">
-            Enter ile gönder · Shift+Enter yeni satır · Önizleme — sunucuya gitmez
-          </p>
+
+          <div ref={messagesRef} className="flex-1 overflow-y-auto py-4">
+            {channelMessages.length === 0 && !messagesLoading && <AiDigestEmpty channelLabel={channel.name} />}
+            {messagesLoading && channelMessages.length === 0 && (
+              <div className="px-4">
+                <LoadingBlock label="Mesajlar yükleniyor" />
+              </div>
+            )}
+            {messagesError && (
+              <div className="px-4">
+                <ErrorState
+                  message={messagesErr instanceof Error ? messagesErr.message : "Mesajlar yüklenemedi"}
+                  onRetry={() => refetchMessages()}
+                />
+              </div>
+            )}
+            {!messagesLoading && !messagesError && channelMessages.length === 0 ? (
+              <div className="flex h-full items-center justify-center">
+                <div className="text-center">
+                  <Hash className="mx-auto mb-3 size-8 text-[var(--ink-subtle)]" />
+                  <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
+                    #{channel.name} henüz boş
+                  </p>
+                  <p className="mt-1 text-sm text-[var(--ink-muted)]">İlk mesajı sen gönder.</p>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-1">
+                {channelMessages.map((msg, i) => (
+                  <MessageBubble
+                    key={msg.id}
+                    msg={msg}
+                    prevAuthorUserId={i > 0 ? channelMessages[i - 1].authorUserId : undefined}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="border-t border-[var(--ink)]/[0.08] p-4">
+            {sendError && (
+              <p className="mb-2 font-mono text-label text-[var(--error-ink)]" role="alert">
+                {sendError}
+              </p>
+            )}
+            {suggestions.length > 0 && (
+              <div className="mb-2 flex flex-wrap items-center gap-1.5">
+                <Sparkles className="size-3 shrink-0 text-[var(--success-ink)]/70" />
+                {suggestions.map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => setDraft(s)}
+                    className="border border-[var(--ink)]/12 px-2.5 py-1 font-mono text-label text-[var(--ink-muted)] transition-colors hover:border-[var(--inner-green)]/40 hover:text-[var(--ink)]"
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+            )}
+            <div className="flex items-end gap-3 border border-[var(--ink)]/15 bg-[var(--bone)] p-3 transition-colors focus-within:border-[var(--ink)]/40">
+              <textarea
+                value={draft}
+                onChange={(e) => setDraft(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    void handleSend();
+                  }
+                }}
+                placeholder={`#${channel.name} kanalına mesaj gönder…`}
+                rows={1}
+                disabled={sending}
+                className="flex-1 resize-none bg-transparent font-sans text-sm text-[var(--ink)] placeholder:text-[var(--ink-muted)] focus:outline-none disabled:opacity-50"
+                style={{ lineHeight: "1.5" }}
+              />
+              <button
+                type="button"
+                onClick={() => void handleSend()}
+                disabled={!draft.trim() || sending}
+                className="flex size-8 shrink-0 items-center justify-center bg-[var(--ink)] text-[var(--bone)] transition-opacity hover:opacity-80 disabled:opacity-25"
+                aria-label="Gönder"
+              >
+                <Send className="size-3.5" />
+              </button>
+            </div>
+            <p className="mt-1.5 font-mono text-label text-[var(--ink-subtle)]">
+              Enter ile gönder · Shift+Enter yeni satır
+            </p>
+          </div>
         </div>
-      </div>
       </div>
     </div>
   );
