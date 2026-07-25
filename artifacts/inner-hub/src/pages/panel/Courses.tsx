@@ -3,6 +3,7 @@ import { ChevronDown, ChevronRight, BookOpen, CheckCircle2, Lock, Play, Graduati
 import { FadeIn } from "@/components/FadeIn";
 import { AnimatedHeading } from "@/components/AnimatedHeading";
 import { apiUrl } from "@/lib/api";
+import { StatCardSkeleton, CourseCardSkeleton, LoadingBlock, ErrorState } from "@/components/panel/Skeletons";
 
 interface Lesson {
   id: number;
@@ -348,6 +349,7 @@ export default function CoursesPage() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [retryKey, setRetryKey] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -371,7 +373,7 @@ export default function CoursesPage() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [retryKey]);
 
   const enrolled = courses.filter((c) => c.isEnrolled);
   const available = courses.filter((c) => !c.isEnrolled);
@@ -397,15 +399,19 @@ export default function CoursesPage() {
       )}
 
       {loading && (
-        <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)]">
-          Yükleniyor…
-        </p>
+        <LoadingBlock label="Kurslar yükleniyor">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <StatCardSkeleton key={i} />
+            ))}
+          </div>
+          <div className="mt-4 space-y-2">
+            <CourseCardSkeleton />
+            <CourseCardSkeleton />
+          </div>
+        </LoadingBlock>
       )}
-      {error && (
-        <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--error-ink)]">
-          {error}
-        </p>
-      )}
+      {error && <ErrorState message={error} onRetry={() => setRetryKey((k) => k + 1)} />}
       {!loading && !error && courses.length === 0 && (
         <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)]">
           Henüz yayınlanmış kurs yok.
