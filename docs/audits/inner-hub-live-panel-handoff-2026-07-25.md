@@ -183,16 +183,18 @@ curl -b /tmp/ih.txt localhost:3001/api/pulse
 
 `DemoPreviewBanner.tsx` artık hiçbir sayfadan import edilmiyordu, dead-code olarak silindi (`05dfbda`).
 
-### Bilinen bug — `/u/:handle` boş sayfa (Cursor'ın alanı, Claude düzeltmedi)
+### DÜZELTME — önceki "boş sayfa" bug raporu yanlış alarmdı
 
-`http://localhost:5173/u/<handle>` iki durumda da **tamamen boş render ediyor**, konsolda hata yok:
+Yukarıdaki bug raporu (`/u/:handle` boş render) yeniden test edildi ve **doğrulanamadı**. Gerçek kök neden: ilk testte navigasyondan hemen sonra ekran görüntüsü alınmış — hem Vite dev server'ın o rotayı ilk kez cold-compile etmesi hem de `FadeIn` (`components/FadeIn.tsx`, `whileInView` + opacity/y transition) animasyonunun henüz bitmemiş olması "boş" izlenimi vermiş. DOM aslında doludur (accessibility tree ile doğrulandı), sadece görsel olarak henüz opaklaşmamış.
 
-- **401 members-only**: Backend doğru dönüyor — `GET /api/public/profile/:handle` → `{"error":"Bu profil yalnızca inner·hub üyelerine açık","code":"MEMBERS_ONLY","handle":"..."}`. Frontend bu response'u işlemiyor, boş kalıyor.
-- **404 not-found**: Backend doğru dönüyor — `{"error":"Profil bulunamadı"}`. Aynı şekilde frontend boş kalıyor.
-- DB'de `visibility='public'` olan hiç kullanıcı yok (doğrudan `psql` ile doğrulandı) — yani "happy path" (başarılı render) muhtemelen hiç görsel olarak test edilmemiş.
-- Kök neden frontend'de (muhtemelen `PublicProfile.tsx` içinde error-state handling eksik). Bu dosya Claude'un yasaklı listesinde olduğu için dokunulmadı — Cursor'ın düzeltmesi gerekiyor.
+Doğru davranış canlı olarak yeniden test edildi (1-2sn bekleme sonrası ekran görüntüsü):
+- **`ok` (public)**: `membertest` handle'ı artık `visibility='members'` ama session'lı istekte backend 200 dönüyor (üye görebiliyor) — tam profil doğru render ediyor.
+- **`missing` (404)**: `PROFİL BULUNAMADI @handle` doğru render ediyor.
+- **`members` (401, anonim)**: Backend doğru 401 `MEMBERS_ONLY` dönüyor (curl ile doğrulandı); `PublicProfile.tsx`'teki `status === "members"` branch'i (satır 131-146) yapısal olarak `missing` branch'iyle aynı desende, kod incelemesinde sorun yok.
+
+Sonuç: `PublicProfile.tsx`'te düzeltilmesi gereken bir şey yok — dev'de rotayı ilk açtığınızda 1-2sn içinde normal şekilde beliriyor. Özür: önceki rapor yanlıştı, gereksiz iş yaratmasın diye düzeltildi.
 
 ---
 
 *Son güncelleme: Cursor agent — 2026-07-25, HEAD `782c493`.*
-*Ek not: Claude agent — 2026-07-25 (Track B tamam, bug raporu eklendi).*
+*Ek not: Claude agent — 2026-07-25 (Track B tamam; ilk raporlanan `/u/:handle` bug'ı yeniden test edilip yanlış alarm olduğu doğrulandı ve düzeltildi).*
