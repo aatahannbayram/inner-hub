@@ -49,6 +49,44 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
+  /* Tipografi ölçeği — 1.25 modüler, 11px taban (mono mikro etiket).
+     Ad-hoc text-[9px]/[10px] kullanımlarının kademeli migrasyon hedefi. */
+  --text-label: 0.6875rem;              /* 11px */
+  --text-label--line-height: 1.4;
+  --text-label--letter-spacing: 0.08em;
+
+  --text-caption: 0.75rem;              /* 12px */
+  --text-caption--line-height: 1.45;
+  --text-caption--letter-spacing: 0.02em;
+
+  --text-body: 0.875rem;                /* 14px */
+  --text-body--line-height: 1.6;
+  --text-body--letter-spacing: 0em;
+
+  --text-body-lg: 1rem;                 /* 16px */
+  --text-body-lg--line-height: 1.6;
+  --text-body-lg--letter-spacing: 0em;
+
+  --text-title-sm: 1.25rem;             /* 20px */
+  --text-title-sm--line-height: 1.3;
+  --text-title-sm--letter-spacing: -0.01em;
+
+  --text-title: 1.5625rem;              /* ~25px */
+  --text-title--line-height: 1.25;
+  --text-title--letter-spacing: -0.015em;
+
+  --text-title-lg: 1.953rem;            /* ~31px */
+  --text-title-lg--line-height: 1.15;
+  --text-title-lg--letter-spacing: -0.015em;
+
+  --text-display: clamp(2.25rem, 1.6rem + 3vw, 3.815rem);    /* ~36-61px */
+  --text-display--line-height: 1.05;
+  --text-display--letter-spacing: -0.02em;
+
+  --text-display-lg: clamp(2.75rem, 1.8rem + 5vw, 5.96rem);  /* ~44-95px */
+  --text-display-lg--line-height: 1.02;
+  --text-display-lg--letter-spacing: -0.02em;
 }
 
 :root {
@@ -92,6 +130,26 @@
   --app-font-mono: 'JetBrains Mono', monospace;
   --radius: 0rem;
   --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Semantik metin renkleri (bone zemin, ölçülmüş kontrast oranı).
+     Ad-hoc text-[var(--ink)]/NN opaklıklarının kademeli migrasyon hedefi. */
+  --ink-strong:  #0A0A0A; /* 17.57:1 — başlık, birincil değer */
+  --ink-body:    #3A3937; /* 10.24:1 — gövde metni */
+  --ink-muted:   #575654; /*  6.51:1 — ikincil bilgi / sub-label */
+  --ink-subtle:  #6B6A68; /*  4.80:1 — küçük mono etiket (≥11px zorunlu) */
+  --ink-faint:   #767573; /*  4.09:1 ✗ AA altı — sadece 14px+ veya non-text'te kullan */
+  --ink-nontext: #8D8B89; /*  3.01:1 — sadece kenarlık/ikon-dekor, asla metin */
+
+  --success-ink: #0B6B3A; /*  5.86:1 — inner-green'in metin/ikon karşılığı (bone üstünde) */
+  --error-ink:   #9C3F26; /*  5.91:1 — error'ın metin karşılığı (bone üstünde) */
+
+  /* 4px tabanlı dikey ritim */
+  --space-stack-xs: 4px;
+  --space-stack-sm: 8px;
+  --space-stack-md: 16px;
+  --space-stack-lg: 24px;
+  --space-stack-xl: 40px;
+  --space-section:  64px;
 }
 
 .dark {
@@ -292,4 +350,41 @@
   html {
     scroll-behavior: auto;
   }
+}
+
+/* Görünen boyutu değiştirmeden ≥40px dokunma hedefi (WCAG 2.5.8).
+   ::after görünmez, layout etkisi yok — sadece hit-test alanını büyütür. */
+.hit-40 {
+  position: relative;
+}
+.hit-40::after {
+  content: "";
+  position: absolute;
+  inset: 50% auto auto 50%;
+  width: max(100%, 40px);
+  height: max(100%, 40px);
+  transform: translate(-50%, -50%);
+}
+
+/* Türkçe metin İngilizceden ~%10-20 uzun olabilir; sabit width yerine
+   min-h + kelime kırma güvenliği. Buton/etiket metinlerinde kullan. */
+.tr-safe-wrap {
+  overflow-wrap: anywhere;
+  hyphens: auto;
+  text-wrap: pretty;
+}
+
+/* Runtime kill-switch (deploy'suz geri alma). html[data-ux="legacy"]
+   set edilirse migrate edilmiş call-site'lar maksimum-kontrast ink'e
+   döner — piksel-birebir eski hâl değil, "her koşulda okunur" garantili
+   güvenli bir geri çekilme noktası. Konsoldan aç/kapat:
+     document.documentElement.setAttribute('data-ux','legacy')
+     document.documentElement.removeAttribute('data-ux') */
+html[data-ux="legacy"] {
+  --ink-body:    #0A0A0A;
+  --ink-muted:   #0A0A0A;
+  --ink-subtle:  #0A0A0A;
+  --ink-faint:   #0A0A0A;
+  --success-ink: #18FF85;
+  --error-ink:   #B4553B;
 }
