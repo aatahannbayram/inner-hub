@@ -167,7 +167,7 @@ function MatchHero() {
         <div className="lg:grid lg:grid-cols-2 lg:items-end lg:gap-10">
           <div>
             <p className="mb-3 font-mono text-[10px] uppercase tracking-widest text-white/60 [text-shadow:0_1px_12px_rgba(0,0,0,0.6)]">
-              inner·match
+              <span lang="en">inner·match</span>
             </p>
             <AnimatedHeading
               text={"Where trust\nfinds its people."}
@@ -361,7 +361,7 @@ export default function Match() {
 
       <div className="border-t border-[var(--ink)]/[0.08] pt-4">
         <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/36">
-          inner·match — claude-haiku-4-5-20251001 ile güçlendirilmiş · Haftalık güncellenir
+          <span lang="en">inner·match</span> — claude-haiku-4-5-20251001 ile güçlendirilmiş · Haftalık güncellenir
         </p>
       </div>
     </div>

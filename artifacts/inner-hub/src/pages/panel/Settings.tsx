@@ -140,7 +140,7 @@ export default function Settings() {
       <FadeIn>
         <div>
           <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56 mb-2">
-            inner·hub
+            <span lang="en">inner·hub</span>
           </p>
           <h1
             className="font-serif font-display text-4xl md:text-5xl text-[var(--ink)]"
@@ -278,7 +278,7 @@ export default function Settings() {
 
       <div className="border-t border-[var(--ink)]/[0.08] pt-4">
         <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/36">
-          inner·hub · ayarlar · v0.1.0
+          <span lang="en">inner·hub</span> · ayarlar · v0.1.0
         </p>
       </div>
     </div>

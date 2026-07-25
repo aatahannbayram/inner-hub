@@ -252,7 +252,7 @@ export default function Membership() {
       <FadeIn>
         <div>
           <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56 mb-2">
-            inner·hub
+            <span lang="en">inner·hub</span>
           </p>
           <h1
             className="font-serif font-display text-4xl md:text-5xl text-[var(--ink)]"

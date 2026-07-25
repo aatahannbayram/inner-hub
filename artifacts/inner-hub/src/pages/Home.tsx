@@ -229,7 +229,10 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col">
+    // Sayfa içeriği neredeyse tamamen İngilizce (marka sesi); html[lang="tr"]
+    // ile miras alınan Türkçe büyük-harf kuralları uppercase etiketlerdeki
+    // İngilizce kelimeleri bozmasın diye kök seviyede lang="en" işaretlendi.
+    <div lang="en" className="min-h-screen bg-background text-foreground flex flex-col">
       <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[9999] focus:bg-foreground focus:text-background focus:px-4 focus:py-2 font-mono text-xs uppercase tracking-widest">
         Skip to content
       </a>

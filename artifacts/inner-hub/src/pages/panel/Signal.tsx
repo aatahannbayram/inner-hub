@@ -400,7 +400,7 @@ export default function Signal() {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="mb-2 font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56">
-              inner·hub AI
+              <span lang="en">inner·hub</span> AI
             </p>
             <h1
               className="font-serif font-display text-4xl text-[var(--ink)] md:text-5xl"
@@ -764,7 +764,7 @@ export default function Signal() {
 
       <div className="border-t border-[var(--ink)]/[0.08] pt-4">
         <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/41">
-          inner·signal — Claude + Higgsfield · Haftalık güncellenir · Görsel üretimi kredi kullanır
+          <span lang="en">inner·signal</span> — Claude + Higgsfield · Haftalık güncellenir · Görsel üretimi kredi kullanır
         </p>
       </div>
     </div>

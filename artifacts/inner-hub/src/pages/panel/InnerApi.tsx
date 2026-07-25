@@ -172,7 +172,7 @@ export default function InnerApi() {
           <div className="relative z-10 flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <p className="font-mono text-[10px] font-semibold uppercase tracking-widest text-[var(--bone)]/60 mb-2">
-                inner·hub
+                <span lang="en">inner·hub</span>
               </p>
               <h1
                 className="font-serif font-display text-3xl text-[var(--bone)] sm:text-4xl md:text-5xl"
@@ -319,7 +319,7 @@ export default function InnerApi() {
               <div className="relative z-10">
                 <div className="mb-1 flex items-center justify-between">
                   <p className={`font-mono text-[9px] font-semibold uppercase tracking-widest ${plan.current ? "text-[var(--bone)]/60" : "text-[var(--ink)]/65"}`}>
-                    {plan.name}
+                    <span lang="en">{plan.name}</span>
                   </p>
                   {plan.current && (
                     <span className="border border-[var(--inner-green)]/40 px-1.5 py-0.5 font-mono text-[7px] font-semibold uppercase tracking-widest text-[var(--inner-green)]">
@@ -377,7 +377,7 @@ export default function InnerApi() {
 
       <div className="border-t border-[var(--ink)]/[0.08] pt-4">
         <p className="font-mono text-[9px] font-medium uppercase tracking-widest text-[var(--ink)]/40">
-          inner·api v1 — REST · JSON · Bearer Auth · Rate limited · inner·hub ekosistemi
+          <span lang="en">inner·api</span> v1 — REST · JSON · Bearer Auth · Rate limited · <span lang="en">inner·hub</span> ekosistemi
         </p>
       </div>
     </div>

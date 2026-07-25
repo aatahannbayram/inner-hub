@@ -654,7 +654,7 @@ export default function Members() {
             </div>
             <div className="mt-6 border-t border-[var(--ink)]/[0.08] pt-4">
               <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/41">
-                Başarılı eşleşmelerde platform %10 komisyon alır · inner·hub Talent Board
+                Başarılı eşleşmelerde platform %10 komisyon alır · <span lang="en">inner·hub</span> Talent Board
               </p>
             </div>
           </div>

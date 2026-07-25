@@ -267,7 +267,7 @@ function UploadPrompt({ open, onClose }: { open: boolean; onClose: () => void })
     <Drawer open={open} onOpenChange={(v) => !v && onClose()} shouldScaleBackground={false}>
       <DrawerContent className="rounded-none border-[var(--ink)]/15 bg-[var(--bone)]">
         <DrawerHeader className="px-6 pt-2 text-left">
-          <p className="mb-1 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/46">inner·vault</p>
+          <p className="mb-1 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/46"><span lang="en">inner·vault</span></p>
           <DrawerTitle
             className="font-serif text-2xl font-normal text-[var(--ink)]"
             style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
@@ -359,7 +359,7 @@ export default function Vault() {
         <div className="flex items-start justify-between">
           <div>
             <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56 mb-2">
-              inner·hub
+              <span lang="en">inner·hub</span>
             </p>
             <h1
               className="font-serif font-display text-4xl md:text-5xl text-[var(--ink)]"
@@ -451,7 +451,7 @@ export default function Vault() {
                         <div className="flex items-center gap-2">
                           <Icon className="size-3.5 text-[var(--bone)]/50" />
                           <span className="font-mono text-[8px] uppercase tracking-widest text-[var(--bone)]/57">
-                            {doc.type}
+                            {doc.type === "Pitch Deck" ? <span lang="en">{doc.type}</span> : doc.type}
                           </span>
                         </div>
                         <div>
@@ -500,7 +500,7 @@ export default function Vault() {
                   : "border-[var(--ink)]/10 text-[var(--ink)]/46 hover:border-[var(--ink)]/25 hover:text-[var(--ink)]",
               ].join(" ")}
             >
-              {t}
+              {t === "Pitch Deck" ? <span lang="en">{t}</span> : t}
             </button>
           ))}
         </div>
@@ -531,7 +531,7 @@ export default function Vault() {
           );
         })}
         <p className="ml-auto font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/36">
-          inner·vault — yalnızca üyeler erişebilir
+          <span lang="en">inner·vault</span> — yalnızca üyeler erişebilir
         </p>
       </div>
 

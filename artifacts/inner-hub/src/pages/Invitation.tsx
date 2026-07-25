@@ -46,7 +46,9 @@ export default function Invitation() {
   };
 
   return (
-    <div className="relative flex min-h-screen flex-col overflow-hidden bg-black text-white">
+    // Sayfa içeriği İngilizce (marka sesi); html[lang="tr"] mirası uppercase
+    // etiketlerdeki İngilizce kelimeleri bozmasın diye kök seviyede lang="en".
+    <div lang="en" className="relative flex min-h-screen flex-col overflow-hidden bg-black text-white">
       <video
         autoPlay
         muted

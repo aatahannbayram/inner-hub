@@ -452,7 +452,7 @@ function CapitalHero() {
         <div className="lg:grid lg:grid-cols-2 lg:items-end lg:gap-10">
           <div>
             <p className="mb-3 font-mono text-[10px] uppercase tracking-widest text-white/60 [text-shadow:0_1px_12px_rgba(0,0,0,0.6)]">
-              inner·capital
+              <span lang="en">inner·capital</span>
             </p>
             <AnimatedHeading
               text={"Where conviction\nmeets capital."}
@@ -651,7 +651,7 @@ export default function Capital() {
       {/* Disclaimer */}
       <div className="border-t border-[var(--ink)]/[0.08] pt-4">
         <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/36">
-          inner·capital — yalnızca inner·hub üyeleri için · bilgi amaçlıdır, yatırım tavsiyesi değildir
+          <span lang="en">inner·capital</span> — yalnızca <span lang="en">inner·hub</span> üyeleri için · bilgi amaçlıdır, yatırım tavsiyesi değildir
         </p>
       </div>
 

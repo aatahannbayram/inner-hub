@@ -339,7 +339,7 @@ export default function MemberProfile() {
 
       <div className="border-t border-[var(--ink)]/[0.08] pt-4">
         <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/36">
-          inner·hub · üye profili · @{member.handle}
+          <span lang="en">inner·hub</span> · üye profili · @{member.handle}
         </p>
       </div>
     </div>

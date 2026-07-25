@@ -190,7 +190,7 @@ function DetailPanel({
 
           {/* Why */}
           <div className="border-l-2 border-[var(--ink)]/10 pl-4">
-            <p className="mb-1 font-mono text-[8px] uppercase tracking-widest text-[var(--ink)]/41">Neden inner·hub?</p>
+            <p className="mb-1 font-mono text-[8px] uppercase tracking-widest text-[var(--ink)]/41">Neden <span lang="en">inner·hub</span>?</p>
             <p className="text-sm leading-relaxed text-[var(--ink)]/70 font-light">{app.why}</p>
           </div>
 
@@ -278,7 +278,7 @@ export default function ApplicationsPage() {
       <FadeIn>
         <div>
           <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56 mb-2">
-            inner·hub — Admin
+            <span lang="en">inner·hub</span> — Admin
           </p>
           <h1
             className="font-serif font-display text-4xl md:text-5xl text-[var(--ink)]"
@@ -399,7 +399,7 @@ export default function ApplicationsPage() {
 
       <div className="border-t border-[var(--ink)]/[0.08] pt-4">
         <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/36">
-          inner·hub · başvurular · yalnızca admin
+          <span lang="en">inner·hub</span> · başvurular · yalnızca admin
         </p>
       </div>
 

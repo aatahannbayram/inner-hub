@@ -949,153 +949,19 @@ function Home() {
       if (el) requestAnimationFrame(() => el.scrollIntoView({ block: "start" }));
     }
   }, []);
-  return /* @__PURE__ */ jsxs("div", { className: "min-h-screen bg-background text-foreground flex flex-col", children: [
-    /* @__PURE__ */ jsx("a", { href: "#main-content", className: "sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[9999] focus:bg-foreground focus:text-background focus:px-4 focus:py-2 font-mono text-xs uppercase tracking-widest", children: "Skip to content" }),
-    /* @__PURE__ */ jsx(ScrollProgress, {}),
-    /* @__PURE__ */ jsx(Preloader, {}),
-    /* @__PURE__ */ jsx(Grain, {}),
-    /* @__PURE__ */ jsx(IndexRail, {}),
-    /* @__PURE__ */ jsxs("main", { id: "main-content", className: "flex-grow", children: [
-      /* @__PURE__ */ jsxs("section", { ref: heroRef, className: "h-[100svh] mb-[-3rem] flex flex-col justify-end px-6 pb-16 md:px-12 md:pb-24 lg:px-[10%] relative overflow-hidden bg-black text-white", children: [
-        /* @__PURE__ */ jsx(FloatingNavbar, {}),
-        /* @__PURE__ */ jsx(
-          "video",
-          {
-            autoPlay: true,
-            muted: true,
-            loop: true,
-            playsInline: true,
-            className: "absolute inset-0 z-0 h-full w-full object-cover",
-            src: "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260406_094145_4a271a6c-3869-4f1c-8aa7-aeb0cb227994.mp4"
-          }
-        ),
-        /* @__PURE__ */ jsx(
-          "div",
-          {
-            "aria-hidden": "true",
-            className: "bottom-blur-mask pointer-events-none absolute inset-0 z-[1] bg-black/20 backdrop-blur-xl"
-          }
-        ),
-        /* @__PURE__ */ jsx(
-          "div",
-          {
-            "aria-hidden": "true",
-            className: "pointer-events-none absolute inset-0 z-[1] bg-gradient-to-b from-black/50 via-transparent to-transparent"
-          }
-        ),
-        /* @__PURE__ */ jsx(
-          motion.div,
-          {
-            className: "absolute inset-0 z-[1] pointer-events-none",
-            style: { y: heroY },
-            children: /* @__PURE__ */ jsx("div", { className: "absolute top-1/2 right-[5%] -translate-y-1/2 size-[600px] rounded-full bg-[var(--inner-green)]/10 blur-3xl" })
-          }
-        ),
-        /* @__PURE__ */ jsxs(
-          motion.div,
-          {
-            initial: { opacity: 0, y: 24 },
-            animate: { opacity: 1, y: 0 },
-            transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] },
-            className: "relative z-10",
-            children: [
-              /* @__PURE__ */ jsxs("div", { className: "font-mono text-xs uppercase tracking-widest text-white/60 mb-8 flex items-center gap-3", children: [
-                /* @__PURE__ */ jsx("span", { className: "size-1.5 rounded-full bg-[var(--inner-green)] animate-beacon" }),
-                "İstanbul → Global · Est. 2026"
-              ] }),
-              /* @__PURE__ */ jsx("h1", { className: "font-display font-serif italic text-5xl md:text-7xl lg:text-8xl leading-[1.05] max-w-[18ch] text-balance", children: "What comes next starts here." })
-            ]
-          }
-        ),
-        /* @__PURE__ */ jsx(
-          motion.div,
-          {
-            initial: { opacity: 0, y: 24 },
-            animate: { opacity: 1, y: 0 },
-            transition: { duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] },
-            className: "relative z-10 mt-12",
-            children: /* @__PURE__ */ jsx("p", { className: "max-w-[50ch] text-lg md:text-xl text-white/70 leading-[1.6]", children: "inner.hub is a private circle of founders, builders, and investors. People who meet early and support each other first." })
-          }
-        ),
-        /* @__PURE__ */ jsx(
-          motion.div,
-          {
-            initial: { opacity: 0, y: 24 },
-            animate: { opacity: 1, y: 0 },
-            transition: { duration: 0.8, delay: 0.35, ease: [0.16, 1, 0.3, 1] },
-            className: "relative z-10 mt-8",
-            children: /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-4 border border-white/15 bg-black/25 py-1 pl-6 pr-1 backdrop-blur-md", children: [
-              /* @__PURE__ */ jsx("p", { className: "hidden text-sm font-medium text-white sm:block", children: "No tickets. No tiers. Just the circle, gently curated." }),
-              /* @__PURE__ */ jsx("p", { className: "text-sm font-medium text-white sm:hidden", children: "No tickets. No tiers." }),
-              /* @__PURE__ */ jsx(
-                "a",
-                {
-                  href: "/invitation",
-                  className: "whitespace-nowrap bg-white px-5 py-2.5 font-mono text-xs uppercase tracking-widest text-black transition-colors hover:bg-white/90",
-                  children: "Request an invitation"
-                }
-              )
-            ] })
-          }
-        ),
-        /* @__PURE__ */ jsxs(
-          motion.div,
-          {
-            initial: { opacity: 0 },
-            animate: { opacity: 1 },
-            transition: { duration: 0.8, delay: 0.5 },
-            className: "absolute bottom-10 left-6 md:left-12 lg:left-[10%] z-10 flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-white/60",
-            children: [
-              /* @__PURE__ */ jsx(
-                motion.div,
-                {
-                  animate: { y: [0, 6, 0] },
-                  transition: { duration: 2, repeat: Infinity, ease: "easeInOut" },
-                  children: "↓"
-                }
-              ),
-              /* @__PURE__ */ jsx("span", { children: "scroll" })
-            ]
-          }
-        )
-      ] }),
-      /* @__PURE__ */ jsx(MarqueeStrip, {}),
-      /* @__PURE__ */ jsxs("section", { id: "section-01", className: "px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15", children: [
-        /* @__PURE__ */ jsx(SectionLabel, { label: "01 · The idea", meta: "Coming together" }),
-        /* @__PURE__ */ jsx(FadeIn, { children: /* @__PURE__ */ jsx("div", { className: "max-w-[65ch] text-lg md:text-xl leading-[1.7] text-foreground/90", children: "AI is the center of this circle. Around it are the founders, builders, and investors pushing what comes next. inner.hub brings them together. It starts in İstanbul, and it starts early." }) })
-      ] }),
-      /* @__PURE__ */ jsxs("section", { id: "section-02", className: "px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15", children: [
-        /* @__PURE__ */ jsx(SectionLabel, { label: "02 · The first thirty-four", meta: "Founding seats" }),
-        /* @__PURE__ */ jsxs("div", { className: "grid grid-cols-1 md:grid-cols-[1fr_320px] gap-12 md:gap-16 items-start", children: [
-          /* @__PURE__ */ jsxs("div", { children: [
-            /* @__PURE__ */ jsx(FadeIn, { children: /* @__PURE__ */ jsx("p", { className: "max-w-[65ch] text-lg leading-[1.7] text-foreground/90 mb-16", children: "It starts with thirty-four people, chosen one by one:" }) }),
-            /* @__PURE__ */ jsx("div", { className: "max-w-3xl mb-16", children: [
-              { label: "Founders", line: "People building startups, in AI and beyond." },
-              { label: "Builders", line: "Engineers and researchers doing serious AI work." },
-              { label: "Investors", line: "Angel investors and people from venture funds." }
-            ].map((item, i) => /* @__PURE__ */ jsx(FadeIn, { delay: i * 0.1, children: /* @__PURE__ */ jsxs("div", { className: "flex flex-col md:flex-row md:items-baseline gap-2 md:gap-12 py-6 border-t border-border/15 last:border-b", children: [
-              /* @__PURE__ */ jsx("div", { className: "font-mono text-xs uppercase tracking-widest text-muted-foreground w-full md:w-48 flex-shrink-0", children: item.label }),
-              /* @__PURE__ */ jsx("p", { className: "text-lg text-foreground/90", children: item.line })
-            ] }) }, item.label)) }),
-            /* @__PURE__ */ jsx(FadeIn, { delay: 0.2, children: /* @__PURE__ */ jsx("p", { className: "max-w-[65ch] text-lg leading-[1.7] text-foreground/90", children: "These thirty-four are not just members. They are the founding members of inner.hub." }) })
-          ] }),
-          /* @__PURE__ */ jsx(FadeIn, { delay: 0.15, children: /* @__PURE__ */ jsxs("div", { className: "relative aspect-[519/1002] overflow-hidden border border-border/15 bg-black", children: [
-            /* @__PURE__ */ jsx(
-              ProceduralPortrait,
-              {
-                src: "/editorial/circle-portrait.jpg",
-                config: PHOSPHOR_CONFIG,
-                className: "size-full"
-              }
-            ),
-            /* @__PURE__ */ jsx("div", { className: "pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/50 via-transparent to-transparent" }),
-            /* @__PURE__ */ jsx("p", { className: "pointer-events-none absolute bottom-4 left-4 font-mono text-[9px] uppercase tracking-widest text-[#18FF85]/70", children: "Signal · Founding member" })
-          ] }) })
-        ] })
-      ] }),
-      /* @__PURE__ */ jsx("section", { id: "section-03", children: /* @__PURE__ */ jsx(PlatformFeatures, { features: PLATFORM_FEATURES, restModules: MODULES.slice(3) }) }),
-      /* @__PURE__ */ jsxs("div", { className: "relative overflow-hidden bg-black border-t border-border/15", children: [
-        /* @__PURE__ */ jsxs("div", { className: "absolute inset-x-0 top-0 h-[85vh] md:h-[95vh] z-0", "aria-hidden": "true", children: [
+  return (
+    // Sayfa içeriği neredeyse tamamen İngilizce (marka sesi); html[lang="tr"]
+    // ile miras alınan Türkçe büyük-harf kuralları uppercase etiketlerdeki
+    // İngilizce kelimeleri bozmasın diye kök seviyede lang="en" işaretlendi.
+    /* @__PURE__ */ jsxs("div", { lang: "en", className: "min-h-screen bg-background text-foreground flex flex-col", children: [
+      /* @__PURE__ */ jsx("a", { href: "#main-content", className: "sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[9999] focus:bg-foreground focus:text-background focus:px-4 focus:py-2 font-mono text-xs uppercase tracking-widest", children: "Skip to content" }),
+      /* @__PURE__ */ jsx(ScrollProgress, {}),
+      /* @__PURE__ */ jsx(Preloader, {}),
+      /* @__PURE__ */ jsx(Grain, {}),
+      /* @__PURE__ */ jsx(IndexRail, {}),
+      /* @__PURE__ */ jsxs("main", { id: "main-content", className: "flex-grow", children: [
+        /* @__PURE__ */ jsxs("section", { ref: heroRef, className: "h-[100svh] mb-[-3rem] flex flex-col justify-end px-6 pb-16 md:px-12 md:pb-24 lg:px-[10%] relative overflow-hidden bg-black text-white", children: [
+          /* @__PURE__ */ jsx(FloatingNavbar, {}),
           /* @__PURE__ */ jsx(
             "video",
             {
@@ -1103,121 +969,260 @@ function Home() {
               muted: true,
               loop: true,
               playsInline: true,
-              className: "h-full w-full object-cover",
-              src: "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260406_133058_0504132a-0cf3-4450-a370-8ea3b05c95d4.mp4"
-            }
-          ),
-          /* @__PURE__ */ jsx("div", { className: "pointer-events-none absolute inset-0 bg-gradient-to-b from-black/55 via-black/60 to-black" })
-        ] }),
-        /* @__PURE__ */ jsxs("section", { id: "section-04", className: "relative z-10 px-6 md:px-12 lg:px-[10%] pt-28 md:pt-36 pb-24", children: [
-          /* @__PURE__ */ jsxs("div", { className: "flex items-baseline justify-between gap-6 pb-6 mb-16 border-b border-white/15 font-mono text-xs uppercase tracking-widest text-white/50", children: [
-            /* @__PURE__ */ jsx("span", { children: "04 · What this is" }),
-            /* @__PURE__ */ jsx("span", { className: "whitespace-nowrap", children: "The point" })
-          ] }),
-          /* @__PURE__ */ jsx(
-            WordsPullUp,
-            {
-              text: "Big things start here.",
-              className: "font-display font-serif italic text-4xl md:text-5xl lg:text-6xl text-[var(--bone)] max-w-3xl mb-10 text-balance"
+              className: "absolute inset-0 z-0 h-full w-full object-cover",
+              src: "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260406_094145_4a271a6c-3869-4f1c-8aa7-aeb0cb227994.mp4"
             }
           ),
           /* @__PURE__ */ jsx(
-            ScrollTextReveal,
+            "div",
             {
-              text: "New ideas are discussed here, tested here, and supported here — by people who can actually build them and fund them.",
-              className: "max-w-[46ch] text-[var(--bone)]",
-              style: { fontSize: "clamp(19px, 2.4vw, 26px)", lineHeight: 1.55, opacity: 0.85 }
+              "aria-hidden": "true",
+              className: "bottom-blur-mask pointer-events-none absolute inset-0 z-[1] bg-black/20 backdrop-blur-xl"
+            }
+          ),
+          /* @__PURE__ */ jsx(
+            "div",
+            {
+              "aria-hidden": "true",
+              className: "pointer-events-none absolute inset-0 z-[1] bg-gradient-to-b from-black/50 via-transparent to-transparent"
+            }
+          ),
+          /* @__PURE__ */ jsx(
+            motion.div,
+            {
+              className: "absolute inset-0 z-[1] pointer-events-none",
+              style: { y: heroY },
+              children: /* @__PURE__ */ jsx("div", { className: "absolute top-1/2 right-[5%] -translate-y-1/2 size-[600px] rounded-full bg-[var(--inner-green)]/10 blur-3xl" })
+            }
+          ),
+          /* @__PURE__ */ jsxs(
+            motion.div,
+            {
+              initial: { opacity: 0, y: 24 },
+              animate: { opacity: 1, y: 0 },
+              transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] },
+              className: "relative z-10",
+              children: [
+                /* @__PURE__ */ jsxs("div", { className: "font-mono text-xs uppercase tracking-widest text-white/60 mb-8 flex items-center gap-3", children: [
+                  /* @__PURE__ */ jsx("span", { className: "size-1.5 rounded-full bg-[var(--inner-green)] animate-beacon" }),
+                  "İstanbul → Global · Est. 2026"
+                ] }),
+                /* @__PURE__ */ jsx("h1", { className: "font-display font-serif italic text-5xl md:text-7xl lg:text-8xl leading-[1.05] max-w-[18ch] text-balance", children: "What comes next starts here." })
+              ]
+            }
+          ),
+          /* @__PURE__ */ jsx(
+            motion.div,
+            {
+              initial: { opacity: 0, y: 24 },
+              animate: { opacity: 1, y: 0 },
+              transition: { duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] },
+              className: "relative z-10 mt-12",
+              children: /* @__PURE__ */ jsx("p", { className: "max-w-[50ch] text-lg md:text-xl text-white/70 leading-[1.6]", children: "inner.hub is a private circle of founders, builders, and investors. People who meet early and support each other first." })
+            }
+          ),
+          /* @__PURE__ */ jsx(
+            motion.div,
+            {
+              initial: { opacity: 0, y: 24 },
+              animate: { opacity: 1, y: 0 },
+              transition: { duration: 0.8, delay: 0.35, ease: [0.16, 1, 0.3, 1] },
+              className: "relative z-10 mt-8",
+              children: /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-4 border border-white/15 bg-black/25 py-1 pl-6 pr-1 backdrop-blur-md", children: [
+                /* @__PURE__ */ jsx("p", { className: "hidden text-sm font-medium text-white sm:block", children: "No tickets. No tiers. Just the circle, gently curated." }),
+                /* @__PURE__ */ jsx("p", { className: "text-sm font-medium text-white sm:hidden", children: "No tickets. No tiers." }),
+                /* @__PURE__ */ jsx(
+                  "a",
+                  {
+                    href: "/invitation",
+                    className: "whitespace-nowrap bg-white px-5 py-2.5 font-mono text-xs uppercase tracking-widest text-black transition-colors hover:bg-white/90",
+                    children: "Request an invitation"
+                  }
+                )
+              ] })
+            }
+          ),
+          /* @__PURE__ */ jsxs(
+            motion.div,
+            {
+              initial: { opacity: 0 },
+              animate: { opacity: 1 },
+              transition: { duration: 0.8, delay: 0.5 },
+              className: "absolute bottom-10 left-6 md:left-12 lg:left-[10%] z-10 flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-white/60",
+              children: [
+                /* @__PURE__ */ jsx(
+                  motion.div,
+                  {
+                    animate: { y: [0, 6, 0] },
+                    transition: { duration: 2, repeat: Infinity, ease: "easeInOut" },
+                    children: "↓"
+                  }
+                ),
+                /* @__PURE__ */ jsx("span", { children: "scroll" })
+              ]
             }
           )
         ] }),
-        /* @__PURE__ */ jsxs("section", { id: "section-05", className: "relative z-10 px-6 md:px-12 lg:px-[10%] pt-8 pb-32 md:pb-48", children: [
-          /* @__PURE__ */ jsxs("div", { className: "flex items-baseline justify-between gap-6 pb-6 mb-16 border-b border-white/15 font-mono text-xs uppercase tracking-widest text-white/50", children: [
-            /* @__PURE__ */ jsx("span", { children: "05 · Entry" }),
-            /* @__PURE__ */ jsx("span", { className: "whitespace-nowrap", children: "By invitation" })
+        /* @__PURE__ */ jsx(MarqueeStrip, {}),
+        /* @__PURE__ */ jsxs("section", { id: "section-01", className: "px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15", children: [
+          /* @__PURE__ */ jsx(SectionLabel, { label: "01 · The idea", meta: "Coming together" }),
+          /* @__PURE__ */ jsx(FadeIn, { children: /* @__PURE__ */ jsx("div", { className: "max-w-[65ch] text-lg md:text-xl leading-[1.7] text-foreground/90", children: "AI is the center of this circle. Around it are the founders, builders, and investors pushing what comes next. inner.hub brings them together. It starts in İstanbul, and it starts early." }) })
+        ] }),
+        /* @__PURE__ */ jsxs("section", { id: "section-02", className: "px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15", children: [
+          /* @__PURE__ */ jsx(SectionLabel, { label: "02 · The first thirty-four", meta: "Founding seats" }),
+          /* @__PURE__ */ jsxs("div", { className: "grid grid-cols-1 md:grid-cols-[1fr_320px] gap-12 md:gap-16 items-start", children: [
+            /* @__PURE__ */ jsxs("div", { children: [
+              /* @__PURE__ */ jsx(FadeIn, { children: /* @__PURE__ */ jsx("p", { className: "max-w-[65ch] text-lg leading-[1.7] text-foreground/90 mb-16", children: "It starts with thirty-four people, chosen one by one:" }) }),
+              /* @__PURE__ */ jsx("div", { className: "max-w-3xl mb-16", children: [
+                { label: "Founders", line: "People building startups, in AI and beyond." },
+                { label: "Builders", line: "Engineers and researchers doing serious AI work." },
+                { label: "Investors", line: "Angel investors and people from venture funds." }
+              ].map((item, i) => /* @__PURE__ */ jsx(FadeIn, { delay: i * 0.1, children: /* @__PURE__ */ jsxs("div", { className: "flex flex-col md:flex-row md:items-baseline gap-2 md:gap-12 py-6 border-t border-border/15 last:border-b", children: [
+                /* @__PURE__ */ jsx("div", { className: "font-mono text-xs uppercase tracking-widest text-muted-foreground w-full md:w-48 flex-shrink-0", children: item.label }),
+                /* @__PURE__ */ jsx("p", { className: "text-lg text-foreground/90", children: item.line })
+              ] }) }, item.label)) }),
+              /* @__PURE__ */ jsx(FadeIn, { delay: 0.2, children: /* @__PURE__ */ jsx("p", { className: "max-w-[65ch] text-lg leading-[1.7] text-foreground/90", children: "These thirty-four are not just members. They are the founding members of inner.hub." }) })
+            ] }),
+            /* @__PURE__ */ jsx(FadeIn, { delay: 0.15, children: /* @__PURE__ */ jsxs("div", { className: "relative aspect-[519/1002] overflow-hidden border border-border/15 bg-black", children: [
+              /* @__PURE__ */ jsx(
+                ProceduralPortrait,
+                {
+                  src: "/editorial/circle-portrait.jpg",
+                  config: PHOSPHOR_CONFIG,
+                  className: "size-full"
+                }
+              ),
+              /* @__PURE__ */ jsx("div", { className: "pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/50 via-transparent to-transparent" }),
+              /* @__PURE__ */ jsx("p", { className: "pointer-events-none absolute bottom-4 left-4 font-mono text-[9px] uppercase tracking-widest text-[#18FF85]/70", children: "Signal · Founding member" })
+            ] }) })
+          ] })
+        ] }),
+        /* @__PURE__ */ jsx("section", { id: "section-03", children: /* @__PURE__ */ jsx(PlatformFeatures, { features: PLATFORM_FEATURES, restModules: MODULES.slice(3) }) }),
+        /* @__PURE__ */ jsxs("div", { className: "relative overflow-hidden bg-black border-t border-border/15", children: [
+          /* @__PURE__ */ jsxs("div", { className: "absolute inset-x-0 top-0 h-[85vh] md:h-[95vh] z-0", "aria-hidden": "true", children: [
+            /* @__PURE__ */ jsx(
+              "video",
+              {
+                autoPlay: true,
+                muted: true,
+                loop: true,
+                playsInline: true,
+                className: "h-full w-full object-cover",
+                src: "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260406_133058_0504132a-0cf3-4450-a370-8ea3b05c95d4.mp4"
+              }
+            ),
+            /* @__PURE__ */ jsx("div", { className: "pointer-events-none absolute inset-0 bg-gradient-to-b from-black/55 via-black/60 to-black" })
           ] }),
-          /* @__PURE__ */ jsx(
-            WordsPullUp,
-            {
-              text: "Entry is by invitation. Always.",
-              className: "font-display font-serif italic text-4xl md:text-5xl max-w-2xl mb-8 text-balance text-[var(--bone)]"
-            }
-          ),
-          /* @__PURE__ */ jsx(FadeIn, { delay: 0.2, children: /* @__PURE__ */ jsx("p", { className: "max-w-[65ch] text-lg leading-[1.7] text-[var(--bone)]/80 mb-20", children: "There are no tickets, no tiers, and no public list. Members are put forward from inside the circle, considered with care, and invited personally." }) }),
-          /* @__PURE__ */ jsx("div", { className: "max-w-3xl", children: [
-            { label: "Your name", line: "Someone inside the circle puts your name forward." },
-            { label: "Consideration", line: "We take our time. Fit beats fame." },
-            { label: "Invitation", line: "If it is right, you hear from us directly." }
-          ].map((item, i) => /* @__PURE__ */ jsx(FadeIn, { delay: i * 0.1, children: /* @__PURE__ */ jsxs("div", { className: "flex flex-col md:flex-row md:items-baseline gap-2 md:gap-12 py-6 border-t border-white/15 last:border-b", children: [
-            /* @__PURE__ */ jsx("div", { className: "font-mono text-xs uppercase tracking-widest text-white/50 w-full md:w-48 flex-shrink-0", children: item.label }),
-            /* @__PURE__ */ jsx("p", { className: "text-lg text-[var(--bone)]/90", children: item.line })
-          ] }) }, item.label)) })
-        ] })
-      ] }),
-      /* @__PURE__ */ jsxs(
-        "section",
-        {
-          id: "section-06",
-          className: "px-6 md:px-12 lg:px-[10%] py-32 md:py-48 border-t border-border/15 bg-[var(--ink)] text-[var(--bone)] transition-colors duration-700 overflow-hidden relative",
-          children: [
-            /* @__PURE__ */ jsx("div", { className: "absolute top-0 right-0 size-[500px] bg-[var(--inner-green)]/[0.03] blur-3xl pointer-events-none" }),
-            /* @__PURE__ */ jsx(FadeIn, { children: /* @__PURE__ */ jsxs("div", { className: "flex items-baseline justify-between gap-6 pb-6 mb-20 border-b border-white/15 font-mono text-xs uppercase tracking-widest opacity-60", children: [
-              /* @__PURE__ */ jsx("span", { children: "06 · The gathering" }),
-              /* @__PURE__ */ jsx("span", { className: "whitespace-nowrap", children: "Sep 2026 · İstanbul" })
-            ] }) }),
+          /* @__PURE__ */ jsxs("section", { id: "section-04", className: "relative z-10 px-6 md:px-12 lg:px-[10%] pt-28 md:pt-36 pb-24", children: [
+            /* @__PURE__ */ jsxs("div", { className: "flex items-baseline justify-between gap-6 pb-6 mb-16 border-b border-white/15 font-mono text-xs uppercase tracking-widest text-white/50", children: [
+              /* @__PURE__ */ jsx("span", { children: "04 · What this is" }),
+              /* @__PURE__ */ jsx("span", { className: "whitespace-nowrap", children: "The point" })
+            ] }),
             /* @__PURE__ */ jsx(
               WordsPullUp,
               {
-                text: "The first inner.hub gathering. İstanbul, September 2026.",
-                className: "font-display font-serif italic text-4xl md:text-5xl lg:text-6xl max-w-3xl mb-24 text-balance"
+                text: "Big things start here.",
+                className: "font-display font-serif italic text-4xl md:text-5xl lg:text-6xl text-[var(--bone)] max-w-3xl mb-10 text-balance"
               }
             ),
-            /* @__PURE__ */ jsxs("div", { className: "flex flex-col lg:flex-row lg:items-center gap-16 mb-24", children: [
-              /* @__PURE__ */ jsxs("div", { className: "grid grid-cols-3 gap-6 md:gap-10 min-w-0 lg:flex-1", children: [
-                /* @__PURE__ */ jsx(StatItem, { n: 34, label: "People" }),
-                /* @__PURE__ */ jsx(StatItem, { n: 2, label: "Days" }),
-                /* @__PURE__ */ jsx(StatItem, { n: 8, label: "Modules" })
-              ] }),
-              /* @__PURE__ */ jsx(FadeIn, { delay: 0.2, className: "flex-shrink-0", children: /* @__PURE__ */ jsx(DiagramCircle, {}) })
+            /* @__PURE__ */ jsx(
+              ScrollTextReveal,
+              {
+                text: "New ideas are discussed here, tested here, and supported here — by people who can actually build them and fund them.",
+                className: "max-w-[46ch] text-[var(--bone)]",
+                style: { fontSize: "clamp(19px, 2.4vw, 26px)", lineHeight: 1.55, opacity: 0.85 }
+              }
+            )
+          ] }),
+          /* @__PURE__ */ jsxs("section", { id: "section-05", className: "relative z-10 px-6 md:px-12 lg:px-[10%] pt-8 pb-32 md:pb-48", children: [
+            /* @__PURE__ */ jsxs("div", { className: "flex items-baseline justify-between gap-6 pb-6 mb-16 border-b border-white/15 font-mono text-xs uppercase tracking-widest text-white/50", children: [
+              /* @__PURE__ */ jsx("span", { children: "05 · Entry" }),
+              /* @__PURE__ */ jsx("span", { className: "whitespace-nowrap", children: "By invitation" })
             ] }),
-            /* @__PURE__ */ jsx(FadeIn, { delay: 0.15, children: /* @__PURE__ */ jsx("p", { className: "font-serif text-2xl md:text-3xl max-w-2xl text-balance opacity-80", children: "Thirty-four people. Two days. One circle. The first of many." }) })
-          ]
-        }
-      ),
-      /* @__PURE__ */ jsxs("section", { id: "section-07", className: "px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15", children: [
-        /* @__PURE__ */ jsx(SectionLabel, { label: "07 · What's next", meta: "In time" }),
-        /* @__PURE__ */ jsx(
-          WordsPullUp,
-          {
-            text: "hub is where it starts.",
-            className: "font-display font-serif italic text-4xl md:text-5xl max-w-2xl mb-8 text-balance"
-          }
-        ),
-        /* @__PURE__ */ jsx(FadeIn, { delay: 0.2, children: /* @__PURE__ */ jsx(
-          "p",
-          {
-            className: "max-w-[46ch] text-foreground/90",
-            style: { fontSize: "clamp(19px, 2.4vw, 26px)", lineHeight: 1.55 },
-            children: "We are building something bigger, step by step. We announce things when they are real. There is more."
-          }
-        ) })
-      ] })
-    ] }),
-    /* @__PURE__ */ jsxs("footer", { id: "site-footer", className: "bg-[var(--ink)] px-6 md:px-12 lg:px-[10%] pt-20 pb-6 flex flex-col gap-16 overflow-hidden", children: [
-      /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-6", children: [
-        /* @__PURE__ */ jsx("img", { src: "/inner-logo.png", alt: "inner", width: 140, height: 140, className: "w-[140px] h-[140px]" }),
-        /* @__PURE__ */ jsxs("div", { className: "flex flex-col md:flex-row md:items-center md:justify-between gap-4", children: [
-          /* @__PURE__ */ jsx("div", { className: "flex flex-wrap gap-x-5 gap-y-2 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)] opacity-60", children: /* @__PURE__ */ jsx("span", { children: "The next wave knows each other · İstanbul → Global" }) }),
-          /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-center md:justify-end gap-5", children: [
-            /* @__PURE__ */ jsx("a", { href: "#", "aria-label": "inner on LinkedIn", className: "text-[var(--bone)] opacity-60 hover:opacity-100 transition-opacity duration-300", children: /* @__PURE__ */ jsx(Linkedin, { size: 20, strokeWidth: 1.5 }) }),
-            /* @__PURE__ */ jsx("a", { href: "#", "aria-label": "inner on Instagram", className: "text-[var(--bone)] opacity-60 hover:opacity-100 transition-opacity duration-300", children: /* @__PURE__ */ jsx(Instagram, { size: 20, strokeWidth: 1.5 }) })
+            /* @__PURE__ */ jsx(
+              WordsPullUp,
+              {
+                text: "Entry is by invitation. Always.",
+                className: "font-display font-serif italic text-4xl md:text-5xl max-w-2xl mb-8 text-balance text-[var(--bone)]"
+              }
+            ),
+            /* @__PURE__ */ jsx(FadeIn, { delay: 0.2, children: /* @__PURE__ */ jsx("p", { className: "max-w-[65ch] text-lg leading-[1.7] text-[var(--bone)]/80 mb-20", children: "There are no tickets, no tiers, and no public list. Members are put forward from inside the circle, considered with care, and invited personally." }) }),
+            /* @__PURE__ */ jsx("div", { className: "max-w-3xl", children: [
+              { label: "Your name", line: "Someone inside the circle puts your name forward." },
+              { label: "Consideration", line: "We take our time. Fit beats fame." },
+              { label: "Invitation", line: "If it is right, you hear from us directly." }
+            ].map((item, i) => /* @__PURE__ */ jsx(FadeIn, { delay: i * 0.1, children: /* @__PURE__ */ jsxs("div", { className: "flex flex-col md:flex-row md:items-baseline gap-2 md:gap-12 py-6 border-t border-white/15 last:border-b", children: [
+              /* @__PURE__ */ jsx("div", { className: "font-mono text-xs uppercase tracking-widest text-white/50 w-full md:w-48 flex-shrink-0", children: item.label }),
+              /* @__PURE__ */ jsx("p", { className: "text-lg text-[var(--bone)]/90", children: item.line })
+            ] }) }, item.label)) })
           ] })
         ] }),
-        /* @__PURE__ */ jsx("div", { className: "font-mono text-[10px] uppercase tracking-widest text-[var(--bone)] opacity-30", children: "© 2026 inner. İstanbul." })
+        /* @__PURE__ */ jsxs(
+          "section",
+          {
+            id: "section-06",
+            className: "px-6 md:px-12 lg:px-[10%] py-32 md:py-48 border-t border-border/15 bg-[var(--ink)] text-[var(--bone)] transition-colors duration-700 overflow-hidden relative",
+            children: [
+              /* @__PURE__ */ jsx("div", { className: "absolute top-0 right-0 size-[500px] bg-[var(--inner-green)]/[0.03] blur-3xl pointer-events-none" }),
+              /* @__PURE__ */ jsx(FadeIn, { children: /* @__PURE__ */ jsxs("div", { className: "flex items-baseline justify-between gap-6 pb-6 mb-20 border-b border-white/15 font-mono text-xs uppercase tracking-widest opacity-60", children: [
+                /* @__PURE__ */ jsx("span", { children: "06 · The gathering" }),
+                /* @__PURE__ */ jsx("span", { className: "whitespace-nowrap", children: "Sep 2026 · İstanbul" })
+              ] }) }),
+              /* @__PURE__ */ jsx(
+                WordsPullUp,
+                {
+                  text: "The first inner.hub gathering. İstanbul, September 2026.",
+                  className: "font-display font-serif italic text-4xl md:text-5xl lg:text-6xl max-w-3xl mb-24 text-balance"
+                }
+              ),
+              /* @__PURE__ */ jsxs("div", { className: "flex flex-col lg:flex-row lg:items-center gap-16 mb-24", children: [
+                /* @__PURE__ */ jsxs("div", { className: "grid grid-cols-3 gap-6 md:gap-10 min-w-0 lg:flex-1", children: [
+                  /* @__PURE__ */ jsx(StatItem, { n: 34, label: "People" }),
+                  /* @__PURE__ */ jsx(StatItem, { n: 2, label: "Days" }),
+                  /* @__PURE__ */ jsx(StatItem, { n: 8, label: "Modules" })
+                ] }),
+                /* @__PURE__ */ jsx(FadeIn, { delay: 0.2, className: "flex-shrink-0", children: /* @__PURE__ */ jsx(DiagramCircle, {}) })
+              ] }),
+              /* @__PURE__ */ jsx(FadeIn, { delay: 0.15, children: /* @__PURE__ */ jsx("p", { className: "font-serif text-2xl md:text-3xl max-w-2xl text-balance opacity-80", children: "Thirty-four people. Two days. One circle. The first of many." }) })
+            ]
+          }
+        ),
+        /* @__PURE__ */ jsxs("section", { id: "section-07", className: "px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15", children: [
+          /* @__PURE__ */ jsx(SectionLabel, { label: "07 · What's next", meta: "In time" }),
+          /* @__PURE__ */ jsx(
+            WordsPullUp,
+            {
+              text: "hub is where it starts.",
+              className: "font-display font-serif italic text-4xl md:text-5xl max-w-2xl mb-8 text-balance"
+            }
+          ),
+          /* @__PURE__ */ jsx(FadeIn, { delay: 0.2, children: /* @__PURE__ */ jsx(
+            "p",
+            {
+              className: "max-w-[46ch] text-foreground/90",
+              style: { fontSize: "clamp(19px, 2.4vw, 26px)", lineHeight: 1.55 },
+              children: "We are building something bigger, step by step. We announce things when they are real. There is more."
+            }
+          ) })
+        ] })
       ] }),
-      /* @__PURE__ */ jsx("div", { className: "text-[var(--bone)] leading-none -mb-4 md:-mb-8", "aria-hidden": "true", children: /* @__PURE__ */ jsx(Lockup, { showHub: false, fontSize: "clamp(4rem, 16vw, 13rem)" }) }),
-      /* @__PURE__ */ jsx("span", { className: "sr-only", children: "inner." })
+      /* @__PURE__ */ jsxs("footer", { id: "site-footer", className: "bg-[var(--ink)] px-6 md:px-12 lg:px-[10%] pt-20 pb-6 flex flex-col gap-16 overflow-hidden", children: [
+        /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-6", children: [
+          /* @__PURE__ */ jsx("img", { src: "/inner-logo.png", alt: "inner", width: 140, height: 140, className: "w-[140px] h-[140px]" }),
+          /* @__PURE__ */ jsxs("div", { className: "flex flex-col md:flex-row md:items-center md:justify-between gap-4", children: [
+            /* @__PURE__ */ jsx("div", { className: "flex flex-wrap gap-x-5 gap-y-2 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)] opacity-60", children: /* @__PURE__ */ jsx("span", { children: "The next wave knows each other · İstanbul → Global" }) }),
+            /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-center md:justify-end gap-5", children: [
+              /* @__PURE__ */ jsx("a", { href: "#", "aria-label": "inner on LinkedIn", className: "text-[var(--bone)] opacity-60 hover:opacity-100 transition-opacity duration-300", children: /* @__PURE__ */ jsx(Linkedin, { size: 20, strokeWidth: 1.5 }) }),
+              /* @__PURE__ */ jsx("a", { href: "#", "aria-label": "inner on Instagram", className: "text-[var(--bone)] opacity-60 hover:opacity-100 transition-opacity duration-300", children: /* @__PURE__ */ jsx(Instagram, { size: 20, strokeWidth: 1.5 }) })
+            ] })
+          ] }),
+          /* @__PURE__ */ jsx("div", { className: "font-mono text-[10px] uppercase tracking-widest text-[var(--bone)] opacity-30", children: "© 2026 inner. İstanbul." })
+        ] }),
+        /* @__PURE__ */ jsx("div", { className: "text-[var(--bone)] leading-none -mb-4 md:-mb-8", "aria-hidden": "true", children: /* @__PURE__ */ jsx(Lockup, { showHub: false, fontSize: "clamp(4rem, 16vw, 13rem)" }) }),
+        /* @__PURE__ */ jsx("span", { className: "sr-only", children: "inner." })
+      ] })
     ] })
-  ] });
+  );
 }
 function render() {
   const queryClient = new QueryClient();

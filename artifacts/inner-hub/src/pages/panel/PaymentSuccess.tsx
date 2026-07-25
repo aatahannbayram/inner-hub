@@ -76,7 +76,7 @@ export default function PaymentSuccess() {
 
       {/* Heading */}
       <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56 mb-3">
-        inner·hub
+        <span lang="en">inner·hub</span>
       </p>
       <h1
         className="font-serif text-4xl text-[var(--ink)] mb-4"

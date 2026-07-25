@@ -78,7 +78,9 @@ export default function Requests() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground p-6 md:p-12 lg:p-[10%]">
+    // Sayfa içeriği İngilizce (internal admin ekranı); html[lang="tr"] mirası
+    // uppercase etiketlerdeki İngilizce kelimeleri bozmasın diye lang="en".
+    <div lang="en" className="min-h-screen bg-background text-foreground p-6 md:p-12 lg:p-[10%]">
       <div className="flex items-center justify-between mb-16">
         <h1 className="font-serif text-3xl">Requests</h1>
         <Button 
