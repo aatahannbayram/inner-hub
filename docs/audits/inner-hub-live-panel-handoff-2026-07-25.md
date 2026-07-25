@@ -170,4 +170,29 @@ curl -b /tmp/ih.txt localhost:3001/api/pulse
 
 ---
 
+## 9. Durum güncellemesi — Claude, 2026-07-25 (Track B sonrası)
+
+**§6 "Sıradaki işler" listesi tamamlandı** (Claude: Analytics + InnerApi; Cursor: geri kalanı):
+
+1. ✅ Public identity (`/u/:handle`) — Cursor, `routes/publicId.ts` canlı
+2. ✅ Vault file storage — Cursor, upload akışı canlı
+3. ✅ InnerApi — Claude, gerçek key üretimi + tek-seferlik reveal (`routes/apiKeys.ts`, `pages/panel/InnerApi.tsx`)
+4. ✅ Analytics — Claude, canlı metrikler + empty state (`routes/analytics.ts`, `pages/panel/Analytics.tsx`)
+5. ✅ Talent board — Cursor, canlı
+6. ✅ Capital admin write — Cursor, canlı
+
+`DemoPreviewBanner.tsx` artık hiçbir sayfadan import edilmiyordu, dead-code olarak silindi (`05dfbda`).
+
+### Bilinen bug — `/u/:handle` boş sayfa (Cursor'ın alanı, Claude düzeltmedi)
+
+`http://localhost:5173/u/<handle>` iki durumda da **tamamen boş render ediyor**, konsolda hata yok:
+
+- **401 members-only**: Backend doğru dönüyor — `GET /api/public/profile/:handle` → `{"error":"Bu profil yalnızca inner·hub üyelerine açık","code":"MEMBERS_ONLY","handle":"..."}`. Frontend bu response'u işlemiyor, boş kalıyor.
+- **404 not-found**: Backend doğru dönüyor — `{"error":"Profil bulunamadı"}`. Aynı şekilde frontend boş kalıyor.
+- DB'de `visibility='public'` olan hiç kullanıcı yok (doğrudan `psql` ile doğrulandı) — yani "happy path" (başarılı render) muhtemelen hiç görsel olarak test edilmemiş.
+- Kök neden frontend'de (muhtemelen `PublicProfile.tsx` içinde error-state handling eksik). Bu dosya Claude'un yasaklı listesinde olduğu için dokunulmadı — Cursor'ın düzeltmesi gerekiyor.
+
+---
+
 *Son güncelleme: Cursor agent — 2026-07-25, HEAD `782c493`.*
+*Ek not: Claude agent — 2026-07-25 (Track B tamam, bug raporu eklendi).*
