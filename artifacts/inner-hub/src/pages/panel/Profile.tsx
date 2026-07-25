@@ -44,7 +44,7 @@ function Section({ title, sub, children }: { title: string; sub?: string; childr
   return (
     <div className="border-t border-[var(--ink)]/[0.08] pt-6">
       <div className="mb-4">
-        <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40">{title}</p>
+        <p className="font-mono text-[10px] font-semibold uppercase tracking-widest text-[var(--ink)]/65">{title}</p>
         {sub && <p className="mt-0.5 text-xs text-[var(--ink)]/30">{sub}</p>}
       </div>
       {children}
@@ -80,12 +80,12 @@ function Field({
 
   return (
     <div>
-      <label className="mb-1.5 block font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/45">
+      <label className="mb-1.5 block font-mono text-[10px] font-semibold uppercase tracking-widest text-[var(--ink)]/70">
         {label}
       </label>
       {prefix ? (
         <div className="flex items-stretch border border-[var(--ink)]/[0.08] focus-within:border-[var(--ink)]/30 transition-colors">
-          <span className="flex items-center border-r border-[var(--ink)]/[0.08] bg-[var(--ink)]/[0.03] px-3 font-mono text-[10px] text-[var(--ink)]/45">
+          <span className="flex items-center border-r border-[var(--ink)]/[0.08] bg-[var(--ink)]/[0.03] px-3 font-mono text-[10px] font-medium text-[var(--ink)]/60">
             {prefix}
           </span>
           <input
@@ -115,7 +115,7 @@ function Field({
         />
       )}
       {maxLength && (
-        <p className="mt-1 text-right font-mono text-[10px] text-[var(--ink)]/35">
+        <p className="mt-1 text-right font-mono text-[10px] font-medium text-[var(--ink)]/50">
           {value.length}/{maxLength}
         </p>
       )}
@@ -138,7 +138,7 @@ function SkillEditor({ skills, onChange }: { skills: string[]; onChange: (s: str
 
   return (
     <div>
-      <label className="mb-1.5 block font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/45">
+      <label className="mb-1.5 block font-mono text-[10px] font-semibold uppercase tracking-widest text-[var(--ink)]/70">
         Uzmanlıklar
       </label>
       <div className="mb-2 flex flex-wrap gap-1.5">
@@ -174,7 +174,7 @@ function SkillEditor({ skills, onChange }: { skills: string[]; onChange: (s: str
           </div>
         )}
       </div>
-      <p className="font-mono text-[10px] text-[var(--ink)]/35">Maks. 10 etiket · Enter ile ekle</p>
+      <p className="font-mono text-[10px] font-medium text-[var(--ink)]/50">Maks. 10 etiket · Enter ile ekle</p>
     </div>
   );
 }
@@ -217,7 +217,7 @@ function VisibilitySelector({
           </div>
           <div>
             <p className="text-sm text-[var(--ink)]">{opt.label}</p>
-            <p className="font-mono text-[10px] text-[var(--ink)]/40">{opt.desc}</p>
+            <p className="font-mono text-[10px] font-medium text-[var(--ink)]/50">{opt.desc}</p>
           </div>
         </button>
       ))}
@@ -242,7 +242,7 @@ function Avatar({ name }: { name: string }) {
       </div>
       <div>
         <p className="mb-1 text-sm text-[var(--ink)]">Profil fotoğrafı</p>
-        <p className="font-mono text-[10px] text-[var(--ink)]/40">JPG, PNG — maks. 2 MB</p>
+        <p className="font-mono text-[10px] font-medium text-[var(--ink)]/50">JPG, PNG — maks. 2 MB</p>
         <button className="mt-1.5 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/40 underline underline-offset-2 hover:text-[var(--ink)] transition-colors">
           Değiştir
         </button>
@@ -270,7 +270,7 @@ function CompletionBar({ pct }: { pct: number }) {
           <span className="relative block size-full bg-[var(--inner-green)]" />
         </span>
       </div>
-      <span className="shrink-0 font-mono text-[10px] font-medium text-[var(--ink)]/55">%{pct} tamamlandı</span>
+      <span className="shrink-0 font-mono text-[10px] font-semibold text-[var(--ink)]/70">%{pct} tamamlandı</span>
     </div>
   );
 }

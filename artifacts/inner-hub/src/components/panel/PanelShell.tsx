@@ -208,10 +208,10 @@ function SidebarFooter({
       {user.profileCompletionPct < 100 && (
         <div className="space-y-1.5">
           <div className="flex justify-between">
-            <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/50">
+            <span className="font-mono text-[10px] font-semibold uppercase tracking-widest text-[var(--ink)]/70">
               Profil tamamlanma
             </span>
-            <span className="font-mono text-[10px] font-medium tabular-nums text-[var(--ink)]/55">
+            <span className="font-mono text-[10px] font-semibold tabular-nums text-[var(--ink)]/70">
               %{user.profileCompletionPct}
             </span>
           </div>
