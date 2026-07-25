@@ -183,16 +183,24 @@ function EmbedSection() {
 
 // ─── Platform links ───────────────────────────────────────────────────────────
 
-function PlatformLink({ icon: Icon, label, desc, href }: {
+function PlatformLink({ icon: Icon, label, desc, href, brandColor }: {
   icon: React.ComponentType<{ className?: string }>;
   label: string;
   desc: string;
   href: string;
+  brandColor?: string;
 }) {
   return (
     <div className="flex items-center gap-4 border border-[var(--ink)]/[0.08] p-4 transition-all hover:border-[var(--ink)]/20">
-      <div className="flex size-9 shrink-0 items-center justify-center border border-[var(--ink)]/10">
-        <Icon className="size-4 text-[var(--ink)]/40" />
+      <div
+        className={
+          brandColor
+            ? "flex size-9 shrink-0 items-center justify-center border"
+            : "flex size-9 shrink-0 items-center justify-center border border-[var(--ink)]/10"
+        }
+        style={brandColor ? { backgroundColor: brandColor, borderColor: brandColor } : undefined}
+      >
+        <Icon className={brandColor ? "size-4 text-white" : "size-4 text-[var(--ink)]/40"} />
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-sm text-[var(--ink)]">{label}</p>
@@ -271,8 +279,8 @@ export default function InnerId() {
           <p className="mt-0.5 text-xs text-[var(--ink)]/30">inner·id rozetini platformlarda göster</p>
         </div>
         <div className="space-y-2">
-          <PlatformLink icon={Linkedin} label="LinkedIn" desc="Profilinde inner·hub üyeliğini doğrulat" href="#" />
-          <PlatformLink icon={Github} label="GitHub" desc="README'ne rozet ekle, profili verify et" href="#" />
+          <PlatformLink icon={Linkedin} label="LinkedIn" desc="Profilinde inner·hub üyeliğini doğrulat" href="#" brandColor="#0A66C2" />
+          <PlatformLink icon={Github} label="GitHub" desc="README'ne rozet ekle, profili verify et" href="#" brandColor="#181717" />
           <PlatformLink icon={Globe} label="Kişisel Site" desc="HTML embed kodu ile siteye entegre et" href="#" />
         </div>
       </section>

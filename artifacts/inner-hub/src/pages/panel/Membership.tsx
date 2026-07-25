@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Check, ArrowRight, Zap, Star, Crown } from "lucide-react";
 import { FadeIn } from "@/components/FadeIn";
 import { CurrencyValue } from "@/components/panel/CurrencyValue";
+import { AmbientCardBackground } from "@/components/panel/AmbientCardBackground";
 
 interface Plan {
   id: "annual" | "founder";
@@ -106,12 +107,13 @@ function PlanCard({ plan }: { plan: Plan }) {
   return (
     <div
       className={[
-        "relative flex flex-col border p-6 transition-all duration-200",
+        "relative flex flex-col overflow-hidden border p-6 transition-all duration-200",
         plan.highlighted
           ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--bone)]"
           : "border-[var(--ink)]/[0.08] hover:border-[var(--ink)]/20",
       ].join(" ")}
     >
+      {plan.highlighted && <AmbientCardBackground />}
       {plan.badge && (
         <span
           className={[
@@ -125,6 +127,7 @@ function PlanCard({ plan }: { plan: Plan }) {
         </span>
       )}
 
+      <div className="relative z-10 flex flex-1 flex-col">
       {/* Header */}
       <div className="mb-5">
         <div
@@ -222,6 +225,7 @@ function PlanCard({ plan }: { plan: Plan }) {
         <span>{loading ? "Yönlendiriliyor…" : "Satın Al"}</span>
         <ArrowRight className="size-3.5" />
       </button>
+      </div>
     </div>
   );
 }

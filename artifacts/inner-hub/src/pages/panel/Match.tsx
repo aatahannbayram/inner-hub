@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Loader2, RefreshCw, Sparkles, ArrowRight, Check } from "lucide-react";
 import { FadeIn } from "@/components/FadeIn";
 import { AnimatedHeading } from "@/components/AnimatedHeading";
-import { avatarColor } from "@/lib/avatarColor";
+import { PersonAvatar } from "@/components/panel/PersonAvatar";
 
 interface Match {
   name: string;
@@ -53,20 +53,15 @@ function MatchCard({ match, index }: { match: Match; index: number }) {
       {/* Header */}
       <div className="mb-4 flex items-start gap-4">
         <div className="relative shrink-0">
-          <div
-            className="flex size-12 items-center justify-center font-mono text-[13px] uppercase text-[var(--bone)]"
-            style={{ backgroundColor: avatarColor(match.name) }}
-          >
-            {initials}
-          </div>
-          <div className="absolute -right-0.5 -top-0.5 flex size-4 items-center justify-center bg-[var(--bone)] border border-[var(--ink)]/10">
-            <Sparkles className="size-2.5 text-[var(--ink)]/40" />
+          <PersonAvatar name={match.name} initials={initials} className="size-16 font-serif text-2xl italic" />
+          <div className="absolute -right-1 -top-1 flex size-5 items-center justify-center bg-[var(--bone)] border border-[var(--ink)]/10">
+            <Sparkles className="size-3 text-[var(--inner-green)]" />
           </div>
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
             <div>
-              <p className="text-sm font-medium leading-tight text-[var(--ink)]">{match.name}</p>
+              <p className="text-base font-medium leading-tight text-[var(--ink)]">{match.name}</p>
               <p className="mt-0.5 font-mono text-[10px] text-[var(--ink)]/35">{match.company}</p>
             </div>
             <span

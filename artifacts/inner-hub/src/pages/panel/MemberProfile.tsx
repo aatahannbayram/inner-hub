@@ -1,6 +1,7 @@
 import { useParams } from "wouter";
 import { Link } from "wouter";
 import { ArrowLeft, Briefcase, Linkedin, Globe, Github, CheckCircle2, MessageSquare, UserPlus } from "lucide-react";
+import { PersonAvatar } from "@/components/panel/PersonAvatar";
 
 // ─── Member data (same as Members.tsx, extended) ──────────────────────────────
 
@@ -215,9 +216,7 @@ export default function MemberProfile() {
           <div className="flex items-start gap-4">
             {/* Avatar */}
             <div className="relative shrink-0">
-              <div className="flex size-14 items-center justify-center bg-[var(--ink)] font-mono text-base text-[var(--bone)]">
-                {member.initials}
-              </div>
+              <PersonAvatar name={member.name} initials={member.initials} className="size-14 text-base" />
               {member.isAvailable && (
                 <span className="absolute -bottom-0.5 -right-0.5 size-3 rounded-full border-2 border-[var(--bone)] bg-[var(--inner-green)]" />
               )}

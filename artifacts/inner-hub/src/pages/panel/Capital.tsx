@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { FadeIn } from "@/components/FadeIn";
 import { AnimatedHeading } from "@/components/AnimatedHeading";
-import { avatarColor } from "@/lib/avatarColor";
+import { PersonAvatar } from "@/components/panel/PersonAvatar";
 import {
   TrendingUp,
   Users,
@@ -324,12 +324,11 @@ function DealDetail({ deal, onClose }: { deal: Deal; onClose: () => void }) {
           <div className="space-y-2">
             {deal.founders.map((f) => (
               <div key={f} className="flex items-center gap-3">
-                <div
-                  className="flex size-7 items-center justify-center font-mono text-[9px] uppercase text-[var(--bone)]"
-                  style={{ backgroundColor: avatarColor(f) }}
-                >
-                  {f.split(" ").map((n) => n[0]).join("").slice(0, 2)}
-                </div>
+                <PersonAvatar
+                  name={f}
+                  initials={f.split(" ").map((n) => n[0]).join("").slice(0, 2)}
+                  className="size-7 text-[9px]"
+                />
                 <span className="text-sm text-[var(--ink)]/70">{f}</span>
               </div>
             ))}
@@ -341,12 +340,11 @@ function DealDetail({ deal, onClose }: { deal: Deal; onClose: () => void }) {
           <div className="mb-5">
             <p className="mb-2 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/30">Lead Yatırımcı</p>
             <div className="flex items-center gap-3">
-              <div
-                className="flex size-7 items-center justify-center font-mono text-[9px] uppercase text-[var(--bone)]"
-                style={{ backgroundColor: avatarColor(deal.leadInvestor) }}
-              >
-                {deal.leadInvestor.split(" ").map((n) => n[0]).join("").slice(0, 2)}
-              </div>
+              <PersonAvatar
+                name={deal.leadInvestor}
+                initials={deal.leadInvestor.split(" ").map((n) => n[0]).join("").slice(0, 2)}
+                className="size-7 text-[9px]"
+              />
               <span className="text-sm text-[var(--ink)]/70">{deal.leadInvestor}</span>
             </div>
           </div>

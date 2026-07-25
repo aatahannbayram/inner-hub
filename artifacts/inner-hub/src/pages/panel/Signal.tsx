@@ -19,8 +19,8 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Link } from "wouter";
 import { FadeIn } from "@/components/FadeIn";
 import { AmbientCardBackground } from "@/components/panel/AmbientCardBackground";
+import { PersonAvatar } from "@/components/panel/PersonAvatar";
 import { apiUrl } from "@/lib/api";
-import { avatarColor } from "@/lib/avatarColor";
 
 interface Theme {
   topic: string;
@@ -725,16 +725,11 @@ export default function Signal() {
                       key={i}
                       className="flex items-start gap-4 border border-[var(--ink)]/[0.08] p-4 transition-colors hover:border-[var(--ink)]/25"
                     >
-                      <div
-                        className="flex size-10 shrink-0 items-center justify-center font-mono text-[11px] uppercase text-[var(--bone)]"
-                        style={{ backgroundColor: avatarColor(conn.name) }}
-                      >
-                        {conn.name
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")
-                          .slice(0, 2)}
-                      </div>
+                      <PersonAvatar
+                        name={conn.name}
+                        initials={conn.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
+                        className="size-10 text-[11px]"
+                      />
                       <div className="min-w-0 flex-1">
                         <div className="mb-1 flex items-start justify-between gap-2">
                           <p className="text-sm font-medium text-[var(--ink)]">{conn.name}</p>

@@ -1,7 +1,48 @@
 import { useState, useRef, useEffect } from "react";
-import { Send, Hash, Volume2, Pin, Search } from "lucide-react";
+import { Send, Hash, Volume2, Pin, Search, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { avatarColor } from "@/lib/avatarColor";
+import { AmbientCardBackground } from "@/components/panel/AmbientCardBackground";
+import { PersonAvatar } from "@/components/panel/PersonAvatar";
+
+const CHANNEL_SUGGESTIONS: Record<string, string[]> = {
+  genel: ["Ben de AWS Activate'e başvurdum 🙋", "Zirve için elimden geleni yaparım", "Harika gidiyor 🎉"],
+  duyurular: ["Başvuru linkini paylaşır mısın?", "Tarihi takvime ekledim"],
+  girisimler: ["Tebrikler! 🚀", "Nasıl başardınız, detay verir misiniz?"],
+  "ai-tools": ["Cursor ile deneyimim de benzer", "Bu formatı denemek isterim"],
+  jobs: ["İlgileniyorum, DM atabilir miyim?"],
+  tavsiyeler: ["Listeme ekledim, teşekkürler", "Bir de şunu öneririm:"],
+};
+
+const CHANNEL_DIGEST: Record<string, string> = {
+  genel: "Eylül Zirvesi planlaması hızlanıyor. AWS Activate deneyimleri paylaşılıyor, 2-3 hafta içinde dönüş bekleniyor.",
+  duyurular: "2. dönem başvuruları açıldı. Ağustos başında bir workshop planlanıyor.",
+  girisimler: "Hipo 50. müşterisine ulaştı. AWS Activate başvuruları toplulukta gündemde.",
+  "ai-tools": "Claude 4 Opus ve Cursor AI kombinasyonu hızla yaygınlaşıyor — üyeler %40 verim artışı raporluyor.",
+  jobs: "Şu anda açık ilan yok. Talent Board'da 5 aktif fırsat var.",
+  tavsiyeler: "'The Mom Test' ve Acquired podcast bu hafta en çok önerilenler.",
+};
+
+function AiDigest({ channelId, channelLabel }: { channelId: string; channelLabel: string }) {
+  return (
+    <div className="relative mx-4 mb-4 overflow-hidden border border-[var(--ink)] bg-[var(--ink)] p-4 text-[var(--bone)]">
+      <AmbientCardBackground />
+      <div className="relative z-10 flex items-start gap-3">
+        <div className="relative flex size-7 shrink-0 items-center justify-center border border-[var(--inner-green)]/40 bg-[var(--inner-green)]/10">
+          <Sparkles className="size-3.5 text-[var(--inner-green)]" />
+          <span className="absolute -right-1 -top-1 size-1.5 animate-beacon rounded-full bg-[var(--inner-green)]" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="mb-1 font-mono text-[9px] uppercase tracking-widest text-[var(--inner-green)]/80">
+            AI Özet · #{channelLabel}
+          </p>
+          <p className="text-sm leading-relaxed text-[var(--bone)]/80">
+            {CHANNEL_DIGEST[channelId] ?? "Bu kanalda henüz özetlenecek yeterli aktivite yok."}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 interface Message {
   id: number;
@@ -198,17 +239,13 @@ const MESSAGES_BY_CHANNEL: Record<string, Message[]> = {
   ],
 };
 
-function Avatar({ name, initials, role, size = "sm" }: { name: string; initials: string; role: "admin" | "member"; size?: "sm" | "md" }) {
+function Avatar({ name, initials, size = "sm" }: { name: string; initials: string; role: "admin" | "member"; size?: "sm" | "md" }) {
   return (
-    <div
-      className={cn(
-        "flex shrink-0 items-center justify-center font-mono uppercase text-[var(--bone)]",
-        size === "sm" ? "size-7 text-[9px]" : "size-8 text-[10px]",
-      )}
-      style={{ backgroundColor: role === "admin" ? "var(--ink)" : avatarColor(name) }}
-    >
-      {initials}
-    </div>
+    <PersonAvatar
+      name={name}
+      initials={initials}
+      className={size === "sm" ? "size-7 text-[9px]" : "size-8 text-[10px]"}
+    />
   );
 }
 
@@ -330,6 +367,7 @@ export default function ChatPage() {
 
         {/* Messages */}
         <div ref={messagesRef} className="flex-1 overflow-y-auto py-4">
+          <AiDigest channelId={activeChannel} channelLabel={channel.label} />
           {channelMessages.length === 0 ? (
             <div className="flex h-full items-center justify-center">
               <div className="text-center">
@@ -356,6 +394,21 @@ export default function ChatPage() {
 
         {/* Input */}
         <div className="border-t border-[var(--ink)]/[0.08] p-4">
+          {(CHANNEL_SUGGESTIONS[activeChannel]?.length ?? 0) > 0 && (
+            <div className="mb-2 flex flex-wrap items-center gap-1.5">
+              <Sparkles className="size-3 shrink-0 text-[var(--inner-green)]/70" />
+              {CHANNEL_SUGGESTIONS[activeChannel].map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => setDraft(s)}
+                  className="border border-[var(--ink)]/12 px-2.5 py-1 font-mono text-[10px] text-[var(--ink)]/50 transition-colors hover:border-[var(--inner-green)]/40 hover:text-[var(--ink)]"
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          )}
           <div className="flex items-end gap-3 border border-[var(--ink)]/15 bg-[var(--bone)] p-3 focus-within:border-[var(--ink)]/40 transition-colors">
             <textarea
               value={draft}

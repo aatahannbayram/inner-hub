@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { FadeIn } from "@/components/FadeIn";
 import { CurrencyValue } from "@/components/panel/CurrencyValue";
+import { AmbientCardBackground } from "@/components/panel/AmbientCardBackground";
 import {
   Copy,
   RefreshCw,
@@ -301,55 +302,58 @@ export default function InnerApi() {
             <div
               key={plan.name}
               className={[
-                "border p-5 transition-all",
+                "relative overflow-hidden border p-5 transition-all",
                 plan.current
                   ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--bone)]"
                   : "border-[var(--ink)]/[0.08] hover:border-[var(--ink)]/20",
               ].join(" ")}
             >
-              <div className="mb-1 flex items-center justify-between">
-                <p className={`font-mono text-[9px] uppercase tracking-widest ${plan.current ? "text-[var(--bone)]/50" : "text-[var(--ink)]/40"}`}>
-                  {plan.name}
+              {plan.current && <AmbientCardBackground />}
+              <div className="relative z-10">
+                <div className="mb-1 flex items-center justify-between">
+                  <p className={`font-mono text-[9px] uppercase tracking-widest ${plan.current ? "text-[var(--bone)]/50" : "text-[var(--ink)]/40"}`}>
+                    {plan.name}
+                  </p>
+                  {plan.current && (
+                    <span className="border border-[var(--inner-green)]/40 px-1.5 py-0.5 font-mono text-[7px] uppercase tracking-widest text-[var(--inner-green)]">
+                      Mevcut
+                    </span>
+                  )}
+                </div>
+                <div className="mb-3 flex items-baseline gap-1">
+                  <span
+                    className={`font-serif text-2xl ${plan.current ? "text-[var(--bone)]" : "text-[var(--ink)]"}`}
+                    style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
+                  >
+                    <CurrencyValue value={plan.price} />
+                  </span>
+                  {plan.period && (
+                    <span className={`font-mono text-[9px] ${plan.current ? "text-[var(--bone)]/30" : "text-[var(--ink)]/30"}`}>
+                      {plan.period}
+                    </span>
+                  )}
+                </div>
+                <p className={`mb-3 font-mono text-[9px] ${plan.current ? "text-[var(--bone)]/40" : "text-[var(--ink)]/35"}`}>
+                  {plan.requests} istek
                 </p>
-                {plan.current && (
-                  <span className="border border-[var(--inner-green)]/40 px-1.5 py-0.5 font-mono text-[7px] uppercase tracking-widest text-[var(--inner-green)]">
-                    Mevcut
-                  </span>
+                <ul className="mb-4 space-y-1.5">
+                  {plan.features.map((f) => (
+                    <li key={f} className="flex items-start gap-2">
+                      <CheckCircle2 className={`mt-0.5 size-3 shrink-0 ${plan.current ? "text-[var(--inner-green)]" : "text-[var(--ink)]/25"}`} />
+                      <span className={`text-xs ${plan.current ? "text-[var(--bone)]/60" : "text-[var(--ink)]/50"}`}>{f}</span>
+                    </li>
+                  ))}
+                </ul>
+                {!plan.current && (
+                  <button className={[
+                    "flex w-full items-center justify-between border px-3 py-2 font-mono text-[9px] uppercase tracking-widest transition-all",
+                    "border-[var(--ink)]/15 text-[var(--ink)]/40 hover:border-[var(--ink)] hover:text-[var(--ink)]",
+                  ].join(" ")}>
+                    <span>{plan.name === "Starter" ? "Downgrade" : "Upgrade"}</span>
+                    <ArrowUpRight className="size-3" />
+                  </button>
                 )}
               </div>
-              <div className="mb-3 flex items-baseline gap-1">
-                <span
-                  className={`font-serif text-2xl ${plan.current ? "text-[var(--bone)]" : "text-[var(--ink)]"}`}
-                  style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
-                >
-                  <CurrencyValue value={plan.price} />
-                </span>
-                {plan.period && (
-                  <span className={`font-mono text-[9px] ${plan.current ? "text-[var(--bone)]/30" : "text-[var(--ink)]/30"}`}>
-                    {plan.period}
-                  </span>
-                )}
-              </div>
-              <p className={`mb-3 font-mono text-[9px] ${plan.current ? "text-[var(--bone)]/40" : "text-[var(--ink)]/35"}`}>
-                {plan.requests} istek
-              </p>
-              <ul className="mb-4 space-y-1.5">
-                {plan.features.map((f) => (
-                  <li key={f} className="flex items-start gap-2">
-                    <CheckCircle2 className={`mt-0.5 size-3 shrink-0 ${plan.current ? "text-[var(--inner-green)]" : "text-[var(--ink)]/25"}`} />
-                    <span className={`text-xs ${plan.current ? "text-[var(--bone)]/60" : "text-[var(--ink)]/50"}`}>{f}</span>
-                  </li>
-                ))}
-              </ul>
-              {!plan.current && (
-                <button className={[
-                  "flex w-full items-center justify-between border px-3 py-2 font-mono text-[9px] uppercase tracking-widest transition-all",
-                  "border-[var(--ink)]/15 text-[var(--ink)]/40 hover:border-[var(--ink)] hover:text-[var(--ink)]",
-                ].join(" ")}>
-                  <span>{plan.name === "Starter" ? "Downgrade" : "Upgrade"}</span>
-                  <ArrowUpRight className="size-3" />
-                </button>
-              )}
             </div>
           ))}
         </div>

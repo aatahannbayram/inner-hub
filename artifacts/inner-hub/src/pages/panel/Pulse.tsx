@@ -11,7 +11,7 @@ import {
   ArrowUp,
 } from "lucide-react";
 import { ProceduralPortrait, type PortraitConfig } from "@/components/panel/ProceduralPortrait";
-import { avatarColor } from "@/lib/avatarColor";
+import { PersonAvatar } from "@/components/panel/PersonAvatar";
 
 const PHOSPHOR_CONFIG: PortraitConfig = {
   renderMode: "characters",
@@ -332,12 +332,11 @@ export default function Pulse() {
             <div className="space-y-2">
               {TOP_CONTRIBUTORS.map((c, i) => (
                 <div key={c.name} className="flex items-center gap-3">
-                  <div
-                    className="flex size-6 shrink-0 items-center justify-center font-mono text-[8px] uppercase text-[var(--bone)]"
-                    style={{ backgroundColor: avatarColor(c.name) }}
-                  >
-                    {c.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
-                  </div>
+                  <PersonAvatar
+                    name={c.name}
+                    initials={c.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
+                    className="size-6 text-[8px]"
+                  />
                   <div className="flex-1 min-w-0">
                     <p className="text-xs text-[var(--ink)]/70 truncate">{c.name}</p>
                     <div className="mt-0.5 h-0.5 bg-[var(--ink)]/[0.06]">

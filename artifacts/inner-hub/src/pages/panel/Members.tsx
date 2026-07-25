@@ -3,7 +3,7 @@ import { Search, Linkedin, Briefcase, ArrowRight, Tag, CheckCircle2, MessageSqua
 import { FadeIn } from "@/components/FadeIn";
 import { AnimatedHeading } from "@/components/AnimatedHeading";
 import { cn } from "@/lib/utils";
-import { avatarColor } from "@/lib/avatarColor";
+import { PersonAvatar } from "@/components/panel/PersonAvatar";
 
 type Tab = "uyeler" | "talent";
 
@@ -189,12 +189,7 @@ function MemberCard({ member, onSelect }: { member: Member; onSelect: (m: Member
       {/* Header */}
       <div className="mb-3 flex items-start gap-3">
         <div className="relative">
-          <div
-            className="flex size-10 items-center justify-center font-mono text-[11px] uppercase text-[var(--bone)]"
-            style={{ backgroundColor: avatarColor(member.name) }}
-          >
-            {member.initials}
-          </div>
+          <PersonAvatar name={member.name} initials={member.initials} className="size-10 text-[11px]" />
           {member.isAvailable && (
             <span className="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full border-2 border-[var(--bone)] bg-[var(--inner-green)]" />
           )}
@@ -292,12 +287,7 @@ function MemberDetailPanel({ member, onClose }: { member: Member; onClose: () =>
           {/* Identity */}
           <div className="flex items-start gap-3">
             <div className="relative shrink-0">
-              <div
-                className="flex size-12 items-center justify-center font-mono text-sm text-[var(--bone)]"
-                style={{ backgroundColor: avatarColor(member.name) }}
-              >
-                {member.initials}
-              </div>
+              <PersonAvatar name={member.name} initials={member.initials} className="size-12 text-sm" />
               {member.isAvailable && (
                 <span className="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full border-2 border-[var(--bone)] bg-[var(--inner-green)]" />
               )}
@@ -497,12 +487,7 @@ function TalentCard({ post }: { post: TalentPost }) {
     <div className="border border-[var(--ink)]/[0.08] p-5 transition-all duration-200 hover:border-[var(--ink)]/20">
       <div className="mb-3 flex items-start justify-between gap-3">
         <div className="flex items-center gap-2.5">
-          <div
-            className="flex size-8 shrink-0 items-center justify-center font-mono text-[10px] uppercase text-[var(--bone)]"
-            style={{ backgroundColor: avatarColor(post.postedBy) }}
-          >
-            {post.postedByInitials}
-          </div>
+          <PersonAvatar name={post.postedBy} initials={post.postedByInitials} className="size-8 text-[10px]" />
           <div>
             <p className="text-xs font-medium text-[var(--ink)]">{post.postedBy}</p>
             <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/30">
