@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ChevronDown, ChevronRight, BookOpen, CheckCircle2, Lock, Play, GraduationCap, TrendingUp } from "lucide-react";
 import { FadeIn } from "@/components/FadeIn";
 import { AnimatedHeading } from "@/components/AnimatedHeading";
+import { HeroVideo } from "@/components/HeroVideo";
 import { useApiQuery } from "@/hooks/useApiQuery";
 import { StatCardSkeleton, CourseCardSkeleton, LoadingBlock, ErrorState } from "@/components/panel/Skeletons";
 
@@ -244,21 +245,17 @@ function CoursesHero({ hasEnrolled }: { hasEnrolled: boolean }) {
       className="relative -mx-4 -mt-6 overflow-hidden sm:-mx-6 lg:-mx-8 lg:-mt-8"
       style={{ height: "min(70vh, 620px)", minHeight: 440 }}
     >
-      <video
-        autoPlay
-        muted
-        loop
-        playsInline
-        className="absolute inset-0 h-full w-full object-cover"
+      <HeroVideo
         src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260406_094145_4a271a6c-3869-4f1c-8aa7-aeb0cb227994.mp4"
+        poster="/posters/courses-hero.jpg"
+        className="absolute inset-0 h-full w-full object-cover"
       />
+      {/* backdrop-blur-xl yerine deterministik gradient scrim — altta duran
+          metin için yeterli kontrast, blur'un sürekli GPU maliyeti olmadan. */}
       <div
         aria-hidden="true"
-        className="bottom-blur-mask pointer-events-none absolute inset-0 z-[1] bg-black/20 backdrop-blur-xl"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-b from-black/50 via-transparent to-transparent"
+        className="pointer-events-none absolute inset-0 z-[1]"
+        style={{ background: "linear-gradient(180deg, rgba(0,0,0,.15) 0%, rgba(0,0,0,.35) 55%, rgba(0,0,0,.75) 100%)" }}
       />
 
       <div className="relative z-10 flex h-full flex-col justify-end px-6 pb-10 md:px-12 md:pb-14">
