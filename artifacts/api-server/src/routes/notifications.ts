@@ -3,6 +3,7 @@ import { and, desc, eq, sql } from "drizzle-orm";
 import { db } from "@workspace/db";
 import { notificationsTable } from "@workspace/db/schema";
 import { requireAuth } from "../lib/auth";
+import { getUserSettingsPrefs } from "./settings";
 
 const router = Router();
 
@@ -59,6 +60,13 @@ function mapRow(n: {
   };
 }
 
+function kindAllowed(prefs: Awaited<ReturnType<typeof getUserSettingsPrefs>>, kind: NotifKind): boolean {
+  if (kind === "match") return prefs.notifMatch;
+  if (kind === "event") return prefs.notifEvents;
+  if (kind === "capital") return prefs.notifCapital;
+  return true; // request | signal
+}
+
 /** Diğer route'lardan bildirim oluşturmak için. */
 export async function createNotification(input: {
   userId: number;
@@ -68,11 +76,15 @@ export async function createNotification(input: {
 }) {
   try {
     await ensureNotificationColumns();
+    const kind = input.kind ?? "signal";
+    const prefs = await getUserSettingsPrefs(input.userId);
+    if (!kindAllowed(prefs, kind)) return;
+
     await db.insert(notificationsTable).values({
       userId: input.userId,
       title: input.title,
       body: input.body,
-      kind: input.kind ?? "signal",
+      kind,
       isRead: false,
     });
   } catch {

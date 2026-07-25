@@ -18925,14 +18925,14 @@ var require_etag = __commonJS({
   "../../node_modules/.pnpm/etag@1.8.1/node_modules/etag/index.js"(exports, module) {
     "use strict";
     module.exports = etag;
-    var crypto10 = __require("crypto");
+    var crypto11 = __require("crypto");
     var Stats = __require("fs").Stats;
     var toString = Object.prototype.toString;
     function entitytag(entity) {
       if (entity.length === 0) {
         return '"0-2jmj7l5rSw0yVb/vlWAYkK/YBwk"';
       }
-      var hash = crypto10.createHash("sha1").update(entity, "utf8").digest("base64").substring(0, 27);
+      var hash = crypto11.createHash("sha1").update(entity, "utf8").digest("base64").substring(0, 27);
       var len = typeof entity === "string" ? Buffer.byteLength(entity, "utf8") : entity.length;
       return '"' + len.toString(16) + "-" + hash + '"';
     }
@@ -20655,27 +20655,27 @@ var require_router = __commonJS({
     var slice = Array.prototype.slice;
     var flatten = Array.prototype.flat;
     var methods = METHODS.map((method) => method.toLowerCase());
-    module.exports = Router19;
+    module.exports = Router21;
     module.exports.Route = Route;
-    function Router19(options) {
-      if (!(this instanceof Router19)) {
-        return new Router19(options);
+    function Router21(options) {
+      if (!(this instanceof Router21)) {
+        return new Router21(options);
       }
       const opts = options || {};
-      function router19(req, res, next) {
-        router19.handle(req, res, next);
+      function router21(req, res, next) {
+        router21.handle(req, res, next);
       }
-      Object.setPrototypeOf(router19, this);
-      router19.caseSensitive = opts.caseSensitive;
-      router19.mergeParams = opts.mergeParams;
-      router19.params = {};
-      router19.strict = opts.strict;
-      router19.stack = [];
-      return router19;
+      Object.setPrototypeOf(router21, this);
+      router21.caseSensitive = opts.caseSensitive;
+      router21.mergeParams = opts.mergeParams;
+      router21.params = {};
+      router21.strict = opts.strict;
+      router21.stack = [];
+      return router21;
     }
-    Router19.prototype = function() {
+    Router21.prototype = function() {
     };
-    Router19.prototype.param = function param(name, fn) {
+    Router21.prototype.param = function param(name, fn) {
       if (!name) {
         throw new TypeError("argument name is required");
       }
@@ -20695,7 +20695,7 @@ var require_router = __commonJS({
       params.push(fn);
       return this;
     };
-    Router19.prototype.handle = function handle(req, res, callback) {
+    Router21.prototype.handle = function handle(req, res, callback) {
       if (!callback) {
         throw new TypeError("argument callback is required");
       }
@@ -20822,7 +20822,7 @@ var require_router = __commonJS({
         }
       }
     };
-    Router19.prototype.use = function use(handler) {
+    Router21.prototype.use = function use(handler) {
       let offset = 0;
       let path7 = "/";
       if (typeof handler !== "function") {
@@ -20855,7 +20855,7 @@ var require_router = __commonJS({
       }
       return this;
     };
-    Router19.prototype.route = function route(path7) {
+    Router21.prototype.route = function route(path7) {
       const route2 = new Route(path7);
       const layer = new Layer(path7, {
         sensitive: this.caseSensitive,
@@ -20870,7 +20870,7 @@ var require_router = __commonJS({
       return route2;
     };
     methods.concat("all").forEach(function(method) {
-      Router19.prototype[method] = function(path7) {
+      Router21.prototype[method] = function(path7) {
         const route = this.route(path7);
         route[method].apply(route, slice.call(arguments, 1));
         return this;
@@ -21053,13 +21053,13 @@ var require_application = __commonJS({
     var compileTrust = require_utils3().compileTrust;
     var resolve4 = __require("node:path").resolve;
     var once = require_once();
-    var Router19 = require_router();
+    var Router21 = require_router();
     var slice = Array.prototype.slice;
     var flatten = Array.prototype.flat;
     var app2 = exports = module.exports = {};
     var trustProxyDefaultSymbol = "@@symbol:trust_proxy_default";
     app2.init = function init() {
-      var router19 = null;
+      var router21 = null;
       this.cache = /* @__PURE__ */ Object.create(null);
       this.engines = /* @__PURE__ */ Object.create(null);
       this.settings = /* @__PURE__ */ Object.create(null);
@@ -21068,13 +21068,13 @@ var require_application = __commonJS({
         configurable: true,
         enumerable: true,
         get: function getrouter() {
-          if (router19 === null) {
-            router19 = new Router19({
+          if (router21 === null) {
+            router21 = new Router21({
               caseSensitive: this.enabled("case sensitive routing"),
               strict: this.enabled("strict routing")
             });
           }
-          return router19;
+          return router21;
         }
       });
     };
@@ -21145,15 +21145,15 @@ var require_application = __commonJS({
       if (fns.length === 0) {
         throw new TypeError("app.use() requires a middleware function");
       }
-      var router19 = this.router;
+      var router21 = this.router;
       fns.forEach(function(fn2) {
         if (!fn2 || !fn2.handle || !fn2.set) {
-          return router19.use(path7, fn2);
+          return router21.use(path7, fn2);
         }
         debug(".use app under %s", path7);
         fn2.mountpath = path7;
         fn2.parent = this;
-        router19.use(path7, function mounted_app(req, res, next) {
+        router21.use(path7, function mounted_app(req, res, next) {
           var orig = req.app;
           fn2.handle(req, res, function(err) {
             Object.setPrototypeOf(req, orig.request);
@@ -22407,17 +22407,17 @@ var require_content_disposition = __commonJS({
 // ../../node_modules/.pnpm/cookie-signature@1.2.2/node_modules/cookie-signature/index.js
 var require_cookie_signature = __commonJS({
   "../../node_modules/.pnpm/cookie-signature@1.2.2/node_modules/cookie-signature/index.js"(exports) {
-    var crypto10 = __require("crypto");
+    var crypto11 = __require("crypto");
     exports.sign = function(val, secret) {
       if ("string" != typeof val) throw new TypeError("Cookie value must be provided as a string.");
       if (null == secret) throw new TypeError("Secret key must be provided.");
-      return val + "." + crypto10.createHmac("sha256", secret).update(val).digest("base64").replace(/\=+$/, "");
+      return val + "." + crypto11.createHmac("sha256", secret).update(val).digest("base64").replace(/\=+$/, "");
     };
     exports.unsign = function(input, secret) {
       if ("string" != typeof input) throw new TypeError("Signed cookie string must be provided.");
       if (null == secret) throw new TypeError("Secret key must be provided.");
       var tentativeValue = input.slice(0, input.lastIndexOf(".")), expectedInput = exports.sign(tentativeValue, secret), expectedBuffer = Buffer.from(expectedInput), inputBuffer = Buffer.from(input);
-      return expectedBuffer.length === inputBuffer.length && crypto10.timingSafeEqual(expectedBuffer, inputBuffer) ? tentativeValue : false;
+      return expectedBuffer.length === inputBuffer.length && crypto11.timingSafeEqual(expectedBuffer, inputBuffer) ? tentativeValue : false;
     };
   }
 });
@@ -23726,7 +23726,7 @@ var require_express = __commonJS({
     var EventEmitter2 = __require("node:events").EventEmitter;
     var mixin = require_merge_descriptors();
     var proto = require_application();
-    var Router19 = require_router();
+    var Router21 = require_router();
     var req = require_request();
     var res = require_response();
     exports = module.exports = createApplication;
@@ -23748,8 +23748,8 @@ var require_express = __commonJS({
     exports.application = proto;
     exports.request = req;
     exports.response = res;
-    exports.Route = Router19.Route;
-    exports.Router = Router19;
+    exports.Route = Router21.Route;
+    exports.Router = Router21;
     exports.json = bodyParser.json;
     exports.raw = bodyParser.raw;
     exports.static = require_serve_static();
@@ -24047,11 +24047,11 @@ var require_lib3 = __commonJS({
 // ../../node_modules/.pnpm/cookie-signature@1.0.6/node_modules/cookie-signature/index.js
 var require_cookie_signature2 = __commonJS({
   "../../node_modules/.pnpm/cookie-signature@1.0.6/node_modules/cookie-signature/index.js"(exports) {
-    var crypto10 = __require("crypto");
+    var crypto11 = __require("crypto");
     exports.sign = function(val, secret) {
       if ("string" != typeof val) throw new TypeError("Cookie value must be provided as a string.");
       if ("string" != typeof secret) throw new TypeError("Secret string must be provided.");
-      return val + "." + crypto10.createHmac("sha256", secret).update(val).digest("base64").replace(/\=+$/, "");
+      return val + "." + crypto11.createHmac("sha256", secret).update(val).digest("base64").replace(/\=+$/, "");
     };
     exports.unsign = function(val, secret) {
       if ("string" != typeof val) throw new TypeError("Signed cookie string must be provided.");
@@ -24060,7 +24060,7 @@ var require_cookie_signature2 = __commonJS({
       return sha12(mac) == sha12(val) ? str : false;
     };
     function sha12(str) {
-      return crypto10.createHash("sha1").update(str).digest("hex");
+      return crypto11.createHash("sha1").update(str).digest("hex");
     }
   }
 });
@@ -30037,7 +30037,7 @@ var require_cert_signatures = __commonJS({
 var require_sasl = __commonJS({
   "../../node_modules/.pnpm/pg@8.22.0/node_modules/pg/lib/crypto/sasl.js"(exports, module) {
     "use strict";
-    var crypto10 = require_utils5();
+    var crypto11 = require_utils5();
     var { signatureAlgorithmHashFromCertificate } = require_cert_signatures();
     function saslprep(password) {
       const nonAsciiSpace = /[\u00A0\u1680\u2000-\u200B\u202F\u205F\u3000]/g;
@@ -30055,7 +30055,7 @@ var require_sasl = __commonJS({
       if (mechanism === "SCRAM-SHA-256-PLUS" && typeof stream.getPeerCertificate !== "function") {
         throw new Error("SASL: Mechanism SCRAM-SHA-256-PLUS requires a certificate");
       }
-      const clientNonce = crypto10.randomBytes(18).toString("base64");
+      const clientNonce = crypto11.randomBytes(18).toString("base64");
       const gs2Header = mechanism === "SCRAM-SHA-256-PLUS" ? "p=tls-server-end-point" : stream ? "y" : "n";
       return {
         mechanism,
@@ -30097,20 +30097,20 @@ var require_sasl = __commonJS({
         const peerCert = stream.getPeerCertificate().raw;
         let hashName = signatureAlgorithmHashFromCertificate(peerCert);
         if (hashName === "MD5" || hashName === "SHA-1") hashName = "SHA-256";
-        const certHash = await crypto10.hashByName(hashName, peerCert);
+        const certHash = await crypto11.hashByName(hashName, peerCert);
         const bindingData = Buffer.concat([Buffer.from("p=tls-server-end-point,,"), Buffer.from(certHash)]);
         channelBinding = bindingData.toString("base64");
       }
       const clientFinalMessageWithoutProof = "c=" + channelBinding + ",r=" + sv.nonce;
       const authMessage = clientFirstMessageBare + "," + serverFirstMessage + "," + clientFinalMessageWithoutProof;
       const saltBytes = Buffer.from(sv.salt, "base64");
-      const saltedPassword = await crypto10.deriveKey(saslprep(password), saltBytes, sv.iteration);
-      const clientKey = await crypto10.hmacSha256(saltedPassword, "Client Key");
-      const storedKey = await crypto10.sha256(clientKey);
-      const clientSignature = await crypto10.hmacSha256(storedKey, authMessage);
+      const saltedPassword = await crypto11.deriveKey(saslprep(password), saltBytes, sv.iteration);
+      const clientKey = await crypto11.hmacSha256(saltedPassword, "Client Key");
+      const storedKey = await crypto11.sha256(clientKey);
+      const clientSignature = await crypto11.hmacSha256(storedKey, authMessage);
       const clientProof = xorBuffers(Buffer.from(clientKey), Buffer.from(clientSignature)).toString("base64");
-      const serverKey = await crypto10.hmacSha256(saltedPassword, "Server Key");
-      const serverSignatureBytes = await crypto10.hmacSha256(serverKey, authMessage);
+      const serverKey = await crypto11.hmacSha256(saltedPassword, "Server Key");
+      const serverSignatureBytes = await crypto11.hmacSha256(serverKey, authMessage);
       session.message = "SASLResponse";
       session.serverSignature = Buffer.from(serverSignatureBytes).toString("base64");
       session.response = clientFinalMessageWithoutProof + ",p=" + clientProof;
@@ -32340,7 +32340,7 @@ var require_client = __commonJS({
     var Query2 = require_query();
     var defaults3 = require_defaults();
     var Connection2 = require_connection();
-    var crypto10 = require_utils5();
+    var crypto11 = require_utils5();
     var activeQueryDeprecationNotice = nodeUtils.deprecate(
       () => {
       },
@@ -32591,7 +32591,7 @@ var require_client = __commonJS({
       _handleAuthMD5Password(msg) {
         this._getPassword(async () => {
           try {
-            const hashedPassword = await crypto10.postgresMd5PasswordHash(this.user, this.password, msg.salt);
+            const hashedPassword = await crypto11.postgresMd5PasswordHash(this.user, this.password, msg.salt);
             this.connection.password(hashedPassword);
           } catch (e) {
             this.emit("error", e);
@@ -38562,7 +38562,7 @@ var require_le_unix = __commonJS({
 var require_mime_node = __commonJS({
   "../../node_modules/.pnpm/nodemailer@9.0.3/node_modules/nodemailer/lib/mime-node/index.js"(exports, module) {
     "use strict";
-    var crypto10 = __require("crypto");
+    var crypto11 = __require("crypto");
     var fs5 = __require("fs");
     var punycode = require_punycode();
     var { PassThrough } = __require("stream");
@@ -38581,7 +38581,7 @@ var require_mime_node = __commonJS({
       constructor(contentType, options) {
         this.nodeCounter = 0;
         options = options || {};
-        this.baseBoundary = options.baseBoundary || crypto10.randomBytes(8).toString("hex");
+        this.baseBoundary = options.baseBoundary || crypto11.randomBytes(8).toString("hex");
         this.boundaryPrefix = options.boundaryPrefix || "--_NmP";
         this.disableFileAccess = !!options.disableFileAccess;
         this.disableUrlAccess = !!options.disableUrlAccess;
@@ -39540,8 +39540,8 @@ var require_mime_node = __commonJS({
       _generateMessageId() {
         return "<" + [2, 2, 2, 6].reduce(
           // crux to generate UUID-like random strings
-          (prev, len) => prev + "-" + crypto10.randomBytes(len).toString("hex"),
-          crypto10.randomBytes(4).toString("hex")
+          (prev, len) => prev + "-" + crypto11.randomBytes(len).toString("hex"),
+          crypto11.randomBytes(4).toString("hex")
         ) + "@" + // try to use the domain of the FROM address or fallback to server hostname
         (this.getEnvelope().from || this.hostname || "localhost").split("@").pop() + ">";
       }
@@ -40171,14 +40171,14 @@ var require_relaxed_body = __commonJS({
   "../../node_modules/.pnpm/nodemailer@9.0.3/node_modules/nodemailer/lib/dkim/relaxed-body.js"(exports, module) {
     "use strict";
     var { Transform } = __require("stream");
-    var crypto10 = __require("crypto");
+    var crypto11 = __require("crypto");
     var RelaxedBody = class extends Transform {
       constructor(options) {
         super();
         options = options || {};
         this.chunkBuffer = [];
         this.chunkBufferLen = 0;
-        this.bodyHash = crypto10.createHash(options.hashAlgo || "sha256");
+        this.bodyHash = crypto11.createHash(options.hashAlgo || "sha256");
         this.remainder = "";
         this.byteLength = 0;
         this.debug = options.debug;
@@ -40281,7 +40281,7 @@ var require_sign2 = __commonJS({
     "use strict";
     var punycode = require_punycode();
     var mimeFuncs = require_mime_funcs();
-    var crypto10 = __require("crypto");
+    var crypto11 = __require("crypto");
     module.exports = (headers, hashAlgo, bodyHash, options) => {
       options = options || {};
       const defaultFieldNames = "From:Sender:Reply-To:Subject:Date:Message-ID:To:Cc:MIME-Version:Content-Type:Content-Transfer-Encoding:Content-ID:Content-Description:Resent-Date:Resent-From:Resent-Sender:Resent-To:Resent-Cc:Resent-Message-ID:In-Reply-To:References:List-Id:List-Help:List-Unsubscribe:List-Subscribe:List-Post:List-Owner:List-Archive";
@@ -40289,7 +40289,7 @@ var require_sign2 = __commonJS({
       const canonicalizedHeaderData = relaxedHeaders(headers, fieldNames, options.skipFields);
       const dkimHeader = generateDKIMHeader(options.domainName, options.keySelector, canonicalizedHeaderData.fieldNames, hashAlgo, bodyHash);
       canonicalizedHeaderData.headers += "dkim-signature:" + relaxedHeaderLine(dkimHeader);
-      const signer = crypto10.createSign(("rsa-" + hashAlgo).toUpperCase());
+      const signer = crypto11.createSign(("rsa-" + hashAlgo).toUpperCase());
       signer.update(canonicalizedHeaderData.headers);
       let signature;
       try {
@@ -40358,7 +40358,7 @@ var require_dkim = __commonJS({
     var { PassThrough } = __require("stream");
     var fs5 = __require("fs");
     var path7 = __require("path");
-    var crypto10 = __require("crypto");
+    var crypto11 = __require("crypto");
     var DKIM_ALGO = "sha256";
     var MAX_MESSAGE_SIZE = 2 * 1024 * 1024;
     var DKIMSigner = class {
@@ -40371,7 +40371,7 @@ var require_dkim = __commonJS({
         this.chunks = [];
         this.chunklen = 0;
         this.readPos = 0;
-        this.cachePath = this.cacheDir ? path7.join(this.cacheDir, "message." + Date.now() + "-" + crypto10.randomBytes(14).toString("hex")) : false;
+        this.cachePath = this.cacheDir ? path7.join(this.cacheDir, "message." + Date.now() + "-" + crypto11.randomBytes(14).toString("hex")) : false;
         this.cache = false;
         this.headers = false;
         this.bodyHash = false;
@@ -40940,7 +40940,7 @@ var require_mailer = __commonJS({
     var MailMessage = require_mail_message();
     var net = __require("net");
     var dns = __require("dns");
-    var crypto10 = __require("crypto");
+    var crypto11 = __require("crypto");
     var Mail = class extends EventEmitter2 {
       constructor(transporter2, options, defaults3) {
         super();
@@ -41283,7 +41283,7 @@ var require_mailer = __commonJS({
             html = (html || "").toString().replace(
               /(<img\b[^<>]{0,1024} src\s{0,20}=[\s"']{0,20})(data:([^;]+);[^"'>\s]+)/gi,
               (match, prefix, dataUri, mimeType) => {
-                const cid = crypto10.randomBytes(10).toString("hex") + "@localhost";
+                const cid = crypto11.randomBytes(10).toString("hex") + "@localhost";
                 if (!mail.data.attachments) {
                   mail.data.attachments = [];
                 }
@@ -41410,7 +41410,7 @@ var require_smtp_connection = __commonJS({
     var net = __require("net");
     var tls = __require("tls");
     var os2 = __require("os");
-    var crypto10 = __require("crypto");
+    var crypto11 = __require("crypto");
     var DataStream = require_data_stream();
     var { PassThrough } = __require("stream");
     var shared = require_shared();
@@ -41430,7 +41430,7 @@ var require_smtp_connection = __commonJS({
     var SMTPConnection = class extends EventEmitter2 {
       constructor(options) {
         super(options);
-        this.id = crypto10.randomBytes(8).toString("base64").replace(/\W/g, "");
+        this.id = crypto11.randomBytes(8).toString("base64").replace(/\W/g, "");
         this.stage = "init";
         this.options = options || {};
         this.secureConnection = !!this.options.secure;
@@ -42615,7 +42615,7 @@ var require_smtp_connection = __commonJS({
           );
         }
         const base64decoded = Buffer.from(challengeMatch[1], "base64").toString("ascii");
-        const hmacMD5 = crypto10.createHmac("md5", this._auth.credentials.pass);
+        const hmacMD5 = crypto11.createHmac("md5", this._auth.credentials.pass);
         hmacMD5.update(base64decoded);
         const prepended = this._auth.credentials.user + " " + hmacMD5.digest("hex");
         this._responseActions.push((str2) => {
@@ -42908,7 +42908,7 @@ var require_xoauth2 = __commonJS({
     "use strict";
     var { Stream: Stream2 } = __require("stream");
     var nmfetch = require_fetch();
-    var crypto10 = __require("crypto");
+    var crypto11 = __require("crypto");
     var shared = require_shared();
     var errors = require_errors();
     var XOAuth2 = class extends Stream2 {
@@ -43254,7 +43254,7 @@ var require_xoauth2 = __commonJS({
        */
       jwtSignRS256(payload) {
         payload = ['{"alg":"RS256","typ":"JWT"}', JSON.stringify(payload)].map((val) => this.toBase64URL(val)).join(".");
-        const signature = crypto10.createSign("RSA-SHA256").update(payload).sign(this.options.privateKey);
+        const signature = crypto11.createSign("RSA-SHA256").update(payload).sign(this.options.privateKey);
         return payload + "." + this.toBase64URL(signature);
       }
     };
@@ -45719,13 +45719,13 @@ var uuid42;
 var init_uuid = __esm({
   "../../node_modules/.pnpm/@anthropic-ai+sdk@0.110.0_zod@3.25.76/node_modules/@anthropic-ai/sdk/internal/utils/uuid.mjs"() {
     uuid42 = function() {
-      const { crypto: crypto10 } = globalThis;
-      if (crypto10?.randomUUID) {
-        uuid42 = crypto10.randomUUID.bind(crypto10);
-        return crypto10.randomUUID();
+      const { crypto: crypto11 } = globalThis;
+      if (crypto11?.randomUUID) {
+        uuid42 = crypto11.randomUUID.bind(crypto11);
+        return crypto11.randomUUID();
       }
       const u8 = new Uint8Array(1);
-      const randomByte = crypto10 ? () => crypto10.getRandomValues(u8)[0] : () => Math.random() * 255 & 255;
+      const randomByte = crypto11 ? () => crypto11.getRandomValues(u8)[0] : () => Math.random() * 255 & 255;
       return "10000000-1000-4000-8000-100000000000".replace(/[018]/g, (c) => (+c ^ randomByte() & 15 >> +c / 4).toString(16));
     };
   }
@@ -66737,22 +66737,22 @@ var require_crypto2 = __commonJS({
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.NodeCrypto = void 0;
-    var crypto10 = __require("crypto");
+    var crypto11 = __require("crypto");
     var NodeCrypto = class {
       async sha256DigestBase64(str) {
-        return crypto10.createHash("sha256").update(str).digest("base64");
+        return crypto11.createHash("sha256").update(str).digest("base64");
       }
       randomBytesBase64(count2) {
-        return crypto10.randomBytes(count2).toString("base64");
+        return crypto11.randomBytes(count2).toString("base64");
       }
       async verify(pubkey, data, signature) {
-        const verifier = crypto10.createVerify("RSA-SHA256");
+        const verifier = crypto11.createVerify("RSA-SHA256");
         verifier.update(data);
         verifier.end();
         return verifier.verify(pubkey, signature, "base64");
       }
       async sign(privateKey, data) {
-        const signer = crypto10.createSign("RSA-SHA256");
+        const signer = crypto11.createSign("RSA-SHA256");
         signer.update(data);
         signer.end();
         return signer.sign(privateKey, "base64");
@@ -66770,7 +66770,7 @@ var require_crypto2 = __commonJS({
        *   string in hexadecimal encoding.
        */
       async sha256DigestHex(str) {
-        return crypto10.createHash("sha256").update(str).digest("hex");
+        return crypto11.createHash("sha256").update(str).digest("hex");
       }
       /**
        * Computes the HMAC hash of a message using the provided crypto key and the
@@ -66782,7 +66782,7 @@ var require_crypto2 = __commonJS({
        */
       async signWithHmacSha256(key, msg) {
         const cryptoKey = typeof key === "string" ? key : toBuffer(key);
-        return toArrayBuffer(crypto10.createHmac("sha256", cryptoKey).update(msg).digest());
+        return toArrayBuffer(crypto11.createHmac("sha256", cryptoKey).update(msg).digest());
       }
     };
     exports.NodeCrypto = NodeCrypto;
@@ -67560,10 +67560,10 @@ var require_oauth2client = __commonJS({
        * https://github.com/googleapis/google-auth-library-nodejs/blob/main/samples/oauth2-codeVerifier.js
        */
       async generateCodeVerifierAsync() {
-        const crypto10 = (0, crypto_1.createCrypto)();
-        const randomString2 = crypto10.randomBytesBase64(96);
+        const crypto11 = (0, crypto_1.createCrypto)();
+        const randomString2 = crypto11.randomBytesBase64(96);
         const codeVerifier = randomString2.replace(/\+/g, "~").replace(/=/g, "_").replace(/\//g, "-");
-        const unencodedCodeChallenge = await crypto10.sha256DigestBase64(codeVerifier);
+        const unencodedCodeChallenge = await crypto11.sha256DigestBase64(codeVerifier);
         const codeChallenge = unencodedCodeChallenge.split("=")[0].replace(/\+/g, "-").replace(/\//g, "_");
         return { codeVerifier, codeChallenge };
       }
@@ -68007,7 +68007,7 @@ var require_oauth2client = __commonJS({
        * @return Returns a promise resolving to LoginTicket on verification.
        */
       async verifySignedJwtWithCertsAsync(jwt2, certs, requiredAudience, issuers, maxExpiry) {
-        const crypto10 = (0, crypto_1.createCrypto)();
+        const crypto11 = (0, crypto_1.createCrypto)();
         if (!maxExpiry) {
           maxExpiry = _OAuth2Client.DEFAULT_MAX_TOKEN_LIFETIME_SECS_;
         }
@@ -68020,7 +68020,7 @@ var require_oauth2client = __commonJS({
         let envelope;
         let payload;
         try {
-          envelope = JSON.parse(crypto10.decodeBase64StringUtf8(segments[0]));
+          envelope = JSON.parse(crypto11.decodeBase64StringUtf8(segments[0]));
         } catch (err) {
           if (err instanceof Error) {
             err.message = `Can't parse token envelope: ${segments[0]}': ${err.message}`;
@@ -68031,7 +68031,7 @@ var require_oauth2client = __commonJS({
           throw new Error("Can't parse token envelope: " + segments[0]);
         }
         try {
-          payload = JSON.parse(crypto10.decodeBase64StringUtf8(segments[1]));
+          payload = JSON.parse(crypto11.decodeBase64StringUtf8(segments[1]));
         } catch (err) {
           if (err instanceof Error) {
             err.message = `Can't parse token payload '${segments[0]}`;
@@ -68048,7 +68048,7 @@ var require_oauth2client = __commonJS({
         if (envelope.alg === "ES256") {
           signature = formatEcdsa.joseToDer(signature, "ES256").toString("base64");
         }
-        const verified = await crypto10.verify(cert, signed, signature);
+        const verified = await crypto11.verify(cert, signed, signature);
         if (!verified) {
           throw new Error("Invalid token signature: " + jwt2);
         }
@@ -68416,14 +68416,14 @@ var require_buffer_equal_constant_time = __commonJS({
 var require_jwa = __commonJS({
   "../../node_modules/.pnpm/jwa@2.0.1/node_modules/jwa/index.js"(exports, module) {
     var Buffer2 = require_safe_buffer().Buffer;
-    var crypto10 = __require("crypto");
+    var crypto11 = __require("crypto");
     var formatEcdsa = require_ecdsa_sig_formatter();
     var util2 = __require("util");
     var MSG_INVALID_ALGORITHM = '"%s" is not a valid algorithm.\n  Supported algorithms are:\n  "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "PS256", "PS384", "PS512", "ES256", "ES384", "ES512" and "none".';
     var MSG_INVALID_SECRET = "secret must be a string or buffer";
     var MSG_INVALID_VERIFIER_KEY = "key must be a string or a buffer";
     var MSG_INVALID_SIGNER_KEY = "key must be a string, a buffer or an object";
-    var supportsKeyObjects = typeof crypto10.createPublicKey === "function";
+    var supportsKeyObjects = typeof crypto11.createPublicKey === "function";
     if (supportsKeyObjects) {
       MSG_INVALID_VERIFIER_KEY += " or a KeyObject";
       MSG_INVALID_SECRET += "or a KeyObject";
@@ -68513,17 +68513,17 @@ var require_jwa = __commonJS({
       return function sign(thing, secret) {
         checkIsSecretKey(secret);
         thing = normalizeInput(thing);
-        var hmac = crypto10.createHmac("sha" + bits, secret);
+        var hmac = crypto11.createHmac("sha" + bits, secret);
         var sig = (hmac.update(thing), hmac.digest("base64"));
         return fromBase64(sig);
       };
     }
     var bufferEqual;
-    var timingSafeEqual2 = "timingSafeEqual" in crypto10 ? function timingSafeEqual3(a, b) {
+    var timingSafeEqual2 = "timingSafeEqual" in crypto11 ? function timingSafeEqual3(a, b) {
       if (a.byteLength !== b.byteLength) {
         return false;
       }
-      return crypto10.timingSafeEqual(a, b);
+      return crypto11.timingSafeEqual(a, b);
     } : function timingSafeEqual3(a, b) {
       if (!bufferEqual) {
         bufferEqual = require_buffer_equal_constant_time();
@@ -68540,7 +68540,7 @@ var require_jwa = __commonJS({
       return function sign(thing, privateKey) {
         checkIsPrivateKey(privateKey);
         thing = normalizeInput(thing);
-        var signer = crypto10.createSign("RSA-SHA" + bits);
+        var signer = crypto11.createSign("RSA-SHA" + bits);
         var sig = (signer.update(thing), signer.sign(privateKey, "base64"));
         return fromBase64(sig);
       };
@@ -68550,7 +68550,7 @@ var require_jwa = __commonJS({
         checkIsPublicKey(publicKey);
         thing = normalizeInput(thing);
         signature = toBase64(signature);
-        var verifier = crypto10.createVerify("RSA-SHA" + bits);
+        var verifier = crypto11.createVerify("RSA-SHA" + bits);
         verifier.update(thing);
         return verifier.verify(publicKey, signature, "base64");
       };
@@ -68559,11 +68559,11 @@ var require_jwa = __commonJS({
       return function sign(thing, privateKey) {
         checkIsPrivateKey(privateKey);
         thing = normalizeInput(thing);
-        var signer = crypto10.createSign("RSA-SHA" + bits);
+        var signer = crypto11.createSign("RSA-SHA" + bits);
         var sig = (signer.update(thing), signer.sign({
           key: privateKey,
-          padding: crypto10.constants.RSA_PKCS1_PSS_PADDING,
-          saltLength: crypto10.constants.RSA_PSS_SALTLEN_DIGEST
+          padding: crypto11.constants.RSA_PKCS1_PSS_PADDING,
+          saltLength: crypto11.constants.RSA_PSS_SALTLEN_DIGEST
         }, "base64"));
         return fromBase64(sig);
       };
@@ -68573,12 +68573,12 @@ var require_jwa = __commonJS({
         checkIsPublicKey(publicKey);
         thing = normalizeInput(thing);
         signature = toBase64(signature);
-        var verifier = crypto10.createVerify("RSA-SHA" + bits);
+        var verifier = crypto11.createVerify("RSA-SHA" + bits);
         verifier.update(thing);
         return verifier.verify({
           key: publicKey,
-          padding: crypto10.constants.RSA_PKCS1_PSS_PADDING,
-          saltLength: crypto10.constants.RSA_PSS_SALTLEN_DIGEST
+          padding: crypto11.constants.RSA_PKCS1_PSS_PADDING,
+          saltLength: crypto11.constants.RSA_PSS_SALTLEN_DIGEST
         }, signature, "base64");
       };
     }
@@ -70736,14 +70736,14 @@ var require_awsrequestsigner = __commonJS({
       }
     };
     exports.AwsRequestSigner = AwsRequestSigner;
-    async function sign(crypto10, key, msg) {
-      return await crypto10.signWithHmacSha256(key, msg);
+    async function sign(crypto11, key, msg) {
+      return await crypto11.signWithHmacSha256(key, msg);
     }
-    async function getSigningKey(crypto10, key, dateStamp, region, serviceName) {
-      const kDate = await sign(crypto10, `AWS4${key}`, dateStamp);
-      const kRegion = await sign(crypto10, kDate, region);
-      const kService = await sign(crypto10, kRegion, serviceName);
-      const kSigning = await sign(crypto10, kService, "aws4_request");
+    async function getSigningKey(crypto11, key, dateStamp, region, serviceName) {
+      const kDate = await sign(crypto11, `AWS4${key}`, dateStamp);
+      const kRegion = await sign(crypto11, kDate, region);
+      const kService = await sign(crypto11, kRegion, serviceName);
+      const kSigning = await sign(crypto11, kService, "aws4_request");
       return kSigning;
     }
     async function generateAuthenticationHeaderMap(options) {
@@ -72328,24 +72328,24 @@ var require_googleauth = __commonJS({
           const signed = await client.sign(data);
           return signed.signedBlob;
         }
-        const crypto10 = (0, crypto_1.createCrypto)();
+        const crypto11 = (0, crypto_1.createCrypto)();
         if (client instanceof jwtclient_1.JWT && client.key) {
-          const sign = await crypto10.sign(client.key, data);
+          const sign = await crypto11.sign(client.key, data);
           return sign;
         }
         const creds = await this.getCredentials();
         if (!creds.client_email) {
           throw new Error("Cannot sign data without `client_email`.");
         }
-        return this.signBlob(crypto10, creds.client_email, data, endpoint);
+        return this.signBlob(crypto11, creds.client_email, data, endpoint);
       }
-      async signBlob(crypto10, emailOrUniqueId, data, endpoint) {
+      async signBlob(crypto11, emailOrUniqueId, data, endpoint) {
         const url2 = new URL(endpoint + `${emailOrUniqueId}:signBlob`);
         const res = await this.request({
           method: "POST",
           url: url2.href,
           data: {
-            payload: crypto10.encodeBase64StringUtf8(data)
+            payload: crypto11.encodeBase64StringUtf8(data)
           },
           retry: true,
           retryConfig: {
@@ -72759,14 +72759,14 @@ var require_src6 = __commonJS({
 });
 
 // src/app.ts
-var import_express19 = __toESM(require_express2(), 1);
+var import_express21 = __toESM(require_express2(), 1);
 var import_cors = __toESM(require_lib3(), 1);
 var import_cookie_parser = __toESM(require_cookie_parser(), 1);
 var import_pino_http = __toESM(require_logger(), 1);
 import path6 from "node:path";
 
 // src/routes/index.ts
-var import_express18 = __toESM(require_express2(), 1);
+var import_express20 = __toESM(require_express2(), 1);
 
 // src/routes/health.ts
 var import_express = __toESM(require_express2(), 1);
@@ -83708,6 +83708,7 @@ function drizzle(...params) {
 // ../../lib/db/src/schema/index.ts
 var schema_exports = {};
 __export(schema_exports, {
+  apiKeysTable: () => apiKeysTable,
   applicationStatusEnum: () => applicationStatusEnum,
   applicationsTable: () => applicationsTable,
   capitalDealsTable: () => capitalDealsTable,
@@ -95189,6 +95190,7 @@ var usersTable = pgTable("users", {
   twitter: text("twitter"),
   skills: text("skills"),
   visibility: text("visibility").default("members"),
+  settingsPrefs: text("settings_prefs"),
   profileCompletionPct: integer("profile_completion_pct").default(0).notNull(),
   passwordHash: text("password_hash"),
   googleId: text("google_id").unique(),
@@ -95387,6 +95389,15 @@ var sessionsTable = pgTable("sessions", {
   userId: integer("user_id").references(() => usersTable.id).notNull(),
   expiresAt: timestamp("expires_at").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull()
+});
+var apiKeysTable = pgTable("api_keys", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => usersTable.id).notNull(),
+  name: text("name").notNull(),
+  keyPrefix: text("key_prefix").notNull(),
+  keyHash: text("key_hash").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  lastUsedAt: timestamp("last_used_at")
 });
 
 // ../../lib/db/src/index.ts
@@ -113534,6 +113545,7 @@ async function ensureUserProfileColumns() {
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS twitter text`);
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS skills text`);
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS visibility text`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS settings_prefs text`);
 }
 async function ensureMatchAndFaqSchema() {
   await db.execute(sql`
@@ -113615,6 +113627,19 @@ async function ensureTalentSchema() {
       description text NOT NULL,
       tags text,
       created_at timestamp NOT NULL DEFAULT now()
+    )
+  `);
+}
+async function ensureApiKeysSchema() {
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS api_keys (
+      id serial PRIMARY KEY,
+      user_id integer NOT NULL REFERENCES users(id),
+      name text NOT NULL,
+      key_prefix text NOT NULL,
+      key_hash text NOT NULL,
+      created_at timestamp NOT NULL DEFAULT now(),
+      last_used_at timestamp
     )
   `);
 }
@@ -113855,11 +113880,97 @@ router5.patch("/me", requireAuth, async (req, res) => {
 var auth_default = router5;
 
 // src/routes/catalog.ts
-var import_express7 = __toESM(require_express2(), 1);
+var import_express8 = __toESM(require_express2(), 1);
 
 // src/routes/notifications.ts
+var import_express7 = __toESM(require_express2(), 1);
+
+// src/routes/settings.ts
 var import_express6 = __toESM(require_express2(), 1);
 var router6 = (0, import_express6.Router)();
+var DEFAULT_SETTINGS_PREFS = {
+  notifMatch: true,
+  notifEvents: true,
+  notifMessages: true,
+  notifCapital: false,
+  notifDigest: true,
+  notifEmail: true,
+  showOnline: true,
+  allowMatch: true,
+  analyticsConsent: true,
+  theme: "light",
+  lang: "tr",
+  compactMode: false
+};
+function parseSettingsPrefs(raw) {
+  if (!raw) return { ...DEFAULT_SETTINGS_PREFS };
+  try {
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object") return { ...DEFAULT_SETTINGS_PREFS };
+    return {
+      notifMatch: parsed.notifMatch !== false,
+      notifEvents: parsed.notifEvents !== false,
+      notifMessages: parsed.notifMessages !== false,
+      notifCapital: parsed.notifCapital === true,
+      notifDigest: parsed.notifDigest !== false,
+      notifEmail: parsed.notifEmail !== false,
+      showOnline: parsed.showOnline !== false,
+      allowMatch: parsed.allowMatch !== false,
+      analyticsConsent: parsed.analyticsConsent !== false,
+      theme: parsed.theme === "dark" || parsed.theme === "system" || parsed.theme === "light" ? parsed.theme : "light",
+      lang: parsed.lang === "en" ? "en" : "tr",
+      compactMode: parsed.compactMode === true
+    };
+  } catch {
+    return { ...DEFAULT_SETTINGS_PREFS };
+  }
+}
+async function getUserSettingsPrefs(userId) {
+  await ensureUserProfileColumns();
+  const [user] = await db.select({ settingsPrefs: usersTable.settingsPrefs }).from(usersTable).where(eq(usersTable.id, userId)).limit(1);
+  return parseSettingsPrefs(user?.settingsPrefs);
+}
+function sanitizeBody(body) {
+  const base = { ...DEFAULT_SETTINGS_PREFS };
+  if (!body || typeof body !== "object") return base;
+  return {
+    notifMatch: body.notifMatch !== false,
+    notifEvents: body.notifEvents !== false,
+    notifMessages: body.notifMessages !== false,
+    notifCapital: body.notifCapital === true,
+    notifDigest: body.notifDigest !== false,
+    notifEmail: body.notifEmail !== false,
+    showOnline: body.showOnline !== false,
+    allowMatch: body.allowMatch !== false,
+    analyticsConsent: body.analyticsConsent !== false,
+    theme: body.theme === "dark" || body.theme === "system" || body.theme === "light" ? body.theme : "light",
+    lang: body.lang === "en" ? "en" : "tr",
+    compactMode: body.compactMode === true
+  };
+}
+router6.get("/settings", requireAuth, async (req, res) => {
+  try {
+    const prefs = await getUserSettingsPrefs(req.user.id);
+    res.json({ prefs });
+  } catch (err) {
+    res.status(500).json({ error: err.message ?? "Ayarlar y\xFCklenemedi" });
+  }
+});
+router6.put("/settings", requireAuth, async (req, res) => {
+  try {
+    await ensureUserProfileColumns();
+    const prefs = sanitizeBody(req.body?.prefs ?? req.body);
+    const userId = req.user.id;
+    await db.update(usersTable).set({ settingsPrefs: JSON.stringify(prefs) }).where(eq(usersTable.id, userId));
+    res.json({ prefs });
+  } catch (err) {
+    res.status(500).json({ error: err.message ?? "Ayarlar kaydedilemedi" });
+  }
+});
+var settings_default = router6;
+
+// src/routes/notifications.ts
+var router7 = (0, import_express7.Router)();
 async function ensureNotificationColumns() {
   await db.execute(sql`ALTER TABLE notifications ADD COLUMN IF NOT EXISTS title text`);
   await db.execute(sql`ALTER TABLE notifications ADD COLUMN IF NOT EXISTS kind text`);
@@ -113895,20 +114006,29 @@ function mapRow(n) {
     createdAt: n.createdAt.toISOString()
   };
 }
+function kindAllowed(prefs, kind) {
+  if (kind === "match") return prefs.notifMatch;
+  if (kind === "event") return prefs.notifEvents;
+  if (kind === "capital") return prefs.notifCapital;
+  return true;
+}
 async function createNotification(input) {
   try {
     await ensureNotificationColumns();
+    const kind = input.kind ?? "signal";
+    const prefs = await getUserSettingsPrefs(input.userId);
+    if (!kindAllowed(prefs, kind)) return;
     await db.insert(notificationsTable).values({
       userId: input.userId,
       title: input.title,
       body: input.body,
-      kind: input.kind ?? "signal",
+      kind,
       isRead: false
     });
   } catch {
   }
 }
-router6.get("/notifications", requireAuth, async (req, res) => {
+router7.get("/notifications", requireAuth, async (req, res) => {
   try {
     await ensureNotificationColumns();
     const userId = req.user.id;
@@ -113921,7 +114041,7 @@ router6.get("/notifications", requireAuth, async (req, res) => {
     res.status(500).json({ error: err.message ?? "Bildirimler y\xFCklenemedi" });
   }
 });
-router6.patch("/notifications/read-all", requireAuth, async (req, res) => {
+router7.patch("/notifications/read-all", requireAuth, async (req, res) => {
   try {
     const userId = req.user.id;
     await db.update(notificationsTable).set({ isRead: true }).where(and(eq(notificationsTable.userId, userId), eq(notificationsTable.isRead, false)));
@@ -113930,7 +114050,7 @@ router6.patch("/notifications/read-all", requireAuth, async (req, res) => {
     res.status(500).json({ error: err.message ?? "\u0130\u015Flem ba\u015Far\u0131s\u0131z" });
   }
 });
-router6.patch("/notifications/:id/read", requireAuth, async (req, res) => {
+router7.patch("/notifications/:id/read", requireAuth, async (req, res) => {
   try {
     const id = Number(req.params.id);
     const userId = req.user.id;
@@ -113945,10 +114065,10 @@ router6.patch("/notifications/:id/read", requireAuth, async (req, res) => {
     res.status(500).json({ error: err.message ?? "\u0130\u015Flem ba\u015Far\u0131s\u0131z" });
   }
 });
-var notifications_default = router6;
+var notifications_default = router7;
 
 // src/routes/catalog.ts
-var router7 = (0, import_express7.Router)();
+var router8 = (0, import_express8.Router)();
 async function ensureDemoContent() {
   if (process.env.NODE_ENV === "production") return;
   const [eventRow] = await db.select({ id: eventsTable.id }).from(eventsTable).limit(1);
@@ -114017,7 +114137,7 @@ async function progressPctForUser(userId, courseId) {
   );
   return Math.round((done?.n ?? 0) / lessons.length * 100);
 }
-router7.get("/events", requireAuth, async (req, res) => {
+router8.get("/events", requireAuth, async (req, res) => {
   try {
     await ensureDemoContent();
     const userId = req.user.id;
@@ -114049,7 +114169,7 @@ router7.get("/events", requireAuth, async (req, res) => {
     res.status(500).json({ error: err.message ?? "Etkinlikler y\xFCklenemedi" });
   }
 });
-router7.post("/events/:id/register", requireAuth, async (req, res) => {
+router8.post("/events/:id/register", requireAuth, async (req, res) => {
   try {
     const eventId = Number(req.params.id);
     const userId = req.user.id;
@@ -114086,7 +114206,7 @@ router7.post("/events/:id/register", requireAuth, async (req, res) => {
     res.status(500).json({ error: err.message ?? "Kay\u0131t ba\u015Far\u0131s\u0131z" });
   }
 });
-router7.delete("/events/:id/register", requireAuth, async (req, res) => {
+router8.delete("/events/:id/register", requireAuth, async (req, res) => {
   try {
     const eventId = Number(req.params.id);
     const userId = req.user.id;
@@ -114105,7 +114225,7 @@ router7.delete("/events/:id/register", requireAuth, async (req, res) => {
     res.status(500).json({ error: err.message ?? "\u0130ptal ba\u015Far\u0131s\u0131z" });
   }
 });
-router7.get("/courses", requireAuth, async (req, res) => {
+router8.get("/courses", requireAuth, async (req, res) => {
   try {
     await ensureDemoContent();
     const userId = req.user.id;
@@ -114128,7 +114248,7 @@ router7.get("/courses", requireAuth, async (req, res) => {
     res.status(500).json({ error: err.message ?? "Kurslar y\xFCklenemedi" });
   }
 });
-router7.post("/courses/:id/enroll", requireAuth, async (req, res) => {
+router8.post("/courses/:id/enroll", requireAuth, async (req, res) => {
   try {
     const courseId = Number(req.params.id);
     const userId = req.user.id;
@@ -114160,11 +114280,11 @@ router7.post("/courses/:id/enroll", requireAuth, async (req, res) => {
     res.status(500).json({ error: err.message ?? "Kay\u0131t ba\u015Far\u0131s\u0131z" });
   }
 });
-var catalog_default = router7;
+var catalog_default = router8;
 
 // src/routes/applications.ts
-var import_express8 = __toESM(require_express2(), 1);
-var router8 = (0, import_express8.Router)();
+var import_express9 = __toESM(require_express2(), 1);
+var router9 = (0, import_express9.Router)();
 function toUiStatus(status) {
   if (status === "approved") return "onayland\u0131";
   if (status === "rejected") return "reddedildi";
@@ -114207,7 +114327,7 @@ async function ensureDemoInvites() {
     }
   ]);
 }
-router8.get("/applications", requireAdmin, async (_req, res) => {
+router9.get("/applications", requireAdmin, async (_req, res) => {
   try {
     await ensureInvitationColumns();
     await ensureDemoInvites();
@@ -114239,7 +114359,7 @@ router8.get("/applications", requireAdmin, async (_req, res) => {
     res.status(500).json({ error: err.message ?? "Ba\u015Fvurular y\xFCklenemedi" });
   }
 });
-router8.patch("/applications/:id", requireAdmin, async (req, res) => {
+router9.patch("/applications/:id", requireAdmin, async (req, res) => {
   try {
     const invitationRequestId = Number(req.params.id);
     if (!Number.isFinite(invitationRequestId)) {
@@ -114273,11 +114393,11 @@ router8.patch("/applications/:id", requireAdmin, async (req, res) => {
     res.status(500).json({ error: err.message ?? "Durum g\xFCncellenemedi" });
   }
 });
-var applications_default = router8;
+var applications_default = router9;
 
 // src/routes/community.ts
-var import_express9 = __toESM(require_express2(), 1);
-var router9 = (0, import_express9.Router)();
+var import_express10 = __toESM(require_express2(), 1);
+var router10 = (0, import_express10.Router)();
 async function ensurePerkColumns() {
   await db.execute(sql`ALTER TABLE perks ADD COLUMN IF NOT EXISTS category text`);
   await db.execute(sql`ALTER TABLE perks ADD COLUMN IF NOT EXISTS badge text`);
@@ -114394,7 +114514,7 @@ async function ensurePerksSeed() {
 function initialsFromName(name) {
   return name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0] ?? "").join("").toLocaleUpperCase("tr-TR");
 }
-router9.get("/perks", requireAuth, async (_req, res) => {
+router10.get("/perks", requireAuth, async (_req, res) => {
   try {
     await ensurePerkColumns();
     await ensurePerksSeed();
@@ -114419,7 +114539,7 @@ router9.get("/perks", requireAuth, async (_req, res) => {
     res.status(500).json({ error: err.message ?? "Ayr\u0131cal\u0131klar y\xFCklenemedi" });
   }
 });
-router9.get("/members", requireAuth, async (_req, res) => {
+router10.get("/members", requireAuth, async (_req, res) => {
   try {
     const rows = await db.select({
       id: usersTable.id,
@@ -114449,11 +114569,11 @@ router9.get("/members", requireAuth, async (_req, res) => {
     res.status(500).json({ error: err.message ?? "\xDCyeler y\xFCklenemedi" });
   }
 });
-var community_default = router9;
+var community_default = router10;
 
 // src/routes/chat.ts
-var import_express10 = __toESM(require_express2(), 1);
-var router10 = (0, import_express10.Router)();
+var import_express11 = __toESM(require_express2(), 1);
+var router11 = (0, import_express11.Router)();
 var DEFAULT_CHANNELS = [
   { name: "genel", description: "Genel topluluk sohbeti", isPublic: true },
   { name: "duyurular", description: "\xD6nemli duyurular ve haberler", isPublic: true },
@@ -114478,7 +114598,7 @@ function initialsFromName2(name, email3) {
 function formatTs(d) {
   return d.toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" });
 }
-router10.get("/channels", requireAuth, async (_req, res) => {
+router11.get("/channels", requireAuth, async (_req, res) => {
   try {
     await ensureChannelsSeed();
     const rows = await db.select().from(channelsTable).orderBy(asc(channelsTable.id));
@@ -114495,7 +114615,7 @@ router10.get("/channels", requireAuth, async (_req, res) => {
     res.status(500).json({ error: err.message ?? "Kanallar y\xFCklenemedi" });
   }
 });
-router10.get("/channels/:id/messages", requireAuth, async (req, res) => {
+router11.get("/channels/:id/messages", requireAuth, async (req, res) => {
   try {
     const channelId = Number(req.params.id);
     if (!Number.isFinite(channelId)) {
@@ -114533,7 +114653,7 @@ router10.get("/channels/:id/messages", requireAuth, async (req, res) => {
     res.status(500).json({ error: err.message ?? "Mesajlar y\xFCklenemedi" });
   }
 });
-router10.post("/channels/:id/messages", requireAuth, async (req, res) => {
+router11.post("/channels/:id/messages", requireAuth, async (req, res) => {
   try {
     const channelId = Number(req.params.id);
     const userId = req.user.id;
@@ -114569,11 +114689,11 @@ router10.post("/channels/:id/messages", requireAuth, async (req, res) => {
     res.status(500).json({ error: err.message ?? "Mesaj g\xF6nderilemedi" });
   }
 });
-var chat_default = router10;
+var chat_default = router11;
 
 // src/routes/match.ts
-var import_express11 = __toESM(require_express2(), 1);
-var router11 = (0, import_express11.Router)();
+var import_express12 = __toESM(require_express2(), 1);
+var router12 = (0, import_express12.Router)();
 var FAQ_SEED = [
   {
     category: "\xDCyelik",
@@ -114665,7 +114785,7 @@ async function ensureFaqSeed() {
   if (row) return;
   await db.insert(faqTable).values(FAQ_SEED);
 }
-router11.get("/faq", requireAuth, async (_req, res) => {
+router12.get("/faq", requireAuth, async (_req, res) => {
   try {
     await ensureMatchAndFaqSchema();
     await ensureFaqSeed();
@@ -114687,7 +114807,7 @@ router11.get("/faq", requireAuth, async (_req, res) => {
     res.status(500).json({ error: err.message ?? "SSS y\xFCklenemedi" });
   }
 });
-router11.post("/match/introduce", requireAuth, async (req, res) => {
+router12.post("/match/introduce", requireAuth, async (req, res) => {
   try {
     await ensureMatchAndFaqSchema();
     const userId = req.user.id;
@@ -114759,7 +114879,7 @@ router11.post("/match/introduce", requireAuth, async (req, res) => {
     res.status(500).json({ error: err.message ?? "Talep g\xF6nderilemedi" });
   }
 });
-router11.get("/match/introductions", requireAuth, async (req, res) => {
+router12.get("/match/introductions", requireAuth, async (req, res) => {
   try {
     await ensureMatchAndFaqSchema();
     const rows = await db.select().from(introductionRequestsTable).where(eq(introductionRequestsTable.fromUserId, req.user.id));
@@ -114775,10 +114895,10 @@ router11.get("/match/introductions", requireAuth, async (req, res) => {
     res.status(500).json({ error: err.message ?? "Talepler y\xFCklenemedi" });
   }
 });
-var match_default = router11;
+var match_default = router12;
 
 // src/routes/vault.ts
-var import_express12 = __toESM(require_express2(), 1);
+var import_express13 = __toESM(require_express2(), 1);
 
 // src/lib/vaultStorage.ts
 import fs4 from "node:fs/promises";
@@ -114849,7 +114969,7 @@ async function deleteVaultFile(fileKey) {
 }
 
 // src/routes/vault.ts
-var router12 = (0, import_express12.Router)();
+var router13 = (0, import_express13.Router)();
 function parseTags(raw) {
   if (!raw) return [];
   try {
@@ -114931,7 +115051,7 @@ async function ensureVaultSeed(adminUserId) {
     }
   ]);
 }
-router12.get("/vault", requireAuth, async (req, res) => {
+router13.get("/vault", requireAuth, async (req, res) => {
   try {
     await ensureVaultCapitalSchema();
     const userId = req.user.id;
@@ -114949,7 +115069,7 @@ router12.get("/vault", requireAuth, async (req, res) => {
     res.status(500).json({ error: err.message ?? "Vault y\xFCklenemedi" });
   }
 });
-router12.post("/vault", requireAuth, async (req, res) => {
+router13.post("/vault", requireAuth, async (req, res) => {
   try {
     await ensureVaultCapitalSchema();
     const userId = req.user.id;
@@ -114979,7 +115099,7 @@ router12.post("/vault", requireAuth, async (req, res) => {
     res.status(500).json({ error: err.message ?? "Belge kaydedilemedi" });
   }
 });
-router12.put("/vault/:id/file", requireAuth, async (req, res) => {
+router13.put("/vault/:id/file", requireAuth, async (req, res) => {
   try {
     await ensureVaultCapitalSchema();
     const userId = req.user.id;
@@ -115040,7 +115160,7 @@ router12.put("/vault/:id/file", requireAuth, async (req, res) => {
     res.status(500).json({ error: err.message ?? "Dosya y\xFCklenemedi" });
   }
 });
-router12.get("/vault/:id/file", requireAuth, async (req, res) => {
+router13.get("/vault/:id/file", requireAuth, async (req, res) => {
   try {
     await ensureVaultCapitalSchema();
     const userId = req.user.id;
@@ -115073,11 +115193,11 @@ router12.get("/vault/:id/file", requireAuth, async (req, res) => {
     res.status(500).json({ error: err.message ?? "Dosya indirilemedi" });
   }
 });
-var vault_default = router12;
+var vault_default = router13;
 
 // src/routes/capital.ts
-var import_express13 = __toESM(require_express2(), 1);
-var router13 = (0, import_express13.Router)();
+var import_express14 = __toESM(require_express2(), 1);
+var router14 = (0, import_express14.Router)();
 var STAGES = /* @__PURE__ */ new Set(["Pitch", "Due Diligence", "Term Sheet", "Kapand\u0131"]);
 var SECTORS = /* @__PURE__ */ new Set(["AI/ML", "B2B SaaS", "Fintech", "HR Tech", "E-ticaret", "DeepTech"]);
 function parseList(raw) {
@@ -115245,7 +115365,7 @@ async function ensureCapitalSeed() {
     ]);
   }
 }
-router13.get("/capital", requireAuth, async (_req, res) => {
+router14.get("/capital", requireAuth, async (_req, res) => {
   try {
     await ensureVaultCapitalSchema();
     await ensureCapitalSeed();
@@ -115268,7 +115388,7 @@ router13.get("/capital", requireAuth, async (_req, res) => {
     res.status(500).json({ error: err.message ?? "Capital y\xFCklenemedi" });
   }
 });
-router13.post("/capital/deals", requireAuth, requireAdmin, async (req, res) => {
+router14.post("/capital/deals", requireAuth, requireAdmin, async (req, res) => {
   try {
     await ensureVaultCapitalSchema();
     const data = normalizeDealBody(req.body);
@@ -115282,7 +115402,7 @@ router13.post("/capital/deals", requireAuth, requireAdmin, async (req, res) => {
     res.status(500).json({ error: err.message ?? "Deal kaydedilemedi" });
   }
 });
-router13.patch("/capital/deals/:id", requireAuth, requireAdmin, async (req, res) => {
+router14.patch("/capital/deals/:id", requireAuth, requireAdmin, async (req, res) => {
   try {
     await ensureVaultCapitalSchema();
     const id = Number(req.params.id);
@@ -115337,7 +115457,7 @@ router13.patch("/capital/deals/:id", requireAuth, requireAdmin, async (req, res)
     res.status(500).json({ error: err.message ?? "Deal g\xFCncellenemedi" });
   }
 });
-router13.delete("/capital/deals/:id", requireAuth, requireAdmin, async (req, res) => {
+router14.delete("/capital/deals/:id", requireAuth, requireAdmin, async (req, res) => {
   try {
     await ensureVaultCapitalSchema();
     const id = Number(req.params.id);
@@ -115356,11 +115476,11 @@ router13.delete("/capital/deals/:id", requireAuth, requireAdmin, async (req, res
     res.status(500).json({ error: err.message ?? "Deal silinemedi" });
   }
 });
-var capital_default = router13;
+var capital_default = router14;
 
 // src/routes/pulse.ts
-var import_express14 = __toESM(require_express2(), 1);
-var router14 = (0, import_express14.Router)();
+var import_express15 = __toESM(require_express2(), 1);
+var router15 = (0, import_express15.Router)();
 var TOPIC_RULES = [
   { topic: "Claude / AI", category: "teknoloji", keywords: ["claude", "gpt", "openai", "llm", "ai"] },
   { topic: "Cursor", category: "teknoloji", keywords: ["cursor"] },
@@ -115369,7 +115489,7 @@ var TOPIC_RULES = [
   { topic: "\xDCr\xFCn / Mom Test", category: "k\xFClt\xFCr", keywords: ["mom test", "m\xFC\u015Fteri", "\xFCr\xFCn"] },
   { topic: "SaaS", category: "i\u015F", keywords: ["saas", "churn", "arr", "mrr"] }
 ];
-router14.get("/pulse", requireAuth, async (_req, res) => {
+router15.get("/pulse", requireAuth, async (_req, res) => {
   try {
     const now = Date.now();
     const weekAgo = new Date(now - 7 * 864e5);
@@ -115442,11 +115562,11 @@ router14.get("/pulse", requireAuth, async (_req, res) => {
     res.status(500).json({ error: err.message ?? "Pulse y\xFCklenemedi" });
   }
 });
-var pulse_default = router14;
+var pulse_default = router15;
 
 // src/routes/publicId.ts
-var import_express15 = __toESM(require_express2(), 1);
-var router15 = (0, import_express15.Router)();
+var import_express16 = __toESM(require_express2(), 1);
+var router16 = (0, import_express16.Router)();
 function parseSkills2(raw) {
   if (!raw) return [];
   try {
@@ -115490,7 +115610,7 @@ function publicPayload(user) {
     tier: user.role === "admin" ? "Kurucu \xDCye" : "\xDCye"
   };
 }
-router15.get("/public/profile/:handle", async (req, res) => {
+router16.get("/public/profile/:handle", async (req, res) => {
   try {
     const handle = normalizeHandle(String(req.params.handle ?? ""));
     if (!handle) {
@@ -115520,7 +115640,7 @@ router15.get("/public/profile/:handle", async (req, res) => {
     res.status(500).json({ error: err.message ?? "Profil y\xFCklenemedi" });
   }
 });
-router15.get("/badge/:handle.svg", async (req, res) => {
+router16.get("/badge/:handle.svg", async (req, res) => {
   try {
     const handle = normalizeHandle(String(req.params.handle ?? ""));
     if (!handle) {
@@ -115550,14 +115670,14 @@ router15.get("/badge/:handle.svg", async (req, res) => {
     res.status(500).type("text/plain").send(err.message ?? "error");
   }
 });
-var publicId_default = router15;
+var publicId_default = router16;
 
 // src/routes/analytics.ts
-var import_express16 = __toESM(require_express2(), 1);
-var router16 = (0, import_express16.Router)();
+var import_express17 = __toESM(require_express2(), 1);
+var router17 = (0, import_express17.Router)();
 var MONTH_LABELS_TR = ["Oca", "\u015Eub", "Mar", "Nis", "May", "Haz", "Tem", "A\u011Fu", "Eyl", "Eki", "Kas", "Ara"];
 var WEEK_LABELS_TR = ["3H", "2H", "GH", "Bu"];
-router16.get("/analytics", requireAuth, async (req, res) => {
+router17.get("/analytics", requireAuth, async (req, res) => {
   try {
     const now = Date.now();
     const weekAgo = new Date(now - 7 * 864e5);
@@ -115654,11 +115774,11 @@ router16.get("/analytics", requireAuth, async (req, res) => {
     res.status(500).json({ error: err.message ?? "Analitik y\xFCklenemedi" });
   }
 });
-var analytics_default = router16;
+var analytics_default = router17;
 
 // src/routes/talent.ts
-var import_express17 = __toESM(require_express2(), 1);
-var router17 = (0, import_express17.Router)();
+var import_express18 = __toESM(require_express2(), 1);
+var router18 = (0, import_express18.Router)();
 function parseTags2(raw) {
   if (!raw) return [];
   try {
@@ -115743,7 +115863,7 @@ async function ensureTalentSeed(adminUserId) {
     }
   ]);
 }
-router17.get("/talent", requireAuth, async (req, res) => {
+router18.get("/talent", requireAuth, async (req, res) => {
   try {
     await ensureTalentSchema();
     const userId = req.user.id;
@@ -115764,7 +115884,7 @@ router17.get("/talent", requireAuth, async (req, res) => {
     res.status(500).json({ error: err.message ?? "Talent board y\xFCklenemedi" });
   }
 });
-router17.post("/talent", requireAuth, async (req, res) => {
+router18.post("/talent", requireAuth, async (req, res) => {
   try {
     await ensureTalentSchema();
     const userId = req.user.id;
@@ -115803,7 +115923,7 @@ router17.post("/talent", requireAuth, async (req, res) => {
     res.status(500).json({ error: err.message ?? "\u0130lan olu\u015Fturulamad\u0131" });
   }
 });
-router17.delete("/talent/:id", requireAuth, async (req, res) => {
+router18.delete("/talent/:id", requireAuth, async (req, res) => {
   try {
     await ensureTalentSchema();
     const id = Number(req.params.id);
@@ -115826,31 +115946,113 @@ router17.delete("/talent/:id", requireAuth, async (req, res) => {
     res.status(500).json({ error: err.message ?? "\u0130lan silinemedi" });
   }
 });
-var talent_default = router17;
+var talent_default = router18;
+
+// src/routes/apiKeys.ts
+var import_express19 = __toESM(require_express2(), 1);
+import crypto10 from "node:crypto";
+var router19 = (0, import_express19.Router)();
+function generateKey() {
+  const raw = crypto10.randomBytes(24).toString("base64url");
+  const plaintext = `ih_live_${raw}`;
+  const prefix = plaintext.slice(0, 15);
+  const hash = crypto10.createHash("sha256").update(plaintext).digest("hex");
+  return { plaintext, prefix, hash };
+}
+router19.get("/api-keys", requireAuth, async (req, res) => {
+  try {
+    await ensureApiKeysSchema();
+    const rows = await db.select({
+      id: apiKeysTable.id,
+      name: apiKeysTable.name,
+      keyPrefix: apiKeysTable.keyPrefix,
+      createdAt: apiKeysTable.createdAt,
+      lastUsedAt: apiKeysTable.lastUsedAt
+    }).from(apiKeysTable).where(eq(apiKeysTable.userId, req.user.id)).orderBy(desc(apiKeysTable.createdAt));
+    res.json({
+      keys: rows.map((k) => ({
+        id: k.id,
+        name: k.name,
+        prefix: `${k.keyPrefix}\u2026`,
+        createdAt: k.createdAt.toISOString(),
+        lastUsedAt: k.lastUsedAt ? k.lastUsedAt.toISOString() : null
+      }))
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message ?? "Anahtarlar y\xFCklenemedi" });
+  }
+});
+router19.post("/api-keys", requireAuth, async (req, res) => {
+  try {
+    await ensureApiKeysSchema();
+    const name = typeof req.body?.name === "string" ? req.body.name.trim().slice(0, 60) : "";
+    if (!name) {
+      res.status(400).json({ error: "Anahtar ad\u0131 gerekli" });
+      return;
+    }
+    const existing = await db.select({ id: apiKeysTable.id }).from(apiKeysTable).where(eq(apiKeysTable.userId, req.user.id));
+    if (existing.length >= 10) {
+      res.status(400).json({ error: "En fazla 10 anahtar olu\u015Fturabilirsin" });
+      return;
+    }
+    const { plaintext, prefix, hash } = generateKey();
+    const [row] = await db.insert(apiKeysTable).values({ userId: req.user.id, name, keyPrefix: prefix, keyHash: hash }).returning({ id: apiKeysTable.id, createdAt: apiKeysTable.createdAt });
+    res.status(201).json({
+      key: plaintext,
+      id: row.id,
+      name,
+      prefix: `${prefix}\u2026`,
+      createdAt: row.createdAt.toISOString()
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message ?? "Anahtar olu\u015Fturulamad\u0131" });
+  }
+});
+router19.delete("/api-keys/:id", requireAuth, async (req, res) => {
+  try {
+    await ensureApiKeysSchema();
+    const id = Number(req.params.id);
+    if (!Number.isFinite(id)) {
+      res.status(400).json({ error: "Ge\xE7ersiz anahtar" });
+      return;
+    }
+    const deleted = await db.delete(apiKeysTable).where(and(eq(apiKeysTable.id, id), eq(apiKeysTable.userId, req.user.id))).returning({ id: apiKeysTable.id });
+    if (deleted.length === 0) {
+      res.status(404).json({ error: "Anahtar bulunamad\u0131" });
+      return;
+    }
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message ?? "Anahtar silinemedi" });
+  }
+});
+var apiKeys_default = router19;
 
 // src/routes/index.ts
-var router18 = (0, import_express18.Router)();
-router18.use(health_default);
-router18.use(invitations_default);
-router18.use("/payments", payments_default);
-router18.use("/ai", ai_default);
-router18.use("/auth", auth_default);
-router18.use(catalog_default);
-router18.use(applications_default);
-router18.use(community_default);
-router18.use(chat_default);
-router18.use(notifications_default);
-router18.use(match_default);
-router18.use(vault_default);
-router18.use(capital_default);
-router18.use(pulse_default);
-router18.use(publicId_default);
-router18.use(analytics_default);
-router18.use(talent_default);
-var routes_default = router18;
+var router20 = (0, import_express20.Router)();
+router20.use(health_default);
+router20.use(invitations_default);
+router20.use("/payments", payments_default);
+router20.use("/ai", ai_default);
+router20.use("/auth", auth_default);
+router20.use(catalog_default);
+router20.use(applications_default);
+router20.use(community_default);
+router20.use(chat_default);
+router20.use(notifications_default);
+router20.use(match_default);
+router20.use(vault_default);
+router20.use(capital_default);
+router20.use(pulse_default);
+router20.use(publicId_default);
+router20.use(analytics_default);
+router20.use(talent_default);
+router20.use(apiKeys_default);
+router20.use(settings_default);
+var routes_default = router20;
 
 // src/app.ts
-var app = (0, import_express19.default)();
+var app = (0, import_express21.default)();
 app.use(
   (0, import_pino_http.default)({
     logger,
@@ -115879,17 +116081,17 @@ app.use(
 );
 app.use((req, res, next) => {
   if (req.method === "PUT" && /^\/api\/vault\/\d+\/file$/.test(req.path)) {
-    return import_express19.default.raw({ type: () => true, limit: "12mb" })(req, res, next);
+    return import_express21.default.raw({ type: () => true, limit: "12mb" })(req, res, next);
   }
   next();
 });
-app.use(import_express19.default.json());
-app.use(import_express19.default.urlencoded({ extended: true }));
+app.use(import_express21.default.json());
+app.use(import_express21.default.urlencoded({ extended: true }));
 app.use((0, import_cookie_parser.default)());
 app.use(attachUser);
 app.use("/api", routes_default);
 var frontendDist = path6.join(__dirname, "..", "..", "inner-hub", "dist");
-app.use(import_express19.default.static(frontendDist));
+app.use(import_express21.default.static(frontendDist));
 app.get(/^(?!\/api).*/, (_req, res) => {
   res.sendFile(path6.join(frontendDist, "index.html"));
 });

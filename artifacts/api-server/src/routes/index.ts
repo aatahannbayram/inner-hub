@@ -17,6 +17,7 @@ import publicIdRouter from "./publicId";
 import analyticsRouter from "./analytics";
 import talentRouter from "./talent";
 import apiKeysRouter from "./apiKeys";
+import settingsRouter from "./settings";
 
 const router: IRouter = Router();
 
@@ -38,5 +39,6 @@ router.use(publicIdRouter);
 router.use(analyticsRouter);
 router.use(talentRouter);
 router.use(apiKeysRouter);
+router.use(settingsRouter);
 
 export default router;

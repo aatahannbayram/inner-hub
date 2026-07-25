@@ -22,6 +22,7 @@ export const usersTable = pgTable("users", {
   twitter: text("twitter"),
   skills: text("skills"),
   visibility: text("visibility").default("members"),
+  settingsPrefs: text("settings_prefs"),
   profileCompletionPct: integer("profile_completion_pct").default(0).notNull(),
   passwordHash: text("password_hash"),
   googleId: text("google_id").unique(),
