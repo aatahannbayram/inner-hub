@@ -110,6 +110,24 @@ function PanelApp() {
       .finally(() => setChecked(true));
   }, []);
 
+  useEffect(() => {
+    const onUpdated = (ev: Event) => {
+      const user = (ev as CustomEvent).detail;
+      if (!user) return;
+      setPanelUser((prev) =>
+        prev
+          ? {
+              ...prev,
+              name: user.name ?? prev.name,
+              profileCompletionPct: user.profileCompletionPct ?? prev.profileCompletionPct ?? 0,
+            }
+          : prev,
+      );
+    };
+    window.addEventListener("inner-profile-updated", onUpdated);
+    return () => window.removeEventListener("inner-profile-updated", onUpdated);
+  }, []);
+
   if (!checked) return null;
 
   const handleLogin = (u: { email: string; role: "member" | "admin"; name: string }) => {

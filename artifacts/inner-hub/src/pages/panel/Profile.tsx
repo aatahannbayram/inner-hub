@@ -1,28 +1,93 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FadeIn } from "@/components/FadeIn";
 import { Check, Plus, X, AlertCircle } from "lucide-react";
 import { toUpperTR } from "@/lib/tr";
+import { useApiQuery } from "@/hooks/useApiQuery";
+import { apiUrl } from "@/lib/api";
+import { ErrorState, LoadingBlock } from "@/components/panel/Skeletons";
 
-// ─── Initial state ────────────────────────────────────────────────────────────
-
-const INITIAL = {
-  firstName: "Ata Han",
-  lastName: "Bayram",
-  handle: "atahan",
-  role: "Kurucu",
-  company: "inner·hub",
-  bio: "Topluluk, ürün ve AI kesişiminde çalışıyorum. inner·hub'ı kuruyorum.",
-  skills: ["Ürün", "AI", "Topluluk", "B2B SaaS"],
-  linkedin: "linkedin.com/in/atahanbayram",
-  github: "github.com/atahan",
-  website: "atahan.co",
-  twitter: "",
-  visibility: "public" as "public" | "members" | "private",
+type Profile = {
+  firstName: string;
+  lastName: string;
+  handle: string;
+  role: string;
+  company: string;
+  bio: string;
+  skills: string[];
+  linkedin: string;
+  github: string;
+  website: string;
+  twitter: string;
+  visibility: "public" | "members" | "private";
 };
 
-type Profile = typeof INITIAL;
+type ApiUser = {
+  name?: string;
+  title?: string | null;
+  company?: string | null;
+  bio?: string | null;
+  linkedin?: string | null;
+  handle?: string | null;
+  github?: string | null;
+  website?: string | null;
+  twitter?: string | null;
+  skills?: string[];
+  visibility?: string | null;
+  profileCompletionPct?: number;
+};
 
-// ─── Completion calculator ─────────────────────────────────────────────────────
+const EMPTY: Profile = {
+  firstName: "",
+  lastName: "",
+  handle: "",
+  role: "",
+  company: "",
+  bio: "",
+  skills: [],
+  linkedin: "",
+  github: "",
+  website: "",
+  twitter: "",
+  visibility: "members",
+};
+
+function splitName(name: string | undefined): { firstName: string; lastName: string } {
+  const parts = (name ?? "").trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return { firstName: "", lastName: "" };
+  if (parts.length === 1) return { firstName: parts[0], lastName: "" };
+  return { firstName: parts[0], lastName: parts.slice(1).join(" ") };
+}
+
+function stripPrefix(value: string, prefixes: string[]): string {
+  let v = value.trim();
+  for (const p of prefixes) {
+    if (v.toLowerCase().startsWith(p.toLowerCase())) {
+      v = v.slice(p.length);
+    }
+  }
+  return v.replace(/^\/+/, "");
+}
+
+function mapUserToProfile(user: ApiUser): Profile {
+  const { firstName, lastName } = splitName(user.name);
+  return {
+    firstName,
+    lastName,
+    handle: user.handle ?? "",
+    role: user.title ?? "",
+    company: user.company ?? "",
+    bio: user.bio ?? "",
+    skills: Array.isArray(user.skills) ? user.skills : [],
+    linkedin: stripPrefix(user.linkedin ?? "", ["https://", "http://", "www.", "linkedin.com/in/"]),
+    github: stripPrefix(user.github ?? "", ["https://", "http://", "www.", "github.com/"]),
+    website: stripPrefix(user.website ?? "", ["https://", "http://"]),
+    twitter: stripPrefix(user.twitter ?? "", ["https://", "http://", "www.", "x.com/", "twitter.com/"]),
+    visibility:
+      user.visibility === "public" || user.visibility === "private" || user.visibility === "members"
+        ? user.visibility
+        : "members",
+  };
+}
 
 function calcCompletion(p: Profile): number {
   const checks = [
@@ -39,8 +104,6 @@ function calcCompletion(p: Profile): number {
   return Math.round((checks.filter(Boolean).length / checks.length) * 100);
 }
 
-// ─── Section wrapper ──────────────────────────────────────────────────────────
-
 function Section({ title, sub, children }: { title: string; sub?: string; children: React.ReactNode }) {
   return (
     <div className="border-t border-[var(--ink)]/[0.08] pt-6">
@@ -52,8 +115,6 @@ function Section({ title, sub, children }: { title: string; sub?: string; childr
     </div>
   );
 }
-
-// ─── Field ────────────────────────────────────────────────────────────────────
 
 function Field({
   label,
@@ -85,7 +146,7 @@ function Field({
         {label}
       </label>
       {prefix ? (
-        <div className="flex items-stretch border border-[var(--ink)]/[0.08] focus-within:border-[var(--ink)]/30 transition-colors">
+        <div className="flex items-stretch border border-[var(--ink)]/[0.08] transition-colors focus-within:border-[var(--ink)]/30">
           <span className="flex items-center border-r border-[var(--ink)]/[0.08] bg-[var(--ink)]/[0.03] px-3 font-mono text-label font-medium text-[var(--ink-body)]">
             {prefix}
           </span>
@@ -124,8 +185,6 @@ function Field({
   );
 }
 
-// ─── Skill editor ─────────────────────────────────────────────────────────────
-
 function SkillEditor({ skills, onChange }: { skills: string[]; onChange: (s: string[]) => void }) {
   const [input, setInput] = useState("");
 
@@ -150,8 +209,9 @@ function SkillEditor({ skills, onChange }: { skills: string[]; onChange: (s: str
           >
             {s}
             <button
+              type="button"
               onClick={() => onChange(skills.filter((x) => x !== s))}
-              className="text-[var(--ink-muted)] hover:text-[var(--ink)] transition-colors"
+              className="text-[var(--ink-muted)] transition-colors hover:text-[var(--ink)]"
             >
               <X className="size-2.5" />
             </button>
@@ -167,8 +227,9 @@ function SkillEditor({ skills, onChange }: { skills: string[]; onChange: (s: str
               onKeyDown={(e) => e.key === "Enter" && add()}
             />
             <button
+              type="button"
               onClick={add}
-              className="border-l border-dashed border-[var(--ink)]/15 px-2 text-[var(--ink-muted)] hover:text-[var(--ink)] transition-colors"
+              className="border-l border-dashed border-[var(--ink)]/15 px-2 text-[var(--ink-muted)] transition-colors hover:text-[var(--ink)]"
             >
               <Plus className="size-3" />
             </button>
@@ -179,8 +240,6 @@ function SkillEditor({ skills, onChange }: { skills: string[]; onChange: (s: str
     </div>
   );
 }
-
-// ─── Visibility selector ──────────────────────────────────────────────────────
 
 const VISIBILITY_OPTIONS = [
   { value: "public", label: "Herkese Açık", desc: "Herkes profilini görebilir" },
@@ -200,6 +259,7 @@ function VisibilitySelector({
       {VISIBILITY_OPTIONS.map((opt) => (
         <button
           key={opt.value}
+          type="button"
           onClick={() => onChange(opt.value)}
           className={[
             "flex items-center gap-3 border px-4 py-3 text-left transition-colors",
@@ -226,8 +286,6 @@ function VisibilitySelector({
   );
 }
 
-// ─── Avatar ───────────────────────────────────────────────────────────────────
-
 function Avatar({ name }: { name: string }) {
   const initials = toUpperTR(
     name
@@ -240,20 +298,15 @@ function Avatar({ name }: { name: string }) {
   return (
     <div className="flex items-center gap-4">
       <div className="flex size-16 items-center justify-center bg-[var(--ink)] font-mono text-lg text-[var(--bone)]">
-        {initials}
+        {initials || "?"}
       </div>
       <div>
         <p className="mb-1 text-sm text-[var(--ink)]">Profil fotoğrafı</p>
-        <p className="font-mono text-label font-medium text-[var(--ink-muted)]">JPG, PNG — maks. 2 MB</p>
-        <button className="mt-1.5 font-mono text-label uppercase tracking-widest text-[var(--ink-body)] underline underline-offset-2 hover:text-[var(--ink)] transition-colors">
-          Değiştir
-        </button>
+        <p className="font-mono text-label font-medium text-[var(--ink-muted)]">Yakında — avatar URL ile</p>
       </div>
     </div>
   );
 }
-
-// ─── Completion bar ───────────────────────────────────────────────────────────
 
 function CompletionBar({ pct }: { pct: number }) {
   return (
@@ -263,7 +316,6 @@ function CompletionBar({ pct }: { pct: number }) {
           className="h-full bg-[var(--inner-green)] shadow-[0_0_8px_var(--inner-green)] transition-all duration-500"
           style={{ width: `${pct}%` }}
         />
-        {/* Leading-edge pulse — same square-ping mark as the inner·hub logo */}
         <span
           className="absolute top-1/2 size-1.5 -translate-y-1/2 transition-all duration-500"
           style={{ left: `${pct}%`, transform: "translate(-100%, -50%)" }}
@@ -277,15 +329,27 @@ function CompletionBar({ pct }: { pct: number }) {
   );
 }
 
-// ─── Main page ────────────────────────────────────────────────────────────────
-
 export default function ProfilePage() {
-  const [profile, setProfile] = useState<Profile>(INITIAL);
+  const { data, isLoading, isError, error, refetch } = useApiQuery<{ user: ApiUser }>(
+    ["auth-me"],
+    "/api/auth/me",
+  );
+  const [profile, setProfile] = useState<Profile>(EMPTY);
+  const [hydrated, setHydrated] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [handleError, setHandleError] = useState("");
+
+  useEffect(() => {
+    if (!data?.user) return;
+    setProfile(mapUserToProfile(data.user));
+    setHydrated(true);
+  }, [data]);
 
   const set = <K extends keyof Profile>(key: K, value: Profile[K]) => {
     setSaved(false);
+    setSaveError(null);
     setProfile((p) => ({ ...p, [key]: value }));
   };
 
@@ -296,43 +360,86 @@ export default function ProfilePage() {
     set("handle", clean);
   };
 
-  const save = () => {
-    if (handleError) return;
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+  const save = async () => {
+    if (handleError || saving) return;
+    setSaving(true);
+    setSaveError(null);
+    try {
+      const res = await fetch(apiUrl("/api/auth/me"), {
+        method: "PATCH",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          firstName: profile.firstName,
+          lastName: profile.lastName,
+          handle: profile.handle,
+          title: profile.role,
+          company: profile.company,
+          bio: profile.bio,
+          skills: profile.skills,
+          linkedin: profile.linkedin,
+          github: profile.github,
+          website: profile.website,
+          twitter: profile.twitter,
+          visibility: profile.visibility,
+        }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json.error ?? "Kaydedilemedi");
+      if (json.user) setProfile(mapUserToProfile(json.user));
+      setSaved(true);
+      window.dispatchEvent(new CustomEvent("inner-profile-updated", { detail: json.user }));
+      setTimeout(() => setSaved(false), 3000);
+    } catch (e: any) {
+      setSaveError(e.message ?? "Kaydedilemedi");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const completion = calcCompletion(profile);
   const fullName = `${profile.firstName} ${profile.lastName}`.trim();
 
+  if (isLoading && !hydrated) {
+    return (
+      <div className="max-w-xl">
+        <LoadingBlock label="Profil yükleniyor" />
+      </div>
+    );
+  }
+
+  if (isError && !hydrated) {
+    return (
+      <div className="max-w-xl">
+        <ErrorState
+          message={error instanceof Error ? error.message : "Profil yüklenemedi"}
+          onRetry={() => refetch()}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-xl space-y-8">
-      {/* Header */}
       <FadeIn>
         <div>
-          <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)] mb-2">
+          <p className="mb-2 font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
             <span lang="en">inner·hub</span>
           </p>
           <h1
-            className="font-serif font-display text-4xl md:text-5xl text-[var(--ink)]"
+            className="font-serif font-display text-4xl text-[var(--ink)] md:text-5xl"
             style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
           >
             profil
-            <span className="inline-block size-[0.35em] translate-y-[0.08em] ml-[0.05em] bg-[var(--inner-green)]" />
+            <span className="ml-[0.05em] inline-block size-[0.35em] translate-y-[0.08em] bg-[var(--inner-green)]" />
           </h1>
-          <p className="mt-2 text-sm text-[var(--ink-muted)] font-light">
-            inner·hub'daki kimliğini yönet.
-          </p>
+          <p className="mt-2 text-sm font-light text-[var(--ink-muted)]">inner·hub'daki kimliğini yönet.</p>
         </div>
       </FadeIn>
 
-      {/* Completion */}
       <CompletionBar pct={completion} />
-
-      {/* Avatar */}
       <Avatar name={fullName || "Üye"} />
 
-      {/* Temel Bilgiler */}
       <Section title="Temel Bilgiler">
         <div className="grid grid-cols-2 gap-3">
           <Field label="Ad" value={profile.firstName} onChange={(v) => set("firstName", v)} placeholder="Adın" maxLength={40} />
@@ -370,12 +477,10 @@ export default function ProfilePage() {
         </div>
       </Section>
 
-      {/* Uzmanlıklar */}
       <Section title="Uzmanlıklar" sub="inner·id kartında ve eşleşmelerde görünür">
         <SkillEditor skills={profile.skills} onChange={(s) => set("skills", s)} />
       </Section>
 
-      {/* Sosyal Linkler */}
       <Section title="Sosyal Linkler" sub="inner·id rozetine bağlanır">
         <div className="space-y-3">
           <Field label="LinkedIn" value={profile.linkedin} onChange={(v) => set("linkedin", v)} prefix="linkedin.com/in/" placeholder="profiladın" mono />
@@ -385,16 +490,15 @@ export default function ProfilePage() {
         </div>
       </Section>
 
-      {/* Gizlilik */}
       <Section title="Profil Görünürlüğü" sub="Profilinin kim tarafından görüleceğini belirle">
         <VisibilitySelector value={profile.visibility} onChange={(v) => set("visibility", v)} />
       </Section>
 
-      {/* Save */}
-      <div className="border-t border-[var(--ink)]/[0.08] pt-6 flex items-center gap-4">
+      <div className="flex items-center gap-4 border-t border-[var(--ink)]/[0.08] pt-6">
         <button
-          onClick={save}
-          disabled={!!handleError}
+          type="button"
+          onClick={() => void save()}
+          disabled={!!handleError || saving}
           className={[
             "flex items-center gap-2 border px-6 py-2.5 font-mono text-label uppercase tracking-widest transition-all",
             saved
@@ -406,13 +510,18 @@ export default function ProfilePage() {
             <>
               <Check className="size-3" /> Kaydedildi
             </>
+          ) : saving ? (
+            "Kaydediliyor…"
           ) : (
             "Kaydet"
           )}
         </button>
         {saved && (
-          <p className="font-mono text-label text-[var(--ink-muted)]">
-            Değişiklikler inner·id'e yansıdı
+          <p className="font-mono text-label text-[var(--ink-muted)]">Değişiklikler kaydedildi</p>
+        )}
+        {saveError && (
+          <p className="font-mono text-label text-[var(--error-ink)]" role="alert">
+            {saveError}
           </p>
         )}
       </div>

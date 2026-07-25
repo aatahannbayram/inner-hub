@@ -95175,6 +95175,12 @@ var usersTable = pgTable("users", {
   company: text("company"),
   linkedin: text("linkedin"),
   phone: text("phone"),
+  handle: text("handle"),
+  github: text("github"),
+  website: text("website"),
+  twitter: text("twitter"),
+  skills: text("skills"),
+  visibility: text("visibility").default("members"),
   profileCompletionPct: integer("profile_completion_pct").default(0).notNull(),
   passwordHash: text("password_hash"),
   googleId: text("google_id").unique(),
@@ -113445,10 +113451,46 @@ function requireAdmin(req, res, next) {
   next();
 }
 
+// src/lib/ensureSchema.ts
+async function ensureUserProfileColumns() {
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS handle text`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS github text`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS website text`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS twitter text`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS skills text`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS visibility text`);
+}
+
 // src/routes/auth.ts
 var router5 = (0, import_express5.Router)();
 var googleClientId = process.env.GOOGLE_CLIENT_ID;
 var googleClient = googleClientId ? new import_google_auth_library.OAuth2Client(googleClientId) : null;
+function calcCompletion(input) {
+  const parts = input.name.trim().split(/\s+/).filter(Boolean);
+  const checks = [
+    (parts[0] ?? "").length > 0,
+    (parts[1] ?? "").length > 0,
+    input.handle.trim().length > 0,
+    input.title.trim().length > 0,
+    input.company.trim().length > 0,
+    input.bio.trim().length > 20,
+    input.skills.length >= 2,
+    input.linkedin.trim().length > 0,
+    input.github.trim().length > 0 || input.website.trim().length > 0
+  ];
+  return Math.round(checks.filter(Boolean).length / checks.length * 100);
+}
+function parseSkills(raw) {
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) {
+      return parsed.filter((s) => typeof s === "string").slice(0, 10);
+    }
+  } catch {
+  }
+  return raw.split(",").map((s) => s.trim()).filter(Boolean).slice(0, 10);
+}
 function assertInviteCode(inviteCode) {
   const expected = process.env.INVITE_PASSCODE?.trim();
   if (!expected) {
@@ -113577,7 +113619,80 @@ router5.get("/me", async (req, res) => {
     res.status(401).json({ error: "Not authenticated" });
     return;
   }
-  res.json({ user: publicUser(req.user) });
+  try {
+    await ensureUserProfileColumns();
+    const [fresh] = await db.select().from(usersTable).where(eq(usersTable.id, req.user.id)).limit(1);
+    const user = fresh ?? req.user;
+    res.json({
+      user: {
+        ...publicUser(user),
+        skills: parseSkills(user.skills)
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message ?? "Profil y\xFCklenemedi" });
+  }
+});
+router5.patch("/me", requireAuth, async (req, res) => {
+  try {
+    await ensureUserProfileColumns();
+    const userId = req.user.id;
+    const body = req.body ?? {};
+    const firstName = typeof body.firstName === "string" ? body.firstName.trim() : "";
+    const lastName = typeof body.lastName === "string" ? body.lastName.trim() : "";
+    const name = `${firstName} ${lastName}`.trim() || req.user.name;
+    const handleRaw = typeof body.handle === "string" ? body.handle.trim().toLowerCase() : "";
+    const handle = handleRaw.replace(/[^a-z0-9_]/g, "").slice(0, 20);
+    const title = typeof body.title === "string" ? body.title.trim().slice(0, 50) : "";
+    const company = typeof body.company === "string" ? body.company.trim().slice(0, 50) : "";
+    const bio = typeof body.bio === "string" ? body.bio.trim().slice(0, 160) : "";
+    const linkedin = typeof body.linkedin === "string" ? body.linkedin.trim().slice(0, 120) : "";
+    const github = typeof body.github === "string" ? body.github.trim().slice(0, 120) : "";
+    const website = typeof body.website === "string" ? body.website.trim().slice(0, 120) : "";
+    const twitter = typeof body.twitter === "string" ? body.twitter.trim().slice(0, 120) : "";
+    const visibility = body.visibility === "public" || body.visibility === "private" || body.visibility === "members" ? body.visibility : "members";
+    const skills = Array.isArray(body.skills) ? body.skills.filter((s) => typeof s === "string").map((s) => s.trim()).filter(Boolean).slice(0, 10) : [];
+    if (handle) {
+      const [taken] = await db.select({ id: usersTable.id }).from(usersTable).where(and(eq(usersTable.handle, handle), ne(usersTable.id, userId))).limit(1);
+      if (taken) {
+        res.status(409).json({ error: "Bu kullan\u0131c\u0131 ad\u0131 al\u0131nm\u0131\u015F" });
+        return;
+      }
+    }
+    const profileCompletionPct = calcCompletion({
+      name,
+      handle,
+      title,
+      company,
+      bio,
+      skills,
+      linkedin,
+      github,
+      website
+    });
+    const [updated] = await db.update(usersTable).set({
+      name,
+      handle: handle || null,
+      title: title || null,
+      company: company || null,
+      bio: bio || null,
+      linkedin: linkedin || null,
+      github: github || null,
+      website: website || null,
+      twitter: twitter || null,
+      skills: JSON.stringify(skills),
+      visibility,
+      profileCompletionPct
+    }).where(eq(usersTable.id, userId)).returning();
+    res.json({
+      user: {
+        ...publicUser(updated),
+        skills: parseSkills(updated.skills)
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message ?? "Profil kaydedilemedi" });
+  }
 });
 var auth_default = router5;
 
@@ -114363,12 +114478,16 @@ var port = Number(rawPort);
 if (Number.isNaN(port) || port <= 0) {
   throw new Error(`Invalid PORT value: "${rawPort}"`);
 }
-app_default.listen(port, (err) => {
-  if (err) {
-    logger.error({ err }, "Error listening on port");
-    process.exit(1);
-  }
-  logger.info({ port }, "Server listening");
+ensureUserProfileColumns().catch((err) => {
+  logger.warn({ err }, "Profile column ensure failed (will retry on /me)");
+}).finally(() => {
+  app_default.listen(port, (err) => {
+    if (err) {
+      logger.error({ err }, "Error listening on port");
+      process.exit(1);
+    }
+    logger.info({ port }, "Server listening");
+  });
 });
 /*! Bundled license information:
 
