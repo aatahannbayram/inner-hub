@@ -13,6 +13,8 @@ import matchRouter from "./match";
 import vaultRouter from "./vault";
 import capitalRouter from "./capital";
 import pulseRouter from "./pulse";
+import publicIdRouter from "./publicId";
+import analyticsRouter from "./analytics";
 
 const router: IRouter = Router();
 
@@ -30,5 +32,6 @@ router.use(matchRouter);
 router.use(vaultRouter);
 router.use(capitalRouter);
 router.use(pulseRouter);
+router.use(publicIdRouter);
 
 export default router;

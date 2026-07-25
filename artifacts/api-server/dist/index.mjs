@@ -20655,27 +20655,27 @@ var require_router = __commonJS({
     var slice = Array.prototype.slice;
     var flatten = Array.prototype.flat;
     var methods = METHODS.map((method) => method.toLowerCase());
-    module.exports = Router16;
+    module.exports = Router17;
     module.exports.Route = Route;
-    function Router16(options) {
-      if (!(this instanceof Router16)) {
-        return new Router16(options);
+    function Router17(options) {
+      if (!(this instanceof Router17)) {
+        return new Router17(options);
       }
       const opts = options || {};
-      function router16(req, res, next) {
-        router16.handle(req, res, next);
+      function router17(req, res, next) {
+        router17.handle(req, res, next);
       }
-      Object.setPrototypeOf(router16, this);
-      router16.caseSensitive = opts.caseSensitive;
-      router16.mergeParams = opts.mergeParams;
-      router16.params = {};
-      router16.strict = opts.strict;
-      router16.stack = [];
-      return router16;
+      Object.setPrototypeOf(router17, this);
+      router17.caseSensitive = opts.caseSensitive;
+      router17.mergeParams = opts.mergeParams;
+      router17.params = {};
+      router17.strict = opts.strict;
+      router17.stack = [];
+      return router17;
     }
-    Router16.prototype = function() {
+    Router17.prototype = function() {
     };
-    Router16.prototype.param = function param(name, fn) {
+    Router17.prototype.param = function param(name, fn) {
       if (!name) {
         throw new TypeError("argument name is required");
       }
@@ -20695,7 +20695,7 @@ var require_router = __commonJS({
       params.push(fn);
       return this;
     };
-    Router16.prototype.handle = function handle(req, res, callback) {
+    Router17.prototype.handle = function handle(req, res, callback) {
       if (!callback) {
         throw new TypeError("argument callback is required");
       }
@@ -20822,7 +20822,7 @@ var require_router = __commonJS({
         }
       }
     };
-    Router16.prototype.use = function use(handler) {
+    Router17.prototype.use = function use(handler) {
       let offset = 0;
       let path6 = "/";
       if (typeof handler !== "function") {
@@ -20855,7 +20855,7 @@ var require_router = __commonJS({
       }
       return this;
     };
-    Router16.prototype.route = function route(path6) {
+    Router17.prototype.route = function route(path6) {
       const route2 = new Route(path6);
       const layer = new Layer(path6, {
         sensitive: this.caseSensitive,
@@ -20870,7 +20870,7 @@ var require_router = __commonJS({
       return route2;
     };
     methods.concat("all").forEach(function(method) {
-      Router16.prototype[method] = function(path6) {
+      Router17.prototype[method] = function(path6) {
         const route = this.route(path6);
         route[method].apply(route, slice.call(arguments, 1));
         return this;
@@ -21053,13 +21053,13 @@ var require_application = __commonJS({
     var compileTrust = require_utils3().compileTrust;
     var resolve4 = __require("node:path").resolve;
     var once = require_once();
-    var Router16 = require_router();
+    var Router17 = require_router();
     var slice = Array.prototype.slice;
     var flatten = Array.prototype.flat;
     var app2 = exports = module.exports = {};
     var trustProxyDefaultSymbol = "@@symbol:trust_proxy_default";
     app2.init = function init() {
-      var router16 = null;
+      var router17 = null;
       this.cache = /* @__PURE__ */ Object.create(null);
       this.engines = /* @__PURE__ */ Object.create(null);
       this.settings = /* @__PURE__ */ Object.create(null);
@@ -21068,13 +21068,13 @@ var require_application = __commonJS({
         configurable: true,
         enumerable: true,
         get: function getrouter() {
-          if (router16 === null) {
-            router16 = new Router16({
+          if (router17 === null) {
+            router17 = new Router17({
               caseSensitive: this.enabled("case sensitive routing"),
               strict: this.enabled("strict routing")
             });
           }
-          return router16;
+          return router17;
         }
       });
     };
@@ -21145,15 +21145,15 @@ var require_application = __commonJS({
       if (fns.length === 0) {
         throw new TypeError("app.use() requires a middleware function");
       }
-      var router16 = this.router;
+      var router17 = this.router;
       fns.forEach(function(fn2) {
         if (!fn2 || !fn2.handle || !fn2.set) {
-          return router16.use(path6, fn2);
+          return router17.use(path6, fn2);
         }
         debug(".use app under %s", path6);
         fn2.mountpath = path6;
         fn2.parent = this;
-        router16.use(path6, function mounted_app(req, res, next) {
+        router17.use(path6, function mounted_app(req, res, next) {
           var orig = req.app;
           fn2.handle(req, res, function(err) {
             Object.setPrototypeOf(req, orig.request);
@@ -23726,7 +23726,7 @@ var require_express = __commonJS({
     var EventEmitter2 = __require("node:events").EventEmitter;
     var mixin = require_merge_descriptors();
     var proto = require_application();
-    var Router16 = require_router();
+    var Router17 = require_router();
     var req = require_request();
     var res = require_response();
     exports = module.exports = createApplication;
@@ -23748,8 +23748,8 @@ var require_express = __commonJS({
     exports.application = proto;
     exports.request = req;
     exports.response = res;
-    exports.Route = Router16.Route;
-    exports.Router = Router16;
+    exports.Route = Router17.Route;
+    exports.Router = Router17;
     exports.json = bodyParser.json;
     exports.raw = bodyParser.raw;
     exports.static = require_serve_static();
@@ -72759,14 +72759,14 @@ var require_src6 = __commonJS({
 });
 
 // src/app.ts
-var import_express16 = __toESM(require_express2(), 1);
+var import_express17 = __toESM(require_express2(), 1);
 var import_cors = __toESM(require_lib3(), 1);
 var import_cookie_parser = __toESM(require_cookie_parser(), 1);
 var import_pino_http = __toESM(require_logger(), 1);
 import path5 from "node:path";
 
 // src/routes/index.ts
-var import_express15 = __toESM(require_express2(), 1);
+var import_express16 = __toESM(require_express2(), 1);
 
 // src/routes/health.ts
 var import_express = __toESM(require_express2(), 1);
@@ -115122,26 +115122,135 @@ router14.get("/pulse", requireAuth, async (_req, res) => {
 });
 var pulse_default = router14;
 
-// src/routes/index.ts
+// src/routes/publicId.ts
+var import_express15 = __toESM(require_express2(), 1);
 var router15 = (0, import_express15.Router)();
-router15.use(health_default);
-router15.use(invitations_default);
-router15.use("/payments", payments_default);
-router15.use("/ai", ai_default);
-router15.use("/auth", auth_default);
-router15.use(catalog_default);
-router15.use(applications_default);
-router15.use(community_default);
-router15.use(chat_default);
-router15.use(notifications_default);
-router15.use(match_default);
-router15.use(vault_default);
-router15.use(capital_default);
-router15.use(pulse_default);
-var routes_default = router15;
+function parseSkills2(raw) {
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) {
+      return parsed.filter((s) => typeof s === "string").slice(0, 10);
+    }
+  } catch {
+  }
+  return raw.split(",").map((s) => s.trim()).filter(Boolean).slice(0, 10);
+}
+function normalizeHandle(raw) {
+  return raw.trim().toLowerCase().replace(/[^a-z0-9_]/g, "").slice(0, 20);
+}
+function escapeXml(s) {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&apos;");
+}
+async function findByHandle(handle) {
+  await ensureUserProfileColumns();
+  const [user] = await db.select().from(usersTable).where(eq(usersTable.handle, handle)).limit(1);
+  return user ?? null;
+}
+function publicPayload(user) {
+  return {
+    id: user.id,
+    name: user.name,
+    handle: user.handle,
+    title: user.title,
+    company: user.company,
+    bio: user.bio,
+    skills: parseSkills2(user.skills),
+    linkedin: user.linkedin,
+    github: user.github,
+    website: user.website,
+    twitter: user.twitter,
+    visibility: user.visibility ?? "members",
+    role: user.role,
+    profileCompletionPct: user.profileCompletionPct,
+    createdAt: user.createdAt.toISOString(),
+    verified: true,
+    tier: user.role === "admin" ? "Kurucu \xDCye" : "\xDCye"
+  };
+}
+router15.get("/public/profile/:handle", async (req, res) => {
+  try {
+    const handle = normalizeHandle(String(req.params.handle ?? ""));
+    if (!handle) {
+      res.status(400).json({ error: "Ge\xE7ersiz handle" });
+      return;
+    }
+    const user = await findByHandle(handle);
+    if (!user) {
+      res.status(404).json({ error: "Profil bulunamad\u0131" });
+      return;
+    }
+    const visibility = user.visibility ?? "members";
+    if (visibility === "private") {
+      res.status(404).json({ error: "Profil bulunamad\u0131" });
+      return;
+    }
+    if (visibility === "members" && !req.user) {
+      res.status(401).json({
+        error: "Bu profil yaln\u0131zca inner\xB7hub \xFCyelerine a\xE7\u0131k",
+        code: "MEMBERS_ONLY",
+        handle
+      });
+      return;
+    }
+    res.json({ profile: publicPayload(user) });
+  } catch (err) {
+    res.status(500).json({ error: err.message ?? "Profil y\xFCklenemedi" });
+  }
+});
+router15.get("/badge/:handle.svg", async (req, res) => {
+  try {
+    const handle = normalizeHandle(String(req.params.handle ?? ""));
+    if (!handle) {
+      res.status(400).type("text/plain").send("invalid handle");
+      return;
+    }
+    const user = await findByHandle(handle);
+    if (!user || (user.visibility ?? "members") === "private") {
+      res.status(404).type("text/plain").send("not found");
+      return;
+    }
+    const label = "inner\xB7hub";
+    const name = escapeXml(user.name.split(/\s+/)[0] || handle);
+    const handleLabel = escapeXml(`@${handle}`);
+    const svg = `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="168" height="28" role="img" aria-label="${label} member">
+  <title>${label} \xB7 ${handleLabel}</title>
+  <rect width="168" height="28" fill="#0A0A0A"/>
+  <rect x="0" y="0" width="3" height="28" fill="#18FF85"/>
+  <text x="12" y="18" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#F4F1EC">${escapeXml(label)}</text>
+  <text x="78" y="18" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#18FF85">${name}</text>
+</svg>`;
+    res.setHeader("Content-Type", "image/svg+xml; charset=utf-8");
+    res.setHeader("Cache-Control", "public, max-age=300");
+    res.send(svg);
+  } catch (err) {
+    res.status(500).type("text/plain").send(err.message ?? "error");
+  }
+});
+var publicId_default = router15;
+
+// src/routes/index.ts
+var router16 = (0, import_express16.Router)();
+router16.use(health_default);
+router16.use(invitations_default);
+router16.use("/payments", payments_default);
+router16.use("/ai", ai_default);
+router16.use("/auth", auth_default);
+router16.use(catalog_default);
+router16.use(applications_default);
+router16.use(community_default);
+router16.use(chat_default);
+router16.use(notifications_default);
+router16.use(match_default);
+router16.use(vault_default);
+router16.use(capital_default);
+router16.use(pulse_default);
+router16.use(publicId_default);
+var routes_default = router16;
 
 // src/app.ts
-var app = (0, import_express16.default)();
+var app = (0, import_express17.default)();
 app.use(
   (0, import_pino_http.default)({
     logger,
@@ -115168,13 +115277,13 @@ app.use(
     credentials: true
   })
 );
-app.use(import_express16.default.json());
-app.use(import_express16.default.urlencoded({ extended: true }));
+app.use(import_express17.default.json());
+app.use(import_express17.default.urlencoded({ extended: true }));
 app.use((0, import_cookie_parser.default)());
 app.use(attachUser);
 app.use("/api", routes_default);
 var frontendDist = path5.join(__dirname, "..", "..", "inner-hub", "dist");
-app.use(import_express16.default.static(frontendDist));
+app.use(import_express17.default.static(frontendDist));
 app.get(/^(?!\/api).*/, (_req, res) => {
   res.sendFile(path5.join(frontendDist, "index.html"));
 });

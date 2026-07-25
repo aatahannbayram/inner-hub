@@ -62,7 +62,7 @@ function memberSince(iso?: string): string {
 
 function buildSnippets(handle: string, name: string) {
   const profile = `https://inner.digital/u/${handle}`;
-  const badge = `https://inner.digital/badge/${handle}.svg`;
+  const badge = `https://inner.digital/api/badge/${handle}.svg`;
   return {
     html: `<a href="${profile}" target="_blank" rel="noopener">
   <img src="${badge}" alt="inner·hub Üyesi" height="28" />
@@ -72,7 +72,8 @@ function buildSnippets(handle: string, name: string) {
   "name": ${JSON.stringify(name)},
   "handle": ${JSON.stringify(handle)},
   "verified": true,
-  "profile": ${JSON.stringify(profile)}
+  "profile": ${JSON.stringify(profile)},
+  "badge": ${JSON.stringify(badge)}
 }`,
   } as const;
 }

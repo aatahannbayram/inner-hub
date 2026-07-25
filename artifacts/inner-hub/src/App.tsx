@@ -7,6 +7,7 @@ import NotFound from "@/pages/not-found";
 import Home from "@/pages/Home";
 import Invitation from "@/pages/Invitation";
 import Requests from "@/pages/Requests";
+import PublicProfile from "@/pages/PublicProfile";
 import { PanelShell, type PanelUser } from "@/components/panel/PanelShell";
 import { PanelPageSkeleton } from "@/components/panel/Skeletons";
 import { apiUrl } from "@/lib/api";
@@ -159,6 +160,7 @@ function Router() {
       <Route path="/"           component={Home} />
       <Route path="/invitation" component={Invitation} />
       <Route path="/requests"   component={Requests} />
+      <Route path="/u/:handle"  component={PublicProfile} />
       <Route path="/panel"    component={PanelApp} />
       <Route path="/panel/:rest+" component={PanelApp} />
       <Route component={NotFound} />
