@@ -86,10 +86,10 @@ function StatCard({ label, value, icon: Icon }: { label: string; value: string |
   return (
     <div className="flex items-center gap-4 border border-[var(--ink)]/[0.08] p-5">
       <div className="flex size-9 shrink-0 items-center justify-center border border-[var(--ink)]/[0.08]">
-        <Icon className="size-4 text-[var(--ink)]/50" />
+        <Icon className="size-4 text-[var(--ink-muted)]" />
       </div>
       <div>
-        <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56">{label}</p>
+        <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)]">{label}</p>
         <p className="text-xl font-light tabular-nums text-[var(--ink)]">{value}</p>
       </div>
     </div>
@@ -117,8 +117,8 @@ function PerkCard({ perk }: { perk: typeof mockPerks[0] }) {
         )}
       </div>
       <p className="mb-1 text-sm font-medium leading-snug text-[var(--ink)]">{perk.title}</p>
-      <p className="mb-4 flex-1 text-sm leading-relaxed text-[var(--ink)]/50 line-clamp-2">{perk.description}</p>
-      <button className="flex items-center gap-1 font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/60 transition-colors hover:text-[var(--ink)]">
+      <p className="mb-4 flex-1 text-sm leading-relaxed text-[var(--ink-muted)] line-clamp-2">{perk.description}</p>
+      <button className="flex items-center gap-1 font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)] transition-colors hover:text-[var(--ink)]">
         Detayları gör <ArrowRight className="size-3" />
       </button>
     </div>
@@ -254,7 +254,7 @@ export default function Dashboard({ userName = "Ata" }: { userName?: string }) {
       <FadeIn delay={0.06}>
         <section>
           <div className="mb-4 border-t border-[var(--ink)]/[0.08] pt-3">
-            <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56">
+            <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)]">
               Öne çıkan
             </p>
           </div>
@@ -300,10 +300,10 @@ export default function Dashboard({ userName = "Ata" }: { userName?: string }) {
         <FadeIn delay={0.12}>
           <section>
             <div className="mb-4 flex items-baseline justify-between border-t border-[var(--ink)]/[0.08] pt-3">
-              <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56">Kurslarım</p>
+              <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)]">Kurslarım</p>
               <Link
                 href="/panel/courses"
-                className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56 transition-colors hover:text-[var(--ink)]"
+                className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)] transition-colors hover:text-[var(--ink)]"
               >
                 Tümü →
               </Link>
@@ -317,7 +317,7 @@ export default function Dashboard({ userName = "Ata" }: { userName?: string }) {
                       <div className="h-full bg-[var(--ink)] transition-all duration-700" style={{ width: `${course.progressPct}%` }} />
                     </div>
                   </div>
-                  <span className="font-mono text-[10px] tabular-nums text-[var(--ink)]/56">%{course.progressPct}</span>
+                  <span className="font-mono text-[10px] tabular-nums text-[var(--ink-body)]">%{course.progressPct}</span>
                 </div>
               ))}
             </div>
@@ -329,12 +329,12 @@ export default function Dashboard({ userName = "Ata" }: { userName?: string }) {
         <section>
           <div className="mb-4 flex items-baseline justify-between border-t border-[var(--ink)]/[0.08] pt-3">
             <div>
-              <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56">Ayrıcalıklar</p>
-              <p className="mt-0.5 text-xs text-[var(--ink)]/46">Program katılımcılarına özel fırsatlar</p>
+              <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)]">Ayrıcalıklar</p>
+              <p className="mt-0.5 text-xs text-[var(--ink-muted)]">Program katılımcılarına özel fırsatlar</p>
             </div>
             <Link
               href="/panel/perks"
-              className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56 transition-colors hover:text-[var(--ink)]"
+              className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)] transition-colors hover:text-[var(--ink)]"
             >
               Tümü →
             </Link>

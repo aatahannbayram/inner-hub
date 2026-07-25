@@ -266,11 +266,11 @@ function MessageBubble({ msg, prevAuthorId }: { msg: Message; prevAuthorId?: num
                 Admin
               </span>
             )}
-            <span className="font-mono text-[10px] text-[var(--ink)]/46">{msg.timestamp}</span>
-            {msg.isPinned && <Pin className="size-2.5 text-[var(--ink)]/46" />}
+            <span className="font-mono text-[10px] text-[var(--ink-muted)]">{msg.timestamp}</span>
+            {msg.isPinned && <Pin className="size-2.5 text-[var(--ink-muted)]" />}
           </div>
         )}
-        <p className="text-sm leading-relaxed text-[var(--ink)]/80">{msg.content}</p>
+        <p className="text-sm leading-relaxed text-[var(--ink-strong)]">{msg.content}</p>
       </div>
     </div>
   );
@@ -315,7 +315,7 @@ export default function ChatPage() {
       {/* Channel sidebar */}
       <aside className="hidden w-[220px] shrink-0 flex-col border-r border-[var(--ink)]/[0.08] bg-[var(--bone)] md:flex">
         <div className="border-b border-[var(--ink)]/[0.08] px-4 py-3">
-          <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56">Kanallar</p>
+          <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)]">Kanallar</p>
         </div>
         <div className="flex-1 overflow-y-auto py-2">
           {CHANNELS.map((ch) => (
@@ -326,7 +326,7 @@ export default function ChatPage() {
                 "flex w-full items-center gap-2 px-3 py-2 text-left transition-colors",
                 activeChannel === ch.id
                   ? "bg-[var(--ink)] text-[var(--bone)]"
-                  : "text-[var(--ink)]/50 hover:bg-[var(--ink)]/[0.04] hover:text-[var(--ink)]",
+                  : "text-[var(--ink-muted)] hover:bg-[var(--ink)]/[0.04] hover:text-[var(--ink)]",
               )}
             >
               {ch.type === "announcement" ? (
@@ -351,16 +351,16 @@ export default function ChatPage() {
         <div className="flex h-[52px] items-center justify-between border-b border-[var(--ink)]/[0.08] px-4">
           <div className="flex items-center gap-2">
             {channel.type === "announcement" ? (
-              <Volume2 className="size-4 text-[var(--ink)]/56" />
+              <Volume2 className="size-4 text-[var(--ink-body)]" />
             ) : (
-              <Hash className="size-4 text-[var(--ink)]/56" />
+              <Hash className="size-4 text-[var(--ink-body)]" />
             )}
             <span className="font-mono text-sm text-[var(--ink)]">{channel.label}</span>
-            <span className="hidden font-mono text-[10px] text-[var(--ink)]/46 sm:block">
+            <span className="hidden font-mono text-[10px] text-[var(--ink-muted)] sm:block">
               — {channel.description}
             </span>
           </div>
-          <button className="text-[var(--ink)]/46 hover:text-[var(--ink)] transition-colors">
+          <button className="text-[var(--ink-muted)] hover:text-[var(--ink)] transition-colors">
             <Search className="size-4" />
           </button>
         </div>
@@ -371,11 +371,11 @@ export default function ChatPage() {
           {channelMessages.length === 0 ? (
             <div className="flex h-full items-center justify-center">
               <div className="text-center">
-                <Hash className="mx-auto mb-3 size-8 text-[var(--ink)]/26" />
-                <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/46">
+                <Hash className="mx-auto mb-3 size-8 text-[var(--ink-subtle)]" />
+                <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-muted)]">
                   #{channel.label} henüz boş
                 </p>
-                <p className="mt-1 text-sm text-[var(--ink)]/46">İlk mesajı sen gönder.</p>
+                <p className="mt-1 text-sm text-[var(--ink-muted)]">İlk mesajı sen gönder.</p>
               </div>
             </div>
           ) : (
@@ -402,7 +402,7 @@ export default function ChatPage() {
                   key={s}
                   type="button"
                   onClick={() => setDraft(s)}
-                  className="border border-[var(--ink)]/12 px-2.5 py-1 font-mono text-[10px] text-[var(--ink)]/50 transition-colors hover:border-[var(--inner-green)]/40 hover:text-[var(--ink)]"
+                  className="border border-[var(--ink)]/12 px-2.5 py-1 font-mono text-[10px] text-[var(--ink-muted)] transition-colors hover:border-[var(--inner-green)]/40 hover:text-[var(--ink)]"
                 >
                   {s}
                 </button>
@@ -421,7 +421,7 @@ export default function ChatPage() {
               }}
               placeholder={`#${channel.label} kanalına mesaj gönder…`}
               rows={1}
-              className="flex-1 resize-none bg-transparent font-sans text-sm text-[var(--ink)] placeholder:text-[var(--ink)]/46 focus:outline-none"
+              className="flex-1 resize-none bg-transparent font-sans text-sm text-[var(--ink)] placeholder:text-[var(--ink-muted)] focus:outline-none"
               style={{ lineHeight: "1.5" }}
             />
             <button
@@ -433,7 +433,7 @@ export default function ChatPage() {
               <Send className="size-3.5" />
             </button>
           </div>
-          <p className="mt-1.5 font-mono text-[9px] text-[var(--ink)]/41">
+          <p className="mt-1.5 font-mono text-[9px] text-[var(--ink-subtle)]">
             Enter ile gönder · Shift+Enter yeni satır
           </p>
         </div>

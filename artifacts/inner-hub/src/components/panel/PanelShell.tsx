@@ -59,7 +59,7 @@ function NotifPanel({
         {/* Header */}
         <div className="flex items-center justify-between border-b border-[var(--ink)]/[0.08] px-4 py-3">
           <div className="flex items-center gap-2">
-            <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/56">Bildirimler</p>
+            <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink-body)]">Bildirimler</p>
             {count > 0 && (
               <span className="flex size-4 items-center justify-center bg-[var(--ink)] font-mono text-[8px] text-[var(--bone)]">
                 {count}
@@ -69,7 +69,7 @@ function NotifPanel({
           {count > 0 && (
             <button
               onClick={markAll}
-              className="font-mono text-[8px] uppercase tracking-widest text-[var(--ink)]/46 hover:text-[var(--ink)] transition-colors"
+              className="font-mono text-[8px] uppercase tracking-widest text-[var(--ink-muted)] hover:text-[var(--ink)] transition-colors"
             >
               Tümünü oku
             </button>
@@ -89,7 +89,7 @@ function NotifPanel({
                 )}
               >
                 <div className="mt-0.5 flex size-7 shrink-0 items-center justify-center bg-[var(--ink)]/[0.06]">
-                  <Icon className="size-3.5 text-[var(--ink)]/56" />
+                  <Icon className="size-3.5 text-[var(--ink-body)]" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2">
@@ -98,8 +98,8 @@ function NotifPanel({
                       <span className="mt-1 size-1.5 shrink-0 rounded-full bg-[var(--inner-green)]" />
                     )}
                   </div>
-                  <p className="mt-0.5 font-mono text-[9px] leading-snug text-[var(--ink)]/51">{n.sub}</p>
-                  <p className="mt-1 font-mono text-[8px] text-[var(--ink)]/36">{n.time}</p>
+                  <p className="mt-0.5 font-mono text-[9px] leading-snug text-[var(--ink-muted)]">{n.sub}</p>
+                  <p className="mt-1 font-mono text-[8px] text-[var(--ink-subtle)]">{n.time}</p>
                 </div>
               </div>
             );
@@ -108,7 +108,7 @@ function NotifPanel({
 
         {/* Footer */}
         <div className="border-t border-[var(--ink)]/[0.08] px-4 py-2.5">
-          <p className="font-mono text-[8px] text-[var(--ink)]/36 text-center">inner·hub · bildirimler</p>
+          <p className="font-mono text-[8px] text-[var(--ink-subtle)] text-center">inner·hub · bildirimler</p>
         </div>
       </div>
     </>
@@ -190,7 +190,7 @@ function SidebarFooter({
       <button
         type="button"
         onClick={onLogout}
-        className="flex w-full justify-center p-2 text-[var(--ink)]/56 transition-colors hover:text-[var(--ink)]"
+        className="flex w-full justify-center p-2 text-[var(--ink-body)] transition-colors hover:text-[var(--ink)]"
         title="Çıkış yap"
       >
         <LogOut className="size-4" />
@@ -201,17 +201,17 @@ function SidebarFooter({
     <div className="space-y-3">
       <div className="space-y-0.5">
         <p className="truncate text-sm font-medium text-[var(--ink)]">{user.name}</p>
-        <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56">
+        <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)]">
           {user.role === "admin" ? "Admin" : "Üye"}
         </p>
       </div>
       {user.profileCompletionPct < 100 && (
         <div className="space-y-1.5">
           <div className="flex justify-between">
-            <span className="font-mono text-[10px] font-semibold uppercase tracking-widest text-[var(--ink)]/70">
+            <span className="font-mono text-[10px] font-semibold uppercase tracking-widest text-[var(--ink-strong)]">
               Profil tamamlanma
             </span>
-            <span className="font-mono text-[10px] font-semibold tabular-nums text-[var(--ink)]/70">
+            <span className="font-mono text-[10px] font-semibold tabular-nums text-[var(--ink-strong)]">
               %{user.profileCompletionPct}
             </span>
           </div>
@@ -226,7 +226,7 @@ function SidebarFooter({
       <button
         type="button"
         onClick={onLogout}
-        className="flex items-center gap-1.5 text-[var(--ink)]/56 transition-colors hover:text-[var(--ink)]"
+        className="flex items-center gap-1.5 text-[var(--ink-body)] transition-colors hover:text-[var(--ink)]"
       >
         <LogOut className="size-3.5" />
         <span className="font-mono text-[10px] uppercase tracking-widest">Çıkış Yap</span>
@@ -293,7 +293,7 @@ function DesktopSidebar({ user, onLogout }: { user: PanelUser; onLogout?: () => 
       <button
         type="button"
         onClick={toggle}
-        className="absolute -right-3 top-[72px] z-10 flex size-6 items-center justify-center border border-[var(--ink)]/[0.08] bg-[var(--bone)] text-[var(--ink)]/56 transition-colors hover:text-[var(--ink)]"
+        className="absolute -right-3 top-[72px] z-10 flex size-6 items-center justify-center border border-[var(--ink)]/[0.08] bg-[var(--bone)] text-[var(--ink-body)] transition-colors hover:text-[var(--ink)]"
         aria-label={collapsed ? "Sidebar'ı genişlet" : "Sidebar'ı daralt"}
       >
         {collapsed ? <ChevronRight className="size-3" /> : <ChevronLeft className="size-3" />}
@@ -346,7 +346,7 @@ function MobileDrawer({
           >
             <div className="flex h-[60px] items-center justify-between border-b border-[var(--ink)]/[0.08] px-4">
               <BrandMark collapsed={false} />
-              <button type="button" onClick={onClose} className="text-[var(--ink)]/56 hover:text-[var(--ink)]">
+              <button type="button" onClick={onClose} className="text-[var(--ink-body)] hover:text-[var(--ink)]">
                 <X className="size-5" />
               </button>
             </div>
@@ -420,7 +420,7 @@ function ShellInner({ user, children, onLogout }: PanelShellProps) {
           <button
             type="button"
             onClick={() => setMobileOpen(true)}
-            className="text-[var(--ink)]/56 hover:text-[var(--ink)] lg:hidden"
+            className="text-[var(--ink-body)] hover:text-[var(--ink)] lg:hidden"
             aria-label="Menüyü aç"
           >
             <Menu className="size-5" />
@@ -433,7 +433,7 @@ function ShellInner({ user, children, onLogout }: PanelShellProps) {
             {/* Online indicator */}
             <div className="flex items-center gap-1.5">
               <span className="size-1.5 rounded-full bg-[var(--inner-green)] animate-beacon" />
-              <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56 hidden sm:block">
+              <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)] hidden sm:block">
                 <span lang="en">online</span>
               </span>
             </div>
@@ -442,7 +442,7 @@ function ShellInner({ user, children, onLogout }: PanelShellProps) {
             <button
               type="button"
               onClick={() => setNotifOpen((o) => !o)}
-              className="relative text-[var(--ink)]/50 hover:text-[var(--ink)] transition-colors"
+              className="relative text-[var(--ink-muted)] hover:text-[var(--ink)] transition-colors"
               aria-label="Bildirimler"
             >
               <Bell className="size-4" />

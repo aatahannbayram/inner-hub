@@ -104,7 +104,7 @@ function EventCard({ event }: { event: Event }) {
       )}
       {/* Date column */}
       <div className="flex w-14 shrink-0 flex-col items-center justify-start border border-[var(--ink)]/[0.08] p-2 text-center">
-        <span className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/56">
+        <span className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink-body)]">
           {formatWeekday(event.startAt)}
         </span>
         <span
@@ -113,7 +113,7 @@ function EventCard({ event }: { event: Event }) {
         >
           {formatDay(event.startAt)}
         </span>
-        <span className="font-mono text-[8px] uppercase tracking-widest text-[var(--ink)]/46">
+        <span className="font-mono text-[8px] uppercase tracking-widest text-[var(--ink-muted)]">
           {new Date(event.startAt).toLocaleDateString("tr-TR", { month: "short" })}
         </span>
       </div>
@@ -122,7 +122,7 @@ function EventCard({ event }: { event: Event }) {
       <div className="flex flex-1 flex-col gap-2 min-w-0">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <span className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/46">
+            <span className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)]">
               {TYPE_LABELS[event.type]}
             </span>
             <h3 className="text-sm font-medium text-[var(--ink)] leading-snug">{event.title}</h3>
@@ -134,9 +134,9 @@ function EventCard({ event }: { event: Event }) {
           )}
         </div>
 
-        <p className="text-sm leading-relaxed text-[var(--ink)]/50 line-clamp-2">{event.description}</p>
+        <p className="text-sm leading-relaxed text-[var(--ink-muted)] line-clamp-2">{event.description}</p>
 
-        <div className="flex flex-wrap items-center gap-3 text-[var(--ink)]/56">
+        <div className="flex flex-wrap items-center gap-3 text-[var(--ink-body)]">
           <span className="flex items-center gap-1 font-mono text-[9px] uppercase tracking-widest">
             <Clock className="size-3" />
             {formatTime(event.startAt)} – {formatTime(event.endAt)}
@@ -156,11 +156,11 @@ function EventCard({ event }: { event: Event }) {
         {!event.isPast && (
           <div className="mt-1">
             {event.capacity > 0 && isFull ? (
-              <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/46">
+              <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-muted)]">
                 Kontenjan dolu
               </span>
             ) : event.isRegistered ? (
-              <button className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56 hover:text-[var(--error)] transition-colors">
+              <button className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)] hover:text-[var(--error)] transition-colors">
                 Kaydı İptal Et
               </button>
             ) : (
@@ -211,7 +211,7 @@ function CalendarView({ events }: { events: Event[] }) {
       {/* Header row */}
       <div className="grid grid-cols-7 border-b border-[var(--ink)]/[0.08]">
         {DAYS.map((d) => (
-          <div key={d} className="p-2 text-center font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/46">
+          <div key={d} className="p-2 text-center font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)]">
             {d}
           </div>
         ))}
@@ -236,7 +236,7 @@ function CalendarView({ events }: { events: Event[] }) {
                       "flex size-6 items-center justify-center font-mono text-[10px]",
                       isToday
                         ? "bg-[var(--ink)] text-[var(--bone)]"
-                        : "text-[var(--ink)]/50",
+                        : "text-[var(--ink-muted)]",
                     ].join(" ")}
                   >
                     {day}
@@ -248,8 +248,8 @@ function CalendarView({ events }: { events: Event[] }) {
                         className={[
                           "truncate px-1 py-0.5 font-mono text-[8px] uppercase tracking-wide",
                           e.isRegistered
-                            ? "bg-[var(--inner-green)]/15 text-[var(--ink)]/70"
-                            : "bg-[var(--ink)]/[0.06] text-[var(--ink)]/50",
+                            ? "bg-[var(--inner-green)]/15 text-[var(--ink-strong)]"
+                            : "bg-[var(--ink)]/[0.06] text-[var(--ink-muted)]",
                         ].join(" ")}
                         title={e.title}
                       >
@@ -257,7 +257,7 @@ function CalendarView({ events }: { events: Event[] }) {
                       </div>
                     ))}
                     {dayEvents.length > 2 && (
-                      <span className="font-mono text-[8px] text-[var(--ink)]/46">
+                      <span className="font-mono text-[8px] text-[var(--ink-muted)]">
                         +{dayEvents.length - 2}
                       </span>
                     )}
@@ -366,8 +366,8 @@ function EventsStat({
   return (
     <div className="border border-[var(--ink)]/[0.08] p-4">
       <div className="mb-2 flex items-center justify-between">
-        <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/51">{label}</p>
-        <Icon className="size-3.5 text-[var(--ink)]/36" />
+        <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)]">{label}</p>
+        <Icon className="size-3.5 text-[var(--ink-subtle)]" />
       </div>
       <p
         className="font-serif text-2xl text-[var(--ink)]"
@@ -375,7 +375,7 @@ function EventsStat({
       >
         {value}
       </p>
-      <p className="mt-1 font-mono text-[9px] text-[var(--ink)]/46">{sub}</p>
+      <p className="mt-1 font-mono text-[9px] text-[var(--ink-muted)]">{sub}</p>
     </div>
   );
 }
@@ -441,7 +441,7 @@ export default function Events() {
       {/* View toggle */}
       <FadeIn delay={0.03}>
         <div className="flex items-center justify-between gap-4">
-          <p className="text-sm text-[var(--ink)]/50 font-light">
+          <p className="text-sm text-[var(--ink-muted)] font-light">
             Topluluk buluşmaları, workshoplar ve networking etkinlikleri.
           </p>
           <div id="events-calendar-toggle" className="flex shrink-0 scroll-mt-6 border border-[var(--ink)]/15">
@@ -453,7 +453,7 @@ export default function Events() {
                   "px-4 py-2 font-mono text-[10px] uppercase tracking-widest transition-colors",
                   view === v
                     ? "bg-[var(--ink)] text-[var(--bone)]"
-                    : "text-[var(--ink)]/56 hover:text-[var(--ink)]",
+                    : "text-[var(--ink-body)] hover:text-[var(--ink)]",
                 ].join(" ")}
               >
                 {v === "liste" ? "Liste" : "Takvim"}
@@ -464,7 +464,7 @@ export default function Events() {
       </FadeIn>
 
       {loading && (
-        <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56">
+        <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)]">
           Yükleniyor…
         </p>
       )}
@@ -474,7 +474,7 @@ export default function Events() {
         </p>
       )}
       {!loading && !error && events.length === 0 && (
-        <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56">
+        <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)]">
           Henüz yayınlanmış etkinlik yok.
         </p>
       )}
@@ -485,7 +485,7 @@ export default function Events() {
           <FadeIn delay={0.05}>
             <section id="events-upcoming" className="scroll-mt-6">
               <div className="mb-3 flex items-center gap-3 border-t border-[var(--ink)]/[0.08] pt-3">
-                <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56">
+                <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)]">
                   Yaklaşan Etkinlikler
                 </p>
                 <span className="flex size-4 items-center justify-center bg-[var(--ink)] font-mono text-[9px] text-[var(--bone)]">
@@ -494,7 +494,7 @@ export default function Events() {
               </div>
               <div className="space-y-2">
                 {upcoming.length === 0 ? (
-                  <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/46">
+                  <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-muted)]">
                     Yaklaşan etkinlik yok.
                   </p>
                 ) : (
@@ -509,7 +509,7 @@ export default function Events() {
             <FadeIn delay={0.1}>
               <section>
                 <div className="mb-3 border-t border-[var(--ink)]/[0.08] pt-3">
-                  <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/46">
+                  <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-muted)]">
                     Geçmiş Etkinlikler
                   </p>
                 </div>
@@ -528,7 +528,7 @@ export default function Events() {
         <FadeIn delay={0.05}>
           <section>
             <div className="mb-3 border-t border-[var(--ink)]/[0.08] pt-3">
-              <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56">
+              <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)]">
                 Takvim
               </p>
             </div>

@@ -118,7 +118,7 @@ export function EditorialCard({
             <p
               className={cn(
                 "font-mono text-[9px] uppercase tracking-widest",
-                dark ? "text-[var(--bone)]/57" : "text-[var(--ink)]/56",
+                dark ? "text-[var(--bone)]/57" : "text-[var(--ink-body)]",
               )}
             >
               {eyebrow}
@@ -134,7 +134,7 @@ export function EditorialCard({
             <p
               className={cn(
                 "text-sm font-light leading-relaxed line-clamp-3",
-                dark ? "text-[var(--bone)]/55" : "text-[var(--ink)]/50",
+                dark ? "text-[var(--bone)]/55" : "text-[var(--ink-muted)]",
               )}
             >
               {description}
@@ -146,7 +146,7 @@ export function EditorialCard({
                 "mt-auto flex items-center gap-1.5 pt-3 font-mono text-[10px] uppercase tracking-widest transition-all",
                 dark
                   ? "text-[var(--bone)]/70 group-hover:text-[var(--inner-green)]"
-                  : "text-[var(--ink)]/50 group-hover:text-[var(--inner-green)]",
+                  : "text-[var(--ink-muted)] group-hover:text-[var(--inner-green)]",
               )}
             >
               {cta}

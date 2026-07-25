@@ -178,8 +178,8 @@ function StatCard({ label, value, sub, icon: Icon }: { label: string; value: str
   return (
     <div className="border border-[var(--ink)]/[0.08] p-5">
       <div className="mb-3 flex items-center justify-between">
-        <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/51">{label}</p>
-        <Icon className="size-3.5 text-[var(--ink)]/36" />
+        <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)]">{label}</p>
+        <Icon className="size-3.5 text-[var(--ink-subtle)]" />
       </div>
       <p
         className="font-serif text-3xl text-[var(--ink)]"
@@ -187,7 +187,7 @@ function StatCard({ label, value, sub, icon: Icon }: { label: string; value: str
       >
         {value}
       </p>
-      <p className="mt-1 font-mono text-[9px] text-[var(--ink)]/46">{sub}</p>
+      <p className="mt-1 font-mono text-[9px] text-[var(--ink-muted)]">{sub}</p>
     </div>
   );
 }
@@ -205,11 +205,11 @@ function DealCard({ deal, onClick }: { deal: Deal; onClick: () => void }) {
       <div className="mb-3 flex items-start justify-between gap-2">
         <div>
           <p className="text-sm font-medium text-[var(--ink)]">{deal.company}</p>
-          <p className="mt-0.5 text-[11px] leading-snug text-[var(--ink)]/56">{deal.tagline}</p>
+          <p className="mt-0.5 text-[11px] leading-snug text-[var(--ink-body)]">{deal.tagline}</p>
         </div>
         <div className={`mt-0.5 flex shrink-0 items-center gap-1.5 border px-2 py-0.5 ${cfg.border}`}>
           <span className={`size-1.5 rounded-full ${cfg.dot}`} />
-          <span className="font-mono text-[8px] uppercase tracking-widest text-[var(--ink)]/50">
+          <span className="font-mono text-[8px] uppercase tracking-widest text-[var(--ink-muted)]">
             {cfg.label}
           </span>
         </div>
@@ -218,35 +218,35 @@ function DealCard({ deal, onClick }: { deal: Deal; onClick: () => void }) {
       {/* Metrics row */}
       <div className="mb-3 flex items-center gap-2 min-w-0">
         <div className="min-w-0">
-          <p className="font-mono text-[8px] uppercase tracking-widest text-[var(--ink)]/41">Hedef</p>
+          <p className="font-mono text-[8px] uppercase tracking-widest text-[var(--ink-subtle)]">Hedef</p>
           <p className="truncate font-mono text-[11px] text-[var(--ink)]">{deal.raise}</p>
         </div>
         <div className="h-8 w-px shrink-0 bg-[var(--ink)]/[0.06]" />
         <div className="min-w-0">
-          <p className="font-mono text-[8px] uppercase tracking-widest text-[var(--ink)]/41">Değerleme</p>
+          <p className="font-mono text-[8px] uppercase tracking-widest text-[var(--ink-subtle)]">Değerleme</p>
           <p className="truncate font-mono text-[11px] text-[var(--ink)]">{deal.valuation}</p>
         </div>
         <div className="h-8 w-px shrink-0 bg-[var(--ink)]/[0.06]" />
         <div className="min-w-0">
-          <p className="font-mono text-[8px] uppercase tracking-widest text-[var(--ink)]/41">Tur</p>
+          <p className="font-mono text-[8px] uppercase tracking-widest text-[var(--ink-subtle)]">Tur</p>
           <p className="truncate font-mono text-[11px] text-[var(--ink)]">{deal.round}</p>
         </div>
       </div>
 
       {/* Score row */}
       <div className="mb-3 flex items-center gap-2">
-        <span className="font-mono text-[8px] uppercase tracking-widest text-[var(--ink)]/41 shrink-0">Skor</span>
+        <span className="font-mono text-[8px] uppercase tracking-widest text-[var(--ink-subtle)] shrink-0">Skor</span>
         <div className="h-1 flex-1 bg-[var(--ink)]/[0.06]">
           <div className="h-full bg-[var(--inner-green)]" style={{ width: `${deal.score}%` }} />
         </div>
-        <span className="font-mono text-[9px] text-[var(--ink)]/56 shrink-0">{deal.score}</span>
+        <span className="font-mono text-[9px] text-[var(--ink-body)] shrink-0">{deal.score}</span>
       </div>
 
       {/* Tags + meta */}
       <div className="flex items-center justify-between">
         <div className="flex flex-wrap gap-1">
           {deal.tags.map((t) => (
-            <span key={t} className="border border-[var(--ink)]/8 px-1.5 py-0.5 font-mono text-[8px] text-[var(--ink)]/51">
+            <span key={t} className="border border-[var(--ink)]/8 px-1.5 py-0.5 font-mono text-[8px] text-[var(--ink-muted)]">
               {t}
             </span>
           ))}
@@ -256,7 +256,7 @@ function DealCard({ deal, onClick }: { deal: Deal; onClick: () => void }) {
             </span>
           )}
         </div>
-        <span className="font-mono text-[8px] text-[var(--ink)]/36">
+        <span className="font-mono text-[8px] text-[var(--ink-subtle)]">
           {deal.updatedDays === 0 ? "bugün" : `${deal.updatedDays}g önce`}
         </span>
       </div>
@@ -276,14 +276,14 @@ function DealDetail({ deal, onClose }: { deal: Deal; onClose: () => void }) {
       >
         <button
           onClick={onClose}
-          className="mb-6 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/46 hover:text-[var(--ink)] transition-colors"
+          className="mb-6 font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)] hover:text-[var(--ink)] transition-colors"
         >
           ← Kapat
         </button>
 
         <div className="mb-1 flex items-center gap-2">
           <div className={`size-2 rounded-full ${cfg.dot}`} />
-          <span className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/56">{deal.stage}</span>
+          <span className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink-body)]">{deal.stage}</span>
         </div>
         <h2
           className="font-serif text-3xl text-[var(--ink)] mb-1"
@@ -291,7 +291,7 @@ function DealDetail({ deal, onClose }: { deal: Deal; onClose: () => void }) {
         >
           {deal.company}
         </h2>
-        <p className="text-sm text-[var(--ink)]/50 mb-6">{deal.tagline}</p>
+        <p className="text-sm text-[var(--ink-muted)] mb-6">{deal.tagline}</p>
 
         {/* Metrics */}
         <div className="mb-6 grid grid-cols-3 gap-3">
@@ -301,7 +301,7 @@ function DealDetail({ deal, onClose }: { deal: Deal; onClose: () => void }) {
             { l: "Tur", v: deal.round },
           ].map((m) => (
             <div key={m.l} className="border border-[var(--ink)]/[0.08] p-3">
-              <p className="font-mono text-[8px] uppercase tracking-widest text-[var(--ink)]/46">{m.l}</p>
+              <p className="font-mono text-[8px] uppercase tracking-widest text-[var(--ink-muted)]">{m.l}</p>
               <p className="mt-0.5 font-mono text-sm text-[var(--ink)]">{m.v}</p>
             </div>
           ))}
@@ -310,8 +310,8 @@ function DealDetail({ deal, onClose }: { deal: Deal; onClose: () => void }) {
         {/* Score bar */}
         <div className="mb-6">
           <div className="mb-1 flex justify-between">
-            <span className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/46">İç Değerlendirme Skoru</span>
-            <span className="font-mono text-[9px] text-[var(--ink)]/50">{deal.score}/100</span>
+            <span className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)]">İç Değerlendirme Skoru</span>
+            <span className="font-mono text-[9px] text-[var(--ink-muted)]">{deal.score}/100</span>
           </div>
           <div className="h-1.5 bg-[var(--ink)]/[0.06]">
             <div className="h-full bg-[var(--inner-green)] transition-all" style={{ width: `${deal.score}%` }} />
@@ -320,7 +320,7 @@ function DealDetail({ deal, onClose }: { deal: Deal; onClose: () => void }) {
 
         {/* Founders */}
         <div className="mb-5">
-          <p className="mb-2 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/46">Kurucular</p>
+          <p className="mb-2 font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)]">Kurucular</p>
           <div className="space-y-2">
             {deal.founders.map((f) => (
               <div key={f} className="flex items-center gap-3">
@@ -329,7 +329,7 @@ function DealDetail({ deal, onClose }: { deal: Deal; onClose: () => void }) {
                   initials={f.split(" ").map((n) => n[0]).join("").slice(0, 2)}
                   className="size-7 text-[9px]"
                 />
-                <span className="text-sm text-[var(--ink)]/70">{f}</span>
+                <span className="text-sm text-[var(--ink-strong)]">{f}</span>
               </div>
             ))}
           </div>
@@ -338,32 +338,32 @@ function DealDetail({ deal, onClose }: { deal: Deal; onClose: () => void }) {
         {/* Lead investor */}
         {deal.leadInvestor && (
           <div className="mb-5">
-            <p className="mb-2 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/46">Lead Yatırımcı</p>
+            <p className="mb-2 font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)]">Lead Yatırımcı</p>
             <div className="flex items-center gap-3">
               <PersonAvatar
                 name={deal.leadInvestor}
                 initials={deal.leadInvestor.split(" ").map((n) => n[0]).join("").slice(0, 2)}
                 className="size-7 text-[9px]"
               />
-              <span className="text-sm text-[var(--ink)]/70">{deal.leadInvestor}</span>
+              <span className="text-sm text-[var(--ink-strong)]">{deal.leadInvestor}</span>
             </div>
           </div>
         )}
 
         {/* Sector */}
         <div className="mb-5">
-          <p className="mb-2 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/46">Sektör</p>
-          <span className="border border-[var(--ink)]/10 px-2.5 py-1 font-mono text-[9px] text-[var(--ink)]/50">
+          <p className="mb-2 font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)]">Sektör</p>
+          <span className="border border-[var(--ink)]/10 px-2.5 py-1 font-mono text-[9px] text-[var(--ink-muted)]">
             {deal.sector}
           </span>
         </div>
 
         {/* Tags */}
         <div className="mb-8">
-          <p className="mb-2 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/46">Etiketler</p>
+          <p className="mb-2 font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)]">Etiketler</p>
           <div className="flex flex-wrap gap-1.5">
             {deal.tags.map((t) => (
-              <span key={t} className="border border-[var(--ink)]/10 px-2 py-0.5 font-mono text-[9px] text-[var(--ink)]/56">
+              <span key={t} className="border border-[var(--ink)]/10 px-2 py-0.5 font-mono text-[9px] text-[var(--ink-body)]">
                 {t}
               </span>
             ))}
@@ -381,7 +381,7 @@ function DealDetail({ deal, onClose }: { deal: Deal; onClose: () => void }) {
             <span>İlgileniyorum</span>
             <ArrowUpRight className="size-3.5" />
           </button>
-          <button className="flex w-full items-center justify-between border border-[var(--ink)]/15 px-5 py-3 font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56 transition-all hover:border-[var(--ink)]/40 hover:text-[var(--ink)]">
+          <button className="flex w-full items-center justify-between border border-[var(--ink)]/15 px-5 py-3 font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)] transition-all hover:border-[var(--ink)]/40 hover:text-[var(--ink)]">
             <span>Kurucuyu Tanıştır</span>
             <ChevronRight className="size-3.5" />
           </button>
@@ -399,15 +399,15 @@ function SpvCard({ spv }: { spv: SPV }) {
       <div className="mb-3 flex items-start justify-between">
         <div>
           <p className="text-sm font-medium text-[var(--ink)]">{spv.name}</p>
-          <p className="mt-0.5 font-mono text-[9px] text-[var(--ink)]/46">{spv.sector} · {spv.participants} katılımcı · Kapanış: {spv.closing}</p>
+          <p className="mt-0.5 font-mono text-[9px] text-[var(--ink-muted)]">{spv.sector} · {spv.participants} katılımcı · Kapanış: {spv.closing}</p>
         </div>
       </div>
       <div className="mb-3">
         <div className="mb-1 flex justify-between">
-          <span className="font-mono text-[9px] text-[var(--ink)]/46">
+          <span className="font-mono text-[9px] text-[var(--ink-muted)]">
             {spv.raised} / {spv.target}
           </span>
-          <span className="font-mono text-[9px] text-[var(--ink)]/50">%{spv.pct}</span>
+          <span className="font-mono text-[9px] text-[var(--ink-muted)]">%{spv.pct}</span>
         </div>
         <div className="h-1 bg-[var(--ink)]/[0.06]">
           <div
@@ -420,7 +420,7 @@ function SpvCard({ spv }: { spv: SPV }) {
           />
         </div>
       </div>
-      <button className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/56 hover:text-[var(--ink)] transition-colors">
+      <button className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-widest text-[var(--ink-body)] hover:text-[var(--ink)] transition-colors">
         SPV'ye Katıl <ExternalLink className="size-2.5" />
       </button>
     </div>
@@ -531,7 +531,7 @@ export default function Capital() {
                   "px-4 py-2 font-mono text-[9px] uppercase tracking-widest transition-colors",
                   view === v
                     ? "bg-[var(--ink)] text-[var(--bone)]"
-                    : "text-[var(--ink)]/56 hover:text-[var(--ink)]",
+                    : "text-[var(--ink-body)] hover:text-[var(--ink)]",
                 ].join(" ")}
               >
                 {v === "pipeline" ? "Pipeline" : "Liste"}
@@ -551,7 +551,7 @@ export default function Capital() {
 
       {/* Sector filter */}
       <div className="flex items-center gap-2 flex-wrap">
-        <Filter className="size-3 text-[var(--ink)]/36 shrink-0" />
+        <Filter className="size-3 text-[var(--ink-subtle)] shrink-0" />
         {sectors.map((s) => (
           <button
             key={s}
@@ -560,7 +560,7 @@ export default function Capital() {
               "border px-2.5 py-1 font-mono text-[9px] uppercase tracking-widest transition-all",
               sectorFilter === s
                 ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--bone)]"
-                : "border-[var(--ink)]/10 text-[var(--ink)]/51 hover:border-[var(--ink)]/30 hover:text-[var(--ink)]",
+                : "border-[var(--ink)]/10 text-[var(--ink-muted)] hover:border-[var(--ink)]/30 hover:text-[var(--ink)]",
             ].join(" ")}
           >
             {s}
@@ -580,16 +580,16 @@ export default function Capital() {
                 <div className={`mb-3 flex items-center justify-between border-b pb-2 ${cfg.border}`}>
                   <div className="flex items-center gap-2">
                     <span className={`size-1.5 rounded-full ${cfg.dot}`} />
-                    <span className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/50">
+                    <span className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)]">
                       {stage}
                     </span>
                   </div>
-                  <span className="font-mono text-[9px] text-[var(--ink)]/41">{stageDeals.length}</span>
+                  <span className="font-mono text-[9px] text-[var(--ink-subtle)]">{stageDeals.length}</span>
                 </div>
                 <div className="space-y-3">
                   {stageDeals.length === 0 ? (
                     <div className="border border-dashed border-[var(--ink)]/[0.06] p-4 text-center">
-                      <p className="font-mono text-[8px] text-[var(--ink)]/36">boş</p>
+                      <p className="font-mono text-[8px] text-[var(--ink-subtle)]">boş</p>
                     </div>
                   ) : (
                     stageDeals.map((deal) => (
@@ -606,7 +606,7 @@ export default function Capital() {
         <div className="space-y-2">
           <div className="grid grid-cols-[1fr_auto_auto_auto_auto] items-center gap-4 border-b border-[var(--ink)]/[0.08] pb-2">
             {["Şirket", "Sektör", "Hedef", "Değerleme", "Aşama"].map((h) => (
-              <span key={h} className="font-mono text-[8px] uppercase tracking-widest text-[var(--ink)]/41">{h}</span>
+              <span key={h} className="font-mono text-[8px] uppercase tracking-widest text-[var(--ink-subtle)]">{h}</span>
             ))}
           </div>
           {filtered.map((deal) => {
@@ -619,14 +619,14 @@ export default function Capital() {
               >
                 <div>
                   <p className="text-sm text-[var(--ink)]">{deal.company}</p>
-                  <p className="font-mono text-[9px] text-[var(--ink)]/46">{deal.round}</p>
+                  <p className="font-mono text-[9px] text-[var(--ink-muted)]">{deal.round}</p>
                 </div>
-                <span className="font-mono text-[9px] text-[var(--ink)]/56">{deal.sector}</span>
+                <span className="font-mono text-[9px] text-[var(--ink-body)]">{deal.sector}</span>
                 <span className="font-mono text-[9px] text-[var(--ink)]">{deal.raise}</span>
-                <span className="font-mono text-[9px] text-[var(--ink)]/50">{deal.valuation}</span>
+                <span className="font-mono text-[9px] text-[var(--ink-muted)]">{deal.valuation}</span>
                 <div className={`flex items-center gap-1.5 border px-2 py-0.5 ${cfg.border}`}>
                   <span className={`size-1.5 rounded-full ${cfg.dot}`} />
-                  <span className="font-mono text-[8px] uppercase tracking-widest text-[var(--ink)]/56">{cfg.label}</span>
+                  <span className="font-mono text-[8px] uppercase tracking-widest text-[var(--ink-body)]">{cfg.label}</span>
                 </div>
               </div>
             );
@@ -638,10 +638,10 @@ export default function Capital() {
       {/* SPV section */}
       <section id="open-spvs" className="scroll-mt-6">
         <div className="mb-4 border-t border-[var(--ink)]/[0.08] pt-3">
-          <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56">
+          <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)]">
             Açık SPV'ler
           </p>
-          <p className="mt-0.5 text-xs text-[var(--ink)]/46">Özel amaçlı araçlarla toplu yatırım katılımı</p>
+          <p className="mt-0.5 text-xs text-[var(--ink-muted)]">Özel amaçlı araçlarla toplu yatırım katılımı</p>
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           {SPVS.map((spv) => <SpvCard key={spv.id} spv={spv} />)}
@@ -650,7 +650,7 @@ export default function Capital() {
 
       {/* Disclaimer */}
       <div className="border-t border-[var(--ink)]/[0.08] pt-4">
-        <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/36">
+        <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink-subtle)]">
           <span lang="en">inner·capital</span> — yalnızca <span lang="en">inner·hub</span> üyeleri için · bilgi amaçlıdır, yatırım tavsiyesi değildir
         </p>
       </div>

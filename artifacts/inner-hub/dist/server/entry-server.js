@@ -335,7 +335,7 @@ function FloatingNavbar() {
           {
             href: link.href,
             onClick: () => setOpen(false),
-            className: "block border-b border-[var(--ink)]/10 px-5 py-3 font-mono text-xs uppercase tracking-widest text-[var(--ink)]/70 transition-colors last:border-b-0 hover:text-[var(--ink)]",
+            className: "block border-b border-[var(--ink)]/10 px-5 py-3 font-mono text-xs uppercase tracking-widest text-[var(--ink-strong)] transition-colors last:border-b-0 hover:text-[var(--ink)]",
             children: link.label
           },
           link.label

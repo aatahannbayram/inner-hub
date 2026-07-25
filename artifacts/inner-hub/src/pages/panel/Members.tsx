@@ -196,25 +196,25 @@ function MemberCard({ member, onSelect }: { member: Member; onSelect: (m: Member
         </div>
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-medium text-[var(--ink)]">{member.name}</p>
-          <p className="truncate font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56">
+          <p className="truncate font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)]">
             {member.title}
           </p>
           <div className="mt-0.5 flex items-center gap-1">
-            <Briefcase className="size-2.5 text-[var(--ink)]/46" />
-            <span className="font-mono text-[9px] text-[var(--ink)]/46">{member.company}</span>
+            <Briefcase className="size-2.5 text-[var(--ink-muted)]" />
+            <span className="font-mono text-[9px] text-[var(--ink-muted)]">{member.company}</span>
           </div>
         </div>
       </div>
 
       {/* Bio */}
-      <p className="mb-3 flex-1 text-sm leading-relaxed text-[var(--ink)]/50 line-clamp-2">{member.bio}</p>
+      <p className="mb-3 flex-1 text-sm leading-relaxed text-[var(--ink-muted)] line-clamp-2">{member.bio}</p>
 
       {/* Tags */}
       <div className="mb-3 flex flex-wrap gap-1">
         {member.tags.map((tag) => (
           <span
             key={tag}
-            className="border border-[var(--ink)]/10 px-1.5 py-0.5 font-mono text-[8px] uppercase tracking-wide text-[var(--ink)]/56"
+            className="border border-[var(--ink)]/10 px-1.5 py-0.5 font-mono text-[8px] uppercase tracking-wide text-[var(--ink-body)]"
           >
             {tag}
           </span>
@@ -223,7 +223,7 @@ function MemberCard({ member, onSelect }: { member: Member; onSelect: (m: Member
 
       {/* Actions */}
       <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
-        <button className="flex flex-1 items-center justify-center gap-1.5 border border-[var(--ink)]/15 py-2 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/50 transition-all hover:border-[var(--ink)] hover:text-[var(--ink)]">
+        <button className="flex flex-1 items-center justify-center gap-1.5 border border-[var(--ink)]/15 py-2 font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)] transition-all hover:border-[var(--ink)] hover:text-[var(--ink)]">
           Bağlan <ArrowRight className="size-2.5" />
         </button>
         {member.linkedin && (
@@ -231,7 +231,7 @@ function MemberCard({ member, onSelect }: { member: Member; onSelect: (m: Member
             href={member.linkedin}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex size-8 items-center justify-center border border-[var(--ink)]/15 text-[var(--ink)]/46 transition-colors hover:border-[var(--ink)]/40 hover:text-[var(--ink)]"
+            className="flex size-8 items-center justify-center border border-[var(--ink)]/15 text-[var(--ink-muted)] transition-colors hover:border-[var(--ink)]/40 hover:text-[var(--ink)]"
           >
             <Linkedin className="size-3.5" />
           </a>
@@ -276,8 +276,8 @@ function MemberDetailPanel({ member, onClose }: { member: Member; onClose: () =>
       >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-[var(--ink)]/[0.08] px-5 py-4 shrink-0">
-          <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/46">Üye Profili</p>
-          <button onClick={onClose} className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/46 hover:text-[var(--ink)] transition-colors">
+          <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)]">Üye Profili</p>
+          <button onClick={onClose} className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)] hover:text-[var(--ink)] transition-colors">
             ← Kapat
           </button>
         </div>
@@ -297,14 +297,14 @@ function MemberDetailPanel({ member, onClose }: { member: Member; onClose: () =>
                 <p className="text-base text-[var(--ink)] font-light">{member.name}</p>
                 {ext?.verified && <CheckCircle2 className="size-3.5 text-[var(--inner-green)] shrink-0" />}
               </div>
-              <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/56">{member.title}</p>
+              <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink-body)]">{member.title}</p>
               <div className="flex items-center gap-1 mt-0.5">
-                <Briefcase className="size-2.5 text-[var(--ink)]/46" />
-                <span className="font-mono text-[9px] text-[var(--ink)]/46">{member.company}</span>
+                <Briefcase className="size-2.5 text-[var(--ink-muted)]" />
+                <span className="font-mono text-[9px] text-[var(--ink-muted)]">{member.company}</span>
               </div>
             </div>
             {ext && (
-              <span className="shrink-0 border border-[var(--ink)]/10 px-2 py-0.5 font-mono text-[7px] uppercase tracking-widest text-[var(--ink)]/46">
+              <span className="shrink-0 border border-[var(--ink)]/10 px-2 py-0.5 font-mono text-[7px] uppercase tracking-widest text-[var(--ink-muted)]">
                 {ext.tier}
               </span>
             )}
@@ -313,7 +313,7 @@ function MemberDetailPanel({ member, onClose }: { member: Member; onClose: () =>
           {/* Tags */}
           <div className="flex flex-wrap gap-1.5">
             {member.tags.map((t) => (
-              <span key={t} className="border border-[var(--ink)]/10 px-2 py-0.5 font-mono text-[8px] uppercase tracking-widest text-[var(--ink)]/50">
+              <span key={t} className="border border-[var(--ink)]/10 px-2 py-0.5 font-mono text-[8px] uppercase tracking-widest text-[var(--ink-muted)]">
                 {t}
               </span>
             ))}
@@ -321,7 +321,7 @@ function MemberDetailPanel({ member, onClose }: { member: Member; onClose: () =>
 
           {/* Bio */}
           <div className="border-l-2 border-[var(--ink)]/10 pl-4">
-            <p className="text-sm leading-relaxed text-[var(--ink)]/60 font-light">{member.bio}</p>
+            <p className="text-sm leading-relaxed text-[var(--ink-body)] font-light">{member.bio}</p>
           </div>
 
           {/* Stats */}
@@ -329,8 +329,8 @@ function MemberDetailPanel({ member, onClose }: { member: Member; onClose: () =>
             <div className="grid grid-cols-4 border border-[var(--ink)]/[0.08] py-3">
               {Object.entries(ext.stats).map(([k, v]) => (
                 <div key={k} className="text-center">
-                  <p className="font-mono text-[7px] uppercase tracking-widest text-[var(--ink)]/41">{k}</p>
-                  <p className="mt-0.5 font-mono text-sm text-[var(--ink)]/60 tabular-nums">{v}</p>
+                  <p className="font-mono text-[7px] uppercase tracking-widest text-[var(--ink-subtle)]">{k}</p>
+                  <p className="mt-0.5 font-mono text-sm text-[var(--ink-body)] tabular-nums">{v}</p>
                 </div>
               ))}
             </div>
@@ -339,14 +339,14 @@ function MemberDetailPanel({ member, onClose }: { member: Member; onClose: () =>
           {/* Expertise */}
           {ext && (
             <div>
-              <p className="mb-2 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/46">Yetkinlikler</p>
+              <p className="mb-2 font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)]">Yetkinlikler</p>
               <div className="space-y-1.5">
                 {ext.expertise.map((e, i) => (
                   <div key={e} className="flex items-center gap-3">
                     <div className="h-1 flex-1 bg-[var(--ink)]/[0.06]">
                       <div className="h-full bg-[var(--ink)]/15" style={{ width: `${100 - i * 18}%` }} />
                     </div>
-                    <span className="w-36 shrink-0 font-mono text-[9px] text-[var(--ink)]/56">{e}</span>
+                    <span className="w-36 shrink-0 font-mono text-[9px] text-[var(--ink-body)]">{e}</span>
                   </div>
                 ))}
               </div>
@@ -355,13 +355,13 @@ function MemberDetailPanel({ member, onClose }: { member: Member; onClose: () =>
 
           {/* Member since */}
           {ext && (
-            <p className="font-mono text-[9px] text-[var(--ink)]/36">Üye: {ext.memberSince}</p>
+            <p className="font-mono text-[9px] text-[var(--ink-subtle)]">Üye: {ext.memberSince}</p>
           )}
         </div>
 
         {/* Actions */}
         <div className="border-t border-[var(--ink)]/[0.08] flex shrink-0">
-          <button className="flex flex-1 items-center justify-center gap-1.5 border-r border-[var(--ink)]/[0.08] py-3.5 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/50 hover:bg-[var(--ink)]/[0.04] hover:text-[var(--ink)] transition-colors">
+          <button className="flex flex-1 items-center justify-center gap-1.5 border-r border-[var(--ink)]/[0.08] py-3.5 font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)] hover:bg-[var(--ink)]/[0.04] hover:text-[var(--ink)] transition-colors">
             <MessageSquare className="size-3.5" /> Mesaj
           </button>
           <button className="flex flex-1 items-center justify-center gap-1.5 py-3.5 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)] hover:bg-[var(--ink)]/[0.04] transition-colors">
@@ -468,8 +468,8 @@ function MembersStat({
   return (
     <div className="border border-[var(--ink)]/[0.08] p-4">
       <div className="mb-2 flex items-center justify-between">
-        <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/51">{label}</p>
-        <Icon className="size-3.5 text-[var(--ink)]/36" />
+        <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)]">{label}</p>
+        <Icon className="size-3.5 text-[var(--ink-subtle)]" />
       </div>
       <p
         className="font-serif text-2xl text-[var(--ink)]"
@@ -477,7 +477,7 @@ function MembersStat({
       >
         {value}
       </p>
-      <p className="mt-1 font-mono text-[9px] text-[var(--ink)]/46">{sub}</p>
+      <p className="mt-1 font-mono text-[9px] text-[var(--ink-muted)]">{sub}</p>
     </div>
   );
 }
@@ -490,7 +490,7 @@ function TalentCard({ post }: { post: TalentPost }) {
           <PersonAvatar name={post.postedBy} initials={post.postedByInitials} className="size-8 text-[10px]" />
           <div>
             <p className="text-xs font-medium text-[var(--ink)]">{post.postedBy}</p>
-            <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/46">
+            <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)]">
               {post.postedByCompany}
             </p>
           </div>
@@ -499,8 +499,8 @@ function TalentCard({ post }: { post: TalentPost }) {
           className={cn(
             "shrink-0 border px-2 py-0.5 font-mono text-[9px] uppercase tracking-widest",
             post.type === "arıyor"
-              ? "border-[var(--ink)]/15 text-[var(--ink)]/50"
-              : "border-[var(--inner-green)]/30 bg-[var(--inner-green)]/10 text-[var(--ink)]/60",
+              ? "border-[var(--ink)]/15 text-[var(--ink-muted)]"
+              : "border-[var(--inner-green)]/30 bg-[var(--inner-green)]/10 text-[var(--ink-body)]",
           )}
         >
           {post.type}
@@ -508,13 +508,13 @@ function TalentCard({ post }: { post: TalentPost }) {
       </div>
 
       <p className="mb-1.5 text-sm font-medium leading-snug text-[var(--ink)]">{post.role}</p>
-      <p className="mb-3 text-sm leading-relaxed text-[var(--ink)]/50">{post.description}</p>
+      <p className="mb-3 text-sm leading-relaxed text-[var(--ink-muted)]">{post.description}</p>
 
       <div className="mb-4 flex flex-wrap gap-1">
         {post.tags.map((tag) => (
           <span
             key={tag}
-            className="border border-[var(--ink)]/10 px-1.5 py-0.5 font-mono text-[8px] uppercase tracking-wide text-[var(--ink)]/56"
+            className="border border-[var(--ink)]/10 px-1.5 py-0.5 font-mono text-[8px] uppercase tracking-wide text-[var(--ink-body)]"
           >
             {tag}
           </span>
@@ -522,7 +522,7 @@ function TalentCard({ post }: { post: TalentPost }) {
       </div>
 
       <div className="flex items-center justify-between">
-        <span className="font-mono text-[9px] text-[var(--ink)]/41">{post.postedAt}</span>
+        <span className="font-mono text-[9px] text-[var(--ink-subtle)]">{post.postedAt}</span>
         <button className="flex items-center gap-1.5 border border-[var(--ink)] bg-[var(--ink)] px-3 py-1.5 font-mono text-[9px] uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-80">
           İletişime Geç <ArrowRight className="size-2.5" />
         </button>
@@ -569,7 +569,7 @@ export default function Members() {
       </FadeIn>
 
       <FadeIn delay={0.03}>
-        <p className="text-sm text-[var(--ink)]/50 font-light">
+        <p className="text-sm text-[var(--ink-muted)] font-light">
           Topluluk üyeleri ve iş birliği fırsatları.
         </p>
       </FadeIn>
@@ -585,7 +585,7 @@ export default function Members() {
                 "px-5 py-2 font-mono text-[10px] uppercase tracking-widest transition-colors",
                 tab === "uyeler"
                   ? "bg-[var(--ink)] text-[var(--bone)]"
-                  : "text-[var(--ink)]/56 hover:text-[var(--ink)]",
+                  : "text-[var(--ink-body)] hover:text-[var(--ink)]",
               )}
             >
               Üyeler
@@ -596,7 +596,7 @@ export default function Members() {
                 "flex items-center gap-1.5 px-5 py-2 font-mono text-[10px] uppercase tracking-widest transition-colors",
                 tab === "talent"
                   ? "bg-[var(--ink)] text-[var(--bone)]"
-                  : "text-[var(--ink)]/56 hover:text-[var(--ink)]",
+                  : "text-[var(--ink-body)] hover:text-[var(--ink)]",
               )}
             >
               Talent Board
@@ -605,13 +605,13 @@ export default function Members() {
 
           {/* Search */}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-[var(--ink)]/46" />
+            <Search className="absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-[var(--ink-muted)]" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={tab === "uyeler" ? "İsim, şirket veya uzmanlık…" : "Rol veya beceri ara…"}
-              className="border border-[var(--ink)]/15 bg-transparent py-2 pl-9 pr-4 font-mono text-[11px] text-[var(--ink)] placeholder:text-[var(--ink)]/46 focus:border-[var(--ink)]/40 focus:outline-none transition-colors"
+              className="border border-[var(--ink)]/15 bg-transparent py-2 pl-9 pr-4 font-mono text-[11px] text-[var(--ink)] placeholder:text-[var(--ink-muted)] focus:border-[var(--ink)]/40 focus:outline-none transition-colors"
             />
           </div>
         </div>
@@ -623,10 +623,10 @@ export default function Members() {
           <div>
             {/* Online indicator */}
             <div className="mb-4 flex items-center gap-3">
-              <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56">
+              <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)]">
                 {filteredMembers.length} üye
               </span>
-              <span className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/46">
+              <span className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-[var(--ink-muted)]">
                 <span className="size-1.5 rounded-full bg-[var(--inner-green)]" />
                 {MEMBERS.filter((m) => m.isAvailable).length} çevrimiçi
               </span>
@@ -640,7 +640,7 @@ export default function Members() {
         ) : (
           <div>
             <div className="mb-4 flex items-center justify-between">
-              <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56">
+              <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)]">
                 {filteredTalent.length} ilan
               </span>
               <button className="flex items-center gap-1.5 border border-[var(--ink)] bg-[var(--ink)] px-4 py-2 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-80">
@@ -653,7 +653,7 @@ export default function Members() {
               ))}
             </div>
             <div className="mt-6 border-t border-[var(--ink)]/[0.08] pt-4">
-              <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/41">
+              <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink-subtle)]">
                 Başarılı eşleşmelerde platform %10 komisyon alır · <span lang="en">inner·hub</span> Talent Board
               </p>
             </div>

@@ -200,18 +200,18 @@ function PerkCard({
         </span>
       </div>
 
-      <p className="mb-1 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/51">
+      <p className="mb-1 font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)]">
         <span lang="en">{perk.brand}</span> · {perk.category}
       </p>
       <p className="mb-2 text-sm font-medium leading-snug text-[var(--ink)] group-hover:underline decoration-[var(--ink)]/20 underline-offset-4">
         {perk.title}
       </p>
-      <p className="mb-5 flex-1 text-sm leading-relaxed text-[var(--ink)]/50 line-clamp-3">
+      <p className="mb-5 flex-1 text-sm leading-relaxed text-[var(--ink-muted)] line-clamp-3">
         {perk.description}
       </p>
 
       <div className="mt-auto flex items-center justify-between border-t border-[var(--ink)]/[0.08] pt-3">
-        <span className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/55 transition-colors group-hover:text-[var(--ink)]">
+        <span className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)] transition-colors group-hover:text-[var(--ink)]">
           İncele <ArrowRight className="size-3 transition-transform group-hover:translate-x-0.5" />
         </span>
         {saved ? (
@@ -219,7 +219,7 @@ function PerkCard({
             Kaydedildi
           </span>
         ) : perk.code ? (
-          <span className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/46">
+          <span className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)]">
             Kod var
           </span>
         ) : null}
@@ -282,13 +282,13 @@ function PerkDetail({
         className="fixed bottom-0 right-0 top-0 z-50 flex w-full max-w-md flex-col border-l border-[var(--ink)]/10 bg-[var(--bone)]"
       >
         <div className="flex items-center justify-between border-b border-[var(--ink)]/[0.08] px-5 py-4">
-          <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/51">
+          <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)]">
             Ayrıcalık · {perk.category}
           </p>
           <button
             type="button"
             onClick={onClose}
-            className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/51 transition-colors hover:text-[var(--ink)]"
+            className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)] transition-colors hover:text-[var(--ink)]"
           >
             <span className="inline-flex items-center gap-1.5">
               <X className="size-3" /> Kapat
@@ -300,7 +300,7 @@ function PerkDetail({
           <div className="flex items-start gap-4">
             <BrandMark brand={perk.brand} />
             <div className="min-w-0">
-              <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/51">
+              <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)]">
                 <span lang="en">{perk.brand}</span>
               </p>
               <h2
@@ -318,19 +318,19 @@ function PerkDetail({
               {perk.badge}
             </span>
             {expiry && (
-              <span className="border border-[var(--ink)]/10 px-2 py-1 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/61">
+              <span className="border border-[var(--ink)]/10 px-2 py-1 font-mono text-[9px] uppercase tracking-widest text-[var(--ink-body)]">
                 Son: {expiry}
               </span>
             )}
           </div>
 
-          <p className="text-sm font-light leading-relaxed text-[var(--ink)]/70">{perk.description}</p>
+          <p className="text-sm font-light leading-relaxed text-[var(--ink-strong)]">{perk.description}</p>
 
           <div className="border border-[var(--ink)]/[0.08] p-4">
-            <p className="mb-2 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/51">
+            <p className="mb-2 font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)]">
               Nasıl kullanılır
             </p>
-            <p className="text-sm leading-relaxed text-[var(--ink)]/65">{perk.howTo}</p>
+            <p className="text-sm leading-relaxed text-[var(--ink-body)]">{perk.howTo}</p>
           </div>
 
           {perk.code && (
@@ -365,7 +365,7 @@ function PerkDetail({
           <button
             type="button"
             onClick={onToggleSave}
-            className="flex w-full items-center justify-center gap-2 border border-[var(--ink)]/20 px-4 py-3 font-mono text-[11px] uppercase tracking-widest text-[var(--ink)]/70 transition-colors hover:border-[var(--ink)] hover:text-[var(--ink)]"
+            className="flex w-full items-center justify-center gap-2 border border-[var(--ink)]/20 px-4 py-3 font-mono text-[11px] uppercase tracking-widest text-[var(--ink-strong)] transition-colors hover:border-[var(--ink)] hover:text-[var(--ink)]"
           >
             {saved ? "Kaydedilenlerden çıkar" : "Daha sonra için kaydet"}
           </button>
@@ -470,8 +470,8 @@ function PerksStat({
   return (
     <div className="border border-[var(--ink)]/[0.08] p-4">
       <div className="mb-2 flex items-center justify-between">
-        <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/51">{label}</p>
-        <Icon className="size-3.5 text-[var(--ink)]/36" />
+        <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)]">{label}</p>
+        <Icon className="size-3.5 text-[var(--ink-subtle)]" />
       </div>
       <p
         className="font-serif text-2xl text-[var(--ink)]"
@@ -479,7 +479,7 @@ function PerksStat({
       >
         {value}
       </p>
-      <p className="mt-1 font-mono text-[9px] text-[var(--ink)]/46">{sub}</p>
+      <p className="mt-1 font-mono text-[9px] text-[var(--ink-muted)]">{sub}</p>
     </div>
   );
 }
@@ -550,11 +550,11 @@ export default function Perks() {
             { step: "03", title: "Kullan", body: "Partner sitesinde kodu uygulayın." },
           ].map((s) => (
             <div key={s.step} className="bg-[var(--bone)] p-4">
-              <p className="mb-1 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/46">
+              <p className="mb-1 font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)]">
                 {s.step}
               </p>
               <p className="text-sm text-[var(--ink)]">{s.title}</p>
-              <p className="mt-1 text-sm leading-relaxed text-[var(--ink)]/61">{s.body}</p>
+              <p className="mt-1 text-sm leading-relaxed text-[var(--ink-body)]">{s.body}</p>
             </div>
           ))}
         </div>
@@ -564,7 +564,7 @@ export default function Perks() {
         <FadeIn delay={0.05}>
           <section id="perks-featured" className="scroll-mt-6">
             <div className="mb-3 flex items-baseline justify-between border-t border-[var(--ink)]/[0.08] pt-3">
-              <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56">
+              <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)]">
                 Öne çıkan
               </p>
             </div>
@@ -602,13 +602,13 @@ export default function Perks() {
       <FadeIn delay={0.06}>
         <div className="space-y-3">
           <div className="relative">
-            <Search className="pointer-events-none absolute left-0 top-1/2 size-3.5 -translate-y-1/2 text-[var(--ink)]/51" />
+            <Search className="pointer-events-none absolute left-0 top-1/2 size-3.5 -translate-y-1/2 text-[var(--ink-muted)]" />
             <input
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Marka, teklif veya kod ara…"
-              className="w-full border-0 border-b border-[var(--ink)]/15 bg-transparent py-3 pl-6 font-light text-sm text-[var(--ink)] placeholder:text-[var(--ink)]/46 focus-visible:border-[var(--ink)] focus-visible:outline-none"
+              className="w-full border-0 border-b border-[var(--ink)]/15 bg-transparent py-3 pl-6 font-light text-sm text-[var(--ink)] placeholder:text-[var(--ink-muted)] focus-visible:border-[var(--ink)] focus-visible:outline-none"
             />
           </div>
 
@@ -622,7 +622,7 @@ export default function Perks() {
                   "border px-3 py-1.5 font-mono text-[10px] uppercase tracking-widest transition-colors",
                   active === cat
                     ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--bone)]"
-                    : "border-[var(--ink)]/15 text-[var(--ink)]/50 hover:border-[var(--ink)]/40 hover:text-[var(--ink)]",
+                    : "border-[var(--ink)]/15 text-[var(--ink-muted)] hover:border-[var(--ink)]/40 hover:text-[var(--ink)]",
                 ].join(" ")}
               >
                 {cat}
@@ -636,13 +636,13 @@ export default function Perks() {
                 "border px-3 py-1.5 font-mono text-[10px] uppercase tracking-widest transition-colors",
                 showSavedOnly
                   ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--bone)]"
-                  : "border-[var(--ink)]/15 text-[var(--ink)]/50 hover:border-[var(--ink)]/40 hover:text-[var(--ink)]",
+                  : "border-[var(--ink)]/15 text-[var(--ink-muted)] hover:border-[var(--ink)]/40 hover:text-[var(--ink)]",
               ].join(" ")}
             >
               Kaydedilenler
               <span className="ml-1.5 opacity-50">{savedIds.length}</span>
             </button>
-            <span className="ml-auto font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/46">
+            <span className="ml-auto font-mono text-[10px] uppercase tracking-widest text-[var(--ink-muted)]">
               {filtered.length} ayrıcalık
             </span>
           </div>
@@ -653,10 +653,10 @@ export default function Perks() {
         <div id="perks-all" className="scroll-mt-6" />
         {filtered.length === 0 ? (
           <div className="border border-[var(--ink)]/[0.08] px-6 py-14 text-center">
-            <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56">
+            <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)]">
               Sonuç yok
             </p>
-            <p className="mt-2 text-sm text-[var(--ink)]/50">
+            <p className="mt-2 text-sm text-[var(--ink-muted)]">
               Filtreyi veya aramayı temizleyip tekrar deneyin.
             </p>
             <button
@@ -687,7 +687,7 @@ export default function Perks() {
 
       <FadeIn delay={0.1}>
         <div className="border-t border-[var(--ink)]/[0.08] pt-4">
-          <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/41">
+          <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink-subtle)]">
             Yeni ayrıcalıklar her ay ekleniyor · Öneri için Slack veya destek kanalını kullanın.
           </p>
         </div>

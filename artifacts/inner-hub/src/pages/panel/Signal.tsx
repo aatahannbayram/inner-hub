@@ -62,7 +62,7 @@ const MOMENTUM_CONFIG = {
   orta: {
     icon: Minus,
     label: "Stabil",
-    tone: "border-[var(--ink)]/15 text-[var(--ink)]/55",
+    tone: "border-[var(--ink)]/15 text-[var(--ink-body)]",
     row: "border-[var(--ink)]/[0.08]",
     accent: "rgba(10,10,10,0.18)",
   },
@@ -83,25 +83,25 @@ function ActivityHeatmap() {
     <div>
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <div>
-          <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56">
+          <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)]">
             Aktivite haritası
           </p>
-          <p className="mt-0.5 text-xs text-[var(--ink)]/51">
+          <p className="mt-0.5 text-xs text-[var(--ink-muted)]">
             Son 5 haftalık topluluk yoğunluğu · gösterge amaçlı
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <span className="font-mono text-[9px] text-[var(--ink)]/41">Az</span>
+          <span className="font-mono text-[9px] text-[var(--ink-subtle)]">Az</span>
           {[0.15, 0.3, 0.5, 0.7, 1].map((o, i) => (
             <span key={i} className="size-2.5 bg-[var(--ink)]" style={{ opacity: o }} />
           ))}
-          <span className="font-mono text-[9px] text-[var(--ink)]/41">Çok</span>
+          <span className="font-mono text-[9px] text-[var(--ink-subtle)]">Çok</span>
         </div>
       </div>
       <div className="flex gap-1">
         <div className="flex flex-col justify-between py-0.5 pr-2">
           {WEEKS.map((w) => (
-            <span key={w} className="font-mono text-[8px] leading-none text-[var(--ink)]/41">
+            <span key={w} className="font-mono text-[8px] leading-none text-[var(--ink-subtle)]">
               {w}
             </span>
           ))}
@@ -109,7 +109,7 @@ function ActivityHeatmap() {
         <div className="flex-1">
           <div className="mb-1 grid grid-cols-7 gap-1">
             {DAYS.map((d) => (
-              <span key={d} className="text-center font-mono text-[8px] text-[var(--ink)]/41">
+              <span key={d} className="text-center font-mono text-[8px] text-[var(--ink-subtle)]">
                 {d}
               </span>
             ))}
@@ -148,7 +148,7 @@ function ScoreRing({ score }: { score: number }) {
           fill="none"
           stroke="currentColor"
           strokeWidth="2.5"
-          className="text-[var(--ink)]/26"
+          className="text-[var(--ink-subtle)]"
         />
         <circle
           cx="22"
@@ -183,8 +183,8 @@ function SignalStat({
   return (
     <div className="border border-[var(--ink)]/[0.08] p-4">
       <div className="mb-2 flex items-center justify-between">
-        <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/51">{label}</p>
-        <Icon className="size-3.5 text-[var(--ink)]/36" />
+        <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)]">{label}</p>
+        <Icon className="size-3.5 text-[var(--ink-subtle)]" />
       </div>
       <p
         className="font-serif text-2xl text-[var(--ink)]"
@@ -192,7 +192,7 @@ function SignalStat({
       >
         {value}
       </p>
-      <p className="mt-1 font-mono text-[9px] text-[var(--ink)]/46">{sub}</p>
+      <p className="mt-1 font-mono text-[9px] text-[var(--ink-muted)]">{sub}</p>
     </div>
   );
 }
@@ -399,7 +399,7 @@ export default function Signal() {
       <FadeIn>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="mb-2 font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56">
+            <p className="mb-2 font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)]">
               <span lang="en">inner·hub</span> AI
             </p>
             <h1
@@ -409,11 +409,11 @@ export default function Signal() {
               inner·signal
               <span className="ml-[0.05em] inline-block size-[0.35em] translate-y-[0.08em] bg-[var(--inner-green)]" />
             </h1>
-            <p className="mt-2 max-w-[42ch] text-sm font-light text-[var(--ink)]/50">
+            <p className="mt-2 max-w-[42ch] text-sm font-light text-[var(--ink-muted)]">
               Topluluk hafızasından senin için çıkarılan sinyaller — oku, kaydet, harekete geç.
             </p>
             {updatedAt && !loading && (
-              <p className="mt-2 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/46">
+              <p className="mt-2 font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)]">
                 Son güncelleme ·{" "}
                 {updatedAt.toLocaleString("tr-TR", {
                   day: "numeric",
@@ -467,7 +467,7 @@ export default function Signal() {
                   "border px-3 py-1.5 font-mono text-[10px] uppercase tracking-widest transition-colors",
                   activeJump === j.id
                     ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--bone)]"
-                    : "border-[var(--ink)]/15 text-[var(--ink)]/61 hover:border-[var(--ink)]/35 hover:text-[var(--ink)]",
+                    : "border-[var(--ink)]/15 text-[var(--ink-body)] hover:border-[var(--ink)]/35 hover:text-[var(--ink)]",
                 ].join(" ")}
               >
                 {j.label}
@@ -479,11 +479,11 @@ export default function Signal() {
 
       {loading ? (
         <div className="border border-[var(--ink)]/[0.08] px-6 py-16 text-center">
-          <Loader2 className="mx-auto size-5 animate-spin text-[var(--ink)]/51" />
-          <p className="mt-4 font-mono text-[11px] uppercase tracking-widest text-[var(--ink)]/51">
+          <Loader2 className="mx-auto size-5 animate-spin text-[var(--ink-muted)]" />
+          <p className="mt-4 font-mono text-[11px] uppercase tracking-widest text-[var(--ink-muted)]">
             Sinyaller analiz ediliyor…
           </p>
-          <p className="mx-auto mt-2 max-w-[36ch] text-xs text-[var(--ink)]/56">
+          <p className="mx-auto mt-2 max-w-[36ch] text-xs text-[var(--ink-body)]">
             Temalar, bağlantılar ve haftalık içgörü hazırlanıyor.
           </p>
         </div>
@@ -492,7 +492,7 @@ export default function Signal() {
           <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--error)]">
             Sinyal alınamadı
           </p>
-          <p className="mt-2 text-sm text-[var(--ink)]/60">{error}</p>
+          <p className="mt-2 text-sm text-[var(--ink-body)]">{error}</p>
           <button
             type="button"
             onClick={fetchSignal}
@@ -652,10 +652,10 @@ export default function Signal() {
           <FadeIn delay={0.06}>
             <section id="signal-themes" className="scroll-mt-4">
               <div className="mb-4 flex items-baseline justify-between border-t border-[var(--ink)]/[0.08] pt-3">
-                <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56">
+                <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)]">
                   Haftalık temalar
                 </p>
-                <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/46">
+                <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-muted)]">
                   {data.weeklyThemes.length} sinyal
                 </span>
               </div>
@@ -676,16 +676,16 @@ export default function Signal() {
                           <Icon className="size-2.5" />
                           {cfg.label}
                         </span>
-                        <span className="font-mono text-[9px] tabular-nums text-[var(--ink)]/41">
+                        <span className="font-mono text-[9px] tabular-nums text-[var(--ink-subtle)]">
                           0{i + 1}
                         </span>
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="mb-1 text-sm font-medium text-[var(--ink)]">{theme.topic}</p>
-                        <p className="text-sm leading-relaxed text-[var(--ink)]/50">{theme.summary}</p>
+                        <p className="text-sm leading-relaxed text-[var(--ink-muted)]">{theme.summary}</p>
                         <Link
                           href="/panel/chat"
-                          className="mt-3 inline-flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/56 transition-colors hover:text-[var(--ink)]"
+                          className="mt-3 inline-flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-widest text-[var(--ink-body)] transition-colors hover:text-[var(--ink)]"
                         >
                           Konuyu chat’te takip et <ArrowRight className="size-2.5" />
                         </Link>
@@ -702,20 +702,20 @@ export default function Signal() {
             <section id="signal-people" className="scroll-mt-4">
               <div className="mb-4 flex items-center justify-between gap-3 border-t border-[var(--ink)]/[0.08] pt-3">
                 <div className="flex items-center gap-2">
-                  <Users className="size-3.5 text-[var(--ink)]/56" />
-                  <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56">
+                  <Users className="size-3.5 text-[var(--ink-body)]" />
+                  <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)]">
                     Bu hafta tanış
                   </p>
                 </div>
                 <Link
                   href="/panel/match"
-                  className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/51 transition-colors hover:text-[var(--ink)]"
+                  className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-muted)] transition-colors hover:text-[var(--ink)]"
                 >
                   Match →
                 </Link>
               </div>
               {data.connections.length === 0 ? (
-                <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/46">
+                <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-muted)]">
                   Bu hafta bağlantı önerisi yok.
                 </p>
               ) : (
@@ -735,7 +735,7 @@ export default function Signal() {
                           <p className="text-sm font-medium text-[var(--ink)]">{conn.name}</p>
                           <ScoreRing score={conn.matchScore} />
                         </div>
-                        <p className="text-sm leading-relaxed text-[var(--ink)]/50">{conn.reason}</p>
+                        <p className="text-sm leading-relaxed text-[var(--ink-muted)]">{conn.reason}</p>
                         <Link
                           href="/panel/match"
                           className="mt-3 inline-flex items-center gap-1.5 border border-[var(--ink)] bg-[var(--ink)] px-3 py-1.5 font-mono text-[9px] uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-85"
@@ -763,7 +763,7 @@ export default function Signal() {
       ) : null}
 
       <div className="border-t border-[var(--ink)]/[0.08] pt-4">
-        <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/41">
+        <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink-subtle)]">
           <span lang="en">inner·signal</span> — Claude + Higgsfield · Haftalık güncellenir · Görsel üretimi kredi kullanır
         </p>
       </div>

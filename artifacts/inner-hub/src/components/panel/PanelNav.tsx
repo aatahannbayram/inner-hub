@@ -83,7 +83,7 @@ function NavLink({
         "group flex items-center gap-3 rounded-none px-3 py-2.5 text-sm transition-colors duration-150",
         isActive
           ? "bg-[var(--ink)] text-[var(--bone)]"
-          : "text-[var(--ink)]/60 hover:bg-[var(--ink)]/[0.06] hover:text-[var(--ink)]",
+          : "text-[var(--ink-body)] hover:bg-[var(--ink)]/[0.06] hover:text-[var(--ink)]",
         collapsed && "justify-center px-2",
       )}
       title={collapsed ? item.label : undefined}

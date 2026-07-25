@@ -43,7 +43,7 @@ export default function PaymentSuccess() {
   if (status === "loading") {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
-        <Loader2 className="size-6 animate-spin text-[var(--ink)]/46" />
+        <Loader2 className="size-6 animate-spin text-[var(--ink-muted)]" />
       </div>
     );
   }
@@ -54,12 +54,12 @@ export default function PaymentSuccess() {
         <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--error)] mb-4">
           Ödeme doğrulanamadı
         </p>
-        <p className="text-sm text-[var(--ink)]/50 mb-6">
+        <p className="text-sm text-[var(--ink-muted)] mb-6">
           Lütfen destek ekibiyle iletişime geçin.
         </p>
         <Link
           href="/panel/membership"
-          className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/50 hover:text-[var(--ink)] transition-colors"
+          className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-muted)] hover:text-[var(--ink)] transition-colors"
         >
           ← Üyelik sayfasına dön
         </Link>
@@ -75,7 +75,7 @@ export default function PaymentSuccess() {
       </div>
 
       {/* Heading */}
-      <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56 mb-3">
+      <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)] mb-3">
         <span lang="en">inner·hub</span>
       </p>
       <h1
@@ -90,7 +90,7 @@ export default function PaymentSuccess() {
       <div className="mb-8 border border-[var(--ink)]/[0.08] p-5 space-y-3">
         {type === "membership" && plan && (
           <div className="flex items-center justify-between">
-            <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56">Plan</span>
+            <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)]">Plan</span>
             <span className="text-sm font-medium text-[var(--ink)]">
               {planLabels[plan] ?? plan}
             </span>
@@ -98,18 +98,18 @@ export default function PaymentSuccess() {
         )}
         {type === "event" && (
           <div className="flex items-center justify-between">
-            <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56">Etkinlik</span>
+            <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)]">Etkinlik</span>
             <span className="text-sm font-medium text-[var(--ink)]">AI & Girişimcilik Zirvesi</span>
           </div>
         )}
         {email && (
           <div className="flex items-center justify-between border-t border-[var(--ink)]/[0.06] pt-3">
-            <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56">E-posta</span>
-            <span className="text-sm text-[var(--ink)]/70">{email}</span>
+            <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)]">E-posta</span>
+            <span className="text-sm text-[var(--ink-strong)]">{email}</span>
           </div>
         )}
         <div className="flex items-center justify-between border-t border-[var(--ink)]/[0.06] pt-3">
-          <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56">Durum</span>
+          <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)]">Durum</span>
           <span className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-[var(--inner-green)]">
             <span className="size-1.5 rounded-full bg-[var(--inner-green)]" />
             Aktif
@@ -119,33 +119,33 @@ export default function PaymentSuccess() {
 
       {/* What's next */}
       <div className="mb-8 space-y-2">
-        <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56 mb-3">
+        <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)] mb-3">
           Sırada ne var?
         </p>
         {type === "membership" ? (
           <>
             <div className="flex items-start gap-3">
-              <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center border border-[var(--ink)]/10 font-mono text-[9px] text-[var(--ink)]/56">1</span>
-              <p className="text-sm text-[var(--ink)]/60">Profilini tamamla — ekibe kim olduğunu göster.</p>
+              <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center border border-[var(--ink)]/10 font-mono text-[9px] text-[var(--ink-body)]">1</span>
+              <p className="text-sm text-[var(--ink-body)]">Profilini tamamla — ekibe kim olduğunu göster.</p>
             </div>
             <div className="flex items-start gap-3">
-              <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center border border-[var(--ink)]/10 font-mono text-[9px] text-[var(--ink)]/56">2</span>
-              <p className="text-sm text-[var(--ink)]/60">Topluluk chat'e katıl ve kendini tanıt.</p>
+              <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center border border-[var(--ink)]/10 font-mono text-[9px] text-[var(--ink-body)]">2</span>
+              <p className="text-sm text-[var(--ink-body)]">Topluluk chat'e katıl ve kendini tanıt.</p>
             </div>
             <div className="flex items-start gap-3">
-              <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center border border-[var(--ink)]/10 font-mono text-[9px] text-[var(--ink)]/56">3</span>
-              <p className="text-sm text-[var(--ink)]/60">İlk etkinliğine kayıt ol ve yüz yüze tanış.</p>
+              <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center border border-[var(--ink)]/10 font-mono text-[9px] text-[var(--ink-body)]">3</span>
+              <p className="text-sm text-[var(--ink-body)]">İlk etkinliğine kayıt ol ve yüz yüze tanış.</p>
             </div>
           </>
         ) : (
           <>
             <div className="flex items-start gap-3">
-              <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center border border-[var(--ink)]/10 font-mono text-[9px] text-[var(--ink)]/56">1</span>
-              <p className="text-sm text-[var(--ink)]/60">Bilet onayın e-posta adresine gönderildi.</p>
+              <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center border border-[var(--ink)]/10 font-mono text-[9px] text-[var(--ink-body)]">1</span>
+              <p className="text-sm text-[var(--ink-body)]">Bilet onayın e-posta adresine gönderildi.</p>
             </div>
             <div className="flex items-start gap-3">
-              <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center border border-[var(--ink)]/10 font-mono text-[9px] text-[var(--ink)]/56">2</span>
-              <p className="text-sm text-[var(--ink)]/60">Etkinlik günü giriş için bileti hazır bulundur.</p>
+              <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center border border-[var(--ink)]/10 font-mono text-[9px] text-[var(--ink-body)]">2</span>
+              <p className="text-sm text-[var(--ink-body)]">Etkinlik günü giriş için bileti hazır bulundur.</p>
             </div>
           </>
         )}
@@ -161,7 +161,7 @@ export default function PaymentSuccess() {
         </Link>
         <Link
           href="/panel/events"
-          className="flex items-center gap-2 border border-[var(--ink)]/15 px-5 py-3 font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/50 transition-all hover:border-[var(--ink)]/40 hover:text-[var(--ink)]"
+          className="flex items-center gap-2 border border-[var(--ink)]/15 px-5 py-3 font-mono text-[10px] uppercase tracking-widest text-[var(--ink-muted)] transition-all hover:border-[var(--ink)]/40 hover:text-[var(--ink)]"
         >
           Etkinlikler
         </Link>

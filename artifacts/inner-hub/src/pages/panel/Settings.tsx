@@ -39,10 +39,10 @@ function Section({
   return (
     <div className="border-t border-[var(--ink)]/[0.08] pt-6">
       <div className="mb-4 flex items-start gap-3">
-        <Icon className="mt-0.5 size-4 shrink-0 text-[var(--ink)]/41" />
+        <Icon className="mt-0.5 size-4 shrink-0 text-[var(--ink-subtle)]" />
         <div>
-          <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56">{title}</p>
-          <p className="mt-0.5 text-xs text-[var(--ink)]/46">{sub}</p>
+          <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)]">{title}</p>
+          <p className="mt-0.5 text-xs text-[var(--ink-muted)]">{sub}</p>
         </div>
       </div>
       {children}
@@ -65,7 +65,7 @@ function SettingRow({
     <div className="flex items-center justify-between gap-4 border-b border-[var(--ink)]/[0.05] py-3 last:border-0">
       <div>
         <p className="text-sm text-[var(--ink)] font-light">{label}</p>
-        {sub && <p className="font-mono text-[9px] text-[var(--ink)]/46">{sub}</p>}
+        {sub && <p className="font-mono text-[9px] text-[var(--ink-muted)]">{sub}</p>}
       </div>
       {children}
     </div>
@@ -93,7 +93,7 @@ function RadioGroup<T extends string>({
             "border px-3 py-1 font-mono text-[8px] uppercase tracking-widest transition-colors",
             value === opt.value
               ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--bone)]"
-              : "border-[var(--ink)]/10 text-[var(--ink)]/46 hover:text-[var(--ink)]",
+              : "border-[var(--ink)]/10 text-[var(--ink-muted)] hover:text-[var(--ink)]",
           ].join(" ")}
         >
           {opt.label}
@@ -139,7 +139,7 @@ export default function Settings() {
       {/* Header */}
       <FadeIn>
         <div>
-          <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56 mb-2">
+          <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)] mb-2">
             <span lang="en">inner·hub</span>
           </p>
           <h1
@@ -149,7 +149,7 @@ export default function Settings() {
             ayarlar
             <span className="inline-block size-[0.35em] translate-y-[0.08em] ml-[0.05em] bg-[var(--inner-green)]" />
           </h1>
-          <p className="mt-2 text-sm text-[var(--ink)]/50 font-light">
+          <p className="mt-2 text-sm text-[var(--ink-muted)] font-light">
             Hesap ve platform tercihlerini yönet.
           </p>
         </div>
@@ -244,7 +244,7 @@ export default function Settings() {
           {saved ? <><Check className="size-3" /> Kaydedildi</> : "Kaydet"}
         </button>
         {saved && (
-          <p className="font-mono text-[9px] text-[var(--ink)]/46">Tercihler güncellendi</p>
+          <p className="font-mono text-[9px] text-[var(--ink-muted)]">Tercihler güncellendi</p>
         )}
       </div>
 
@@ -258,7 +258,7 @@ export default function Settings() {
           <div className="flex items-center justify-between gap-4">
             <div>
               <p className="text-sm text-[var(--ink)] font-light">Hesabı askıya al</p>
-              <p className="font-mono text-[9px] text-[var(--ink)]/46">Üyeliğini geçici olarak durdur</p>
+              <p className="font-mono text-[9px] text-[var(--ink-muted)]">Üyeliğini geçici olarak durdur</p>
             </div>
             <button className="border border-[var(--error)]/20 px-4 py-2 font-mono text-[9px] uppercase tracking-widest text-[var(--error)]/50 hover:border-[var(--error)]/40 hover:text-[var(--error)] transition-colors">
               Askıya Al
@@ -267,9 +267,9 @@ export default function Settings() {
           <div className="flex items-center justify-between gap-4">
             <div>
               <p className="text-sm text-[var(--ink)] font-light">Çıkış yap</p>
-              <p className="font-mono text-[9px] text-[var(--ink)]/46">Bu cihazdan oturumu kapat</p>
+              <p className="font-mono text-[9px] text-[var(--ink-muted)]">Bu cihazdan oturumu kapat</p>
             </div>
-            <button className="flex items-center gap-1.5 border border-[var(--ink)]/10 px-4 py-2 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/56 hover:text-[var(--ink)] transition-colors">
+            <button className="flex items-center gap-1.5 border border-[var(--ink)]/10 px-4 py-2 font-mono text-[9px] uppercase tracking-widest text-[var(--ink-body)] hover:text-[var(--ink)] transition-colors">
               <LogOut className="size-3" /> Çıkış
             </button>
           </div>
@@ -277,7 +277,7 @@ export default function Settings() {
       </div>
 
       <div className="border-t border-[var(--ink)]/[0.08] pt-4">
-        <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/36">
+        <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink-subtle)]">
           <span lang="en">inner·hub</span> · ayarlar · v0.1.0
         </p>
       </div>

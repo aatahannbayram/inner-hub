@@ -187,7 +187,7 @@ const TYPE_ICONS: Record<DocType, React.ComponentType<{ className?: string }>> =
 
 const ACCESS_CONFIG: Record<AccessLevel, { icon: React.ComponentType<{ className?: string }>; label: string; color: string }> = {
   özel: { icon: Lock, label: "Özel", color: "text-[var(--error)]" },
-  topluluk: { icon: Users, label: "Topluluk", color: "text-[var(--ink)]/56" },
+  topluluk: { icon: Users, label: "Topluluk", color: "text-[var(--ink-body)]" },
   davetli: { icon: Globe, label: "Davetli", color: "text-[var(--inner-green)]" },
 };
 
@@ -206,13 +206,13 @@ function DocCard({ doc }: { doc: VaultDoc }) {
       <div className="mb-3 flex items-start justify-between gap-3">
         <div className="flex items-start gap-3">
           <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center border border-[var(--ink)]/[0.08] bg-[var(--ink)]/[0.03]">
-            <TypeIcon className="size-3.5 text-[var(--ink)]/51" />
+            <TypeIcon className="size-3.5 text-[var(--ink-muted)]" />
           </div>
           <div>
             <p className="text-sm font-medium leading-snug text-[var(--ink)] group-hover:underline decoration-[var(--ink)]/20 underline-offset-2">
               {doc.title}
             </p>
-            <p className="mt-0.5 font-mono text-[9px] text-[var(--ink)]/46">
+            <p className="mt-0.5 font-mono text-[9px] text-[var(--ink-muted)]">
               {doc.type} · {doc.author}
             </p>
           </div>
@@ -224,12 +224,12 @@ function DocCard({ doc }: { doc: VaultDoc }) {
       </div>
 
       {/* Excerpt */}
-      <p className="mb-3 text-sm leading-relaxed text-[var(--ink)]/61 line-clamp-2">{doc.excerpt}</p>
+      <p className="mb-3 text-sm leading-relaxed text-[var(--ink-body)] line-clamp-2">{doc.excerpt}</p>
 
       {/* Tags */}
       <div className="mb-3 flex flex-wrap gap-1">
         {doc.tags.map((t) => (
-          <span key={t} className="flex items-center gap-1 border border-[var(--ink)]/[0.07] px-1.5 py-0.5 font-mono text-[8px] text-[var(--ink)]/46">
+          <span key={t} className="flex items-center gap-1 border border-[var(--ink)]/[0.07] px-1.5 py-0.5 font-mono text-[8px] text-[var(--ink-muted)]">
             <Tag className="size-2" />{t}
           </span>
         ))}
@@ -244,11 +244,11 @@ function DocCard({ doc }: { doc: VaultDoc }) {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           {doc.pages && (
-            <span className="font-mono text-[8px] text-[var(--ink)]/36">{doc.pages} sayfa</span>
+            <span className="font-mono text-[8px] text-[var(--ink-subtle)]">{doc.pages} sayfa</span>
           )}
-          <span className="font-mono text-[8px] text-[var(--ink)]/36">{doc.views} görüntülenme</span>
+          <span className="font-mono text-[8px] text-[var(--ink-subtle)]">{doc.views} görüntülenme</span>
         </div>
-        <div className="flex items-center gap-1 text-[var(--ink)]/36">
+        <div className="flex items-center gap-1 text-[var(--ink-subtle)]">
           <Clock className="size-2.5" />
           <span className="font-mono text-[8px]">
             {doc.updatedDays === 0 ? "bugün" : `${doc.updatedDays}g önce`}
@@ -267,26 +267,26 @@ function UploadPrompt({ open, onClose }: { open: boolean; onClose: () => void })
     <Drawer open={open} onOpenChange={(v) => !v && onClose()} shouldScaleBackground={false}>
       <DrawerContent className="rounded-none border-[var(--ink)]/15 bg-[var(--bone)]">
         <DrawerHeader className="px-6 pt-2 text-left">
-          <p className="mb-1 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/46"><span lang="en">inner·vault</span></p>
+          <p className="mb-1 font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)]"><span lang="en">inner·vault</span></p>
           <DrawerTitle
             className="font-serif text-2xl font-normal text-[var(--ink)]"
             style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
           >
             Belge Paylaş
           </DrawerTitle>
-          <DrawerDescription className="text-[var(--ink)]/61">
+          <DrawerDescription className="text-[var(--ink-body)]">
             PDF, PPTX veya Markdown — maks 50MB
           </DrawerDescription>
         </DrawerHeader>
 
         <div className="px-6 pb-8">
           <div className="mb-4 flex flex-col items-center justify-center border border-dashed border-[var(--ink)]/20 py-8 text-center">
-            <Upload className="mb-2 size-5 text-[var(--ink)]/41" />
-            <p className="text-sm text-[var(--ink)]/56">Dosyayı buraya bırak</p>
+            <Upload className="mb-2 size-5 text-[var(--ink-subtle)]" />
+            <p className="text-sm text-[var(--ink-body)]">Dosyayı buraya bırak</p>
           </div>
 
           <div className="mb-4">
-            <p className="mb-2 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/46">Erişim Seviyesi</p>
+            <p className="mb-2 font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)]">Erişim Seviyesi</p>
             <div className="flex gap-2">
               {(["özel", "topluluk", "davetli"] as AccessLevel[]).map((a) => {
                 const cfg = ACCESS_CONFIG[a];
@@ -303,7 +303,7 @@ function UploadPrompt({ open, onClose }: { open: boolean; onClose: () => void })
                     ].join(" ")}
                   >
                     <Icon className={`size-3.5 ${cfg.color}`} />
-                    <span className="font-mono text-[8px] uppercase tracking-widest text-[var(--ink)]/56">{cfg.label}</span>
+                    <span className="font-mono text-[8px] uppercase tracking-widest text-[var(--ink-body)]">{cfg.label}</span>
                   </button>
                 );
               })}
@@ -313,7 +313,7 @@ function UploadPrompt({ open, onClose }: { open: boolean; onClose: () => void })
           <div className="flex gap-2">
             <button
               onClick={onClose}
-              className="flex-1 border border-[var(--ink)]/15 py-2.5 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/56 transition-all hover:border-[var(--ink)]/30 hover:text-[var(--ink)]"
+              className="flex-1 border border-[var(--ink)]/15 py-2.5 font-mono text-[9px] uppercase tracking-widest text-[var(--ink-body)] transition-all hover:border-[var(--ink)]/30 hover:text-[var(--ink)]"
             >
               İptal
             </button>
@@ -358,7 +358,7 @@ export default function Vault() {
       <FadeIn>
         <div className="flex items-start justify-between">
           <div>
-            <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56 mb-2">
+            <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)] mb-2">
               <span lang="en">inner·hub</span>
             </p>
             <h1
@@ -368,7 +368,7 @@ export default function Vault() {
               inner·vault
               <span className="inline-block size-[0.35em] translate-y-[0.08em] ml-[0.05em] bg-[var(--inner-green)]" />
             </h1>
-            <p className="mt-2 text-sm text-[var(--ink)]/50 font-light">
+            <p className="mt-2 text-sm text-[var(--ink-muted)] font-light">
               Topluluğun özel bilgi tabanı. Paylaş, öğren, referans al.
             </p>
           </div>
@@ -391,7 +391,7 @@ export default function Vault() {
             className="aspect-[21/9] w-full md:aspect-[24/9]"
           />
           <div className="pointer-events-none absolute inset-0 flex flex-col justify-end p-6 md:p-8">
-            <p className="mb-1 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/56">
+            <p className="mb-1 font-mono text-[9px] uppercase tracking-widest text-[var(--ink-body)]">
               D60 · arşivin haritası
             </p>
             <p className="max-w-[26ch] font-serif text-2xl text-[var(--ink)] md:text-3xl" style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 300 }}>
@@ -409,7 +409,7 @@ export default function Vault() {
           { label: "Toplam Görüntülenme", value: totalViews },
         ].map((s) => (
           <div key={s.label} className="border border-[var(--ink)]/[0.08] p-4">
-            <p className="font-mono text-[8px] uppercase tracking-widest text-[var(--ink)]/41">{s.label}</p>
+            <p className="font-mono text-[8px] uppercase tracking-widest text-[var(--ink-subtle)]">{s.label}</p>
             <p
               className="mt-1 font-serif text-2xl text-[var(--ink)]"
               style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
@@ -423,7 +423,7 @@ export default function Vault() {
       {/* Featured strip — Embla */}
       <FadeIn delay={0.06}>
         <div className="space-y-3">
-          <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56">
+          <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)]">
             Öne çıkan
           </p>
           <Carousel opts={{ align: "start", loop: false }} className="w-full">
@@ -479,13 +479,13 @@ export default function Vault() {
       {/* Search + filter row */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-[var(--ink)]/41" />
+          <Search className="absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-[var(--ink-subtle)]" />
           <input
             type="text"
             placeholder="Belge, etiket veya yazar ara…"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="w-full border border-[var(--ink)]/[0.08] bg-transparent py-2.5 pl-9 pr-4 font-light text-sm text-[var(--ink)] outline-none placeholder:text-[var(--ink)]/41 focus:border-[var(--ink)]/25 transition-colors"
+            className="w-full border border-[var(--ink)]/[0.08] bg-transparent py-2.5 pl-9 pr-4 font-light text-sm text-[var(--ink)] outline-none placeholder:text-[var(--ink-subtle)] focus:border-[var(--ink)]/25 transition-colors"
           />
         </div>
         <div className="flex gap-1.5 flex-wrap">
@@ -497,7 +497,7 @@ export default function Vault() {
                 "border px-2.5 py-1.5 font-mono text-[8px] uppercase tracking-widest transition-all",
                 typeFilter === t
                   ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--bone)]"
-                  : "border-[var(--ink)]/10 text-[var(--ink)]/46 hover:border-[var(--ink)]/25 hover:text-[var(--ink)]",
+                  : "border-[var(--ink)]/10 text-[var(--ink-muted)] hover:border-[var(--ink)]/25 hover:text-[var(--ink)]",
               ].join(" ")}
             >
               {t === "Pitch Deck" ? <span lang="en">{t}</span> : t}
@@ -510,7 +510,7 @@ export default function Vault() {
       <div>
         {filtered.length === 0 ? (
           <div className="border border-dashed border-[var(--ink)]/10 py-12 text-center">
-            <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/41">Sonuç bulunamadı</p>
+            <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-subtle)]">Sonuç bulunamadı</p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -530,7 +530,7 @@ export default function Vault() {
             </div>
           );
         })}
-        <p className="ml-auto font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/36">
+        <p className="ml-auto font-mono text-[9px] uppercase tracking-widest text-[var(--ink-subtle)]">
           <span lang="en">inner·vault</span> — yalnızca üyeler erişebilir
         </p>
       </div>
