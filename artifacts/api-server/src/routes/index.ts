@@ -9,6 +9,7 @@ import applicationsRouter from "./applications";
 import communityRouter from "./community";
 import chatRouter from "./chat";
 import notificationsRouter from "./notifications";
+import matchRouter from "./match";
 
 const router: IRouter = Router();
 
@@ -22,5 +23,6 @@ router.use(applicationsRouter);
 router.use(communityRouter);
 router.use(chatRouter);
 router.use(notificationsRouter);
+router.use(matchRouter);
 
 export default router;

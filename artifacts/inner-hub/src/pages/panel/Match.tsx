@@ -43,10 +43,51 @@ function ScoreBar({ score }: { score: number }) {
   );
 }
 
-function MatchCard({ match, index }: { match: Match; index: number }) {
-  const [introduced, setIntroduced] = useState(false);
+function MatchCard({
+  match,
+  index,
+  initiallyIntroduced,
+}: {
+  match: Match;
+  index: number;
+  initiallyIntroduced?: boolean;
+}) {
+  const [introduced, setIntroduced] = useState(!!initiallyIntroduced);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const cfg = TYPE_CONFIG[match.matchType];
   const initials = match.name.split(" ").map((n) => n[0]).join("").slice(0, 2);
+
+  useEffect(() => {
+    if (initiallyIntroduced) setIntroduced(true);
+  }, [initiallyIntroduced]);
+
+  const requestIntro = async () => {
+    if (introduced || busy) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await fetch(apiUrl("/api/match/introduce"), {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          targetName: match.name,
+          targetCompany: match.company,
+          matchType: match.matchType,
+          reason: match.why,
+          score: match.score,
+        }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json.error ?? "Talep gönderilemedi");
+      setIntroduced(true);
+    } catch (e: any) {
+      setError(e.message ?? "Talep gönderilemedi");
+    } finally {
+      setBusy(false);
+    }
+  };
 
   return (
     <div
@@ -111,18 +152,26 @@ function MatchCard({ match, index }: { match: Match; index: number }) {
       </div>
 
       {/* CTA */}
-      <div className="mt-auto">
+      <div className="mt-auto space-y-2">
+        {error && (
+          <p className="font-mono text-label text-[var(--error-ink)]" role="alert">
+            {error}
+          </p>
+        )}
         <button
-          onClick={() => setIntroduced(true)}
-          disabled={introduced}
+          type="button"
+          onClick={() => void requestIntro()}
+          disabled={introduced || busy}
           className={[
             "flex w-full items-center justify-between border px-4 py-2.5 font-mono text-label uppercase tracking-widest transition-all",
             introduced
-              ? "border-[var(--inner-green)]/30 bg-[var(--inner-green)]/5 text-[var(--success-ink)] cursor-default"
-              : "border-[var(--ink)]/15 text-[var(--ink-body)] hover:border-[var(--ink)] hover:text-[var(--ink)]",
+              ? "cursor-default border-[var(--inner-green)]/30 bg-[var(--inner-green)]/5 text-[var(--success-ink)]"
+              : "border-[var(--ink)]/15 text-[var(--ink-body)] hover:border-[var(--ink)] hover:text-[var(--ink)] disabled:opacity-40",
           ].join(" ")}
         >
-          <span>{introduced ? "Tanışma Talebi Gönderildi" : "Tanıştır"}</span>
+          <span>
+            {introduced ? "Tanışma Talebi Gönderildi" : busy ? "Gönderiliyor…" : "Tanıştır"}
+          </span>
           {introduced ? (
             <Check className="size-3 text-[var(--success-ink)]" />
           ) : (
@@ -220,6 +269,7 @@ export default function Match() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [preferences, setPreferences] = useState<string[]>([]);
+  const [introducedNames, setIntroducedNames] = useState<Set<string>>(new Set());
 
   const PREF_OPTIONS = ["Co-founder", "Mentor", "Yatırımcı", "İş birliği"];
 
@@ -227,6 +277,22 @@ export default function Match() {
     setPreferences((prev) =>
       prev.includes(p) ? prev.filter((x) => x !== p) : [...prev, p]
     );
+  };
+
+  const loadIntroductions = async () => {
+    try {
+      const res = await fetch(apiUrl("/api/match/introductions"), { credentials: "include" });
+      if (!res.ok) return;
+      const json = await res.json();
+      const names = new Set<string>(
+        (json.introductions ?? [])
+          .filter((r: { status: string }) => r.status === "pending" || r.status === "done")
+          .map((r: { targetName: string }) => r.targetName),
+      );
+      setIntroducedNames(names);
+    } catch {
+      /* ignore */
+    }
   };
 
   const fetchMatches = async () => {
@@ -253,6 +319,7 @@ export default function Match() {
       const json = await res.json();
       if (json.error) throw new Error(json.error);
       setData(json);
+      await loadIntroductions();
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Eşleşmeler alınamadı");
     } finally {
@@ -341,7 +408,12 @@ export default function Match() {
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               {data.matches.map((match, i) => (
-                <MatchCard key={`${match.name}-${i}`} match={match} index={i} />
+                <MatchCard
+                  key={`${match.name}-${i}`}
+                  match={match}
+                  index={i}
+                  initiallyIntroduced={introducedNames.has(match.name)}
+                />
               ))}
             </div>
           </div>

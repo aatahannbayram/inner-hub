@@ -150,12 +150,28 @@ export type Notification = typeof notificationsTable.$inferSelect;
 // ─── SSS ──────────────────────────────────────────────────────────────────────
 export const faqTable = pgTable("faq", {
   id: serial("id").primaryKey(),
+  category: text("category").default("Genel").notNull(),
   question: text("question").notNull(),
   answer: text("answer").notNull(),
   order: integer("order").default(0).notNull(),
 });
 
 export type FAQ = typeof faqTable.$inferSelect;
+
+// ─── TANİŞMA TALEPLERİ ────────────────────────────────────────────────────────
+export const introductionRequestsTable = pgTable("introduction_requests", {
+  id: serial("id").primaryKey(),
+  fromUserId: integer("from_user_id").references(() => usersTable.id).notNull(),
+  targetName: text("target_name").notNull(),
+  targetCompany: text("target_company"),
+  matchType: text("match_type"),
+  reason: text("reason"),
+  score: integer("score"),
+  status: text("status").default("pending").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export type IntroductionRequest = typeof introductionRequestsTable.$inferSelect;
 
 // ─── SESSIONS (auth) ──────────────────────────────────────────────────────────
 export const sessionsTable = pgTable("sessions", {

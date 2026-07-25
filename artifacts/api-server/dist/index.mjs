@@ -20655,27 +20655,27 @@ var require_router = __commonJS({
     var slice = Array.prototype.slice;
     var flatten = Array.prototype.flat;
     var methods = METHODS.map((method) => method.toLowerCase());
-    module.exports = Router12;
+    module.exports = Router13;
     module.exports.Route = Route;
-    function Router12(options) {
-      if (!(this instanceof Router12)) {
-        return new Router12(options);
+    function Router13(options) {
+      if (!(this instanceof Router13)) {
+        return new Router13(options);
       }
       const opts = options || {};
-      function router12(req, res, next) {
-        router12.handle(req, res, next);
+      function router13(req, res, next) {
+        router13.handle(req, res, next);
       }
-      Object.setPrototypeOf(router12, this);
-      router12.caseSensitive = opts.caseSensitive;
-      router12.mergeParams = opts.mergeParams;
-      router12.params = {};
-      router12.strict = opts.strict;
-      router12.stack = [];
-      return router12;
+      Object.setPrototypeOf(router13, this);
+      router13.caseSensitive = opts.caseSensitive;
+      router13.mergeParams = opts.mergeParams;
+      router13.params = {};
+      router13.strict = opts.strict;
+      router13.stack = [];
+      return router13;
     }
-    Router12.prototype = function() {
+    Router13.prototype = function() {
     };
-    Router12.prototype.param = function param(name, fn) {
+    Router13.prototype.param = function param(name, fn) {
       if (!name) {
         throw new TypeError("argument name is required");
       }
@@ -20695,7 +20695,7 @@ var require_router = __commonJS({
       params.push(fn);
       return this;
     };
-    Router12.prototype.handle = function handle(req, res, callback) {
+    Router13.prototype.handle = function handle(req, res, callback) {
       if (!callback) {
         throw new TypeError("argument callback is required");
       }
@@ -20822,7 +20822,7 @@ var require_router = __commonJS({
         }
       }
     };
-    Router12.prototype.use = function use(handler) {
+    Router13.prototype.use = function use(handler) {
       let offset = 0;
       let path6 = "/";
       if (typeof handler !== "function") {
@@ -20855,7 +20855,7 @@ var require_router = __commonJS({
       }
       return this;
     };
-    Router12.prototype.route = function route(path6) {
+    Router13.prototype.route = function route(path6) {
       const route2 = new Route(path6);
       const layer = new Layer(path6, {
         sensitive: this.caseSensitive,
@@ -20870,7 +20870,7 @@ var require_router = __commonJS({
       return route2;
     };
     methods.concat("all").forEach(function(method) {
-      Router12.prototype[method] = function(path6) {
+      Router13.prototype[method] = function(path6) {
         const route = this.route(path6);
         route[method].apply(route, slice.call(arguments, 1));
         return this;
@@ -21053,13 +21053,13 @@ var require_application = __commonJS({
     var compileTrust = require_utils3().compileTrust;
     var resolve4 = __require("node:path").resolve;
     var once = require_once();
-    var Router12 = require_router();
+    var Router13 = require_router();
     var slice = Array.prototype.slice;
     var flatten = Array.prototype.flat;
     var app2 = exports = module.exports = {};
     var trustProxyDefaultSymbol = "@@symbol:trust_proxy_default";
     app2.init = function init() {
-      var router12 = null;
+      var router13 = null;
       this.cache = /* @__PURE__ */ Object.create(null);
       this.engines = /* @__PURE__ */ Object.create(null);
       this.settings = /* @__PURE__ */ Object.create(null);
@@ -21068,13 +21068,13 @@ var require_application = __commonJS({
         configurable: true,
         enumerable: true,
         get: function getrouter() {
-          if (router12 === null) {
-            router12 = new Router12({
+          if (router13 === null) {
+            router13 = new Router13({
               caseSensitive: this.enabled("case sensitive routing"),
               strict: this.enabled("strict routing")
             });
           }
-          return router12;
+          return router13;
         }
       });
     };
@@ -21145,15 +21145,15 @@ var require_application = __commonJS({
       if (fns.length === 0) {
         throw new TypeError("app.use() requires a middleware function");
       }
-      var router12 = this.router;
+      var router13 = this.router;
       fns.forEach(function(fn2) {
         if (!fn2 || !fn2.handle || !fn2.set) {
-          return router12.use(path6, fn2);
+          return router13.use(path6, fn2);
         }
         debug(".use app under %s", path6);
         fn2.mountpath = path6;
         fn2.parent = this;
-        router12.use(path6, function mounted_app(req, res, next) {
+        router13.use(path6, function mounted_app(req, res, next) {
           var orig = req.app;
           fn2.handle(req, res, function(err) {
             Object.setPrototypeOf(req, orig.request);
@@ -23726,7 +23726,7 @@ var require_express = __commonJS({
     var EventEmitter2 = __require("node:events").EventEmitter;
     var mixin = require_merge_descriptors();
     var proto = require_application();
-    var Router12 = require_router();
+    var Router13 = require_router();
     var req = require_request();
     var res = require_response();
     exports = module.exports = createApplication;
@@ -23748,8 +23748,8 @@ var require_express = __commonJS({
     exports.application = proto;
     exports.request = req;
     exports.response = res;
-    exports.Route = Router12.Route;
-    exports.Router = Router12;
+    exports.Route = Router13.Route;
+    exports.Router = Router13;
     exports.json = bodyParser.json;
     exports.raw = bodyParser.raw;
     exports.static = require_serve_static();
@@ -72759,14 +72759,14 @@ var require_src6 = __commonJS({
 });
 
 // src/app.ts
-var import_express12 = __toESM(require_express2(), 1);
+var import_express13 = __toESM(require_express2(), 1);
 var import_cors = __toESM(require_lib3(), 1);
 var import_cookie_parser = __toESM(require_cookie_parser(), 1);
 var import_pino_http = __toESM(require_logger(), 1);
 import path5 from "node:path";
 
 // src/routes/index.ts
-var import_express11 = __toESM(require_express2(), 1);
+var import_express12 = __toESM(require_express2(), 1);
 
 // src/routes/health.ts
 var import_express = __toESM(require_express2(), 1);
@@ -83720,6 +83720,7 @@ __export(schema_exports, {
   insertMessageSchema: () => insertMessageSchema,
   insertPerkSchema: () => insertPerkSchema,
   insertUserSchema: () => insertUserSchema,
+  introductionRequestsTable: () => introductionRequestsTable,
   invitationRequestsTable: () => invitationRequestsTable,
   lessonsTable: () => lessonsTable,
   messagesTable: () => messagesTable,
@@ -95303,9 +95304,21 @@ var notificationsTable = pgTable("notifications", {
 });
 var faqTable = pgTable("faq", {
   id: serial("id").primaryKey(),
+  category: text("category").default("Genel").notNull(),
   question: text("question").notNull(),
   answer: text("answer").notNull(),
   order: integer("order").default(0).notNull()
+});
+var introductionRequestsTable = pgTable("introduction_requests", {
+  id: serial("id").primaryKey(),
+  fromUserId: integer("from_user_id").references(() => usersTable.id).notNull(),
+  targetName: text("target_name").notNull(),
+  targetCompany: text("target_company"),
+  matchType: text("match_type"),
+  reason: text("reason"),
+  score: integer("score"),
+  status: text("status").default("pending").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull()
 });
 var sessionsTable = pgTable("sessions", {
   id: text("id").primaryKey(),
@@ -113460,6 +113473,23 @@ async function ensureUserProfileColumns() {
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS skills text`);
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS visibility text`);
 }
+async function ensureMatchAndFaqSchema() {
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS introduction_requests (
+      id serial PRIMARY KEY,
+      from_user_id integer NOT NULL REFERENCES users(id),
+      target_name text NOT NULL,
+      target_company text,
+      match_type text,
+      reason text,
+      score integer,
+      status text NOT NULL DEFAULT 'pending',
+      created_at timestamp NOT NULL DEFAULT now()
+    )
+  `);
+  await db.execute(sql`ALTER TABLE faq ADD COLUMN IF NOT EXISTS category text`);
+  await db.execute(sql`UPDATE faq SET category = 'Genel' WHERE category IS NULL`);
+}
 
 // src/routes/auth.ts
 var router5 = (0, import_express5.Router)();
@@ -114413,22 +114443,229 @@ router10.post("/channels/:id/messages", requireAuth, async (req, res) => {
 });
 var chat_default = router10;
 
-// src/routes/index.ts
+// src/routes/match.ts
+var import_express11 = __toESM(require_express2(), 1);
 var router11 = (0, import_express11.Router)();
-router11.use(health_default);
-router11.use(invitations_default);
-router11.use("/payments", payments_default);
-router11.use("/ai", ai_default);
-router11.use("/auth", auth_default);
-router11.use(catalog_default);
-router11.use(applications_default);
-router11.use(community_default);
-router11.use(chat_default);
-router11.use(notifications_default);
-var routes_default = router11;
+var FAQ_SEED = [
+  {
+    category: "\xDCyelik",
+    order: 1,
+    question: "inner\xB7hub'a nas\u0131l \xFCye olabilirim?",
+    answer: "inner\xB7hub davet bazl\u0131 bir topluluktur. Mevcut \xFCyelerden referans alarak ba\u015Fvurabilir veya web sitesindeki ba\u015Fvuru formunu doldurabilirsiniz. Ba\u015Fvurular inner\xB7hub ekibi taraf\u0131ndan de\u011Ferlendirilir."
+  },
+  {
+    category: "\xDCyelik",
+    order: 2,
+    question: "\xDCyelik \xFCcretli mi?",
+    answer: "Evet. Kurucu \xFCyeler i\xE7in \xF6zel bir fiyatland\u0131rma s\xF6z konusudur. Sonraki dalgalar i\xE7in standart y\u0131ll\u0131k \xFCyelik planlar\u0131 mevcuttur. Ayr\u0131nt\u0131lar i\xE7in \xDCyelik sayfas\u0131n\u0131 inceleyebilirsiniz."
+  },
+  {
+    category: "\xDCyelik",
+    order: 3,
+    question: "\xDCyeli\u011Fimi iptal edebilir miyim?",
+    answer: "Y\u0131ll\u0131k \xFCyeli\u011Finizi d\xF6nem sonunda iptal edebilirsiniz. \u0130ptal taleplerini destek ekibimize iletebilirsiniz. D\xF6nem i\xE7i iade yap\u0131lmamaktad\u0131r."
+  },
+  {
+    category: "\xDCyelik",
+    order: 4,
+    question: "Kurumsal koltuk nedir?",
+    answer: "Bir \u015Firket ad\u0131na birden fazla \xE7al\u0131\u015Fan\u0131n \xFCyeli\u011Fi i\xE7in kurumsal koltuk planlar\u0131 mevcuttur. Bu plan dahilinde ekibinizin tamam\u0131 inner\xB7hub ekosisteminden yararlanabilir."
+  },
+  {
+    category: "Platform",
+    order: 5,
+    question: "inner\xB7signal nedir?",
+    answer: "inner\xB7signal, etkile\u015Fimlerinizi analiz ederek size \xF6zel haftal\u0131k temalar, ba\u011Flant\u0131 \xF6nerileri ve ekosistem i\xE7g\xF6r\xFCleri \xFCreten AI katman\u0131d\u0131r. Profil verileriniz ve platform aktiviteniz temel al\u0131n\u0131r."
+  },
+  {
+    category: "Platform",
+    order: 6,
+    question: "inner\xB7match nas\u0131l \xE7al\u0131\u015F\u0131r?",
+    answer: "inner\xB7match, profil bilgilerinizi ve AI analizini kullanarak size uygun co-founder, mentor, yat\u0131r\u0131mc\u0131 veya i\u015F birli\u011Fi \xF6nerileri sunar. Tan\u0131\u015Ft\u0131r talebi sonras\u0131 inner ekibi s\xFCreci y\xF6netir."
+  },
+  {
+    category: "Platform",
+    order: 7,
+    question: "inner\xB7vault'taki belgeler g\xFCvende mi?",
+    answer: "Evet. inner\xB7vault'a y\xFCklenen belgeler yaln\u0131zca siz veya se\xE7ti\u011Finiz izin seviyesine g\xF6re topluluk \xFCyeleri taraf\u0131ndan g\xF6r\xFClebilir. Hi\xE7bir i\xE7erik d\u0131\u015Far\u0131ya a\xE7\u0131k de\u011Fildir."
+  },
+  {
+    category: "Platform",
+    order: 8,
+    question: "inner\xB7id'i nerede kullanabilirim?",
+    answer: "inner\xB7id rozetini LinkedIn, GitHub ve ki\u015Fisel sitenize ekleyebilirsiniz. Ayr\u0131ca partner platformlar API \xFCzerinden \xFCyeli\u011Finizi do\u011Frulayabilir."
+  },
+  {
+    category: "Etkinlikler & \u0130\xE7erik",
+    order: 9,
+    question: "Etkinliklere nas\u0131l kay\u0131t olabilirim?",
+    answer: "Etkinlikler sayfas\u0131ndan a\xE7\u0131k etkinlikleri g\xF6rebilir, do\u011Frudan kay\u0131t olabilirsiniz. \xDCyeler i\xE7in etkinlik biletleri genellikle indirimlidir."
+  },
+  {
+    category: "Etkinlikler & \u0130\xE7erik",
+    order: 10,
+    question: "Kurslar\u0131 sonradan izleyebilir miyim?",
+    answer: "Cohort bazl\u0131 kurslar belirli bir takvimde ilerler, ancak kay\u0131t olduktan sonra i\xE7eriklere diledi\u011Finiz zaman eri\u015Febilirsiniz. Canl\u0131 oturumlar kaydedilir ve platform \xFCzerinden payla\u015F\u0131l\u0131r."
+  },
+  {
+    category: "Etkinlikler & \u0130\xE7erik",
+    order: 11,
+    question: "Ben de i\xE7erik \xFCretip payla\u015Fabilir miyim?",
+    answer: "Evet. inner\xB7vault \xFCzerinden belgelerinizi payla\u015Fabilir; workshop teklifi i\xE7in destek ekibiyle ileti\u015Fime ge\xE7ebilirsiniz."
+  },
+  {
+    category: "Teknik & API",
+    order: 12,
+    question: "inner\xB7api'ye nas\u0131l eri\u015Febilirim?",
+    answer: "inner\xB7api sayfas\u0131ndan API anahtar\u0131n\u0131z\u0131 g\xF6r\xFCnt\xFCleyebilir, kullan\u0131m istatistiklerinizi takip edebilir ve endpoint dok\xFCmantasyonuna ula\u015Fabilirsiniz."
+  },
+  {
+    category: "Teknik & API",
+    order: 13,
+    question: "API rate limitleri nelerdir?",
+    answer: "Starter planda saatte 100 istek, Builder planda saatte 1.000 istek, Scale planda saatte 10.000 istek limitiniz vard\u0131r. Limitler a\u015F\u0131ld\u0131\u011F\u0131nda 429 d\xF6ner."
+  },
+  {
+    category: "Teknik & API",
+    order: 14,
+    question: "Webhook kurulumu nas\u0131l yap\u0131l\u0131r?",
+    answer: "inner\xB7api sayfas\u0131ndan Webhooks b\xF6l\xFCm\xFCne gidin. HTTPS endpoint URL'inizi ekleyin ve dinlemek istedi\u011Finiz olaylar\u0131 se\xE7in."
+  }
+];
+async function ensureFaqSeed() {
+  const [row] = await db.select({ id: faqTable.id }).from(faqTable).limit(1);
+  if (row) return;
+  await db.insert(faqTable).values(FAQ_SEED);
+}
+router11.get("/faq", requireAuth, async (_req, res) => {
+  try {
+    await ensureMatchAndFaqSchema();
+    await ensureFaqSeed();
+    const rows = await db.select().from(faqTable).orderBy(asc(faqTable.order), asc(faqTable.id));
+    const byCategory = /* @__PURE__ */ new Map();
+    for (const r of rows) {
+      const cat = r.category || "Genel";
+      const list = byCategory.get(cat) ?? [];
+      list.push({ question: r.question, answer: r.answer });
+      byCategory.set(cat, list);
+    }
+    res.json({
+      categories: [...byCategory.entries()].map(([category, items]) => ({
+        category,
+        items
+      }))
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message ?? "SSS y\xFCklenemedi" });
+  }
+});
+router11.post("/match/introduce", requireAuth, async (req, res) => {
+  try {
+    await ensureMatchAndFaqSchema();
+    const userId = req.user.id;
+    const targetName = typeof req.body?.targetName === "string" ? req.body.targetName.trim() : "";
+    const targetCompany = typeof req.body?.targetCompany === "string" ? req.body.targetCompany.trim().slice(0, 120) : "";
+    const matchType = typeof req.body?.matchType === "string" ? req.body.matchType.trim().slice(0, 60) : "";
+    const reason = typeof req.body?.reason === "string" ? req.body.reason.trim().slice(0, 500) : "";
+    const score = Number.isFinite(Number(req.body?.score)) ? Math.round(Number(req.body.score)) : null;
+    if (!targetName || targetName.length > 120) {
+      res.status(400).json({ error: "Ge\xE7ersiz e\u015Fle\u015Fme hedefi" });
+      return;
+    }
+    const [existing] = await db.select().from(introductionRequestsTable).where(
+      and(
+        eq(introductionRequestsTable.fromUserId, userId),
+        eq(introductionRequestsTable.targetName, targetName),
+        eq(introductionRequestsTable.status, "pending")
+      )
+    ).limit(1);
+    if (existing) {
+      res.json({
+        request: {
+          id: existing.id,
+          targetName: existing.targetName,
+          status: existing.status,
+          createdAt: existing.createdAt.toISOString()
+        },
+        alreadyRequested: true
+      });
+      return;
+    }
+    const [inserted] = await db.insert(introductionRequestsTable).values({
+      fromUserId: userId,
+      targetName,
+      targetCompany: targetCompany || null,
+      matchType: matchType || null,
+      reason: reason || null,
+      score,
+      status: "pending"
+    }).returning();
+    await createNotification({
+      userId,
+      title: "Tan\u0131\u015Fma talebin al\u0131nd\u0131",
+      body: `${targetName} i\xE7in talebin inner ekibine iletildi. K\u0131sa s\xFCrede d\xF6n\xFC\u015F yap\u0131l\u0131r.`,
+      kind: "match"
+    });
+    const admins = await db.select({ id: usersTable.id }).from(usersTable).where(eq(usersTable.role, "admin"));
+    const fromName = req.user.name || req.user.email;
+    await Promise.all(
+      admins.map(
+        (a) => createNotification({
+          userId: a.id,
+          title: "Yeni tan\u0131\u015Fma talebi",
+          body: `${fromName}, ${targetName}${matchType ? ` (${matchType})` : ""} ile tan\u0131\u015Fmak istiyor.`,
+          kind: "request"
+        })
+      )
+    );
+    res.status(201).json({
+      request: {
+        id: inserted.id,
+        targetName: inserted.targetName,
+        status: inserted.status,
+        createdAt: inserted.createdAt.toISOString()
+      },
+      alreadyRequested: false
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message ?? "Talep g\xF6nderilemedi" });
+  }
+});
+router11.get("/match/introductions", requireAuth, async (req, res) => {
+  try {
+    await ensureMatchAndFaqSchema();
+    const rows = await db.select().from(introductionRequestsTable).where(eq(introductionRequestsTable.fromUserId, req.user.id));
+    res.json({
+      introductions: rows.map((r) => ({
+        id: r.id,
+        targetName: r.targetName,
+        status: r.status,
+        createdAt: r.createdAt.toISOString()
+      }))
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message ?? "Talepler y\xFCklenemedi" });
+  }
+});
+var match_default = router11;
+
+// src/routes/index.ts
+var router12 = (0, import_express12.Router)();
+router12.use(health_default);
+router12.use(invitations_default);
+router12.use("/payments", payments_default);
+router12.use("/ai", ai_default);
+router12.use("/auth", auth_default);
+router12.use(catalog_default);
+router12.use(applications_default);
+router12.use(community_default);
+router12.use(chat_default);
+router12.use(notifications_default);
+router12.use(match_default);
+var routes_default = router12;
 
 // src/app.ts
-var app = (0, import_express12.default)();
+var app = (0, import_express13.default)();
 app.use(
   (0, import_pino_http.default)({
     logger,
@@ -114455,13 +114692,13 @@ app.use(
     credentials: true
   })
 );
-app.use(import_express12.default.json());
-app.use(import_express12.default.urlencoded({ extended: true }));
+app.use(import_express13.default.json());
+app.use(import_express13.default.urlencoded({ extended: true }));
 app.use((0, import_cookie_parser.default)());
 app.use(attachUser);
 app.use("/api", routes_default);
 var frontendDist = path5.join(__dirname, "..", "..", "inner-hub", "dist");
-app.use(import_express12.default.static(frontendDist));
+app.use(import_express13.default.static(frontendDist));
 app.get(/^(?!\/api).*/, (_req, res) => {
   res.sendFile(path5.join(frontendDist, "index.html"));
 });
@@ -114478,8 +114715,8 @@ var port = Number(rawPort);
 if (Number.isNaN(port) || port <= 0) {
   throw new Error(`Invalid PORT value: "${rawPort}"`);
 }
-ensureUserProfileColumns().catch((err) => {
-  logger.warn({ err }, "Profile column ensure failed (will retry on /me)");
+Promise.all([ensureUserProfileColumns(), ensureMatchAndFaqSchema()]).catch((err) => {
+  logger.warn({ err }, "Schema ensure failed (will retry on demand)");
 }).finally(() => {
   app_default.listen(port, (err) => {
     if (err) {

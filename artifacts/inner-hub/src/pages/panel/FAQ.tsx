@@ -1,89 +1,13 @@
 import { useState } from "react";
 import { FadeIn } from "@/components/FadeIn";
 import { ChevronDown } from "lucide-react";
+import { useApiQuery } from "@/hooks/useApiQuery";
+import { ErrorState, LoadingBlock } from "@/components/panel/Skeletons";
 
-// ─── FAQ data ─────────────────────────────────────────────────────────────────
-
-const FAQS = [
-  {
-    category: "Üyelik",
-    items: [
-      {
-        q: "inner·hub'a nasıl üye olabilirim?",
-        a: "inner·hub davet bazlı bir topluluktır. Mevcut üyelerden referans alarak başvurabilir veya web sitesindeki başvuru formunu doldurabilirsiniz. Başvurular inner·hub ekibi tarafından değerlendirilir.",
-      },
-      {
-        q: "Üyelik ücretli mi?",
-        a: "Evet. Kurucu üyeler için özel bir fiyatlandırma söz konusudur. Sonraki dalgalar için standart yıllık üyelik planları mevcuttur. Ayrıntılar için Üyelik sayfasını inceleyebilirsiniz.",
-      },
-      {
-        q: "Üyeliğimi iptal edebilir miyim?",
-        a: "Yıllık üyeliğinizi dönem sonunda iptal edebilirsiniz. İptal taleplerini destek ekibimize iletebilirsiniz. Dönem içi iade yapılmamaktadır.",
-      },
-      {
-        q: "Kurumsal koltuk nedir?",
-        a: "Bir şirket adına birden fazla çalışanın üyeliği için kurumsal koltuk planları mevcuttur. Bu plan dahilinde ekibinizin tamamı inner·hub ekosisteminden yararlanabilir.",
-      },
-    ],
-  },
-  {
-    category: "Platform",
-    items: [
-      {
-        q: "inner·signal nedir?",
-        a: "inner·signal, etkileşimlerinizi analiz ederek size özel haftalık temalar, bağlantı önerileri ve ekosistem içgörüleri üreten AI katmanıdır. Profil verileriniz ve platform aktiviteniz temel alınır.",
-      },
-      {
-        q: "inner·match nasıl çalışır?",
-        a: "inner·match, profil bilgilerinizi ve AI analizini kullanarak size uygun co-founder, mentor, yatırımcı veya iş birliği önerileri sunar. Eşleşme onayı sonrası platform tanışma sürecini yönetir.",
-      },
-      {
-        q: "inner·vault'taki belgeler güvende mi?",
-        a: "Evet. inner·vault'a yüklenen belgeler yalnızca siz veya seçtiğiniz izin seviyesine göre topluluk üyeleri tarafından görülebilir. Hiçbir içerik dışarıya açık değildir.",
-      },
-      {
-        q: "inner·id'i nerede kullanabilirim?",
-        a: "inner·id rozetini LinkedIn, GitHub ve kişisel sitenize ekleyebilirsiniz. Ayrıca partner platformlar API üzerinden üyeliğinizi doğrulayabilir. Embed kodlarını inner·id sayfasından alabilirsiniz.",
-      },
-    ],
-  },
-  {
-    category: "Etkinlikler & İçerik",
-    items: [
-      {
-        q: "Etkinliklere nasıl kayıt olabilirim?",
-        a: "Etkinlikler sayfasından açık etkinlikleri görebilir, doğrudan kayıt olabilirsiniz. Üyeler için etkinlik biletleri genellikle indirimlidir. Bazı özel etkinlikler yalnızca davetiye ile açık olabilir.",
-      },
-      {
-        q: "Kursları sonradan izleyebilir miyim?",
-        a: "Cohort bazlı kurslar belirli bir takvimde ilerler, ancak kayıt olduktan sonra içeriklere dilediğiniz zaman erişebilirsiniz. Canlı oturumlar kaydedilir ve platform üzerinden paylaşılır.",
-      },
-      {
-        q: "Ben de içerik üretip paylaşabilir miyim?",
-        a: "Evet. inner·vault üzerinden belgelerinizi, araştırmalarınızı ve notlarınızı toplulukla paylaşabilirsiniz. Workshop veya masterclass teklif etmek için destek ekibiyle iletişime geçebilirsiniz.",
-      },
-    ],
-  },
-  {
-    category: "Teknik & API",
-    items: [
-      {
-        q: "inner·api'ye nasıl erişebilirim?",
-        a: "inner·api sayfasından API anahtarınızı görüntüleyebilir, kullanım istatistiklerinizi takip edebilir ve endpoint dokümantasyonuna ulaşabilirsiniz. Starter plan ücretsizdir.",
-      },
-      {
-        q: "API rate limitleri nelerdir?",
-        a: "Starter planda saatte 100 istek, Builder planda saatte 1.000 istek, Scale planda saatte 10.000 istek limitiniz vardır. Limitler aşıldığında 429 Too Many Requests döner.",
-      },
-      {
-        q: "Webhook kurulumu nasıl yapılır?",
-        a: "inner·api sayfasından Webhooks bölümüne gidin. HTTPS endpoint URL'inizi ekleyin ve dinlemek istediğiniz olayları seçin. Teslim loglarını ve yeniden deneme geçmişini aynı sayfada takip edebilirsiniz.",
-      },
-    ],
-  },
-];
-
-// ─── Accordion item ───────────────────────────────────────────────────────────
+type FaqCategory = {
+  category: string;
+  items: { question: string; answer: string }[];
+};
 
 function AccordionItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false);
@@ -91,85 +15,104 @@ function AccordionItem({ q, a }: { q: string; a: string }) {
   return (
     <div className="border-b border-[var(--ink)]/[0.06] last:border-0">
       <button
+        type="button"
         onClick={() => setOpen((o) => !o)}
         className="flex w-full items-start justify-between gap-4 py-4 text-left transition-colors hover:text-[var(--ink)]"
       >
-        <span className="text-sm text-[var(--ink)] font-light leading-relaxed">{q}</span>
+        <span className="text-sm font-light leading-relaxed text-[var(--ink)]">{q}</span>
         <ChevronDown
           className={`mt-0.5 size-4 shrink-0 text-[var(--ink-muted)] transition-transform duration-200 ${open ? "rotate-180" : ""}`}
         />
       </button>
       {open && (
-        <p className="pb-4 text-sm leading-relaxed text-[var(--ink-body)] font-light">{a}</p>
+        <p className="pb-4 text-sm font-light leading-relaxed text-[var(--ink-body)]">{a}</p>
       )}
     </div>
   );
 }
 
-// ─── Main page ────────────────────────────────────────────────────────────────
-
 export default function FAQ() {
-  const [activeCategory, setActiveCategory] = useState(FAQS[0].category);
+  const { data, isLoading, isError, error, refetch } = useApiQuery<{ categories: FaqCategory[] }>(
+    ["faq"],
+    "/api/faq",
+  );
+  const categories = data?.categories ?? [];
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const current = activeCategory ?? categories[0]?.category ?? null;
+  const active = categories.find((c) => c.category === current) ?? categories[0];
 
   return (
-    <div className="space-y-8 max-w-xl">
-      {/* Header */}
+    <div className="max-w-xl space-y-8">
       <FadeIn>
         <div>
-          <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)] mb-2">
+          <p className="mb-2 font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
             <span lang="en">inner·hub</span>
           </p>
           <h1
-            className="font-serif font-display text-4xl md:text-5xl text-[var(--ink)]"
+            className="font-serif font-display text-4xl text-[var(--ink)] md:text-5xl"
             style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
           >
             sss
-            <span className="inline-block size-[0.35em] translate-y-[0.08em] ml-[0.05em] bg-[var(--inner-green)]" />
+            <span className="ml-[0.05em] inline-block size-[0.35em] translate-y-[0.08em] bg-[var(--inner-green)]" />
           </h1>
-          <p className="mt-2 text-sm text-[var(--ink-muted)] font-light">
-            Sıkça sorulan sorular.
-          </p>
+          <p className="mt-2 text-sm font-light text-[var(--ink-muted)]">Sıkça sorulan sorular.</p>
         </div>
       </FadeIn>
 
-      {/* Category tabs */}
-      <div className="flex flex-wrap gap-1.5">
-        {FAQS.map((cat) => (
-          <button
-            key={cat.category}
-            onClick={() => setActiveCategory(cat.category)}
-            className={[
-              "border px-3.5 py-1.5 font-mono text-label uppercase tracking-widest transition-colors",
-              activeCategory === cat.category
-                ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--bone)]"
-                : "border-[var(--ink)]/15 text-[var(--ink-muted)] hover:text-[var(--ink)]",
-            ].join(" ")}
-          >
-            {cat.category}
-          </button>
-        ))}
-      </div>
+      {isLoading && categories.length === 0 && <LoadingBlock label="SSS yükleniyor" />}
+      {isError && (
+        <ErrorState
+          message={error instanceof Error ? error.message : "SSS yüklenemedi"}
+          onRetry={() => refetch()}
+        />
+      )}
 
-      {/* Questions */}
-      {FAQS.filter((cat) => cat.category === activeCategory).map((cat) => (
-        <div key={cat.category} className="border border-[var(--ink)]/[0.08] px-5">
-          {cat.items.map((item) => (
-            <AccordionItem key={item.q} q={item.q} a={item.a} />
-          ))}
-        </div>
-      ))}
+      {!isLoading && !isError && categories.length === 0 && (
+        <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
+          Henüz SSS yok.
+        </p>
+      )}
 
-      {/* Contact */}
+      {categories.length > 0 && (
+        <>
+          <div className="flex flex-wrap gap-1.5">
+            {categories.map((cat) => (
+              <button
+                key={cat.category}
+                type="button"
+                onClick={() => setActiveCategory(cat.category)}
+                className={[
+                  "border px-3.5 py-1.5 font-mono text-label uppercase tracking-widest transition-colors",
+                  current === cat.category
+                    ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--bone)]"
+                    : "border-[var(--ink)]/15 text-[var(--ink-muted)] hover:text-[var(--ink)]",
+                ].join(" ")}
+              >
+                {cat.category}
+              </button>
+            ))}
+          </div>
+
+          {active && (
+            <div className="border border-[var(--ink)]/[0.08] px-5">
+              {active.items.map((item) => (
+                <AccordionItem key={item.question} q={item.question} a={item.answer} />
+              ))}
+            </div>
+          )}
+        </>
+      )}
+
       <div className="border border-[var(--ink)]/[0.08] p-5">
         <p className="mb-1 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
           Cevap bulamadın mı?
         </p>
-        <p className="mb-3 text-sm text-[var(--ink-muted)] font-light">
+        <p className="mb-3 text-sm font-light text-[var(--ink-muted)]">
           Topluluk Chat'ten bize ulaş veya e-posta gönder.
         </p>
         <a
           href="mailto:destek@inner.digital"
-          className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)] underline underline-offset-2 hover:text-[var(--ink)] transition-colors"
+          className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)] underline underline-offset-2 transition-colors hover:text-[var(--ink)]"
         >
           destek@inner.digital
         </a>
