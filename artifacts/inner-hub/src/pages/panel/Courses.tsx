@@ -235,7 +235,7 @@ function scrollToId(id: string) {
   document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
-function CoursesHero() {
+function CoursesHero({ hasEnrolled }: { hasEnrolled: boolean }) {
   return (
     <div
       className="relative -mx-4 -mt-6 overflow-hidden sm:-mx-6 lg:-mx-8 lg:-mt-8"
@@ -276,16 +276,22 @@ function CoursesHero() {
             </FadeIn>
             <FadeIn delay={1.2}>
               <div className="flex flex-wrap gap-4">
-                <button
-                  onClick={() => scrollToId("courses-enrolled")}
-                  className="group inline-flex items-center gap-2 bg-white px-8 py-3 font-mono text-xs uppercase tracking-widest text-black transition-colors hover:bg-white/90"
-                >
-                  Devam Et
-                  <ChevronRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
-                </button>
+                {hasEnrolled && (
+                  <button
+                    onClick={() => scrollToId("courses-enrolled")}
+                    className="group inline-flex items-center gap-2 bg-white px-8 py-3 font-mono text-xs uppercase tracking-widest text-black transition-colors hover:bg-white/90"
+                  >
+                    Devam Et
+                    <ChevronRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
+                  </button>
+                )}
                 <button
                   onClick={() => scrollToId("courses-available")}
-                  className="liquid-glass group inline-flex items-center gap-2 border border-white/20 px-8 py-3 font-mono text-xs uppercase tracking-widest text-white transition-colors hover:bg-white hover:text-black"
+                  className={
+                    hasEnrolled
+                      ? "liquid-glass group inline-flex items-center gap-2 border border-white/20 px-8 py-3 font-mono text-xs uppercase tracking-widest text-white transition-colors hover:bg-white hover:text-black"
+                      : "group inline-flex items-center gap-2 bg-white px-8 py-3 font-mono text-xs uppercase tracking-widest text-black transition-colors hover:bg-white/90"
+                  }
                 >
                   Kursları Keşfet
                   <ChevronRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
@@ -377,7 +383,7 @@ export default function CoursesPage() {
   return (
     <div className="space-y-8 max-w-4xl">
       {/* Hero */}
-      <CoursesHero />
+      <CoursesHero hasEnrolled={enrolled.length > 0} />
 
       {!loading && !error && courses.length > 0 && (
         <FadeIn delay={0.02}>

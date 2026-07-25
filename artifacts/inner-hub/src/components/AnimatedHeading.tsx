@@ -1,9 +1,10 @@
 import type { CSSProperties } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 
-const CHAR_DELAY = 0.03;
+const WORD_DELAY = 0.045;
 const INITIAL_DELAY = 0.2;
 const CHAR_DURATION = 0.5;
+const MAX_STAGGER = 0.35; // toplam gecikme tavanı — birincil CTA'nın etkileşilebilir olması gecikmesin
 const EASE = [0.16, 1, 0.3, 1] as const;
 
 export function AnimatedHeading({
@@ -30,25 +31,30 @@ export function AnimatedHeading({
     );
   }
 
+  // Kelime bazlı split — harf bazlıya göre daha kısa toplam stagger süresi
+  // ve tam metin ekran okuyucular için aria-label'da (span'ler aria-hidden).
+  let globalWordIndex = 0;
+
   return (
-    <h1 className={className} style={style}>
+    <h1 className={className} style={style} aria-label={lines.join(" ")}>
       {lines.map((line, lineIndex) => (
-        <span key={lineIndex} className="block">
-          {line.split("").map((char, charIndex) => (
-            <motion.span
-              key={charIndex}
-              className="inline-block"
-              initial={{ opacity: 0, x: -18 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{
-                duration: CHAR_DURATION,
-                ease: EASE,
-                delay: INITIAL_DELAY + lineIndex * line.length * CHAR_DELAY + charIndex * CHAR_DELAY,
-              }}
-            >
-              {char === " " ? " " : char}
-            </motion.span>
-          ))}
+        <span key={lineIndex} className="block" aria-hidden="true">
+          {line.split(" ").map((word, wordIndex, arr) => {
+            const delay = INITIAL_DELAY + Math.min(globalWordIndex * WORD_DELAY, MAX_STAGGER);
+            globalWordIndex += 1;
+            return (
+              <motion.span
+                key={wordIndex}
+                className="inline-block"
+                initial={{ opacity: 0, x: -18 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: CHAR_DURATION, ease: EASE, delay }}
+              >
+                {word}
+                {wordIndex < arr.length - 1 ? " " : ""}
+              </motion.span>
+            );
+          })}
         </span>
       ))}
     </h1>
