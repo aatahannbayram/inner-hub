@@ -114,7 +114,7 @@ export default function FAQ() {
           href="mailto:destek@inner.digital"
           className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)] underline underline-offset-2 transition-colors hover:text-[var(--ink)]"
         >
-          destek@inner.digital
+          <span lang="en">destek@inner.digital</span>
         </a>
       </div>
 

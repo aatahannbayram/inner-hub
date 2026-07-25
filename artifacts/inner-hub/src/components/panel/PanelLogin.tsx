@@ -266,14 +266,20 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
             onClick={copySupportEmail}
             className="mt-5 inline-flex items-center gap-2 rounded-full border border-white/40 px-5 py-2.5 font-mono text-caption uppercase tracking-widest text-white transition-colors duration-200 hover:bg-white hover:text-black"
           >
-            {emailCopied ? "Kopyalandı" : "Bize ulaş: destek@inner.digital"}
+            {emailCopied ? (
+              "Kopyalandı"
+            ) : (
+              <>
+                Bize ulaş: <span lang="en">destek@inner.digital</span>
+              </>
+            )}
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <rect x="8" y="8" width="13" height="13" rx="1.5" stroke="currentColor" strokeWidth="1.6" />
               <rect x="3" y="3" width="13" height="13" rx="1.5" stroke="currentColor" strokeWidth="1.6" />
             </svg>
           </button>
           <p className="mt-3 font-mono text-label uppercase tracking-widest text-white/35">
-            Fareyi hareket ettir — bakış seni takip eder
+            Fareyi hareket ettir · bakış seni takip eder
           </p>
         </div>
 
