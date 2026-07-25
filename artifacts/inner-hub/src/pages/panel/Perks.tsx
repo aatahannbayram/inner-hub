@@ -16,8 +16,9 @@ import { AnimatedHeading } from "@/components/AnimatedHeading";
 import { AmbientCardBackground } from "@/components/panel/AmbientCardBackground";
 import { avatarColor } from "@/lib/avatarColor";
 import { HeroVideo } from "@/components/HeroVideo";
-import { DemoPreviewBanner } from "@/components/panel/DemoPreviewBanner";
 import { toLowerTR, toUpperTR } from "@/lib/tr";
+import { useApiQuery } from "@/hooks/useApiQuery";
+import { LoadingBlock, ErrorState, CourseCardSkeleton } from "@/components/panel/Skeletons";
 
 type Category = "Tümü" | "Yazılım" | "Finans" | "Yaşam" | "Eğitim";
 
@@ -35,117 +36,6 @@ interface Perk {
   featured?: boolean;
   expiresAt?: string;
 }
-
-const PERKS: Perk[] = [
-  {
-    id: 1,
-    brand: "Monolite",
-    title: "Monolite İlk Ay Ücretsiz!",
-    description:
-      "Sunumlarınızı, etkinliklerinizi ve eğitimlerinizi Monolite ile profesyonel biçimde yönetin.",
-    howTo:
-      "Kodu kopyalayıp Monolite kayıt ekranında “Promo / Invite” alanına yapıştırın. İlk faturalandırma döneminde ücret alınmaz.",
-    category: "Yazılım",
-    logoUrl: null,
-    badge: "1 Ay Ücretsiz",
-    code: "INNER-MONOLITE",
-    partnerUrl: "https://monolite.io",
-    featured: true,
-    expiresAt: "2026-12-31",
-  },
-  {
-    id: 2,
-    brand: "iyigo",
-    title: "İyigo 2 Ay Ücretsiz",
-    description:
-      "Enocta'nın yeni iştiraki olan iyigo ile kurumsal öğrenme deneyimini keşfedin. Kullanıma hazır platform.",
-    howTo: "Partner sayfasından “inner·hub” seçeneğini işaretleyin; aktivasyon 24 saat içinde e-postanıza gelir.",
-    category: "Eğitim",
-    logoUrl: null,
-    badge: "2 Ay Ücretsiz",
-    code: "INNER-IYIGO",
-    partnerUrl: "https://iyigo.com",
-  },
-  {
-    id: 3,
-    brand: "Salary Insights",
-    title: "Kurumsal Maaş Raporu %15 İndirimli",
-    description:
-      "Ara zam öncesi Nisan–Mayıs maaş raporu. 10.000'den fazla pozisyon verisi ile sektör karşılaştırması.",
-    howTo: "Checkout’ta davet kodunu girin. Rapor PDF olarak anında indirilir.",
-    category: "Finans",
-    logoUrl: null,
-    badge: "%15 İndirim",
-    code: "INNER15",
-    partnerUrl: "https://salaryinsights.com",
-  },
-  {
-    id: 4,
-    brand: "Dermolisa",
-    title: "Kozmetik Ürünlerinde %30 İndirim",
-    description:
-      "Dr. Dennis Gross, Peter Thomas Roth ve Philip B gibi dünya markalarında üyeye özel indirim.",
-    howTo: "Sepette kodu uygulayın. Kampanya stokla sınırlıdır.",
-    category: "Yaşam",
-    logoUrl: null,
-    badge: "%30 İndirim",
-    code: "INNER30",
-    partnerUrl: "https://dermolisa.com",
-  },
-  {
-    id: 5,
-    brand: "Notion",
-    title: "Notion Plus 6 Ay Ücretsiz",
-    description:
-      "Startup planına dahil tüm özellikleri, öncelikli destek ve ek depolamayı 6 ay boyunca ücretsiz kullanın.",
-    howTo: "Notion Education / Startup formunda inner·hub e-postanızla başvurun; onay sonrası plan yükseltilir.",
-    category: "Yazılım",
-    logoUrl: null,
-    badge: "6 Ay Ücretsiz",
-    code: null,
-    partnerUrl: "https://www.notion.so",
-    featured: true,
-  },
-  {
-    id: 6,
-    brand: "AWS",
-    title: "AWS Activate — $1.000 Kredi",
-    description:
-      "AWS Activate kapsamında seçili startuplara özel $1.000 kredi, teknik destek ve AWS ekibine erişim.",
-    howTo: "Org ID’nizi panel üzerinden iletin; Activate org kodu 3–5 iş gününde Slack’e düşer.",
-    category: "Yazılım",
-    logoUrl: null,
-    badge: "$1.000 Kredi",
-    code: null,
-    partnerUrl: "https://aws.amazon.com/activate",
-  },
-  {
-    id: 7,
-    brand: "Wise Business",
-    title: "Wise Business İlk Yıl Ücretsiz",
-    description:
-      "Uluslararası para transferi ve çoklu para birimi hesabı. inner·hub üyelerine ilk yıl kart ücreti yok.",
-    howTo: "Wise Business kayıt linkinden ilerleyin; referans alanına kodu yazın.",
-    category: "Finans",
-    logoUrl: null,
-    badge: "1 Yıl Ücretsiz",
-    code: "INNERWISE",
-    partnerUrl: "https://wise.com/business",
-  },
-  {
-    id: 8,
-    brand: "Maven",
-    title: "Maven Cohort Kurslarında %20 İndirim",
-    description:
-      "Dünyanın önde gelen uzmanlarından canlı cohort kursları. Liderlik, ürün, pazarlama ve daha fazlası.",
-    howTo: "Kurs checkout sayfasında kodu girin. Tek seferlik kullanım.",
-    category: "Eğitim",
-    logoUrl: null,
-    badge: "%20 İndirim",
-    code: "INNERMAVEN",
-    partnerUrl: "https://maven.com",
-  },
-];
 
 const CATEGORIES: Category[] = ["Tümü", "Yazılım", "Finans", "Yaşam", "Eğitim"];
 const SAVED_KEY = "inner_perks_saved";
@@ -491,23 +381,31 @@ export default function Perks() {
   const [savedIds, setSavedIds] = useState<number[]>(() => loadSaved());
   const [showSavedOnly, setShowSavedOnly] = useState(false);
 
+  const { data, isLoading, isError, error, refetch } = useApiQuery<{ perks: Perk[] }>(
+    ["perks"],
+    "/api/perks",
+  );
+  const perks = data?.perks ?? [];
+
   const counts = useMemo(() => {
     const map: Record<Category, number> = {
-      Tümü: PERKS.length,
+      Tümü: perks.length,
       Yazılım: 0,
       Finans: 0,
       Yaşam: 0,
       Eğitim: 0,
     };
-    for (const p of PERKS) map[p.category] += 1;
+    for (const p of perks) {
+      if (p.category in map) map[p.category] += 1;
+    }
     return map;
-  }, []);
+  }, [perks]);
 
-  const featured = PERKS.filter((p) => p.featured);
+  const featured = perks.filter((p) => p.featured);
 
   const filtered = useMemo(() => {
     const q = toLowerTR(query.trim());
-    return PERKS.filter((p) => {
+    return perks.filter((p) => {
       if (active !== "Tümü" && p.category !== active) return false;
       if (showSavedOnly && !savedIds.includes(p.id)) return false;
       if (!q) return true;
@@ -518,7 +416,7 @@ export default function Perks() {
         toLowerTR(p.badge).includes(q)
       );
     });
-  }, [active, query, showSavedOnly, savedIds]);
+  }, [perks, active, query, showSavedOnly, savedIds]);
 
   const toggleSave = (id: number) => {
     setSavedIds((prev) => {
@@ -532,11 +430,24 @@ export default function Perks() {
     <div className="mx-auto max-w-5xl space-y-8">
       {/* Hero */}
       <PerksHero />
-      <DemoPreviewBanner surface="Ayrıcalıklar" />
 
+      {isLoading ? (
+        <LoadingBlock label="Ayrıcalıklar yükleniyor">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <CourseCardSkeleton />
+            <CourseCardSkeleton />
+          </div>
+        </LoadingBlock>
+      ) : isError ? (
+        <ErrorState
+          message={error instanceof Error ? error.message : "Ayrıcalıklar alınamadı"}
+          onRetry={() => refetch()}
+        />
+      ) : (
+        <>
       <FadeIn delay={0.01}>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <PerksStat label="Toplam Fırsat" value={String(PERKS.length)} sub="aktif ayrıcalık" icon={Gift} />
+          <PerksStat label="Toplam Fırsat" value={String(perks.length)} sub="aktif ayrıcalık" icon={Gift} />
           <PerksStat label="Öne Çıkan" value={String(featured.length)} sub="bu dönem" icon={Sparkles} />
           <PerksStat label="Kategori" value={String(CATEGORIES.length - 1)} sub="yazılım, finans, yaşam…" icon={Layers} />
           <PerksStat label="Kaydettiğin" value={String(savedIds.length)} sub="favorilerinde" icon={Check} />
@@ -705,6 +616,8 @@ export default function Perks() {
           />
         )}
       </AnimatePresence>
+        </>
+      )}
     </div>
   );
 }

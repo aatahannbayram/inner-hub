@@ -20655,27 +20655,27 @@ var require_router = __commonJS({
     var slice = Array.prototype.slice;
     var flatten = Array.prototype.flat;
     var methods = METHODS.map((method) => method.toLowerCase());
-    module.exports = Router9;
+    module.exports = Router10;
     module.exports.Route = Route;
-    function Router9(options) {
-      if (!(this instanceof Router9)) {
-        return new Router9(options);
+    function Router10(options) {
+      if (!(this instanceof Router10)) {
+        return new Router10(options);
       }
       const opts = options || {};
-      function router9(req, res, next) {
-        router9.handle(req, res, next);
+      function router10(req, res, next) {
+        router10.handle(req, res, next);
       }
-      Object.setPrototypeOf(router9, this);
-      router9.caseSensitive = opts.caseSensitive;
-      router9.mergeParams = opts.mergeParams;
-      router9.params = {};
-      router9.strict = opts.strict;
-      router9.stack = [];
-      return router9;
+      Object.setPrototypeOf(router10, this);
+      router10.caseSensitive = opts.caseSensitive;
+      router10.mergeParams = opts.mergeParams;
+      router10.params = {};
+      router10.strict = opts.strict;
+      router10.stack = [];
+      return router10;
     }
-    Router9.prototype = function() {
+    Router10.prototype = function() {
     };
-    Router9.prototype.param = function param(name, fn) {
+    Router10.prototype.param = function param(name, fn) {
       if (!name) {
         throw new TypeError("argument name is required");
       }
@@ -20695,7 +20695,7 @@ var require_router = __commonJS({
       params.push(fn);
       return this;
     };
-    Router9.prototype.handle = function handle(req, res, callback) {
+    Router10.prototype.handle = function handle(req, res, callback) {
       if (!callback) {
         throw new TypeError("argument callback is required");
       }
@@ -20822,7 +20822,7 @@ var require_router = __commonJS({
         }
       }
     };
-    Router9.prototype.use = function use(handler) {
+    Router10.prototype.use = function use(handler) {
       let offset = 0;
       let path6 = "/";
       if (typeof handler !== "function") {
@@ -20855,7 +20855,7 @@ var require_router = __commonJS({
       }
       return this;
     };
-    Router9.prototype.route = function route(path6) {
+    Router10.prototype.route = function route(path6) {
       const route2 = new Route(path6);
       const layer = new Layer(path6, {
         sensitive: this.caseSensitive,
@@ -20870,7 +20870,7 @@ var require_router = __commonJS({
       return route2;
     };
     methods.concat("all").forEach(function(method) {
-      Router9.prototype[method] = function(path6) {
+      Router10.prototype[method] = function(path6) {
         const route = this.route(path6);
         route[method].apply(route, slice.call(arguments, 1));
         return this;
@@ -21053,13 +21053,13 @@ var require_application = __commonJS({
     var compileTrust = require_utils3().compileTrust;
     var resolve4 = __require("node:path").resolve;
     var once = require_once();
-    var Router9 = require_router();
+    var Router10 = require_router();
     var slice = Array.prototype.slice;
     var flatten = Array.prototype.flat;
     var app2 = exports = module.exports = {};
     var trustProxyDefaultSymbol = "@@symbol:trust_proxy_default";
     app2.init = function init() {
-      var router9 = null;
+      var router10 = null;
       this.cache = /* @__PURE__ */ Object.create(null);
       this.engines = /* @__PURE__ */ Object.create(null);
       this.settings = /* @__PURE__ */ Object.create(null);
@@ -21068,13 +21068,13 @@ var require_application = __commonJS({
         configurable: true,
         enumerable: true,
         get: function getrouter() {
-          if (router9 === null) {
-            router9 = new Router9({
+          if (router10 === null) {
+            router10 = new Router10({
               caseSensitive: this.enabled("case sensitive routing"),
               strict: this.enabled("strict routing")
             });
           }
-          return router9;
+          return router10;
         }
       });
     };
@@ -21145,15 +21145,15 @@ var require_application = __commonJS({
       if (fns.length === 0) {
         throw new TypeError("app.use() requires a middleware function");
       }
-      var router9 = this.router;
+      var router10 = this.router;
       fns.forEach(function(fn2) {
         if (!fn2 || !fn2.handle || !fn2.set) {
-          return router9.use(path6, fn2);
+          return router10.use(path6, fn2);
         }
         debug(".use app under %s", path6);
         fn2.mountpath = path6;
         fn2.parent = this;
-        router9.use(path6, function mounted_app(req, res, next) {
+        router10.use(path6, function mounted_app(req, res, next) {
           var orig = req.app;
           fn2.handle(req, res, function(err) {
             Object.setPrototypeOf(req, orig.request);
@@ -23726,7 +23726,7 @@ var require_express = __commonJS({
     var EventEmitter2 = __require("node:events").EventEmitter;
     var mixin = require_merge_descriptors();
     var proto = require_application();
-    var Router9 = require_router();
+    var Router10 = require_router();
     var req = require_request();
     var res = require_response();
     exports = module.exports = createApplication;
@@ -23748,8 +23748,8 @@ var require_express = __commonJS({
     exports.application = proto;
     exports.request = req;
     exports.response = res;
-    exports.Route = Router9.Route;
-    exports.Router = Router9;
+    exports.Route = Router10.Route;
+    exports.Router = Router10;
     exports.json = bodyParser.json;
     exports.raw = bodyParser.raw;
     exports.static = require_serve_static();
@@ -72759,14 +72759,14 @@ var require_src6 = __commonJS({
 });
 
 // src/app.ts
-var import_express9 = __toESM(require_express2(), 1);
+var import_express10 = __toESM(require_express2(), 1);
 var import_cors = __toESM(require_lib3(), 1);
 var import_cookie_parser = __toESM(require_cookie_parser(), 1);
 var import_pino_http = __toESM(require_logger(), 1);
 import path5 from "node:path";
 
 // src/routes/index.ts
-var import_express8 = __toESM(require_express2(), 1);
+var import_express9 = __toESM(require_express2(), 1);
 
 // src/routes/health.ts
 var import_express = __toESM(require_express2(), 1);
@@ -95271,6 +95271,12 @@ var perksTable = pgTable("perks", {
   ctaUrl: text("cta_url").notNull(),
   isActive: boolean("is_active").default(true).notNull(),
   order: integer("order").default(0).notNull(),
+  category: text("category"),
+  badge: text("badge"),
+  code: text("code"),
+  howTo: text("how_to"),
+  featured: boolean("featured").default(false).notNull(),
+  expiresAt: timestamp("expires_at"),
   createdAt: timestamp("created_at").defaultNow().notNull()
 });
 var insertPerkSchema = createInsertSchema(perksTable).omit({ id: true, createdAt: true });
@@ -113778,19 +113784,196 @@ router7.patch("/applications/:id", requireAdmin, async (req, res) => {
 });
 var applications_default = router7;
 
-// src/routes/index.ts
+// src/routes/community.ts
+var import_express8 = __toESM(require_express2(), 1);
 var router8 = (0, import_express8.Router)();
-router8.use(health_default);
-router8.use(invitations_default);
-router8.use("/payments", payments_default);
-router8.use("/ai", ai_default);
-router8.use("/auth", auth_default);
-router8.use(catalog_default);
-router8.use(applications_default);
-var routes_default = router8;
+async function ensurePerkColumns() {
+  await db.execute(sql`ALTER TABLE perks ADD COLUMN IF NOT EXISTS category text`);
+  await db.execute(sql`ALTER TABLE perks ADD COLUMN IF NOT EXISTS badge text`);
+  await db.execute(sql`ALTER TABLE perks ADD COLUMN IF NOT EXISTS code text`);
+  await db.execute(sql`ALTER TABLE perks ADD COLUMN IF NOT EXISTS how_to text`);
+  await db.execute(sql`ALTER TABLE perks ADD COLUMN IF NOT EXISTS featured boolean NOT NULL DEFAULT false`);
+  await db.execute(sql`ALTER TABLE perks ADD COLUMN IF NOT EXISTS expires_at timestamp`);
+}
+async function ensurePerksSeed() {
+  const [row] = await db.select({ id: perksTable.id }).from(perksTable).limit(1);
+  if (row) return;
+  await db.insert(perksTable).values([
+    {
+      brand: "Monolite",
+      title: "Monolite \u0130lk Ay \xDCcretsiz!",
+      description: "Sunumlar\u0131n\u0131z\u0131, etkinliklerinizi ve e\u011Fitimlerinizi Monolite ile profesyonel bi\xE7imde y\xF6netin.",
+      howTo: "Kodu kopyalay\u0131p Monolite kay\u0131t ekran\u0131nda \u201CPromo / Invite\u201D alan\u0131na yap\u0131\u015Ft\u0131r\u0131n. \u0130lk faturaland\u0131rma d\xF6neminde \xFCcret al\u0131nmaz.",
+      category: "Yaz\u0131l\u0131m",
+      badge: "1 Ay \xDCcretsiz",
+      code: "INNER-MONOLITE",
+      ctaUrl: "https://monolite.io",
+      featured: true,
+      order: 1,
+      expiresAt: /* @__PURE__ */ new Date("2026-12-31"),
+      isActive: true
+    },
+    {
+      brand: "iyigo",
+      title: "\u0130yigo 2 Ay \xDCcretsiz",
+      description: "Enocta'n\u0131n yeni i\u015Ftiraki olan iyigo ile kurumsal \xF6\u011Frenme deneyimini ke\u015Ffedin.",
+      howTo: "Partner sayfas\u0131ndan \u201Cinner\xB7hub\u201D se\xE7ene\u011Fini i\u015Faretleyin; aktivasyon 24 saat i\xE7inde e-postan\u0131za gelir.",
+      category: "E\u011Fitim",
+      badge: "2 Ay \xDCcretsiz",
+      code: "INNER-IYIGO",
+      ctaUrl: "https://iyigo.com",
+      order: 2,
+      isActive: true
+    },
+    {
+      brand: "Salary Insights",
+      title: "Kurumsal Maa\u015F Raporu %15 \u0130ndirimli",
+      description: "10.000'den fazla pozisyon verisi ile sekt\xF6r kar\u015F\u0131la\u015Ft\u0131rmas\u0131.",
+      howTo: "Checkout\u2019ta davet kodunu girin. Rapor PDF olarak an\u0131nda indirilir.",
+      category: "Finans",
+      badge: "%15 \u0130ndirim",
+      code: "INNER15",
+      ctaUrl: "https://salaryinsights.com",
+      order: 3,
+      isActive: true
+    },
+    {
+      brand: "Dermolisa",
+      title: "Kozmetik \xDCr\xFCnlerinde %30 \u0130ndirim",
+      description: "Se\xE7ili d\xFCnya markalar\u0131nda \xFCyeye \xF6zel indirim.",
+      howTo: "Sepette kodu uygulay\u0131n. Kampanya stokla s\u0131n\u0131rl\u0131d\u0131r.",
+      category: "Ya\u015Fam",
+      badge: "%30 \u0130ndirim",
+      code: "INNER30",
+      ctaUrl: "https://dermolisa.com",
+      order: 4,
+      isActive: true
+    },
+    {
+      brand: "Notion",
+      title: "Notion Plus 6 Ay \xDCcretsiz",
+      description: "Startup plan\u0131na dahil t\xFCm \xF6zellikler, 6 ay \xFCcretsiz.",
+      howTo: "Notion Startup formunda inner\xB7hub e-postan\u0131zla ba\u015Fvurun.",
+      category: "Yaz\u0131l\u0131m",
+      badge: "6 Ay \xDCcretsiz",
+      code: null,
+      ctaUrl: "https://www.notion.so",
+      featured: true,
+      order: 5,
+      isActive: true
+    },
+    {
+      brand: "AWS",
+      title: "AWS Activate \u2014 $1.000 Kredi",
+      description: "Se\xE7ili startuplara \xF6zel $1.000 kredi ve teknik destek.",
+      howTo: "Org ID\u2019nizi panel \xFCzerinden iletin; Activate kodu 3\u20135 i\u015F g\xFCn\xFCnde gelir.",
+      category: "Yaz\u0131l\u0131m",
+      badge: "$1.000 Kredi",
+      code: null,
+      ctaUrl: "https://aws.amazon.com/activate",
+      order: 6,
+      isActive: true
+    },
+    {
+      brand: "Wise Business",
+      title: "Wise Business \u0130lk Y\u0131l \xDCcretsiz",
+      description: "Uluslararas\u0131 para transferi; ilk y\u0131l kart \xFCcreti yok.",
+      howTo: "Wise Business kay\u0131t linkinden ilerleyin; referans alan\u0131na kodu yaz\u0131n.",
+      category: "Finans",
+      badge: "1 Y\u0131l \xDCcretsiz",
+      code: "INNERWISE",
+      ctaUrl: "https://wise.com/business",
+      order: 7,
+      isActive: true
+    },
+    {
+      brand: "Maven",
+      title: "Maven Cohort Kurslar\u0131nda %20 \u0130ndirim",
+      description: "Canl\u0131 cohort kurslar\u0131nda \xFCyeye \xF6zel indirim.",
+      howTo: "Kurs checkout sayfas\u0131nda kodu girin. Tek seferlik kullan\u0131m.",
+      category: "E\u011Fitim",
+      badge: "%20 \u0130ndirim",
+      code: "INNERMAVEN",
+      ctaUrl: "https://maven.com",
+      order: 8,
+      isActive: true
+    }
+  ]);
+}
+function initialsFromName(name) {
+  return name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0] ?? "").join("").toLocaleUpperCase("tr-TR");
+}
+router8.get("/perks", requireAuth, async (_req, res) => {
+  try {
+    await ensurePerkColumns();
+    await ensurePerksSeed();
+    const rows = await db.select().from(perksTable).where(eq(perksTable.isActive, true)).orderBy(asc(perksTable.order), asc(perksTable.id));
+    res.json({
+      perks: rows.map((p) => ({
+        id: p.id,
+        brand: p.brand,
+        title: p.title,
+        description: p.description ?? "",
+        howTo: p.howTo ?? "Partner sitesinde inner\xB7hub \xFCyeli\u011Finizi belirtin.",
+        category: p.category ?? "Yaz\u0131l\u0131m",
+        logoUrl: p.logoUrl,
+        badge: p.badge ?? p.brand,
+        code: p.code,
+        partnerUrl: p.ctaUrl,
+        featured: p.featured,
+        expiresAt: p.expiresAt ? p.expiresAt.toISOString().slice(0, 10) : void 0
+      }))
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message ?? "Ayr\u0131cal\u0131klar y\xFCklenemedi" });
+  }
+});
+router8.get("/members", requireAuth, async (_req, res) => {
+  try {
+    const rows = await db.select({
+      id: usersTable.id,
+      name: usersTable.name,
+      title: usersTable.title,
+      company: usersTable.company,
+      bio: usersTable.bio,
+      linkedin: usersTable.linkedin,
+      avatarUrl: usersTable.avatarUrl,
+      role: usersTable.role
+    }).from(usersTable).orderBy(asc(usersTable.name));
+    res.json({
+      members: rows.map((u) => ({
+        id: u.id,
+        name: u.name,
+        initials: initialsFromName(u.name),
+        title: u.title ?? (u.role === "admin" ? "Admin" : "\xDCye"),
+        company: u.company ?? "\u2014",
+        bio: u.bio ?? "",
+        tags: [u.title, u.company].filter((t) => Boolean(t && t.trim())),
+        linkedin: u.linkedin,
+        avatarUrl: u.avatarUrl,
+        isAvailable: false
+      }))
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message ?? "\xDCyeler y\xFCklenemedi" });
+  }
+});
+var community_default = router8;
+
+// src/routes/index.ts
+var router9 = (0, import_express9.Router)();
+router9.use(health_default);
+router9.use(invitations_default);
+router9.use("/payments", payments_default);
+router9.use("/ai", ai_default);
+router9.use("/auth", auth_default);
+router9.use(catalog_default);
+router9.use(applications_default);
+router9.use(community_default);
+var routes_default = router9;
 
 // src/app.ts
-var app = (0, import_express9.default)();
+var app = (0, import_express10.default)();
 app.use(
   (0, import_pino_http.default)({
     logger,
@@ -113817,13 +114000,13 @@ app.use(
     credentials: true
   })
 );
-app.use(import_express9.default.json());
-app.use(import_express9.default.urlencoded({ extended: true }));
+app.use(import_express10.default.json());
+app.use(import_express10.default.urlencoded({ extended: true }));
 app.use((0, import_cookie_parser.default)());
 app.use(attachUser);
 app.use("/api", routes_default);
 var frontendDist = path5.join(__dirname, "..", "..", "inner-hub", "dist");
-app.use(import_express9.default.static(frontendDist));
+app.use(import_express10.default.static(frontendDist));
 app.get(/^(?!\/api).*/, (_req, res) => {
   res.sendFile(path5.join(frontendDist, "index.html"));
 });

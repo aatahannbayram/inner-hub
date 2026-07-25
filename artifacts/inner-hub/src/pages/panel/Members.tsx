@@ -7,6 +7,8 @@ import { PersonAvatar } from "@/components/panel/PersonAvatar";
 import { DemoPreviewBanner } from "@/components/panel/DemoPreviewBanner";
 import { HeroVideo } from "@/components/HeroVideo";
 import { toLowerTR } from "@/lib/tr";
+import { useApiQuery } from "@/hooks/useApiQuery";
+import { LoadingBlock, ErrorState, CourseCardSkeleton } from "@/components/panel/Skeletons";
 
 type Tab = "uyeler" | "talent";
 
@@ -33,97 +35,6 @@ interface TalentPost {
   tags: string[];
   postedAt: string;
 }
-
-const MEMBERS: Member[] = [
-  {
-    id: 1,
-    name: "Ata Han Bayram",
-    initials: "AT",
-    title: "Founder & CEO",
-    company: "inner·hub",
-    bio: "Topluluk kurucusu. Ürün, yapay zeka ve ekosistem inşası üzerine çalışıyor.",
-    tags: ["Ürün", "AI", "Topluluk"],
-    linkedin: null,
-    isAvailable: false,
-  },
-  {
-    id: 2,
-    name: "Zeynep Arslan",
-    initials: "ZA",
-    title: "Co-founder",
-    company: "Hipo",
-    bio: "B2B SaaS, yetenek yönetimi platformu. 50+ müşteri, ARR büyümesi devam ediyor.",
-    tags: ["B2B SaaS", "Liderlik", "Satış"],
-    linkedin: null,
-    isAvailable: true,
-  },
-  {
-    id: 3,
-    name: "Mert Demir",
-    initials: "MD",
-    title: "AI Product Manager",
-    company: "Insider",
-    bio: "Ürün geliştirme, ML entegrasyonu, Growth. Seed aşamasındaki girişimlere danışmanlık.",
-    tags: ["AI", "Ürün", "Growth"],
-    linkedin: null,
-    isAvailable: true,
-  },
-  {
-    id: 4,
-    name: "Ayşe Kaya",
-    initials: "AK",
-    title: "HR Tech Lead",
-    company: "Getir",
-    bio: "Büyük ölçekli insan kaynakları dijital dönüşümü. HRIS, ATS ve çalışan deneyimi platformları.",
-    tags: ["HR Tech", "Dijital Dönüşüm"],
-    linkedin: null,
-    isAvailable: false,
-  },
-  {
-    id: 5,
-    name: "Berk Yılmaz",
-    initials: "BY",
-    title: "Angel Investor",
-    company: "Bağımsız",
-    bio: "Erken aşama yatırımcı. Pre-seed ve seed. Fintech, SaaS ve AI odaklı.",
-    tags: ["Yatırım", "Fintech", "AI"],
-    linkedin: null,
-    isAvailable: true,
-  },
-  {
-    id: 6,
-    name: "Selin Çelik",
-    initials: "SC",
-    title: "CTO",
-    company: "Dopigo",
-    bio: "Full-stack mühendislik, DevOps, platform altyapısı. Startup mühendislik ekibi kurulumu.",
-    tags: ["Teknik", "CTO", "DevOps"],
-    linkedin: null,
-    isAvailable: false,
-  },
-  {
-    id: 7,
-    name: "Ozan Kırmızı",
-    initials: "OK",
-    title: "Growth Lead",
-    company: "Pazarama",
-    bio: "E-ticaret büyümesi, performance marketing, A/B testleri ve konversiyon optimizasyonu.",
-    tags: ["Growth", "E-ticaret", "Pazarlama"],
-    linkedin: null,
-    isAvailable: true,
-  },
-  {
-    id: 8,
-    name: "Deniz Alp",
-    initials: "DA",
-    title: "Legal Counsel",
-    company: "Alp Hukuk",
-    bio: "Startup hukuku, yatırım anlaşmaları, KVKK ve GDPR uyumluluk danışmanlığı.",
-    tags: ["Hukuk", "Yatırım", "KVKK"],
-    linkedin: null,
-    isAvailable: true,
-  },
-];
 
 const TALENT_POSTS: TalentPost[] = [
   {
@@ -535,7 +446,13 @@ export default function Members() {
   const [search, setSearch] = useState("");
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
 
-  const filteredMembers = MEMBERS.filter((m) => {
+  const { data, isLoading, isError, error, refetch } = useApiQuery<{ members: Member[] }>(
+    ["members"],
+    "/api/members",
+  );
+  const members = data?.members ?? [];
+
+  const filteredMembers = members.filter((m) => {
     const q = toLowerTR(search);
     return (
       toLowerTR(m.name).includes(q) ||
@@ -556,17 +473,31 @@ export default function Members() {
     <div className="space-y-8 max-w-5xl">
       {/* Hero */}
       <MembersHero onTalentClick={() => { setTab("talent"); requestAnimationFrame(() => scrollToId("members-talent")); }} />
-      <DemoPreviewBanner surface="Katılımcılar" />
+      {tab === "talent" && <DemoPreviewBanner surface="Talent board" />}
 
+      {isLoading && tab === "uyeler" ? (
+        <LoadingBlock label="Üyeler yükleniyor">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <CourseCardSkeleton />
+            <CourseCardSkeleton />
+          </div>
+        </LoadingBlock>
+      ) : isError && tab === "uyeler" ? (
+        <ErrorState
+          message={error instanceof Error ? error.message : "Üyeler alınamadı"}
+          onRetry={() => refetch()}
+        />
+      ) : (
+        <>
       <FadeIn delay={0.02}>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <MembersStat label="Toplam Üye" value={String(MEMBERS.length)} sub="dairenin içinde" icon={Users2} />
-          <MembersStat label="Çevrimiçi" value={String(MEMBERS.filter((m) => m.isAvailable).length)} sub="şu anda aktif" icon={Users2} />
-          <MembersStat label="Talent İlanı" value={String(TALENT_POSTS.length)} sub="açık pozisyon" icon={Tag} />
+          <MembersStat label="Toplam Üye" value={String(members.length)} sub="dairenin içinde" icon={Users2} />
+          <MembersStat label="Profil" value={String(members.filter((m) => m.bio).length)} sub="bio dolu" icon={Users2} />
+          <MembersStat label="Talent İlanı" value={String(TALENT_POSTS.length)} sub="önizleme" icon={Tag} />
           <MembersStat
-            label="Kurucu Üye"
-            value={String(Object.values(MEMBER_EXPERTISE).filter((e) => e.tier === "Kurucu Üye").length)}
-            sub="ilk otuz dörtten"
+            label="Admin"
+            value={String(members.filter((m) => m.title === "Admin").length)}
+            sub="yönetim"
             icon={CheckCircle2}
           />
         </div>
@@ -631,8 +562,8 @@ export default function Members() {
                 {filteredMembers.length} üye
               </span>
               <span className="flex items-center gap-1.5 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
-                <span className="size-1.5 rounded-full bg-[var(--inner-green)]" />
-                {MEMBERS.filter((m) => m.isAvailable).length} çevrimiçi
+                <span className="size-1.5 rounded-full bg-[var(--ink-subtle)]" />
+                canlı durum yakında
               </span>
             </div>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -667,6 +598,8 @@ export default function Members() {
 
       {selectedMember && (
         <MemberDetailPanel member={selectedMember} onClose={() => setSelectedMember(null)} />
+      )}
+        </>
       )}
     </div>
   );

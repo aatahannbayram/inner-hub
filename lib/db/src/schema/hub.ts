@@ -121,6 +121,12 @@ export const perksTable = pgTable("perks", {
   ctaUrl: text("cta_url").notNull(),
   isActive: boolean("is_active").default(true).notNull(),
   order: integer("order").default(0).notNull(),
+  category: text("category"),
+  badge: text("badge"),
+  code: text("code"),
+  howTo: text("how_to"),
+  featured: boolean("featured").default(false).notNull(),
+  expiresAt: timestamp("expires_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

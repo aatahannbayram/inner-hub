@@ -51,13 +51,6 @@ const QUICK_NAV: { brand?: string; label: string; href: string }[] = [
 
 const EDITORIAL_PORTRAIT = "/editorial/circle-portrait.jpg";
 
-const mockPerks = [
-  { id: 1, brand: "Monolite", title: "Monolite İlk Ay Ücretsiz!", description: "Monolite ile sunumlarınızı, etkinliklerinizi ve eğitimlerinizi yönetin.", logoUrl: null },
-  { id: 2, brand: "iyigo", title: "İyigo 2 Ay Ücretsiz", description: "Iyigo: Enocta'nın yeni iştiraki olarak geliştirilen, kullanıma hazır platform.", logoUrl: null },
-  { id: 3, brand: "Salary Insights", title: "Salary Insights Kurumsal Maaş Raporu %15 İndirimli", description: "Ara zam öncesi Nisan-Mayıs maaş raporu (+10.000 maaş).", logoUrl: null },
-  { id: 4, brand: "Dermolisa", title: "Dermolisa Kozmetik Ürünlerinde %30 İndirim", description: "Dr. Dennis Gross, Peter Thomas Roth ve Philip B gibi dünya markaları.", logoUrl: null },
-];
-
 const spotlightCards = [
   {
     title: "inner·signal",
@@ -98,7 +91,7 @@ function StatCard({ label, value, icon: Icon }: { label: string; value: string |
   );
 }
 
-function PerkCard({ perk }: { perk: typeof mockPerks[0] }) {
+function PerkCard({ perk }: { perk: { id: number; brand: string; title: string; description: string; logoUrl: string | null } }) {
   const color = avatarColor(perk.brand);
   return (
     <div className="group relative flex flex-col overflow-hidden border border-[var(--ink)]/[0.08] p-5 transition-colors duration-200 hover:border-[var(--ink)]/20">
@@ -219,12 +212,17 @@ export default function Dashboard({ userName = "Ata" }: { userName?: string }) {
     ["events"],
     "/api/events",
   );
+  const { data: perksData } = useApiQuery<{ perks: { id: number; brand: string; title: string; description: string; logoUrl: string | null }[] }>(
+    ["perks"],
+    "/api/perks",
+  );
   const courses: DashCourse[] = (coursesData?.courses ?? []).map((c) => ({
     id: c.id,
     title: c.title,
     progressPct: c.progressPct ?? 0,
   }));
   const events: DashEvent[] = (eventsData?.events ?? []).map((e) => ({ id: e.id, title: e.title }));
+  const perks = perksData?.perks ?? [];
 
   return (
     <div className="space-y-10 max-w-5xl">
@@ -271,7 +269,7 @@ export default function Dashboard({ userName = "Ata" }: { userName?: string }) {
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           <StatCard label="Kurslarım" value={courses.length} icon={BookOpen} />
           <StatCard label="Etkinlikler" value={events.length} icon={CalendarDays} />
-          <StatCard label="Ayrıcalıklar" value={mockPerks.length} icon={Gift} />
+          <StatCard label="Ayrıcalıklar" value={perks.length} icon={Gift} />
         </div>
       </FadeIn>
 
@@ -319,7 +317,7 @@ export default function Dashboard({ userName = "Ata" }: { userName?: string }) {
             </Link>
           </div>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {mockPerks.map((perk) => (
+            {perks.slice(0, 4).map((perk) => (
               <PerkCard key={perk.id} perk={perk} />
             ))}
           </div>

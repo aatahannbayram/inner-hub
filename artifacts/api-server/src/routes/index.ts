@@ -6,6 +6,7 @@ import aiRouter from "./ai";
 import authRouter from "./auth";
 import catalogRouter from "./catalog";
 import applicationsRouter from "./applications";
+import communityRouter from "./community";
 
 const router: IRouter = Router();
 
@@ -16,5 +17,6 @@ router.use("/ai", aiRouter);
 router.use("/auth", authRouter);
 router.use(catalogRouter);
 router.use(applicationsRouter);
+router.use(communityRouter);
 
 export default router;
