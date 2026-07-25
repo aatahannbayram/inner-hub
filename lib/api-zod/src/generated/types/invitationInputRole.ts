@@ -13,8 +13,10 @@ export type InvitationInputRole = typeof InvitationInputRole[keyof typeof Invita
 
 
 export const InvitationInputRole = {
-  operator: 'operator',
+  builder: 'builder',
   investor: 'investor',
   founder: 'founder',
   company: 'company',
+  /** @deprecated use builder */
+  operator: 'operator',
 } as const;

@@ -233,9 +233,9 @@ export default function ChatPage() {
               ) : (
                 <Hash className="size-4 text-[var(--ink-body)]" />
               )}
-              <span className="font-mono text-sm text-[var(--ink)]">{channel.name}</span>
-              <span className="hidden font-mono text-label text-[var(--ink-muted)] sm:block">
-                — {channel.description}
+              <span className="font-serif text-sm text-[var(--ink)]">{channel.name}</span>
+              <span className="hidden text-xs text-[var(--ink-muted)] sm:block">
+                {channel.description ? ` · ${channel.description}` : ""}
               </span>
             </div>
             <button

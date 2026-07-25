@@ -21,8 +21,19 @@ export interface InvitationInput {
   link?: string | null;
   /** @nullable */
   whoIntroduced?: string | null;
+  /** @nullable */
+  organization?: string | null;
+  /** @nullable */
+  organizationDomain?: string | null;
+  /** @nullable */
+  organizationLogo?: string | null;
   /**
      * Honeypot field — must be empty
+     * @nullable
+     */
+  fax?: string | null;
+  /**
+     * Legacy honeypot field — must be empty
      * @nullable
      */
   company?: string | null;

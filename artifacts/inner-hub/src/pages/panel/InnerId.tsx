@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Lockup } from "@/components/Lockup";
 import { useQueryClient } from "@tanstack/react-query";
 import { FadeIn } from "@/components/FadeIn";
 import { AmbientCardBackground } from "@/components/panel/AmbientCardBackground";
@@ -56,7 +57,7 @@ function handleFromUser(user: ApiUser): string {
 }
 
 function memberSince(iso?: string): string {
-  if (!iso) return "—";
+  if (!iso) return "Yok";
   return new Date(iso).toLocaleDateString("tr-TR", { month: "long", year: "numeric" });
 }
 
@@ -444,14 +445,13 @@ export default function InnerId() {
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="mb-2 font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
-              <span lang="en">inner·hub</span>
+              Portable identity
             </p>
             <h1
               className="font-serif font-display text-4xl text-[var(--ink)] md:text-5xl"
               style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
             >
-              inner·id
-              <span className="ml-[0.05em] inline-block size-[0.35em] translate-y-[0.08em] bg-[var(--inner-green)]" />
+              <Lockup suffix="id" className="text-[var(--ink)]" />
             </h1>
             <p className="mt-2 text-sm font-light text-[var(--ink-muted)]">
               Doğrulanmış kimliğin. Platform bağlarını buradan yönet.
@@ -611,7 +611,7 @@ export default function InnerId() {
 
       <div className="border-t border-[var(--ink)]/[0.08] pt-4">
         <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)]">
-          <span lang="en">inner·id</span> — taşınabilir kimlik · davet bazlı ·{" "}
+          <span lang="en">inner·id</span> · taşınabilir kimlik · davet bazlı ·{" "}
           <span lang="en">inner·hub</span> ekosistemi
         </p>
       </div>

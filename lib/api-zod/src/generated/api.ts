@@ -27,12 +27,16 @@ export const HealthCheckResponse = zod.object({
 export const SubmitRequestBody = zod.object({
   "name": zod.string().min(1),
   "email": zod.string().email(),
-  "role": zod.union([zod.literal('operator'),zod.literal('investor'),zod.literal('founder'),zod.literal('company'),zod.literal(null)]).nullish(),
+  "role": zod.union([zod.literal('builder'),zod.literal('investor'),zod.literal('founder'),zod.literal('company'),zod.literal('operator'),zod.literal(null)]).nullish(),
   "linkedin": zod.string().nullish(),
   "whoYouAre": zod.string().min(1),
   "link": zod.string().nullish(),
   "whoIntroduced": zod.string().nullish(),
-  "company": zod.string().nullish().describe('Honeypot field — must be empty')
+  "organization": zod.string().nullish(),
+  "organizationDomain": zod.string().nullish(),
+  "organizationLogo": zod.string().nullish(),
+  "fax": zod.string().nullish().describe('Honeypot field — must be empty'),
+  "company": zod.string().nullish().describe('Legacy honeypot field — must be empty')
 })
 
 export const SubmitRequestResponse = zod.object({
@@ -56,6 +60,9 @@ export const ListRequestsResponseItem = zod.object({
   "whoYouAre": zod.string(),
   "link": zod.string().nullish(),
   "whoIntroduced": zod.string().nullish(),
+  "organization": zod.string().nullish(),
+  "organizationDomain": zod.string().nullish(),
+  "organizationLogo": zod.string().nullish(),
   "ipAddress": zod.string().nullish(),
   "createdAt": zod.coerce.date()
 })

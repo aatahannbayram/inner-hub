@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Lockup } from "@/components/Lockup";
 import {
   TrendingUp,
   TrendingDown,
@@ -22,6 +23,7 @@ import { AmbientCardBackground } from "@/components/panel/AmbientCardBackground"
 import { PersonAvatar } from "@/components/panel/PersonAvatar";
 import { CourseCardSkeleton, LoadingBlock, ErrorState } from "@/components/panel/Skeletons";
 import { apiUrl } from "@/lib/api";
+import { cleanDisplayText } from "@/lib/displayText";
 
 interface Theme {
   topic: string;
@@ -57,21 +59,18 @@ const MOMENTUM_CONFIG = {
     icon: TrendingUp,
     label: "Yükselen",
     tone: "border-[var(--ink)] bg-[var(--ink)] text-[var(--bone)]",
-    row: "border-[var(--ink)]/[0.12]",
     accent: "var(--inner-green)",
   },
   orta: {
     icon: Minus,
     label: "Stabil",
     tone: "border-[var(--ink)]/15 text-[var(--ink-body)]",
-    row: "border-[var(--ink)]/[0.08]",
-    accent: "rgba(10,10,10,0.18)",
+    accent: "rgba(10,10,10,0.22)",
   },
   düşük: {
     icon: TrendingDown,
     label: "Düşen",
     tone: "border-[var(--error)]/30 text-[var(--error-ink)]",
-    row: "border-[var(--error)]/20",
     accent: "var(--error)",
   },
 } as const;
@@ -84,7 +83,10 @@ function ActivityHeatmap() {
     <div>
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <div>
-          <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
+          <p
+            className="font-display font-serif text-lg text-[var(--ink)]"
+            style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 400 }}
+          >
             Aktivite haritası
           </p>
           <p className="mt-0.5 text-xs text-[var(--ink-muted)]">
@@ -182,19 +184,129 @@ function SignalStat({
   icon: React.ComponentType<{ className?: string }>;
 }) {
   return (
-    <div className="border border-[var(--ink)]/[0.08] p-4">
-      <div className="mb-2 flex items-center justify-between">
-        <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">{label}</p>
-        <Icon className="size-3.5 text-[var(--ink-subtle)]" />
+    <div className="relative overflow-hidden border border-[var(--ink)]/[0.1] bg-[var(--bone)] p-4">
+      <span aria-hidden className="absolute inset-y-0 left-0 w-[3px] bg-[var(--ink)]/12" />
+      <div className="mb-2 flex items-center justify-between gap-2 pl-1">
+        <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--ink-muted)]">{label}</p>
+        <Icon className="size-3.5 shrink-0 text-[var(--ink-subtle)]" />
       </div>
       <p
-        className="font-serif text-2xl text-[var(--ink)]"
-        style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
+        className="pl-1 font-display font-serif text-2xl leading-none text-[var(--ink)]"
+        style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 400 }}
       >
         {value}
       </p>
-      <p className="mt-1 font-mono text-label text-[var(--ink-muted)]">{sub}</p>
+      <p className="mt-1.5 pl-1 font-mono text-[9px] tracking-wide text-[var(--ink-muted)]">{sub}</p>
     </div>
+  );
+}
+
+function ThemeCard({ theme, index }: { theme: Theme; index: number }) {
+  const cfg = MOMENTUM_CONFIG[theme.momentum];
+  const Icon = cfg.icon;
+  const rising = theme.momentum === "yüksek";
+
+  return (
+    <article
+      className={[
+        "group relative overflow-hidden border bg-[var(--bone)] p-4 transition-colors sm:p-5",
+        rising
+          ? "border-[var(--ink)]/[0.12] hover:border-[var(--ink)]/30"
+          : "border-[var(--ink)]/[0.1] hover:border-[var(--ink)]/25",
+      ].join(" ")}
+    >
+      <span
+        aria-hidden
+        className="absolute inset-y-0 left-0 w-[3px]"
+        style={{ background: cfg.accent }}
+      />
+
+      <div className="flex flex-col gap-3 pl-1 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+        <div className="min-w-0 flex-1">
+          <div className="mb-2 flex flex-wrap items-center gap-2">
+            <span className="font-mono text-[10px] tabular-nums text-[var(--ink-subtle)]">
+              {String(index + 1).padStart(2, "0")}
+            </span>
+            <span
+              className={[
+                "inline-flex items-center gap-1 border px-2 py-0.5 font-mono text-[9px] uppercase tracking-widest",
+                cfg.tone,
+              ].join(" ")}
+            >
+              <Icon className="size-2.5" />
+              {cfg.label}
+            </span>
+          </div>
+          <h3
+            className="font-display font-serif text-lg leading-snug tracking-[-0.02em] text-[var(--ink)] sm:text-xl"
+            style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1" }}
+          >
+            {cleanDisplayText(theme.topic)}
+          </h3>
+          <p className="mt-2 line-clamp-2 max-w-[54ch] text-sm leading-relaxed text-[var(--ink-body)]">
+            {theme.summary}
+          </p>
+        </div>
+
+        <Link
+          href="/panel/chat"
+          className="inline-flex min-h-10 shrink-0 items-center justify-center gap-1.5 border border-[var(--ink)]/15 px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)] transition-colors hover:border-[var(--ink)] hover:bg-[var(--ink)] hover:text-[var(--bone)] sm:self-center"
+        >
+          <MessageSquare className="size-3" />
+          Chat&apos;te takip et
+          <ArrowRight className="size-3" />
+        </Link>
+      </div>
+    </article>
+  );
+}
+
+function ConnectionCard({ conn }: { conn: Connection }) {
+  return (
+    <article className="group relative flex h-full flex-col overflow-hidden border border-[var(--ink)]/[0.1] bg-[var(--bone)] p-4 transition-colors hover:border-[var(--ink)]/28 sm:p-5">
+      <span
+        aria-hidden
+        className="absolute inset-y-0 left-0 w-[3px] bg-[var(--inner-green)]/50 transition-colors group-hover:bg-[var(--inner-green)]"
+      />
+
+      <div className="mb-3 flex items-start gap-3 pl-1">
+        <PersonAvatar
+          name={conn.name}
+          initials={conn.name
+            .split(" ")
+            .map((n) => n[0])
+            .join("")
+            .slice(0, 2)}
+          className="size-11 text-caption"
+        />
+        <div className="min-w-0 flex-1">
+          <div className="flex items-start justify-between gap-2">
+            <h3
+              className="font-display font-serif text-lg leading-tight text-[var(--ink)]"
+              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1" }}
+            >
+              {cleanDisplayText(conn.name)}
+            </h3>
+            <ScoreRing score={conn.matchScore} />
+          </div>
+          <p className="mt-0.5 font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)]">
+            Uyum %{conn.matchScore}
+          </p>
+        </div>
+      </div>
+
+      <p className="mb-4 flex-1 pl-1 text-sm leading-relaxed text-[var(--ink-body)] line-clamp-3">
+        {conn.reason}
+      </p>
+
+      <Link
+        href="/panel/match"
+        className="mt-auto inline-flex min-h-11 w-full items-center justify-center gap-1.5 bg-[var(--ink)] px-4 py-2.5 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-85"
+      >
+        Tanışma talebi
+        <ArrowRight className="size-3" />
+      </Link>
+    </article>
   );
 }
 
@@ -300,7 +412,7 @@ export default function Signal() {
         throw new Error(`Üretim başarısız: ${json.status}`);
       }
     }
-    throw new Error("Zaman aşımı — görsel henüz hazır değil");
+    throw new Error("Zaman aşımı · görsel henüz hazır değil");
   };
 
   const generateInsightImage = async (force = false) => {
@@ -401,20 +513,19 @@ export default function Signal() {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="mb-2 font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
-              <span lang="en">inner·hub</span> AI
+              AI layer
             </p>
             <h1
-              className="font-serif font-display text-4xl text-[var(--ink)] md:text-5xl"
-              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
+              className="font-display font-serif text-4xl text-[var(--ink)] md:text-5xl"
+              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 300 }}
             >
-              inner·signal
-              <span className="ml-[0.05em] inline-block size-[0.35em] translate-y-[0.08em] bg-[var(--inner-green)]" />
+              <Lockup suffix="signal" className="text-[var(--ink)]" />
             </h1>
             <p className="mt-2 max-w-[42ch] text-sm font-light text-[var(--ink-muted)]">
-              Topluluk hafızasından senin için çıkarılan sinyaller — oku, kaydet, harekete geç.
+              Topluluk hafızasından senin için çıkarılan sinyaller. Oku, kaydet, harekete geç.
             </p>
             {updatedAt && !loading && (
-              <p className="mt-2 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
+              <p className="mt-2 text-xs text-[var(--ink-muted)]">
                 Son güncelleme ·{" "}
                 {updatedAt.toLocaleString("tr-TR", {
                   day: "numeric",
@@ -429,7 +540,7 @@ export default function Signal() {
             type="button"
             onClick={fetchSignal}
             disabled={loading}
-            className="inline-flex shrink-0 items-center gap-2 border border-[var(--ink)] bg-[var(--ink)] px-4 py-2.5 font-mono text-label uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-85 disabled:opacity-35"
+            className="inline-flex min-h-11 shrink-0 items-center gap-2 border border-[var(--ink)] bg-[var(--ink)] px-4 py-2.5 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-85 disabled:opacity-35"
           >
             <RefreshCw className={`size-3 ${loading ? "animate-spin" : ""}`} />
             {loading ? "Analiz…" : "Güncelle"}
@@ -445,7 +556,7 @@ export default function Signal() {
             <SignalStat label="Bağlantı" value={String(data.connections.length)} sub="bu hafta önerilen" icon={Users} />
             <SignalStat
               label="Ort. Uyum"
-              value={avgMatchScore !== null ? String(avgMatchScore) : "—"}
+              value={avgMatchScore !== null ? String(avgMatchScore) : "·"}
               sub="eşleşme skoru"
               icon={Target}
             />
@@ -455,7 +566,7 @@ export default function Signal() {
 
       {!loading && data && (
         <FadeIn delay={0.03}>
-          <div className="flex flex-wrap gap-2 border-b border-[var(--ink)]/[0.08] pb-3">
+          <div className="-mx-1 flex gap-2 overflow-x-auto border-b border-[var(--ink)]/[0.08] px-1 pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {jumps.map((j) => (
               <button
                 key={j.id}
@@ -465,7 +576,7 @@ export default function Signal() {
                   scrollToSection(j.id);
                 }}
                 className={[
-                  "border px-3 py-1.5 font-mono text-label uppercase tracking-widest transition-colors",
+                  "shrink-0 border px-3 py-2 font-mono text-[10px] uppercase tracking-widest transition-colors min-h-10",
                   activeJump === j.id
                     ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--bone)]"
                     : "border-[var(--ink)]/15 text-[var(--ink-body)] hover:border-[var(--ink)]/35 hover:text-[var(--ink)]",
@@ -509,7 +620,7 @@ export default function Signal() {
                 <div className="relative z-10">
                   <div className="mb-4 flex flex-wrap items-center gap-2">
                     <Zap className="size-3.5 text-[var(--success-ink)]" />
-                    <span className="font-mono text-label uppercase tracking-widest text-[var(--bone)]/62">
+                    <span className="text-[10px] uppercase tracking-[0.16em] text-[var(--bone)]/62">
                       Bu haftanın içgörüsü
                     </span>
                     <span className="ml-auto size-3 bg-[var(--inner-green)]" aria-hidden />
@@ -642,48 +753,23 @@ export default function Signal() {
           {/* Themes */}
           <FadeIn delay={0.06}>
             <section id="signal-themes" className="scroll-mt-4">
-              <div className="mb-4 flex items-baseline justify-between border-t border-[var(--ink)]/[0.08] pt-3">
-                <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
-                  Haftalık temalar
-                </p>
-                <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
-                  {data.weeklyThemes.length} sinyal
+              <div className="mb-4 flex items-end justify-between gap-3 border-t border-[var(--ink)]/[0.08] pt-4">
+                <div>
+                  <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--ink)]">
+                    Haftalık temalar
+                  </p>
+                  <p className="mt-1 text-sm text-[var(--ink-muted)]">
+                    Topluluktan çıkan bu haftanın sinyalleri
+                  </p>
+                </div>
+                <span className="flex size-6 shrink-0 items-center justify-center bg-[var(--ink)] font-mono text-[10px] text-[var(--bone)]">
+                  {data.weeklyThemes.length}
                 </span>
               </div>
-              <div className="space-y-2">
-                {data.weeklyThemes.map((theme, i) => {
-                  const cfg = MOMENTUM_CONFIG[theme.momentum];
-                  const Icon = cfg.icon;
-                  return (
-                    <div
-                      key={i}
-                      className={`flex gap-4 border border-l-[3px] bg-[var(--bone)] p-4 transition-colors hover:border-[var(--ink)]/25 ${cfg.row}`}
-                      style={{ borderLeftColor: cfg.accent }}
-                    >
-                      <div className="flex w-[4.5rem] shrink-0 flex-col items-start gap-1.5">
-                        <span
-                          className={`inline-flex items-center gap-1 border px-1.5 py-0.5 font-mono text-label uppercase tracking-widest ${cfg.tone}`}
-                        >
-                          <Icon className="size-2.5" />
-                          {cfg.label}
-                        </span>
-                        <span className="font-mono text-label tabular-nums text-[var(--ink-subtle)]">
-                          0{i + 1}
-                        </span>
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="mb-1 text-sm font-medium text-[var(--ink)]">{theme.topic}</p>
-                        <p className="text-sm leading-relaxed text-[var(--ink-muted)]">{theme.summary}</p>
-                        <Link
-                          href="/panel/chat"
-                          className="mt-3 inline-flex items-center gap-1.5 font-mono text-label uppercase tracking-widest text-[var(--ink-body)] transition-colors hover:text-[var(--ink)]"
-                        >
-                          Konuyu chat’te takip et <ArrowRight className="size-2.5" />
-                        </Link>
-                      </div>
-                    </div>
-                  );
-                })}
+              <div className="space-y-2.5">
+                {data.weeklyThemes.map((theme, i) => (
+                  <ThemeCard key={`${theme.topic}-${i}`} theme={theme} index={i} />
+                ))}
               </div>
             </section>
           </FadeIn>
@@ -691,50 +777,28 @@ export default function Signal() {
           {/* Connections */}
           <FadeIn delay={0.08}>
             <section id="signal-people" className="scroll-mt-4">
-              <div className="mb-4 flex items-center justify-between gap-3 border-t border-[var(--ink)]/[0.08] pt-3">
-                <div className="flex items-center gap-2">
-                  <Users className="size-3.5 text-[var(--ink-body)]" />
-                  <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
+              <div className="mb-4 flex items-end justify-between gap-3 border-t border-[var(--ink)]/[0.08] pt-4">
+                <div>
+                  <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--ink)]">
                     Bu hafta tanış
+                  </p>
+                  <p className="mt-1 text-sm text-[var(--ink-muted)]">
+                    Uyum skoruna göre önerilen bağlantılar
                   </p>
                 </div>
                 <Link
                   href="/panel/match"
-                  className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)] transition-colors hover:text-[var(--ink)]"
+                  className="inline-flex min-h-9 shrink-0 items-center gap-1 font-mono text-[10px] uppercase tracking-widest text-[var(--ink-muted)] transition-colors hover:text-[var(--ink)]"
                 >
-                  Match →
+                  Match <ArrowRight className="size-3" />
                 </Link>
               </div>
               {data.connections.length === 0 ? (
-                <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
-                  Bu hafta bağlantı önerisi yok.
-                </p>
+                <p className="text-sm text-[var(--ink-muted)]">Bu hafta bağlantı önerisi yok.</p>
               ) : (
                 <div className="grid gap-3 sm:grid-cols-2">
                   {data.connections.map((conn, i) => (
-                    <div
-                      key={i}
-                      className="flex items-start gap-4 border border-[var(--ink)]/[0.08] p-4 transition-colors hover:border-[var(--ink)]/25"
-                    >
-                      <PersonAvatar
-                        name={conn.name}
-                        initials={conn.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
-                        className="size-10 text-caption"
-                      />
-                      <div className="min-w-0 flex-1">
-                        <div className="mb-1 flex items-start justify-between gap-2">
-                          <p className="text-sm font-medium text-[var(--ink)]">{conn.name}</p>
-                          <ScoreRing score={conn.matchScore} />
-                        </div>
-                        <p className="text-sm leading-relaxed text-[var(--ink-muted)]">{conn.reason}</p>
-                        <Link
-                          href="/panel/match"
-                          className="mt-3 inline-flex items-center gap-1.5 border border-[var(--ink)] bg-[var(--ink)] px-3 py-1.5 font-mono text-label uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-85"
-                        >
-                          Tanışma talebi <ArrowRight className="size-2.5" />
-                        </Link>
-                      </div>
-                    </div>
+                    <ConnectionCard key={`${conn.name}-${i}`} conn={conn} />
                   ))}
                 </div>
               )}
@@ -754,8 +818,10 @@ export default function Signal() {
       ) : null}
 
       <div className="border-t border-[var(--ink)]/[0.08] pt-4">
-        <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)]">
-          <span lang="en">inner·signal</span> — Claude + Higgsfield · Haftalık güncellenir · Görsel üretimi kredi kullanır
+        <p className="text-xs text-[var(--ink-subtle)]">
+          <span lang="en">inner·signal</span>
+          {" · "}
+          Claude + Higgsfield · haftalık güncellenir · görsel üretimi kredi kullanır
         </p>
       </div>
     </div>

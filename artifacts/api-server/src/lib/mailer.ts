@@ -30,10 +30,14 @@ type NewInvitationRequest = {
   whoYouAre: string;
   link?: string | null;
   whoIntroduced?: string | null;
+  organization?: string | null;
+  organizationDomain?: string | null;
+  organizationLogo?: string | null;
 };
 
 const ROLE_LABELS: Record<string, string> = {
-  operator: "Operator",
+  builder: "Builder",
+  operator: "Builder", // legacy
   investor: "Yatırımcı",
   founder: "Girişimci",
   company: "Şirket",
@@ -51,6 +55,9 @@ export async function notifyNewInvitationRequest(req: NewInvitationRequest) {
     `İsim: ${req.name}`,
     `Email: ${req.email}`,
     req.role ? `Kimlik: ${ROLE_LABELS[req.role] ?? req.role}` : null,
+    req.organization ? `Kurum: ${req.organization}` : null,
+    req.organizationDomain ? `Domain: ${req.organizationDomain}` : null,
+    req.organizationLogo ? `Logo: ${req.organizationLogo}` : null,
     req.linkedin ? `LinkedIn: ${req.linkedin}` : null,
     `Kim: ${req.whoYouAre}`,
     req.link ? `Link: ${req.link}` : null,

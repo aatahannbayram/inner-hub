@@ -94,10 +94,13 @@ function PerkCard({
         </span>
       </div>
 
-      <p className="mb-1 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
+      <p className="mb-1 text-xs text-[var(--ink-muted)]">
         <span lang="en">{perk.brand}</span> · {perk.category}
       </p>
-      <p className="mb-2 text-sm font-medium leading-snug text-[var(--ink)] group-hover:underline decoration-[var(--ink)]/20 underline-offset-4">
+      <p
+        className="mb-2 font-serif text-base leading-snug text-[var(--ink)] group-hover:underline decoration-[var(--ink)]/20 underline-offset-4"
+        style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 400 }}
+      >
         {perk.title}
       </p>
       <p className="mb-5 flex-1 text-sm leading-relaxed text-[var(--ink-muted)] line-clamp-3">
@@ -105,7 +108,7 @@ function PerkCard({
       </p>
 
       <div className="mt-auto flex items-center justify-between border-t border-[var(--ink)]/[0.08] pt-3">
-        <span className="flex items-center gap-1.5 font-mono text-label uppercase tracking-widest text-[var(--ink-body)] transition-colors group-hover:text-[var(--ink)]">
+        <span className="inline-flex items-center gap-1.5 font-mono text-label uppercase tracking-widest text-[var(--ink-body)] transition-colors group-hover:text-[var(--ink)]">
           İncele <ArrowRight className="size-3 transition-transform group-hover:translate-x-0.5" />
         </span>
         {saved ? (
@@ -449,7 +452,7 @@ export default function Perks() {
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           <PerksStat label="Toplam Fırsat" value={String(perks.length)} sub="aktif ayrıcalık" icon={Gift} />
           <PerksStat label="Öne Çıkan" value={String(featured.length)} sub="bu dönem" icon={Sparkles} />
-          <PerksStat label="Kategori" value={String(CATEGORIES.length - 1)} sub="yazılım, finans, yaşam…" icon={Layers} />
+          <PerksStat label="Kategori" value={String(CATEGORIES.length - 1)} sub="yazılım · finans · yaşam" icon={Layers} />
           <PerksStat label="Kaydettiğin" value={String(savedIds.length)} sub="favorilerinde" icon={Check} />
         </div>
       </FadeIn>

@@ -8,8 +8,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { PanelNav } from "./PanelNav";
 import { PanelPageTransition } from "./PanelPageTransition";
+import { PanelOnboarding } from "./PanelOnboarding";
 import { useApiQuery } from "@/hooks/useApiQuery";
 import { apiUrl } from "@/lib/api";
+import { Lockup } from "@/components/Lockup";
 
 // ─── Notifications ────────────────────────────────────────────────────────────
 
@@ -130,7 +132,7 @@ function NotifPanel({
               onClick={() => refetch()}
               className="w-full px-4 py-6 text-left font-mono text-label uppercase tracking-widest text-[var(--error-ink)]"
             >
-              Yüklenemedi — tekrar dene
+              Yüklenemedi · tekrar dene
             </button>
           )}
           {!isLoading && !isError && notifs.length === 0 && (
@@ -205,39 +207,15 @@ function SidebarProvider({ children }: { children: React.ReactNode }) {
 }
 
 // ─── Brand mark ───────────────────────────────────────────────────────────────
-function LogoSquare({ size, translate }: { size: string; translate: string }) {
-  return (
-    <span className={`relative inline-block ${size} ${translate} shrink-0`}>
-      <span className={`absolute inset-0 bg-[var(--inner-green)] animate-logo-ping`} />
-      <span className="relative block size-full bg-[var(--inner-green)]" />
-    </span>
-  );
-}
-
 function BrandMark({ collapsed }: { collapsed: boolean }) {
   if (collapsed) {
     return (
-      <div className="flex size-8 items-center justify-center" lang="en">
-        <span
-          className="font-serif text-lg leading-none text-[var(--ink)]"
-          style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
-        >
-          i<LogoSquare size="size-[0.38em]" translate="translate-y-[0.08em]" />
-        </span>
+      <div className="flex size-8 items-center justify-center text-[var(--ink)]">
+        <Lockup compact fontSize="18px" className="text-[var(--ink)]" />
       </div>
     );
   }
-  return (
-    <div className="flex items-baseline gap-0 leading-none" lang="en">
-      <span
-        className="font-serif text-xl text-[var(--ink)]"
-        style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300, letterSpacing: "-0.015em" }}
-      >
-        innerhub
-      </span>
-      <LogoSquare size="size-[0.42em]" translate="translate-y-[0.06em]" />
-    </div>
-  );
+  return <Lockup className="text-[var(--ink)]" fontSize="20px" />;
 }
 
 // ─── Sidebar footer ───────────────────────────────────────────────────────────
@@ -322,6 +300,7 @@ function DesktopSidebar({ user, onLogout }: { user: PanelUser; onLogout?: () => 
 
   return (
     <aside
+      data-onboarding="nav"
       className={cn(
         "relative hidden h-full shrink-0 flex-col border-r border-[var(--ink)]/[0.08] bg-[var(--bone)] transition-all duration-300 ease-expo lg:flex",
         collapsed ? "w-[60px]" : "w-[220px]",
@@ -489,6 +468,7 @@ function ShellInner({ user, children, onLogout }: PanelShellProps) {
         <header className="z-40 flex h-[60px] shrink-0 items-center justify-between border-b border-[var(--ink)]/[0.08] bg-[var(--bone)]/90 px-4 backdrop-blur-md sm:px-6">
           <button
             type="button"
+            data-onboarding="nav"
             onClick={() => setMobileOpen(true)}
             className="hit-40 relative text-[var(--ink-body)] hover:text-[var(--ink)] lg:hidden"
             aria-label="Menüyü aç"
@@ -511,6 +491,7 @@ function ShellInner({ user, children, onLogout }: PanelShellProps) {
             {/* Notifications */}
             <button
               type="button"
+              data-onboarding="notifications"
               onClick={() => setNotifOpen((o) => !o)}
               className="hit-40 relative text-[var(--ink-muted)] hover:text-[var(--ink)] transition-colors"
               aria-label="Bildirimler"
@@ -560,11 +541,14 @@ function ShellInner({ user, children, onLogout }: PanelShellProps) {
           id="panel-main"
           ref={mainRef}
           tabIndex={-1}
+          data-onboarding="main"
           className="min-h-0 min-w-0 flex-1 overflow-y-auto px-4 py-6 outline-none sm:px-6 lg:px-8 lg:py-8"
         >
           <PanelPageTransition>{children}</PanelPageTransition>
         </main>
       </div>
+
+      <PanelOnboarding userName={user.name} />
     </div>
   );
 }

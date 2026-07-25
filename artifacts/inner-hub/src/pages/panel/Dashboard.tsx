@@ -10,6 +10,7 @@ import { useScrubVideo } from "@/hooks/useScrubVideo";
 import { useTypewriter } from "@/hooks/useTypewriter";
 import type { PortraitConfig } from "@/components/panel/ProceduralPortrait";
 import { posterForVideo } from "@/lib/videoPosters";
+import { cleanDisplayText } from "@/lib/displayText";
 
 const DASHBOARD_VIDEO_SRC =
   "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260530_042513_df96a13b-6155-4f6e-8b93-c9dee66fba08.mp4";
@@ -71,52 +72,135 @@ const spotlightCards = [
   {
     title: "inner·vault",
     eyebrow: "Bilgi tabanı",
-    description: "Pitch deck’ler, araştırmalar ve notlar — yalnızca daire içinde.",
+    description: "Pitch deck’ler, araştırmalar ve notlar · yalnızca daire içinde.",
     href: "/panel/vault",
     portrait: { src: EDITORIAL_PORTRAIT, config: VAULT_CARD_PORTRAIT },
   },
 ];
 
-function StatCard({ label, value, icon: Icon }: { label: string; value: string | number; icon: React.ComponentType<{ className?: string }> }) {
+function StatCard({
+  label,
+  value,
+  icon: Icon,
+  href,
+  sub,
+}: {
+  label: string;
+  value: string | number;
+  icon: React.ComponentType<{ className?: string }>;
+  href: string;
+  sub: string;
+}) {
   return (
-    <div className="flex items-center gap-4 border border-[var(--ink)]/[0.08] p-5">
-      <div className="flex size-9 shrink-0 items-center justify-center border border-[var(--ink)]/[0.08]">
+    <Link
+      href={href}
+      className="group relative flex items-center gap-3 overflow-hidden border border-[var(--ink)]/[0.1] bg-[var(--bone)] p-4 transition-colors hover:border-[var(--ink)]/30 sm:gap-4 sm:p-5"
+    >
+      <span
+        aria-hidden
+        className="absolute inset-y-0 left-0 w-[3px] bg-[var(--ink)]/15 transition-colors group-hover:bg-[var(--inner-green)]"
+      />
+      <div className="ml-1 flex size-10 shrink-0 items-center justify-center border border-[var(--ink)]/[0.1] bg-[var(--ink)]/[0.03] transition-colors group-hover:border-[var(--ink)]/25">
         <Icon className="size-4 text-[var(--ink-muted)]" />
       </div>
-      <div>
-        <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">{label}</p>
-        <p className="text-xl font-light tabular-nums text-[var(--ink)]">{value}</p>
+      <div className="min-w-0">
+        <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--ink-muted)]">{label}</p>
+        <p
+          className="mt-0.5 font-display font-serif text-2xl tabular-nums leading-none text-[var(--ink)] sm:text-3xl"
+          style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 400 }}
+        >
+          {value}
+        </p>
+        <p className="mt-1.5 font-mono text-[9px] uppercase tracking-widest text-[var(--ink-subtle)]">{sub}</p>
       </div>
-    </div>
+    </Link>
   );
 }
 
-function PerkCard({ perk }: { perk: { id: number; brand: string; title: string; description: string; logoUrl: string | null } }) {
+function CourseRow({ course }: { course: DashCourse }) {
+  const pct = Math.max(0, Math.min(100, course.progressPct));
+  return (
+    <Link
+      href="/panel/courses"
+      className="group relative flex flex-col gap-3 overflow-hidden border border-[var(--ink)]/[0.1] bg-[var(--bone)] p-4 transition-colors hover:border-[var(--ink)]/28 sm:flex-row sm:items-center sm:gap-5 sm:p-5"
+    >
+      <span
+        aria-hidden
+        className="absolute inset-y-0 left-0 w-[3px] bg-[var(--inner-green)]/40 transition-colors group-hover:bg-[var(--inner-green)]"
+      />
+      <div className="min-w-0 flex-1 pl-1">
+        <div className="mb-2 flex items-start justify-between gap-3">
+          <h3
+            className="font-display font-serif text-base leading-snug tracking-[-0.02em] text-[var(--ink)] sm:text-lg"
+            style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1" }}
+          >
+            {cleanDisplayText(course.title)}
+          </h3>
+          <span className="shrink-0 font-mono text-xs tabular-nums text-[var(--ink)]">%{pct}</span>
+        </div>
+        <div className="h-1.5 w-full bg-[var(--ink)]/[0.08]">
+          <div
+            className="h-full bg-[var(--inner-green)] transition-all duration-700"
+            style={{ width: `${pct}%` }}
+          />
+        </div>
+        <p className="mt-2 font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)]">
+          {pct === 0 ? "Henüz başlanmadı" : pct >= 100 ? "Tamamlandı" : "Devam ediyor"}
+          <span className="mx-1.5 text-[var(--ink)]/20">·</span>
+          <span className="inline-flex items-center gap-0.5 transition-colors group-hover:text-[var(--ink)]">
+            Devam et <ArrowRight className="size-2.5" />
+          </span>
+        </p>
+      </div>
+    </Link>
+  );
+}
+
+function PerkCard({
+  perk,
+}: {
+  perk: { id: number; brand: string; title: string; description: string; logoUrl: string | null };
+}) {
   const color = avatarColor(perk.brand);
   return (
-    <div className="group relative flex flex-col overflow-hidden border border-[var(--ink)]/[0.08] p-5 transition-colors duration-200 hover:border-[var(--ink)]/20">
+    <Link
+      href="/panel/perks"
+      className="group relative flex h-full flex-col overflow-hidden border border-[var(--ink)]/[0.1] bg-[var(--bone)] p-4 transition-colors hover:border-[var(--ink)]/28 sm:p-5"
+    >
       <span
-        aria-hidden="true"
-        className="absolute inset-x-0 top-0 z-10 h-[2px] origin-left scale-x-0 bg-[var(--inner-green)] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-x-100"
+        aria-hidden
+        className="absolute inset-y-0 left-0 w-[3px] bg-[var(--ink)]/12 transition-colors group-hover:bg-[var(--inner-green)]"
       />
-      <div
-        className="mb-4 flex size-12 items-center justify-center border text-[var(--bone)]"
-        style={{ backgroundColor: color, borderColor: color }}
-      >
-        {perk.logoUrl ? (
-          <img src={perk.logoUrl} alt={perk.brand} className="size-8 object-contain" />
-        ) : (
-          <span className="font-mono text-label uppercase tracking-wide">
-            <span lang="en">{perk.brand.slice(0, 2)}</span>
-          </span>
-        )}
+      <div className="mb-3 flex items-center gap-3 pl-1">
+        <div
+          className="flex size-10 shrink-0 items-center justify-center text-[var(--bone)]"
+          style={{ backgroundColor: color }}
+        >
+          {perk.logoUrl ? (
+            <img src={perk.logoUrl} alt="" className="size-6 object-contain" />
+          ) : (
+            <span className="font-mono text-[10px] uppercase tracking-wide" lang="en">
+              {perk.brand.slice(0, 2)}
+            </span>
+          )}
+        </div>
+        <p className="truncate font-mono text-[9px] uppercase tracking-[0.14em] text-[var(--ink-muted)]">
+          {perk.brand}
+        </p>
       </div>
-      <p className="mb-1 text-sm font-medium leading-snug text-[var(--ink)]">{perk.title}</p>
-      <p className="mb-4 flex-1 text-sm leading-relaxed text-[var(--ink-muted)] line-clamp-2">{perk.description}</p>
-      <button className="flex items-center gap-1 font-mono text-label uppercase tracking-widest text-[var(--ink-body)] transition-colors hover:text-[var(--ink)]">
-        Detayları gör <ArrowRight className="size-3" />
-      </button>
-    </div>
+      <h3
+        className="mb-1.5 pl-1 font-display font-serif text-base leading-snug tracking-[-0.02em] text-[var(--ink)]"
+        style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1" }}
+      >
+        {cleanDisplayText(perk.title)}
+      </h3>
+      <p className="mb-4 flex-1 pl-1 text-sm leading-relaxed text-[var(--ink-body)] line-clamp-2">
+        {perk.description}
+      </p>
+      <span className="mt-auto inline-flex items-center gap-1 pl-1 font-mono text-[10px] uppercase tracking-widest text-[var(--ink-muted)] transition-colors group-hover:text-[var(--ink)]">
+        Detay <ArrowRight className="size-3" />
+      </span>
+    </Link>
   );
 }
 
@@ -181,7 +265,7 @@ function DashboardHero({ userName }: { userName: string }) {
             <Link
               key={item.href}
               href={item.href}
-              className="mx-[0.2em] mb-[0.4em] inline-flex items-center justify-center whitespace-nowrap rounded-full border border-black/10 bg-white px-4 py-[0.5em] font-mono text-caption uppercase tracking-widest text-black transition-colors duration-200 hover:bg-black hover:text-white sm:px-5 sm:text-[12px]"
+              className="mx-[0.2em] mb-[0.4em] inline-flex items-center justify-center whitespace-nowrap border border-black/10 bg-white px-4 py-[0.5em] font-mono text-caption uppercase tracking-widest text-black transition-colors duration-200 hover:bg-black hover:text-white sm:px-5 sm:text-[12px]"
             >
               {item.brand && <span lang="en">{item.brand}</span>}
               {item.label}
@@ -189,7 +273,7 @@ function DashboardHero({ userName }: { userName: string }) {
           ))}
           <Link
             href="/panel/profile"
-            className="mx-[0.2em] mb-[0.4em] inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full border border-white bg-transparent px-4 py-[0.5em] font-mono text-caption uppercase tracking-widest text-white transition-colors duration-200 hover:bg-white hover:text-black sm:px-5 sm:text-[12px]"
+            className="mx-[0.2em] mb-[0.4em] inline-flex items-center justify-center gap-2 whitespace-nowrap border border-white bg-transparent px-4 py-[0.5em] font-mono text-caption uppercase tracking-widest text-white transition-colors duration-200 hover:bg-white hover:text-black sm:px-5 sm:text-[12px]"
           >
             Profilini tamamla
             <ArrowRight className="size-3" />
@@ -235,7 +319,7 @@ export default function Dashboard({ userName = "Ata" }: { userName?: string }) {
               Öne çıkan
             </p>
           </div>
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-2 sm:gap-3 md:grid-cols-3">
             {spotlightCards.map((card, i) => (
               <EditorialCard key={card.href} {...card} tone="light" cta="Aç" index={i + 1} />
             ))}
@@ -253,7 +337,9 @@ export default function Dashboard({ userName = "Ata" }: { userName?: string }) {
                 Yeni Dönem
               </p>
               <p className="text-lg font-light text-[var(--bone)]">2. Kursa Kayıt Ol</p>
-              <p className="text-sm text-[var(--bone)]/50">inner·hub — 2. dönem başvuruları açık</p>
+              <p className="text-sm text-[var(--bone)]/50">
+                <span lang="en">inner·hub</span> · 2. dönem başvuruları açık
+              </p>
             </div>
             <Link
               href="/panel/applications"
@@ -266,36 +352,51 @@ export default function Dashboard({ userName = "Ata" }: { userName?: string }) {
       </FadeIn>
 
       <FadeIn delay={0.1}>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-          <StatCard label="Kurslarım" value={courses.length} icon={BookOpen} />
-          <StatCard label="Etkinlikler" value={events.length} icon={CalendarDays} />
-          <StatCard label="Ayrıcalıklar" value={perks.length} icon={Gift} />
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-3">
+          <StatCard
+            label="Kurslarım"
+            value={courses.length}
+            icon={BookOpen}
+            href="/panel/courses"
+            sub="kayıtlı"
+          />
+          <StatCard
+            label="Etkinlikler"
+            value={events.length}
+            icon={CalendarDays}
+            href="/panel/events"
+            sub="yaklaşan"
+          />
+          <StatCard
+            label="Ayrıcalıklar"
+            value={perks.length}
+            icon={Gift}
+            href="/panel/perks"
+            sub="aktif fırsat"
+          />
         </div>
       </FadeIn>
 
       {courses.length > 0 && (
         <FadeIn delay={0.12}>
           <section>
-            <div className="mb-4 flex items-baseline justify-between border-t border-[var(--ink)]/[0.08] pt-3">
-              <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">Kurslarım</p>
+            <div className="mb-4 flex items-end justify-between gap-3 border-t border-[var(--ink)]/[0.08] pt-4">
+              <div>
+                <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--ink)]">
+                  Kurslarım
+                </p>
+                <p className="mt-1 text-sm text-[var(--ink-muted)]">Kaldığın yerden devam et</p>
+              </div>
               <Link
                 href="/panel/courses"
-                className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)] transition-colors hover:text-[var(--ink)]"
+                className="inline-flex min-h-9 items-center gap-1 font-mono text-[10px] uppercase tracking-widest text-[var(--ink-muted)] transition-colors hover:text-[var(--ink)]"
               >
-                Tümü →
+                Tümü <ArrowRight className="size-3" />
               </Link>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-2.5">
               {courses.map((course) => (
-                <div key={course.id} className="flex items-center gap-4 border border-[var(--ink)]/[0.08] p-4">
-                  <div className="flex-1 space-y-1.5">
-                    <p className="text-sm font-light text-[var(--ink)]">{course.title}</p>
-                    <div className="h-px w-full bg-[var(--ink)]/10">
-                      <div className="h-full bg-[var(--ink)] transition-all duration-700" style={{ width: `${course.progressPct}%` }} />
-                    </div>
-                  </div>
-                  <span className="font-mono text-label tabular-nums text-[var(--ink-body)]">%{course.progressPct}</span>
-                </div>
+                <CourseRow key={course.id} course={course} />
               ))}
             </div>
           </section>
@@ -304,16 +405,20 @@ export default function Dashboard({ userName = "Ata" }: { userName?: string }) {
 
       <FadeIn delay={0.15}>
         <section>
-          <div className="mb-4 flex items-baseline justify-between border-t border-[var(--ink)]/[0.08] pt-3">
+          <div className="mb-4 flex items-end justify-between gap-3 border-t border-[var(--ink)]/[0.08] pt-4">
             <div>
-              <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">Ayrıcalıklar</p>
-              <p className="mt-0.5 text-xs text-[var(--ink-muted)]">Program katılımcılarına özel fırsatlar</p>
+              <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--ink)]">
+                Ayrıcalıklar
+              </p>
+              <p className="mt-1 text-sm text-[var(--ink-muted)]">
+                Program katılımcılarına özel fırsatlar
+              </p>
             </div>
             <Link
               href="/panel/perks"
-              className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)] transition-colors hover:text-[var(--ink)]"
+              className="inline-flex min-h-9 shrink-0 items-center gap-1 font-mono text-[10px] uppercase tracking-widest text-[var(--ink-muted)] transition-colors hover:text-[var(--ink)]"
             >
-              Tümü →
+              Tümü <ArrowRight className="size-3" />
             </Link>
           </div>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">

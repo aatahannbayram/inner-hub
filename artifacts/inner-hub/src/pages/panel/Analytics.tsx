@@ -2,6 +2,7 @@ import { TrendingUp, TrendingDown, Minus, Users, MessageSquare, CalendarCheck, S
 import { FadeIn } from "@/components/FadeIn";
 import { useApiQuery } from "@/hooks/useApiQuery";
 import { LoadingBlock, ErrorState, StatCardSkeleton } from "@/components/panel/Skeletons";
+import { Lockup } from "@/components/Lockup";
 
 // ─── API tipleri ────────────────────────────────────────────────────────────
 
@@ -145,7 +146,7 @@ function Section({ title, sub, children }: { title: string; sub?: string; childr
     <div className="border-t border-[var(--ink)]/[0.08] pt-6">
       <div className="mb-4">
         <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">{title}</p>
-        {sub && <p className="mt-0.5 text-xs text-[var(--ink-muted)]">{sub}</p>}
+        {sub && <p className="mt-0.5 text-xs font-light text-[var(--ink-muted)]">{sub}</p>}
       </div>
       {children}
     </div>
@@ -165,18 +166,18 @@ export default function Analytics() {
       {/* Header */}
       <FadeIn>
         <div>
-          <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)] mb-2">
-            <span lang="en">inner·hub</span> — Admin
-          </p>
+          <div className="mb-2 flex flex-wrap items-center gap-2">
+            <Lockup suffix="hub" className="text-[var(--ink)]" fontSize="1.15rem" />
+            <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">Admin</span>
+          </div>
           <h1
             className="font-serif font-display text-4xl md:text-5xl text-[var(--ink)]"
             style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
           >
             analitik
-            <span className="inline-block size-[0.35em] translate-y-[0.08em] ml-[0.05em] bg-[var(--inner-green)]" />
           </h1>
           <p className="mt-2 text-sm text-[var(--ink-muted)] font-light">
-            Topluluk büyümesi ve katılım — canlı veritabanından, gerçek zamanlı.
+            Topluluk büyümesi ve katılım · canlı veritabanından, gerçek zamanlı.
           </p>
         </div>
       </FadeIn>
@@ -248,7 +249,7 @@ export default function Analytics() {
           ) : (
             <>
               {/* Member growth chart */}
-              <Section title="Üye Büyümesi" sub="Kümülatif üye sayısı — aylık, gerçek kayıt tarihlerinden">
+              <Section title="Üye Büyümesi" sub="Kümülatif üye sayısı · aylık, gerçek kayıt tarihlerinden">
                 <div className="border border-[var(--ink)]/[0.08] p-5">
                   <div className="mb-4 flex items-baseline gap-3">
                     <span
@@ -280,7 +281,7 @@ export default function Analytics() {
               </Section>
 
               {/* Engagement */}
-              <Section title="Haftalık Katılım" sub="Aktif üye · mesaj · etkinlik kaydı — son 4 hafta">
+              <Section title="Haftalık Katılım" sub="Aktif üye · mesaj · etkinlik kaydı · son 4 hafta">
                 <div className="grid grid-cols-3 gap-3">
                   {(["activeMembers", "messages", "registrations"] as const).map((key, ki) => {
                     const labels = ["Aktif Üye", "Mesaj", "Kayıt"];
@@ -334,7 +335,7 @@ export default function Analytics() {
 
               {/* Channel activity */}
               {data.channelActivity.length > 0 && (
-                <Section title="Kanal Aktivitesi" sub="En aktif kanallar — toplam mesaj">
+                <Section title="Kanal Aktivitesi" sub="En aktif kanallar · toplam mesaj">
                   <div className="space-y-2">
                     {data.channelActivity.map((ch) => {
                       const max = data.channelActivity[0].messages || 1;

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Lockup } from "@/components/Lockup";
 import { useQueryClient } from "@tanstack/react-query";
 import { FadeIn } from "@/components/FadeIn";
 import {
@@ -13,7 +14,6 @@ import {
   Code2,
   Upload,
   ChevronRight,
-  Tag,
   Clock,
   Download,
   Paperclip,
@@ -38,6 +38,7 @@ import {
   DrawerDescription,
 } from "@/components/ui/drawer";
 import { motion } from "framer-motion";
+import { cleanDisplayText } from "@/lib/displayText";
 
 const D60_HERO_CONFIG: PortraitConfig = {
   renderMode: "contour",
@@ -135,6 +136,8 @@ function DocCard({ doc }: { doc: VaultDoc }) {
   const AccIcon = acc.icon;
   const [dlBusy, setDlBusy] = useState(false);
   const [dlError, setDlError] = useState<string | null>(null);
+  const title = cleanDisplayText(doc.title);
+  const tags = doc.tags.slice(0, 3);
 
   const onDownload = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -152,68 +155,85 @@ function DocCard({ doc }: { doc: VaultDoc }) {
   };
 
   return (
-    <div className="group border border-[var(--ink)]/[0.08] p-5 transition-all hover:border-[var(--ink)]/20">
-      <div className="mb-3 flex items-start justify-between gap-3">
-        <div className="flex items-start gap-3">
-          <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center border border-[var(--ink)]/[0.08] bg-[var(--ink)]/[0.03]">
+    <article className="group relative flex h-full flex-col overflow-hidden border border-[var(--ink)]/[0.1] bg-[var(--bone)] p-4 transition-colors hover:border-[var(--ink)]/28 sm:p-5">
+      <span aria-hidden className="absolute inset-y-0 left-0 w-[3px] bg-[var(--ink)]/15 transition-colors group-hover:bg-[var(--inner-green)]" />
+
+      <div className="mb-3 flex items-start justify-between gap-3 pl-1">
+        <div className="flex min-w-0 items-start gap-3">
+          <div className="mt-0.5 flex size-9 shrink-0 items-center justify-center border border-[var(--ink)]/[0.1] bg-[var(--ink)]/[0.03]">
             <TypeIcon className="size-3.5 text-[var(--ink-muted)]" />
           </div>
-          <div>
-            <p className="text-sm font-medium leading-snug text-[var(--ink)]">
-              {doc.title}
+          <div className="min-w-0">
+            <p className="font-mono text-[9px] uppercase tracking-[0.14em] text-[var(--ink-muted)]">
+              {doc.type === "Pitch Deck" ? <span lang="en">{doc.type}</span> : doc.type}
+              <span className="mx-1.5 text-[var(--ink)]/20">·</span>
+              {doc.author}
             </p>
-            <p className="mt-0.5 font-mono text-label text-[var(--ink-muted)]">
-              {doc.type} · {doc.author}
-            </p>
+            <h3
+              className="mt-1 font-display font-serif text-lg leading-snug tracking-[-0.02em] text-[var(--ink)]"
+              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1" }}
+            >
+              {title}
+            </h3>
           </div>
         </div>
-        <div className={`flex shrink-0 items-center gap-1 ${acc.color}`}>
+        <div className={`inline-flex shrink-0 items-center gap-1 ${acc.color}`}>
           <AccIcon className="size-3" />
-          <span className="font-mono text-label uppercase tracking-widest">{acc.label}</span>
+          <span className="font-mono text-[9px] uppercase tracking-widest">{acc.label}</span>
         </div>
       </div>
 
-      <p className="mb-3 text-sm leading-relaxed text-[var(--ink-body)] line-clamp-2">{doc.excerpt}</p>
+      {doc.excerpt ? (
+        <p className="mb-3 line-clamp-2 pl-1 text-sm leading-relaxed text-[var(--ink-body)]">{doc.excerpt}</p>
+      ) : null}
 
-      <div className="mb-3 flex flex-wrap gap-1">
-        {doc.tags.map((t) => (
-          <span key={t} className="flex items-center gap-1 border border-[var(--ink)]/[0.07] px-1.5 py-0.5 font-mono text-label text-[var(--ink-muted)]">
-            <Tag className="size-2" />{t}
+      {doc.hasFile && (
+        <div className="mb-3 ml-1 flex items-center gap-2 border border-[var(--ink)]/[0.08] bg-[var(--ink)]/[0.02] px-2.5 py-2">
+          <Paperclip className="size-3 shrink-0 text-[var(--ink-muted)]" />
+          <span className="min-w-0 truncate font-mono text-[10px] text-[var(--ink)]">
+            {doc.fileName || "dosya"}
           </span>
-        ))}
-        {doc.mine && (
-          <span className="border border-[var(--inner-green)]/25 bg-[var(--inner-green)]/5 px-1.5 py-0.5 font-mono text-label text-[var(--success-ink)]">
-            benim
-          </span>
-        )}
-        {doc.hasFile && (
-          <span className="flex items-center gap-1 border border-[var(--ink)]/10 px-1.5 py-0.5 font-mono text-label text-[var(--ink-muted)]">
-            <Paperclip className="size-2" />
-            {doc.fileName ? doc.fileName.slice(0, 28) : "dosya"}
-            {doc.sizeBytes ? ` · ${formatBytes(doc.sizeBytes)}` : ""}
-          </span>
-        )}
-      </div>
-
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-3">
-          {doc.pages && (
-            <span className="font-mono text-label text-[var(--ink-subtle)]">{doc.pages} sayfa</span>
-          )}
-          <span className="font-mono text-label text-[var(--ink-subtle)]">{doc.views} görüntülenme</span>
-          <div className="flex items-center gap-1 text-[var(--ink-subtle)]">
-            <Clock className="size-2.5" />
-            <span className="font-mono text-label">
-              {doc.updatedDays === 0 ? "bugün" : `${doc.updatedDays}g önce`}
+          {doc.sizeBytes ? (
+            <span className="shrink-0 font-mono text-[10px] text-[var(--ink-muted)]">
+              {formatBytes(doc.sizeBytes)}
             </span>
-          </div>
+          ) : null}
         </div>
+      )}
+
+      {(tags.length > 0 || doc.mine) && (
+        <div className="mb-3 flex flex-wrap gap-1 pl-1">
+          {tags.map((t) => (
+            <span
+              key={t}
+              className="border border-[var(--ink)]/10 px-1.5 py-0.5 font-mono text-[9px] text-[var(--ink-muted)]"
+            >
+              {t}
+            </span>
+          ))}
+          {doc.mine && (
+            <span className="border border-[var(--inner-green)]/30 bg-[var(--inner-green)]/10 px-1.5 py-0.5 font-mono text-[9px] text-[var(--success-ink)]">
+              benim
+            </span>
+          )}
+        </div>
+      )}
+
+      <div className="mt-auto flex items-center justify-between gap-3 border-t border-[var(--ink)]/[0.06] pt-3 pl-1">
+        <ul className="flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[10px] text-[var(--ink-muted)]">
+          {doc.pages ? <li>{doc.pages} sayfa</li> : null}
+          <li>{doc.views} görüntülenme</li>
+          <li className="inline-flex items-center gap-1">
+            <Clock className="size-2.5" aria-hidden />
+            {doc.updatedDays === 0 ? "bugün" : `${doc.updatedDays}g önce`}
+          </li>
+        </ul>
         {doc.hasFile && (
           <button
             type="button"
             onClick={(e) => void onDownload(e)}
             disabled={dlBusy}
-            className="flex items-center gap-1.5 border border-[var(--ink)]/15 px-2.5 py-1.5 font-mono text-label uppercase tracking-widest text-[var(--ink-body)] transition-colors hover:border-[var(--ink)]/35 hover:text-[var(--ink)] disabled:opacity-40"
+            className="inline-flex min-h-9 shrink-0 items-center gap-1.5 bg-[var(--ink)] px-3 py-1.5 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-85 disabled:opacity-40"
           >
             <Download className="size-3" />
             {dlBusy ? "…" : "İndir"}
@@ -221,9 +241,11 @@ function DocCard({ doc }: { doc: VaultDoc }) {
         )}
       </div>
       {dlError && (
-        <p className="mt-2 font-mono text-label text-[var(--error-ink)]" role="alert">{dlError}</p>
+        <p className="mt-2 pl-1 font-mono text-[10px] text-[var(--error-ink)]" role="alert">
+          {dlError}
+        </p>
       )}
-    </div>
+    </article>
   );
 }
 
@@ -303,7 +325,7 @@ function UploadPrompt({
             Belge Paylaş
           </DrawerTitle>
           <DrawerDescription className="text-[var(--ink-body)]">
-            Metadata + isteğe bağlı dosya (PDF, Office, görsel — en fazla 12 MB)
+            Metadata + isteğe bağlı dosya (PDF, Office, görsel · en fazla 12 MB)
           </DrawerDescription>
         </DrawerHeader>
 
@@ -433,28 +455,28 @@ export default function Vault() {
   const totalViews = docs.reduce((s, d) => s + d.views, 0);
 
   return (
-    <div className="space-y-8 max-w-4xl">
+    <div className="mx-auto max-w-5xl space-y-8">
       {/* Header */}
       <FadeIn>
-        <div className="flex items-start justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)] mb-2">
-              <span lang="en">inner·hub</span>
+            <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--ink-body)]">
+              Knowledge base
             </p>
             <h1
-              className="font-serif font-display text-4xl md:text-5xl text-[var(--ink)]"
-              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
+              className="font-display font-serif text-4xl text-[var(--ink)] md:text-5xl"
+              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 300 }}
             >
-              inner·vault
-              <span className="inline-block size-[0.35em] translate-y-[0.08em] ml-[0.05em] bg-[var(--inner-green)]" />
+              <Lockup suffix="vault" className="text-[var(--ink)]" />
             </h1>
-            <p className="mt-2 text-sm text-[var(--ink-muted)] font-light">
+            <p className="mt-2 max-w-[42ch] text-sm font-light text-[var(--ink-muted)]">
               Topluluğun özel bilgi tabanı. Paylaş, öğren, referans al.
             </p>
           </div>
           <button
+            type="button"
             onClick={() => setShowUpload(true)}
-            className="flex items-center gap-2 border border-[var(--ink)] bg-[var(--ink)] px-4 py-2.5 font-mono text-label uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-80"
+            className="inline-flex min-h-11 w-full items-center justify-center gap-2 bg-[var(--ink)] px-4 py-2.5 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-85 sm:w-auto"
           >
             <Upload className="size-3.5" />
             Paylaş
@@ -490,17 +512,19 @@ export default function Vault() {
       </FadeIn>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-3 gap-2 sm:gap-3">
         {[
           { label: "Toplam Belge", value: totalDocs },
           { label: "Paylaşımlarım", value: myDocs },
-          { label: "Toplam Görüntülenme", value: totalViews },
+          { label: "Görüntülenme", value: totalViews },
         ].map((s) => (
-          <div key={s.label} className="border border-[var(--ink)]/[0.08] p-4">
-            <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)]">{s.label}</p>
+          <div key={s.label} className="border border-[var(--ink)]/[0.1] p-3 sm:p-4">
+            <p className="font-mono text-[9px] uppercase tracking-[0.14em] text-[var(--ink-muted)] sm:text-[10px]">
+              {s.label}
+            </p>
             <p
-              className="mt-1 font-serif text-2xl text-[var(--ink)]"
-              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
+              className="mt-1 font-display font-serif text-xl text-[var(--ink)] sm:text-2xl"
+              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 400 }}
             >
               {s.value}
             </p>
@@ -547,7 +571,7 @@ export default function Vault() {
                           <p className="line-clamp-2 font-serif text-lg leading-snug text-[var(--bone)]"
                             style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 300 }}
                           >
-                            {doc.title}
+                            {cleanDisplayText(doc.title)}
                           </p>
                           <p className="mt-1 font-mono text-label uppercase tracking-widest text-[var(--bone)]/52">
                             {doc.author}
@@ -567,28 +591,28 @@ export default function Vault() {
       )}
 
       {/* Search + filter row */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <div className="relative flex-1">
+      <div className="flex flex-col gap-3">
+        <div className="relative">
           <Search className="absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-[var(--ink-subtle)]" />
           <input
-            type="text"
+            type="search"
             placeholder="Belge, etiket veya yazar ara…"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="w-full border border-[var(--ink)]/[0.08] bg-transparent py-2.5 pl-9 pr-4 font-light text-sm text-[var(--ink)] outline-none placeholder:text-[var(--ink-subtle)] focus:border-[var(--ink)]/25 transition-colors"
+            className="w-full border border-[var(--ink)]/[0.1] bg-transparent py-3 pl-9 pr-4 text-sm font-light text-[var(--ink)] outline-none transition-colors placeholder:text-[var(--ink-subtle)] focus:border-[var(--ink)]/30"
           />
         </div>
-        <div className="flex gap-1.5 flex-wrap">
+        <div className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {DOC_TYPES.map((t) => (
             <button
               key={t}
               type="button"
               onClick={() => setTypeFilter(t)}
               className={[
-                "border px-2.5 py-1 font-mono text-label uppercase tracking-widest transition-all",
+                "shrink-0 border px-3 py-1.5 font-mono text-[10px] uppercase tracking-widest transition-colors",
                 typeFilter === t
                   ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--bone)]"
-                  : "border-[var(--ink)]/10 text-[var(--ink-muted)] hover:border-[var(--ink)]/30",
+                  : "border-[var(--ink)]/12 text-[var(--ink-muted)] hover:border-[var(--ink)]/30",
               ].join(" ")}
             >
               {t}
@@ -603,7 +627,7 @@ export default function Vault() {
         ))}
       </div>
       {!isLoading && !isError && filtered.length === 0 && (
-        <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
+        <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-muted)]">
           Belge bulunamadı.
         </p>
       )}
@@ -616,18 +640,20 @@ export default function Vault() {
         }}
       />
 
-      <div className="flex flex-wrap items-center gap-5 border-t border-[var(--ink)]/[0.08] pt-4">
-        {(Object.entries(ACCESS_CONFIG) as [AccessLevel, typeof ACCESS_CONFIG[AccessLevel]][]).map(([key, cfg]) => {
-          const Icon = cfg.icon;
-          return (
-            <div key={key} className={`flex items-center gap-1.5 ${cfg.color}`}>
-              <Icon className="size-3" />
-              <span className="font-mono text-label uppercase tracking-widest">{cfg.label}</span>
-            </div>
-          );
-        })}
-        <p className="ml-auto font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)]">
-          <span lang="en">inner·vault</span> — yalnızca üyeler erişebilir
+      <div className="flex flex-wrap items-center gap-4 border-t border-[var(--ink)]/[0.08] pt-4">
+        {(Object.entries(ACCESS_CONFIG) as [AccessLevel, typeof ACCESS_CONFIG[AccessLevel]][]).map(
+          ([key, cfg]) => {
+            const Icon = cfg.icon;
+            return (
+              <div key={key} className={`flex items-center gap-1.5 ${cfg.color}`}>
+                <Icon className="size-3" />
+                <span className="font-mono text-[9px] uppercase tracking-widest">{cfg.label}</span>
+              </div>
+            );
+          },
+        )}
+        <p className="ml-auto font-mono text-[10px] uppercase tracking-widest text-[var(--ink-subtle)]">
+          <span lang="en">inner·vault</span> · yalnızca üyeler
         </p>
       </div>
     </div>

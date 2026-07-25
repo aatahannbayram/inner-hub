@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Lockup } from "@/components/Lockup";
 import { FadeIn } from "@/components/FadeIn";
 import {
   TrendingUp,
@@ -109,7 +110,7 @@ function TrendRow({ trend, rank, maxMentions }: { trend: Trend; rank: number; ma
       <span className="w-5 shrink-0 font-mono text-label text-[var(--ink-subtle)] text-right">{rank}</span>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1">
-          <p className="text-sm text-[var(--ink)] truncate">{trend.topic}</p>
+          <p className="font-serif text-sm text-[var(--ink)] truncate" style={{ fontWeight: 400 }}>{trend.topic}</p>
           <span className={`shrink-0 border px-1.5 py-0.5 font-mono text-label uppercase tracking-widest ${CAT_COLORS[trend.category]}`}>
             {trend.category}
           </span>
@@ -199,14 +200,13 @@ export default function Pulse() {
         <div className="flex items-start justify-between">
           <div>
             <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)] mb-2">
-              <span lang="en">inner·hub</span>
+              Community pulse
             </p>
             <h1
               className="font-serif font-display text-4xl md:text-5xl text-[var(--ink)]"
               style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
             >
-              inner·pulse
-              <span className="inline-block size-[0.35em] translate-y-[0.08em] ml-[0.05em] bg-[var(--inner-green)]" />
+              <Lockup suffix="pulse" className="text-[var(--ink)]" />
             </h1>
             <p className="mt-2 text-sm text-[var(--ink-muted)] font-light">
               Topluluğun anonim nabzı. Bu hafta ne konuşuluyor?
@@ -333,7 +333,7 @@ export default function Pulse() {
             <div className="space-y-6">
               {/* Weekly activity */}
               <section className="border border-[var(--ink)]/[0.08] p-4">
-                <p className="mb-4 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
+                <p className="mb-4 text-xs uppercase tracking-widest text-[var(--ink-muted)]">
                   Haftalık Aktivite
                 </p>
                 <ActivityColumns weekly={weekly} />
@@ -358,7 +358,7 @@ export default function Pulse() {
                         <span className="font-mono text-label text-[var(--ink-subtle)] w-3">{i + 1}</span>
                         <Hash className="size-3 text-[var(--ink-subtle)] shrink-0" />
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs text-[var(--ink-strong)] truncate">{ch.name}</p>
+                          <p className="font-serif text-sm text-[var(--ink-strong)] truncate" style={{ fontWeight: 400 }}>{ch.name}</p>
                           <p className="font-mono text-label text-[var(--ink-subtle)] truncate">{ch.trending}</p>
                         </div>
                         <span className="shrink-0 font-mono text-label text-[var(--ink-body)]">{ch.messages}</span>
@@ -413,7 +413,7 @@ export default function Pulse() {
       {/* Footer */}
       <div className="border-t border-[var(--ink)]/[0.08] pt-4">
         <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)]">
-          <span lang="en">inner·pulse</span> — veriler anonimleştirilmiş · gerçek zamanlı · yalnızca üyeler görür
+          <span lang="en">inner·pulse</span> · veriler anonimleştirilmiş · gerçek zamanlı · yalnızca üyeler görür
         </p>
       </div>
     </div>

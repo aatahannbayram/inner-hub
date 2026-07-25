@@ -6,6 +6,8 @@ import { PersonAvatar } from "@/components/panel/PersonAvatar";
 import { HeroVideo } from "@/components/HeroVideo";
 import { CourseCardSkeleton, LoadingBlock, ErrorState } from "@/components/panel/Skeletons";
 import { apiUrl } from "@/lib/api";
+import { cleanDisplayText } from "@/lib/displayText";
+import { Lockup } from "@/components/Lockup";
 
 interface Match {
   name: string;
@@ -42,6 +44,13 @@ function ScoreBar({ score }: { score: number }) {
     </div>
   );
 }
+
+const TYPE_ACCENT: Record<Match["matchType"], string> = {
+  "Co-founder": "var(--ink)",
+  "Mentor": "rgba(10,10,10,0.35)",
+  "Yatırımcı": "var(--inner-green)",
+  "İş birliği": "rgba(10,10,10,0.22)",
+};
 
 function MatchCard({
   match,
@@ -91,8 +100,8 @@ function MatchCard({
 
   return (
     <div
-      className="flex flex-col border border-[var(--ink)]/[0.08] p-5 transition-all duration-200 hover:border-[var(--ink)]/20"
-      style={{ animationDelay: `${index * 0.07}s` }}
+      className="relative flex flex-col border border-[var(--ink)]/[0.08] border-l-[3px] bg-[var(--bone)] p-5 transition-all duration-200 hover:border-[var(--ink)]/20"
+      style={{ animationDelay: `${index * 0.07}s`, borderLeftColor: TYPE_ACCENT[match.matchType] }}
     >
       {/* Header */}
       <div className="mb-4 flex items-start gap-4">
@@ -105,8 +114,15 @@ function MatchCard({
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
             <div>
-              <p className="text-base font-medium leading-tight text-[var(--ink)]">{match.name}</p>
-              <p className="mt-0.5 font-mono text-label text-[var(--ink-muted)]">{match.company}</p>
+              <p
+                className="font-display font-serif text-lg leading-tight text-[var(--ink)]"
+                style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 400 }}
+              >
+                {cleanDisplayText(match.name)}
+              </p>
+              <p className="mt-0.5 text-xs text-[var(--ink-muted)]">
+                {match.company ? cleanDisplayText(match.company) : "·"}
+              </p>
             </div>
             <span
               className={[
@@ -118,9 +134,7 @@ function MatchCard({
             </span>
           </div>
           <div className="mt-3">
-            <p className="mb-1 font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)]">
-              Uyumluluk
-            </p>
+            <p className="mb-1 text-xs text-[var(--ink-muted)]">Uyumluluk</p>
             <ScoreBar score={match.score} />
           </div>
         </div>
@@ -128,26 +142,27 @@ function MatchCard({
 
       {/* Why section */}
       <div className="mb-4 border-t border-[var(--ink)]/[0.06] pt-4">
-        <p className="mb-1.5 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
-          Neden uyumlu?
-        </p>
-        <p className="text-sm leading-relaxed text-[var(--ink-body)]">{match.why}</p>
+        <p className="mb-1.5 text-xs text-[var(--ink-muted)]">Neden uyumlu?</p>
+        <p className="line-clamp-3 text-sm leading-relaxed text-[var(--ink-body)]">{match.why}</p>
       </div>
 
       {/* Common ground */}
       <div className="mb-5">
-        <p className="mb-2 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
-          Ortak Zemin
-        </p>
+        <p className="mb-2 text-xs text-[var(--ink-muted)]">Ortak zemin</p>
         <div className="flex flex-wrap gap-1.5">
-          {match.commonGround.map((tag) => (
+          {match.commonGround.slice(0, 3).map((tag) => (
             <span
               key={tag}
-              className="border border-[var(--ink)]/10 px-2 py-0.5 font-mono text-label text-[var(--ink-body)]"
+              className="border border-[var(--ink)]/10 px-2 py-0.5 text-xs text-[var(--ink-body)]"
             >
               {tag}
             </span>
           ))}
+          {match.commonGround.length > 3 && (
+            <span className="px-2 py-0.5 text-xs text-[var(--ink-muted)]">
+              +{match.commonGround.length - 3}
+            </span>
+          )}
         </div>
       </div>
 
@@ -163,7 +178,7 @@ function MatchCard({
           onClick={() => void requestIntro()}
           disabled={introduced || busy}
           className={[
-            "flex w-full items-center justify-between border px-4 py-2.5 font-mono text-label uppercase tracking-widest transition-all",
+            "flex min-h-11 w-full items-center justify-between border px-4 py-2.5 font-mono text-[10px] uppercase tracking-widest transition-all",
             introduced
               ? "cursor-default border-[var(--inner-green)]/30 bg-[var(--inner-green)]/5 text-[var(--success-ink)]"
               : "border-[var(--ink)]/15 text-[var(--ink-body)] hover:border-[var(--ink)] hover:text-[var(--ink)] disabled:opacity-40",
@@ -214,9 +229,9 @@ function MatchHero() {
       <div className="relative z-10 flex h-full flex-col justify-end px-6 pb-10 md:px-12 md:pb-14">
         <div className="lg:grid lg:grid-cols-2 lg:items-end lg:gap-10">
           <div>
-            <p className="mb-3 font-mono text-label uppercase tracking-widest text-white/60 [text-shadow:0_1px_12px_rgba(0,0,0,0.6)]">
-              <span lang="en">inner·match</span>
-            </p>
+            <div className="mb-3">
+              <Lockup suffix="match" className="text-white" fontSize="clamp(1.75rem, 4vw, 2.5rem)" />
+            </div>
             <AnimatedHeading
               text={"Where trust\nfinds its people."}
               className="mb-4 font-display font-serif italic text-4xl leading-[1.1] text-white [text-shadow:0_2px_24px_rgba(0,0,0,0.55)] md:text-5xl lg:text-6xl"
@@ -224,21 +239,21 @@ function MatchHero() {
             />
             <FadeIn delay={0.8}>
               <p className="mb-6 max-w-[46ch] text-base text-white/75 [text-shadow:0_1px_12px_rgba(0,0,0,0.6)] md:text-lg">
-                Co-founder, mentor, and investor matching — curated inside the circle, guided by trust.
+                Co-founder, mentor, and investor matching · curated inside the circle, guided by trust.
               </p>
             </FadeIn>
             <FadeIn delay={1.2}>
               <div className="flex flex-wrap gap-4">
                 <button
                   onClick={() => scrollToId("match-results")}
-                  className="group inline-flex items-center gap-2 bg-white px-8 py-3 font-mono text-xs uppercase tracking-widest text-black transition-colors hover:bg-white/90"
+                  className="group inline-flex min-h-11 items-center gap-2 bg-white px-8 py-3 font-mono text-xs uppercase tracking-widest text-black transition-colors hover:bg-white/90"
                 >
                   <span lang="en">View Matches</span>
                   <ArrowRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
                 </button>
                 <button
                   onClick={() => scrollToId("match-preferences")}
-                  className="liquid-glass group inline-flex items-center gap-2 border border-white/20 px-8 py-3 font-mono text-xs uppercase tracking-widest text-white transition-colors hover:bg-white hover:text-black"
+                  className="liquid-glass group inline-flex min-h-11 items-center gap-2 border border-white/20 px-8 py-3 font-mono text-xs uppercase tracking-widest text-white transition-colors hover:bg-white hover:text-black"
                 >
                   <span lang="en">Set Preferences</span>
                   <ArrowRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
@@ -343,7 +358,7 @@ export default function Match() {
           <button
             onClick={fetchMatches}
             disabled={loading}
-            className="flex shrink-0 items-center gap-2 border border-[var(--ink)]/15 px-3 py-2 font-mono text-label uppercase tracking-widest text-[var(--ink-body)] transition-all hover:border-[var(--ink)]/40 hover:text-[var(--ink)] disabled:opacity-30"
+            className="flex min-h-11 shrink-0 items-center gap-2 border border-[var(--ink)]/15 px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)] transition-all hover:border-[var(--ink)]/40 hover:text-[var(--ink)] disabled:opacity-30"
           >
             <RefreshCw className={`size-3 ${loading ? "animate-spin" : ""}`} />
             Yenile
@@ -353,10 +368,8 @@ export default function Match() {
 
       {/* Preference filter */}
       <div id="match-preferences" className="scroll-mt-6">
-        <p className="mb-3 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
-          Arıyor olduğun
-        </p>
-        <div className="flex flex-wrap gap-2">
+        <p className="mb-3 text-xs text-[var(--ink-muted)]">Arıyor olduğun</p>
+        <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {PREF_OPTIONS.map((p) => {
             const active = preferences.includes(p);
             return (
@@ -364,7 +377,7 @@ export default function Match() {
                 key={p}
                 onClick={() => togglePref(p)}
                 className={[
-                  "border px-3 py-1.5 font-mono text-label uppercase tracking-widest transition-all",
+                  "shrink-0 border px-3 py-2 font-mono text-[10px] uppercase tracking-widest transition-all min-h-10",
                   active
                     ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--bone)]"
                     : "border-[var(--ink)]/15 text-[var(--ink-body)] hover:border-[var(--ink)]/40 hover:text-[var(--ink)]",
@@ -377,7 +390,7 @@ export default function Match() {
           {preferences.length > 0 && (
             <button
               onClick={fetchMatches}
-              className="border border-[var(--inner-green)]/30 bg-[var(--inner-green)]/5 px-3 py-1.5 font-mono text-label uppercase tracking-widest text-[var(--success-ink)] transition-all hover:bg-[var(--inner-green)]/10"
+              className="shrink-0 border border-[var(--inner-green)]/30 bg-[var(--inner-green)]/5 px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-[var(--success-ink)] transition-all hover:bg-[var(--inner-green)]/10 min-h-10"
             >
               Filtrele →
             </button>
@@ -398,13 +411,14 @@ export default function Match() {
       ) : data?.matches ? (
         <>
           <div id="match-results" className="scroll-mt-6">
-            <div className="mb-4 border-t border-[var(--ink)]/[0.08] pt-3 flex items-center justify-between">
-              <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
-                {data.matches.length} Eşleşme Bulundu
-              </p>
-              <p className="font-mono text-label text-[var(--ink-subtle)]">
-                AI güven skoru ile sıralandı
-              </p>
+            <div className="mb-4 flex flex-col gap-1 border-t border-[var(--ink)]/[0.08] pt-4 sm:flex-row sm:items-baseline sm:justify-between">
+              <h2
+                className="font-display font-serif text-xl text-[var(--ink)]"
+                style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 400 }}
+              >
+                {data.matches.length} eşleşme
+              </h2>
+              <p className="text-xs text-[var(--ink-muted)]">AI güven skoru ile sıralandı</p>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               {data.matches.map((match, i) => (
@@ -420,20 +434,38 @@ export default function Match() {
 
           {/* How it works */}
           <div className="border border-[var(--ink)]/[0.06] p-5">
-            <p className="mb-3 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
-              Nasıl Çalışır?
-            </p>
+            <h2
+              className="mb-3 font-display font-serif text-lg text-[var(--ink)]"
+              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 400 }}
+            >
+              Nasıl çalışır?
+            </h2>
             <div className="grid gap-3 sm:grid-cols-3 text-xs text-[var(--ink-body)] leading-relaxed">
               <div>
-                <span className="block font-mono text-label text-[var(--ink-body)] mb-1">01 Profil Analizi</span>
+                <span
+                  className="mb-1 block font-display font-serif text-base text-[var(--ink)]"
+                  style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 400 }}
+                >
+                  01 · Profil analizi
+                </span>
                 Üye sektörü, deneyimi ve topluluk etkileşimleri analiz edilir.
               </div>
               <div>
-                <span className="block font-mono text-label text-[var(--ink-body)] mb-1">02 Vektör Eşleşme</span>
+                <span
+                  className="mb-1 block font-display font-serif text-base text-[var(--ink)]"
+                  style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 400 }}
+                >
+                  02 · Vektör eşleşme
+                </span>
                 Claude Haiku benzerlik skoru hesaplar, ortak zemin bulur.
               </div>
               <div>
-                <span className="block font-mono text-label text-[var(--ink-body)] mb-1">03 İnsan Onayı</span>
+                <span
+                  className="mb-1 block font-display font-serif text-base text-[var(--ink)]"
+                  style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 400 }}
+                >
+                  03 · İnsan onayı
+                </span>
                 "Tanıştır" butonuna basarsan inner ekibi devreye girer.
               </div>
             </div>
@@ -442,8 +474,10 @@ export default function Match() {
       ) : null}
 
       <div className="border-t border-[var(--ink)]/[0.08] pt-4">
-        <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)]">
-          <span lang="en">inner·match</span> — claude-haiku-4-5-20251001 ile güçlendirilmiş · Haftalık güncellenir
+        <p className="text-xs text-[var(--ink-subtle)]">
+          <span lang="en">inner·match</span>
+          {" · "}
+          claude-haiku-4-5-20251001 · haftalık güncellenir
         </p>
       </div>
     </div>

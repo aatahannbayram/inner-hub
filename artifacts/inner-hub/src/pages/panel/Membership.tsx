@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Lockup } from "@/components/Lockup";
 import { Check, ArrowRight, Zap, Star, Crown } from "lucide-react";
 import { FadeIn } from "@/components/FadeIn";
 import { CurrencyValue } from "@/components/panel/CurrencyValue";
@@ -251,15 +252,13 @@ export default function Membership() {
       {/* Header */}
       <FadeIn>
         <div>
-          <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)] mb-2">
-            <span lang="en">inner·hub</span>
-          </p>
+          <div className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)] mb-2"><Lockup suffix="hub" className="text-[var(--ink)]" fontSize="1.15rem" /></div>
           <h1
             className="font-serif font-display text-4xl md:text-5xl text-[var(--ink)]"
             style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
           >
             Üyelik
-            <span className="inline-block size-[0.35em] translate-y-[0.08em] ml-[0.05em] bg-[var(--inner-green)]" />
+
           </h1>
           <p className="mt-2 text-sm text-[var(--ink-muted)] font-light">
             inner·hub'a katıl. Yıllık planını seç, toplulukla büyü.

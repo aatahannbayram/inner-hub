@@ -92,6 +92,14 @@ function spotsLeft(event: Event) {
   return event.capacity - event.registered;
 }
 
+/** Başlıktaki em dash / ay tekrarını temizle — tarih sütunu zaten ayı gösterir. */
+function displayTitle(title: string) {
+  return title
+    .replace(/\s*[—–―]\s*[A-Za-zÇĞİÖŞÜçğıöşü]+\.?\s*$/u, "")
+    .replace(/\s*[—–―]\s*/g, " · ")
+    .trim();
+}
+
 function EventCard({
   event,
   busy,
@@ -105,107 +113,133 @@ function EventCard({
 }) {
   const spots = spotsLeft(event);
   const isFull = event.capacity > 0 && spots <= 0;
+  const title = displayTitle(event.title);
+  const monthShort = new Date(event.startAt).toLocaleDateString("tr-TR", { month: "short" });
 
   return (
-    <div
+    <article
       className={[
-        "group relative flex gap-5 overflow-hidden border p-5 transition-all duration-200",
+        "group relative grid gap-4 overflow-hidden border bg-[var(--bone)] p-4 transition-colors duration-200 sm:grid-cols-[5.5rem_1fr] sm:gap-5 sm:p-5",
         event.isPast
-          ? "border-[var(--ink)]/[0.06] opacity-60"
-          : "border-[var(--ink)]/[0.08] hover:border-[var(--ink)]/20",
+          ? "border-[var(--ink)]/[0.06] opacity-55"
+          : "border-[var(--ink)]/[0.1] hover:border-[var(--ink)]/25",
       ].join(" ")}
     >
       {!event.isPast && (
         <span
-          aria-hidden="true"
-          className="absolute inset-y-0 left-0 w-[2px] origin-top scale-y-0 bg-[var(--inner-green)] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-y-100"
+          aria-hidden
+          className="absolute inset-y-0 left-0 w-[3px] bg-[var(--inner-green)]"
         />
       )}
-      {/* Date column */}
-      <div className="flex w-14 shrink-0 flex-col items-center justify-start border border-[var(--ink)]/[0.08] p-2 text-center">
-        <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
-          {formatWeekday(event.startAt)}
-        </span>
-        <span
-          className="font-serif text-3xl leading-none text-[var(--ink)]"
-          style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
-        >
-          {formatDay(event.startAt)}
-        </span>
-        <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
-          {new Date(event.startAt).toLocaleDateString("tr-TR", { month: "short" })}
-        </span>
+
+      {/* Date */}
+      <div className="flex items-center gap-3 sm:flex-col sm:items-center sm:justify-center sm:gap-0 sm:border sm:border-[var(--ink)]/[0.08] sm:px-2 sm:py-3 sm:text-center">
+        <div className="flex size-14 shrink-0 flex-col items-center justify-center border border-[var(--ink)]/[0.1] bg-[var(--ink)]/[0.03] sm:size-auto sm:border-0 sm:bg-transparent">
+          <span className="font-mono text-[9px] uppercase tracking-[0.16em] text-[var(--ink-muted)]">
+            {formatWeekday(event.startAt)}
+          </span>
+          <span
+            className="font-display font-serif text-[1.75rem] leading-none text-[var(--ink)] sm:text-3xl"
+            style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 400 }}
+          >
+            {formatDay(event.startAt)}
+          </span>
+          <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-[var(--ink-muted)]">
+            {monthShort}
+          </span>
+        </div>
+        <div className="min-w-0 sm:hidden">
+          <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-[var(--ink-muted)]">
+            {event.type === "online" ? (
+              <span lang="en">{TYPE_LABELS[event.type]}</span>
+            ) : (
+              TYPE_LABELS[event.type]
+            )}
+          </p>
+          <h3 className="font-display font-serif text-lg leading-tight text-[var(--ink)]">{title}</h3>
+        </div>
       </div>
 
-      {/* Content */}
-      <div className="flex flex-1 flex-col gap-2 min-w-0">
+      {/* Body */}
+      <div className="flex min-w-0 flex-col gap-3">
         <div className="flex items-start justify-between gap-3">
-          <div>
-            <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
-              {event.type === "online" ? <span lang="en">{TYPE_LABELS[event.type]}</span> : TYPE_LABELS[event.type]}
-            </span>
-            <h3 className="text-sm font-medium text-[var(--ink)] leading-snug">{event.title}</h3>
+          <div className="min-w-0">
+            <p className="mb-1 hidden font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--ink-muted)] sm:block">
+              {event.type === "online" ? (
+                <span lang="en">{TYPE_LABELS[event.type]}</span>
+              ) : (
+                TYPE_LABELS[event.type]
+              )}
+            </p>
+            <h3 className="hidden font-display font-serif text-xl leading-snug tracking-[-0.02em] text-[var(--ink)] sm:block md:text-[1.35rem]">
+              {title}
+            </h3>
+            {event.description ? (
+              <p className="mt-1 max-w-[52ch] text-sm leading-relaxed text-[var(--ink-body)] line-clamp-2">
+                {event.description}
+              </p>
+            ) : null}
           </div>
           {event.isRegistered && (
-            <span className="shrink-0 flex items-center gap-1 font-mono text-label uppercase tracking-widest text-[var(--success-ink)] border border-[var(--inner-green)]/30 bg-[var(--inner-green)]/10 px-2 py-0.5">
-              <CheckCircle2 className="size-2.5" /> Kayıtlısın
+            <span className="inline-flex shrink-0 items-center gap-1 border border-[var(--inner-green)]/35 bg-[var(--inner-green)]/10 px-2 py-1 font-mono text-[9px] uppercase tracking-widest text-[var(--success-ink)]">
+              <CheckCircle2 className="size-2.5" /> Kayıtlı
             </span>
           )}
         </div>
 
-        <p className="text-sm leading-relaxed text-[var(--ink-muted)] line-clamp-2">{event.description}</p>
-
-        <div className="flex flex-wrap items-center gap-3 text-[var(--ink-body)]">
-          <span className="flex items-center gap-1 font-mono text-label uppercase tracking-widest">
-            <Clock className="size-3" />
-            {formatTime(event.startAt)} – {formatTime(event.endAt)}
-          </span>
-          <span className="flex items-center gap-1 font-mono text-label uppercase tracking-widest">
-            <MapPin className="size-3" />
-            {event.location ? (
-              <span lang="en">{event.location}</span>
-            ) : (
-              "Konum yakında"
-            )}
-          </span>
-          {event.capacity > 0 && (
-            <span className="flex items-center gap-1 font-mono text-label uppercase tracking-widest">
-              <Users className="size-3" />
-              {event.registered}/{event.capacity}
-            </span>
-          )}
-        </div>
-
-        {!event.isPast && (
-          <div className="mt-1">
-            {event.capacity > 0 && isFull ? (
-              <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
-                Kontenjan dolu
+        <div className="flex flex-col gap-3 border-t border-[var(--ink)]/[0.06] pt-3 sm:flex-row sm:items-center sm:justify-between">
+          <ul className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[var(--ink-body)]">
+            <li className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.12em]">
+              <Clock className="size-3 shrink-0 text-[var(--ink-muted)]" aria-hidden />
+              <span>
+                {formatTime(event.startAt)}
+                <span className="mx-1 text-[var(--ink-muted)]">·</span>
+                {formatTime(event.endAt)}
               </span>
-            ) : event.isRegistered ? (
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() => onUnregister?.(event.id)}
-                className="flex items-center gap-1.5 font-mono text-label uppercase tracking-widest text-[var(--ink-body)] transition-colors hover:text-[var(--error-ink)] disabled:opacity-40"
-              >
-                Kaydı İptal Et
-              </button>
-            ) : (
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() => onRegister?.(event.id)}
-                className="flex items-center gap-1.5 border border-[var(--ink)] bg-[var(--ink)] px-4 py-2 font-mono text-label uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-80 disabled:opacity-40"
-              >
-                Kayıt Ol
-                <ChevronRight className="size-3" />
-              </button>
+            </li>
+            <li className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.12em]">
+              <MapPin className="size-3 shrink-0 text-[var(--ink-muted)]" aria-hidden />
+              {event.location ? <span lang="en">{event.location}</span> : "Konum yakında"}
+            </li>
+            {event.capacity > 0 && (
+              <li className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.12em]">
+                <Users className="size-3 shrink-0 text-[var(--ink-muted)]" aria-hidden />
+                {event.registered}/{event.capacity} kişi
+              </li>
             )}
-          </div>
-        )}
+          </ul>
+
+          {!event.isPast && (
+            <div className="shrink-0">
+              {event.capacity > 0 && isFull ? (
+                <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-muted)]">
+                  Kontenjan dolu
+                </span>
+              ) : event.isRegistered ? (
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => onUnregister?.(event.id)}
+                  className="min-h-10 w-full px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)] transition-colors hover:text-[var(--error-ink)] disabled:opacity-40 sm:min-h-0 sm:w-auto"
+                >
+                  Kaydı İptal Et
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => onRegister?.(event.id)}
+                  className="inline-flex min-h-11 w-full items-center justify-center gap-1.5 bg-[var(--ink)] px-5 py-2.5 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-85 disabled:opacity-40 sm:min-h-0 sm:w-auto"
+                >
+                  Kayıt Ol
+                  <ChevronRight className="size-3" />
+                </button>
+              )}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </article>
   );
 }
 
@@ -343,7 +377,7 @@ function EventsHero() {
             />
             <FadeIn delay={0.8}>
               <p className="mb-6 max-w-[46ch] text-base text-white/75 [text-shadow:0_1px_12px_rgba(0,0,0,0.6)] md:text-lg">
-                Topluluk buluşmaları, workshoplar ve networking — dairenin içinde, güvenle kurulan bağlar.
+                Topluluk buluşmaları, workshoplar ve networking. Dairenin içinde, güvenle kurulan bağlar.
               </p>
             </FadeIn>
             <FadeIn delay={1.2}>
@@ -539,15 +573,15 @@ export default function Events() {
           {/* Upcoming */}
           <FadeIn delay={0.05}>
             <section id="events-upcoming" className="scroll-mt-6">
-              <div className="mb-3 flex items-center gap-3 border-t border-[var(--ink)]/[0.08] pt-3">
-                <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
+              <div className="mb-4 flex items-center gap-3 border-t border-[var(--ink)]/[0.08] pt-4">
+                <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--ink)]">
                   Yaklaşan Etkinlikler
                 </p>
-                <span className="flex size-4 items-center justify-center bg-[var(--ink)] font-mono text-label text-[var(--bone)]">
+                <span className="flex size-5 items-center justify-center bg-[var(--ink)] font-mono text-[10px] text-[var(--bone)]">
                   {upcoming.length}
                 </span>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {upcoming.length === 0 ? (
                   <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
                     Yaklaşan etkinlik yok.
@@ -571,12 +605,12 @@ export default function Events() {
           {past.length > 0 && (
             <FadeIn delay={0.1}>
               <section>
-                <div className="mb-3 border-t border-[var(--ink)]/[0.08] pt-3">
-                  <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
+                <div className="mb-4 border-t border-[var(--ink)]/[0.08] pt-4">
+                  <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--ink-muted)]">
                     Geçmiş Etkinlikler
                   </p>
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {past.map((e) => (
                     <EventCard key={e.id} event={e} />
                   ))}

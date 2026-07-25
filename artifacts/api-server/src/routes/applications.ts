@@ -21,10 +21,13 @@ function toDbStatus(status: string): "pending" | "approved" | "rejected" | null 
   return null;
 }
 
-/** Eski DB'lerde role/linkedin yoksa ekle (idempotent). */
+/** Eski DB'lerde role/linkedin/org kolonlarını ekle (idempotent). */
 async function ensureInvitationColumns() {
   await db.execute(sql`ALTER TABLE invitation_requests ADD COLUMN IF NOT EXISTS role text`);
   await db.execute(sql`ALTER TABLE invitation_requests ADD COLUMN IF NOT EXISTS linkedin text`);
+  await db.execute(sql`ALTER TABLE invitation_requests ADD COLUMN IF NOT EXISTS organization text`);
+  await db.execute(sql`ALTER TABLE invitation_requests ADD COLUMN IF NOT EXISTS organization_domain text`);
+  await db.execute(sql`ALTER TABLE invitation_requests ADD COLUMN IF NOT EXISTS organization_logo text`);
 }
 
 /** Dev'de boş inbox olmasın diye birkaç örnek başvuru. Prod'da dokunulmaz. */
@@ -79,18 +82,31 @@ router.get("/applications", requireAdmin, async (_req, res) => {
     res.json({
       applications: requests.map((r) => {
         const review = byInvite.get(r.id);
+        const roleRaw = r.role ?? "—";
+        const roleLabel =
+          roleRaw === "operator" || roleRaw === "builder"
+            ? "Builder"
+            : roleRaw === "investor"
+              ? "Yatırımcı"
+              : roleRaw === "founder"
+                ? "Girişimci"
+                : roleRaw === "company"
+                  ? "Şirket"
+                  : roleRaw;
         return {
           id: r.id,
           name: r.name,
           email: r.email,
-          role: r.role ?? "—",
-          company: "",
+          role: roleLabel,
+          company: r.organization ?? "",
+          companyLogo: r.organizationLogo ?? "",
+          companyDomain: r.organizationDomain ?? "",
           why: r.whoYouAre,
           referrer: r.whoIntroduced,
           appliedAt: r.createdAt.toISOString().slice(0, 10),
           status: toUiStatus(review?.status ?? "pending"),
           linkedinUrl: r.linkedin ?? "",
-          tags: r.role ? [r.role] : [],
+          tags: r.role ? [roleLabel] : [],
           reviewNote: review?.reviewNote ?? null,
         };
       }),

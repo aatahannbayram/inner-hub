@@ -20,6 +20,8 @@ export type SettingsPrefs = {
   theme: "light" | "dark" | "system";
   lang: "tr" | "en";
   compactMode: boolean;
+  /** First-login panel wizard completed */
+  onboardingCompleted: boolean;
 };
 
 export const DEFAULT_SETTINGS_PREFS: SettingsPrefs = {
@@ -35,6 +37,7 @@ export const DEFAULT_SETTINGS_PREFS: SettingsPrefs = {
   theme: "light",
   lang: "tr",
   compactMode: false,
+  onboardingCompleted: false,
 };
 
 export function parseSettingsPrefs(raw: string | null | undefined): SettingsPrefs {
@@ -58,6 +61,7 @@ export function parseSettingsPrefs(raw: string | null | undefined): SettingsPref
           : "light",
       lang: parsed.lang === "en" ? "en" : "tr",
       compactMode: parsed.compactMode === true,
+      onboardingCompleted: parsed.onboardingCompleted === true,
     };
   } catch {
     return { ...DEFAULT_SETTINGS_PREFS };
@@ -93,6 +97,7 @@ function sanitizeBody(body: any): SettingsPrefs {
         : "light",
     lang: body.lang === "en" ? "en" : "tr",
     compactMode: body.compactMode === true,
+    onboardingCompleted: body.onboardingCompleted === true,
   };
 }
 

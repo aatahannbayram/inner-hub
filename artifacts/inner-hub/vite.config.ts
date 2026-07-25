@@ -32,6 +32,7 @@ export default defineConfig({
     alias: {
       "@": path.resolve(import.meta.dirname, "src"),
       "@assets": path.resolve(import.meta.dirname, "..", "..", "attached_assets"),
+      gsap: path.resolve(import.meta.dirname, "vendor/gsap"),
     },
     dedupe: ["react", "react-dom"],
   },

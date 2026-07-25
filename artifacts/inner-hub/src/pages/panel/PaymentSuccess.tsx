@@ -1,4 +1,5 @@
 import { Link } from "wouter";
+import { Lockup } from "@/components/Lockup";
 import { CheckCircle2, ArrowRight } from "lucide-react";
 import { useApiQuery } from "@/hooks/useApiQuery";
 import { PanelPageSkeleton, ErrorState } from "@/components/panel/Skeletons";
@@ -91,15 +92,13 @@ function SuccessView({
         <CheckCircle2 className="size-7 text-[var(--success-ink)]" />
       </div>
 
-      <p className="mb-3 font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
-        <span lang="en">inner·hub</span>
-      </p>
+      <div className="mb-3 font-mono text-label uppercase tracking-widest text-[var(--ink-body)]"><Lockup suffix="hub" className="text-[var(--ink)]" fontSize="1.15rem" /></div>
       <h1
         className="mb-4 font-serif font-display text-4xl text-[var(--ink)]"
         style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 300 }}
       >
         Ödeme alındı
-        <span className="ml-[0.05em] inline-block size-[0.35em] translate-y-[0.08em] bg-[var(--inner-green)]" />
+
       </h1>
       <p className="mb-8 text-sm font-light text-[var(--ink-muted)]">
         {type === "event"

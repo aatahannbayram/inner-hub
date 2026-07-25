@@ -31,7 +31,7 @@ async function ensureDemoContent() {
         isPublished: true,
       },
       {
-        title: "Networking Kahvaltısı — Ağustos",
+        title: "Networking Kahvaltısı",
         description: "Küçük grup, derin konuşmalar. Tema: B2B satış ve uluslararasılaşma.",
         location: "Online (Zoom)", // UI'da lang="en" ile uppercase; TR İ bozulmasın
         startAt: new Date("2026-08-05T09:00:00"),
@@ -47,6 +47,12 @@ async function ensureDemoContent() {
         isPublished: true,
       },
     ]);
+  } else {
+    // Mevcut demo başlıklarındaki em dash'i temizle (tarih sütunu ayı zaten gösterir)
+    await db
+      .update(eventsTable)
+      .set({ title: "Networking Kahvaltısı" })
+      .where(eq(eventsTable.title, "Networking Kahvaltısı — Ağustos"));
   }
 
   const [courseRow] = await db.select({ id: coursesTable.id }).from(coursesTable).limit(1);

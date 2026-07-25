@@ -7,6 +7,7 @@ import { HeroVideo } from "@/components/HeroVideo";
 import { useApiQuery } from "@/hooks/useApiQuery";
 import { apiUrl } from "@/lib/api";
 import { StatCardSkeleton, CourseCardSkeleton, LoadingBlock, ErrorState } from "@/components/panel/Skeletons";
+import { cleanDisplayText } from "@/lib/displayText";
 
 interface Lesson {
   id: number;
@@ -56,7 +57,7 @@ function mapApiCourse(row: RawCourse): Course {
     progressPct: row.progressPct ?? 0,
     totalLessons: 0,
     completedLessons: 0,
-    totalDuration: "—",
+    totalDuration: "",
     isEnrolled: row.isEnrolled ?? false,
     tag: "Kurs",
     modules: [],
@@ -133,11 +134,11 @@ function CourseCard({
         className="absolute inset-x-0 top-0 z-10 h-[2px] origin-left scale-x-0 bg-[var(--inner-green)] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-x-100"
       />
       {/* Card header */}
-      <div className="p-5">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1">
-              <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)] border border-[var(--ink)]/10 px-1.5 py-0.5">
+      <div className="p-4 sm:p-5">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+          <div className="min-w-0 flex-1">
+            <div className="mb-2 flex flex-wrap items-center gap-2">
+              <span className="border border-[var(--ink)]/10 px-1.5 py-0.5 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
                 {course.tag}
               </span>
               {!course.isEnrolled && (
@@ -147,18 +148,20 @@ function CourseCard({
               )}
             </div>
             <h3
-              className="font-serif text-xl text-[var(--ink)] leading-snug"
+              className="font-serif text-xl text-[var(--ink)] leading-snug sm:text-2xl"
               style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
             >
-              {course.title}
+              {cleanDisplayText(course.title)}
             </h3>
-            <p className="mt-1 text-xs text-[var(--ink-muted)] leading-relaxed line-clamp-2">
-              {course.description}
-            </p>
+            {course.description ? (
+              <p className="mt-2 text-sm leading-relaxed text-[var(--ink-muted)] line-clamp-2">
+                {course.description}
+              </p>
+            ) : null}
           </div>
 
           {/* Progress ring area */}
-          <div className="shrink-0 text-right">
+          <div className="shrink-0 sm:text-right">
             <p className="font-mono text-2xl tabular-nums text-[var(--ink)]">
               %{course.progressPct}
             </p>
@@ -179,24 +182,31 @@ function CourseCard({
         )}
 
         {/* Meta */}
-        <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
-          <div>
-            <p className="text-xs text-[var(--ink-body)]">{course.instructor}</p>
-            <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
-              {course.instructorTitle}
-            </p>
-          </div>
-          <div className="flex items-center gap-4 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
-            <span className="flex items-center gap-1">
-              <BookOpen className="size-3" />
-              {course.completedLessons}/{course.totalLessons} ders
-            </span>
-            <span>{course.totalDuration}</span>
-          </div>
+        <div className="mt-4 flex flex-wrap items-end justify-between gap-x-4 gap-y-1 text-xs text-[var(--ink-muted)]">
+          <p>
+            <span lang="en">{course.instructor}</span>
+            {course.instructorTitle ? (
+              <>
+                {" · "}
+                <span className="font-mono text-label uppercase tracking-widest">{course.instructorTitle}</span>
+              </>
+            ) : null}
+          </p>
+          {(course.totalLessons > 0 || course.totalDuration) && (
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-label uppercase tracking-widest">
+              {course.totalLessons > 0 && (
+                <span className="flex items-center gap-1">
+                  <BookOpen className="size-3" />
+                  {course.completedLessons}/{course.totalLessons} ders
+                </span>
+              )}
+              {course.totalDuration ? <span>{course.totalDuration}</span> : null}
+            </div>
+          )}
         </div>
 
         {/* Actions */}
-        <div className="mt-4 flex items-center gap-3">
+        <div className="mt-4 flex flex-wrap items-center gap-2 sm:gap-3">
           {course.isEnrolled ? (
             <button
               onClick={() => setExpanded((v) => !v)}
@@ -286,7 +296,7 @@ function CoursesHero({ hasEnrolled }: { hasEnrolled: boolean }) {
             />
             <FadeIn delay={0.8}>
               <p className="mb-6 max-w-[46ch] text-base text-white/75 [text-shadow:0_1px_12px_rgba(0,0,0,0.6)] md:text-lg">
-                inner·hub eğitim içerikleri — kendi hızında, kendi zamanında, dairenin bilgisiyle.
+                inner·hub eğitim içerikleri · kendi hızında, kendi zamanında, dairenin bilgisiyle.
               </p>
             </FadeIn>
             <FadeIn delay={1.2}>
@@ -402,9 +412,9 @@ export default function CoursesPage() {
 
       {!loading && !isError && courses.length > 0 && (
         <FadeIn delay={0.02}>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="grid grid-cols-2 gap-2 sm:gap-3 sm:grid-cols-4">
             <CoursesStat label="Kayıtlı Kurs" value={String(enrolled.length)} sub="devam ediyor" icon={GraduationCap} />
-            <CoursesStat label="Ort. İlerleme" value={avgProgress !== null ? `%${avgProgress}` : "—"} sub="kayıtlı kurslarda" icon={TrendingUp} />
+            <CoursesStat label="Ort. İlerleme" value={avgProgress !== null ? `%${avgProgress}` : "·"} sub="kayıtlı kurslarda" icon={TrendingUp} />
             <CoursesStat label="Diğer Kurslar" value={String(available.length)} sub="keşfedilmeyi bekliyor" icon={BookOpen} />
             <CoursesStat label="Toplam" value={String(courses.length)} sub="inner·hub kataloğu" icon={Play} />
           </div>

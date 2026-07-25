@@ -64,12 +64,23 @@ function canAccess(
 
 async function ensureVaultSeed(adminUserId: number) {
   const [row] = await db.select({ id: vaultDocumentsTable.id }).from(vaultDocumentsTable).limit(1);
-  if (row) return;
+  if (row) {
+    // Mevcut demo başlıklarındaki em dash temizliği
+    await db
+      .update(vaultDocumentsTable)
+      .set({ title: "Pre-seed Yatırımcı Pitch Deck" })
+      .where(eq(vaultDocumentsTable.title, "Pre-seed Yatırımcı Pitch Deck — inner·hub"));
+    await db
+      .update(vaultDocumentsTable)
+      .set({ title: "The Mom Test · Okuma Notları" })
+      .where(eq(vaultDocumentsTable.title, "The Mom Test — Okuma Notları"));
+    return;
+  }
 
   await db.insert(vaultDocumentsTable).values([
     {
       userId: adminUserId,
-      title: "Pre-seed Yatırımcı Pitch Deck — inner·hub",
+      title: "Pre-seed Yatırımcı Pitch Deck",
       docType: "Pitch Deck",
       access: "davetli",
       excerpt:
@@ -90,7 +101,7 @@ async function ensureVaultSeed(adminUserId: number) {
     },
     {
       userId: adminUserId,
-      title: "The Mom Test — Okuma Notları",
+      title: "The Mom Test · Okuma Notları",
       docType: "Not",
       access: "topluluk",
       excerpt: "Müşteri görüşmesi için actionable framework notları.",

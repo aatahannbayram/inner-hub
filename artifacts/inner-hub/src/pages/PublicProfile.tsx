@@ -124,7 +124,7 @@ export default function PublicProfilePage() {
             <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
               {message || "Profil bulunamadı"}
             </p>
-            <p className="mt-2 text-sm text-[var(--ink-body)]">@{handle || "—"}</p>
+            <p className="mt-2 text-sm text-[var(--ink-body)]">@{handle || "·"}</p>
           </div>
         )}
 

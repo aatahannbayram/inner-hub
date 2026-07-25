@@ -11,6 +11,9 @@ export const invitationRequestsTable = pgTable("invitation_requests", {
   whoYouAre: text("who_you_are").notNull(),
   link: text("link"),
   whoIntroduced: text("who_introduced"),
+  organization: text("organization"),
+  organizationDomain: text("organization_domain"),
+  organizationLogo: text("organization_logo"),
   ipAddress: text("ip_address"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });

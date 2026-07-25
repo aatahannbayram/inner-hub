@@ -16,10 +16,12 @@ export type InvitationInputRole = typeof InvitationInputRole[keyof typeof Invita
 
 
 export const InvitationInputRole = {
-  operator: 'operator',
+  builder: 'builder',
   investor: 'investor',
   founder: 'founder',
   company: 'company',
+  /** @deprecated use builder */
+  operator: 'operator',
 } as const;
 
 export interface InvitationInput {
@@ -36,8 +38,19 @@ export interface InvitationInput {
   link?: string | null;
   /** @nullable */
   whoIntroduced?: string | null;
+  /** @nullable */
+  organization?: string | null;
+  /** @nullable */
+  organizationDomain?: string | null;
+  /** @nullable */
+  organizationLogo?: string | null;
   /**
      * Honeypot field — must be empty
+     * @nullable
+     */
+  fax?: string | null;
+  /**
+     * Legacy honeypot field — must be empty
      * @nullable
      */
   company?: string | null;
@@ -61,6 +74,12 @@ export interface InvitationRecord {
   /** @nullable */
   whoIntroduced?: string | null;
   /** @nullable */
+  organization?: string | null;
+  /** @nullable */
+  organizationDomain?: string | null;
+  /** @nullable */
+  organizationLogo?: string | null;
+  /** @nullable */
   ipAddress?: string | null;
   createdAt: string;
 }
@@ -72,4 +91,3 @@ export interface ErrorResponse {
 export type ListRequestsParams = {
 passcode: string;
 };
-

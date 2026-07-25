@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Lockup } from "@/components/Lockup";
 import { FadeIn } from "@/components/FadeIn";
 import { ChevronDown } from "lucide-react";
 import { useApiQuery } from "@/hooks/useApiQuery";
@@ -45,15 +46,13 @@ export default function FAQ() {
     <div className="max-w-xl space-y-8">
       <FadeIn>
         <div>
-          <p className="mb-2 font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
-            <span lang="en">inner·hub</span>
-          </p>
+          <div className="mb-2 font-mono text-label uppercase tracking-widest text-[var(--ink-body)]"><Lockup suffix="hub" className="text-[var(--ink)]" fontSize="1.15rem" /></div>
           <h1
             className="font-serif font-display text-4xl text-[var(--ink)] md:text-5xl"
             style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
           >
             sss
-            <span className="ml-[0.05em] inline-block size-[0.35em] translate-y-[0.08em] bg-[var(--inner-green)]" />
+
           </h1>
           <p className="mt-2 text-sm font-light text-[var(--ink-muted)]">Sıkça sorulan sorular.</p>
         </div>

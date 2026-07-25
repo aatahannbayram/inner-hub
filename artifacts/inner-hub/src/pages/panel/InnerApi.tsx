@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Lockup } from "@/components/Lockup";
 import { useQueryClient } from "@tanstack/react-query";
 import { FadeIn } from "@/components/FadeIn";
 import { AsciiField } from "@/components/AsciiField";
@@ -127,7 +128,7 @@ function NewKeyReveal({ plaintext, onDone }: { plaintext: string; onDone: () => 
         Yeni anahtar oluşturuldu
       </p>
       <p className="mt-1 text-xs font-medium text-[var(--ink-muted)]">
-        Bu anahtar bir daha gösterilmeyecek — şimdi kopyala ve güvenli bir yere kaydet.
+        Bu anahtar bir daha gösterilmeyecek. Şimdi kopyala ve güvenli bir yere kaydet.
       </p>
       <div className="mt-3 flex items-center gap-2 border border-[var(--ink)]/[0.08] bg-[var(--bone)] px-3 py-2.5">
         <code className="flex-1 overflow-x-auto font-mono text-label font-medium text-[var(--ink-strong)] whitespace-nowrap">
@@ -258,14 +259,13 @@ export default function InnerApi() {
           <div className="relative z-10 flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <p className="font-mono text-label font-semibold uppercase tracking-widest text-[var(--bone)]/60 mb-2">
-                <span lang="en">inner·hub</span>
+                Platform API
               </p>
               <h1
                 className="font-serif font-display text-3xl text-[var(--bone)] sm:text-4xl md:text-5xl"
                 style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
               >
-                inner·api
-                <span className="inline-block size-[0.35em] translate-y-[0.08em] ml-[0.05em] bg-[var(--inner-green)]" />
+                <Lockup suffix="api" className="text-[var(--bone)]" />
               </h1>
               <p className="mt-2 max-w-md text-sm text-[var(--bone)]/65 font-light">
                 Topluluk altyapısına programatik erişim. Kendi ürününe entegre et.
@@ -285,7 +285,7 @@ export default function InnerApi() {
       <section>
         <div className="mb-3 border-t border-[var(--ink)]/[0.08] pt-3">
           <p className="font-mono text-label font-semibold uppercase tracking-widest text-[var(--ink-body)]">API Anahtarların</p>
-          <p className="mt-0.5 text-xs font-medium text-[var(--ink-muted)]">Anahtarları güvende tut — kimseyle paylaşma</p>
+          <p className="mt-0.5 text-xs font-medium text-[var(--ink-muted)]">Anahtarları güvende tut · kimseyle paylaşma</p>
         </div>
 
         {isLoading && <LoadingBlock label="Anahtarlar yükleniyor" />}
@@ -369,7 +369,7 @@ export default function InnerApi() {
                 <span className="ml-auto font-mono text-label font-medium text-[var(--ink-muted)] shrink-0">{ep.rate}</span>
               </div>
               <p className="font-mono text-label font-medium text-[var(--ink-strong)] truncate">{ep.path}</p>
-              <p className="font-mono text-label font-medium text-[var(--ink-muted)] truncate">{ep.desc}</p>
+              <p className="text-xs text-[var(--ink-muted)] truncate">{ep.desc}</p>
             </div>
           ))}
         </div>
@@ -455,13 +455,13 @@ export default function InnerApi() {
         <AlertCircle className="size-4 shrink-0 text-[var(--ink-muted)] mt-0.5" />
         <p className="text-sm leading-relaxed font-medium text-[var(--ink-body)]">
           inner·api beta aşamasındadır. Anahtar oluşturma ve silme canlı çalışır; kullanım/rate-limit takibi ve
-          faturalandırma henüz bağlanmadı — plan yükseltmesi için destek ekibiyle iletişime geç.
+          faturalandırma henüz bağlanmadı. Plan yükseltmesi için destek ekibiyle iletişime geç.
         </p>
       </div>
 
       <div className="border-t border-[var(--ink)]/[0.08] pt-4">
         <p className="font-mono text-label font-medium uppercase tracking-widest text-[var(--ink-subtle)]">
-          <span lang="en">inner·api</span> v1 — REST · JSON · Bearer Auth · <span lang="en">inner·hub</span> ekosistemi
+          <span lang="en">inner·api</span> v1 · REST · JSON · Bearer Auth · <span lang="en">inner·hub</span> ekosistemi
         </p>
       </div>
     </div>

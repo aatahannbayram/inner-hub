@@ -7,6 +7,7 @@ import { HeroVideo } from "@/components/HeroVideo";
 import { useApiQuery } from "@/hooks/useApiQuery";
 import { apiUrl } from "@/lib/api";
 import { LoadingBlock, ErrorState, StatCardSkeleton } from "@/components/panel/Skeletons";
+import { Lockup } from "@/components/Lockup";
 import {
   Drawer,
   DrawerContent,
@@ -20,7 +21,6 @@ import {
   DollarSign,
   ChevronRight,
   ExternalLink,
-  Circle,
   ArrowUpRight,
   Building2,
   Filter,
@@ -76,7 +76,7 @@ function parseRaiseUsd(raise: string): number | null {
 function formatTotalRaise(deals: Deal[]): string {
   const active = deals.filter((d) => d.stage !== "Kapandı");
   const amounts = active.map((d) => parseRaiseUsd(d.raise)).filter((n): n is number => n != null);
-  if (amounts.length === 0) return "—";
+  if (amounts.length === 0) return "·";
   const sum = amounts.reduce((a, b) => a + b, 0);
   if (sum >= 1_000_000) {
     const m = sum / 1_000_000;
@@ -88,102 +88,158 @@ function formatTotalRaise(deals: Deal[]): string {
 
 const STAGES: Stage[] = ["Pitch", "Due Diligence", "Term Sheet", "Kapandı"];
 
-const STAGE_CONFIG: Record<Stage, { dot: string; border: string; label: string }> = {
-  Pitch: { dot: "bg-[var(--ink)]/25", border: "border-[var(--ink)]/10", label: "Pitch" },
-  "Due Diligence": { dot: "bg-amber-400", border: "border-amber-200", label: "Due Diligence" },
-  "Term Sheet": { dot: "bg-[var(--inner-green)]", border: "border-[var(--inner-green)]/30", label: "Term Sheet" },
-  Kapandı: { dot: "bg-[var(--ink)]", border: "border-[var(--ink)]/20", label: "Kapandı" },
+const STAGE_CONFIG: Record<Stage, { dot: string; border: string; accent: string; label: string }> = {
+  Pitch: {
+    dot: "bg-[var(--ink)]/30",
+    border: "border-[var(--ink)]/12",
+    accent: "bg-[var(--ink)]/25",
+    label: "Pitch",
+  },
+  "Due Diligence": {
+    dot: "bg-amber-400",
+    border: "border-amber-300/60",
+    accent: "bg-amber-400",
+    label: "Due Diligence",
+  },
+  "Term Sheet": {
+    dot: "bg-[var(--inner-green)]",
+    border: "border-[var(--inner-green)]/35",
+    accent: "bg-[var(--inner-green)]",
+    label: "Term Sheet",
+  },
+  Kapandı: {
+    dot: "bg-[var(--ink)]",
+    border: "border-[var(--ink)]/20",
+    accent: "bg-[var(--ink)]",
+    label: "Kapandı",
+  },
 };
 
 // ─── Stat card ────────────────────────────────────────────────────────────────
 
-function StatCard({ label, value, sub, icon: Icon }: { label: string; value: string; sub: string; icon: React.ComponentType<{ className?: string }> }) {
+function StatCard({
+  label,
+  value,
+  sub,
+  icon: Icon,
+}: {
+  label: string;
+  value: string;
+  sub: string;
+  icon: React.ComponentType<{ className?: string }>;
+}) {
   return (
-    <div className="border border-[var(--ink)]/[0.08] p-5">
-      <div className="mb-3 flex items-center justify-between">
-        <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">{label}</p>
-        <Icon className="size-3.5 text-[var(--ink-subtle)]" />
+    <div className="border border-[var(--ink)]/[0.1] bg-[var(--bone)] p-4 sm:p-5">
+      <div className="mb-3 flex items-center justify-between gap-2">
+        <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--ink-muted)]">{label}</p>
+        <Icon className="size-3.5 shrink-0 text-[var(--ink-subtle)]" />
       </div>
       <p
-        className="font-serif text-3xl text-[var(--ink)]"
-        style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
+        className="font-display font-serif text-2xl leading-none text-[var(--ink)] sm:text-3xl"
+        style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 400 }}
       >
         {value}
       </p>
-      <p className="mt-1 font-mono text-label text-[var(--ink-muted)]">{sub}</p>
+      <p className="mt-2 font-mono text-[10px] tracking-wide text-[var(--ink-muted)]">{sub}</p>
     </div>
   );
 }
 
 // ─── Deal card ────────────────────────────────────────────────────────────────
 
-function DealCard({ deal, onClick }: { deal: Deal; onClick: () => void }) {
+function DealCard({
+  deal,
+  onClick,
+  showStage = false,
+}: {
+  deal: Deal;
+  onClick: () => void;
+  /** Liste görünümünde aşama rozeti göster; pipeline sütununda gereksiz. */
+  showStage?: boolean;
+}) {
   const cfg = STAGE_CONFIG[deal.stage];
+  const visibleTags = deal.tags.slice(0, 2);
+
   return (
-    <div
+    <button
+      type="button"
       onClick={onClick}
-      className="cursor-pointer border border-[var(--ink)]/[0.08] bg-[var(--bone)] p-4 transition-all hover:border-[var(--ink)]/25 hover:shadow-sm"
+      className="group relative w-full overflow-hidden border border-[var(--ink)]/[0.1] bg-[var(--bone)] p-4 text-left transition-colors hover:border-[var(--ink)]/30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ink)]"
     >
-      {/* Header */}
-      <div className="mb-3 flex items-start justify-between gap-2">
-        <div>
-          <p className="text-sm font-medium text-[var(--ink)]">{deal.company}</p>
-          <p className="mt-0.5 text-caption leading-snug text-[var(--ink-body)]">{deal.tagline}</p>
+      <span aria-hidden className={`absolute inset-y-0 left-0 w-[3px] ${cfg.accent}`} />
+
+      <div className="mb-3 flex items-start justify-between gap-3 pl-1">
+        <div className="min-w-0">
+          <p className="font-mono text-[9px] uppercase tracking-[0.14em] text-[var(--ink-muted)]">
+            {deal.sector}
+            <span className="mx-1.5 text-[var(--ink)]/20">·</span>
+            {deal.round}
+          </p>
+          <h3
+            className="mt-1 font-display font-serif text-lg leading-tight tracking-[-0.02em] text-[var(--ink)]"
+            style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1" }}
+          >
+            {deal.company}
+          </h3>
+          {deal.tagline ? (
+            <p className="mt-1 line-clamp-2 text-sm leading-snug text-[var(--ink-body)]">{deal.tagline}</p>
+          ) : null}
         </div>
-        <div className={`mt-0.5 flex shrink-0 items-center gap-1.5 border px-2 py-0.5 ${cfg.border}`}>
-          <span className={`size-1.5 rounded-full ${cfg.dot}`} />
-          <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
-            {cfg.label}
+        {showStage ? (
+          <span className={`mt-0.5 inline-flex shrink-0 items-center gap-1.5 border px-2 py-0.5 ${cfg.border}`}>
+            <span className={`size-1.5 ${cfg.dot}`} />
+            <span className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)]">
+              {cfg.label}
+            </span>
           </span>
+        ) : (
+          <span className="shrink-0 font-mono text-[9px] uppercase tracking-widest text-[var(--ink-subtle)]">
+            {deal.updatedDays === 0 ? "bugün" : `${deal.updatedDays}g`}
+          </span>
+        )}
+      </div>
+
+      <div className="mb-3 grid grid-cols-2 gap-px border border-[var(--ink)]/[0.08] bg-[var(--ink)]/[0.08] pl-1 sm:grid-cols-3">
+        <div className="bg-[var(--bone)] px-2.5 py-2">
+          <p className="font-mono text-[8px] uppercase tracking-[0.14em] text-[var(--ink-muted)]">Hedef</p>
+          <p className="mt-0.5 truncate font-mono text-xs font-medium text-[var(--ink)]">{deal.raise || "·"}</p>
+        </div>
+        <div className="bg-[var(--bone)] px-2.5 py-2">
+          <p className="font-mono text-[8px] uppercase tracking-[0.14em] text-[var(--ink-muted)]">Değerleme</p>
+          <p className="mt-0.5 truncate font-mono text-xs font-medium text-[var(--ink)]">{deal.valuation || "·"}</p>
+        </div>
+        <div className="col-span-2 bg-[var(--bone)] px-2.5 py-2 sm:col-span-1">
+          <p className="font-mono text-[8px] uppercase tracking-[0.14em] text-[var(--ink-muted)]">Skor</p>
+          <div className="mt-1.5 flex items-center gap-2">
+            <div className="h-1 flex-1 bg-[var(--ink)]/[0.08]">
+              <div className="h-full bg-[var(--inner-green)]" style={{ width: `${deal.score}%` }} />
+            </div>
+            <span className="font-mono text-xs text-[var(--ink)]">{deal.score}</span>
+          </div>
         </div>
       </div>
 
-      {/* Metrics row */}
-      <div className="mb-3 flex items-center gap-2 min-w-0">
-        <div className="min-w-0">
-          <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)]">Hedef</p>
-          <p className="truncate font-mono text-caption text-[var(--ink)]">{deal.raise}</p>
-        </div>
-        <div className="h-8 w-px shrink-0 bg-[var(--ink)]/[0.06]" />
-        <div className="min-w-0">
-          <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)]">Değerleme</p>
-          <p className="truncate font-mono text-caption text-[var(--ink)]">{deal.valuation}</p>
-        </div>
-        <div className="h-8 w-px shrink-0 bg-[var(--ink)]/[0.06]" />
-        <div className="min-w-0">
-          <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)]">Tur</p>
-          <p className="truncate font-mono text-caption text-[var(--ink)]">{deal.round}</p>
-        </div>
-      </div>
-
-      {/* Score row */}
-      <div className="mb-3 flex items-center gap-2">
-        <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)] shrink-0">Skor</span>
-        <div className="h-1 flex-1 bg-[var(--ink)]/[0.06]">
-          <div className="h-full bg-[var(--inner-green)]" style={{ width: `${deal.score}%` }} />
-        </div>
-        <span className="font-mono text-label text-[var(--ink-body)] shrink-0">{deal.score}</span>
-      </div>
-
-      {/* Tags + meta */}
-      <div className="flex items-center justify-between">
-        <div className="flex flex-wrap gap-1">
-          {deal.tags.map((t) => (
-            <span key={t} className="border border-[var(--ink)]/8 px-1.5 py-0.5 font-mono text-label text-[var(--ink-muted)]">
+      <div className="flex items-center justify-between gap-2 pl-1">
+        <div className="flex min-w-0 flex-wrap gap-1">
+          {visibleTags.map((t) => (
+            <span
+              key={t}
+              className="border border-[var(--ink)]/10 px-1.5 py-0.5 font-mono text-[9px] text-[var(--ink-muted)]"
+            >
               {t}
             </span>
           ))}
           {deal.spv && (
-            <span className="border border-[var(--inner-green)]/30 bg-[var(--inner-green)]/5 px-1.5 py-0.5 font-mono text-label text-[var(--success-ink)]">
+            <span className="border border-[var(--inner-green)]/35 bg-[var(--inner-green)]/10 px-1.5 py-0.5 font-mono text-[9px] text-[var(--success-ink)]">
               SPV
             </span>
           )}
         </div>
-        <span className="font-mono text-label text-[var(--ink-subtle)]">
-          {deal.updatedDays === 0 ? "bugün" : `${deal.updatedDays}g önce`}
+        <span className="inline-flex shrink-0 items-center gap-0.5 font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)] opacity-0 transition-opacity group-hover:opacity-100">
+          Detay <ChevronRight className="size-3" />
         </span>
       </div>
-    </div>
+    </button>
   );
 }
 
@@ -418,33 +474,48 @@ function DealDetail({
 
 function SpvCard({ spv }: { spv: SPV }) {
   return (
-    <div className="border border-[var(--ink)]/[0.08] p-5">
-      <div className="mb-3 flex items-start justify-between">
-        <div>
-          <p className="text-sm font-medium text-[var(--ink)]">{spv.name}</p>
-          <p className="mt-0.5 font-mono text-label text-[var(--ink-muted)]">{spv.sector} · {spv.participants} katılımcı · Kapanış: {spv.closing}</p>
+    <div className="border border-[var(--ink)]/[0.1] bg-[var(--bone)] p-5">
+      <div className="mb-4 flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <h3
+            className="font-display font-serif text-lg text-[var(--ink)]"
+            style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1" }}
+          >
+            {spv.name}
+          </h3>
+          <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.12em] text-[var(--ink-muted)]">
+            {spv.sector}
+            <span className="mx-1.5 text-[var(--ink)]/20">·</span>
+            {spv.participants} katılımcı
+            <span className="mx-1.5 text-[var(--ink)]/20">·</span>
+            Kapanış {spv.closing}
+          </p>
         </div>
       </div>
-      <div className="mb-3">
-        <div className="mb-1 flex justify-between">
-          <span className="font-mono text-label text-[var(--ink-muted)]">
-            {spv.raised} / {spv.target}
+      <div className="mb-4">
+        <div className="mb-1.5 flex justify-between gap-3">
+          <span className="font-mono text-xs text-[var(--ink)]">
+            {spv.raised}
+            <span className="text-[var(--ink-muted)]"> / {spv.target}</span>
           </span>
-          <span className="font-mono text-label text-[var(--ink-muted)]">%{spv.pct}</span>
+          <span className="font-mono text-xs text-[var(--ink-muted)]">%{spv.pct}</span>
         </div>
-        <div className="h-1 bg-[var(--ink)]/[0.06]">
+        <div className="h-1.5 bg-[var(--ink)]/[0.08]">
           <div
             className="h-full transition-all"
             style={{
               width: `${spv.pct}%`,
               background: spv.pct >= 80 ? "var(--inner-green)" : "var(--ink)",
-              opacity: spv.pct >= 80 ? 1 : 0.5,
+              opacity: spv.pct >= 80 ? 1 : 0.55,
             }}
           />
         </div>
       </div>
-      <button className="flex items-center gap-1.5 font-mono text-label uppercase tracking-widest text-[var(--ink-body)] hover:text-[var(--ink)] transition-colors">
-        SPV'ye Katıl <ExternalLink className="size-2.5" />
+      <button
+        type="button"
+        className="inline-flex min-h-10 items-center gap-1.5 bg-[var(--ink)] px-4 py-2 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-85"
+      >
+        SPV&apos;ye Katıl <ExternalLink className="size-3" />
       </button>
     </div>
   );
@@ -470,9 +541,9 @@ function CapitalHero() {
       <div className="relative z-10 flex h-full flex-col justify-end px-6 pb-10 md:px-12 md:pb-14">
         <div className="lg:grid lg:grid-cols-2 lg:items-end lg:gap-10">
           <div>
-            <p className="mb-3 font-mono text-label uppercase tracking-widest text-white/60 [text-shadow:0_1px_12px_rgba(0,0,0,0.6)]">
-              <span lang="en">inner·capital</span>
-            </p>
+            <div className="mb-3">
+              <Lockup suffix="capital" className="text-white" fontSize="clamp(1.75rem, 4vw, 2.5rem)" />
+            </div>
             <AnimatedHeading
               text={"Where conviction\nmeets capital."}
               className="mb-4 font-display font-serif italic text-4xl leading-[1.1] text-white [text-shadow:0_2px_24px_rgba(0,0,0,0.55)] md:text-5xl lg:text-6xl"
@@ -480,7 +551,7 @@ function CapitalHero() {
             />
             <FadeIn delay={0.8}>
               <p className="mb-6 max-w-[46ch] text-base text-white/75 [text-shadow:0_1px_12px_rgba(0,0,0,0.6)] md:text-lg">
-                Private deal flow, SPVs, and co-investment — curated inside the circle, invited by trust.
+                Private deal flow, SPVs, and co-investment. Curated inside the circle, invited by trust.
               </p>
             </FadeIn>
             <FadeIn delay={1.2}>
@@ -735,7 +806,7 @@ export default function Capital() {
   };
 
   return (
-    <div className="space-y-8 max-w-5xl">
+    <div className="mx-auto max-w-7xl space-y-8">
       {/* Hero */}
       <CapitalHero />
 
@@ -757,17 +828,17 @@ export default function Capital() {
 
       {/* View toggle */}
       <FadeIn>
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           {isAdmin ? (
             <button
               type="button"
               onClick={() => setComposeOpen(true)}
-              className="flex items-center gap-1.5 border border-[var(--ink)] bg-[var(--ink)] px-4 py-2 font-mono text-label uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-80"
+              className="inline-flex min-h-10 items-center gap-1.5 bg-[var(--ink)] px-4 py-2 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-85"
             >
               <Plus className="size-3.5" /> Deal Ekle
             </button>
           ) : (
-            <span />
+            <p className="text-sm text-[var(--ink-muted)]">Kapalı deal flow · yalnızca daire üyeleri</p>
           )}
           <div className="flex border border-[var(--ink)]/15">
             {(["pipeline", "liste"] as const).map((v) => (
@@ -776,7 +847,7 @@ export default function Capital() {
                 type="button"
                 onClick={() => setView(v)}
                 className={[
-                  "px-4 py-2 font-mono text-label uppercase tracking-widest transition-colors",
+                  "min-h-10 px-4 py-2 font-mono text-[10px] uppercase tracking-widest transition-colors",
                   view === v
                     ? "bg-[var(--ink)] text-[var(--bone)]"
                     : "text-[var(--ink-body)] hover:text-[var(--ink)]",
@@ -790,7 +861,7 @@ export default function Capital() {
       </FadeIn>
 
       {/* Stats row */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4">
         <StatCard label="Aktif Deal" value={String(activeDeals)} sub="pipeline'da" icon={TrendingUp} />
         <StatCard label="Toplam Hedef" value={totalRaise} sub="aktif turlar" icon={DollarSign} />
         <StatCard label="Kapanan" value={String(closedDeals)} sub="inner portföyü" icon={Building2} />
@@ -798,17 +869,18 @@ export default function Capital() {
       </div>
 
       {/* Sector filter */}
-      <div className="flex items-center gap-2 flex-wrap">
-        <Filter className="size-3 text-[var(--ink-subtle)] shrink-0" />
+      <div className="-mx-1 flex items-center gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <Filter className="size-3.5 shrink-0 text-[var(--ink-subtle)]" aria-hidden />
         {sectors.map((s) => (
           <button
             key={s}
+            type="button"
             onClick={() => setSectorFilter(s)}
             className={[
-              "border px-2.5 py-1 font-mono text-label uppercase tracking-widest transition-all",
+              "shrink-0 border px-3 py-1.5 font-mono text-[10px] uppercase tracking-widest transition-colors",
               sectorFilter === s
                 ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--bone)]"
-                : "border-[var(--ink)]/10 text-[var(--ink-muted)] hover:border-[var(--ink)]/30 hover:text-[var(--ink)]",
+                : "border-[var(--ink)]/12 text-[var(--ink-muted)] hover:border-[var(--ink)]/30 hover:text-[var(--ink)]",
             ].join(" ")}
           >
             {s}
@@ -818,88 +890,111 @@ export default function Capital() {
 
       {/* Pipeline view */}
       <div id="deal-pipeline" className="scroll-mt-6">
-      {view === "pipeline" ? (
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {STAGES.map((stage) => {
-            const stageDeals = filtered.filter((d) => d.stage === stage);
-            const cfg = STAGE_CONFIG[stage];
-            return (
-              <div key={stage}>
-                <div className={`mb-3 flex items-center justify-between border-b pb-2 ${cfg.border}`}>
-                  <div className="flex items-center gap-2">
-                    <span className={`size-1.5 rounded-full ${cfg.dot}`} />
-                    <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
-                      {stage}
+        {view === "pipeline" ? (
+          <div className="-mx-4 flex gap-4 overflow-x-auto px-4 pb-2 snap-x snap-mandatory sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 sm:pb-0 sm:snap-none lg:grid-cols-4">
+            {STAGES.map((stage) => {
+              const stageDeals = filtered.filter((d) => d.stage === stage);
+              const cfg = STAGE_CONFIG[stage];
+              return (
+                <div
+                  key={stage}
+                  className="w-[min(78vw,280px)] shrink-0 snap-start sm:w-auto"
+                >
+                  <div className={`mb-3 flex items-center justify-between border-b pb-2.5 ${cfg.border}`}>
+                    <div className="flex items-center gap-2">
+                      <span className={`size-2 ${cfg.dot}`} />
+                      <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--ink)]">
+                        {stage}
+                      </span>
+                    </div>
+                    <span className="flex size-5 items-center justify-center bg-[var(--ink)] font-mono text-[10px] text-[var(--bone)]">
+                      {stageDeals.length}
                     </span>
                   </div>
-                  <span className="font-mono text-label text-[var(--ink-subtle)]">{stageDeals.length}</span>
+                  <div className="space-y-2.5">
+                    {stageDeals.length === 0 ? (
+                      <div className="border border-dashed border-[var(--ink)]/[0.1] px-4 py-8 text-center">
+                        <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-subtle)]">
+                          Boş
+                        </p>
+                      </div>
+                    ) : (
+                      stageDeals.map((deal) => (
+                        <DealCard key={deal.id} deal={deal} onClick={() => setSelectedDeal(deal)} />
+                      ))
+                    )}
+                  </div>
                 </div>
-                <div className="space-y-3">
-                  {stageDeals.length === 0 ? (
-                    <div className="border border-dashed border-[var(--ink)]/[0.06] p-4 text-center">
-                      <p className="font-mono text-label text-[var(--ink-subtle)]">boş</p>
-                    </div>
-                  ) : (
-                    stageDeals.map((deal) => (
-                      <DealCard key={deal.id} deal={deal} onClick={() => setSelectedDeal(deal)} />
-                    ))
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      ) : (
-        /* Liste view */
-        <div className="space-y-2">
-          <div className="grid grid-cols-[1fr_auto_auto_auto_auto] items-center gap-4 border-b border-[var(--ink)]/[0.08] pb-2">
-            {["Şirket", "Sektör", "Hedef", "Değerleme", "Aşama"].map((h) => (
-              <span key={h} className="font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)]">{h}</span>
-            ))}
+              );
+            })}
           </div>
-          {filtered.map((deal) => {
-            const cfg = STAGE_CONFIG[deal.stage];
-            return (
-              <div
-                key={deal.id}
-                onClick={() => setSelectedDeal(deal)}
-                className="grid cursor-pointer grid-cols-[1fr_auto_auto_auto_auto] items-center gap-4 border-b border-[var(--ink)]/[0.04] py-3 transition-colors hover:bg-[var(--ink)]/[0.02]"
-              >
-                <div>
-                  <p className="text-sm text-[var(--ink)]">{deal.company}</p>
-                  <p className="font-mono text-label text-[var(--ink-muted)]">{deal.round}</p>
-                </div>
-                <span className="font-mono text-label text-[var(--ink-body)]">{deal.sector}</span>
-                <span className="font-mono text-label text-[var(--ink)]">{deal.raise}</span>
-                <span className="font-mono text-label text-[var(--ink-muted)]">{deal.valuation}</span>
-                <div className={`flex items-center gap-1.5 border px-2 py-0.5 ${cfg.border}`}>
-                  <span className={`size-1.5 rounded-full ${cfg.dot}`} />
-                  <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">{cfg.label}</span>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
+        ) : (
+          /* Liste view */
+          <div className="space-y-2">
+            <div className="hidden items-center gap-4 border-b border-[var(--ink)]/[0.1] pb-2 md:grid md:grid-cols-[1.4fr_0.8fr_0.6fr_0.6fr_auto]">
+              {["Şirket", "Sektör", "Hedef", "Değerleme", "Aşama"].map((h) => (
+                <span
+                  key={h}
+                  className="font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--ink-muted)]"
+                >
+                  {h}
+                </span>
+              ))}
+            </div>
+            {filtered.map((deal) => {
+              const cfg = STAGE_CONFIG[deal.stage];
+              return (
+                <button
+                  key={deal.id}
+                  type="button"
+                  onClick={() => setSelectedDeal(deal)}
+                  className="grid w-full grid-cols-1 gap-2 border border-[var(--ink)]/[0.08] bg-[var(--bone)] p-4 text-left transition-colors hover:border-[var(--ink)]/25 md:grid-cols-[1.4fr_0.8fr_0.6fr_0.6fr_auto] md:items-center md:gap-4 md:border-0 md:border-b md:border-[var(--ink)]/[0.06] md:bg-transparent md:px-0 md:py-3"
+                >
+                  <div className="min-w-0">
+                    <p className="font-display font-serif text-base text-[var(--ink)] md:text-sm">{deal.company}</p>
+                    <p className="mt-0.5 font-mono text-[10px] text-[var(--ink-muted)]">{deal.round}</p>
+                  </div>
+                  <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)]">
+                    {deal.sector}
+                  </span>
+                  <span className="font-mono text-xs text-[var(--ink)]">{deal.raise || "·"}</span>
+                  <span className="font-mono text-xs text-[var(--ink-muted)]">{deal.valuation || "·"}</span>
+                  <div className={`inline-flex w-fit items-center gap-1.5 border px-2 py-0.5 ${cfg.border}`}>
+                    <span className={`size-1.5 ${cfg.dot}`} />
+                    <span className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink-body)]">
+                      {cfg.label}
+                    </span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* SPV section */}
       <section id="open-spvs" className="scroll-mt-6">
-        <div className="mb-4 border-t border-[var(--ink)]/[0.08] pt-3">
-          <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
-            Açık SPV'ler
+        <div className="mb-4 border-t border-[var(--ink)]/[0.08] pt-4">
+          <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--ink)]">
+            Açık SPV&apos;ler
           </p>
-          <p className="mt-0.5 text-xs text-[var(--ink-muted)]">Özel amaçlı araçlarla toplu yatırım katılımı</p>
+          <p className="mt-1 text-sm text-[var(--ink-muted)]">
+            Özel amaçlı araçlarla toplu yatırım katılımı
+          </p>
         </div>
-        <div className="grid gap-4 sm:grid-cols-2">
-          {spvs.map((spv) => <SpvCard key={spv.id} spv={spv} />)}
+        <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
+          {spvs.map((spv) => (
+            <SpvCard key={spv.id} spv={spv} />
+          ))}
         </div>
       </section>
 
       {/* Disclaimer */}
       <div className="border-t border-[var(--ink)]/[0.08] pt-4">
-        <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)]">
-          <span lang="en">inner·capital</span> — yalnızca <span lang="en">inner·hub</span> üyeleri için · bilgi amaçlıdır, yatırım tavsiyesi değildir
+        <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-subtle)]">
+          <span lang="en">inner·capital</span>
+          {" · "}
+          yalnızca <span lang="en">inner·hub</span> üyeleri için · bilgi amaçlıdır, yatırım tavsiyesi değildir
         </p>
       </div>
 

@@ -6,6 +6,7 @@ import { toLowerTR, toUpperTR } from "@/lib/tr";
 import { useApiQuery } from "@/hooks/useApiQuery";
 import { apiUrl } from "@/lib/api";
 import { LoadingBlock, ErrorState, CourseCardSkeleton } from "@/components/panel/Skeletons";
+import { Lockup } from "@/components/Lockup";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -17,6 +18,8 @@ type Application = {
   email: string;
   role: string;
   company: string;
+  companyLogo?: string;
+  companyDomain?: string;
   why: string;
   referrer: string | null;
   appliedAt: string;
@@ -88,15 +91,30 @@ function DetailPanel({
         <div className="flex-1 space-y-5 p-5">
           <div>
             <div className="mb-1 flex items-start justify-between gap-3">
-              <div>
-                <p className="text-lg font-light text-[var(--ink)]">{app.name}</p>
-                <p className="font-mono text-label text-[var(--ink-body)]">{app.email}</p>
+              <div className="flex min-w-0 items-start gap-3">
+                {app.companyLogo ? (
+                  <img
+                    src={app.companyLogo}
+                    alt=""
+                    className="size-10 shrink-0 border border-[var(--ink)]/10 bg-white object-contain p-1"
+                  />
+                ) : null}
+                <div className="min-w-0">
+                  <p
+                    className="font-serif text-xl text-[var(--ink)]"
+                    style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 300 }}
+                  >
+                    {app.name}
+                  </p>
+                  <p className="font-mono text-label text-[var(--ink-body)]">{app.email}</p>
+                </div>
               </div>
               <StatusBadge status={app.status} />
             </div>
             <p className="mt-1 font-mono text-label text-[var(--ink-body)]">
               {app.role}
               {app.company ? `, ${app.company}` : ""}
+              {app.companyDomain ? ` · ${app.companyDomain}` : ""}
             </p>
           </div>
 
@@ -127,12 +145,12 @@ function DetailPanel({
             </div>
             <div className="flex justify-between">
               <span className="font-mono text-label text-[var(--ink-muted)]">Referans</span>
-              <span className="font-mono text-label text-[var(--ink-muted)]">{app.referrer ?? "—"}</span>
+              <span className="font-mono text-label text-[var(--ink-muted)]">{app.referrer ?? "Yok"}</span>
             </div>
             <div className="flex justify-between gap-3">
               <span className="font-mono text-label text-[var(--ink-muted)]">LinkedIn</span>
               <span className="max-w-[140px] truncate font-mono text-label text-[var(--ink-muted)]">
-                {app.linkedinUrl || "—"}
+                {app.linkedinUrl || "Yok"}
               </span>
             </div>
           </div>
@@ -226,15 +244,15 @@ export default function ApplicationsPage() {
     <div className="max-w-2xl space-y-6">
       <FadeIn>
         <div>
-          <p className="mb-2 font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
-            <span lang="en">inner·hub</span> — Admin
-          </p>
+          <div className="mb-2 flex flex-wrap items-center gap-2">
+            <Lockup suffix="hub" className="text-[var(--ink)]" fontSize="1.15rem" />
+            <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">Admin</span>
+          </div>
           <h1
             className="font-serif font-display text-4xl text-[var(--ink)] md:text-5xl"
             style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
           >
             başvurular
-            <span className="ml-[0.05em] inline-block size-[0.35em] translate-y-[0.08em] bg-[var(--inner-green)]" />
           </h1>
           <p className="mt-2 text-sm font-light text-[var(--ink-muted)]">
             Davet taleplerini incele; onay / red kalıcı kaydedilir.
@@ -326,19 +344,25 @@ export default function ApplicationsPage() {
                     i < filtered.length - 1 ? "border-b border-[var(--ink)]/[0.05]" : "",
                   ].join(" ")}
                 >
-                  <div className="flex size-8 shrink-0 items-center justify-center bg-[var(--ink)]/[0.06] font-mono text-label text-[var(--ink-body)]">
-                    {toUpperTR(
-                      app.name
-                        .split(" ")
-                        .map((w) => w[0])
-                        .slice(0, 2)
-                        .join(""),
+                  <div className="flex size-8 shrink-0 items-center justify-center overflow-hidden border border-[var(--ink)]/[0.08] bg-white font-mono text-label text-[var(--ink-body)]">
+                    {app.companyLogo ? (
+                      <img src={app.companyLogo} alt="" className="size-full object-contain p-0.5" />
+                    ) : (
+                      toUpperTR(
+                        app.name
+                          .split(" ")
+                          .map((w) => w[0])
+                          .slice(0, 2)
+                          .join(""),
+                      )
                     )}
                   </div>
 
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <p className="text-sm font-light text-[var(--ink)]">{app.name}</p>
+                      <p className="font-serif text-sm text-[var(--ink)]" style={{ fontWeight: 400 }}>
+                        {app.name}
+                      </p>
                       {app.referrer && (
                         <span className="font-mono text-label text-[var(--ink-muted)]">
                           ref: {app.referrer.split(" ")[0]}

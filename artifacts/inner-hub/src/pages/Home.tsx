@@ -1,6 +1,19 @@
 import { useEffect, useRef, useState } from "react";
-import { Linkedin, Instagram, Zap, Users, TrendingUp, BookOpen, Radio, Fingerprint, Code2, Target } from "lucide-react";
-import { motion, useInView, useScroll, useTransform } from "framer-motion";
+import {
+  Linkedin,
+  Instagram,
+  Zap,
+  Users,
+  TrendingUp,
+  BookOpen,
+  Radio,
+  Fingerprint,
+  Code2,
+  Target,
+  ArrowUpRight,
+  Mail,
+} from "lucide-react";
+import { motion, useInView, useScroll } from "framer-motion";
 import { FadeIn } from "@/components/FadeIn";
 import { WordsPullUp } from "@/components/WordsPullUp";
 import { ScrollTextReveal } from "@/components/ScrollTextReveal";
@@ -9,37 +22,11 @@ import { Grain } from "@/components/Grain";
 import { IndexRail } from "@/components/IndexRail";
 import { DiagramCircle } from "@/components/DiagramCircle";
 import { Preloader } from "@/components/Preloader";
-import { FloatingNavbar } from "@/components/FloatingNavbar";
 import { PlatformFeatures, type PlatformFeature } from "@/components/PlatformFeatures";
-import { ProceduralPortrait, type PortraitConfig } from "@/components/panel/ProceduralPortrait";
 import { HeroVideo } from "@/components/HeroVideo";
+import { WhatsNextCinematic } from "@/components/WhatsNextCinematic";
+import { HomeOpening } from "@/components/HomeOpening";
 import { useLenis } from "@/hooks/useLenis";
-
-const PHOSPHOR_CONFIG: PortraitConfig = {
-  renderMode: "characters",
-  bgMode: "solid",
-  bgColor: "#000000",
-  cellSize: 9,
-  coverage: 100,
-  invert: false,
-  charSet: " .:-=+*#%@",
-  brightness: 0,
-  contrast: 115,
-  saturation: 100,
-  grayscale: 0,
-  tint: "#33ff99",
-  tintOpacity: 18,
-  overlayBlend: "screen",
-  color: "#18FF85",
-  pfx: {
-    vignette: { enabled: true, intensity: 50 },
-    scanLines: { enabled: true, intensity: 45 },
-    bloom: { enabled: true, intensity: 25 },
-  },
-  animStyle: "flicker",
-  animSpeed: 100,
-  animIntensity: 60,
-};
 
 // ─── Animated counter ─────────────────────────────────────────────────────────
 function Counter({ to, suffix = "" }: { to: number; suffix?: string }) {
@@ -60,18 +47,6 @@ function Counter({ to, suffix = "" }: { to: number; suffix?: string }) {
   }, [inView, to]);
 
   return <span ref={ref}>{val}{suffix}</span>;
-}
-
-// ─── Section label ────────────────────────────────────────────────────────────
-function SectionLabel({ label, meta }: { label: string; meta: string }) {
-  return (
-    <FadeIn>
-      <div className="flex items-baseline justify-between gap-6 pb-6 mb-16 border-b border-border/20 font-mono text-xs uppercase tracking-widest">
-        <span>{label}</span>
-        <span className="text-muted-foreground whitespace-nowrap">{meta}</span>
-      </div>
-    </FadeIn>
-  );
 }
 
 // ─── Platform modules ─────────────────────────────────────────────────────────
@@ -100,14 +75,14 @@ const MODULES = [
   {
     id: "vault",
     name: "inner·vault",
-    desc: "Shared knowledge base. Pitch decks, market research, and documents — permissioned and searchable.",
+    desc: "Shared knowledge base. Pitch decks, market research, and documents. Permissioned and searchable.",
     icon: BookOpen,
     tag: "Knowledge",
   },
   {
     id: "pulse",
     name: "inner·pulse",
-    desc: "Live ecosystem signal dashboard. What's moving, what's trending, what matters — inside only.",
+    desc: "Live ecosystem signal dashboard. What's moving, what's trending, what matters. Inside only.",
     icon: Radio,
     tag: "Intelligence",
   },
@@ -168,26 +143,65 @@ const PLATFORM_FEATURES: PlatformFeature[] = [
 ];
 
 // ─── Marquee strip ────────────────────────────────────────────────────────────
-const MARQUEE_ITEMS = [
-  "inner·signal", "inner·match", "inner·capital", "inner·vault",
-  "inner·pulse", "inner·id", "inner·api", "inner·bounty",
-];
+const MARQUEE_MODULES = MODULES.map((m) => ({
+  id: m.id,
+  name: m.name,
+  icon: m.icon,
+  tag: m.tag,
+}));
 
 function MarqueeStrip() {
-  const items = [...MARQUEE_ITEMS, ...MARQUEE_ITEMS];
+  const loop = [...MARQUEE_MODULES, ...MARQUEE_MODULES, ...MARQUEE_MODULES];
+
   return (
-    <div className="relative z-10 overflow-hidden border-y border-border/15 py-4 bg-background">
-      <motion.div
-        className="flex gap-16 whitespace-nowrap"
-        animate={{ x: ["0%", "-50%"] }}
-        transition={{ duration: 24, ease: "linear", repeat: Infinity }}
-      >
-        {items.map((item, i) => (
-          <span key={i} className="font-mono text-xs uppercase tracking-widest text-muted-foreground flex-shrink-0">
-            {item} <span className="text-[var(--success-ink)] ml-4">·</span>
-          </span>
-        ))}
-      </motion.div>
+    <div className="relative z-10 overflow-hidden bg-[var(--ink)] py-3 sm:py-4">
+      {/* Edge fades */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-y-0 left-0 z-10 w-12 bg-gradient-to-r from-[var(--ink)] to-transparent sm:w-20"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-y-0 right-0 z-10 w-12 bg-gradient-to-l from-[var(--ink)] to-transparent sm:w-20"
+      />
+
+      <div className="relative mx-auto max-w-[100vw] overflow-hidden border-y border-white/10 bg-[var(--bone)] py-3.5 sm:py-4">
+        <motion.div
+          className="flex w-max items-center gap-0"
+          animate={{ x: ["0%", "-33.333%"] }}
+          transition={{ duration: 36, ease: "linear", repeat: Infinity }}
+        >
+          {loop.map((item, i) => {
+            const Icon = item.icon;
+            return (
+              <a
+                key={`${item.id}-${i}`}
+                href="#section-03"
+                className="group flex shrink-0 items-center gap-3 px-5 sm:gap-3.5 sm:px-7"
+              >
+                <span className="flex size-7 items-center justify-center bg-[var(--ink)] transition-colors group-hover:bg-[var(--inner-green)] sm:size-8">
+                  <Icon
+                    className="size-3.5 text-[var(--bone)] transition-colors group-hover:text-[var(--ink)] sm:size-4"
+                    strokeWidth={1.6}
+                  />
+                </span>
+                <span className="flex flex-col gap-0.5">
+                  <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--ink)] sm:text-[11px]">
+                    {item.name}
+                  </span>
+                  <span className="hidden font-mono text-[8px] uppercase tracking-[0.14em] text-[var(--ink)]/40 sm:block">
+                    {item.tag}
+                  </span>
+                </span>
+                <span
+                  aria-hidden
+                  className="ml-5 size-1 shrink-0 bg-[var(--inner-green)] sm:ml-7"
+                />
+              </a>
+            );
+          })}
+        </motion.div>
+      </div>
     </div>
   );
 }
@@ -207,10 +221,10 @@ function ScrollProgress() {
 function StatItem({ n, label, suffix = "" }: { n: number; label: string; suffix?: string }) {
   return (
     <div className="flex flex-col items-start">
-      <span className="font-display font-serif italic text-5xl md:text-7xl leading-none mb-3 text-[var(--bone)]">
+      <span className="font-display font-serif italic text-4xl leading-none mb-2 text-[var(--bone)] sm:mb-3 sm:text-5xl md:text-7xl">
         <Counter to={n} suffix={suffix} />
       </span>
-      <span className="font-mono text-label uppercase tracking-widest opacity-40 text-[var(--bone)]">{label}</span>
+      <span className="font-mono text-[9px] uppercase tracking-widest opacity-40 text-[var(--bone)] sm:text-label">{label}</span>
     </div>
   );
 }
@@ -218,9 +232,6 @@ function StatItem({ n, label, suffix = "" }: { n: number; label: string; suffix?
 // ─── Main ─────────────────────────────────────────────────────────────────────
 export default function Home() {
   useLenis(true);
-  const heroRef = useRef(null);
-  const { scrollY } = useScroll();
-  const heroY = useTransform(scrollY, [0, 600], [0, 120]);
 
   useEffect(() => {
     if (window.location.hash) {
@@ -245,150 +256,11 @@ export default function Home() {
 
       <main id="main-content" className="flex-grow">
 
-        {/* ── Hero ── */}
-        <section ref={heroRef} className="h-[100svh] mb-[-3rem] flex flex-col justify-end px-6 pb-16 md:px-12 md:pb-24 lg:px-[10%] relative overflow-hidden bg-black text-white">
-          <FloatingNavbar />
-          <HeroVideo
-            src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260406_094145_4a271a6c-3869-4f1c-8aa7-aeb0cb227994.mp4"
-            className="absolute inset-0 z-0 h-full w-full object-cover"
-          />
-          <div
-            aria-hidden="true"
-            className="bottom-blur-mask pointer-events-none absolute inset-0 z-[1] bg-black/20 backdrop-blur-xl"
-          />
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-b from-black/50 via-transparent to-transparent"
-          />
-
-          <motion.div
-            className="absolute inset-0 z-[1] pointer-events-none"
-            style={{ y: heroY }}
-          >
-            <div className="absolute top-1/2 right-[5%] -translate-y-1/2 size-[600px] rounded-full bg-[var(--inner-green)]/10 blur-3xl" />
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            className="relative z-10"
-          >
-            <div className="font-mono text-xs uppercase tracking-widest text-white/60 mb-8 flex items-center gap-3">
-              <span className="size-1.5 rounded-full bg-[var(--inner-green)] animate-beacon" />
-              İstanbul → Global · Est. 2026
-            </div>
-            <h1 className="font-display font-serif italic text-5xl md:text-7xl lg:text-8xl leading-[1.05] max-w-[18ch] text-balance">
-              What comes next starts here.
-            </h1>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="relative z-10 mt-12"
-          >
-            <p className="max-w-[50ch] text-lg md:text-xl text-white/70 leading-[1.6]">
-              inner.hub is a private circle of founders, builders, and investors. People who meet early and support each other first.
-            </p>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.35, ease: [0.16, 1, 0.3, 1] }}
-            className="relative z-10 mt-8"
-          >
-            <div className="flex items-center gap-4 border border-white/15 bg-black/25 py-1 pl-6 pr-1 backdrop-blur-md">
-              <p className="hidden text-sm font-medium text-white sm:block">
-                No tickets. No tiers. Just the circle, gently curated.
-              </p>
-              <p className="text-sm font-medium text-white sm:hidden">No tickets. No tiers.</p>
-              <a
-                href="/invitation"
-                className="whitespace-nowrap bg-white px-5 py-2.5 font-mono text-xs uppercase tracking-widest text-black transition-colors hover:bg-white/90"
-              >
-                Request an invitation
-              </a>
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.5 }}
-            className="absolute bottom-10 left-6 md:left-12 lg:left-[10%] z-10 flex items-center gap-2 font-mono text-label uppercase tracking-widest text-white/60"
-          >
-            <motion.div
-              animate={{ y: [0, 6, 0] }}
-              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-            >
-              ↓
-            </motion.div>
-            <span>scroll</span>
-          </motion.div>
-        </section>
+        {/* ── Hero + 01 + 02 (Prisma composition → inner·hub) ── */}
+        <HomeOpening />
 
         {/* ── Marquee ── */}
         <MarqueeStrip />
-
-        {/* ── 01 · The idea ── */}
-        <section id="section-01" className="px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15">
-          <SectionLabel label="01 · The idea" meta="Coming together" />
-          <FadeIn>
-            <div className="max-w-[65ch] text-lg md:text-xl leading-[1.7] text-foreground/90">
-              AI is the center of this circle. Around it are the founders, builders, and investors pushing what comes next. inner.hub brings them together. It starts in İstanbul, and it starts early.
-            </div>
-          </FadeIn>
-        </section>
-
-        {/* ── 02 · The first thirty-four ── */}
-        <section id="section-02" className="px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15">
-          <SectionLabel label="02 · The first thirty-four" meta="Founding seats" />
-          <div className="grid grid-cols-1 md:grid-cols-[1fr_320px] gap-12 md:gap-16 items-start">
-            <div>
-              <FadeIn>
-                <p className="max-w-[65ch] text-lg leading-[1.7] text-foreground/90 mb-16">
-                  It starts with thirty-four people, chosen one by one:
-                </p>
-              </FadeIn>
-              <div className="max-w-3xl mb-16">
-                {[
-                  { label: "Founders", line: "People building startups, in AI and beyond." },
-                  { label: "Builders", line: "Engineers and researchers doing serious AI work." },
-                  { label: "Investors", line: "Angel investors and people from venture funds." },
-                ].map((item, i) => (
-                  <FadeIn key={item.label} delay={i * 0.1}>
-                    <div className="flex flex-col md:flex-row md:items-baseline gap-2 md:gap-12 py-6 border-t border-border/15 last:border-b">
-                      <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground w-full md:w-48 flex-shrink-0">{item.label}</div>
-                      <p className="text-lg text-foreground/90">{item.line}</p>
-                    </div>
-                  </FadeIn>
-                ))}
-              </div>
-              <FadeIn delay={0.2}>
-                <p className="max-w-[65ch] text-lg leading-[1.7] text-foreground/90">
-                  These thirty-four are not just members. They are the founding members of inner.hub.
-                </p>
-              </FadeIn>
-            </div>
-
-            <FadeIn delay={0.15}>
-              <div className="relative aspect-[519/1002] overflow-hidden border border-border/15 bg-black">
-                <ProceduralPortrait
-                  src="/editorial/circle-portrait.jpg"
-                  config={PHOSPHOR_CONFIG}
-                  className="size-full"
-                />
-                <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
-                <p className="pointer-events-none absolute bottom-4 left-4 font-mono text-label uppercase tracking-widest text-[#18FF85]/70">
-                  Signal · Founding member
-                </p>
-              </div>
-            </FadeIn>
-          </div>
-        </section>
 
         {/* ── 03 · The platform ── */}
         <section id="section-03">
@@ -406,34 +278,34 @@ export default function Home() {
           </div>
 
           {/* 04 · What this is */}
-          <section id="section-04" className="relative z-10 px-6 md:px-12 lg:px-[10%] pt-28 md:pt-36 pb-24">
-            <div className="flex items-baseline justify-between gap-6 pb-6 mb-16 border-b border-white/15 font-mono text-xs uppercase tracking-widest text-white/50">
+          <section id="section-04" className="relative z-10 px-4 pt-20 pb-16 sm:px-6 sm:pt-28 sm:pb-24 md:px-12 md:pt-36 lg:px-[10%]">
+            <div className="mb-10 flex items-baseline justify-between gap-3 border-b border-white/15 pb-5 font-mono text-[10px] uppercase tracking-widest text-white/50 sm:mb-16 sm:gap-6 sm:pb-6 sm:text-xs">
               <span>04 · What this is</span>
               <span className="whitespace-nowrap">The point</span>
             </div>
             <WordsPullUp
               text="Big things start here."
-              className="font-display font-serif italic text-4xl md:text-5xl lg:text-6xl text-[var(--bone)] max-w-3xl mb-10 text-balance"
+              className="font-display font-serif italic text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-[var(--bone)] max-w-3xl mb-8 sm:mb-10 text-balance"
             />
             <ScrollTextReveal
-              text="New ideas are discussed here, tested here, and supported here — by people who can actually build them and fund them."
+              text="New ideas are discussed here, tested here, and supported here by people who can actually build them and fund them."
               className="max-w-[46ch] text-[var(--bone)]"
-              style={{ fontSize: "clamp(19px, 2.4vw, 26px)", lineHeight: 1.55, opacity: 0.85 }}
+              style={{ fontSize: "clamp(17px, 2.4vw, 26px)", lineHeight: 1.55, opacity: 0.85 }}
             />
           </section>
 
           {/* 05 · Entry */}
-          <section id="section-05" className="relative z-10 px-6 md:px-12 lg:px-[10%] pt-8 pb-32 md:pb-48">
-            <div className="flex items-baseline justify-between gap-6 pb-6 mb-16 border-b border-white/15 font-mono text-xs uppercase tracking-widest text-white/50">
+          <section id="section-05" className="relative z-10 px-4 pt-6 pb-24 sm:px-6 sm:pt-8 sm:pb-32 md:px-12 md:pb-48 lg:px-[10%]">
+            <div className="mb-10 flex items-baseline justify-between gap-3 border-b border-white/15 pb-5 font-mono text-[10px] uppercase tracking-widest text-white/50 sm:mb-16 sm:gap-6 sm:pb-6 sm:text-xs">
               <span>05 · Entry</span>
               <span className="whitespace-nowrap">By invitation</span>
             </div>
             <WordsPullUp
               text="Entry is by invitation. Always."
-              className="font-display font-serif italic text-4xl md:text-5xl max-w-2xl mb-8 text-balance text-[var(--bone)]"
+              className="font-display font-serif italic text-3xl sm:text-4xl md:text-5xl max-w-2xl mb-6 sm:mb-8 text-balance text-[var(--bone)]"
             />
             <FadeIn delay={0.2}>
-              <p className="max-w-[65ch] text-lg leading-[1.7] text-[var(--bone)]/80 mb-20">
+              <p className="mb-12 max-w-[65ch] text-base leading-[1.7] text-[var(--bone)]/80 sm:mb-20 sm:text-lg">
                 There are no tickets, no tiers, and no public list. Members are put forward from inside the circle, considered with care, and invited personally.
               </p>
             </FadeIn>
@@ -444,9 +316,9 @@ export default function Home() {
                 { label: "Invitation", line: "If it is right, you hear from us directly." },
               ].map((item, i) => (
                 <FadeIn key={item.label} delay={i * 0.1}>
-                  <div className="flex flex-col md:flex-row md:items-baseline gap-2 md:gap-12 py-6 border-t border-white/15 last:border-b">
-                    <div className="font-mono text-xs uppercase tracking-widest text-white/50 w-full md:w-48 flex-shrink-0">{item.label}</div>
-                    <p className="text-lg text-[var(--bone)]/90">{item.line}</p>
+                  <div className="flex flex-col gap-2 border-t border-white/15 py-5 last:border-b md:flex-row md:items-baseline md:gap-12 md:py-6">
+                    <div className="w-full flex-shrink-0 font-mono text-[10px] uppercase tracking-widest text-white/50 sm:text-xs md:w-48">{item.label}</div>
+                    <p className="text-base text-[var(--bone)]/90 sm:text-lg">{item.line}</p>
                   </div>
                 </FadeIn>
               ))}
@@ -454,26 +326,27 @@ export default function Home() {
           </section>
         </div>
 
-        {/* ── 06 · The gathering (ink) ── */}
+        {/* ── 06 · The gathering (ink bridge into cinematic) ── */}
         <section
           id="section-06"
-          className="px-6 md:px-12 lg:px-[10%] py-32 md:py-48 border-t border-border/15 bg-[var(--ink)] text-[var(--bone)] transition-colors duration-700 overflow-hidden relative"
+          className="relative overflow-hidden border-t border-border/15 bg-[var(--ink)] px-4 py-20 text-[var(--bone)] transition-colors duration-700 sm:px-6 sm:py-32 md:px-12 md:py-48 lg:px-[10%]"
         >
-          <div className="absolute top-0 right-0 size-[500px] bg-[var(--inner-green)]/[0.03] blur-3xl pointer-events-none" />
+          <div className="pointer-events-none absolute -right-24 top-0 size-[520px] bg-[var(--inner-green)]/[0.04] blur-3xl" />
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-black/40 to-transparent" />
 
           <FadeIn>
-            <div className="flex items-baseline justify-between gap-6 pb-6 mb-20 border-b border-white/15 font-mono text-xs uppercase tracking-widest opacity-60">
+            <div className="mb-12 flex items-baseline justify-between gap-3 border-b border-white/15 pb-5 font-mono text-[10px] uppercase tracking-widest opacity-60 sm:mb-20 sm:gap-6 sm:pb-6 sm:text-xs">
               <span>06 · The gathering</span>
               <span className="whitespace-nowrap">Sep 2026 · İstanbul</span>
             </div>
           </FadeIn>
           <WordsPullUp
             text="The first inner.hub gathering. İstanbul, September 2026."
-            className="font-display font-serif italic text-4xl md:text-5xl lg:text-6xl max-w-3xl mb-24 text-balance"
+            className="mb-12 max-w-3xl text-balance font-display font-serif italic text-3xl sm:mb-20 sm:text-4xl md:mb-24 md:text-5xl lg:text-6xl"
           />
 
-          <div className="flex flex-col lg:flex-row lg:items-center gap-16 mb-24">
-            <div className="grid grid-cols-3 gap-6 md:gap-10 min-w-0 lg:flex-1">
+          <div className="mb-12 flex flex-col gap-12 sm:mb-20 sm:gap-16 lg:mb-24 lg:flex-row lg:items-center">
+            <div className="grid min-w-0 grid-cols-3 gap-3 sm:gap-6 md:gap-10 lg:flex-1">
               <StatItem n={34} label="People" />
               <StatItem n={2} label="Days" />
               <StatItem n={8} label="Modules" />
@@ -484,56 +357,111 @@ export default function Home() {
           </div>
 
           <FadeIn delay={0.15}>
-            <p className="font-serif text-2xl md:text-3xl max-w-2xl text-balance opacity-80">
-              Thirty-four people. Two days. One circle. The first of many.
-            </p>
+            <div className="flex flex-col gap-6 sm:gap-8 md:flex-row md:items-end md:justify-between">
+              <p className="max-w-2xl text-balance font-serif text-xl opacity-80 sm:text-2xl md:text-3xl">
+                Thirty-four people. Two days. One circle. The first of many.
+              </p>
+              <a
+                href="#section-07"
+                className="group inline-flex min-h-11 items-center justify-center gap-2 border border-white/25 px-5 py-3 font-mono text-xs uppercase tracking-widest text-[var(--bone)] transition-colors hover:border-white/60 hover:bg-white hover:text-black sm:min-h-0 sm:justify-start"
+              >
+                What&apos;s next
+                <ArrowUpRight className="size-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+              </a>
+            </div>
           </FadeIn>
         </section>
 
-        {/* ── 07 · What's next ── */}
-        <section id="section-07" className="px-6 md:px-12 lg:px-[10%] py-32 border-t border-border/15">
-          <SectionLabel label="07 · What's next" meta="In time" />
-          <WordsPullUp
-            text="hub is where it starts."
-            className="font-display font-serif italic text-4xl md:text-5xl max-w-2xl mb-8 text-balance"
-          />
-          <FadeIn delay={0.2}>
-            <p
-              className="max-w-[46ch] text-foreground/90"
-              style={{ fontSize: "clamp(19px, 2.4vw, 26px)", lineHeight: 1.55 }}
-            >
-              We are building something bigger, step by step. We announce things when they are real. There is more.
-            </p>
-          </FadeIn>
-        </section>
+        {/* ── 07 · What's next (cinematic) ── */}
+        <WhatsNextCinematic />
 
       </main>
 
       {/* Footer */}
-      <footer id="site-footer" className="bg-[var(--ink)] px-6 md:px-12 lg:px-[10%] pt-20 pb-6 flex flex-col gap-16 overflow-hidden">
-        <div className="flex flex-col gap-6">
-          <img src="/inner-logo.png" alt="inner" width={140} height={140} className="w-[140px] h-[140px]" />
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div className="flex flex-wrap gap-x-5 gap-y-2 font-mono text-label uppercase tracking-widest text-[var(--bone)] opacity-60">
-              <span>The next wave knows each other · İstanbul → Global</span>
-            </div>
-            <div className="flex items-center justify-center md:justify-end gap-5">
-              <a href="#" aria-label="inner on LinkedIn" className="text-[var(--bone)] opacity-60 hover:opacity-100 transition-opacity duration-300">
-                <Linkedin size={20} strokeWidth={1.5} />
-              </a>
-              <a href="#" aria-label="inner on Instagram" className="text-[var(--bone)] opacity-60 hover:opacity-100 transition-opacity duration-300">
-                <Instagram size={20} strokeWidth={1.5} />
-              </a>
-            </div>
+      <footer
+        id="site-footer"
+        className="relative overflow-hidden border-t border-white/10 bg-[var(--ink)] px-4 pb-8 pt-12 text-[var(--bone)] sm:px-6 sm:pt-16 md:px-12 md:pt-20 lg:px-[10%]"
+      >
+        <div className="pointer-events-none absolute -left-20 top-10 size-72 bg-[var(--inner-green)]/[0.05] blur-3xl" />
+
+        <div className="relative z-10 grid gap-12 lg:grid-cols-[1.2fr_1fr_1fr]">
+          <div className="space-y-5">
+            <Lockup className="text-[var(--bone)]" fontSize="clamp(28px, 4vw, 36px)" />
+            <p className="max-w-[36ch] text-sm font-light leading-relaxed text-[var(--bone)]/70">
+              A private circle for founders, operators, and investors who prefer signal over noise.
+            </p>
+            <a
+              href="mailto:destek@inner.digital"
+              className="inline-flex items-center gap-2 font-mono text-label uppercase tracking-widest text-[var(--bone)]/55 transition-colors hover:text-[var(--bone)]"
+            >
+              <Mail className="size-3.5" />
+              destek@inner.digital
+            </a>
           </div>
-          <div className="font-mono text-label uppercase tracking-widest text-[var(--bone)] opacity-30">
-            © 2026 inner. İstanbul.
+
+          <div>
+            <p className="mb-4 font-mono text-label uppercase tracking-widest text-[var(--bone)]/40">
+              Navigate
+            </p>
+            <ul className="space-y-2.5">
+              {[
+                { label: "Platform", href: "#section-03" },
+                { label: "Gathering", href: "#section-06" },
+                { label: "What's next", href: "#section-07" },
+                { label: "Panel", href: "/panel" },
+                { label: "Invitation", href: "/invitation" },
+              ].map((l) => (
+                <li key={l.href}>
+                  <a
+                    href={l.href}
+                    className="font-mono text-caption uppercase tracking-widest text-[var(--bone)]/65 transition-colors hover:text-[var(--bone)]"
+                  >
+                    {l.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div>
+            <p className="mb-4 font-mono text-label uppercase tracking-widest text-[var(--bone)]/40">
+              Connect
+            </p>
+            <div className="mb-6 flex items-center gap-4">
+              <a
+                href="https://www.linkedin.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="inner on LinkedIn"
+                className="border border-white/15 p-2.5 text-[var(--bone)]/60 transition-colors hover:border-white/35 hover:text-[var(--bone)]"
+              >
+                <Linkedin size={18} strokeWidth={1.5} />
+              </a>
+              <a
+                href="https://www.instagram.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="inner on Instagram"
+                className="border border-white/15 p-2.5 text-[var(--bone)]/60 transition-colors hover:border-white/35 hover:text-[var(--bone)]"
+              >
+                <Instagram size={18} strokeWidth={1.5} />
+              </a>
+            </div>
+            <p className="font-mono text-label uppercase tracking-widest text-[var(--bone)]/35">
+              İstanbul → Global
+            </p>
           </div>
         </div>
-        <div className="text-[var(--bone)] leading-none -mb-4 md:-mb-8" aria-hidden="true">
-          <Lockup showHub={false} fontSize="clamp(4rem, 16vw, 13rem)" />
+
+        <div className="relative z-10 mt-14 flex flex-col gap-6 border-t border-white/10 pt-6 md:flex-row md:items-end md:justify-between">
+          <p className="font-mono text-label uppercase tracking-widest text-[var(--bone)]/35">
+            © 2026 inner hub · All rights reserved
+          </p>
+          <div className="leading-none text-[var(--bone)]" aria-hidden="true">
+            <Lockup fontSize="clamp(2.75rem, 10vw, 7.5rem)" />
+          </div>
         </div>
-        <span className="sr-only">inner.</span>
+        <span className="sr-only">inner hub</span>
       </footer>
     </div>
   );

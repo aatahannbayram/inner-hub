@@ -12,6 +12,7 @@ import { PanelShell, type PanelUser } from "@/components/panel/PanelShell";
 import { PanelPageSkeleton } from "@/components/panel/Skeletons";
 import { apiUrl } from "@/lib/api";
 import { PanelLogin } from "@/components/panel/PanelLogin";
+import { Lockup } from "@/components/Lockup";
 
 // Panel sayfaları auth arkasında (SEO'ya tabi değil) — code-split edilir.
 // Home/Invitation/Requests eager kalır (prerender/SEO).
@@ -41,15 +42,12 @@ const queryClient = new QueryClient();
 function PlaceholderPage({ title }: { title: string }) {
   return (
     <div className="flex flex-col gap-3">
-      <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)]">
-        inner·hub
-      </p>
+      <Lockup suffix="hub" className="text-[var(--ink)]" fontSize="1.15rem" />
       <h1
         className="font-serif font-display text-4xl text-[var(--ink)]"
         style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
       >
         {title}
-        <span className="inline-block size-[0.35em] translate-y-[0.08em] ml-[0.05em] bg-[var(--inner-green)]" />
       </h1>
       <p className="text-sm text-[var(--ink-muted)] font-light">Bu sayfa yakında hazır olacak.</p>
     </div>

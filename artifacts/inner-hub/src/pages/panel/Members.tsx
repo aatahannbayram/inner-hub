@@ -3,7 +3,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import {
   Search,
   Linkedin,
-  Briefcase,
   ArrowRight,
   Tag,
   CheckCircle2,
@@ -19,6 +18,7 @@ import { cn } from "@/lib/utils";
 import { PersonAvatar } from "@/components/panel/PersonAvatar";
 import { HeroVideo } from "@/components/HeroVideo";
 import { toLowerTR } from "@/lib/tr";
+import { cleanDisplayText } from "@/lib/displayText";
 import { useApiQuery } from "@/hooks/useApiQuery";
 import { apiUrl } from "@/lib/api";
 import { LoadingBlock, ErrorState, CourseCardSkeleton } from "@/components/panel/Skeletons";
@@ -61,28 +61,33 @@ interface TalentPost {
 function MemberCard({ member, onSelect }: { member: Member; onSelect: (m: Member) => void }) {
   return (
     <div
-      className="flex flex-col border border-[var(--ink)]/[0.08] p-5 transition-all duration-200 hover:border-[var(--ink)]/20 cursor-pointer"
+      className="flex flex-col border border-[var(--ink)]/[0.08] p-4 sm:p-5 transition-all duration-200 hover:border-[var(--ink)]/20 cursor-pointer"
       onClick={() => onSelect(member)}
     >
       <div className="mb-3 flex items-start gap-3">
-        <div className="relative">
+        <div className="relative shrink-0">
           <PersonAvatar name={member.name} initials={member.initials} className="size-10 text-caption" />
           {member.isAvailable && (
             <span className="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full border-2 border-[var(--bone)] bg-[var(--inner-green)]" />
           )}
         </div>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-medium text-[var(--ink)]">{member.name}</p>
-          <p className="truncate font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
-            {member.title}
+          <p
+            className="truncate font-serif text-base text-[var(--ink)] leading-snug"
+            style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
+          >
+            {member.name}
           </p>
-          <div className="mt-0.5 flex items-center gap-1">
-            <Briefcase className="size-2.5 text-[var(--ink-muted)]" />
-            <span className="font-mono text-label text-[var(--ink-muted)]">{member.company}</span>
-          </div>
+          {(member.title || member.company) && (
+            <p className="mt-1 truncate text-xs text-[var(--ink-muted)]">
+              {[cleanDisplayText(member.title), member.company].filter(Boolean).join(" · ")}
+            </p>
+          )}
         </div>
       </div>
-      <p className="mb-3 line-clamp-2 flex-1 text-sm leading-relaxed text-[var(--ink-muted)]">{member.bio}</p>
+      {member.bio ? (
+        <p className="mb-3 line-clamp-2 flex-1 text-sm leading-relaxed text-[var(--ink-muted)]">{member.bio}</p>
+      ) : null}
       <div className="flex flex-wrap gap-1">
         {member.tags.slice(0, 3).map((tag) => (
           <span
@@ -119,9 +124,17 @@ function MemberDetailPanel({ member, onClose }: { member: Member; onClose: () =>
           <div className="flex items-start gap-3">
             <PersonAvatar name={member.name} initials={member.initials} className="size-12 text-sm" />
             <div>
-              <p className="text-base font-medium text-[var(--ink)]">{member.name}</p>
-              <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">{member.title}</p>
-              <p className="mt-0.5 font-mono text-label text-[var(--ink-muted)]">{member.company}</p>
+              <p
+                className="font-serif text-lg text-[var(--ink)]"
+                style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
+              >
+                {member.name}
+              </p>
+              {(member.title || member.company) && (
+                <p className="mt-1 text-sm text-[var(--ink-muted)]">
+                  {[cleanDisplayText(member.title), member.company].filter(Boolean).join(" · ")}
+                </p>
+              )}
             </div>
           </div>
           <button
@@ -224,7 +237,7 @@ function MembersHero({ onTalentClick }: { onTalentClick: () => void }) {
             />
             <FadeIn delay={0.8}>
               <p className="mb-6 max-w-[46ch] text-base text-white/75 [text-shadow:0_1px_12px_rgba(0,0,0,0.6)] md:text-lg">
-                Kurucular, mühendisler, yatırımcılar — daire içinde birbirini bulur ve büyür.
+                Kurucular, mühendisler, yatırımcılar · daire içinde birbirini bulur ve büyür.
               </p>
             </FadeIn>
             <FadeIn delay={1.2}>
@@ -322,15 +335,15 @@ function TalentCard({
   };
 
   return (
-    <div className="border border-[var(--ink)]/[0.08] p-5 transition-all duration-200 hover:border-[var(--ink)]/20">
+    <div className="border border-[var(--ink)]/[0.08] p-4 sm:p-5 transition-all duration-200 hover:border-[var(--ink)]/20">
       <div className="mb-3 flex items-start justify-between gap-3">
-        <div className="flex items-center gap-2.5">
-          <PersonAvatar name={post.postedBy} initials={post.postedByInitials} className="size-8 text-label" />
-          <div>
-            <p className="text-xs font-medium text-[var(--ink)]">{post.postedBy}</p>
-            <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
-              {post.postedByCompany}
-            </p>
+        <div className="flex min-w-0 items-center gap-2.5">
+          <PersonAvatar name={post.postedBy} initials={post.postedByInitials} className="size-8 shrink-0 text-label" />
+          <div className="min-w-0">
+            <p className="truncate text-xs font-medium text-[var(--ink)]">{post.postedBy}</p>
+            {post.postedByCompany ? (
+              <p className="truncate text-xs text-[var(--ink-muted)]">{post.postedByCompany}</p>
+            ) : null}
           </div>
         </div>
         <span
@@ -345,11 +358,16 @@ function TalentCard({
         </span>
       </div>
 
-      <p className="mb-1.5 text-sm font-medium leading-snug text-[var(--ink)]">{post.role}</p>
+      <p
+        className="mb-1.5 font-serif text-base leading-snug text-[var(--ink)]"
+        style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
+      >
+        {cleanDisplayText(post.role)}
+      </p>
       <p className="mb-3 text-sm leading-relaxed text-[var(--ink-muted)]">{post.description}</p>
 
       <div className="mb-4 flex flex-wrap gap-1">
-        {post.tags.map((tag) => (
+        {post.tags.slice(0, 3).map((tag) => (
           <span
             key={tag}
             className="border border-[var(--ink)]/10 px-1.5 py-0.5 font-mono text-label uppercase tracking-wide text-[var(--ink-body)]"
@@ -583,7 +601,7 @@ export default function Members() {
       ) : (
         <>
           <FadeIn delay={0.02}>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <div className="grid grid-cols-2 gap-2 sm:gap-3 sm:grid-cols-4">
               <MembersStat label="Toplam Üye" value={String(members.length)} sub="dairenin içinde" icon={Users2} />
               <MembersStat
                 label="Profil"
@@ -695,7 +713,7 @@ export default function Members() {
                 </div>
                 {filteredTalent.length === 0 ? (
                   <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
-                    Henüz ilan yok — ilk ilanı sen ver.
+                    Henüz ilan yok · ilk ilanı sen ver.
                   </p>
                 ) : (
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">

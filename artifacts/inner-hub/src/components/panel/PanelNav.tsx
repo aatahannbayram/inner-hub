@@ -23,6 +23,7 @@ import {
   UserCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Lockup } from "@/components/Lockup";
 
 type NavItem = {
   href: string;
@@ -30,6 +31,8 @@ type NavItem = {
   icon: React.ComponentType<{ className?: string }>;
   roles?: ("member" | "admin")[];
   badge?: number;
+  /** inner■{mark} ürün etiketi (· yerine yeşil kare) */
+  mark?: string;
 };
 
 /** Hover/focus prefetch — F12 lazy chunk'larını tıklamadan önce ısıtır */
@@ -62,13 +65,13 @@ const navItems: NavItem[] = [
   { href: "/panel/events", label: "Etkinlikler", icon: CalendarDays },
   { href: "/panel/members", label: "Katılımcılar", icon: Users },
   { href: "/panel/perks", label: "Ayrıcalıklar", icon: Gift },
-  { href: "/panel/signal", label: "inner·signal", icon: Zap },
-  { href: "/panel/match", label: "inner·match", icon: Sparkles },
-  { href: "/panel/capital", label: "inner·capital", icon: TrendingUp },
-  { href: "/panel/vault", label: "inner·vault", icon: BookMarked },
-  { href: "/panel/pulse", label: "inner·pulse", icon: Activity },
-  { href: "/panel/id", label: "inner·id", icon: Fingerprint },
-  { href: "/panel/api", label: "inner·api", icon: Webhook },
+  { href: "/panel/signal", label: "inner signal", mark: "signal", icon: Zap },
+  { href: "/panel/match", label: "inner match", mark: "match", icon: Sparkles },
+  { href: "/panel/capital", label: "inner capital", mark: "capital", icon: TrendingUp },
+  { href: "/panel/vault", label: "inner vault", mark: "vault", icon: BookMarked },
+  { href: "/panel/pulse", label: "inner pulse", mark: "pulse", icon: Activity },
+  { href: "/panel/id", label: "inner id", mark: "id", icon: Fingerprint },
+  { href: "/panel/api", label: "inner api", mark: "api", icon: Webhook },
   { href: "/panel/profile", label: "Profilim", icon: UserCircle },
   { href: "/panel/faq", label: "SSS", icon: HelpCircle },
   { href: "/panel/membership", label: "Üyelik", icon: CreditCard },
@@ -124,7 +127,17 @@ function NavLink({
         )}
       />
       {!collapsed && (
-        <span className="truncate font-light tracking-wide">{item.label}</span>
+        item.mark ? (
+          <Lockup
+            suffix={item.mark}
+            className={cn(
+              "min-w-0 truncate text-[0.95em] leading-none",
+              isActive ? "text-[var(--bone)]" : "text-inherit",
+            )}
+          />
+        ) : (
+          <span className="truncate font-light tracking-wide">{item.label}</span>
+        )
       )}
       {!collapsed && item.badge ? (
         <span className="ml-auto font-mono text-label tabular-nums">

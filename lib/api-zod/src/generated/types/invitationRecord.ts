@@ -20,6 +20,12 @@ export interface InvitationRecord {
   /** @nullable */
   whoIntroduced?: string | null;
   /** @nullable */
+  organization?: string | null;
+  /** @nullable */
+  organizationDomain?: string | null;
+  /** @nullable */
+  organizationLogo?: string | null;
+  /** @nullable */
   ipAddress?: string | null;
   createdAt: Date;
 }
