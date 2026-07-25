@@ -112,7 +112,7 @@ function PerkCard({ perk }: { perk: typeof mockPerks[0] }) {
           <img src={perk.logoUrl} alt={perk.brand} className="size-8 object-contain" />
         ) : (
           <span className="font-mono text-[10px] uppercase tracking-wide">
-            {perk.brand.slice(0, 2)}
+            <span lang="en">{perk.brand.slice(0, 2)}</span>
           </span>
         )}
       </div>

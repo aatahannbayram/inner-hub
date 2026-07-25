@@ -201,7 +201,7 @@ function PerkCard({
       </div>
 
       <p className="mb-1 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/51">
-        {perk.brand} · {perk.category}
+        <span lang="en">{perk.brand}</span> · {perk.category}
       </p>
       <p className="mb-2 text-sm font-medium leading-snug text-[var(--ink)] group-hover:underline decoration-[var(--ink)]/20 underline-offset-4">
         {perk.title}
@@ -301,7 +301,7 @@ function PerkDetail({
             <BrandMark brand={perk.brand} />
             <div className="min-w-0">
               <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/51">
-                {perk.brand}
+                <span lang="en">{perk.brand}</span>
               </p>
               <h2
                 id="perk-detail-title"
@@ -579,7 +579,7 @@ export default function Perks() {
                   <AmbientCardBackground />
                   <div className="relative z-10">
                     <p className="mb-2 font-mono text-[9px] uppercase tracking-widest text-[var(--bone)]/57">
-                      {perk.brand} · {perk.badge}
+                      <span lang="en">{perk.brand}</span> · {perk.badge}
                     </p>
                     <h2
                       className="max-w-[18ch] font-serif text-2xl leading-snug md:text-3xl"

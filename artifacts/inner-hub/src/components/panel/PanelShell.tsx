@@ -1,7 +1,7 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
-import { Link } from "wouter";
+import React, { createContext, useContext, useState, useEffect, useRef } from "react";
+import { Link, useLocation } from "wouter";
 import { LogOut, Menu, X, Bell, ChevronLeft, ChevronRight, Sparkles, CalendarDays, TrendingUp, UserPlus, Zap } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -364,13 +364,48 @@ function MobileDrawer({
 }
 
 // ─── Shell ────────────────────────────────────────────────────────────────────
+// Route → scroll pozisyonu haritası (modül seviyesinde, unmount'ta kaybolmaz)
+const scrollMap = new Map<string, number>();
+let isPopNavigation = false;
+if (typeof window !== "undefined") {
+  window.addEventListener("popstate", () => {
+    isPopNavigation = true;
+  });
+}
+
 function ShellInner({ user, children, onLogout }: PanelShellProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [notifCount, setNotifCount] = useState(user.notificationCount ?? 0);
+  const [location] = useLocation();
+  const mainRef = useRef<HTMLElement>(null);
+  const prevLocation = useRef(location);
+
+  useEffect(() => {
+    const main = mainRef.current;
+    if (!main) return;
+
+    // Ayrılan sayfanın scroll'unu kaydet
+    scrollMap.set(prevLocation.current, main.scrollTop);
+
+    if (isPopNavigation && scrollMap.has(location)) {
+      main.scrollTop = scrollMap.get(location)!; // geri/ileri: eski pozisyona dön
+    } else {
+      main.scrollTop = 0; // yeni navigasyon: en üste sıfırla
+      main.focus({ preventScroll: true }); // focus'u BODY'de bırakma
+    }
+    isPopNavigation = false;
+    prevLocation.current = location;
+  }, [location]);
 
   return (
     <div className="flex h-svh overflow-hidden bg-[var(--bone)] text-[var(--ink)]">
+      <a
+        href="#panel-main"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:bg-[var(--ink)] focus:text-[var(--bone)] focus:px-4 focus:py-2"
+      >
+        İçeriğe atla
+      </a>
       <DesktopSidebar user={user} onLogout={onLogout} />
       <MobileDrawer
         open={mobileOpen}
@@ -399,7 +434,7 @@ function ShellInner({ user, children, onLogout }: PanelShellProps) {
             <div className="flex items-center gap-1.5">
               <span className="size-1.5 rounded-full bg-[var(--inner-green)] animate-beacon" />
               <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56 hidden sm:block">
-                online
+                <span lang="en">online</span>
               </span>
             </div>
 
@@ -441,7 +476,12 @@ function ShellInner({ user, children, onLogout }: PanelShellProps) {
         </header>
 
         {/* Main content — tek scroll container */}
-        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+        <main
+          id="panel-main"
+          ref={mainRef}
+          tabIndex={-1}
+          className="min-h-0 min-w-0 flex-1 overflow-y-auto px-4 py-6 outline-none sm:px-6 lg:px-8 lg:py-8"
+        >
           <PanelPageTransition>{children}</PanelPageTransition>
         </main>
       </div>
