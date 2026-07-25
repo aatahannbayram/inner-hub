@@ -11,5 +11,7 @@ Yeniden kullanılabilir analiz playbook’ları ve Inner-Hub instance’ları.
 | [inner-hub-design-ux-2026-07-25.md](./inner-hub-design-ux-2026-07-25.md) | Instance | Web + Panel tasarım güzelliği & UX derin analiz |
 | [inner-hub-ascii-placement-2026-07-25.md](./inner-hub-ascii-placement-2026-07-25.md) | Instance | 21st.dev ASCII × site yerleşim rehberi |
 | [inner-hub-panel-ux-remediation-plan-2026-07-25.md](./inner-hub-panel-ux-remediation-plan-2026-07-25.md) | Plan | F1–F15 kademeli iyileştirme planı (kontrast, i18n, skeleton, video, a11y, perf) — kod önerileri + dalga bazlı uygulama sırası |
+| [inner-hub-live-panel-handoff-2026-07-25.md](./inner-hub-live-panel-handoff-2026-07-25.md) | Handoff | Canlı panel wave (API haritası, kalan mock, Cursor↔Claude paralel çalışma) |
 
-**Sıra:** önce Brand & Panel → sonra Deep UX.
+**Sıra:** önce Brand & Panel → sonra Deep UX.  
+**Paralel agent’lar:** güncel durum için `inner-hub-live-panel-handoff-2026-07-25.md`.
