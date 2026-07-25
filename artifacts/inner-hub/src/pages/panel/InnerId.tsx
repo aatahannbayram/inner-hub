@@ -67,11 +67,11 @@ function IdCard() {
         {/* Left — identity info */}
         <div className="flex-1">
           <div className="mb-4 flex items-center gap-2">
-            <span className="font-mono text-[8px] uppercase tracking-widest text-[var(--bone)]/30">
+            <span className="font-mono text-[8px] uppercase tracking-widest text-[var(--bone)]/47">
               inner·id
             </span>
-            <span className="font-mono text-[8px] text-[var(--bone)]/20">·</span>
-            <span className="font-mono text-[8px] uppercase tracking-widest text-[var(--bone)]/30">
+            <span className="font-mono text-[8px] text-[var(--bone)]/37">·</span>
+            <span className="font-mono text-[8px] uppercase tracking-widest text-[var(--bone)]/47">
               {IDENTITY.cohort}
             </span>
           </div>
@@ -88,7 +88,7 @@ function IdCard() {
             )}
           </div>
 
-          <p className="mb-4 font-mono text-[11px] text-[var(--bone)]/40">
+          <p className="mb-4 font-mono text-[11px] text-[var(--bone)]/57">
             @{IDENTITY.handle} · {IDENTITY.role}, {IDENTITY.company}
           </p>
 
@@ -109,7 +109,7 @@ function IdCard() {
         <div className="flex flex-col items-end gap-3 shrink-0">
           {/* QR mock */}
           <div className="flex size-16 items-center justify-center border border-[var(--bone)]/15 bg-[var(--bone)]/5">
-            <QrCode className="size-8 text-[var(--bone)]/25" />
+            <QrCode className="size-8 text-[var(--bone)]/42" />
           </div>
           <span className="border border-[var(--inner-green)]/40 bg-[var(--inner-green)]/10 px-2.5 py-1 font-mono text-[8px] uppercase tracking-widest text-[var(--inner-green)]">
             {IDENTITY.tier}
@@ -122,12 +122,12 @@ function IdCard() {
         <div className="flex items-center gap-4">
           {Object.entries(IDENTITY.stats).map(([k, v]) => (
             <div key={k}>
-              <p className="font-mono text-[8px] uppercase tracking-widest text-[var(--bone)]/25">{k}</p>
+              <p className="font-mono text-[8px] uppercase tracking-widest text-[var(--bone)]/42">{k}</p>
               <p className="font-mono text-sm text-[var(--bone)]/70">{v}</p>
             </div>
           ))}
         </div>
-        <p className="font-mono text-[8px] text-[var(--bone)]/20">
+        <p className="font-mono text-[8px] text-[var(--bone)]/37">
           Üye: {IDENTITY.memberSince}
         </p>
       </div>
@@ -159,7 +159,7 @@ function EmbedSection() {
               "px-4 py-2.5 font-mono text-[9px] uppercase tracking-widest transition-colors border-r border-[var(--ink)]/[0.08] last:border-0",
               tab === t
                 ? "bg-[var(--ink)] text-[var(--bone)]"
-                : "text-[var(--ink)]/35 hover:text-[var(--ink)]",
+                : "text-[var(--ink)]/51 hover:text-[var(--ink)]",
             ].join(" ")}
           >
             {t}
@@ -167,7 +167,7 @@ function EmbedSection() {
         ))}
         <button
           onClick={copy}
-          className="ml-auto flex items-center gap-1.5 px-4 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/30 transition-colors hover:text-[var(--ink)]"
+          className="ml-auto flex items-center gap-1.5 px-4 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/46 transition-colors hover:text-[var(--ink)]"
         >
           <Copy className="size-3" />
           {copied ? "Kopyalandı" : "Kopyala"}
@@ -200,13 +200,13 @@ function PlatformLink({ icon: Icon, label, desc, href, brandColor }: {
         }
         style={brandColor ? { backgroundColor: brandColor, borderColor: brandColor } : undefined}
       >
-        <Icon className={brandColor ? "size-4 text-white" : "size-4 text-[var(--ink)]/40"} />
+        <Icon className={brandColor ? "size-4 text-white" : "size-4 text-[var(--ink)]/56"} />
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-sm text-[var(--ink)]">{label}</p>
-        <p className="font-mono text-[9px] text-[var(--ink)]/30">{desc}</p>
+        <p className="font-mono text-[9px] text-[var(--ink)]/46">{desc}</p>
       </div>
-      <button className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/30 hover:text-[var(--ink)] transition-colors shrink-0">
+      <button className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/46 hover:text-[var(--ink)] transition-colors shrink-0">
         Bağla <ChevronRight className="size-3" />
       </button>
     </div>
@@ -223,7 +223,7 @@ export default function InnerId() {
       {/* Header */}
       <FadeIn>
         <div>
-          <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40 mb-2">
+          <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56 mb-2">
             inner·hub
           </p>
           <h1
@@ -244,13 +244,13 @@ export default function InnerId() {
 
       {/* Public profile URL */}
       <div>
-        <p className="mb-2 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/30">
+        <p className="mb-2 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/46">
           Herkese Açık Profil
         </p>
         <div className="flex items-center gap-2 border border-[var(--ink)]/[0.08] px-4 py-3">
-          <Globe className="size-3.5 text-[var(--ink)]/25 shrink-0" />
+          <Globe className="size-3.5 text-[var(--ink)]/41 shrink-0" />
           <span className="flex-1 font-mono text-[11px] text-[var(--ink)]/60">{publicUrl}</span>
-          <button className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/30 hover:text-[var(--ink)] transition-colors">
+          <button className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/46 hover:text-[var(--ink)] transition-colors">
             <ExternalLink className="size-3" /> Görüntüle
           </button>
         </div>
@@ -258,7 +258,7 @@ export default function InnerId() {
 
       {/* Skills */}
       <div>
-        <p className="mb-2 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/30">
+        <p className="mb-2 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/46">
           Uzmanlıklar
         </p>
         <div className="flex flex-wrap gap-2">
@@ -273,10 +273,10 @@ export default function InnerId() {
       {/* Platform integrations */}
       <section>
         <div className="mb-3 border-t border-[var(--ink)]/[0.08] pt-3">
-          <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40">
+          <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56">
             Platform Bağlantıları
           </p>
-          <p className="mt-0.5 text-xs text-[var(--ink)]/30">inner·id rozetini platformlarda göster</p>
+          <p className="mt-0.5 text-xs text-[var(--ink)]/46">inner·id rozetini platformlarda göster</p>
         </div>
         <div className="space-y-2">
           <PlatformLink icon={Linkedin} label="LinkedIn" desc="Profilinde inner·hub üyeliğini doğrulat" href="#" brandColor="#0A66C2" />
@@ -288,10 +288,10 @@ export default function InnerId() {
       {/* Embed widget */}
       <section>
         <div className="mb-3 border-t border-[var(--ink)]/[0.08] pt-3">
-          <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40">
+          <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56">
             Rozet & Embed
           </p>
-          <p className="mt-0.5 text-xs text-[var(--ink)]/30">
+          <p className="mt-0.5 text-xs text-[var(--ink)]/46">
             Platformuna göre snippet'i seç ve kopyala
           </p>
         </div>
@@ -313,7 +313,7 @@ export default function InnerId() {
       </div>
 
       <div className="border-t border-[var(--ink)]/[0.08] pt-4">
-        <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/20">
+        <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/36">
           inner·id — taşınabilir kimlik · davet bazlı · inner·hub ekosistemi
         </p>
       </div>

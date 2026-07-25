@@ -191,11 +191,11 @@ export default function MemberProfile() {
       <div className="space-y-4">
         <Link
           href="/panel/members"
-          className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/30 hover:text-[var(--ink)] transition-colors"
+          className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/46 hover:text-[var(--ink)] transition-colors"
         >
           <ArrowLeft className="size-3" /> Katılımcılar
         </Link>
-        <p className="text-sm text-[var(--ink)]/40">Üye bulunamadı.</p>
+        <p className="text-sm text-[var(--ink)]/56">Üye bulunamadı.</p>
       </div>
     );
   }
@@ -205,7 +205,7 @@ export default function MemberProfile() {
       {/* Back */}
       <Link
         href="/panel/members"
-        className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/30 hover:text-[var(--ink)] transition-colors"
+        className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/46 hover:text-[var(--ink)] transition-colors"
       >
         <ArrowLeft className="size-3" /> Katılımcılar
       </Link>
@@ -228,18 +228,18 @@ export default function MemberProfile() {
                 <h1 className="text-xl text-[var(--ink)] font-light">{member.name}</h1>
                 {member.verified && <CheckCircle2 className="size-4 text-[var(--inner-green)] shrink-0" />}
               </div>
-              <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40">
+              <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56">
                 {member.title}
               </p>
               <div className="mt-0.5 flex items-center gap-1.5">
-                <Briefcase className="size-2.5 text-[var(--ink)]/30" />
-                <span className="font-mono text-[9px] text-[var(--ink)]/35">{member.company}</span>
+                <Briefcase className="size-2.5 text-[var(--ink)]/46" />
+                <span className="font-mono text-[9px] text-[var(--ink)]/51">{member.company}</span>
               </div>
             </div>
           </div>
 
           {/* Tier */}
-          <span className="shrink-0 border border-[var(--ink)]/10 px-2.5 py-1 font-mono text-[8px] uppercase tracking-widest text-[var(--ink)]/40">
+          <span className="shrink-0 border border-[var(--ink)]/10 px-2.5 py-1 font-mono text-[8px] uppercase tracking-widest text-[var(--ink)]/56">
             {member.tier}
           </span>
         </div>
@@ -248,7 +248,7 @@ export default function MemberProfile() {
         <div className="mt-5 grid grid-cols-4 border-t border-[var(--ink)]/[0.06] pt-4">
           {Object.entries(member.stats).map(([k, v]) => (
             <div key={k} className="text-center">
-              <p className="font-mono text-[7px] uppercase tracking-widest text-[var(--ink)]/25">{k}</p>
+              <p className="font-mono text-[7px] uppercase tracking-widest text-[var(--ink)]/41">{k}</p>
               <p className="mt-0.5 font-mono text-sm text-[var(--ink)]/60 tabular-nums">{v}</p>
             </div>
           ))}
@@ -258,21 +258,21 @@ export default function MemberProfile() {
         <div className="mt-3 flex items-center justify-between border-t border-[var(--ink)]/[0.06] pt-3">
           <div className="flex items-center gap-2">
             <ActivityDot level={member.activity} />
-            <span className="font-mono text-[9px] text-[var(--ink)]/30">{member.activity} aktivite</span>
+            <span className="font-mono text-[9px] text-[var(--ink)]/46">{member.activity} aktivite</span>
           </div>
-          <span className="font-mono text-[9px] text-[var(--ink)]/20">Üye: {member.memberSince}</span>
+          <span className="font-mono text-[9px] text-[var(--ink)]/36">Üye: {member.memberSince}</span>
         </div>
       </div>
 
       {/* Bio */}
       <div>
-        <p className="mb-2 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/30">Hakkında</p>
+        <p className="mb-2 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/46">Hakkında</p>
         <p className="text-sm leading-relaxed text-[var(--ink)]/60 font-light">{member.bio}</p>
       </div>
 
       {/* Tags */}
       <div>
-        <p className="mb-2 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/30">Uzmanlıklar</p>
+        <p className="mb-2 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/46">Uzmanlıklar</p>
         <div className="flex flex-wrap gap-1.5">
           {member.tags.map((t) => (
             <span key={t} className="border border-[var(--ink)]/10 px-2.5 py-1 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/50">
@@ -284,7 +284,7 @@ export default function MemberProfile() {
 
       {/* Expertise */}
       <div className="border border-[var(--ink)]/[0.08] p-5">
-        <p className="mb-3 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/30">Yetkinlik Alanları</p>
+        <p className="mb-3 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/46">Yetkinlik Alanları</p>
         <div className="space-y-1.5">
           {member.expertise.map((e, i) => (
             <div key={e} className="flex items-center gap-3">
@@ -294,7 +294,7 @@ export default function MemberProfile() {
                   style={{ width: `${100 - i * 15}%` }}
                 />
               </div>
-              <span className="w-40 shrink-0 font-mono text-[9px] text-[var(--ink)]/40">{e}</span>
+              <span className="w-40 shrink-0 font-mono text-[9px] text-[var(--ink)]/56">{e}</span>
             </div>
           ))}
         </div>
@@ -303,23 +303,23 @@ export default function MemberProfile() {
       {/* Social */}
       {(member.linkedin || member.github || member.website) && (
         <div>
-          <p className="mb-2 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/30">Bağlantılar</p>
+          <p className="mb-2 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/46">Bağlantılar</p>
           <div className="flex gap-2">
             {member.linkedin && (
               <a href={`https://${member.linkedin}`} target="_blank" rel="noopener noreferrer"
-                className="flex items-center gap-1.5 border border-[var(--ink)]/10 px-3 py-2 font-mono text-[9px] text-[var(--ink)]/40 hover:text-[var(--ink)] hover:border-[var(--ink)]/20 transition-colors">
+                className="flex items-center gap-1.5 border border-[var(--ink)]/10 px-3 py-2 font-mono text-[9px] text-[var(--ink)]/56 hover:text-[var(--ink)] hover:border-[var(--ink)]/20 transition-colors">
                 <Linkedin className="size-3" /> LinkedIn
               </a>
             )}
             {member.github && (
               <a href={`https://${member.github}`} target="_blank" rel="noopener noreferrer"
-                className="flex items-center gap-1.5 border border-[var(--ink)]/10 px-3 py-2 font-mono text-[9px] text-[var(--ink)]/40 hover:text-[var(--ink)] hover:border-[var(--ink)]/20 transition-colors">
+                className="flex items-center gap-1.5 border border-[var(--ink)]/10 px-3 py-2 font-mono text-[9px] text-[var(--ink)]/56 hover:text-[var(--ink)] hover:border-[var(--ink)]/20 transition-colors">
                 <Github className="size-3" /> GitHub
               </a>
             )}
             {member.website && (
               <a href={`https://${member.website}`} target="_blank" rel="noopener noreferrer"
-                className="flex items-center gap-1.5 border border-[var(--ink)]/10 px-3 py-2 font-mono text-[9px] text-[var(--ink)]/40 hover:text-[var(--ink)] hover:border-[var(--ink)]/20 transition-colors">
+                className="flex items-center gap-1.5 border border-[var(--ink)]/10 px-3 py-2 font-mono text-[9px] text-[var(--ink)]/56 hover:text-[var(--ink)] hover:border-[var(--ink)]/20 transition-colors">
                 <Globe className="size-3" /> Site
               </a>
             )}
@@ -338,7 +338,7 @@ export default function MemberProfile() {
       </div>
 
       <div className="border-t border-[var(--ink)]/[0.08] pt-4">
-        <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/20">
+        <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/36">
           inner·hub · üye profili · @{member.handle}
         </p>
       </div>

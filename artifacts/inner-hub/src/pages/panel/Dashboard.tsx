@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { ArrowRight, BookOpen, CalendarDays, Gift } from "lucide-react";
 import { Link } from "wouter";
 import { FadeIn } from "@/components/FadeIn";
+import { AsciiField } from "@/components/AsciiField";
 import { EditorialCard } from "@/components/panel/EditorialCard";
 import { AmbientCardBackground } from "@/components/panel/AmbientCardBackground";
 import { apiUrl } from "@/lib/api";
@@ -86,7 +87,7 @@ function StatCard({ label, value, icon: Icon }: { label: string; value: string |
         <Icon className="size-4 text-[var(--ink)]/50" />
       </div>
       <div>
-        <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40">{label}</p>
+        <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56">{label}</p>
         <p className="text-xl font-light tabular-nums text-[var(--ink)]">{value}</p>
       </div>
     </div>
@@ -250,7 +251,7 @@ export default function Dashboard({ userName = "Ata" }: { userName?: string }) {
       <FadeIn delay={0.06}>
         <section>
           <div className="mb-4 border-t border-[var(--ink)]/[0.08] pt-3">
-            <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40">
+            <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56">
               Öne çıkan
             </p>
           </div>
@@ -264,10 +265,11 @@ export default function Dashboard({ userName = "Ata" }: { userName?: string }) {
 
       <FadeIn delay={0.08}>
         <div className="relative overflow-hidden border border-[var(--ink)]/[0.08] bg-[var(--ink)] p-6 text-[var(--bone)]">
+          <AsciiField tone="dark" />
           <AmbientCardBackground />
           <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="mb-1 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)]/40">
+              <p className="mb-1 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)]/57">
                 Yeni Dönem
               </p>
               <p className="text-lg font-light text-[var(--bone)]">2. Kursa Kayıt Ol</p>
@@ -295,10 +297,10 @@ export default function Dashboard({ userName = "Ata" }: { userName?: string }) {
         <FadeIn delay={0.12}>
           <section>
             <div className="mb-4 flex items-baseline justify-between border-t border-[var(--ink)]/[0.08] pt-3">
-              <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40">Kurslarım</p>
+              <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56">Kurslarım</p>
               <Link
                 href="/panel/courses"
-                className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40 transition-colors hover:text-[var(--ink)]"
+                className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56 transition-colors hover:text-[var(--ink)]"
               >
                 Tümü →
               </Link>
@@ -312,7 +314,7 @@ export default function Dashboard({ userName = "Ata" }: { userName?: string }) {
                       <div className="h-full bg-[var(--ink)] transition-all duration-700" style={{ width: `${course.progressPct}%` }} />
                     </div>
                   </div>
-                  <span className="font-mono text-[10px] tabular-nums text-[var(--ink)]/40">%{course.progressPct}</span>
+                  <span className="font-mono text-[10px] tabular-nums text-[var(--ink)]/56">%{course.progressPct}</span>
                 </div>
               ))}
             </div>
@@ -324,12 +326,12 @@ export default function Dashboard({ userName = "Ata" }: { userName?: string }) {
         <section>
           <div className="mb-4 flex items-baseline justify-between border-t border-[var(--ink)]/[0.08] pt-3">
             <div>
-              <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40">Ayrıcalıklar</p>
-              <p className="mt-0.5 text-xs text-[var(--ink)]/30">Program katılımcılarına özel fırsatlar</p>
+              <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56">Ayrıcalıklar</p>
+              <p className="mt-0.5 text-xs text-[var(--ink)]/46">Program katılımcılarına özel fırsatlar</p>
             </div>
             <Link
               href="/panel/perks"
-              className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40 transition-colors hover:text-[var(--ink)]"
+              className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56 transition-colors hover:text-[var(--ink)]"
             >
               Tümü →
             </Link>

@@ -357,7 +357,7 @@ function FeatureCard({ feature, index, setRef }) {
       "data-feature-index": index,
       className: `border border-[var(--bone)]/15 bg-[var(--bone)]/[0.06] p-6 backdrop-blur-sm transition-all duration-700 ease-out md:p-10 ${inView ? "translate-x-0 opacity-100" : "translate-x-16 opacity-0"}`,
       children: [
-        /* @__PURE__ */ jsx("p", { className: "mb-4 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)]/40", children: feature.tag }),
+        /* @__PURE__ */ jsx("p", { className: "mb-4 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)]/57", children: feature.tag }),
         /* @__PURE__ */ jsx("h3", { className: "mb-6 font-serif text-xl italic text-[var(--bone)] md:text-2xl", children: feature.name }),
         /* @__PURE__ */ jsx("div", { className: "mb-6 aspect-video overflow-hidden bg-black/30", children: feature.media.type === "video" ? /* @__PURE__ */ jsx(
           "video",
@@ -402,7 +402,7 @@ function PlatformFeatures({
   return /* @__PURE__ */ jsx("div", { className: "bg-[var(--ink)] px-6 py-20 text-[var(--bone)] md:px-12 md:py-40 lg:px-[10%] lg:py-48", children: /* @__PURE__ */ jsxs("div", { className: "grid grid-cols-1 gap-16 lg:grid-cols-[400px_1fr] lg:gap-24 xl:grid-cols-[460px_1fr] xl:gap-48", children: [
     /* @__PURE__ */ jsxs("div", { className: "lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col lg:justify-between lg:py-32", children: [
       /* @__PURE__ */ jsxs("div", { children: [
-        /* @__PURE__ */ jsx("p", { className: "mb-4 font-mono text-xs uppercase tracking-widest text-[var(--bone)]/40", children: "03 · The platform" }),
+        /* @__PURE__ */ jsx("p", { className: "mb-4 font-mono text-xs uppercase tracking-widest text-[var(--bone)]/57", children: "03 · The platform" }),
         /* @__PURE__ */ jsx("h2", { className: "font-display font-serif italic text-2xl leading-[1.2] sm:text-3xl lg:text-[46px]", children: "Built for the pace of a closed circle." })
       ] }),
       /* @__PURE__ */ jsx("div", { className: "mt-12 hidden flex-col gap-2 lg:flex", children: features.map((f, i) => /* @__PURE__ */ jsx(
@@ -410,7 +410,7 @@ function PlatformFeatures({
         {
           type: "button",
           onClick: () => scrollToCard(i),
-          className: `border px-4 py-3 text-left font-mono text-xs uppercase tracking-widest transition-colors ${activeIndex === i ? "border-[var(--bone)]/20 bg-[var(--bone)]/10 text-[var(--bone)]" : "border-transparent text-[var(--bone)]/40 hover:text-[var(--bone)]/70"}`,
+          className: `border px-4 py-3 text-left font-mono text-xs uppercase tracking-widest transition-colors ${activeIndex === i ? "border-[var(--bone)]/20 bg-[var(--bone)]/10 text-[var(--bone)]" : "border-transparent text-[var(--bone)]/57 hover:text-[var(--bone)]/70"}`,
           children: f.name
         },
         f.id
@@ -444,7 +444,7 @@ function PlatformFeatures({
         f.id
       )),
       restModules.length > 0 && /* @__PURE__ */ jsxs("div", { className: "mt-6 border-t border-[var(--bone)]/15 pt-10", children: [
-        /* @__PURE__ */ jsxs("p", { className: "mb-6 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)]/40", children: [
+        /* @__PURE__ */ jsxs("p", { className: "mb-6 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)]/57", children: [
           "+",
           restModules.length,
           " more tools"
@@ -454,7 +454,7 @@ function PlatformFeatures({
           return /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-3 bg-[var(--ink)] p-6", children: [
             /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between", children: [
               /* @__PURE__ */ jsx(Icon, { className: "size-4 text-[var(--bone)]/50", strokeWidth: 1.5 }),
-              /* @__PURE__ */ jsx("span", { className: "font-mono text-[9px] uppercase tracking-widest text-[var(--bone)]/30", children: mod.tag })
+              /* @__PURE__ */ jsx("span", { className: "font-mono text-[9px] uppercase tracking-widest text-[var(--bone)]/47", children: mod.tag })
             ] }),
             /* @__PURE__ */ jsx("h4", { className: "font-serif italic text-lg text-[var(--bone)]/90", children: mod.name }),
             /* @__PURE__ */ jsx("p", { className: "text-sm leading-relaxed text-[var(--bone)]/50", children: mod.desc })

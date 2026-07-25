@@ -157,10 +157,10 @@ function DetailPanel({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-[var(--ink)]/[0.08] px-5 py-4">
-          <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/30">Başvuru Detayı</p>
+          <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/46">Başvuru Detayı</p>
           <button
             onClick={onClose}
-            className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/30 hover:text-[var(--ink)] transition-colors"
+            className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/46 hover:text-[var(--ink)] transition-colors"
           >
             ← Kapat
           </button>
@@ -172,17 +172,17 @@ function DetailPanel({
             <div className="mb-1 flex items-start justify-between gap-3">
               <div>
                 <p className="text-lg text-[var(--ink)] font-light">{app.name}</p>
-                <p className="font-mono text-[10px] text-[var(--ink)]/40">{app.email}</p>
+                <p className="font-mono text-[10px] text-[var(--ink)]/56">{app.email}</p>
               </div>
               <StatusBadge status={app.status} />
             </div>
-            <p className="mt-1 font-mono text-[9px] text-[var(--ink)]/40">{app.role}, {app.company}</p>
+            <p className="mt-1 font-mono text-[9px] text-[var(--ink)]/56">{app.role}, {app.company}</p>
           </div>
 
           {/* Tags */}
           <div className="flex flex-wrap gap-1.5">
             {app.tags.map((t) => (
-              <span key={t} className="border border-[var(--ink)]/10 px-2 py-0.5 font-mono text-[8px] uppercase tracking-widest text-[var(--ink)]/40">
+              <span key={t} className="border border-[var(--ink)]/10 px-2 py-0.5 font-mono text-[8px] uppercase tracking-widest text-[var(--ink)]/56">
                 {t}
               </span>
             ))}
@@ -190,22 +190,22 @@ function DetailPanel({
 
           {/* Why */}
           <div className="border-l-2 border-[var(--ink)]/10 pl-4">
-            <p className="mb-1 font-mono text-[8px] uppercase tracking-widest text-[var(--ink)]/25">Neden inner·hub?</p>
+            <p className="mb-1 font-mono text-[8px] uppercase tracking-widest text-[var(--ink)]/41">Neden inner·hub?</p>
             <p className="text-sm leading-relaxed text-[var(--ink)]/70 font-light">{app.why}</p>
           </div>
 
           {/* Meta */}
           <div className="space-y-2 border border-[var(--ink)]/[0.08] p-3">
             <div className="flex justify-between">
-              <span className="font-mono text-[9px] text-[var(--ink)]/30">Başvuru Tarihi</span>
+              <span className="font-mono text-[9px] text-[var(--ink)]/46">Başvuru Tarihi</span>
               <span className="font-mono text-[9px] text-[var(--ink)]/50">{app.appliedAt}</span>
             </div>
             <div className="flex justify-between">
-              <span className="font-mono text-[9px] text-[var(--ink)]/30">Referans</span>
+              <span className="font-mono text-[9px] text-[var(--ink)]/46">Referans</span>
               <span className="font-mono text-[9px] text-[var(--ink)]/50">{app.referrer ?? "—"}</span>
             </div>
             <div className="flex justify-between">
-              <span className="font-mono text-[9px] text-[var(--ink)]/30">LinkedIn</span>
+              <span className="font-mono text-[9px] text-[var(--ink)]/46">LinkedIn</span>
               <span className="font-mono text-[9px] text-[var(--ink)]/50 truncate max-w-[140px]">{app.linkedinUrl}</span>
             </div>
           </div>
@@ -216,7 +216,7 @@ function DetailPanel({
           <div className="border-t border-[var(--ink)]/[0.08] flex">
             <button
               onClick={onReject}
-              className="flex-1 border-r border-[var(--ink)]/[0.08] py-3.5 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/40 hover:bg-[var(--error)]/5 hover:text-[var(--error)] transition-colors"
+              className="flex-1 border-r border-[var(--ink)]/[0.08] py-3.5 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/56 hover:bg-[var(--error)]/5 hover:text-[var(--error)] transition-colors"
             >
               Reddet
             </button>
@@ -277,7 +277,7 @@ export default function ApplicationsPage() {
       {/* Header */}
       <FadeIn>
         <div>
-          <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40 mb-2">
+          <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56 mb-2">
             inner·hub — Admin
           </p>
           <h1
@@ -301,7 +301,7 @@ export default function ApplicationsPage() {
           { label: "Reddedildi", val: counts.Reddedildi, color: "text-[var(--error)]" },
         ].map((s) => (
           <div key={s.label} className="border border-[var(--ink)]/[0.08] p-4">
-            <p className="font-mono text-[8px] uppercase tracking-widest text-[var(--ink)]/30">{s.label}</p>
+            <p className="font-mono text-[8px] uppercase tracking-widest text-[var(--ink)]/46">{s.label}</p>
             <p className={`mt-1 font-serif text-2xl ${s.color}`}
               style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}>
               {s.val}
@@ -322,7 +322,7 @@ export default function ApplicationsPage() {
                 "border-y border-r first:border-l px-3 py-1.5 font-mono text-[8px] uppercase tracking-widest transition-colors",
                 filter === f
                   ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--bone)]"
-                  : "border-[var(--ink)]/15 text-[var(--ink)]/30 hover:text-[var(--ink)]",
+                  : "border-[var(--ink)]/15 text-[var(--ink)]/46 hover:text-[var(--ink)]",
               ].join(" ")}
             >
               {f}
@@ -333,9 +333,9 @@ export default function ApplicationsPage() {
 
         {/* Search */}
         <div className="flex flex-1 items-center gap-2 border border-[var(--ink)]/[0.08] px-3 py-1.5">
-          <Search className="size-3 text-[var(--ink)]/25 shrink-0" />
+          <Search className="size-3 text-[var(--ink)]/41 shrink-0" />
           <input
-            className="flex-1 bg-transparent text-xs text-[var(--ink)] placeholder:text-[var(--ink)]/25 outline-none font-light"
+            className="flex-1 bg-transparent text-xs text-[var(--ink)] placeholder:text-[var(--ink)]/41 outline-none font-light"
             placeholder="Ad, şirket, etiket..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -347,8 +347,8 @@ export default function ApplicationsPage() {
       <div className="border border-[var(--ink)]/[0.08]">
         {filtered.length === 0 ? (
           <div className="px-5 py-10 text-center">
-            <SlidersHorizontal className="mx-auto mb-3 size-6 text-[var(--ink)]/15" />
-            <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/25">Sonuç bulunamadı</p>
+            <SlidersHorizontal className="mx-auto mb-3 size-6 text-[var(--ink)]/31" />
+            <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/41">Sonuç bulunamadı</p>
           </div>
         ) : (
           filtered.map((app, i) => (
@@ -361,7 +361,7 @@ export default function ApplicationsPage() {
               ].join(" ")}
             >
               {/* Avatar */}
-              <div className="flex size-8 shrink-0 items-center justify-center bg-[var(--ink)]/[0.06] font-mono text-[10px] text-[var(--ink)]/40">
+              <div className="flex size-8 shrink-0 items-center justify-center bg-[var(--ink)]/[0.06] font-mono text-[10px] text-[var(--ink)]/56">
                 {app.name.split(" ").map((w) => w[0]).slice(0, 2).join("")}
               </div>
 
@@ -370,16 +370,16 @@ export default function ApplicationsPage() {
                 <div className="flex items-center gap-2">
                   <p className="text-sm text-[var(--ink)] font-light">{app.name}</p>
                   {app.referrer && (
-                    <span className="font-mono text-[8px] text-[var(--ink)]/30">ref: {app.referrer.split(" ")[0]}</span>
+                    <span className="font-mono text-[8px] text-[var(--ink)]/46">ref: {app.referrer.split(" ")[0]}</span>
                   )}
                 </div>
-                <p className="font-mono text-[9px] text-[var(--ink)]/35">{app.role}, {app.company}</p>
+                <p className="font-mono text-[9px] text-[var(--ink)]/51">{app.role}, {app.company}</p>
               </div>
 
               {/* Tags */}
               <div className="hidden sm:flex gap-1">
                 {app.tags.slice(0, 2).map((t) => (
-                  <span key={t} className="border border-[var(--ink)]/[0.08] px-2 py-0.5 font-mono text-[7px] uppercase tracking-widest text-[var(--ink)]/30">
+                  <span key={t} className="border border-[var(--ink)]/[0.08] px-2 py-0.5 font-mono text-[7px] uppercase tracking-widest text-[var(--ink)]/46">
                     {t}
                   </span>
                 ))}
@@ -388,17 +388,17 @@ export default function ApplicationsPage() {
               {/* Status + date */}
               <div className="flex shrink-0 flex-col items-end gap-1">
                 <StatusBadge status={app.status} />
-                <span className="font-mono text-[8px] text-[var(--ink)]/20">{app.appliedAt}</span>
+                <span className="font-mono text-[8px] text-[var(--ink)]/36">{app.appliedAt}</span>
               </div>
 
-              <ChevronRight className="size-3.5 shrink-0 text-[var(--ink)]/20" />
+              <ChevronRight className="size-3.5 shrink-0 text-[var(--ink)]/36" />
             </div>
           ))
         )}
       </div>
 
       <div className="border-t border-[var(--ink)]/[0.08] pt-4">
-        <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/20">
+        <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/36">
           inner·hub · başvurular · yalnızca admin
         </p>
       </div>

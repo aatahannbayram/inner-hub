@@ -43,7 +43,7 @@ export default function PaymentSuccess() {
   if (status === "loading") {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
-        <Loader2 className="size-6 animate-spin text-[var(--ink)]/30" />
+        <Loader2 className="size-6 animate-spin text-[var(--ink)]/46" />
       </div>
     );
   }
@@ -75,7 +75,7 @@ export default function PaymentSuccess() {
       </div>
 
       {/* Heading */}
-      <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40 mb-3">
+      <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56 mb-3">
         inner·hub
       </p>
       <h1
@@ -90,7 +90,7 @@ export default function PaymentSuccess() {
       <div className="mb-8 border border-[var(--ink)]/[0.08] p-5 space-y-3">
         {type === "membership" && plan && (
           <div className="flex items-center justify-between">
-            <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40">Plan</span>
+            <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56">Plan</span>
             <span className="text-sm font-medium text-[var(--ink)]">
               {planLabels[plan] ?? plan}
             </span>
@@ -98,18 +98,18 @@ export default function PaymentSuccess() {
         )}
         {type === "event" && (
           <div className="flex items-center justify-between">
-            <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40">Etkinlik</span>
+            <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56">Etkinlik</span>
             <span className="text-sm font-medium text-[var(--ink)]">AI & Girişimcilik Zirvesi</span>
           </div>
         )}
         {email && (
           <div className="flex items-center justify-between border-t border-[var(--ink)]/[0.06] pt-3">
-            <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40">E-posta</span>
+            <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56">E-posta</span>
             <span className="text-sm text-[var(--ink)]/70">{email}</span>
           </div>
         )}
         <div className="flex items-center justify-between border-t border-[var(--ink)]/[0.06] pt-3">
-          <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40">Durum</span>
+          <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56">Durum</span>
           <span className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-[var(--inner-green)]">
             <span className="size-1.5 rounded-full bg-[var(--inner-green)]" />
             Aktif
@@ -119,32 +119,32 @@ export default function PaymentSuccess() {
 
       {/* What's next */}
       <div className="mb-8 space-y-2">
-        <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40 mb-3">
+        <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56 mb-3">
           Sırada ne var?
         </p>
         {type === "membership" ? (
           <>
             <div className="flex items-start gap-3">
-              <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center border border-[var(--ink)]/10 font-mono text-[9px] text-[var(--ink)]/40">1</span>
+              <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center border border-[var(--ink)]/10 font-mono text-[9px] text-[var(--ink)]/56">1</span>
               <p className="text-sm text-[var(--ink)]/60">Profilini tamamla — ekibe kim olduğunu göster.</p>
             </div>
             <div className="flex items-start gap-3">
-              <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center border border-[var(--ink)]/10 font-mono text-[9px] text-[var(--ink)]/40">2</span>
+              <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center border border-[var(--ink)]/10 font-mono text-[9px] text-[var(--ink)]/56">2</span>
               <p className="text-sm text-[var(--ink)]/60">Topluluk chat'e katıl ve kendini tanıt.</p>
             </div>
             <div className="flex items-start gap-3">
-              <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center border border-[var(--ink)]/10 font-mono text-[9px] text-[var(--ink)]/40">3</span>
+              <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center border border-[var(--ink)]/10 font-mono text-[9px] text-[var(--ink)]/56">3</span>
               <p className="text-sm text-[var(--ink)]/60">İlk etkinliğine kayıt ol ve yüz yüze tanış.</p>
             </div>
           </>
         ) : (
           <>
             <div className="flex items-start gap-3">
-              <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center border border-[var(--ink)]/10 font-mono text-[9px] text-[var(--ink)]/40">1</span>
+              <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center border border-[var(--ink)]/10 font-mono text-[9px] text-[var(--ink)]/56">1</span>
               <p className="text-sm text-[var(--ink)]/60">Bilet onayın e-posta adresine gönderildi.</p>
             </div>
             <div className="flex items-start gap-3">
-              <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center border border-[var(--ink)]/10 font-mono text-[9px] text-[var(--ink)]/40">2</span>
+              <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center border border-[var(--ink)]/10 font-mono text-[9px] text-[var(--ink)]/56">2</span>
               <p className="text-sm text-[var(--ink)]/60">Etkinlik günü giriş için bileti hazır bulundur.</p>
             </div>
           </>

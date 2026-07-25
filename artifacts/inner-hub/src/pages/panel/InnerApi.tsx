@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { FadeIn } from "@/components/FadeIn";
+import { AsciiField } from "@/components/AsciiField";
 import { CurrencyValue } from "@/components/panel/CurrencyValue";
 import { AmbientCardBackground } from "@/components/panel/AmbientCardBackground";
 import {
@@ -8,9 +9,6 @@ import {
   CheckCircle2,
   AlertCircle,
   Code2,
-  Zap,
-  Users,
-  BarChart2,
   ArrowUpRight,
   Eye,
   EyeOff,
@@ -129,7 +127,7 @@ function UsageChart() {
       </div>
       <div className="flex gap-1.5">
         {USAGE_DATA.map((d) => (
-          <span key={d.day} className="flex-1 text-center font-mono text-[7px] text-[var(--ink)]/25">{d.day}</span>
+          <span key={d.day} className="flex-1 text-center font-mono text-[7px] font-medium text-[var(--ink)]/45">{d.day}</span>
         ))}
       </div>
     </div>
@@ -155,41 +153,45 @@ export default function InnerApi() {
   };
 
   const METHOD_COLORS: Record<string, string> = {
-    GET: "text-[var(--inner-green)] border-[var(--inner-green)]/25 bg-[var(--inner-green)]/8",
-    POST: "text-amber-600 border-amber-300/40 bg-amber-50/60",
+    GET: "text-[var(--inner-green)] border-[var(--inner-green)]/30 bg-[var(--inner-green)]/8",
+    POST: "text-amber-700 border-amber-300/50 bg-amber-50/60",
   };
 
   const STATUS_COLORS: Record<string, string> = {
-    stable: "text-[var(--ink)]/40 border-[var(--ink)]/10",
-    beta: "text-amber-600 border-amber-300/40",
+    stable: "text-[var(--ink)]/60 border-[var(--ink)]/15",
+    beta: "text-amber-700 border-amber-300/50",
   };
 
   return (
     <div className="space-y-8 max-w-4xl">
-      {/* Header */}
+      {/* Hero banner */}
       <FadeIn>
-        <div className="flex items-start justify-between">
-          <div>
-            <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40 mb-2">
-              inner·hub
-            </p>
-            <h1
-              className="font-serif font-display text-4xl md:text-5xl text-[var(--ink)]"
-              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
+        <div className="relative overflow-hidden border border-[var(--ink)]/[0.08] bg-[var(--ink)] p-6 text-[var(--bone)] sm:p-8">
+          <AsciiField tone="dark" />
+          <AmbientCardBackground />
+          <div className="relative z-10 flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <p className="font-mono text-[10px] font-semibold uppercase tracking-widest text-[var(--bone)]/60 mb-2">
+                inner·hub
+              </p>
+              <h1
+                className="font-serif font-display text-3xl text-[var(--bone)] sm:text-4xl md:text-5xl"
+                style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
+              >
+                inner·api
+                <span className="inline-block size-[0.35em] translate-y-[0.08em] ml-[0.05em] bg-[var(--inner-green)]" />
+              </h1>
+              <p className="mt-2 max-w-md text-sm text-[var(--bone)]/65 font-light">
+                Topluluk altyapısına programatik erişim. Kendi ürününe entegre et.
+              </p>
+            </div>
+            <a
+              href="#"
+              className="flex shrink-0 items-center justify-center gap-1.5 border border-[var(--bone)]/25 px-3 py-2 font-mono text-[9px] font-semibold uppercase tracking-widest text-[var(--bone)]/70 transition-all hover:border-[var(--bone)]/50 hover:text-[var(--bone)] sm:justify-start"
             >
-              inner·api
-              <span className="inline-block size-[0.35em] translate-y-[0.08em] ml-[0.05em] bg-[var(--inner-green)]" />
-            </h1>
-            <p className="mt-2 text-sm text-[var(--ink)]/50 font-light">
-              Topluluk altyapısına programatik erişim. Kendi ürününe entegre et.
-            </p>
+              <Code2 className="size-3" /> Dokümantasyon <ArrowUpRight className="size-2.5" />
+            </a>
           </div>
-          <a
-            href="#"
-            className="flex items-center gap-1.5 border border-[var(--ink)]/15 px-3 py-2 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/40 transition-all hover:border-[var(--ink)]/30 hover:text-[var(--ink)]"
-          >
-            <Code2 className="size-3" /> Dokümantasyon <ArrowUpRight className="size-2.5" />
-          </a>
         </div>
       </FadeIn>
 
@@ -197,14 +199,14 @@ export default function InnerApi() {
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {STATS.map((s) => (
           <div key={s.label} className="border border-[var(--ink)]/[0.08] p-4">
-            <p className="font-mono text-[8px] uppercase tracking-widest text-[var(--ink)]/25">{s.label}</p>
+            <p className="font-mono text-[8px] font-medium uppercase tracking-widest text-[var(--ink)]/45">{s.label}</p>
             <p
-              className="mt-1 font-serif text-2xl text-[var(--ink)]"
+              className="mt-1 font-serif text-xl text-[var(--ink)] sm:text-2xl"
               style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
             >
               {s.value}
             </p>
-            <p className="mt-0.5 font-mono text-[8px] text-[var(--ink)]/25">{s.sub}</p>
+            <p className="mt-0.5 font-mono text-[8px] font-medium text-[var(--ink)]/45">{s.sub}</p>
           </div>
         ))}
       </div>
@@ -212,32 +214,32 @@ export default function InnerApi() {
       {/* API Key */}
       <section>
         <div className="mb-3 border-t border-[var(--ink)]/[0.08] pt-3">
-          <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40">API Anahtarı</p>
-          <p className="mt-0.5 text-xs text-[var(--ink)]/30">Anahtarı güvende tut — kimseyle paylaşma</p>
+          <p className="font-mono text-[10px] font-semibold uppercase tracking-widest text-[var(--ink)]/65">API Anahtarı</p>
+          <p className="mt-0.5 text-xs font-medium text-[var(--ink)]/50">Anahtarı güvende tut — kimseyle paylaşma</p>
         </div>
         <div className="flex items-center gap-2 border border-[var(--ink)]/[0.08] bg-[var(--ink)]/[0.02] px-4 py-3">
-          <Code2 className="size-3.5 shrink-0 text-[var(--ink)]/20" />
-          <code className="flex-1 font-mono text-[10px] text-[var(--ink)]/55 truncate">
+          <Code2 className="size-3.5 shrink-0 text-[var(--ink)]/40" />
+          <code className="flex-1 font-mono text-[10px] font-medium text-[var(--ink)]/65 truncate">
             {showKey ? API_KEY : API_KEY_MASKED}
           </code>
           <div className="flex items-center gap-1 shrink-0">
             <button
               onClick={() => setShowKey((v) => !v)}
-              className="p-1.5 text-[var(--ink)]/25 hover:text-[var(--ink)] transition-colors"
+              className="p-1.5 text-[var(--ink)]/45 hover:text-[var(--ink)] transition-colors"
               title={showKey ? "Gizle" : "Göster"}
             >
               {showKey ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
             </button>
             <button
               onClick={copyKey}
-              className="flex items-center gap-1 p-1.5 font-mono text-[8px] uppercase tracking-widest text-[var(--ink)]/25 hover:text-[var(--ink)] transition-colors"
+              className="flex items-center gap-1 p-1.5 font-mono text-[8px] font-medium uppercase tracking-widest text-[var(--ink)]/45 hover:text-[var(--ink)] transition-colors"
             >
               <Copy className="size-3.5" />
               {copied ? "Kopyalandı" : "Kopyala"}
             </button>
             <button
               onClick={rotateKey}
-              className="p-1.5 text-[var(--ink)]/25 hover:text-[var(--error)] transition-colors"
+              className="p-1.5 text-[var(--ink)]/45 hover:text-[var(--error)] transition-colors"
               title="Anahtarı yenile"
             >
               <RefreshCw className={`size-3.5 ${rotating ? "animate-spin" : ""}`} />
@@ -245,7 +247,7 @@ export default function InnerApi() {
           </div>
         </div>
         {rotating && (
-          <p className="mt-2 font-mono text-[9px] uppercase tracking-widest text-amber-600">
+          <p className="mt-2 font-mono text-[9px] font-semibold uppercase tracking-widest text-amber-700">
             Eski anahtar 5 dakika içinde devre dışı kalacak
           </p>
         )}
@@ -253,13 +255,13 @@ export default function InnerApi() {
 
       {/* Usage chart */}
       <section className="border border-[var(--ink)]/[0.08] p-5">
-        <div className="mb-4 flex items-center justify-between">
-          <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/40">Bu Hafta Kullanım</p>
+        <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <p className="font-mono text-[9px] font-semibold uppercase tracking-widest text-[var(--ink)]/65">Bu Hafta Kullanım</p>
           <div className="flex items-center gap-1.5">
             <div className="h-1 w-16 bg-[var(--ink)]/[0.06]">
               <div className="h-full bg-[var(--inner-green)]" style={{ width: "25%" }} />
             </div>
-            <span className="font-mono text-[9px] text-[var(--ink)]/40">12.480 / 50.000</span>
+            <span className="font-mono text-[9px] font-medium text-[var(--ink)]/60">12.480 / 50.000</span>
           </div>
         </div>
         <UsageChart />
@@ -268,25 +270,25 @@ export default function InnerApi() {
       {/* Endpoints */}
       <section>
         <div className="mb-4 border-t border-[var(--ink)]/[0.08] pt-3">
-          <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40">Endpoint'ler</p>
+          <p className="font-mono text-[10px] font-semibold uppercase tracking-widest text-[var(--ink)]/65">Endpoint'ler</p>
         </div>
         <div className="space-y-1">
           {ENDPOINTS.map((ep) => (
             <div
               key={ep.path}
-              className="grid grid-cols-[auto_1fr_auto_auto] items-center gap-4 border border-[var(--ink)]/[0.06] px-4 py-3 transition-colors hover:border-[var(--ink)]/15"
+              className="border border-[var(--ink)]/[0.06] px-4 py-3 transition-colors hover:border-[var(--ink)]/15"
             >
-              <span className={`border px-2 py-0.5 font-mono text-[8px] uppercase tracking-widest ${METHOD_COLORS[ep.method]}`}>
-                {ep.method}
-              </span>
-              <div className="min-w-0">
-                <p className="font-mono text-[10px] text-[var(--ink)]/70 truncate">{ep.path}</p>
-                <p className="font-mono text-[8px] text-[var(--ink)]/30 truncate">{ep.desc}</p>
+              <div className="mb-1.5 flex flex-wrap items-center gap-2">
+                <span className={`border px-2 py-0.5 font-mono text-[8px] font-semibold uppercase tracking-widest ${METHOD_COLORS[ep.method]}`}>
+                  {ep.method}
+                </span>
+                <span className={`border px-1.5 py-0.5 font-mono text-[7px] font-semibold uppercase tracking-widest ${STATUS_COLORS[ep.status]}`}>
+                  {ep.status}
+                </span>
+                <span className="ml-auto font-mono text-[8px] font-medium text-[var(--ink)]/45 shrink-0">{ep.rate}</span>
               </div>
-              <span className="font-mono text-[8px] text-[var(--ink)]/25 shrink-0">{ep.rate}</span>
-              <span className={`border px-1.5 py-0.5 font-mono text-[7px] uppercase tracking-widest ${STATUS_COLORS[ep.status]}`}>
-                {ep.status}
-              </span>
+              <p className="font-mono text-[10px] font-medium text-[var(--ink)]/75 truncate">{ep.path}</p>
+              <p className="font-mono text-[8px] font-medium text-[var(--ink)]/50 truncate">{ep.desc}</p>
             </div>
           ))}
         </div>
@@ -295,7 +297,7 @@ export default function InnerApi() {
       {/* Pricing plans */}
       <section>
         <div className="mb-4 border-t border-[var(--ink)]/[0.08] pt-3">
-          <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40">API Planları</p>
+          <p className="font-mono text-[10px] font-semibold uppercase tracking-widest text-[var(--ink)]/65">API Planları</p>
         </div>
         <div className="grid gap-3 sm:grid-cols-3">
           {PLANS.map((plan) => (
@@ -308,14 +310,19 @@ export default function InnerApi() {
                   : "border-[var(--ink)]/[0.08] hover:border-[var(--ink)]/20",
               ].join(" ")}
             >
-              {plan.current && <AmbientCardBackground />}
+              {plan.current && (
+                <>
+                  <AsciiField tone="dark" cell={12} />
+                  <AmbientCardBackground />
+                </>
+              )}
               <div className="relative z-10">
                 <div className="mb-1 flex items-center justify-between">
-                  <p className={`font-mono text-[9px] uppercase tracking-widest ${plan.current ? "text-[var(--bone)]/50" : "text-[var(--ink)]/40"}`}>
+                  <p className={`font-mono text-[9px] font-semibold uppercase tracking-widest ${plan.current ? "text-[var(--bone)]/60" : "text-[var(--ink)]/65"}`}>
                     {plan.name}
                   </p>
                   {plan.current && (
-                    <span className="border border-[var(--inner-green)]/40 px-1.5 py-0.5 font-mono text-[7px] uppercase tracking-widest text-[var(--inner-green)]">
+                    <span className="border border-[var(--inner-green)]/40 px-1.5 py-0.5 font-mono text-[7px] font-semibold uppercase tracking-widest text-[var(--inner-green)]">
                       Mevcut
                     </span>
                   )}
@@ -328,26 +335,26 @@ export default function InnerApi() {
                     <CurrencyValue value={plan.price} />
                   </span>
                   {plan.period && (
-                    <span className={`font-mono text-[9px] ${plan.current ? "text-[var(--bone)]/30" : "text-[var(--ink)]/30"}`}>
+                    <span className={`font-mono text-[9px] font-medium ${plan.current ? "text-[var(--bone)]/55" : "text-[var(--ink)]/50"}`}>
                       {plan.period}
                     </span>
                   )}
                 </div>
-                <p className={`mb-3 font-mono text-[9px] ${plan.current ? "text-[var(--bone)]/40" : "text-[var(--ink)]/35"}`}>
+                <p className={`mb-3 font-mono text-[9px] font-medium ${plan.current ? "text-[var(--bone)]/65" : "text-[var(--ink)]/55"}`}>
                   {plan.requests} istek
                 </p>
                 <ul className="mb-4 space-y-1.5">
                   {plan.features.map((f) => (
                     <li key={f} className="flex items-start gap-2">
-                      <CheckCircle2 className={`mt-0.5 size-3 shrink-0 ${plan.current ? "text-[var(--inner-green)]" : "text-[var(--ink)]/25"}`} />
-                      <span className={`text-xs ${plan.current ? "text-[var(--bone)]/60" : "text-[var(--ink)]/50"}`}>{f}</span>
+                      <CheckCircle2 className={`mt-0.5 size-3 shrink-0 ${plan.current ? "text-[var(--inner-green)]" : "text-[var(--ink)]/45"}`} />
+                      <span className={`text-xs font-medium ${plan.current ? "text-[var(--bone)]/70" : "text-[var(--ink)]/55"}`}>{f}</span>
                     </li>
                   ))}
                 </ul>
                 {!plan.current && (
                   <button className={[
-                    "flex w-full items-center justify-between border px-3 py-2 font-mono text-[9px] uppercase tracking-widest transition-all",
-                    "border-[var(--ink)]/15 text-[var(--ink)]/40 hover:border-[var(--ink)] hover:text-[var(--ink)]",
+                    "flex w-full items-center justify-between border px-3 py-2 font-mono text-[9px] font-semibold uppercase tracking-widest transition-all",
+                    "border-[var(--ink)]/15 text-[var(--ink)]/60 hover:border-[var(--ink)] hover:text-[var(--ink)]",
                   ].join(" ")}>
                     <span>{plan.name === "Starter" ? "Downgrade" : "Upgrade"}</span>
                     <ArrowUpRight className="size-3" />
@@ -361,15 +368,15 @@ export default function InnerApi() {
 
       {/* Warning note */}
       <div className="flex items-start gap-3 border border-[var(--ink)]/[0.08] p-4">
-        <AlertCircle className="size-4 shrink-0 text-[var(--ink)]/25 mt-0.5" />
-        <p className="text-sm leading-relaxed text-[var(--ink)]/40">
+        <AlertCircle className="size-4 shrink-0 text-[var(--ink)]/45 mt-0.5" />
+        <p className="text-sm leading-relaxed font-medium text-[var(--ink)]/60">
           inner·api beta aşamasındadır. Breaking change'ler versiyonlanır ve 30 gün önceden bildirilir.
           Üretim kullanımı için Builder veya Scale planı önerilir.
         </p>
       </div>
 
       <div className="border-t border-[var(--ink)]/[0.08] pt-4">
-        <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/20">
+        <p className="font-mono text-[9px] font-medium uppercase tracking-widest text-[var(--ink)]/40">
           inner·api v1 — REST · JSON · Bearer Auth · Rate limited · inner·hub ekosistemi
         </p>
       </div>

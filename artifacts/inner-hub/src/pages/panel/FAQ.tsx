@@ -96,7 +96,7 @@ function AccordionItem({ q, a }: { q: string; a: string }) {
       >
         <span className="text-sm text-[var(--ink)] font-light leading-relaxed">{q}</span>
         <ChevronDown
-          className={`mt-0.5 size-4 shrink-0 text-[var(--ink)]/30 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+          className={`mt-0.5 size-4 shrink-0 text-[var(--ink)]/46 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
         />
       </button>
       {open && (
@@ -116,7 +116,7 @@ export default function FAQ() {
       {/* Header */}
       <FadeIn>
         <div>
-          <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40 mb-2">
+          <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56 mb-2">
             inner·hub
           </p>
           <h1
@@ -142,7 +142,7 @@ export default function FAQ() {
               "border px-3.5 py-1.5 font-mono text-[9px] uppercase tracking-widest transition-colors",
               activeCategory === cat.category
                 ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--bone)]"
-                : "border-[var(--ink)]/15 text-[var(--ink)]/35 hover:text-[var(--ink)]",
+                : "border-[var(--ink)]/15 text-[var(--ink)]/51 hover:text-[var(--ink)]",
             ].join(" ")}
           >
             {cat.category}
@@ -161,7 +161,7 @@ export default function FAQ() {
 
       {/* Contact */}
       <div className="border border-[var(--ink)]/[0.08] p-5">
-        <p className="mb-1 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/30">
+        <p className="mb-1 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/46">
           Cevap bulamadın mı?
         </p>
         <p className="mb-3 text-sm text-[var(--ink)]/50 font-light">
@@ -169,14 +169,14 @@ export default function FAQ() {
         </p>
         <a
           href="mailto:destek@inner.digital"
-          className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/40 underline underline-offset-2 hover:text-[var(--ink)] transition-colors"
+          className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/56 underline underline-offset-2 hover:text-[var(--ink)] transition-colors"
         >
           destek@inner.digital
         </a>
       </div>
 
       <div className="border-t border-[var(--ink)]/[0.08] pt-4">
-        <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/20">
+        <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/36">
           inner·hub · sık sorulan sorular
         </p>
       </div>

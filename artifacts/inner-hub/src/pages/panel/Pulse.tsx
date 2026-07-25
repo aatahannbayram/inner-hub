@@ -108,7 +108,7 @@ const CAT_COLORS: Record<Trend["category"], string> = {
   teknoloji: "text-[var(--ink)] bg-[var(--ink)]/[0.06] border-[var(--ink)]/10",
   iş: "text-[var(--ink)]/60 bg-[var(--ink)]/[0.03] border-[var(--ink)]/8",
   yatırım: "text-[var(--inner-green)] bg-[var(--inner-green)]/8 border-[var(--inner-green)]/20",
-  kültür: "text-[var(--ink)]/40 bg-transparent border-[var(--ink)]/[0.06]",
+  kültür: "text-[var(--ink)]/56 bg-transparent border-[var(--ink)]/[0.06]",
 };
 
 // ─── Mini bar chart ───────────────────────────────────────────────────────────
@@ -127,11 +127,11 @@ function TrendRow({ trend, rank, maxMentions }: { trend: Trend; rank: number; ma
   const isUp = trend.delta > 0;
   const isFlat = trend.delta === 0;
   const DeltaIcon = isFlat ? Minus : isUp ? TrendingUp : TrendingDown;
-  const deltaColor = isFlat ? "text-[var(--ink)]/30" : isUp ? "text-[var(--inner-green)]" : "text-[var(--error)]";
+  const deltaColor = isFlat ? "text-[var(--ink)]/46" : isUp ? "text-[var(--inner-green)]" : "text-[var(--error)]";
 
   return (
     <div className="flex items-center gap-4 py-2.5 border-b border-[var(--ink)]/[0.05] last:border-0">
-      <span className="w-5 shrink-0 font-mono text-[9px] text-[var(--ink)]/20 text-right">{rank}</span>
+      <span className="w-5 shrink-0 font-mono text-[9px] text-[var(--ink)]/36 text-right">{rank}</span>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1">
           <p className="text-sm text-[var(--ink)] truncate">{trend.topic}</p>
@@ -168,7 +168,7 @@ function ActivityColumns() {
               opacity: w.label === "Bu" ? 1 : 0.15 + (w.activity / max) * 0.25,
             }}
           />
-          <span className="font-mono text-[8px] text-[var(--ink)]/30">{w.label}</span>
+          <span className="font-mono text-[8px] text-[var(--ink)]/46">{w.label}</span>
         </div>
       ))}
     </div>
@@ -195,7 +195,7 @@ export default function Pulse() {
       <FadeIn>
         <div className="flex items-start justify-between">
           <div>
-            <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40 mb-2">
+            <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56 mb-2">
               inner·hub
             </p>
             <h1
@@ -245,8 +245,8 @@ export default function Pulse() {
         ].map((s) => (
           <div key={s.label} className="border border-[var(--ink)]/[0.08] p-4">
             <div className="mb-2 flex items-center justify-between">
-              <p className="font-mono text-[8px] uppercase tracking-widest text-[var(--ink)]/25">{s.label}</p>
-              <s.icon className="size-3 text-[var(--ink)]/15" />
+              <p className="font-mono text-[8px] uppercase tracking-widest text-[var(--ink)]/41">{s.label}</p>
+              <s.icon className="size-3 text-[var(--ink)]/31" />
             </div>
             <p
               className="font-serif text-2xl text-[var(--ink)]"
@@ -254,7 +254,7 @@ export default function Pulse() {
             >
               {s.value}
             </p>
-            <p className="mt-0.5 font-mono text-[8px] text-[var(--ink)]/25">{s.sub}</p>
+            <p className="mt-0.5 font-mono text-[8px] text-[var(--ink)]/41">{s.sub}</p>
           </div>
         ))}
       </div>
@@ -264,7 +264,7 @@ export default function Pulse() {
         {/* Trends */}
         <section>
           <div className="mb-4 border-t border-[var(--ink)]/[0.08] pt-3 flex items-center justify-between">
-            <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40">
+            <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56">
               Trending Konular
             </p>
             <div className="flex gap-1.5">
@@ -276,7 +276,7 @@ export default function Pulse() {
                     "border px-2 py-0.5 font-mono text-[7px] uppercase tracking-widest transition-all",
                     catFilter === c
                       ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--bone)]"
-                      : "border-[var(--ink)]/10 text-[var(--ink)]/30 hover:border-[var(--ink)]/25",
+                      : "border-[var(--ink)]/10 text-[var(--ink)]/46 hover:border-[var(--ink)]/25",
                   ].join(" ")}
                 >
                   {c}
@@ -295,30 +295,30 @@ export default function Pulse() {
         <div className="space-y-6">
           {/* Weekly activity */}
           <section className="border border-[var(--ink)]/[0.08] p-4">
-            <p className="mb-4 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/30">
+            <p className="mb-4 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/46">
               Haftalık Aktivite
             </p>
             <ActivityColumns />
-            <p className="mt-3 font-mono text-[8px] text-[var(--ink)]/20">
+            <p className="mt-3 font-mono text-[8px] text-[var(--ink)]/36">
               Bu hafta %{Math.round(((WEEKLY[3].activity - WEEKLY[2].activity) / WEEKLY[2].activity) * 100)} artış
             </p>
           </section>
 
           {/* Top channels */}
           <section>
-            <p className="mb-3 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/30">
+            <p className="mb-3 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/46">
               En Aktif Kanallar
             </p>
             <div className="space-y-2">
               {CHANNELS.map((ch, i) => (
                 <div key={ch.name} className="flex items-center gap-3 py-1.5 border-b border-[var(--ink)]/[0.05] last:border-0">
-                  <span className="font-mono text-[8px] text-[var(--ink)]/20 w-3">{i + 1}</span>
-                  <Hash className="size-3 text-[var(--ink)]/25 shrink-0" />
+                  <span className="font-mono text-[8px] text-[var(--ink)]/36 w-3">{i + 1}</span>
+                  <Hash className="size-3 text-[var(--ink)]/41 shrink-0" />
                   <div className="flex-1 min-w-0">
                     <p className="text-xs text-[var(--ink)]/70 truncate">{ch.name}</p>
-                    <p className="font-mono text-[7px] text-[var(--ink)]/25 truncate">{ch.trending}</p>
+                    <p className="font-mono text-[7px] text-[var(--ink)]/41 truncate">{ch.trending}</p>
                   </div>
-                  <span className="shrink-0 font-mono text-[9px] text-[var(--ink)]/40">{ch.messages}</span>
+                  <span className="shrink-0 font-mono text-[9px] text-[var(--ink)]/56">{ch.messages}</span>
                 </div>
               ))}
             </div>
@@ -326,7 +326,7 @@ export default function Pulse() {
 
           {/* Top contributors */}
           <section>
-            <p className="mb-3 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/30">
+            <p className="mb-3 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/46">
               Bu Hafta Öne Çıkanlar
             </p>
             <div className="space-y-2">
@@ -351,7 +351,7 @@ export default function Pulse() {
                     </div>
                   </div>
                   <div className="flex items-center gap-1 shrink-0">
-                    <span className="font-mono text-[8px] text-[var(--ink)]/35">{c.streak}g</span>
+                    <span className="font-mono text-[8px] text-[var(--ink)]/51">{c.streak}g</span>
                   </div>
                 </div>
               ))}
@@ -362,7 +362,7 @@ export default function Pulse() {
 
       {/* Footer */}
       <div className="border-t border-[var(--ink)]/[0.08] pt-4">
-        <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/20">
+        <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/36">
           inner·pulse — veriler anonimleştirilmiş · gerçek zamanlı · yalnızca üyeler görür
         </p>
       </div>

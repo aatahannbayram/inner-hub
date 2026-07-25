@@ -74,13 +74,13 @@ function StatCard({
   icon: React.ComponentType<{ className?: string }>;
 }) {
   const trendColor =
-    trend === "up" ? "text-[var(--inner-green)]" : trend === "down" ? "text-[var(--error)]" : "text-[var(--ink)]/30";
+    trend === "up" ? "text-[var(--inner-green)]" : trend === "down" ? "text-[var(--error)]" : "text-[var(--ink)]/46";
 
   return (
     <div className="border border-[var(--ink)]/[0.08] p-5">
       <div className="mb-3 flex items-center justify-between">
-        <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/30">{label}</p>
-        <Icon className="size-3.5 text-[var(--ink)]/20" />
+        <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/46">{label}</p>
+        <Icon className="size-3.5 text-[var(--ink)]/36" />
       </div>
       <p
         className="mb-1 font-serif text-3xl text-[var(--ink)]"
@@ -91,7 +91,7 @@ function StatCard({
       <div className="flex items-center gap-1.5">
         <TrendIcon trend={trend} className={`size-3 ${trendColor}`} />
         <span className={`font-mono text-[9px] ${trendColor}`}>{delta}</span>
-        <span className="font-mono text-[9px] text-[var(--ink)]/20">{sub}</span>
+        <span className="font-mono text-[9px] text-[var(--ink)]/36">{sub}</span>
       </div>
     </div>
   );
@@ -132,11 +132,11 @@ function BarChart<T extends Record<string, number | string>>({
                   opacity: isLast ? 1 : 0.25 + (i / (data.length - 1)) * 0.45,
                 }}
               />
-              <span className="pointer-events-none absolute -top-5 left-1/2 -translate-x-1/2 whitespace-nowrap font-mono text-[8px] text-[var(--ink)]/40 opacity-0 group-hover:opacity-100 transition-opacity">
+              <span className="pointer-events-none absolute -top-5 left-1/2 -translate-x-1/2 whitespace-nowrap font-mono text-[8px] text-[var(--ink)]/56 opacity-0 group-hover:opacity-100 transition-opacity">
                 {formatValue ? formatValue(v) : v}
               </span>
             </div>
-            <span className="font-mono text-[8px] text-[var(--ink)]/30">{String(d[labelKey])}</span>
+            <span className="font-mono text-[8px] text-[var(--ink)]/46">{String(d[labelKey])}</span>
           </div>
         );
       })}
@@ -151,8 +151,8 @@ function Section({ title, sub, children, action }: { title: string; sub?: string
     <div className="border-t border-[var(--ink)]/[0.08] pt-6">
       <div className="mb-4 flex items-start justify-between">
         <div>
-          <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40">{title}</p>
-          {sub && <p className="mt-0.5 text-xs text-[var(--ink)]/30">{sub}</p>}
+          <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56">{title}</p>
+          {sub && <p className="mt-0.5 text-xs text-[var(--ink)]/46">{sub}</p>}
         </div>
         {action}
       </div>
@@ -177,7 +177,7 @@ function RangeSelector({ value, onChange }: { value: Range; onChange: (r: Range)
             "border-y border-r first:border-l first:border-l px-3 py-1 font-mono text-[8px] uppercase tracking-widest transition-colors",
             value === r
               ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--bone)]"
-              : "border-[var(--ink)]/15 text-[var(--ink)]/30 hover:text-[var(--ink)]",
+              : "border-[var(--ink)]/15 text-[var(--ink)]/46 hover:text-[var(--ink)]",
           ].join(" ")}
         >
           {r}
@@ -198,7 +198,7 @@ export default function Analytics() {
       <FadeIn>
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40 mb-2">
+            <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56 mb-2">
               inner·hub — Admin
             </p>
             <h1
@@ -297,7 +297,7 @@ export default function Analytics() {
             const colors = ["var(--ink)", "var(--ink)", "var(--ink)"];
             return (
               <div key={key} className="border border-[var(--ink)]/[0.08] p-4">
-                <p className="mb-3 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/30">
+                <p className="mb-3 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/46">
                   {labels[ki]}
                 </p>
                 <BarChart
@@ -317,7 +317,7 @@ export default function Analytics() {
         <div className="border border-[var(--ink)]/[0.08]">
           <div className="grid grid-cols-[1fr_auto_auto_auto] border-b border-[var(--ink)]/[0.08] px-4 py-2">
             {["Üye", "Katkı", "Etkinlik", "Katıldı"].map((h) => (
-              <p key={h} className="font-mono text-[8px] uppercase tracking-widest text-[var(--ink)]/25 last:text-right">
+              <p key={h} className="font-mono text-[8px] uppercase tracking-widest text-[var(--ink)]/41 last:text-right">
                 {h}
               </p>
             ))}
@@ -328,15 +328,15 @@ export default function Analytics() {
               className="grid grid-cols-[1fr_auto_auto_auto] items-center gap-4 border-b border-[var(--ink)]/[0.05] px-4 py-3 last:border-0"
             >
               <div className="flex items-center gap-3 min-w-0">
-                <span className="font-mono text-[9px] text-[var(--ink)]/20 tabular-nums w-3">{i + 1}</span>
+                <span className="font-mono text-[9px] text-[var(--ink)]/36 tabular-nums w-3">{i + 1}</span>
                 <div className="min-w-0">
                   <p className="truncate text-sm text-[var(--ink)]">{m.name}</p>
-                  <p className="font-mono text-[9px] text-[var(--ink)]/30">@{m.handle}</p>
+                  <p className="font-mono text-[9px] text-[var(--ink)]/46">@{m.handle}</p>
                 </div>
               </div>
               <span className="font-mono text-[11px] tabular-nums text-[var(--ink)]/60">{m.contributions}</span>
-              <span className="font-mono text-[11px] tabular-nums text-[var(--ink)]/40">{m.events}</span>
-              <span className="font-mono text-[9px] text-[var(--ink)]/25 text-right">{m.joined}</span>
+              <span className="font-mono text-[11px] tabular-nums text-[var(--ink)]/56">{m.events}</span>
+              <span className="font-mono text-[9px] text-[var(--ink)]/41 text-right">{m.joined}</span>
             </div>
           ))}
         </div>
@@ -353,7 +353,7 @@ export default function Analytics() {
                 <div className="flex-1 h-1.5 bg-[var(--ink)]/[0.06]">
                   <div className="h-full bg-[var(--ink)]/20" style={{ width: `${pct}%` }} />
                 </div>
-                <span className="w-12 shrink-0 text-right font-mono text-[9px] text-[var(--ink)]/30 tabular-nums">
+                <span className="w-12 shrink-0 text-right font-mono text-[9px] text-[var(--ink)]/46 tabular-nums">
                   {ch.messages}
                 </span>
               </div>
@@ -363,7 +363,7 @@ export default function Analytics() {
       </Section>
 
       <div className="border-t border-[var(--ink)]/[0.08] pt-4">
-        <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/20">
+        <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/36">
           inner·hub · analitik · yalnızca admin
         </p>
       </div>

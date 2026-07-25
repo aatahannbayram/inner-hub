@@ -118,7 +118,7 @@ export function EditorialCard({
             <p
               className={cn(
                 "font-mono text-[9px] uppercase tracking-widest",
-                dark ? "text-[var(--bone)]/40" : "text-[var(--ink)]/40",
+                dark ? "text-[var(--bone)]/57" : "text-[var(--ink)]/56",
               )}
             >
               {eyebrow}

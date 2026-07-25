@@ -68,12 +68,12 @@ function LessonRow({ lesson }: { lesson: Lesson }) {
       {lesson.isCompleted ? (
         <CheckCircle2 className="size-3.5 shrink-0 text-[var(--inner-green)]" />
       ) : lesson.isLocked ? (
-        <Lock className="size-3.5 shrink-0 text-[var(--ink)]/30" />
+        <Lock className="size-3.5 shrink-0 text-[var(--ink)]/46" />
       ) : (
-        <Play className="size-3.5 shrink-0 text-[var(--ink)]/40" />
+        <Play className="size-3.5 shrink-0 text-[var(--ink)]/56" />
       )}
       <span className="flex-1 text-xs text-[var(--ink)]/70">{lesson.title}</span>
-      <span className="font-mono text-[9px] text-[var(--ink)]/30">{lesson.duration}</span>
+      <span className="font-mono text-[9px] text-[var(--ink)]/46">{lesson.duration}</span>
     </div>
   );
 }
@@ -89,12 +89,12 @@ function ModuleAccordion({ module, defaultOpen = false }: { module: Module; defa
         className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-[var(--ink)]/[0.02]"
       >
         {open ? (
-          <ChevronDown className="size-3.5 shrink-0 text-[var(--ink)]/40" />
+          <ChevronDown className="size-3.5 shrink-0 text-[var(--ink)]/56" />
         ) : (
-          <ChevronRight className="size-3.5 shrink-0 text-[var(--ink)]/40" />
+          <ChevronRight className="size-3.5 shrink-0 text-[var(--ink)]/56" />
         )}
         <span className="flex-1 text-xs font-medium text-[var(--ink)]">{module.title}</span>
-        <span className="font-mono text-[9px] text-[var(--ink)]/30">
+        <span className="font-mono text-[9px] text-[var(--ink)]/46">
           {completed}/{module.lessons.length}
         </span>
       </button>
@@ -123,11 +123,11 @@ function CourseCard({ course }: { course: Course }) {
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
-              <span className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/30 border border-[var(--ink)]/10 px-1.5 py-0.5">
+              <span className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/46 border border-[var(--ink)]/10 px-1.5 py-0.5">
                 {course.tag}
               </span>
               {!course.isEnrolled && (
-                <span className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/30">
+                <span className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/46">
                   Kayıt gerekli
                 </span>
               )}
@@ -148,7 +148,7 @@ function CourseCard({ course }: { course: Course }) {
             <p className="font-mono text-2xl tabular-nums text-[var(--ink)]">
               %{course.progressPct}
             </p>
-            <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/30">
+            <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/46">
               tamamlandı
             </p>
           </div>
@@ -168,11 +168,11 @@ function CourseCard({ course }: { course: Course }) {
         <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
           <div>
             <p className="text-xs text-[var(--ink)]/60">{course.instructor}</p>
-            <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/30">
+            <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/46">
               {course.instructorTitle}
             </p>
           </div>
-          <div className="flex items-center gap-4 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/30">
+          <div className="flex items-center gap-4 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/46">
             <span className="flex items-center gap-1">
               <BookOpen className="size-3" />
               {course.completedLessons}/{course.totalLessons} ders
@@ -199,7 +199,7 @@ function CourseCard({ course }: { course: Course }) {
           )}
           <button
             onClick={() => setExpanded((v) => !v)}
-            className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40 hover:text-[var(--ink)] transition-colors"
+            className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56 hover:text-[var(--ink)] transition-colors"
           >
             {expanded ? "Gizle" : "Müfredatı Gör"}
             {expanded ? (
@@ -215,7 +215,7 @@ function CourseCard({ course }: { course: Course }) {
       {expanded && (
         <div className="border-t border-[var(--ink)]/[0.08]">
           {course.modules.length === 0 ? (
-            <p className="px-4 py-3 font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/30">
+            <p className="px-4 py-3 font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/46">
               Müfredat yakında yayınlanacak.
             </p>
           ) : (
@@ -323,8 +323,8 @@ function CoursesStat({
   return (
     <div className="border border-[var(--ink)]/[0.08] p-4">
       <div className="mb-2 flex items-center justify-between">
-        <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/35">{label}</p>
-        <Icon className="size-3.5 text-[var(--ink)]/20" />
+        <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/51">{label}</p>
+        <Icon className="size-3.5 text-[var(--ink)]/36" />
       </div>
       <p
         className="font-serif text-2xl text-[var(--ink)]"
@@ -332,7 +332,7 @@ function CoursesStat({
       >
         {value}
       </p>
-      <p className="mt-1 font-mono text-[9px] text-[var(--ink)]/30">{sub}</p>
+      <p className="mt-1 font-mono text-[9px] text-[var(--ink)]/46">{sub}</p>
     </div>
   );
 }
@@ -391,7 +391,7 @@ export default function CoursesPage() {
       )}
 
       {loading && (
-        <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40">
+        <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56">
           Yükleniyor…
         </p>
       )}
@@ -401,7 +401,7 @@ export default function CoursesPage() {
         </p>
       )}
       {!loading && !error && courses.length === 0 && (
-        <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40">
+        <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56">
           Henüz yayınlanmış kurs yok.
         </p>
       )}
@@ -410,7 +410,7 @@ export default function CoursesPage() {
         <FadeIn delay={0.05}>
           <section id="courses-enrolled" className="scroll-mt-6">
             <div className="mb-3 flex items-center gap-3 border-t border-[var(--ink)]/[0.08] pt-3">
-              <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40">
+              <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56">
                 Kayıtlı Kurslarım
               </p>
               <span className="flex size-4 items-center justify-center bg-[var(--ink)] font-mono text-[9px] text-[var(--bone)]">
@@ -430,7 +430,7 @@ export default function CoursesPage() {
         <FadeIn delay={0.1}>
           <section id="courses-available" className="scroll-mt-6">
             <div className="mb-3 border-t border-[var(--ink)]/[0.08] pt-3">
-              <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40">
+              <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56">
                 Diğer Kurslar
               </p>
             </div>

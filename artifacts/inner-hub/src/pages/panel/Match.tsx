@@ -62,7 +62,7 @@ function MatchCard({ match, index }: { match: Match; index: number }) {
           <div className="flex items-start justify-between gap-2">
             <div>
               <p className="text-base font-medium leading-tight text-[var(--ink)]">{match.name}</p>
-              <p className="mt-0.5 font-mono text-[10px] text-[var(--ink)]/35">{match.company}</p>
+              <p className="mt-0.5 font-mono text-[10px] text-[var(--ink)]/51">{match.company}</p>
             </div>
             <span
               className={[
@@ -74,7 +74,7 @@ function MatchCard({ match, index }: { match: Match; index: number }) {
             </span>
           </div>
           <div className="mt-3">
-            <p className="mb-1 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/25">
+            <p className="mb-1 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/41">
               Uyumluluk
             </p>
             <ScoreBar score={match.score} />
@@ -84,7 +84,7 @@ function MatchCard({ match, index }: { match: Match; index: number }) {
 
       {/* Why section */}
       <div className="mb-4 border-t border-[var(--ink)]/[0.06] pt-4">
-        <p className="mb-1.5 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/30">
+        <p className="mb-1.5 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/46">
           Neden uyumlu?
         </p>
         <p className="text-sm leading-relaxed text-[var(--ink)]/55">{match.why}</p>
@@ -92,14 +92,14 @@ function MatchCard({ match, index }: { match: Match; index: number }) {
 
       {/* Common ground */}
       <div className="mb-5">
-        <p className="mb-2 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/30">
+        <p className="mb-2 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/46">
           Ortak Zemin
         </p>
         <div className="flex flex-wrap gap-1.5">
           {match.commonGround.map((tag) => (
             <span
               key={tag}
-              className="border border-[var(--ink)]/10 px-2 py-0.5 font-mono text-[9px] text-[var(--ink)]/40"
+              className="border border-[var(--ink)]/10 px-2 py-0.5 font-mono text-[9px] text-[var(--ink)]/56"
             >
               {tag}
             </span>
@@ -116,7 +116,7 @@ function MatchCard({ match, index }: { match: Match; index: number }) {
             "flex w-full items-center justify-between border px-4 py-2.5 font-mono text-[10px] uppercase tracking-widest transition-all",
             introduced
               ? "border-[var(--inner-green)]/30 bg-[var(--inner-green)]/5 text-[var(--inner-green)] cursor-default"
-              : "border-[var(--ink)]/15 text-[var(--ink)]/40 hover:border-[var(--ink)] hover:text-[var(--ink)]",
+              : "border-[var(--ink)]/15 text-[var(--ink)]/56 hover:border-[var(--ink)] hover:text-[var(--ink)]",
           ].join(" ")}
         >
           <span>{introduced ? "Tanışma Talebi Gönderildi" : "Tanıştır"}</span>
@@ -265,7 +265,7 @@ export default function Match() {
           <button
             onClick={fetchMatches}
             disabled={loading}
-            className="flex shrink-0 items-center gap-2 border border-[var(--ink)]/15 px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40 transition-all hover:border-[var(--ink)]/40 hover:text-[var(--ink)] disabled:opacity-30"
+            className="flex shrink-0 items-center gap-2 border border-[var(--ink)]/15 px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56 transition-all hover:border-[var(--ink)]/40 hover:text-[var(--ink)] disabled:opacity-30"
           >
             <RefreshCw className={`size-3 ${loading ? "animate-spin" : ""}`} />
             Yenile
@@ -275,7 +275,7 @@ export default function Match() {
 
       {/* Preference filter */}
       <div id="match-preferences" className="scroll-mt-6">
-        <p className="mb-3 font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/30">
+        <p className="mb-3 font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/46">
           Arıyor olduğun
         </p>
         <div className="flex flex-wrap gap-2">
@@ -289,7 +289,7 @@ export default function Match() {
                   "border px-3 py-1.5 font-mono text-[9px] uppercase tracking-widest transition-all",
                   active
                     ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--bone)]"
-                    : "border-[var(--ink)]/15 text-[var(--ink)]/40 hover:border-[var(--ink)]/40 hover:text-[var(--ink)]",
+                    : "border-[var(--ink)]/15 text-[var(--ink)]/56 hover:border-[var(--ink)]/40 hover:text-[var(--ink)]",
                 ].join(" ")}
               >
                 {p}
@@ -309,8 +309,8 @@ export default function Match() {
 
       {loading ? (
         <div className="flex items-center gap-3 py-12">
-          <Loader2 className="size-5 animate-spin text-[var(--ink)]/30" />
-          <span className="font-mono text-[11px] uppercase tracking-widest text-[var(--ink)]/30">
+          <Loader2 className="size-5 animate-spin text-[var(--ink)]/46" />
+          <span className="font-mono text-[11px] uppercase tracking-widest text-[var(--ink)]/46">
             AI eşleşmeleri hesaplıyor…
           </span>
         </div>
@@ -322,10 +322,10 @@ export default function Match() {
         <>
           <div id="match-results" className="scroll-mt-6">
             <div className="mb-4 border-t border-[var(--ink)]/[0.08] pt-3 flex items-center justify-between">
-              <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40">
+              <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56">
                 {data.matches.length} Eşleşme Bulundu
               </p>
-              <p className="font-mono text-[9px] text-[var(--ink)]/20">
+              <p className="font-mono text-[9px] text-[var(--ink)]/36">
                 AI güven skoru ile sıralandı
               </p>
             </div>
@@ -338,10 +338,10 @@ export default function Match() {
 
           {/* How it works */}
           <div className="border border-[var(--ink)]/[0.06] p-5">
-            <p className="mb-3 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/30">
+            <p className="mb-3 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/46">
               Nasıl Çalışır?
             </p>
-            <div className="grid gap-3 sm:grid-cols-3 text-xs text-[var(--ink)]/40 leading-relaxed">
+            <div className="grid gap-3 sm:grid-cols-3 text-xs text-[var(--ink)]/56 leading-relaxed">
               <div>
                 <span className="block font-mono text-[10px] text-[var(--ink)]/60 mb-1">01 Profil Analizi</span>
                 Üye sektörü, deneyimi ve topluluk etkileşimleri analiz edilir.
@@ -360,7 +360,7 @@ export default function Match() {
       ) : null}
 
       <div className="border-t border-[var(--ink)]/[0.08] pt-4">
-        <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/20">
+        <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/36">
           inner·match — claude-haiku-4-5-20251001 ile güçlendirilmiş · Haftalık güncellenir
         </p>
       </div>

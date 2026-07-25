@@ -120,7 +120,7 @@ function PlanCard({ plan }: { plan: Plan }) {
             "absolute right-4 top-4 border px-2 py-0.5 font-mono text-[8px] uppercase tracking-widest",
             plan.highlighted
               ? "border-[var(--inner-green)]/50 bg-[var(--inner-green)]/20 text-[var(--inner-green)]"
-              : "border-[var(--ink)]/15 text-[var(--ink)]/40",
+              : "border-[var(--ink)]/15 text-[var(--ink)]/56",
           ].join(" ")}
         >
           {plan.badge}
@@ -141,14 +141,14 @@ function PlanCard({ plan }: { plan: Plan }) {
           <Icon
             className={[
               "size-4",
-              plan.highlighted ? "text-[var(--bone)]/70" : "text-[var(--ink)]/40",
+              plan.highlighted ? "text-[var(--bone)]/70" : "text-[var(--ink)]/56",
             ].join(" ")}
           />
         </div>
         <p
           className={[
             "font-mono text-[10px] uppercase tracking-widest",
-            plan.highlighted ? "text-[var(--bone)]/50" : "text-[var(--ink)]/40",
+            plan.highlighted ? "text-[var(--bone)]/50" : "text-[var(--ink)]/56",
           ].join(" ")}
         >
           {plan.name}
@@ -166,7 +166,7 @@ function PlanCard({ plan }: { plan: Plan }) {
           <span
             className={[
               "font-mono text-[11px]",
-              plan.highlighted ? "text-[var(--bone)]/40" : "text-[var(--ink)]/30",
+              plan.highlighted ? "text-[var(--bone)]/57" : "text-[var(--ink)]/46",
             ].join(" ")}
           >
             {plan.period}
@@ -189,7 +189,7 @@ function PlanCard({ plan }: { plan: Plan }) {
             <Check
               className={[
                 "mt-0.5 size-3.5 shrink-0",
-                plan.highlighted ? "text-[var(--inner-green)]" : "text-[var(--ink)]/40",
+                plan.highlighted ? "text-[var(--inner-green)]" : "text-[var(--ink)]/56",
               ].join(" ")}
             />
             <span
@@ -251,7 +251,7 @@ export default function Membership() {
       {/* Header */}
       <FadeIn>
         <div>
-          <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40 mb-2">
+          <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56 mb-2">
             inner·hub
           </p>
           <h1
@@ -282,10 +282,10 @@ export default function Membership() {
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border border-[var(--ink)]/[0.08] p-5">
             <div className="flex items-start gap-4">
               <div className="flex size-9 items-center justify-center border border-[var(--ink)]/10">
-                <Zap className="size-4 text-[var(--ink)]/40" />
+                <Zap className="size-4 text-[var(--ink)]/56" />
               </div>
               <div>
-                <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40 mb-0.5">
+                <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56 mb-0.5">
                   Tek Seferlik
                 </p>
                 <p className="text-sm font-medium text-[var(--ink)]">{EVENT_TICKET.name}</p>
@@ -319,7 +319,7 @@ export default function Membership() {
 
       {/* Trust note */}
       <div className="border-t border-[var(--ink)]/[0.08] pt-4">
-        <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/25 text-center">
+        <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/41 text-center">
           Ödemeler Stripe ile güvenli şekilde işlenir · SSL şifreli · İstediğinde iptal et
         </p>
       </div>

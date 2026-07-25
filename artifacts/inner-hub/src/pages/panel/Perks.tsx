@@ -200,7 +200,7 @@ function PerkCard({
         </span>
       </div>
 
-      <p className="mb-1 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/35">
+      <p className="mb-1 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/51">
         {perk.brand} · {perk.category}
       </p>
       <p className="mb-2 text-sm font-medium leading-snug text-[var(--ink)] group-hover:underline decoration-[var(--ink)]/20 underline-offset-4">
@@ -219,7 +219,7 @@ function PerkCard({
             Kaydedildi
           </span>
         ) : perk.code ? (
-          <span className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/30">
+          <span className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/46">
             Kod var
           </span>
         ) : null}
@@ -282,13 +282,13 @@ function PerkDetail({
         className="fixed bottom-0 right-0 top-0 z-50 flex w-full max-w-md flex-col border-l border-[var(--ink)]/10 bg-[var(--bone)]"
       >
         <div className="flex items-center justify-between border-b border-[var(--ink)]/[0.08] px-5 py-4">
-          <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/35">
+          <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/51">
             Ayrıcalık · {perk.category}
           </p>
           <button
             type="button"
             onClick={onClose}
-            className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/35 transition-colors hover:text-[var(--ink)]"
+            className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/51 transition-colors hover:text-[var(--ink)]"
           >
             <span className="inline-flex items-center gap-1.5">
               <X className="size-3" /> Kapat
@@ -300,7 +300,7 @@ function PerkDetail({
           <div className="flex items-start gap-4">
             <BrandMark brand={perk.brand} />
             <div className="min-w-0">
-              <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/35">
+              <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/51">
                 {perk.brand}
               </p>
               <h2
@@ -318,7 +318,7 @@ function PerkDetail({
               {perk.badge}
             </span>
             {expiry && (
-              <span className="border border-[var(--ink)]/10 px-2 py-1 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/45">
+              <span className="border border-[var(--ink)]/10 px-2 py-1 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/61">
                 Son: {expiry}
               </span>
             )}
@@ -327,7 +327,7 @@ function PerkDetail({
           <p className="text-sm font-light leading-relaxed text-[var(--ink)]/70">{perk.description}</p>
 
           <div className="border border-[var(--ink)]/[0.08] p-4">
-            <p className="mb-2 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/35">
+            <p className="mb-2 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/51">
               Nasıl kullanılır
             </p>
             <p className="text-sm leading-relaxed text-[var(--ink)]/65">{perk.howTo}</p>
@@ -335,7 +335,7 @@ function PerkDetail({
 
           {perk.code && (
             <div className="border border-[var(--ink)] bg-[var(--ink)] p-4 text-[var(--bone)]">
-              <p className="mb-2 font-mono text-[9px] uppercase tracking-widest text-[var(--bone)]/45">
+              <p className="mb-2 font-mono text-[9px] uppercase tracking-widest text-[var(--bone)]/62">
                 Aktivasyon kodu
               </p>
               <div className="flex items-center justify-between gap-3">
@@ -470,8 +470,8 @@ function PerksStat({
   return (
     <div className="border border-[var(--ink)]/[0.08] p-4">
       <div className="mb-2 flex items-center justify-between">
-        <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/35">{label}</p>
-        <Icon className="size-3.5 text-[var(--ink)]/20" />
+        <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/51">{label}</p>
+        <Icon className="size-3.5 text-[var(--ink)]/36" />
       </div>
       <p
         className="font-serif text-2xl text-[var(--ink)]"
@@ -479,7 +479,7 @@ function PerksStat({
       >
         {value}
       </p>
-      <p className="mt-1 font-mono text-[9px] text-[var(--ink)]/30">{sub}</p>
+      <p className="mt-1 font-mono text-[9px] text-[var(--ink)]/46">{sub}</p>
     </div>
   );
 }
@@ -550,11 +550,11 @@ export default function Perks() {
             { step: "03", title: "Kullan", body: "Partner sitesinde kodu uygulayın." },
           ].map((s) => (
             <div key={s.step} className="bg-[var(--bone)] p-4">
-              <p className="mb-1 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/30">
+              <p className="mb-1 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/46">
                 {s.step}
               </p>
               <p className="text-sm text-[var(--ink)]">{s.title}</p>
-              <p className="mt-1 text-sm leading-relaxed text-[var(--ink)]/45">{s.body}</p>
+              <p className="mt-1 text-sm leading-relaxed text-[var(--ink)]/61">{s.body}</p>
             </div>
           ))}
         </div>
@@ -564,7 +564,7 @@ export default function Perks() {
         <FadeIn delay={0.05}>
           <section id="perks-featured" className="scroll-mt-6">
             <div className="mb-3 flex items-baseline justify-between border-t border-[var(--ink)]/[0.08] pt-3">
-              <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40">
+              <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56">
                 Öne çıkan
               </p>
             </div>
@@ -578,7 +578,7 @@ export default function Perks() {
                 >
                   <AmbientCardBackground />
                   <div className="relative z-10">
-                    <p className="mb-2 font-mono text-[9px] uppercase tracking-widest text-[var(--bone)]/40">
+                    <p className="mb-2 font-mono text-[9px] uppercase tracking-widest text-[var(--bone)]/57">
                       {perk.brand} · {perk.badge}
                     </p>
                     <h2
@@ -602,13 +602,13 @@ export default function Perks() {
       <FadeIn delay={0.06}>
         <div className="space-y-3">
           <div className="relative">
-            <Search className="pointer-events-none absolute left-0 top-1/2 size-3.5 -translate-y-1/2 text-[var(--ink)]/35" />
+            <Search className="pointer-events-none absolute left-0 top-1/2 size-3.5 -translate-y-1/2 text-[var(--ink)]/51" />
             <input
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Marka, teklif veya kod ara…"
-              className="w-full border-0 border-b border-[var(--ink)]/15 bg-transparent py-3 pl-6 font-light text-sm text-[var(--ink)] placeholder:text-[var(--ink)]/30 focus-visible:border-[var(--ink)] focus-visible:outline-none"
+              className="w-full border-0 border-b border-[var(--ink)]/15 bg-transparent py-3 pl-6 font-light text-sm text-[var(--ink)] placeholder:text-[var(--ink)]/46 focus-visible:border-[var(--ink)] focus-visible:outline-none"
             />
           </div>
 
@@ -642,7 +642,7 @@ export default function Perks() {
               Kaydedilenler
               <span className="ml-1.5 opacity-50">{savedIds.length}</span>
             </button>
-            <span className="ml-auto font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/30">
+            <span className="ml-auto font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/46">
               {filtered.length} ayrıcalık
             </span>
           </div>
@@ -653,7 +653,7 @@ export default function Perks() {
         <div id="perks-all" className="scroll-mt-6" />
         {filtered.length === 0 ? (
           <div className="border border-[var(--ink)]/[0.08] px-6 py-14 text-center">
-            <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40">
+            <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56">
               Sonuç yok
             </p>
             <p className="mt-2 text-sm text-[var(--ink)]/50">
@@ -687,7 +687,7 @@ export default function Perks() {
 
       <FadeIn delay={0.1}>
         <div className="border-t border-[var(--ink)]/[0.08] pt-4">
-          <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/25">
+          <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink)]/41">
             Yeni ayrıcalıklar her ay ekleniyor · Öneri için Slack veya destek kanalını kullanın.
           </p>
         </div>

@@ -266,8 +266,8 @@ function MessageBubble({ msg, prevAuthorId }: { msg: Message; prevAuthorId?: num
                 Admin
               </span>
             )}
-            <span className="font-mono text-[10px] text-[var(--ink)]/30">{msg.timestamp}</span>
-            {msg.isPinned && <Pin className="size-2.5 text-[var(--ink)]/30" />}
+            <span className="font-mono text-[10px] text-[var(--ink)]/46">{msg.timestamp}</span>
+            {msg.isPinned && <Pin className="size-2.5 text-[var(--ink)]/46" />}
           </div>
         )}
         <p className="text-sm leading-relaxed text-[var(--ink)]/80">{msg.content}</p>
@@ -315,7 +315,7 @@ export default function ChatPage() {
       {/* Channel sidebar */}
       <aside className="hidden w-[220px] shrink-0 flex-col border-r border-[var(--ink)]/[0.08] bg-[var(--bone)] md:flex">
         <div className="border-b border-[var(--ink)]/[0.08] px-4 py-3">
-          <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40">Kanallar</p>
+          <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/56">Kanallar</p>
         </div>
         <div className="flex-1 overflow-y-auto py-2">
           {CHANNELS.map((ch) => (
@@ -351,16 +351,16 @@ export default function ChatPage() {
         <div className="flex h-[52px] items-center justify-between border-b border-[var(--ink)]/[0.08] px-4">
           <div className="flex items-center gap-2">
             {channel.type === "announcement" ? (
-              <Volume2 className="size-4 text-[var(--ink)]/40" />
+              <Volume2 className="size-4 text-[var(--ink)]/56" />
             ) : (
-              <Hash className="size-4 text-[var(--ink)]/40" />
+              <Hash className="size-4 text-[var(--ink)]/56" />
             )}
             <span className="font-mono text-sm text-[var(--ink)]">{channel.label}</span>
-            <span className="hidden font-mono text-[10px] text-[var(--ink)]/30 sm:block">
+            <span className="hidden font-mono text-[10px] text-[var(--ink)]/46 sm:block">
               — {channel.description}
             </span>
           </div>
-          <button className="text-[var(--ink)]/30 hover:text-[var(--ink)] transition-colors">
+          <button className="text-[var(--ink)]/46 hover:text-[var(--ink)] transition-colors">
             <Search className="size-4" />
           </button>
         </div>
@@ -371,11 +371,11 @@ export default function ChatPage() {
           {channelMessages.length === 0 ? (
             <div className="flex h-full items-center justify-center">
               <div className="text-center">
-                <Hash className="mx-auto mb-3 size-8 text-[var(--ink)]/10" />
-                <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/30">
+                <Hash className="mx-auto mb-3 size-8 text-[var(--ink)]/26" />
+                <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/46">
                   #{channel.label} henüz boş
                 </p>
-                <p className="mt-1 text-sm text-[var(--ink)]/30">İlk mesajı sen gönder.</p>
+                <p className="mt-1 text-sm text-[var(--ink)]/46">İlk mesajı sen gönder.</p>
               </div>
             </div>
           ) : (
@@ -421,7 +421,7 @@ export default function ChatPage() {
               }}
               placeholder={`#${channel.label} kanalına mesaj gönder…`}
               rows={1}
-              className="flex-1 resize-none bg-transparent font-sans text-sm text-[var(--ink)] placeholder:text-[var(--ink)]/30 focus:outline-none"
+              className="flex-1 resize-none bg-transparent font-sans text-sm text-[var(--ink)] placeholder:text-[var(--ink)]/46 focus:outline-none"
               style={{ lineHeight: "1.5" }}
             />
             <button
@@ -433,7 +433,7 @@ export default function ChatPage() {
               <Send className="size-3.5" />
             </button>
           </div>
-          <p className="mt-1.5 font-mono text-[9px] text-[var(--ink)]/25">
+          <p className="mt-1.5 font-mono text-[9px] text-[var(--ink)]/41">
             Enter ile gönder · Shift+Enter yeni satır
           </p>
         </div>

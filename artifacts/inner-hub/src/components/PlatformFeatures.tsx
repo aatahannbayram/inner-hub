@@ -25,7 +25,7 @@ function FeatureCard({ feature, index, setRef }: { feature: PlatformFeature; ind
         inView ? "translate-x-0 opacity-100" : "translate-x-16 opacity-0"
       }`}
     >
-      <p className="mb-4 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)]/40">{feature.tag}</p>
+      <p className="mb-4 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)]/57">{feature.tag}</p>
       <h3 className="mb-6 font-serif text-xl italic text-[var(--bone)] md:text-2xl">{feature.name}</h3>
       <div className="mb-6 aspect-video overflow-hidden bg-black/30">
         {feature.media.type === "video" ? (
@@ -83,7 +83,7 @@ export function PlatformFeatures({
         {/* Left: sticky heading + nav + CTA */}
         <div className="lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col lg:justify-between lg:py-32">
           <div>
-            <p className="mb-4 font-mono text-xs uppercase tracking-widest text-[var(--bone)]/40">
+            <p className="mb-4 font-mono text-xs uppercase tracking-widest text-[var(--bone)]/57">
               03 · The platform
             </p>
             <h2 className="font-display font-serif italic text-2xl leading-[1.2] sm:text-3xl lg:text-[46px]">
@@ -100,7 +100,7 @@ export function PlatformFeatures({
                 className={`border px-4 py-3 text-left font-mono text-xs uppercase tracking-widest transition-colors ${
                   activeIndex === i
                     ? "border-[var(--bone)]/20 bg-[var(--bone)]/10 text-[var(--bone)]"
-                    : "border-transparent text-[var(--bone)]/40 hover:text-[var(--bone)]/70"
+                    : "border-transparent text-[var(--bone)]/57 hover:text-[var(--bone)]/70"
                 }`}
               >
                 {f.name}
@@ -135,7 +135,7 @@ export function PlatformFeatures({
 
           {restModules.length > 0 && (
             <div className="mt-6 border-t border-[var(--bone)]/15 pt-10">
-              <p className="mb-6 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)]/40">
+              <p className="mb-6 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)]/57">
                 +{restModules.length} more tools
               </p>
               <div className="grid grid-cols-1 gap-px bg-[var(--bone)]/10 sm:grid-cols-2">
@@ -145,7 +145,7 @@ export function PlatformFeatures({
                     <div key={mod.id} className="flex flex-col gap-3 bg-[var(--ink)] p-6">
                       <div className="flex items-center justify-between">
                         <Icon className="size-4 text-[var(--bone)]/50" strokeWidth={1.5} />
-                        <span className="font-mono text-[9px] uppercase tracking-widest text-[var(--bone)]/30">
+                        <span className="font-mono text-[9px] uppercase tracking-widest text-[var(--bone)]/47">
                           {mod.tag}
                         </span>
                       </div>
