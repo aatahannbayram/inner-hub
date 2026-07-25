@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { MapPin, Clock, Users, ChevronRight, CheckCircle2, CalendarDays, Sparkles } from "lucide-react";
 import { FadeIn } from "@/components/FadeIn";
 import { AnimatedHeading } from "@/components/AnimatedHeading";
-import { apiUrl } from "@/lib/api";
+import { useApiQuery } from "@/hooks/useApiQuery";
+import { StatCardSkeleton, LoadingBlock, ErrorState } from "@/components/panel/Skeletons";
 
 type ViewMode = "liste" | "takvim";
 
@@ -27,7 +28,7 @@ function inferType(title: string, location: string): Event["type"] {
   return "gathering";
 }
 
-function mapApiEvent(row: {
+interface RawEvent {
   id: number;
   title: string;
   description?: string;
@@ -35,7 +36,9 @@ function mapApiEvent(row: {
   startAt: string;
   endAt: string;
   isPast?: boolean;
-}): Event {
+}
+
+function mapApiEvent(row: RawEvent): Event {
   const location = row.location ?? "";
   return {
     id: row.id,
@@ -123,7 +126,7 @@ function EventCard({ event }: { event: Event }) {
         <div className="flex items-start justify-between gap-3">
           <div>
             <span className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)]">
-              {TYPE_LABELS[event.type]}
+              {event.type === "online" ? <span lang="en">{TYPE_LABELS[event.type]}</span> : TYPE_LABELS[event.type]}
             </span>
             <h3 className="text-sm font-medium text-[var(--ink)] leading-snug">{event.title}</h3>
           </div>
@@ -383,35 +386,11 @@ function EventsStat({
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function Events() {
   const [view, setView] = useState<ViewMode>("liste");
-  const [events, setEvents] = useState<Event[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      setLoading(true);
-      setError("");
-      try {
-        const res = await fetch(apiUrl("/api/events"), { credentials: "include" });
-        const json = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error(json.error ?? "Etkinlikler yüklenemedi");
-        if (!cancelled) {
-          setEvents((json.events ?? []).map(mapApiEvent));
-        }
-      } catch (e: unknown) {
-        if (!cancelled) {
-          setError(e instanceof Error ? e.message : "Etkinlikler yüklenemedi");
-          setEvents([]);
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const { data, isLoading: loading, isError, error, refetch } = useApiQuery<{ events: RawEvent[] }>(
+    ["events"],
+    "/api/events",
+  );
+  const events: Event[] = (data?.events ?? []).map(mapApiEvent);
 
   const upcoming = events.filter((e) => !e.isPast);
   const past = events.filter((e) => e.isPast);
@@ -427,7 +406,7 @@ export default function Events() {
       {/* Hero */}
       <EventsHero />
 
-      {!loading && !error && events.length > 0 && (
+      {!loading && !isError && events.length > 0 && (
         <FadeIn delay={0.02}>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <EventsStat label="Yaklaşan" value={String(upcoming.length)} sub="planlanan etkinlik" icon={CalendarDays} />
@@ -464,22 +443,27 @@ export default function Events() {
       </FadeIn>
 
       {loading && (
-        <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)]">
-          Yükleniyor…
-        </p>
+        <LoadingBlock label="Etkinlikler yükleniyor">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <StatCardSkeleton key={i} />
+            ))}
+          </div>
+        </LoadingBlock>
       )}
-      {error && (
-        <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--error-ink)]">
-          {error}
-        </p>
+      {isError && (
+        <ErrorState
+          message={error instanceof Error ? error.message : "Etkinlikler yüklenemedi"}
+          onRetry={() => refetch()}
+        />
       )}
-      {!loading && !error && events.length === 0 && (
+      {!loading && !isError && events.length === 0 && (
         <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)]">
           Henüz yayınlanmış etkinlik yok.
         </p>
       )}
 
-      {!loading && !error && events.length > 0 && view === "liste" ? (
+      {!loading && !isError && events.length > 0 && view === "liste" ? (
         <>
           {/* Upcoming */}
           <FadeIn delay={0.05}>
@@ -524,7 +508,7 @@ export default function Events() {
         </>
       ) : null}
 
-      {!loading && !error && events.length > 0 && view === "takvim" ? (
+      {!loading && !isError && events.length > 0 && view === "takvim" ? (
         <FadeIn delay={0.05}>
           <section>
             <div className="mb-3 border-t border-[var(--ink)]/[0.08] pt-3">

@@ -1,11 +1,10 @@
-import { useEffect, useState } from "react";
 import { ArrowRight, BookOpen, CalendarDays, Gift } from "lucide-react";
 import { Link } from "wouter";
 import { FadeIn } from "@/components/FadeIn";
 import { AsciiField } from "@/components/AsciiField";
 import { EditorialCard } from "@/components/panel/EditorialCard";
 import { AmbientCardBackground } from "@/components/panel/AmbientCardBackground";
-import { apiUrl } from "@/lib/api";
+import { useApiQuery } from "@/hooks/useApiQuery";
 import { avatarColor } from "@/lib/avatarColor";
 import { useScrubVideo } from "@/hooks/useScrubVideo";
 import { useTypewriter } from "@/hooks/useTypewriter";
@@ -207,45 +206,21 @@ function DashboardHero({ userName }: { userName: string }) {
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function Dashboard({ userName = "Ata" }: { userName?: string }) {
-  const [courses, setCourses] = useState<DashCourse[]>([]);
-  const [events, setEvents] = useState<DashEvent[]>([]);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const [coursesRes, eventsRes] = await Promise.all([
-          fetch(apiUrl("/api/courses"), { credentials: "include" }),
-          fetch(apiUrl("/api/events"), { credentials: "include" }),
-        ]);
-        const coursesJson = await coursesRes.json().catch(() => ({}));
-        const eventsJson = await eventsRes.json().catch(() => ({}));
-        if (cancelled) return;
-        if (coursesRes.ok) {
-          setCourses(
-            (coursesJson.courses ?? []).map((c: { id: number; title: string; progressPct?: number }) => ({
-              id: c.id,
-              title: c.title,
-              progressPct: c.progressPct ?? 0,
-            })),
-          );
-        }
-        if (eventsRes.ok) {
-          setEvents(
-            (eventsJson.events ?? []).map((e: { id: number; title: string }) => ({
-              id: e.id,
-              title: e.title,
-            })),
-          );
-        }
-      } catch {
-        // Dashboard stats fail soft — empty counts
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  // Dashboard stats fail soft — 0 sonuç göster, hata banner'ı yok (bilinçli tasarım kararı).
+  const { data: coursesData } = useApiQuery<{ courses: { id: number; title: string; progressPct?: number }[] }>(
+    ["courses"],
+    "/api/courses",
+  );
+  const { data: eventsData } = useApiQuery<{ events: { id: number; title: string }[] }>(
+    ["events"],
+    "/api/events",
+  );
+  const courses: DashCourse[] = (coursesData?.courses ?? []).map((c) => ({
+    id: c.id,
+    title: c.title,
+    progressPct: c.progressPct ?? 0,
+  }));
+  const events: DashEvent[] = (eventsData?.events ?? []).map((e) => ({ id: e.id, title: e.title }));
 
   return (
     <div className="space-y-10 max-w-5xl">
