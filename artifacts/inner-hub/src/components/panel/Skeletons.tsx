@@ -75,7 +75,7 @@ export function ErrorState({
       <p className="text-sm text-[var(--error-ink)]">{message}</p>
       <button
         onClick={onRetry}
-        className="mt-2 font-mono text-[11px] uppercase tracking-widest text-[var(--error-ink)] underline"
+        className="mt-2 font-mono text-caption uppercase tracking-widest text-[var(--error-ink)] underline"
       >
         Tekrar dene
       </button>

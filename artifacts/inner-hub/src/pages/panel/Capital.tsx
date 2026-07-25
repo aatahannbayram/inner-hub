@@ -2,6 +2,8 @@ import { useState } from "react";
 import { FadeIn } from "@/components/FadeIn";
 import { AnimatedHeading } from "@/components/AnimatedHeading";
 import { PersonAvatar } from "@/components/panel/PersonAvatar";
+import { HeroVideo } from "@/components/HeroVideo";
+import { DemoPreviewBanner } from "@/components/panel/DemoPreviewBanner";
 import {
   TrendingUp,
   Users,
@@ -178,7 +180,7 @@ function StatCard({ label, value, sub, icon: Icon }: { label: string; value: str
   return (
     <div className="border border-[var(--ink)]/[0.08] p-5">
       <div className="mb-3 flex items-center justify-between">
-        <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)]">{label}</p>
+        <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">{label}</p>
         <Icon className="size-3.5 text-[var(--ink-subtle)]" />
       </div>
       <p
@@ -187,7 +189,7 @@ function StatCard({ label, value, sub, icon: Icon }: { label: string; value: str
       >
         {value}
       </p>
-      <p className="mt-1 font-mono text-[9px] text-[var(--ink-muted)]">{sub}</p>
+      <p className="mt-1 font-mono text-label text-[var(--ink-muted)]">{sub}</p>
     </div>
   );
 }
@@ -205,11 +207,11 @@ function DealCard({ deal, onClick }: { deal: Deal; onClick: () => void }) {
       <div className="mb-3 flex items-start justify-between gap-2">
         <div>
           <p className="text-sm font-medium text-[var(--ink)]">{deal.company}</p>
-          <p className="mt-0.5 text-[11px] leading-snug text-[var(--ink-body)]">{deal.tagline}</p>
+          <p className="mt-0.5 text-caption leading-snug text-[var(--ink-body)]">{deal.tagline}</p>
         </div>
         <div className={`mt-0.5 flex shrink-0 items-center gap-1.5 border px-2 py-0.5 ${cfg.border}`}>
           <span className={`size-1.5 rounded-full ${cfg.dot}`} />
-          <span className="font-mono text-[8px] uppercase tracking-widest text-[var(--ink-muted)]">
+          <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
             {cfg.label}
           </span>
         </div>
@@ -218,45 +220,45 @@ function DealCard({ deal, onClick }: { deal: Deal; onClick: () => void }) {
       {/* Metrics row */}
       <div className="mb-3 flex items-center gap-2 min-w-0">
         <div className="min-w-0">
-          <p className="font-mono text-[8px] uppercase tracking-widest text-[var(--ink-subtle)]">Hedef</p>
-          <p className="truncate font-mono text-[11px] text-[var(--ink)]">{deal.raise}</p>
+          <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)]">Hedef</p>
+          <p className="truncate font-mono text-caption text-[var(--ink)]">{deal.raise}</p>
         </div>
         <div className="h-8 w-px shrink-0 bg-[var(--ink)]/[0.06]" />
         <div className="min-w-0">
-          <p className="font-mono text-[8px] uppercase tracking-widest text-[var(--ink-subtle)]">Değerleme</p>
-          <p className="truncate font-mono text-[11px] text-[var(--ink)]">{deal.valuation}</p>
+          <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)]">Değerleme</p>
+          <p className="truncate font-mono text-caption text-[var(--ink)]">{deal.valuation}</p>
         </div>
         <div className="h-8 w-px shrink-0 bg-[var(--ink)]/[0.06]" />
         <div className="min-w-0">
-          <p className="font-mono text-[8px] uppercase tracking-widest text-[var(--ink-subtle)]">Tur</p>
-          <p className="truncate font-mono text-[11px] text-[var(--ink)]">{deal.round}</p>
+          <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)]">Tur</p>
+          <p className="truncate font-mono text-caption text-[var(--ink)]">{deal.round}</p>
         </div>
       </div>
 
       {/* Score row */}
       <div className="mb-3 flex items-center gap-2">
-        <span className="font-mono text-[8px] uppercase tracking-widest text-[var(--ink-subtle)] shrink-0">Skor</span>
+        <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)] shrink-0">Skor</span>
         <div className="h-1 flex-1 bg-[var(--ink)]/[0.06]">
           <div className="h-full bg-[var(--inner-green)]" style={{ width: `${deal.score}%` }} />
         </div>
-        <span className="font-mono text-[9px] text-[var(--ink-body)] shrink-0">{deal.score}</span>
+        <span className="font-mono text-label text-[var(--ink-body)] shrink-0">{deal.score}</span>
       </div>
 
       {/* Tags + meta */}
       <div className="flex items-center justify-between">
         <div className="flex flex-wrap gap-1">
           {deal.tags.map((t) => (
-            <span key={t} className="border border-[var(--ink)]/8 px-1.5 py-0.5 font-mono text-[8px] text-[var(--ink-muted)]">
+            <span key={t} className="border border-[var(--ink)]/8 px-1.5 py-0.5 font-mono text-label text-[var(--ink-muted)]">
               {t}
             </span>
           ))}
           {deal.spv && (
-            <span className="border border-[var(--inner-green)]/30 bg-[var(--inner-green)]/5 px-1.5 py-0.5 font-mono text-[8px] text-[var(--inner-green)]">
+            <span className="border border-[var(--inner-green)]/30 bg-[var(--inner-green)]/5 px-1.5 py-0.5 font-mono text-label text-[var(--success-ink)]">
               SPV
             </span>
           )}
         </div>
-        <span className="font-mono text-[8px] text-[var(--ink-subtle)]">
+        <span className="font-mono text-label text-[var(--ink-subtle)]">
           {deal.updatedDays === 0 ? "bugün" : `${deal.updatedDays}g önce`}
         </span>
       </div>
@@ -276,14 +278,14 @@ function DealDetail({ deal, onClose }: { deal: Deal; onClose: () => void }) {
       >
         <button
           onClick={onClose}
-          className="mb-6 font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)] hover:text-[var(--ink)] transition-colors"
+          className="mb-6 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)] hover:text-[var(--ink)] transition-colors"
         >
           ← Kapat
         </button>
 
         <div className="mb-1 flex items-center gap-2">
           <div className={`size-2 rounded-full ${cfg.dot}`} />
-          <span className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink-body)]">{deal.stage}</span>
+          <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">{deal.stage}</span>
         </div>
         <h2
           className="font-serif text-3xl text-[var(--ink)] mb-1"
@@ -301,7 +303,7 @@ function DealDetail({ deal, onClose }: { deal: Deal; onClose: () => void }) {
             { l: "Tur", v: deal.round },
           ].map((m) => (
             <div key={m.l} className="border border-[var(--ink)]/[0.08] p-3">
-              <p className="font-mono text-[8px] uppercase tracking-widest text-[var(--ink-muted)]">{m.l}</p>
+              <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">{m.l}</p>
               <p className="mt-0.5 font-mono text-sm text-[var(--ink)]">{m.v}</p>
             </div>
           ))}
@@ -310,8 +312,8 @@ function DealDetail({ deal, onClose }: { deal: Deal; onClose: () => void }) {
         {/* Score bar */}
         <div className="mb-6">
           <div className="mb-1 flex justify-between">
-            <span className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)]">İç Değerlendirme Skoru</span>
-            <span className="font-mono text-[9px] text-[var(--ink-muted)]">{deal.score}/100</span>
+            <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">İç Değerlendirme Skoru</span>
+            <span className="font-mono text-label text-[var(--ink-muted)]">{deal.score}/100</span>
           </div>
           <div className="h-1.5 bg-[var(--ink)]/[0.06]">
             <div className="h-full bg-[var(--inner-green)] transition-all" style={{ width: `${deal.score}%` }} />
@@ -320,14 +322,14 @@ function DealDetail({ deal, onClose }: { deal: Deal; onClose: () => void }) {
 
         {/* Founders */}
         <div className="mb-5">
-          <p className="mb-2 font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)]">Kurucular</p>
+          <p className="mb-2 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">Kurucular</p>
           <div className="space-y-2">
             {deal.founders.map((f) => (
               <div key={f} className="flex items-center gap-3">
                 <PersonAvatar
                   name={f}
                   initials={f.split(" ").map((n) => n[0]).join("").slice(0, 2)}
-                  className="size-7 text-[9px]"
+                  className="size-7 text-label"
                 />
                 <span className="text-sm text-[var(--ink-strong)]">{f}</span>
               </div>
@@ -338,12 +340,12 @@ function DealDetail({ deal, onClose }: { deal: Deal; onClose: () => void }) {
         {/* Lead investor */}
         {deal.leadInvestor && (
           <div className="mb-5">
-            <p className="mb-2 font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)]">Lead Yatırımcı</p>
+            <p className="mb-2 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">Lead Yatırımcı</p>
             <div className="flex items-center gap-3">
               <PersonAvatar
                 name={deal.leadInvestor}
                 initials={deal.leadInvestor.split(" ").map((n) => n[0]).join("").slice(0, 2)}
-                className="size-7 text-[9px]"
+                className="size-7 text-label"
               />
               <span className="text-sm text-[var(--ink-strong)]">{deal.leadInvestor}</span>
             </div>
@@ -352,23 +354,23 @@ function DealDetail({ deal, onClose }: { deal: Deal; onClose: () => void }) {
 
         {/* Sector */}
         <div className="mb-5">
-          <p className="mb-2 font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)]">Sektör</p>
-          <span className="border border-[var(--ink)]/10 px-2.5 py-1 font-mono text-[9px] text-[var(--ink-muted)]">
+          <p className="mb-2 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">Sektör</p>
+          <span className="border border-[var(--ink)]/10 px-2.5 py-1 font-mono text-label text-[var(--ink-muted)]">
             {deal.sector}
           </span>
         </div>
 
         {/* Tags */}
         <div className="mb-8">
-          <p className="mb-2 font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)]">Etiketler</p>
+          <p className="mb-2 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">Etiketler</p>
           <div className="flex flex-wrap gap-1.5">
             {deal.tags.map((t) => (
-              <span key={t} className="border border-[var(--ink)]/10 px-2 py-0.5 font-mono text-[9px] text-[var(--ink-body)]">
+              <span key={t} className="border border-[var(--ink)]/10 px-2 py-0.5 font-mono text-label text-[var(--ink-body)]">
                 {t}
               </span>
             ))}
             {deal.spv && (
-              <span className="border border-[var(--inner-green)]/30 bg-[var(--inner-green)]/5 px-2 py-0.5 font-mono text-[9px] text-[var(--inner-green)]">
+              <span className="border border-[var(--inner-green)]/30 bg-[var(--inner-green)]/5 px-2 py-0.5 font-mono text-label text-[var(--success-ink)]">
                 SPV açık
               </span>
             )}
@@ -377,11 +379,11 @@ function DealDetail({ deal, onClose }: { deal: Deal; onClose: () => void }) {
 
         {/* Actions */}
         <div className="space-y-2">
-          <button className="flex w-full items-center justify-between border border-[var(--ink)] bg-[var(--ink)] px-5 py-3 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-80">
+          <button className="flex w-full items-center justify-between border border-[var(--ink)] bg-[var(--ink)] px-5 py-3 font-mono text-label uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-80">
             <span>İlgileniyorum</span>
             <ArrowUpRight className="size-3.5" />
           </button>
-          <button className="flex w-full items-center justify-between border border-[var(--ink)]/15 px-5 py-3 font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)] transition-all hover:border-[var(--ink)]/40 hover:text-[var(--ink)]">
+          <button className="flex w-full items-center justify-between border border-[var(--ink)]/15 px-5 py-3 font-mono text-label uppercase tracking-widest text-[var(--ink-body)] transition-all hover:border-[var(--ink)]/40 hover:text-[var(--ink)]">
             <span>Kurucuyu Tanıştır</span>
             <ChevronRight className="size-3.5" />
           </button>
@@ -399,15 +401,15 @@ function SpvCard({ spv }: { spv: SPV }) {
       <div className="mb-3 flex items-start justify-between">
         <div>
           <p className="text-sm font-medium text-[var(--ink)]">{spv.name}</p>
-          <p className="mt-0.5 font-mono text-[9px] text-[var(--ink-muted)]">{spv.sector} · {spv.participants} katılımcı · Kapanış: {spv.closing}</p>
+          <p className="mt-0.5 font-mono text-label text-[var(--ink-muted)]">{spv.sector} · {spv.participants} katılımcı · Kapanış: {spv.closing}</p>
         </div>
       </div>
       <div className="mb-3">
         <div className="mb-1 flex justify-between">
-          <span className="font-mono text-[9px] text-[var(--ink-muted)]">
+          <span className="font-mono text-label text-[var(--ink-muted)]">
             {spv.raised} / {spv.target}
           </span>
-          <span className="font-mono text-[9px] text-[var(--ink-muted)]">%{spv.pct}</span>
+          <span className="font-mono text-label text-[var(--ink-muted)]">%{spv.pct}</span>
         </div>
         <div className="h-1 bg-[var(--ink)]/[0.06]">
           <div
@@ -420,7 +422,7 @@ function SpvCard({ spv }: { spv: SPV }) {
           />
         </div>
       </div>
-      <button className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-widest text-[var(--ink-body)] hover:text-[var(--ink)] transition-colors">
+      <button className="flex items-center gap-1.5 font-mono text-label uppercase tracking-widest text-[var(--ink-body)] hover:text-[var(--ink)] transition-colors">
         SPV'ye Katıl <ExternalLink className="size-2.5" />
       </button>
     </div>
@@ -439,19 +441,15 @@ function CapitalHero() {
       className="relative -mx-4 -mt-6 overflow-hidden sm:-mx-6 lg:-mx-8 lg:-mt-8"
       style={{ height: "min(70vh, 620px)", minHeight: 440 }}
     >
-      <video
-        autoPlay
-        muted
-        loop
-        playsInline
-        className="absolute inset-0 h-full w-full object-cover"
+      <HeroVideo
         src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260403_050628_c4e32401-fab4-4a27-b7a8-6e9291cd5959.mp4"
+        className="absolute inset-0 h-full w-full object-cover"
       />
 
       <div className="relative z-10 flex h-full flex-col justify-end px-6 pb-10 md:px-12 md:pb-14">
         <div className="lg:grid lg:grid-cols-2 lg:items-end lg:gap-10">
           <div>
-            <p className="mb-3 font-mono text-[10px] uppercase tracking-widest text-white/60 [text-shadow:0_1px_12px_rgba(0,0,0,0.6)]">
+            <p className="mb-3 font-mono text-label uppercase tracking-widest text-white/60 [text-shadow:0_1px_12px_rgba(0,0,0,0.6)]">
               <span lang="en">inner·capital</span>
             </p>
             <AnimatedHeading
@@ -518,6 +516,7 @@ export default function Capital() {
     <div className="space-y-8 max-w-5xl">
       {/* Hero */}
       <CapitalHero />
+      <DemoPreviewBanner surface="inner·capital" />
 
       {/* View toggle */}
       <FadeIn>
@@ -528,7 +527,7 @@ export default function Capital() {
                 key={v}
                 onClick={() => setView(v)}
                 className={[
-                  "px-4 py-2 font-mono text-[9px] uppercase tracking-widest transition-colors",
+                  "px-4 py-2 font-mono text-label uppercase tracking-widest transition-colors",
                   view === v
                     ? "bg-[var(--ink)] text-[var(--bone)]"
                     : "text-[var(--ink-body)] hover:text-[var(--ink)]",
@@ -557,7 +556,7 @@ export default function Capital() {
             key={s}
             onClick={() => setSectorFilter(s)}
             className={[
-              "border px-2.5 py-1 font-mono text-[9px] uppercase tracking-widest transition-all",
+              "border px-2.5 py-1 font-mono text-label uppercase tracking-widest transition-all",
               sectorFilter === s
                 ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--bone)]"
                 : "border-[var(--ink)]/10 text-[var(--ink-muted)] hover:border-[var(--ink)]/30 hover:text-[var(--ink)]",
@@ -580,16 +579,16 @@ export default function Capital() {
                 <div className={`mb-3 flex items-center justify-between border-b pb-2 ${cfg.border}`}>
                   <div className="flex items-center gap-2">
                     <span className={`size-1.5 rounded-full ${cfg.dot}`} />
-                    <span className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)]">
+                    <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
                       {stage}
                     </span>
                   </div>
-                  <span className="font-mono text-[9px] text-[var(--ink-subtle)]">{stageDeals.length}</span>
+                  <span className="font-mono text-label text-[var(--ink-subtle)]">{stageDeals.length}</span>
                 </div>
                 <div className="space-y-3">
                   {stageDeals.length === 0 ? (
                     <div className="border border-dashed border-[var(--ink)]/[0.06] p-4 text-center">
-                      <p className="font-mono text-[8px] text-[var(--ink-subtle)]">boş</p>
+                      <p className="font-mono text-label text-[var(--ink-subtle)]">boş</p>
                     </div>
                   ) : (
                     stageDeals.map((deal) => (
@@ -606,7 +605,7 @@ export default function Capital() {
         <div className="space-y-2">
           <div className="grid grid-cols-[1fr_auto_auto_auto_auto] items-center gap-4 border-b border-[var(--ink)]/[0.08] pb-2">
             {["Şirket", "Sektör", "Hedef", "Değerleme", "Aşama"].map((h) => (
-              <span key={h} className="font-mono text-[8px] uppercase tracking-widest text-[var(--ink-subtle)]">{h}</span>
+              <span key={h} className="font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)]">{h}</span>
             ))}
           </div>
           {filtered.map((deal) => {
@@ -619,14 +618,14 @@ export default function Capital() {
               >
                 <div>
                   <p className="text-sm text-[var(--ink)]">{deal.company}</p>
-                  <p className="font-mono text-[9px] text-[var(--ink-muted)]">{deal.round}</p>
+                  <p className="font-mono text-label text-[var(--ink-muted)]">{deal.round}</p>
                 </div>
-                <span className="font-mono text-[9px] text-[var(--ink-body)]">{deal.sector}</span>
-                <span className="font-mono text-[9px] text-[var(--ink)]">{deal.raise}</span>
-                <span className="font-mono text-[9px] text-[var(--ink-muted)]">{deal.valuation}</span>
+                <span className="font-mono text-label text-[var(--ink-body)]">{deal.sector}</span>
+                <span className="font-mono text-label text-[var(--ink)]">{deal.raise}</span>
+                <span className="font-mono text-label text-[var(--ink-muted)]">{deal.valuation}</span>
                 <div className={`flex items-center gap-1.5 border px-2 py-0.5 ${cfg.border}`}>
                   <span className={`size-1.5 rounded-full ${cfg.dot}`} />
-                  <span className="font-mono text-[8px] uppercase tracking-widest text-[var(--ink-body)]">{cfg.label}</span>
+                  <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">{cfg.label}</span>
                 </div>
               </div>
             );
@@ -638,7 +637,7 @@ export default function Capital() {
       {/* SPV section */}
       <section id="open-spvs" className="scroll-mt-6">
         <div className="mb-4 border-t border-[var(--ink)]/[0.08] pt-3">
-          <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)]">
+          <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
             Açık SPV'ler
           </p>
           <p className="mt-0.5 text-xs text-[var(--ink-muted)]">Özel amaçlı araçlarla toplu yatırım katılımı</p>
@@ -650,7 +649,7 @@ export default function Capital() {
 
       {/* Disclaimer */}
       <div className="border-t border-[var(--ink)]/[0.08] pt-4">
-        <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink-subtle)]">
+        <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)]">
           <span lang="en">inner·capital</span> — yalnızca <span lang="en">inner·hub</span> üyeleri için · bilgi amaçlıdır, yatırım tavsiyesi değildir
         </p>
       </div>

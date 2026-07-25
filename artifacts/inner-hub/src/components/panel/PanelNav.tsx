@@ -32,6 +32,29 @@ type NavItem = {
   badge?: number;
 };
 
+/** Hover/focus prefetch — F12 lazy chunk'larını tıklamadan önce ısıtır */
+const PREFETCH: Record<string, () => Promise<unknown>> = {
+  "/panel": () => import("@/pages/panel/Dashboard"),
+  "/panel/chat": () => import("@/pages/panel/Chat"),
+  "/panel/courses": () => import("@/pages/panel/Courses"),
+  "/panel/events": () => import("@/pages/panel/Events"),
+  "/panel/members": () => import("@/pages/panel/Members"),
+  "/panel/perks": () => import("@/pages/panel/Perks"),
+  "/panel/signal": () => import("@/pages/panel/Signal"),
+  "/panel/match": () => import("@/pages/panel/Match"),
+  "/panel/capital": () => import("@/pages/panel/Capital"),
+  "/panel/vault": () => import("@/pages/panel/Vault"),
+  "/panel/pulse": () => import("@/pages/panel/Pulse"),
+  "/panel/id": () => import("@/pages/panel/InnerId"),
+  "/panel/api": () => import("@/pages/panel/InnerApi"),
+  "/panel/profile": () => import("@/pages/panel/Profile"),
+  "/panel/faq": () => import("@/pages/panel/FAQ"),
+  "/panel/membership": () => import("@/pages/panel/Membership"),
+  "/panel/applications": () => import("@/pages/panel/Applications"),
+  "/panel/analytics": () => import("@/pages/panel/Analytics"),
+  "/panel/settings": () => import("@/pages/panel/Settings"),
+};
+
 const navItems: NavItem[] = [
   { href: "/panel", label: "Dashboard", icon: LayoutDashboard },
   { href: "/panel/chat", label: "Topluluk Chat", icon: MessageSquare },
@@ -79,6 +102,12 @@ function NavLink({
     <Link
       href={item.href}
       aria-current={isActive ? "page" : undefined}
+      onMouseEnter={() => {
+        void PREFETCH[item.href]?.();
+      }}
+      onFocus={() => {
+        void PREFETCH[item.href]?.();
+      }}
       className={cn(
         "group flex items-center gap-3 rounded-none px-3 py-2.5 text-sm transition-colors duration-150",
         isActive
@@ -98,7 +127,7 @@ function NavLink({
         <span className="truncate font-light tracking-wide">{item.label}</span>
       )}
       {!collapsed && item.badge ? (
-        <span className="ml-auto font-mono text-[10px] tabular-nums">
+        <span className="ml-auto font-mono text-label tabular-nums">
           {item.badge}
         </span>
       ) : null}

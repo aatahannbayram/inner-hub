@@ -24,7 +24,7 @@ async function ensureDemoContent() {
       {
         title: "Networking Kahvaltısı — Ağustos",
         description: "Küçük grup, derin konuşmalar. Tema: B2B satış ve uluslararasılaşma.",
-        location: "Online (Zoom)",
+        location: "Online (Zoom)", // UI'da lang="en" ile uppercase; TR İ bozulmasın
         startAt: new Date("2026-08-05T09:00:00"),
         endAt: new Date("2026-08-05T11:00:00"),
         isPublished: true,

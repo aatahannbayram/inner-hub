@@ -15,7 +15,7 @@ export function PersonAvatar({
 }: {
   name: string;
   initials: string;
-  /** Sizing + text-size classes, e.g. "size-10 text-[11px]" — shared by both the photo and fallback */
+  /** Sizing + text-size classes, e.g. "size-10 text-caption" — shared by both the photo and fallback */
   className?: string;
 }) {
   const photo = memberPhoto(name);

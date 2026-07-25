@@ -1,9 +1,12 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { posterForVideo } from "@/lib/videoPosters";
 
 interface HeroVideoProps {
   src: string;
-  poster: string;
+  /** Verilmezse src'den otomatik eşlenir (F11 poster map). */
+  poster?: string;
   className?: string;
+  style?: CSSProperties;
 }
 
 /** Otomatik oynatılan hero video'ların ortak, performans-güvenli sarmalayıcısı.
@@ -11,7 +14,8 @@ interface HeroVideoProps {
  *  - preload="none": ilk yükte video dosyası indirilmez, sadece poster.
  *  - IntersectionObserver: viewport dışına çıkınca duraklatılır (arka planda CPU/GPU harcamasın).
  *  - prefers-reduced-motion: video hiç mount edilmez, sadece statik poster gösterilir. */
-export function HeroVideo({ src, poster, className }: HeroVideoProps) {
+export function HeroVideo({ src, poster, className, style }: HeroVideoProps) {
+  const resolvedPoster = poster ?? posterForVideo(src);
   const ref = useRef<HTMLVideoElement>(null);
   const [reduce, setReduce] = useState(false);
 
@@ -41,7 +45,9 @@ export function HeroVideo({ src, poster, className }: HeroVideoProps) {
   }, [reduce]);
 
   if (reduce) {
-    return <img src={poster} alt="" aria-hidden="true" className={className} />;
+    return (
+      <img src={resolvedPoster} alt="" aria-hidden="true" className={className} style={style} />
+    );
   }
 
   return (
@@ -50,9 +56,10 @@ export function HeroVideo({ src, poster, className }: HeroVideoProps) {
       muted
       loop
       playsInline
-      poster={poster}
+      poster={resolvedPoster}
       preload="none"
       className={className}
+      style={style}
       src={src}
     />
   );

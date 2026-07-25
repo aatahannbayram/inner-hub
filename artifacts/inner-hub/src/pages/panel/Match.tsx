@@ -1,8 +1,11 @@
 import { useState, useEffect } from "react";
-import { Loader2, RefreshCw, Sparkles, ArrowRight, Check } from "lucide-react";
+import { RefreshCw, Sparkles, ArrowRight, Check } from "lucide-react";
 import { FadeIn } from "@/components/FadeIn";
 import { AnimatedHeading } from "@/components/AnimatedHeading";
 import { PersonAvatar } from "@/components/panel/PersonAvatar";
+import { HeroVideo } from "@/components/HeroVideo";
+import { CourseCardSkeleton, LoadingBlock, ErrorState } from "@/components/panel/Skeletons";
+import { apiUrl } from "@/lib/api";
 
 interface Match {
   name: string;
@@ -33,7 +36,7 @@ function ScoreBar({ score }: { score: number }) {
           style={{ width: `${score}%` }}
         />
       </div>
-      <span className="w-8 text-right font-mono text-[11px] text-[var(--ink-muted)]">
+      <span className="w-8 text-right font-mono text-caption text-[var(--ink-muted)]">
         %{score}
       </span>
     </div>
@@ -62,11 +65,11 @@ function MatchCard({ match, index }: { match: Match; index: number }) {
           <div className="flex items-start justify-between gap-2">
             <div>
               <p className="text-base font-medium leading-tight text-[var(--ink)]">{match.name}</p>
-              <p className="mt-0.5 font-mono text-[10px] text-[var(--ink-muted)]">{match.company}</p>
+              <p className="mt-0.5 font-mono text-label text-[var(--ink-muted)]">{match.company}</p>
             </div>
             <span
               className={[
-                "shrink-0 border px-2 py-0.5 font-mono text-[8px] uppercase tracking-widest",
+                "shrink-0 border px-2 py-0.5 font-mono text-label uppercase tracking-widest",
                 cfg.color, cfg.bg, cfg.border,
               ].join(" ")}
             >
@@ -74,7 +77,7 @@ function MatchCard({ match, index }: { match: Match; index: number }) {
             </span>
           </div>
           <div className="mt-3">
-            <p className="mb-1 font-mono text-[9px] uppercase tracking-widest text-[var(--ink-subtle)]">
+            <p className="mb-1 font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)]">
               Uyumluluk
             </p>
             <ScoreBar score={match.score} />
@@ -84,7 +87,7 @@ function MatchCard({ match, index }: { match: Match; index: number }) {
 
       {/* Why section */}
       <div className="mb-4 border-t border-[var(--ink)]/[0.06] pt-4">
-        <p className="mb-1.5 font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)]">
+        <p className="mb-1.5 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
           Neden uyumlu?
         </p>
         <p className="text-sm leading-relaxed text-[var(--ink-body)]">{match.why}</p>
@@ -92,14 +95,14 @@ function MatchCard({ match, index }: { match: Match; index: number }) {
 
       {/* Common ground */}
       <div className="mb-5">
-        <p className="mb-2 font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)]">
+        <p className="mb-2 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
           Ortak Zemin
         </p>
         <div className="flex flex-wrap gap-1.5">
           {match.commonGround.map((tag) => (
             <span
               key={tag}
-              className="border border-[var(--ink)]/10 px-2 py-0.5 font-mono text-[9px] text-[var(--ink-body)]"
+              className="border border-[var(--ink)]/10 px-2 py-0.5 font-mono text-label text-[var(--ink-body)]"
             >
               {tag}
             </span>
@@ -113,7 +116,7 @@ function MatchCard({ match, index }: { match: Match; index: number }) {
           onClick={() => setIntroduced(true)}
           disabled={introduced}
           className={[
-            "flex w-full items-center justify-between border px-4 py-2.5 font-mono text-[10px] uppercase tracking-widest transition-all",
+            "flex w-full items-center justify-between border px-4 py-2.5 font-mono text-label uppercase tracking-widest transition-all",
             introduced
               ? "border-[var(--inner-green)]/30 bg-[var(--inner-green)]/5 text-[var(--success-ink)] cursor-default"
               : "border-[var(--ink)]/15 text-[var(--ink-body)] hover:border-[var(--ink)] hover:text-[var(--ink)]",
@@ -143,13 +146,9 @@ function MatchHero() {
       className="relative -mx-4 -mt-6 overflow-hidden sm:-mx-6 lg:-mx-8 lg:-mt-8"
       style={{ height: "min(70vh, 620px)", minHeight: 440 }}
     >
-      <video
-        autoPlay
-        muted
-        loop
-        playsInline
-        className="absolute inset-0 h-full w-full object-cover"
+      <HeroVideo
         src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260508_215831_c6a8989c-d716-4d8d-8745-e972a2eec711.mp4"
+        className="absolute inset-0 h-full w-full object-cover"
       />
 
       {/* Video is bright/white — scrim needed for text legibility */}
@@ -166,7 +165,7 @@ function MatchHero() {
       <div className="relative z-10 flex h-full flex-col justify-end px-6 pb-10 md:px-12 md:pb-14">
         <div className="lg:grid lg:grid-cols-2 lg:items-end lg:gap-10">
           <div>
-            <p className="mb-3 font-mono text-[10px] uppercase tracking-widest text-white/60 [text-shadow:0_1px_12px_rgba(0,0,0,0.6)]">
+            <p className="mb-3 font-mono text-label uppercase tracking-widest text-white/60 [text-shadow:0_1px_12px_rgba(0,0,0,0.6)]">
               <span lang="en">inner·match</span>
             </p>
             <AnimatedHeading
@@ -234,16 +233,28 @@ export default function Match() {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("/api/ai/match", {
+      let userId: string | number = "guest";
+      try {
+        const meRes = await fetch(apiUrl("/api/auth/me"), { credentials: "include" });
+        if (meRes.ok) {
+          const me = await meRes.json();
+          userId = me.user?.id ?? me.user?.email ?? "guest";
+        }
+      } catch {
+        // session yoksa guest
+      }
+
+      const res = await fetch(apiUrl("/api/ai/match"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: "admin", preferences }),
+        credentials: "include",
+        body: JSON.stringify({ userId, preferences }),
       });
       const json = await res.json();
       if (json.error) throw new Error(json.error);
       setData(json);
-    } catch (e: any) {
-      setError(e.message);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Eşleşmeler alınamadı");
     } finally {
       setLoading(false);
     }
@@ -265,7 +276,7 @@ export default function Match() {
           <button
             onClick={fetchMatches}
             disabled={loading}
-            className="flex shrink-0 items-center gap-2 border border-[var(--ink)]/15 px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)] transition-all hover:border-[var(--ink)]/40 hover:text-[var(--ink)] disabled:opacity-30"
+            className="flex shrink-0 items-center gap-2 border border-[var(--ink)]/15 px-3 py-2 font-mono text-label uppercase tracking-widest text-[var(--ink-body)] transition-all hover:border-[var(--ink)]/40 hover:text-[var(--ink)] disabled:opacity-30"
           >
             <RefreshCw className={`size-3 ${loading ? "animate-spin" : ""}`} />
             Yenile
@@ -275,7 +286,7 @@ export default function Match() {
 
       {/* Preference filter */}
       <div id="match-preferences" className="scroll-mt-6">
-        <p className="mb-3 font-mono text-[10px] uppercase tracking-widest text-[var(--ink-muted)]">
+        <p className="mb-3 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
           Arıyor olduğun
         </p>
         <div className="flex flex-wrap gap-2">
@@ -286,7 +297,7 @@ export default function Match() {
                 key={p}
                 onClick={() => togglePref(p)}
                 className={[
-                  "border px-3 py-1.5 font-mono text-[9px] uppercase tracking-widest transition-all",
+                  "border px-3 py-1.5 font-mono text-label uppercase tracking-widest transition-all",
                   active
                     ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--bone)]"
                     : "border-[var(--ink)]/15 text-[var(--ink-body)] hover:border-[var(--ink)]/40 hover:text-[var(--ink)]",
@@ -299,7 +310,7 @@ export default function Match() {
           {preferences.length > 0 && (
             <button
               onClick={fetchMatches}
-              className="border border-[var(--inner-green)]/30 bg-[var(--inner-green)]/5 px-3 py-1.5 font-mono text-[9px] uppercase tracking-widest text-[var(--success-ink)] transition-all hover:bg-[var(--inner-green)]/10"
+              className="border border-[var(--inner-green)]/30 bg-[var(--inner-green)]/5 px-3 py-1.5 font-mono text-label uppercase tracking-widest text-[var(--success-ink)] transition-all hover:bg-[var(--inner-green)]/10"
             >
               Filtrele →
             </button>
@@ -308,24 +319,23 @@ export default function Match() {
       </div>
 
       {loading ? (
-        <div className="flex items-center gap-3 py-12">
-          <Loader2 className="size-5 animate-spin text-[var(--ink-muted)]" />
-          <span className="font-mono text-[11px] uppercase tracking-widest text-[var(--ink-muted)]">
-            AI eşleşmeleri hesaplıyor…
-          </span>
-        </div>
+        <LoadingBlock label="AI eşleşmeleri hesaplanıyor">
+          <div className="space-y-3">
+            <CourseCardSkeleton />
+            <CourseCardSkeleton />
+            <CourseCardSkeleton />
+          </div>
+        </LoadingBlock>
       ) : error ? (
-        <div className="border border-[var(--error)]/20 bg-[var(--error)]/5 p-4">
-          <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--error-ink)]">{error}</p>
-        </div>
+        <ErrorState message={error} onRetry={fetchMatches} />
       ) : data?.matches ? (
         <>
           <div id="match-results" className="scroll-mt-6">
             <div className="mb-4 border-t border-[var(--ink)]/[0.08] pt-3 flex items-center justify-between">
-              <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)]">
+              <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
                 {data.matches.length} Eşleşme Bulundu
               </p>
-              <p className="font-mono text-[9px] text-[var(--ink-subtle)]">
+              <p className="font-mono text-label text-[var(--ink-subtle)]">
                 AI güven skoru ile sıralandı
               </p>
             </div>
@@ -338,20 +348,20 @@ export default function Match() {
 
           {/* How it works */}
           <div className="border border-[var(--ink)]/[0.06] p-5">
-            <p className="mb-3 font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)]">
+            <p className="mb-3 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
               Nasıl Çalışır?
             </p>
             <div className="grid gap-3 sm:grid-cols-3 text-xs text-[var(--ink-body)] leading-relaxed">
               <div>
-                <span className="block font-mono text-[10px] text-[var(--ink-body)] mb-1">01 Profil Analizi</span>
+                <span className="block font-mono text-label text-[var(--ink-body)] mb-1">01 Profil Analizi</span>
                 Üye sektörü, deneyimi ve topluluk etkileşimleri analiz edilir.
               </div>
               <div>
-                <span className="block font-mono text-[10px] text-[var(--ink-body)] mb-1">02 Vektör Eşleşme</span>
+                <span className="block font-mono text-label text-[var(--ink-body)] mb-1">02 Vektör Eşleşme</span>
                 Claude Haiku benzerlik skoru hesaplar, ortak zemin bulur.
               </div>
               <div>
-                <span className="block font-mono text-[10px] text-[var(--ink-body)] mb-1">03 İnsan Onayı</span>
+                <span className="block font-mono text-label text-[var(--ink-body)] mb-1">03 İnsan Onayı</span>
                 "Tanıştır" butonuna basarsan inner ekibi devreye girer.
               </div>
             </div>
@@ -360,7 +370,7 @@ export default function Match() {
       ) : null}
 
       <div className="border-t border-[var(--ink)]/[0.08] pt-4">
-        <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink-subtle)]">
+        <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)]">
           <span lang="en">inner·match</span> — claude-haiku-4-5-20251001 ile güçlendirilmiş · Haftalık güncellenir
         </p>
       </div>

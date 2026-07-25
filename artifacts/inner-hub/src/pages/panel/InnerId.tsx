@@ -13,6 +13,7 @@ import {
   Linkedin,
   ChevronRight,
 } from "lucide-react";
+import { DemoPreviewBanner } from "@/components/panel/DemoPreviewBanner";
 
 // ─── Mock identity data ───────────────────────────────────────────────────────
 
@@ -67,11 +68,11 @@ function IdCard() {
         {/* Left — identity info */}
         <div className="flex-1">
           <div className="mb-4 flex items-center gap-2">
-            <span className="font-mono text-[8px] uppercase tracking-widest text-[var(--bone)]/47">
+            <span className="font-mono text-label uppercase tracking-widest text-[var(--bone)]/47">
               <span lang="en">inner·id</span>
             </span>
-            <span className="font-mono text-[8px] text-[var(--bone)]/37">·</span>
-            <span className="font-mono text-[8px] uppercase tracking-widest text-[var(--bone)]/47">
+            <span className="font-mono text-label text-[var(--bone)]/37">·</span>
+            <span className="font-mono text-label uppercase tracking-widest text-[var(--bone)]/47">
               {IDENTITY.cohort}
             </span>
           </div>
@@ -88,7 +89,7 @@ function IdCard() {
             )}
           </div>
 
-          <p className="mb-4 font-mono text-[11px] text-[var(--bone)]/57">
+          <p className="mb-4 font-mono text-caption text-[var(--bone)]/57">
             @{IDENTITY.handle} · {IDENTITY.role}, {IDENTITY.company}
           </p>
 
@@ -97,7 +98,7 @@ function IdCard() {
             {IDENTITY.badges.map((b) => (
               <span
                 key={b}
-                className="border border-[var(--bone)]/15 px-2 py-0.5 font-mono text-[8px] uppercase tracking-widest text-[var(--bone)]/50"
+                className="border border-[var(--bone)]/15 px-2 py-0.5 font-mono text-label uppercase tracking-widest text-[var(--bone)]/50"
               >
                 {b}
               </span>
@@ -111,7 +112,7 @@ function IdCard() {
           <div className="flex size-16 items-center justify-center border border-[var(--bone)]/15 bg-[var(--bone)]/5">
             <QrCode className="size-8 text-[var(--bone)]/42" />
           </div>
-          <span className="border border-[var(--inner-green)]/40 bg-[var(--inner-green)]/10 px-2.5 py-1 font-mono text-[8px] uppercase tracking-widest text-[var(--success-ink)]">
+          <span className="border border-[var(--inner-green)]/40 bg-[var(--inner-green)]/10 px-2.5 py-1 font-mono text-label uppercase tracking-widest text-[var(--success-ink)]">
             {IDENTITY.tier}
           </span>
         </div>
@@ -122,12 +123,12 @@ function IdCard() {
         <div className="flex items-center gap-4">
           {Object.entries(IDENTITY.stats).map(([k, v]) => (
             <div key={k}>
-              <p className="font-mono text-[8px] uppercase tracking-widest text-[var(--bone)]/42">{k}</p>
+              <p className="font-mono text-label uppercase tracking-widest text-[var(--bone)]/42">{k}</p>
               <p className="font-mono text-sm text-[var(--bone)]/70">{v}</p>
             </div>
           ))}
         </div>
-        <p className="font-mono text-[8px] text-[var(--bone)]/37">
+        <p className="font-mono text-label text-[var(--bone)]/37">
           Üye: {IDENTITY.memberSince}
         </p>
       </div>
@@ -156,7 +157,7 @@ function EmbedSection() {
             key={t}
             onClick={() => setTab(t)}
             className={[
-              "px-4 py-2.5 font-mono text-[9px] uppercase tracking-widest transition-colors border-r border-[var(--ink)]/[0.08] last:border-0",
+              "px-4 py-2.5 font-mono text-label uppercase tracking-widest transition-colors border-r border-[var(--ink)]/[0.08] last:border-0",
               tab === t
                 ? "bg-[var(--ink)] text-[var(--bone)]"
                 : "text-[var(--ink-muted)] hover:text-[var(--ink)]",
@@ -167,14 +168,14 @@ function EmbedSection() {
         ))}
         <button
           onClick={copy}
-          className="ml-auto flex items-center gap-1.5 px-4 font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)] transition-colors hover:text-[var(--ink)]"
+          className="ml-auto flex items-center gap-1.5 px-4 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)] transition-colors hover:text-[var(--ink)]"
         >
           <Copy className="size-3" />
           {copied ? "Kopyalandı" : "Kopyala"}
         </button>
       </div>
       {/* Code */}
-      <pre className="overflow-x-auto p-4 font-mono text-[11px] leading-relaxed text-[var(--ink-body)] bg-[var(--ink)]/[0.02]">
+      <pre className="overflow-x-auto p-4 font-mono text-caption leading-relaxed text-[var(--ink-body)] bg-[var(--ink)]/[0.02]">
         {EMBED_SNIPPETS[tab]}
       </pre>
     </div>
@@ -204,9 +205,9 @@ function PlatformLink({ icon: Icon, label, desc, href, brandColor }: {
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-sm text-[var(--ink)]">{label}</p>
-        <p className="font-mono text-[9px] text-[var(--ink-muted)]">{desc}</p>
+        <p className="font-mono text-label text-[var(--ink-muted)]">{desc}</p>
       </div>
-      <button className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)] hover:text-[var(--ink)] transition-colors shrink-0">
+      <button className="flex items-center gap-1.5 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)] hover:text-[var(--ink)] transition-colors shrink-0">
         Bağla <ChevronRight className="size-3" />
       </button>
     </div>
@@ -223,7 +224,7 @@ export default function InnerId() {
       {/* Header */}
       <FadeIn>
         <div>
-          <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)] mb-2">
+          <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)] mb-2">
             <span lang="en">inner·hub</span>
           </p>
           <h1
@@ -239,18 +240,20 @@ export default function InnerId() {
         </div>
       </FadeIn>
 
+      <DemoPreviewBanner surface="inner·id" />
+
       {/* ID Card */}
       <IdCard />
 
       {/* Public profile URL */}
       <div>
-        <p className="mb-2 font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)]">
+        <p className="mb-2 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
           Herkese Açık Profil
         </p>
         <div className="flex items-center gap-2 border border-[var(--ink)]/[0.08] px-4 py-3">
           <Globe className="size-3.5 text-[var(--ink-subtle)] shrink-0" />
-          <span className="flex-1 font-mono text-[11px] text-[var(--ink-body)]">{publicUrl}</span>
-          <button className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)] hover:text-[var(--ink)] transition-colors">
+          <span className="flex-1 font-mono text-caption text-[var(--ink-body)]">{publicUrl}</span>
+          <button className="flex items-center gap-1.5 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)] hover:text-[var(--ink)] transition-colors">
             <ExternalLink className="size-3" /> Görüntüle
           </button>
         </div>
@@ -258,12 +261,12 @@ export default function InnerId() {
 
       {/* Skills */}
       <div>
-        <p className="mb-2 font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)]">
+        <p className="mb-2 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
           Uzmanlıklar
         </p>
         <div className="flex flex-wrap gap-2">
           {IDENTITY.skills.map((s) => (
-            <span key={s} className="border border-[var(--ink)]/10 px-3 py-1.5 font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)]">
+            <span key={s} className="border border-[var(--ink)]/10 px-3 py-1.5 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
               {s}
             </span>
           ))}
@@ -273,7 +276,7 @@ export default function InnerId() {
       {/* Platform integrations */}
       <section>
         <div className="mb-3 border-t border-[var(--ink)]/[0.08] pt-3">
-          <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)]">
+          <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
             Platform Bağlantıları
           </p>
           <p className="mt-0.5 text-xs text-[var(--ink-muted)]">inner·id rozetini platformlarda göster</p>
@@ -288,7 +291,7 @@ export default function InnerId() {
       {/* Embed widget */}
       <section>
         <div className="mb-3 border-t border-[var(--ink)]/[0.08] pt-3">
-          <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)]">
+          <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
             Rozet & Embed
           </p>
           <p className="mt-0.5 text-xs text-[var(--ink-muted)]">
@@ -302,7 +305,7 @@ export default function InnerId() {
       <div className="flex items-start gap-3 border border-[var(--inner-green)]/20 bg-[var(--inner-green)]/5 p-4">
         <Shield className="size-4 shrink-0 text-[var(--success-ink)] mt-0.5" />
         <div>
-          <p className="mb-0.5 font-mono text-[9px] uppercase tracking-widest text-[var(--success-ink)]">
+          <p className="mb-0.5 font-mono text-label uppercase tracking-widest text-[var(--success-ink)]">
             Kimlik Doğrulandı
           </p>
           <p className="text-sm leading-relaxed text-[var(--ink-muted)]">
@@ -313,7 +316,7 @@ export default function InnerId() {
       </div>
 
       <div className="border-t border-[var(--ink)]/[0.08] pt-4">
-        <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink-subtle)]">
+        <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)]">
           <span lang="en">inner·id</span> — taşınabilir kimlik · davet bazlı · <span lang="en">inner·hub</span> ekosistemi
         </p>
       </div>

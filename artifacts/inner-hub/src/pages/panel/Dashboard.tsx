@@ -9,6 +9,7 @@ import { avatarColor } from "@/lib/avatarColor";
 import { useScrubVideo } from "@/hooks/useScrubVideo";
 import { useTypewriter } from "@/hooks/useTypewriter";
 import type { PortraitConfig } from "@/components/panel/ProceduralPortrait";
+import { posterForVideo } from "@/lib/videoPosters";
 
 const DASHBOARD_VIDEO_SRC =
   "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260530_042513_df96a13b-6155-4f6e-8b93-c9dee66fba08.mp4";
@@ -64,6 +65,7 @@ const spotlightCards = [
     description: "Topluluk hafızasından çıkan sinyaller ve bağlantı önerileri.",
     href: "/panel/signal",
     videoSrc: SIGNAL_CARD_VIDEO,
+    videoPoster: "/posters/courses-hero.jpg",
   },
   {
     title: "Eylül Gathering",
@@ -71,6 +73,7 @@ const spotlightCards = [
     description: "Otuz dört kişi. İki gün. Bir daire. İlk buluşma.",
     href: "/panel/events",
     videoSrc: GATHERING_CARD_VIDEO,
+    videoPoster: "/posters/capital-events.jpg",
   },
   {
     title: "inner·vault",
@@ -88,7 +91,7 @@ function StatCard({ label, value, icon: Icon }: { label: string; value: string |
         <Icon className="size-4 text-[var(--ink-muted)]" />
       </div>
       <div>
-        <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)]">{label}</p>
+        <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">{label}</p>
         <p className="text-xl font-light tabular-nums text-[var(--ink)]">{value}</p>
       </div>
     </div>
@@ -110,14 +113,14 @@ function PerkCard({ perk }: { perk: typeof mockPerks[0] }) {
         {perk.logoUrl ? (
           <img src={perk.logoUrl} alt={perk.brand} className="size-8 object-contain" />
         ) : (
-          <span className="font-mono text-[10px] uppercase tracking-wide">
+          <span className="font-mono text-label uppercase tracking-wide">
             <span lang="en">{perk.brand.slice(0, 2)}</span>
           </span>
         )}
       </div>
       <p className="mb-1 text-sm font-medium leading-snug text-[var(--ink)]">{perk.title}</p>
       <p className="mb-4 flex-1 text-sm leading-relaxed text-[var(--ink-muted)] line-clamp-2">{perk.description}</p>
-      <button className="flex items-center gap-1 font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)] transition-colors hover:text-[var(--ink)]">
+      <button className="flex items-center gap-1 font-mono text-label uppercase tracking-widest text-[var(--ink-body)] transition-colors hover:text-[var(--ink)]">
         Detayları gör <ArrowRight className="size-3" />
       </button>
     </div>
@@ -144,7 +147,8 @@ function DashboardHero({ userName }: { userName: string }) {
         ref={scrubVideoRef}
         muted
         playsInline
-        preload="auto"
+        poster={posterForVideo(DASHBOARD_VIDEO_SRC)}
+        preload="none"
         className="absolute inset-0 h-full w-full object-cover"
         style={{ objectPosition: "70% center" }}
         src={DASHBOARD_VIDEO_SRC}
@@ -184,7 +188,7 @@ function DashboardHero({ userName }: { userName: string }) {
             <Link
               key={item.href}
               href={item.href}
-              className="mx-[0.2em] mb-[0.4em] inline-flex items-center justify-center whitespace-nowrap rounded-full border border-black/10 bg-white px-4 py-[0.5em] font-mono text-[11px] uppercase tracking-widest text-black transition-colors duration-200 hover:bg-black hover:text-white sm:px-5 sm:text-[12px]"
+              className="mx-[0.2em] mb-[0.4em] inline-flex items-center justify-center whitespace-nowrap rounded-full border border-black/10 bg-white px-4 py-[0.5em] font-mono text-caption uppercase tracking-widest text-black transition-colors duration-200 hover:bg-black hover:text-white sm:px-5 sm:text-[12px]"
             >
               {item.brand && <span lang="en">{item.brand}</span>}
               {item.label}
@@ -192,7 +196,7 @@ function DashboardHero({ userName }: { userName: string }) {
           ))}
           <Link
             href="/panel/profile"
-            className="mx-[0.2em] mb-[0.4em] inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full border border-white bg-transparent px-4 py-[0.5em] font-mono text-[11px] uppercase tracking-widest text-white transition-colors duration-200 hover:bg-white hover:text-black sm:px-5 sm:text-[12px]"
+            className="mx-[0.2em] mb-[0.4em] inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full border border-white bg-transparent px-4 py-[0.5em] font-mono text-caption uppercase tracking-widest text-white transition-colors duration-200 hover:bg-white hover:text-black sm:px-5 sm:text-[12px]"
           >
             Profilini tamamla
             <ArrowRight className="size-3" />
@@ -229,7 +233,7 @@ export default function Dashboard({ userName = "Ata" }: { userName?: string }) {
       <FadeIn delay={0.06}>
         <section>
           <div className="mb-4 border-t border-[var(--ink)]/[0.08] pt-3">
-            <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)]">
+            <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
               Öne çıkan
             </p>
           </div>
@@ -247,7 +251,7 @@ export default function Dashboard({ userName = "Ata" }: { userName?: string }) {
           <AmbientCardBackground />
           <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="mb-1 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)]/57">
+              <p className="mb-1 font-mono text-label uppercase tracking-widest text-[var(--bone)]/57">
                 Yeni Dönem
               </p>
               <p className="text-lg font-light text-[var(--bone)]">2. Kursa Kayıt Ol</p>
@@ -255,7 +259,7 @@ export default function Dashboard({ userName = "Ata" }: { userName?: string }) {
             </div>
             <Link
               href="/panel/applications"
-              className="inline-flex shrink-0 items-center gap-2 border border-[var(--bone)]/20 bg-[var(--bone)] px-5 py-2.5 font-mono text-[11px] uppercase tracking-widest text-[var(--ink)] transition-opacity hover:opacity-80"
+              className="inline-flex shrink-0 items-center gap-2 border border-[var(--bone)]/20 bg-[var(--bone)] px-5 py-2.5 font-mono text-caption uppercase tracking-widest text-[var(--ink)] transition-opacity hover:opacity-80"
             >
               Başvur <ArrowRight className="size-3.5" />
             </Link>
@@ -275,10 +279,10 @@ export default function Dashboard({ userName = "Ata" }: { userName?: string }) {
         <FadeIn delay={0.12}>
           <section>
             <div className="mb-4 flex items-baseline justify-between border-t border-[var(--ink)]/[0.08] pt-3">
-              <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)]">Kurslarım</p>
+              <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">Kurslarım</p>
               <Link
                 href="/panel/courses"
-                className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)] transition-colors hover:text-[var(--ink)]"
+                className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)] transition-colors hover:text-[var(--ink)]"
               >
                 Tümü →
               </Link>
@@ -292,7 +296,7 @@ export default function Dashboard({ userName = "Ata" }: { userName?: string }) {
                       <div className="h-full bg-[var(--ink)] transition-all duration-700" style={{ width: `${course.progressPct}%` }} />
                     </div>
                   </div>
-                  <span className="font-mono text-[10px] tabular-nums text-[var(--ink-body)]">%{course.progressPct}</span>
+                  <span className="font-mono text-label tabular-nums text-[var(--ink-body)]">%{course.progressPct}</span>
                 </div>
               ))}
             </div>
@@ -304,12 +308,12 @@ export default function Dashboard({ userName = "Ata" }: { userName?: string }) {
         <section>
           <div className="mb-4 flex items-baseline justify-between border-t border-[var(--ink)]/[0.08] pt-3">
             <div>
-              <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)]">Ayrıcalıklar</p>
+              <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">Ayrıcalıklar</p>
               <p className="mt-0.5 text-xs text-[var(--ink-muted)]">Program katılımcılarına özel fırsatlar</p>
             </div>
             <Link
               href="/panel/perks"
-              className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)] transition-colors hover:text-[var(--ink)]"
+              className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)] transition-colors hover:text-[var(--ink)]"
             >
               Tümü →
             </Link>

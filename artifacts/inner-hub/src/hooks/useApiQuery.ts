@@ -4,9 +4,14 @@ import { apiUrl } from "@/lib/api";
 /** Panel sayfalarındaki elle useEffect+fetch deseninin tek noktadan yerini alır.
  *  staleTime: panel verisi sık değişmiyor. placeholderData: sayfa/route
  *  değişiminde flicker olmasın diye önceki veri korunur. */
-export function useApiQuery<T>(key: readonly unknown[], path: string) {
+export function useApiQuery<T>(
+  key: readonly unknown[],
+  path: string,
+  opts?: { enabled?: boolean },
+) {
   return useQuery<T>({
     queryKey: key,
+    enabled: opts?.enabled ?? true,
     queryFn: async () => {
       const res = await fetch(apiUrl(path), { credentials: "include" });
       const json = await res.json().catch(() => ({}));

@@ -4,6 +4,7 @@ import { FadeIn } from "@/components/FadeIn";
 import { AnimatedHeading } from "@/components/AnimatedHeading";
 import { useApiQuery } from "@/hooks/useApiQuery";
 import { StatCardSkeleton, LoadingBlock, ErrorState } from "@/components/panel/Skeletons";
+import { HeroVideo } from "@/components/HeroVideo";
 
 type ViewMode = "liste" | "takvim";
 
@@ -107,7 +108,7 @@ function EventCard({ event }: { event: Event }) {
       )}
       {/* Date column */}
       <div className="flex w-14 shrink-0 flex-col items-center justify-start border border-[var(--ink)]/[0.08] p-2 text-center">
-        <span className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink-body)]">
+        <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
           {formatWeekday(event.startAt)}
         </span>
         <span
@@ -116,7 +117,7 @@ function EventCard({ event }: { event: Event }) {
         >
           {formatDay(event.startAt)}
         </span>
-        <span className="font-mono text-[8px] uppercase tracking-widest text-[var(--ink-muted)]">
+        <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
           {new Date(event.startAt).toLocaleDateString("tr-TR", { month: "short" })}
         </span>
       </div>
@@ -125,13 +126,13 @@ function EventCard({ event }: { event: Event }) {
       <div className="flex flex-1 flex-col gap-2 min-w-0">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <span className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)]">
+            <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
               {event.type === "online" ? <span lang="en">{TYPE_LABELS[event.type]}</span> : TYPE_LABELS[event.type]}
             </span>
             <h3 className="text-sm font-medium text-[var(--ink)] leading-snug">{event.title}</h3>
           </div>
           {event.isRegistered && (
-            <span className="shrink-0 flex items-center gap-1 font-mono text-[9px] uppercase tracking-widest text-[var(--inner-green)] border border-[var(--inner-green)]/30 bg-[var(--inner-green)]/10 px-2 py-0.5">
+            <span className="shrink-0 flex items-center gap-1 font-mono text-label uppercase tracking-widest text-[var(--success-ink)] border border-[var(--inner-green)]/30 bg-[var(--inner-green)]/10 px-2 py-0.5">
               <CheckCircle2 className="size-2.5" /> Kayıtlısın
             </span>
           )}
@@ -140,16 +141,20 @@ function EventCard({ event }: { event: Event }) {
         <p className="text-sm leading-relaxed text-[var(--ink-muted)] line-clamp-2">{event.description}</p>
 
         <div className="flex flex-wrap items-center gap-3 text-[var(--ink-body)]">
-          <span className="flex items-center gap-1 font-mono text-[9px] uppercase tracking-widest">
+          <span className="flex items-center gap-1 font-mono text-label uppercase tracking-widest">
             <Clock className="size-3" />
             {formatTime(event.startAt)} – {formatTime(event.endAt)}
           </span>
-          <span className="flex items-center gap-1 font-mono text-[9px] uppercase tracking-widest">
+          <span className="flex items-center gap-1 font-mono text-label uppercase tracking-widest">
             <MapPin className="size-3" />
-            {event.location || "Konum yakında"}
+            {event.location ? (
+              <span lang="en">{event.location}</span>
+            ) : (
+              "Konum yakında"
+            )}
           </span>
           {event.capacity > 0 && (
-            <span className="flex items-center gap-1 font-mono text-[9px] uppercase tracking-widest">
+            <span className="flex items-center gap-1 font-mono text-label uppercase tracking-widest">
               <Users className="size-3" />
               {event.registered}/{event.capacity}
             </span>
@@ -159,15 +164,15 @@ function EventCard({ event }: { event: Event }) {
         {!event.isPast && (
           <div className="mt-1">
             {event.capacity > 0 && isFull ? (
-              <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-muted)]">
+              <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
                 Kontenjan dolu
               </span>
             ) : event.isRegistered ? (
-              <button className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)] hover:text-[var(--error-ink)] transition-colors">
+              <button className="flex items-center gap-1.5 font-mono text-label uppercase tracking-widest text-[var(--ink-body)] hover:text-[var(--error-ink)] transition-colors">
                 Kaydı İptal Et
               </button>
             ) : (
-              <button className="flex items-center gap-1.5 border border-[var(--ink)] bg-[var(--ink)] px-4 py-2 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-80">
+              <button className="flex items-center gap-1.5 border border-[var(--ink)] bg-[var(--ink)] px-4 py-2 font-mono text-label uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-80">
                 Kayıt Ol
                 <ChevronRight className="size-3" />
               </button>
@@ -214,7 +219,7 @@ function CalendarView({ events }: { events: Event[] }) {
       {/* Header row */}
       <div className="grid grid-cols-7 border-b border-[var(--ink)]/[0.08]">
         {DAYS.map((d) => (
-          <div key={d} className="p-2 text-center font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)]">
+          <div key={d} className="p-2 text-center font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
             {d}
           </div>
         ))}
@@ -236,7 +241,7 @@ function CalendarView({ events }: { events: Event[] }) {
                 <>
                   <span
                     className={[
-                      "flex size-6 items-center justify-center font-mono text-[10px]",
+                      "flex size-6 items-center justify-center font-mono text-label",
                       isToday
                         ? "bg-[var(--ink)] text-[var(--bone)]"
                         : "text-[var(--ink-muted)]",
@@ -249,7 +254,7 @@ function CalendarView({ events }: { events: Event[] }) {
                       <div
                         key={e.id}
                         className={[
-                          "truncate px-1 py-0.5 font-mono text-[8px] uppercase tracking-wide",
+                          "truncate px-1 py-0.5 font-mono text-label uppercase tracking-wide",
                           e.isRegistered
                             ? "bg-[var(--inner-green)]/15 text-[var(--ink-strong)]"
                             : "bg-[var(--ink)]/[0.06] text-[var(--ink-muted)]",
@@ -260,7 +265,7 @@ function CalendarView({ events }: { events: Event[] }) {
                       </div>
                     ))}
                     {dayEvents.length > 2 && (
-                      <span className="font-mono text-[8px] text-[var(--ink-muted)]">
+                      <span className="font-mono text-label text-[var(--ink-muted)]">
                         +{dayEvents.length - 2}
                       </span>
                     )}
@@ -287,13 +292,9 @@ function EventsHero() {
       className="relative -mx-4 -mt-6 overflow-hidden sm:-mx-6 lg:-mx-8 lg:-mt-8"
       style={{ height: "min(70vh, 620px)", minHeight: 440 }}
     >
-      <video
-        autoPlay
-        muted
-        loop
-        playsInline
-        className="absolute inset-0 h-full w-full object-cover"
+      <HeroVideo
         src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260403_050628_c4e32401-fab4-4a27-b7a8-6e9291cd5959.mp4"
+        className="absolute inset-0 h-full w-full object-cover"
       />
       <div
         aria-hidden="true"
@@ -307,7 +308,7 @@ function EventsHero() {
       <div className="relative z-10 flex h-full flex-col justify-end px-6 pb-10 md:px-12 md:pb-14">
         <div className="lg:grid lg:grid-cols-2 lg:items-end lg:gap-10">
           <div>
-            <p className="mb-3 font-mono text-[10px] uppercase tracking-widest text-white/60 [text-shadow:0_1px_12px_rgba(0,0,0,0.6)]">
+            <p className="mb-3 font-mono text-label uppercase tracking-widest text-white/60 [text-shadow:0_1px_12px_rgba(0,0,0,0.6)]">
               Etkinlikler
             </p>
             <AnimatedHeading
@@ -369,7 +370,7 @@ function EventsStat({
   return (
     <div className="border border-[var(--ink)]/[0.08] p-4">
       <div className="mb-2 flex items-center justify-between">
-        <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)]">{label}</p>
+        <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">{label}</p>
         <Icon className="size-3.5 text-[var(--ink-subtle)]" />
       </div>
       <p
@@ -378,7 +379,7 @@ function EventsStat({
       >
         {value}
       </p>
-      <p className="mt-1 font-mono text-[9px] text-[var(--ink-muted)]">{sub}</p>
+      <p className="mt-1 font-mono text-label text-[var(--ink-muted)]">{sub}</p>
     </div>
   );
 }
@@ -429,7 +430,7 @@ export default function Events() {
                 key={v}
                 onClick={() => setView(v)}
                 className={[
-                  "px-4 py-2 font-mono text-[10px] uppercase tracking-widest transition-colors",
+                  "px-4 py-2 font-mono text-label uppercase tracking-widest transition-colors",
                   view === v
                     ? "bg-[var(--ink)] text-[var(--bone)]"
                     : "text-[var(--ink-body)] hover:text-[var(--ink)]",
@@ -458,7 +459,7 @@ export default function Events() {
         />
       )}
       {!loading && !isError && events.length === 0 && (
-        <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)]">
+        <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
           Henüz yayınlanmış etkinlik yok.
         </p>
       )}
@@ -469,16 +470,16 @@ export default function Events() {
           <FadeIn delay={0.05}>
             <section id="events-upcoming" className="scroll-mt-6">
               <div className="mb-3 flex items-center gap-3 border-t border-[var(--ink)]/[0.08] pt-3">
-                <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)]">
+                <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
                   Yaklaşan Etkinlikler
                 </p>
-                <span className="flex size-4 items-center justify-center bg-[var(--ink)] font-mono text-[9px] text-[var(--bone)]">
+                <span className="flex size-4 items-center justify-center bg-[var(--ink)] font-mono text-label text-[var(--bone)]">
                   {upcoming.length}
                 </span>
               </div>
               <div className="space-y-2">
                 {upcoming.length === 0 ? (
-                  <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-muted)]">
+                  <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
                     Yaklaşan etkinlik yok.
                   </p>
                 ) : (
@@ -493,7 +494,7 @@ export default function Events() {
             <FadeIn delay={0.1}>
               <section>
                 <div className="mb-3 border-t border-[var(--ink)]/[0.08] pt-3">
-                  <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-muted)]">
+                  <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
                     Geçmiş Etkinlikler
                   </p>
                 </div>
@@ -512,7 +513,7 @@ export default function Events() {
         <FadeIn delay={0.05}>
           <section>
             <div className="mb-3 border-t border-[var(--ink)]/[0.08] pt-3">
-              <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)]">
+              <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
                 Takvim
               </p>
             </div>

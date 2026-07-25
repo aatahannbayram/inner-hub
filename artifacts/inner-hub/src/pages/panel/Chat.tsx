@@ -3,6 +3,7 @@ import { Send, Hash, Volume2, Pin, Search, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AmbientCardBackground } from "@/components/panel/AmbientCardBackground";
 import { PersonAvatar } from "@/components/panel/PersonAvatar";
+import { DemoPreviewBanner } from "@/components/panel/DemoPreviewBanner";
 
 const CHANNEL_SUGGESTIONS: Record<string, string[]> = {
   genel: ["Ben de AWS Activate'e başvurdum 🙋", "Zirve için elimden geleni yaparım", "Harika gidiyor 🎉"],
@@ -28,11 +29,11 @@ function AiDigest({ channelId, channelLabel }: { channelId: string; channelLabel
       <AmbientCardBackground />
       <div className="relative z-10 flex items-start gap-3">
         <div className="relative flex size-7 shrink-0 items-center justify-center border border-[var(--inner-green)]/40 bg-[var(--inner-green)]/10">
-          <Sparkles className="size-3.5 text-[var(--inner-green)]" />
+          <Sparkles className="size-3.5 text-[var(--success-ink)]" />
           <span className="absolute -right-1 -top-1 size-1.5 animate-beacon rounded-full bg-[var(--inner-green)]" />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="mb-1 font-mono text-[9px] uppercase tracking-widest text-[var(--inner-green)]/80">
+          <p className="mb-1 font-mono text-label uppercase tracking-widest text-[var(--success-ink)]/80">
             AI Özet · #{channelLabel}
           </p>
           <p className="text-sm leading-relaxed text-[var(--bone)]/80">
@@ -244,7 +245,7 @@ function Avatar({ name, initials, size = "sm" }: { name: string; initials: strin
     <PersonAvatar
       name={name}
       initials={initials}
-      className={size === "sm" ? "size-7 text-[9px]" : "size-8 text-[10px]"}
+      className={size === "sm" ? "size-7 text-label" : "size-8 text-label"}
     />
   );
 }
@@ -262,11 +263,11 @@ function MessageBubble({ msg, prevAuthorId }: { msg: Message; prevAuthorId?: num
           <div className="mb-0.5 flex items-baseline gap-2">
             <span className="text-sm font-medium text-[var(--ink)]">{msg.authorName}</span>
             {msg.authorRole === "admin" && (
-              <span className="font-mono text-[8px] uppercase tracking-widest text-[var(--inner-green)] border border-[var(--inner-green)]/30 px-1">
+              <span className="font-mono text-label uppercase tracking-widest text-[var(--success-ink)] border border-[var(--inner-green)]/30 px-1">
                 Admin
               </span>
             )}
-            <span className="font-mono text-[10px] text-[var(--ink-muted)]">{msg.timestamp}</span>
+            <span className="font-mono text-label text-[var(--ink-muted)]">{msg.timestamp}</span>
             {msg.isPinned && <Pin className="size-2.5 text-[var(--ink-muted)]" />}
           </div>
         )}
@@ -308,14 +309,19 @@ export default function ChatPage() {
       [activeChannel]: [...(prev[activeChannel] ?? []), newMsg],
     }));
     setDraft("");
+    // Demo: local only — banner zaten uyarıyor
   };
 
   return (
-    <div className="-mx-4 -my-6 flex h-[calc(100svh-60px)] min-h-0 sm:-mx-6 lg:-mx-8 lg:-my-8">
+    <div className="-mx-4 -my-6 flex h-[calc(100svh-60px)] min-h-0 flex-col sm:-mx-6 lg:-mx-8 lg:-my-8">
+      <div className="shrink-0 px-4 pt-3 sm:px-6 lg:px-8">
+        <DemoPreviewBanner surface="Topluluk chat" />
+      </div>
+      <div className="flex min-h-0 flex-1">
       {/* Channel sidebar */}
       <aside className="hidden w-[220px] shrink-0 flex-col border-r border-[var(--ink)]/[0.08] bg-[var(--bone)] md:flex">
         <div className="border-b border-[var(--ink)]/[0.08] px-4 py-3">
-          <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)]">Kanallar</p>
+          <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">Kanallar</p>
         </div>
         <div className="flex-1 overflow-y-auto py-2">
           {CHANNELS.map((ch) => (
@@ -334,9 +340,9 @@ export default function ChatPage() {
               ) : (
                 <Hash className="size-3 shrink-0" />
               )}
-              <span className="flex-1 truncate font-mono text-[11px]">{ch.label}</span>
+              <span className="flex-1 truncate font-mono text-caption">{ch.label}</span>
               {ch.unread > 0 && activeChannel !== ch.id && (
-                <span className="flex size-4 items-center justify-center bg-[var(--ink)] font-mono text-[8px] text-[var(--bone)]">
+                <span className="flex size-4 items-center justify-center bg-[var(--ink)] font-mono text-label text-[var(--bone)]">
                   {ch.unread}
                 </span>
               )}
@@ -356,7 +362,7 @@ export default function ChatPage() {
               <Hash className="size-4 text-[var(--ink-body)]" />
             )}
             <span className="font-mono text-sm text-[var(--ink)]">{channel.label}</span>
-            <span className="hidden font-mono text-[10px] text-[var(--ink-muted)] sm:block">
+            <span className="hidden font-mono text-label text-[var(--ink-muted)] sm:block">
               — {channel.description}
             </span>
           </div>
@@ -372,7 +378,7 @@ export default function ChatPage() {
             <div className="flex h-full items-center justify-center">
               <div className="text-center">
                 <Hash className="mx-auto mb-3 size-8 text-[var(--ink-subtle)]" />
-                <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-muted)]">
+                <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
                   #{channel.label} henüz boş
                 </p>
                 <p className="mt-1 text-sm text-[var(--ink-muted)]">İlk mesajı sen gönder.</p>
@@ -396,13 +402,13 @@ export default function ChatPage() {
         <div className="border-t border-[var(--ink)]/[0.08] p-4">
           {(CHANNEL_SUGGESTIONS[activeChannel]?.length ?? 0) > 0 && (
             <div className="mb-2 flex flex-wrap items-center gap-1.5">
-              <Sparkles className="size-3 shrink-0 text-[var(--inner-green)]/70" />
+              <Sparkles className="size-3 shrink-0 text-[var(--success-ink)]/70" />
               {CHANNEL_SUGGESTIONS[activeChannel].map((s) => (
                 <button
                   key={s}
                   type="button"
                   onClick={() => setDraft(s)}
-                  className="border border-[var(--ink)]/12 px-2.5 py-1 font-mono text-[10px] text-[var(--ink-muted)] transition-colors hover:border-[var(--inner-green)]/40 hover:text-[var(--ink)]"
+                  className="border border-[var(--ink)]/12 px-2.5 py-1 font-mono text-label text-[var(--ink-muted)] transition-colors hover:border-[var(--inner-green)]/40 hover:text-[var(--ink)]"
                 >
                   {s}
                 </button>
@@ -433,10 +439,11 @@ export default function ChatPage() {
               <Send className="size-3.5" />
             </button>
           </div>
-          <p className="mt-1.5 font-mono text-[9px] text-[var(--ink-subtle)]">
-            Enter ile gönder · Shift+Enter yeni satır
+          <p className="mt-1.5 font-mono text-label text-[var(--ink-subtle)]">
+            Enter ile gönder · Shift+Enter yeni satır · Önizleme — sunucuya gitmez
           </p>
         </div>
+      </div>
       </div>
     </div>
   );

@@ -59,9 +59,9 @@ function NotifPanel({
         {/* Header */}
         <div className="flex items-center justify-between border-b border-[var(--ink)]/[0.08] px-4 py-3">
           <div className="flex items-center gap-2">
-            <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink-body)]">Bildirimler</p>
+            <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">Bildirimler</p>
             {count > 0 && (
-              <span className="flex size-4 items-center justify-center bg-[var(--ink)] font-mono text-[8px] text-[var(--bone)]">
+              <span className="flex size-4 items-center justify-center bg-[var(--ink)] font-mono text-label text-[var(--bone)]">
                 {count}
               </span>
             )}
@@ -69,7 +69,7 @@ function NotifPanel({
           {count > 0 && (
             <button
               onClick={markAll}
-              className="font-mono text-[8px] uppercase tracking-widest text-[var(--ink-muted)] hover:text-[var(--ink)] transition-colors"
+              className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)] hover:text-[var(--ink)] transition-colors"
             >
               Tümünü oku
             </button>
@@ -98,8 +98,8 @@ function NotifPanel({
                       <span className="mt-1 size-1.5 shrink-0 rounded-full bg-[var(--inner-green)]" />
                     )}
                   </div>
-                  <p className="mt-0.5 font-mono text-[9px] leading-snug text-[var(--ink-muted)]">{n.sub}</p>
-                  <p className="mt-1 font-mono text-[8px] text-[var(--ink-subtle)]">{n.time}</p>
+                  <p className="mt-0.5 font-mono text-label leading-snug text-[var(--ink-muted)]">{n.sub}</p>
+                  <p className="mt-1 font-mono text-label text-[var(--ink-subtle)]">{n.time}</p>
                 </div>
               </div>
             );
@@ -108,7 +108,7 @@ function NotifPanel({
 
         {/* Footer */}
         <div className="border-t border-[var(--ink)]/[0.08] px-4 py-2.5">
-          <p className="font-mono text-[8px] text-[var(--ink-subtle)] text-center">inner·hub · bildirimler</p>
+          <p className="font-mono text-label text-[var(--ink-subtle)] text-center">inner·hub · bildirimler</p>
         </div>
       </div>
     </>
@@ -152,7 +152,7 @@ function LogoSquare({ size, translate }: { size: string; translate: string }) {
 function BrandMark({ collapsed }: { collapsed: boolean }) {
   if (collapsed) {
     return (
-      <div className="flex size-8 items-center justify-center">
+      <div className="flex size-8 items-center justify-center" lang="en">
         <span
           className="font-serif text-lg leading-none text-[var(--ink)]"
           style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
@@ -163,7 +163,7 @@ function BrandMark({ collapsed }: { collapsed: boolean }) {
     );
   }
   return (
-    <div className="flex items-baseline gap-0 leading-none">
+    <div className="flex items-baseline gap-0 leading-none" lang="en">
       <span
         className="font-serif text-xl text-[var(--ink)]"
         style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300, letterSpacing: "-0.015em" }}
@@ -201,17 +201,17 @@ function SidebarFooter({
     <div className="space-y-3">
       <div className="space-y-0.5">
         <p className="truncate text-sm font-medium text-[var(--ink)]">{user.name}</p>
-        <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)]">
+        <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
           {user.role === "admin" ? "Admin" : "Üye"}
         </p>
       </div>
       {user.profileCompletionPct < 100 && (
         <div className="space-y-1.5">
           <div className="flex justify-between">
-            <span className="font-mono text-[10px] font-semibold uppercase tracking-widest text-[var(--ink-strong)]">
+            <span className="font-mono text-label font-semibold uppercase tracking-widest text-[var(--ink-strong)]">
               Profil tamamlanma
             </span>
-            <span className="font-mono text-[10px] font-semibold tabular-nums text-[var(--ink-strong)]">
+            <span className="font-mono text-label font-semibold tabular-nums text-[var(--ink-strong)]">
               %{user.profileCompletionPct}
             </span>
           </div>
@@ -229,7 +229,7 @@ function SidebarFooter({
         className="hit-40 relative flex items-center gap-1.5 text-[var(--ink-body)] transition-colors hover:text-[var(--ink)]"
       >
         <LogOut className="size-3.5" />
-        <span className="font-mono text-[10px] uppercase tracking-widest">Çıkış Yap</span>
+        <span className="font-mono text-label uppercase tracking-widest">Çıkış Yap</span>
       </button>
     </div>
   );
@@ -433,7 +433,7 @@ function ShellInner({ user, children, onLogout }: PanelShellProps) {
             {/* Online indicator */}
             <div className="flex items-center gap-1.5">
               <span className="size-1.5 rounded-full bg-[var(--inner-green)] animate-beacon" />
-              <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)] hidden sm:block">
+              <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)] hidden sm:block">
                 <span lang="en">online</span>
               </span>
             </div>
@@ -447,7 +447,7 @@ function ShellInner({ user, children, onLogout }: PanelShellProps) {
             >
               <Bell className="size-4" />
               {notifCount > 0 && (
-                <span className="absolute -right-1 -top-1 flex size-3.5 items-center justify-center bg-[var(--ink)] font-mono text-[8px] text-[var(--bone)]">
+                <span className="absolute -right-1 -top-1 flex size-3.5 items-center justify-center bg-[var(--ink)] font-mono text-label text-[var(--bone)]">
                   {notifCount}
                 </span>
               )}
@@ -468,7 +468,7 @@ function ShellInner({ user, children, onLogout }: PanelShellProps) {
                 className="size-7 object-cover"
               />
             ) : (
-              <div className="flex size-7 items-center justify-center bg-[var(--ink)] font-mono text-[10px] uppercase text-[var(--bone)]">
+              <div className="flex size-7 items-center justify-center bg-[var(--ink)] font-mono text-label uppercase text-[var(--bone)]">
                 {user.name.slice(0, 2)}
               </div>
             )}

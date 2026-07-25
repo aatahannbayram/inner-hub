@@ -116,7 +116,7 @@ export default function FAQ() {
       {/* Header */}
       <FadeIn>
         <div>
-          <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)] mb-2">
+          <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)] mb-2">
             <span lang="en">inner·hub</span>
           </p>
           <h1
@@ -139,7 +139,7 @@ export default function FAQ() {
             key={cat.category}
             onClick={() => setActiveCategory(cat.category)}
             className={[
-              "border px-3.5 py-1.5 font-mono text-[9px] uppercase tracking-widest transition-colors",
+              "border px-3.5 py-1.5 font-mono text-label uppercase tracking-widest transition-colors",
               activeCategory === cat.category
                 ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--bone)]"
                 : "border-[var(--ink)]/15 text-[var(--ink-muted)] hover:text-[var(--ink)]",
@@ -161,7 +161,7 @@ export default function FAQ() {
 
       {/* Contact */}
       <div className="border border-[var(--ink)]/[0.08] p-5">
-        <p className="mb-1 font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)]">
+        <p className="mb-1 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
           Cevap bulamadın mı?
         </p>
         <p className="mb-3 text-sm text-[var(--ink-muted)] font-light">
@@ -169,14 +169,14 @@ export default function FAQ() {
         </p>
         <a
           href="mailto:destek@inner.digital"
-          className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink-body)] underline underline-offset-2 hover:text-[var(--ink)] transition-colors"
+          className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)] underline underline-offset-2 hover:text-[var(--ink)] transition-colors"
         >
           destek@inner.digital
         </a>
       </div>
 
       <div className="border-t border-[var(--ink)]/[0.08] pt-4">
-        <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink-subtle)]">
+        <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)]">
           <span lang="en">inner·hub</span> · sık sorulan sorular
         </p>
       </div>

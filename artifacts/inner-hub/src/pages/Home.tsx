@@ -12,6 +12,7 @@ import { Preloader } from "@/components/Preloader";
 import { FloatingNavbar } from "@/components/FloatingNavbar";
 import { PlatformFeatures, type PlatformFeature } from "@/components/PlatformFeatures";
 import { ProceduralPortrait, type PortraitConfig } from "@/components/panel/ProceduralPortrait";
+import { HeroVideo } from "@/components/HeroVideo";
 import { useLenis } from "@/hooks/useLenis";
 
 const PHOSPHOR_CONFIG: PortraitConfig = {
@@ -209,7 +210,7 @@ function StatItem({ n, label, suffix = "" }: { n: number; label: string; suffix?
       <span className="font-display font-serif italic text-5xl md:text-7xl leading-none mb-3 text-[var(--bone)]">
         <Counter to={n} suffix={suffix} />
       </span>
-      <span className="font-mono text-[10px] uppercase tracking-widest opacity-40 text-[var(--bone)]">{label}</span>
+      <span className="font-mono text-label uppercase tracking-widest opacity-40 text-[var(--bone)]">{label}</span>
     </div>
   );
 }
@@ -247,13 +248,9 @@ export default function Home() {
         {/* ── Hero ── */}
         <section ref={heroRef} className="h-[100svh] mb-[-3rem] flex flex-col justify-end px-6 pb-16 md:px-12 md:pb-24 lg:px-[10%] relative overflow-hidden bg-black text-white">
           <FloatingNavbar />
-          <video
-            autoPlay
-            muted
-            loop
-            playsInline
-            className="absolute inset-0 z-0 h-full w-full object-cover"
+          <HeroVideo
             src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260406_094145_4a271a6c-3869-4f1c-8aa7-aeb0cb227994.mp4"
+            className="absolute inset-0 z-0 h-full w-full object-cover"
           />
           <div
             aria-hidden="true"
@@ -321,7 +318,7 @@ export default function Home() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.5 }}
-            className="absolute bottom-10 left-6 md:left-12 lg:left-[10%] z-10 flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-white/60"
+            className="absolute bottom-10 left-6 md:left-12 lg:left-[10%] z-10 flex items-center gap-2 font-mono text-label uppercase tracking-widest text-white/60"
           >
             <motion.div
               animate={{ y: [0, 6, 0] }}
@@ -385,7 +382,7 @@ export default function Home() {
                   className="size-full"
                 />
                 <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
-                <p className="pointer-events-none absolute bottom-4 left-4 font-mono text-[9px] uppercase tracking-widest text-[#18FF85]/70">
+                <p className="pointer-events-none absolute bottom-4 left-4 font-mono text-label uppercase tracking-widest text-[#18FF85]/70">
                   Signal · Founding member
                 </p>
               </div>
@@ -401,13 +398,9 @@ export default function Home() {
         {/* ── 04–05 · What this is → Entry (one continuous dark, video-anchored span) ── */}
         <div className="relative overflow-hidden bg-black border-t border-border/15">
           <div className="absolute inset-x-0 top-0 h-[85vh] md:h-[95vh] z-0" aria-hidden="true">
-            <video
-              autoPlay
-              muted
-              loop
-              playsInline
-              className="h-full w-full object-cover"
+            <HeroVideo
               src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260406_133058_0504132a-0cf3-4450-a370-8ea3b05c95d4.mp4"
+              className="h-full w-full object-cover"
             />
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/55 via-black/60 to-black" />
           </div>
@@ -521,7 +514,7 @@ export default function Home() {
         <div className="flex flex-col gap-6">
           <img src="/inner-logo.png" alt="inner" width={140} height={140} className="w-[140px] h-[140px]" />
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div className="flex flex-wrap gap-x-5 gap-y-2 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)] opacity-60">
+            <div className="flex flex-wrap gap-x-5 gap-y-2 font-mono text-label uppercase tracking-widest text-[var(--bone)] opacity-60">
               <span>The next wave knows each other · İstanbul → Global</span>
             </div>
             <div className="flex items-center justify-center md:justify-end gap-5">
@@ -533,7 +526,7 @@ export default function Home() {
               </a>
             </div>
           </div>
-          <div className="font-mono text-[10px] uppercase tracking-widest text-[var(--bone)] opacity-30">
+          <div className="font-mono text-label uppercase tracking-widest text-[var(--bone)] opacity-30">
             © 2026 inner. İstanbul.
           </div>
         </div>

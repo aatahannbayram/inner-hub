@@ -63,7 +63,7 @@ export default function Requests() {
             data-testid="input-passcode"
           />
           {isError && hasAttempted && (
-            <p className="text-destructive font-mono text-[10px] uppercase">Invalid passcode</p>
+            <p className="text-destructive font-mono text-label uppercase">Invalid passcode</p>
           )}
           <Button 
             type="submit"
@@ -102,20 +102,20 @@ export default function Requests() {
           <Table>
             <TableHeader>
               <TableRow className="border-border/20 hover:bg-transparent">
-                <TableHead className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground h-12">Date</TableHead>
-                <TableHead className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground h-12">Name</TableHead>
-                <TableHead className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground h-12">Email</TableHead>
-                <TableHead className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground h-12">Role</TableHead>
-                <TableHead className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground h-12">LinkedIn</TableHead>
-                <TableHead className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground h-12 min-w-[300px]">Background</TableHead>
-                <TableHead className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground h-12">Link</TableHead>
-                <TableHead className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground h-12">Intro By</TableHead>
+                <TableHead className="font-mono text-label uppercase tracking-wider text-muted-foreground h-12">Date</TableHead>
+                <TableHead className="font-mono text-label uppercase tracking-wider text-muted-foreground h-12">Name</TableHead>
+                <TableHead className="font-mono text-label uppercase tracking-wider text-muted-foreground h-12">Email</TableHead>
+                <TableHead className="font-mono text-label uppercase tracking-wider text-muted-foreground h-12">Role</TableHead>
+                <TableHead className="font-mono text-label uppercase tracking-wider text-muted-foreground h-12">LinkedIn</TableHead>
+                <TableHead className="font-mono text-label uppercase tracking-wider text-muted-foreground h-12 min-w-[300px]">Background</TableHead>
+                <TableHead className="font-mono text-label uppercase tracking-wider text-muted-foreground h-12">Link</TableHead>
+                <TableHead className="font-mono text-label uppercase tracking-wider text-muted-foreground h-12">Intro By</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {requests.map((req) => (
                 <TableRow key={req.id} className="border-border/10 hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
-                  <TableCell className="font-mono text-[11px] align-top py-4 text-muted-foreground whitespace-nowrap">
+                  <TableCell className="font-mono text-caption align-top py-4 text-muted-foreground whitespace-nowrap">
                     {format(new Date(req.createdAt), "MMM d, yyyy")}
                   </TableCell>
                   <TableCell className="font-medium align-top py-4">{req.name}</TableCell>

@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { FadeIn } from "@/components/FadeIn";
 import { Check, X, ChevronRight, Clock, Search, SlidersHorizontal } from "lucide-react";
+import { DemoPreviewBanner } from "@/components/panel/DemoPreviewBanner";
+import { toLowerTR } from "@/lib/tr";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -116,7 +118,7 @@ const STATUS_CONFIG: Record<AppStatus, { label: string; color: string; bg: strin
 function StatusBadge({ status }: { status: AppStatus }) {
   const cfg = STATUS_CONFIG[status];
   return (
-    <span className={`inline-flex items-center gap-1 px-2 py-0.5 font-mono text-[8px] uppercase tracking-widest ${cfg.color} ${cfg.bg}`}>
+    <span className={`inline-flex items-center gap-1 px-2 py-0.5 font-mono text-label uppercase tracking-widest ${cfg.color} ${cfg.bg}`}>
       {status === "beklemede" && <Clock className="size-2.5" />}
       {status === "onaylandı" && <Check className="size-2.5" />}
       {status === "reddedildi" && <X className="size-2.5" />}
@@ -157,10 +159,10 @@ function DetailPanel({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-[var(--ink)]/[0.08] px-5 py-4">
-          <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)]">Başvuru Detayı</p>
+          <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">Başvuru Detayı</p>
           <button
             onClick={onClose}
-            className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)] hover:text-[var(--ink)] transition-colors"
+            className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)] hover:text-[var(--ink)] transition-colors"
           >
             ← Kapat
           </button>
@@ -172,17 +174,17 @@ function DetailPanel({
             <div className="mb-1 flex items-start justify-between gap-3">
               <div>
                 <p className="text-lg text-[var(--ink)] font-light">{app.name}</p>
-                <p className="font-mono text-[10px] text-[var(--ink-body)]">{app.email}</p>
+                <p className="font-mono text-label text-[var(--ink-body)]">{app.email}</p>
               </div>
               <StatusBadge status={app.status} />
             </div>
-            <p className="mt-1 font-mono text-[9px] text-[var(--ink-body)]">{app.role}, {app.company}</p>
+            <p className="mt-1 font-mono text-label text-[var(--ink-body)]">{app.role}, {app.company}</p>
           </div>
 
           {/* Tags */}
           <div className="flex flex-wrap gap-1.5">
             {app.tags.map((t) => (
-              <span key={t} className="border border-[var(--ink)]/10 px-2 py-0.5 font-mono text-[8px] uppercase tracking-widest text-[var(--ink-body)]">
+              <span key={t} className="border border-[var(--ink)]/10 px-2 py-0.5 font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
                 {t}
               </span>
             ))}
@@ -190,23 +192,23 @@ function DetailPanel({
 
           {/* Why */}
           <div className="border-l-2 border-[var(--ink)]/10 pl-4">
-            <p className="mb-1 font-mono text-[8px] uppercase tracking-widest text-[var(--ink-subtle)]">Neden <span lang="en">inner·hub</span>?</p>
+            <p className="mb-1 font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)]">Neden <span lang="en">inner·hub</span>?</p>
             <p className="text-sm leading-relaxed text-[var(--ink-strong)] font-light">{app.why}</p>
           </div>
 
           {/* Meta */}
           <div className="space-y-2 border border-[var(--ink)]/[0.08] p-3">
             <div className="flex justify-between">
-              <span className="font-mono text-[9px] text-[var(--ink-muted)]">Başvuru Tarihi</span>
-              <span className="font-mono text-[9px] text-[var(--ink-muted)]">{app.appliedAt}</span>
+              <span className="font-mono text-label text-[var(--ink-muted)]">Başvuru Tarihi</span>
+              <span className="font-mono text-label text-[var(--ink-muted)]">{app.appliedAt}</span>
             </div>
             <div className="flex justify-between">
-              <span className="font-mono text-[9px] text-[var(--ink-muted)]">Referans</span>
-              <span className="font-mono text-[9px] text-[var(--ink-muted)]">{app.referrer ?? "—"}</span>
+              <span className="font-mono text-label text-[var(--ink-muted)]">Referans</span>
+              <span className="font-mono text-label text-[var(--ink-muted)]">{app.referrer ?? "—"}</span>
             </div>
             <div className="flex justify-between">
-              <span className="font-mono text-[9px] text-[var(--ink-muted)]">LinkedIn</span>
-              <span className="font-mono text-[9px] text-[var(--ink-muted)] truncate max-w-[140px]">{app.linkedinUrl}</span>
+              <span className="font-mono text-label text-[var(--ink-muted)]">LinkedIn</span>
+              <span className="font-mono text-label text-[var(--ink-muted)] truncate max-w-[140px]">{app.linkedinUrl}</span>
             </div>
           </div>
         </div>
@@ -216,13 +218,13 @@ function DetailPanel({
           <div className="border-t border-[var(--ink)]/[0.08] flex">
             <button
               onClick={onReject}
-              className="flex-1 border-r border-[var(--ink)]/[0.08] py-3.5 font-mono text-[9px] uppercase tracking-widest text-[var(--ink-body)] hover:bg-[var(--error)]/5 hover:text-[var(--error-ink)] transition-colors"
+              className="flex-1 border-r border-[var(--ink)]/[0.08] py-3.5 font-mono text-label uppercase tracking-widest text-[var(--ink-body)] hover:bg-[var(--error)]/5 hover:text-[var(--error-ink)] transition-colors"
             >
               Reddet
             </button>
             <button
               onClick={onApprove}
-              className="flex-1 py-3.5 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)] hover:bg-[var(--inner-green)]/10 hover:text-[var(--success-ink)] transition-colors"
+              className="flex-1 py-3.5 font-mono text-label uppercase tracking-widest text-[var(--ink)] hover:bg-[var(--inner-green)]/10 hover:text-[var(--success-ink)] transition-colors"
             >
               Onayla
             </button>
@@ -257,13 +259,13 @@ export default function ApplicationsPage() {
       (filter === "Beklemede" && a.status === "beklemede") ||
       (filter === "Onaylandı" && a.status === "onaylandı") ||
       (filter === "Reddedildi" && a.status === "reddedildi");
-    const q = search.toLowerCase();
+    const q = toLowerTR(search);
     const matchSearch =
       !q ||
-      a.name.toLowerCase().includes(q) ||
-      a.company.toLowerCase().includes(q) ||
-      a.email.toLowerCase().includes(q) ||
-      a.tags.some((t) => t.toLowerCase().includes(q));
+      toLowerTR(a.name).includes(q) ||
+      toLowerTR(a.company).includes(q) ||
+      toLowerTR(a.email).includes(q) ||
+      a.tags.some((t) => toLowerTR(t).includes(q));
     return matchFilter && matchSearch;
   });
 
@@ -277,7 +279,7 @@ export default function ApplicationsPage() {
       {/* Header */}
       <FadeIn>
         <div>
-          <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)] mb-2">
+          <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)] mb-2">
             <span lang="en">inner·hub</span> — Admin
           </p>
           <h1
@@ -293,6 +295,8 @@ export default function ApplicationsPage() {
         </div>
       </FadeIn>
 
+      <DemoPreviewBanner surface="Başvurular" />
+
       {/* Stats row */}
       <div className="grid grid-cols-3 gap-2">
         {[
@@ -301,7 +305,7 @@ export default function ApplicationsPage() {
           { label: "Reddedildi", val: counts.Reddedildi, color: "text-[var(--error-ink)]" },
         ].map((s) => (
           <div key={s.label} className="border border-[var(--ink)]/[0.08] p-4">
-            <p className="font-mono text-[8px] uppercase tracking-widest text-[var(--ink-muted)]">{s.label}</p>
+            <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">{s.label}</p>
             <p className={`mt-1 font-serif text-2xl ${s.color}`}
               style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}>
               {s.val}
@@ -319,7 +323,7 @@ export default function ApplicationsPage() {
               key={f}
               onClick={() => setFilter(f)}
               className={[
-                "border-y border-r first:border-l px-3 py-1.5 font-mono text-[8px] uppercase tracking-widest transition-colors",
+                "border-y border-r first:border-l px-3 py-1.5 font-mono text-label uppercase tracking-widest transition-colors",
                 filter === f
                   ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--bone)]"
                   : "border-[var(--ink)]/15 text-[var(--ink-muted)] hover:text-[var(--ink)]",
@@ -348,7 +352,7 @@ export default function ApplicationsPage() {
         {filtered.length === 0 ? (
           <div className="px-5 py-10 text-center">
             <SlidersHorizontal className="mx-auto mb-3 size-6 text-[var(--ink-subtle)]" />
-            <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink-subtle)]">Sonuç bulunamadı</p>
+            <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)]">Sonuç bulunamadı</p>
           </div>
         ) : (
           filtered.map((app, i) => (
@@ -361,7 +365,7 @@ export default function ApplicationsPage() {
               ].join(" ")}
             >
               {/* Avatar */}
-              <div className="flex size-8 shrink-0 items-center justify-center bg-[var(--ink)]/[0.06] font-mono text-[10px] text-[var(--ink-body)]">
+              <div className="flex size-8 shrink-0 items-center justify-center bg-[var(--ink)]/[0.06] font-mono text-label text-[var(--ink-body)]">
                 {app.name.split(" ").map((w) => w[0]).slice(0, 2).join("")}
               </div>
 
@@ -370,16 +374,16 @@ export default function ApplicationsPage() {
                 <div className="flex items-center gap-2">
                   <p className="text-sm text-[var(--ink)] font-light">{app.name}</p>
                   {app.referrer && (
-                    <span className="font-mono text-[8px] text-[var(--ink-muted)]">ref: {app.referrer.split(" ")[0]}</span>
+                    <span className="font-mono text-label text-[var(--ink-muted)]">ref: {app.referrer.split(" ")[0]}</span>
                   )}
                 </div>
-                <p className="font-mono text-[9px] text-[var(--ink-muted)]">{app.role}, {app.company}</p>
+                <p className="font-mono text-label text-[var(--ink-muted)]">{app.role}, {app.company}</p>
               </div>
 
               {/* Tags */}
               <div className="hidden sm:flex gap-1">
                 {app.tags.slice(0, 2).map((t) => (
-                  <span key={t} className="border border-[var(--ink)]/[0.08] px-2 py-0.5 font-mono text-[7px] uppercase tracking-widest text-[var(--ink-muted)]">
+                  <span key={t} className="border border-[var(--ink)]/[0.08] px-2 py-0.5 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
                     {t}
                   </span>
                 ))}
@@ -388,7 +392,7 @@ export default function ApplicationsPage() {
               {/* Status + date */}
               <div className="flex shrink-0 flex-col items-end gap-1">
                 <StatusBadge status={app.status} />
-                <span className="font-mono text-[8px] text-[var(--ink-subtle)]">{app.appliedAt}</span>
+                <span className="font-mono text-label text-[var(--ink-subtle)]">{app.appliedAt}</span>
               </div>
 
               <ChevronRight className="size-3.5 shrink-0 text-[var(--ink-subtle)]" />
@@ -398,7 +402,7 @@ export default function ApplicationsPage() {
       </div>
 
       <div className="border-t border-[var(--ink)]/[0.08] pt-4">
-        <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink-subtle)]">
+        <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)]">
           <span lang="en">inner·hub</span> · başvurular · yalnızca admin
         </p>
       </div>

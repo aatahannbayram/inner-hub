@@ -16,6 +16,8 @@ import {
   Clock,
 } from "lucide-react";
 import { ProceduralPortrait, type PortraitConfig } from "@/components/panel/ProceduralPortrait";
+import { DemoPreviewBanner } from "@/components/panel/DemoPreviewBanner";
+import { toLowerTR } from "@/lib/tr";
 import {
   Carousel,
   CarouselContent,
@@ -212,14 +214,14 @@ function DocCard({ doc }: { doc: VaultDoc }) {
             <p className="text-sm font-medium leading-snug text-[var(--ink)] group-hover:underline decoration-[var(--ink)]/20 underline-offset-2">
               {doc.title}
             </p>
-            <p className="mt-0.5 font-mono text-[9px] text-[var(--ink-muted)]">
+            <p className="mt-0.5 font-mono text-label text-[var(--ink-muted)]">
               {doc.type} · {doc.author}
             </p>
           </div>
         </div>
         <div className={`flex shrink-0 items-center gap-1 ${acc.color}`}>
           <AccIcon className="size-3" />
-          <span className="font-mono text-[8px] uppercase tracking-widest">{acc.label}</span>
+          <span className="font-mono text-label uppercase tracking-widest">{acc.label}</span>
         </div>
       </div>
 
@@ -229,12 +231,12 @@ function DocCard({ doc }: { doc: VaultDoc }) {
       {/* Tags */}
       <div className="mb-3 flex flex-wrap gap-1">
         {doc.tags.map((t) => (
-          <span key={t} className="flex items-center gap-1 border border-[var(--ink)]/[0.07] px-1.5 py-0.5 font-mono text-[8px] text-[var(--ink-muted)]">
+          <span key={t} className="flex items-center gap-1 border border-[var(--ink)]/[0.07] px-1.5 py-0.5 font-mono text-label text-[var(--ink-muted)]">
             <Tag className="size-2" />{t}
           </span>
         ))}
         {doc.mine && (
-          <span className="border border-[var(--inner-green)]/25 bg-[var(--inner-green)]/5 px-1.5 py-0.5 font-mono text-[8px] text-[var(--success-ink)]">
+          <span className="border border-[var(--inner-green)]/25 bg-[var(--inner-green)]/5 px-1.5 py-0.5 font-mono text-label text-[var(--success-ink)]">
             benim
           </span>
         )}
@@ -244,13 +246,13 @@ function DocCard({ doc }: { doc: VaultDoc }) {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           {doc.pages && (
-            <span className="font-mono text-[8px] text-[var(--ink-subtle)]">{doc.pages} sayfa</span>
+            <span className="font-mono text-label text-[var(--ink-subtle)]">{doc.pages} sayfa</span>
           )}
-          <span className="font-mono text-[8px] text-[var(--ink-subtle)]">{doc.views} görüntülenme</span>
+          <span className="font-mono text-label text-[var(--ink-subtle)]">{doc.views} görüntülenme</span>
         </div>
         <div className="flex items-center gap-1 text-[var(--ink-subtle)]">
           <Clock className="size-2.5" />
-          <span className="font-mono text-[8px]">
+          <span className="font-mono text-label">
             {doc.updatedDays === 0 ? "bugün" : `${doc.updatedDays}g önce`}
           </span>
         </div>
@@ -267,7 +269,7 @@ function UploadPrompt({ open, onClose }: { open: boolean; onClose: () => void })
     <Drawer open={open} onOpenChange={(v) => !v && onClose()} shouldScaleBackground={false}>
       <DrawerContent className="rounded-none border-[var(--ink)]/15 bg-[var(--bone)]">
         <DrawerHeader className="px-6 pt-2 text-left">
-          <p className="mb-1 font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)]"><span lang="en">inner·vault</span></p>
+          <p className="mb-1 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]"><span lang="en">inner·vault</span></p>
           <DrawerTitle
             className="font-serif text-2xl font-normal text-[var(--ink)]"
             style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
@@ -286,7 +288,7 @@ function UploadPrompt({ open, onClose }: { open: boolean; onClose: () => void })
           </div>
 
           <div className="mb-4">
-            <p className="mb-2 font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)]">Erişim Seviyesi</p>
+            <p className="mb-2 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">Erişim Seviyesi</p>
             <div className="flex gap-2">
               {(["özel", "topluluk", "davetli"] as AccessLevel[]).map((a) => {
                 const cfg = ACCESS_CONFIG[a];
@@ -303,7 +305,7 @@ function UploadPrompt({ open, onClose }: { open: boolean; onClose: () => void })
                     ].join(" ")}
                   >
                     <Icon className={`size-3.5 ${cfg.color}`} />
-                    <span className="font-mono text-[8px] uppercase tracking-widest text-[var(--ink-body)]">{cfg.label}</span>
+                    <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">{cfg.label}</span>
                   </button>
                 );
               })}
@@ -313,13 +315,13 @@ function UploadPrompt({ open, onClose }: { open: boolean; onClose: () => void })
           <div className="flex gap-2">
             <button
               onClick={onClose}
-              className="flex-1 border border-[var(--ink)]/15 py-2.5 font-mono text-[9px] uppercase tracking-widest text-[var(--ink-body)] transition-all hover:border-[var(--ink)]/30 hover:text-[var(--ink)]"
+              className="flex-1 border border-[var(--ink)]/15 py-2.5 font-mono text-label uppercase tracking-widest text-[var(--ink-body)] transition-all hover:border-[var(--ink)]/30 hover:text-[var(--ink)]"
             >
               İptal
             </button>
             <button
               onClick={onClose}
-              className="flex flex-1 items-center justify-between border border-[var(--ink)] bg-[var(--ink)] px-4 py-2.5 font-mono text-[9px] uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-80"
+              className="flex flex-1 items-center justify-between border border-[var(--ink)] bg-[var(--ink)] px-4 py-2.5 font-mono text-label uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-80"
             >
               <span>Yükle</span>
               <ChevronRight className="size-3" />
@@ -340,11 +342,12 @@ export default function Vault() {
 
   const filtered = DOCS.filter((d) => {
     const matchType = typeFilter === "Tümü" || d.type === typeFilter;
+    const q = toLowerTR(query);
     const matchQuery =
       !query ||
-      d.title.toLowerCase().includes(query.toLowerCase()) ||
-      d.tags.some((t) => t.toLowerCase().includes(query.toLowerCase())) ||
-      d.author.toLowerCase().includes(query.toLowerCase());
+      toLowerTR(d.title).includes(q) ||
+      d.tags.some((t) => toLowerTR(t).includes(q)) ||
+      toLowerTR(d.author).includes(q);
     return matchType && matchQuery;
   });
 
@@ -358,7 +361,7 @@ export default function Vault() {
       <FadeIn>
         <div className="flex items-start justify-between">
           <div>
-            <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)] mb-2">
+            <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)] mb-2">
               <span lang="en">inner·hub</span>
             </p>
             <h1
@@ -374,13 +377,15 @@ export default function Vault() {
           </div>
           <button
             onClick={() => setShowUpload(true)}
-            className="flex items-center gap-2 border border-[var(--ink)] bg-[var(--ink)] px-4 py-2.5 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-80"
+            className="flex items-center gap-2 border border-[var(--ink)] bg-[var(--ink)] px-4 py-2.5 font-mono text-label uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-80"
           >
             <Upload className="size-3.5" />
             Paylaş
           </button>
         </div>
       </FadeIn>
+
+      <DemoPreviewBanner surface="inner·vault" />
 
       {/* D60-hero portrait — topographic contour rendering of the archive's depth */}
       <FadeIn delay={0.03}>
@@ -391,7 +396,7 @@ export default function Vault() {
             className="aspect-[21/9] w-full md:aspect-[24/9]"
           />
           <div className="pointer-events-none absolute inset-0 flex flex-col justify-end p-6 md:p-8">
-            <p className="mb-1 font-mono text-[9px] uppercase tracking-widest text-[var(--ink-body)]">
+            <p className="mb-1 font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
               D60 · arşivin haritası
             </p>
             <p className="max-w-[26ch] font-serif text-2xl text-[var(--ink)] md:text-3xl" style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 300 }}>
@@ -409,7 +414,7 @@ export default function Vault() {
           { label: "Toplam Görüntülenme", value: totalViews },
         ].map((s) => (
           <div key={s.label} className="border border-[var(--ink)]/[0.08] p-4">
-            <p className="font-mono text-[8px] uppercase tracking-widest text-[var(--ink-subtle)]">{s.label}</p>
+            <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)]">{s.label}</p>
             <p
               className="mt-1 font-serif text-2xl text-[var(--ink)]"
               style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
@@ -423,7 +428,7 @@ export default function Vault() {
       {/* Featured strip — Embla */}
       <FadeIn delay={0.06}>
         <div className="space-y-3">
-          <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)]">
+          <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
             Öne çıkan
           </p>
           <Carousel opts={{ align: "start", loop: false }} className="w-full">
@@ -450,7 +455,7 @@ export default function Vault() {
                       <div className="relative flex h-full flex-col justify-between p-4">
                         <div className="flex items-center gap-2">
                           <Icon className="size-3.5 text-[var(--bone)]/50" />
-                          <span className="font-mono text-[8px] uppercase tracking-widest text-[var(--bone)]/57">
+                          <span className="font-mono text-label uppercase tracking-widest text-[var(--bone)]/57">
                             {doc.type === "Pitch Deck" ? <span lang="en">{doc.type}</span> : doc.type}
                           </span>
                         </div>
@@ -460,7 +465,7 @@ export default function Vault() {
                           >
                             {doc.title}
                           </p>
-                          <p className="mt-1 font-mono text-[8px] uppercase tracking-widest text-[var(--bone)]/52">
+                          <p className="mt-1 font-mono text-label uppercase tracking-widest text-[var(--bone)]/52">
                             {doc.author}
                           </p>
                         </div>
@@ -494,7 +499,7 @@ export default function Vault() {
               key={t}
               onClick={() => setTypeFilter(t)}
               className={[
-                "border px-2.5 py-1.5 font-mono text-[8px] uppercase tracking-widest transition-all",
+                "border px-2.5 py-1.5 font-mono text-label uppercase tracking-widest transition-all",
                 typeFilter === t
                   ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--bone)]"
                   : "border-[var(--ink)]/10 text-[var(--ink-muted)] hover:border-[var(--ink)]/25 hover:text-[var(--ink)]",
@@ -510,7 +515,7 @@ export default function Vault() {
       <div>
         {filtered.length === 0 ? (
           <div className="border border-dashed border-[var(--ink)]/10 py-12 text-center">
-            <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-subtle)]">Sonuç bulunamadı</p>
+            <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)]">Sonuç bulunamadı</p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -526,11 +531,11 @@ export default function Vault() {
           return (
             <div key={key} className={`flex items-center gap-1.5 ${cfg.color}`}>
               <Icon className="size-3" />
-              <span className="font-mono text-[9px] uppercase tracking-widest">{cfg.label}</span>
+              <span className="font-mono text-label uppercase tracking-widest">{cfg.label}</span>
             </div>
           );
         })}
-        <p className="ml-auto font-mono text-[9px] uppercase tracking-widest text-[var(--ink-subtle)]">
+        <p className="ml-auto font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)]">
           <span lang="en">inner·vault</span> — yalnızca üyeler erişebilir
         </p>
       </div>

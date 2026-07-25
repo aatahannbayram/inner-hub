@@ -1,1 +1,0 @@
-import{k as n,l as s,n as o}from"./index-C2Zr1Snm.js";function u(a,t){return n({queryKey:a,queryFn:async()=>{const e=await fetch(o(t),{credentials:"include"}),r=await e.json().catch(()=>({}));if(!e.ok)throw new Error(r.error??"Veri alınamadı");return r},staleTime:6e4,placeholderData:s})}export{u};

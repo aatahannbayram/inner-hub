@@ -44,7 +44,7 @@ export function IndexRail() {
           <a
             key={id}
             href={`#${id}`}
-            className="flex items-center gap-2 font-mono text-[11px] tabular-nums tracking-widest transition-opacity duration-500"
+            className="flex items-center gap-2 font-mono text-caption tabular-nums tracking-widest transition-opacity duration-500"
             style={{ opacity: isActive ? 1 : 0.35 }}
           >
             {isActive && (

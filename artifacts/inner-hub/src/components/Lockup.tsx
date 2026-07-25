@@ -19,7 +19,7 @@ export function Lockup({
   };
 
   return (
-    <span className={`inline-flex items-baseline gap-[0.15em] ${className}`}>
+    <span lang="en" className={`inline-flex items-baseline gap-[0.15em] ${className}`}>
       <span style={textStyle}>inner</span>
       <span
         className="inline-block bg-[#18FF85] flex-shrink-0"

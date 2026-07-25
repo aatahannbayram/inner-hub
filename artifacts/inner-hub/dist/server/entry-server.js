@@ -130,7 +130,7 @@ function Lockup({
     letterSpacing: "-0.015em",
     ...fontSize ? { fontSize } : {}
   };
-  return /* @__PURE__ */ jsxs("span", { className: `inline-flex items-baseline gap-[0.15em] ${className}`, children: [
+  return /* @__PURE__ */ jsxs("span", { lang: "en", className: `inline-flex items-baseline gap-[0.15em] ${className}`, children: [
     /* @__PURE__ */ jsx("span", { style: textStyle, children: "inner" }),
     /* @__PURE__ */ jsx(
       "span",
@@ -185,7 +185,7 @@ function IndexRail() {
           "a",
           {
             href: `#${id}`,
-            className: "flex items-center gap-2 font-mono text-[11px] tabular-nums tracking-widest transition-opacity duration-500",
+            className: "flex items-center gap-2 font-mono text-caption tabular-nums tracking-widest transition-opacity duration-500",
             style: { opacity: isActive ? 1 : 0.35 },
             children: [
               isActive && /* @__PURE__ */ jsx(
@@ -238,7 +238,7 @@ function DiagramCircle() {
         ))
       }
     ),
-    /* @__PURE__ */ jsx("span", { className: "font-mono text-[10px] uppercase tracking-widest opacity-50", children: "34 · One circle" }),
+    /* @__PURE__ */ jsx("span", { className: "font-mono text-label uppercase tracking-widest opacity-50", children: "34 · One circle" }),
     /* @__PURE__ */ jsx("span", { className: "sr-only", children: "Thirty-four squares forming one circle." })
   ] });
 }
@@ -344,6 +344,65 @@ function FloatingNavbar() {
     )
   ] });
 }
+const BY_FRAGMENT = {
+  "hf_20260406_094145_4a271a6c-3869-4f1c-8aa7-aeb0cb227994": "/posters/courses-hero.jpg",
+  "hf_20260403_050628_c4e32401-fab4-4a27-b7a8-6e9291cd5959": "/posters/capital-events.jpg",
+  "hf_20260406_133058_0504132a-0cf3-4450-a370-8ea3b05c95d4": "/posters/gathering.jpg",
+  "hf_20260508_215831_c6a8989c-d716-4d8d-8745-e972a2eec711": "/posters/match-hero.jpg",
+  "hf_20260530_042513_df96a13b-6155-4f6e-8b93-c9dee66fba08": "/posters/perks-ambient.jpg"
+};
+function posterForVideo(src, fallback = "/posters/courses-hero.jpg") {
+  for (const [fragment, poster] of Object.entries(BY_FRAGMENT)) {
+    if (src.includes(fragment)) return poster;
+  }
+  return fallback;
+}
+function HeroVideo({ src, poster, className, style }) {
+  const resolvedPoster = poster ?? posterForVideo(src);
+  const ref = useRef(null);
+  const [reduce, setReduce] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReduce(mq.matches);
+    const onChange = () => setReduce(mq.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+  useEffect(() => {
+    if (reduce || !ref.current) return;
+    const el = ref.current;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          el.play().catch(() => {
+          });
+        } else {
+          el.pause();
+        }
+      },
+      { threshold: 0.25 }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [reduce]);
+  if (reduce) {
+    return /* @__PURE__ */ jsx("img", { src: resolvedPoster, alt: "", "aria-hidden": "true", className, style });
+  }
+  return /* @__PURE__ */ jsx(
+    "video",
+    {
+      ref,
+      muted: true,
+      loop: true,
+      playsInline: true,
+      poster: resolvedPoster,
+      preload: "none",
+      className,
+      style,
+      src
+    }
+  );
+}
 function FeatureCard({ feature, index, setRef }) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-15% 0px -15% 0px" });
@@ -357,16 +416,13 @@ function FeatureCard({ feature, index, setRef }) {
       "data-feature-index": index,
       className: `border border-[var(--bone)]/15 bg-[var(--bone)]/[0.06] p-6 backdrop-blur-sm transition-all duration-700 ease-out md:p-10 ${inView ? "translate-x-0 opacity-100" : "translate-x-16 opacity-0"}`,
       children: [
-        /* @__PURE__ */ jsx("p", { className: "mb-4 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)]/57", children: feature.tag }),
+        /* @__PURE__ */ jsx("p", { className: "mb-4 font-mono text-label uppercase tracking-widest text-[var(--bone)]/57", children: feature.tag }),
         /* @__PURE__ */ jsx("h3", { className: "mb-6 font-serif text-xl italic text-[var(--bone)] md:text-2xl", children: feature.name }),
         /* @__PURE__ */ jsx("div", { className: "mb-6 aspect-video overflow-hidden bg-black/30", children: feature.media.type === "video" ? /* @__PURE__ */ jsx(
-          "video",
+          HeroVideo,
           {
             src: feature.media.src,
-            autoPlay: true,
-            muted: true,
-            loop: true,
-            playsInline: true,
+            poster: posterForVideo(feature.media.src),
             className: "size-full object-cover"
           }
         ) : /* @__PURE__ */ jsx("img", { src: feature.media.src, alt: feature.name, className: "size-full object-cover", loading: "lazy" }) }),
@@ -444,7 +500,7 @@ function PlatformFeatures({
         f.id
       )),
       restModules.length > 0 && /* @__PURE__ */ jsxs("div", { className: "mt-6 border-t border-[var(--bone)]/15 pt-10", children: [
-        /* @__PURE__ */ jsxs("p", { className: "mb-6 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)]/57", children: [
+        /* @__PURE__ */ jsxs("p", { className: "mb-6 font-mono text-label uppercase tracking-widest text-[var(--bone)]/57", children: [
           "+",
           restModules.length,
           " more tools"
@@ -454,7 +510,7 @@ function PlatformFeatures({
           return /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-3 bg-[var(--ink)] p-6", children: [
             /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between", children: [
               /* @__PURE__ */ jsx(Icon, { className: "size-4 text-[var(--bone)]/50", strokeWidth: 1.5 }),
-              /* @__PURE__ */ jsx("span", { className: "font-mono text-[9px] uppercase tracking-widest text-[var(--bone)]/47", children: mod.tag })
+              /* @__PURE__ */ jsx("span", { className: "font-mono text-label uppercase tracking-widest text-[var(--bone)]/47", children: mod.tag })
             ] }),
             /* @__PURE__ */ jsx("h4", { className: "font-serif italic text-lg text-[var(--bone)]/90", children: mod.name }),
             /* @__PURE__ */ jsx("p", { className: "text-sm leading-relaxed text-[var(--bone)]/50", children: mod.desc })
@@ -935,7 +991,7 @@ function ScrollProgress() {
 function StatItem({ n, label, suffix = "" }) {
   return /* @__PURE__ */ jsxs("div", { className: "flex flex-col items-start", children: [
     /* @__PURE__ */ jsx("span", { className: "font-display font-serif italic text-5xl md:text-7xl leading-none mb-3 text-[var(--bone)]", children: /* @__PURE__ */ jsx(Counter, { to: n, suffix }) }),
-    /* @__PURE__ */ jsx("span", { className: "font-mono text-[10px] uppercase tracking-widest opacity-40 text-[var(--bone)]", children: label })
+    /* @__PURE__ */ jsx("span", { className: "font-mono text-label uppercase tracking-widest opacity-40 text-[var(--bone)]", children: label })
   ] });
 }
 function Home() {
@@ -963,14 +1019,10 @@ function Home() {
         /* @__PURE__ */ jsxs("section", { ref: heroRef, className: "h-[100svh] mb-[-3rem] flex flex-col justify-end px-6 pb-16 md:px-12 md:pb-24 lg:px-[10%] relative overflow-hidden bg-black text-white", children: [
           /* @__PURE__ */ jsx(FloatingNavbar, {}),
           /* @__PURE__ */ jsx(
-            "video",
+            HeroVideo,
             {
-              autoPlay: true,
-              muted: true,
-              loop: true,
-              playsInline: true,
-              className: "absolute inset-0 z-0 h-full w-full object-cover",
-              src: "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260406_094145_4a271a6c-3869-4f1c-8aa7-aeb0cb227994.mp4"
+              src: "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260406_094145_4a271a6c-3869-4f1c-8aa7-aeb0cb227994.mp4",
+              className: "absolute inset-0 z-0 h-full w-full object-cover"
             }
           ),
           /* @__PURE__ */ jsx(
@@ -1048,7 +1100,7 @@ function Home() {
               initial: { opacity: 0 },
               animate: { opacity: 1 },
               transition: { duration: 0.8, delay: 0.5 },
-              className: "absolute bottom-10 left-6 md:left-12 lg:left-[10%] z-10 flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-white/60",
+              className: "absolute bottom-10 left-6 md:left-12 lg:left-[10%] z-10 flex items-center gap-2 font-mono text-label uppercase tracking-widest text-white/60",
               children: [
                 /* @__PURE__ */ jsx(
                   motion.div,
@@ -1093,7 +1145,7 @@ function Home() {
                 }
               ),
               /* @__PURE__ */ jsx("div", { className: "pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/50 via-transparent to-transparent" }),
-              /* @__PURE__ */ jsx("p", { className: "pointer-events-none absolute bottom-4 left-4 font-mono text-[9px] uppercase tracking-widest text-[#18FF85]/70", children: "Signal · Founding member" })
+              /* @__PURE__ */ jsx("p", { className: "pointer-events-none absolute bottom-4 left-4 font-mono text-label uppercase tracking-widest text-[#18FF85]/70", children: "Signal · Founding member" })
             ] }) })
           ] })
         ] }),
@@ -1101,14 +1153,10 @@ function Home() {
         /* @__PURE__ */ jsxs("div", { className: "relative overflow-hidden bg-black border-t border-border/15", children: [
           /* @__PURE__ */ jsxs("div", { className: "absolute inset-x-0 top-0 h-[85vh] md:h-[95vh] z-0", "aria-hidden": "true", children: [
             /* @__PURE__ */ jsx(
-              "video",
+              HeroVideo,
               {
-                autoPlay: true,
-                muted: true,
-                loop: true,
-                playsInline: true,
-                className: "h-full w-full object-cover",
-                src: "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260406_133058_0504132a-0cf3-4450-a370-8ea3b05c95d4.mp4"
+                src: "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260406_133058_0504132a-0cf3-4450-a370-8ea3b05c95d4.mp4",
+                className: "h-full w-full object-cover"
               }
             ),
             /* @__PURE__ */ jsx("div", { className: "pointer-events-none absolute inset-0 bg-gradient-to-b from-black/55 via-black/60 to-black" })
@@ -1210,13 +1258,13 @@ function Home() {
         /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-6", children: [
           /* @__PURE__ */ jsx("img", { src: "/inner-logo.png", alt: "inner", width: 140, height: 140, className: "w-[140px] h-[140px]" }),
           /* @__PURE__ */ jsxs("div", { className: "flex flex-col md:flex-row md:items-center md:justify-between gap-4", children: [
-            /* @__PURE__ */ jsx("div", { className: "flex flex-wrap gap-x-5 gap-y-2 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)] opacity-60", children: /* @__PURE__ */ jsx("span", { children: "The next wave knows each other · İstanbul → Global" }) }),
+            /* @__PURE__ */ jsx("div", { className: "flex flex-wrap gap-x-5 gap-y-2 font-mono text-label uppercase tracking-widest text-[var(--bone)] opacity-60", children: /* @__PURE__ */ jsx("span", { children: "The next wave knows each other · İstanbul → Global" }) }),
             /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-center md:justify-end gap-5", children: [
               /* @__PURE__ */ jsx("a", { href: "#", "aria-label": "inner on LinkedIn", className: "text-[var(--bone)] opacity-60 hover:opacity-100 transition-opacity duration-300", children: /* @__PURE__ */ jsx(Linkedin, { size: 20, strokeWidth: 1.5 }) }),
               /* @__PURE__ */ jsx("a", { href: "#", "aria-label": "inner on Instagram", className: "text-[var(--bone)] opacity-60 hover:opacity-100 transition-opacity duration-300", children: /* @__PURE__ */ jsx(Instagram, { size: 20, strokeWidth: 1.5 }) })
             ] })
           ] }),
-          /* @__PURE__ */ jsx("div", { className: "font-mono text-[10px] uppercase tracking-widest text-[var(--bone)] opacity-30", children: "© 2026 inner. İstanbul." })
+          /* @__PURE__ */ jsx("div", { className: "font-mono text-label uppercase tracking-widest text-[var(--bone)] opacity-30", children: "© 2026 inner. İstanbul." })
         ] }),
         /* @__PURE__ */ jsx("div", { className: "text-[var(--bone)] leading-none -mb-4 md:-mb-8", "aria-hidden": "true", children: /* @__PURE__ */ jsx(Lockup, { showHub: false, fontSize: "clamp(4rem, 16vw, 13rem)" }) }),
         /* @__PURE__ */ jsx("span", { className: "sr-only", children: "inner." })

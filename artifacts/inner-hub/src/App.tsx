@@ -40,7 +40,7 @@ const queryClient = new QueryClient();
 function PlaceholderPage({ title }: { title: string }) {
   return (
     <div className="flex flex-col gap-3">
-      <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]/40">
+      <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)]">
         inner·hub
       </p>
       <h1
@@ -50,7 +50,7 @@ function PlaceholderPage({ title }: { title: string }) {
         {title}
         <span className="inline-block size-[0.35em] translate-y-[0.08em] ml-[0.05em] bg-[var(--inner-green)]" />
       </h1>
-      <p className="text-sm text-[var(--ink)]/40 font-light">Bu sayfa yakında hazır olacak.</p>
+      <p className="text-sm text-[var(--ink-muted)] font-light">Bu sayfa yakında hazır olacak.</p>
     </div>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { HeroVideo } from "@/components/HeroVideo";
 import { Lockup } from "@/components/Lockup";
 import { useSubmitRequest } from "@workspace/api-client-react";
 
@@ -49,13 +50,9 @@ export default function Invitation() {
     // Sayfa içeriği İngilizce (marka sesi); html[lang="tr"] mirası uppercase
     // etiketlerdeki İngilizce kelimeleri bozmasın diye kök seviyede lang="en".
     <div lang="en" className="relative flex min-h-screen flex-col overflow-hidden bg-black text-white">
-      <video
-        autoPlay
-        muted
-        loop
-        playsInline
-        className="fixed inset-0 z-0 h-full w-full object-cover"
+      <HeroVideo
         src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260406_094145_4a271a6c-3869-4f1c-8aa7-aeb0cb227994.mp4"
+        className="fixed inset-0 z-0 h-full w-full object-cover"
       />
       <div
         aria-hidden="true"
@@ -79,7 +76,7 @@ export default function Invitation() {
         </a>
         <a
           href="/"
-          className="animate-blur-fade-up font-mono text-[11px] uppercase tracking-widest text-white/60 transition-colors hover:text-white"
+          className="animate-blur-fade-up font-mono text-caption uppercase tracking-widest text-white/60 transition-colors hover:text-white"
           style={{ animationDelay: "150ms" }}
         >
           Ana sayfa
@@ -164,7 +161,7 @@ export default function Invitation() {
                           key={r.value}
                           type="button"
                           onClick={() => setRole(r.value)}
-                          className={`liquid-glass border px-3 py-2.5 font-mono text-[11px] uppercase tracking-widest transition-colors ${
+                          className={`liquid-glass border px-3 py-2.5 font-mono text-caption uppercase tracking-widest transition-colors ${
                             role === r.value
                               ? "border-white text-white"
                               : "border-white/20 text-white/50 hover:border-white/40 hover:text-white/80"
@@ -240,7 +237,7 @@ export default function Invitation() {
                   </div>
 
                   {isError && (
-                    <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--error-ink)]">
+                    <p className="font-mono text-label uppercase tracking-widest text-[var(--error-ink)]">
                       Bir şeyler ters gitti. Tekrar dene.
                     </p>
                   )}

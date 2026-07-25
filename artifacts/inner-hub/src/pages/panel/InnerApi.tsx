@@ -13,6 +13,7 @@ import {
   Eye,
   EyeOff,
 } from "lucide-react";
+import { DemoPreviewBanner } from "@/components/panel/DemoPreviewBanner";
 
 // ─── Mock data ────────────────────────────────────────────────────────────────
 
@@ -127,7 +128,7 @@ function UsageChart() {
       </div>
       <div className="flex gap-1.5">
         {USAGE_DATA.map((d) => (
-          <span key={d.day} className="flex-1 text-center font-mono text-[7px] font-medium text-[var(--ink-muted)]">{d.day}</span>
+          <span key={d.day} className="flex-1 text-center font-mono text-label font-medium text-[var(--ink-muted)]">{d.day}</span>
         ))}
       </div>
     </div>
@@ -153,7 +154,7 @@ export default function InnerApi() {
   };
 
   const METHOD_COLORS: Record<string, string> = {
-    GET: "text-[var(--inner-green)] border-[var(--inner-green)]/30 bg-[var(--inner-green)]/8",
+    GET: "text-[var(--success-ink)] border-[var(--inner-green)]/30 bg-[var(--inner-green)]/8",
     POST: "text-amber-700 border-amber-300/50 bg-amber-50/60",
   };
 
@@ -171,7 +172,7 @@ export default function InnerApi() {
           <AmbientCardBackground />
           <div className="relative z-10 flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <p className="font-mono text-[10px] font-semibold uppercase tracking-widest text-[var(--bone)]/60 mb-2">
+              <p className="font-mono text-label font-semibold uppercase tracking-widest text-[var(--bone)]/60 mb-2">
                 <span lang="en">inner·hub</span>
               </p>
               <h1
@@ -187,7 +188,7 @@ export default function InnerApi() {
             </div>
             <a
               href="#"
-              className="flex shrink-0 items-center justify-center gap-1.5 border border-[var(--bone)]/25 px-3 py-2 font-mono text-[9px] font-semibold uppercase tracking-widest text-[var(--bone)]/70 transition-all hover:border-[var(--bone)]/50 hover:text-[var(--bone)] sm:justify-start"
+              className="flex shrink-0 items-center justify-center gap-1.5 border border-[var(--bone)]/25 px-3 py-2 font-mono text-label font-semibold uppercase tracking-widest text-[var(--bone)]/70 transition-all hover:border-[var(--bone)]/50 hover:text-[var(--bone)] sm:justify-start"
             >
               <Code2 className="size-3" /> Dokümantasyon <ArrowUpRight className="size-2.5" />
             </a>
@@ -195,18 +196,20 @@ export default function InnerApi() {
         </div>
       </FadeIn>
 
+      <DemoPreviewBanner surface="inner·api" />
+
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {STATS.map((s) => (
           <div key={s.label} className="border border-[var(--ink)]/[0.08] p-4">
-            <p className="font-mono text-[8px] font-medium uppercase tracking-widest text-[var(--ink-muted)]">{s.label}</p>
+            <p className="font-mono text-label font-medium uppercase tracking-widest text-[var(--ink-muted)]">{s.label}</p>
             <p
               className="mt-1 font-serif text-xl text-[var(--ink)] sm:text-2xl"
               style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
             >
               {s.value}
             </p>
-            <p className="mt-0.5 font-mono text-[8px] font-medium text-[var(--ink-muted)]">{s.sub}</p>
+            <p className="mt-0.5 font-mono text-label font-medium text-[var(--ink-muted)]">{s.sub}</p>
           </div>
         ))}
       </div>
@@ -214,12 +217,12 @@ export default function InnerApi() {
       {/* API Key */}
       <section>
         <div className="mb-3 border-t border-[var(--ink)]/[0.08] pt-3">
-          <p className="font-mono text-[10px] font-semibold uppercase tracking-widest text-[var(--ink-body)]">API Anahtarı</p>
+          <p className="font-mono text-label font-semibold uppercase tracking-widest text-[var(--ink-body)]">API Anahtarı</p>
           <p className="mt-0.5 text-xs font-medium text-[var(--ink-muted)]">Anahtarı güvende tut — kimseyle paylaşma</p>
         </div>
         <div className="flex items-center gap-2 border border-[var(--ink)]/[0.08] bg-[var(--ink)]/[0.02] px-4 py-3">
           <Code2 className="size-3.5 shrink-0 text-[var(--ink-subtle)]" />
-          <code className="flex-1 font-mono text-[10px] font-medium text-[var(--ink-body)] truncate">
+          <code className="flex-1 font-mono text-label font-medium text-[var(--ink-body)] truncate">
             {showKey ? API_KEY : API_KEY_MASKED}
           </code>
           <div className="flex items-center gap-1 shrink-0">
@@ -232,7 +235,7 @@ export default function InnerApi() {
             </button>
             <button
               onClick={copyKey}
-              className="flex items-center gap-1 p-1.5 font-mono text-[8px] font-medium uppercase tracking-widest text-[var(--ink-muted)] hover:text-[var(--ink)] transition-colors"
+              className="flex items-center gap-1 p-1.5 font-mono text-label font-medium uppercase tracking-widest text-[var(--ink-muted)] hover:text-[var(--ink)] transition-colors"
             >
               <Copy className="size-3.5" />
               {copied ? "Kopyalandı" : "Kopyala"}
@@ -247,7 +250,7 @@ export default function InnerApi() {
           </div>
         </div>
         {rotating && (
-          <p className="mt-2 font-mono text-[9px] font-semibold uppercase tracking-widest text-amber-700">
+          <p className="mt-2 font-mono text-label font-semibold uppercase tracking-widest text-amber-700">
             Eski anahtar 5 dakika içinde devre dışı kalacak
           </p>
         )}
@@ -256,12 +259,12 @@ export default function InnerApi() {
       {/* Usage chart */}
       <section className="border border-[var(--ink)]/[0.08] p-5">
         <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <p className="font-mono text-[9px] font-semibold uppercase tracking-widest text-[var(--ink-body)]">Bu Hafta Kullanım</p>
+          <p className="font-mono text-label font-semibold uppercase tracking-widest text-[var(--ink-body)]">Bu Hafta Kullanım</p>
           <div className="flex items-center gap-1.5">
             <div className="h-1 w-16 bg-[var(--ink)]/[0.06]">
               <div className="h-full bg-[var(--inner-green)]" style={{ width: "25%" }} />
             </div>
-            <span className="font-mono text-[9px] font-medium text-[var(--ink-body)]">12.480 / 50.000</span>
+            <span className="font-mono text-label font-medium text-[var(--ink-body)]">12.480 / 50.000</span>
           </div>
         </div>
         <UsageChart />
@@ -270,7 +273,7 @@ export default function InnerApi() {
       {/* Endpoints */}
       <section>
         <div className="mb-4 border-t border-[var(--ink)]/[0.08] pt-3">
-          <p className="font-mono text-[10px] font-semibold uppercase tracking-widest text-[var(--ink-body)]">Endpoint'ler</p>
+          <p className="font-mono text-label font-semibold uppercase tracking-widest text-[var(--ink-body)]">Endpoint'ler</p>
         </div>
         <div className="space-y-1">
           {ENDPOINTS.map((ep) => (
@@ -279,16 +282,16 @@ export default function InnerApi() {
               className="border border-[var(--ink)]/[0.06] px-4 py-3 transition-colors hover:border-[var(--ink)]/15"
             >
               <div className="mb-1.5 flex flex-wrap items-center gap-2">
-                <span className={`border px-2 py-0.5 font-mono text-[8px] font-semibold uppercase tracking-widest ${METHOD_COLORS[ep.method]}`}>
+                <span className={`border px-2 py-0.5 font-mono text-label font-semibold uppercase tracking-widest ${METHOD_COLORS[ep.method]}`}>
                   {ep.method}
                 </span>
-                <span className={`border px-1.5 py-0.5 font-mono text-[7px] font-semibold uppercase tracking-widest ${STATUS_COLORS[ep.status]}`}>
+                <span className={`border px-1.5 py-0.5 font-mono text-label font-semibold uppercase tracking-widest ${STATUS_COLORS[ep.status]}`}>
                   {ep.status}
                 </span>
-                <span className="ml-auto font-mono text-[8px] font-medium text-[var(--ink-muted)] shrink-0">{ep.rate}</span>
+                <span className="ml-auto font-mono text-label font-medium text-[var(--ink-muted)] shrink-0">{ep.rate}</span>
               </div>
-              <p className="font-mono text-[10px] font-medium text-[var(--ink-strong)] truncate">{ep.path}</p>
-              <p className="font-mono text-[8px] font-medium text-[var(--ink-muted)] truncate">{ep.desc}</p>
+              <p className="font-mono text-label font-medium text-[var(--ink-strong)] truncate">{ep.path}</p>
+              <p className="font-mono text-label font-medium text-[var(--ink-muted)] truncate">{ep.desc}</p>
             </div>
           ))}
         </div>
@@ -297,7 +300,7 @@ export default function InnerApi() {
       {/* Pricing plans */}
       <section>
         <div className="mb-4 border-t border-[var(--ink)]/[0.08] pt-3">
-          <p className="font-mono text-[10px] font-semibold uppercase tracking-widest text-[var(--ink-body)]">API Planları</p>
+          <p className="font-mono text-label font-semibold uppercase tracking-widest text-[var(--ink-body)]">API Planları</p>
         </div>
         <div className="grid gap-3 sm:grid-cols-3">
           {PLANS.map((plan) => (
@@ -318,11 +321,11 @@ export default function InnerApi() {
               )}
               <div className="relative z-10">
                 <div className="mb-1 flex items-center justify-between">
-                  <p className={`font-mono text-[9px] font-semibold uppercase tracking-widest ${plan.current ? "text-[var(--bone)]/60" : "text-[var(--ink-body)]"}`}>
+                  <p className={`font-mono text-label font-semibold uppercase tracking-widest ${plan.current ? "text-[var(--bone)]/60" : "text-[var(--ink-body)]"}`}>
                     <span lang="en">{plan.name}</span>
                   </p>
                   {plan.current && (
-                    <span className="border border-[var(--inner-green)]/40 px-1.5 py-0.5 font-mono text-[7px] font-semibold uppercase tracking-widest text-[var(--inner-green)]">
+                    <span className="border border-[var(--inner-green)]/40 px-1.5 py-0.5 font-mono text-label font-semibold uppercase tracking-widest text-[var(--success-ink)]">
                       Mevcut
                     </span>
                   )}
@@ -335,25 +338,25 @@ export default function InnerApi() {
                     <CurrencyValue value={plan.price} />
                   </span>
                   {plan.period && (
-                    <span className={`font-mono text-[9px] font-medium ${plan.current ? "text-[var(--bone)]/55" : "text-[var(--ink-muted)]"}`}>
+                    <span className={`font-mono text-label font-medium ${plan.current ? "text-[var(--bone)]/55" : "text-[var(--ink-muted)]"}`}>
                       {plan.period}
                     </span>
                   )}
                 </div>
-                <p className={`mb-3 font-mono text-[9px] font-medium ${plan.current ? "text-[var(--bone)]/65" : "text-[var(--ink-body)]"}`}>
+                <p className={`mb-3 font-mono text-label font-medium ${plan.current ? "text-[var(--bone)]/65" : "text-[var(--ink-body)]"}`}>
                   {plan.requests} istek
                 </p>
                 <ul className="mb-4 space-y-1.5">
                   {plan.features.map((f) => (
                     <li key={f} className="flex items-start gap-2">
-                      <CheckCircle2 className={`mt-0.5 size-3 shrink-0 ${plan.current ? "text-[var(--inner-green)]" : "text-[var(--ink-muted)]"}`} />
+                      <CheckCircle2 className={`mt-0.5 size-3 shrink-0 ${plan.current ? "text-[var(--success-ink)]" : "text-[var(--ink-muted)]"}`} />
                       <span className={`text-xs font-medium ${plan.current ? "text-[var(--bone)]/70" : "text-[var(--ink-body)]"}`}>{f}</span>
                     </li>
                   ))}
                 </ul>
                 {!plan.current && (
                   <button className={[
-                    "flex w-full items-center justify-between border px-3 py-2 font-mono text-[9px] font-semibold uppercase tracking-widest transition-all",
+                    "flex w-full items-center justify-between border px-3 py-2 font-mono text-label font-semibold uppercase tracking-widest transition-all",
                     "border-[var(--ink)]/15 text-[var(--ink-body)] hover:border-[var(--ink)] hover:text-[var(--ink)]",
                   ].join(" ")}>
                     <span>{plan.name === "Starter" ? "Downgrade" : "Upgrade"}</span>
@@ -376,7 +379,7 @@ export default function InnerApi() {
       </div>
 
       <div className="border-t border-[var(--ink)]/[0.08] pt-4">
-        <p className="font-mono text-[9px] font-medium uppercase tracking-widest text-[var(--ink-subtle)]">
+        <p className="font-mono text-label font-medium uppercase tracking-widest text-[var(--ink-subtle)]">
           <span lang="en">inner·api</span> v1 — REST · JSON · Bearer Auth · Rate limited · <span lang="en">inner·hub</span> ekosistemi
         </p>
       </div>

@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { ProceduralPortrait, type PortraitConfig } from "@/components/panel/ProceduralPortrait";
 import { PersonAvatar } from "@/components/panel/PersonAvatar";
+import { DemoPreviewBanner } from "@/components/panel/DemoPreviewBanner";
 
 const PHOSPHOR_CONFIG: PortraitConfig = {
   renderMode: "characters",
@@ -131,11 +132,11 @@ function TrendRow({ trend, rank, maxMentions }: { trend: Trend; rank: number; ma
 
   return (
     <div className="flex items-center gap-4 py-2.5 border-b border-[var(--ink)]/[0.05] last:border-0">
-      <span className="w-5 shrink-0 font-mono text-[9px] text-[var(--ink-subtle)] text-right">{rank}</span>
+      <span className="w-5 shrink-0 font-mono text-label text-[var(--ink-subtle)] text-right">{rank}</span>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1">
           <p className="text-sm text-[var(--ink)] truncate">{trend.topic}</p>
-          <span className={`shrink-0 border px-1.5 py-0.5 font-mono text-[7px] uppercase tracking-widest ${CAT_COLORS[trend.category]}`}>
+          <span className={`shrink-0 border px-1.5 py-0.5 font-mono text-label uppercase tracking-widest ${CAT_COLORS[trend.category]}`}>
             {trend.category}
           </span>
         </div>
@@ -143,11 +144,11 @@ function TrendRow({ trend, rank, maxMentions }: { trend: Trend; rank: number; ma
       </div>
       <div className="flex shrink-0 items-center gap-1">
         <DeltaIcon className={`size-3 ${deltaColor}`} />
-        <span className={`font-mono text-[9px] ${deltaColor}`}>
+        <span className={`font-mono text-label ${deltaColor}`}>
           {trend.delta > 0 ? "+" : ""}{trend.delta}%
         </span>
       </div>
-      <span className="w-8 shrink-0 text-right font-mono text-[10px] text-[var(--ink-muted)]">{trend.mentions}</span>
+      <span className="w-8 shrink-0 text-right font-mono text-label text-[var(--ink-muted)]">{trend.mentions}</span>
     </div>
   );
 }
@@ -168,7 +169,7 @@ function ActivityColumns() {
               opacity: w.label === "Bu" ? 1 : 0.15 + (w.activity / max) * 0.25,
             }}
           />
-          <span className="font-mono text-[8px] text-[var(--ink-muted)]">{w.label}</span>
+          <span className="font-mono text-label text-[var(--ink-muted)]">{w.label}</span>
         </div>
       ))}
     </div>
@@ -195,7 +196,7 @@ export default function Pulse() {
       <FadeIn>
         <div className="flex items-start justify-between">
           <div>
-            <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)] mb-2">
+            <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)] mb-2">
               <span lang="en">inner·hub</span>
             </p>
             <h1
@@ -209,12 +210,14 @@ export default function Pulse() {
               Topluluğun anonim nabzı. Bu hafta ne konuşuluyor?
             </p>
           </div>
-          <div className="flex items-center gap-2 border border-[var(--inner-green)]/30 bg-[var(--inner-green)]/5 px-3 py-2">
-            <Radio className="size-3 text-[var(--success-ink)]" />
-            <span className="font-mono text-[9px] uppercase tracking-widest text-[var(--success-ink)]">Canlı</span>
+          <div className="flex items-center gap-2 border border-[var(--ink)]/15 bg-[var(--ink)]/[0.03] px-3 py-2">
+            <Radio className="size-3 text-[var(--ink-muted)]" />
+            <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">Önizleme</span>
           </div>
         </div>
       </FadeIn>
+
+      <DemoPreviewBanner surface="inner·pulse" />
 
       {/* Phosphor portrait — the community's pulse, rendered as a live signal */}
       <FadeIn delay={0.03}>
@@ -225,7 +228,7 @@ export default function Pulse() {
             className="aspect-[21/9] w-full md:aspect-[24/9]"
           />
           <div className="pointer-events-none absolute inset-0 flex flex-col justify-end p-6 md:p-8">
-            <p className="mb-1 font-mono text-[9px] uppercase tracking-widest text-[var(--success-ink)]/70">
+            <p className="mb-1 font-mono text-label uppercase tracking-widest text-[var(--success-ink)]/70">
               Phosphor · canlı sinyal
             </p>
             <p className="max-w-[26ch] font-serif text-2xl text-[var(--bone)] md:text-3xl" style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 300 }}>
@@ -245,7 +248,7 @@ export default function Pulse() {
         ].map((s) => (
           <div key={s.label} className="border border-[var(--ink)]/[0.08] p-4">
             <div className="mb-2 flex items-center justify-between">
-              <p className="font-mono text-[8px] uppercase tracking-widest text-[var(--ink-subtle)]">{s.label}</p>
+              <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)]">{s.label}</p>
               <s.icon className="size-3 text-[var(--ink-subtle)]" />
             </div>
             <p
@@ -254,7 +257,7 @@ export default function Pulse() {
             >
               {s.value}
             </p>
-            <p className="mt-0.5 font-mono text-[8px] text-[var(--ink-subtle)]">{s.sub}</p>
+            <p className="mt-0.5 font-mono text-label text-[var(--ink-subtle)]">{s.sub}</p>
           </div>
         ))}
       </div>
@@ -264,7 +267,7 @@ export default function Pulse() {
         {/* Trends */}
         <section>
           <div className="mb-4 border-t border-[var(--ink)]/[0.08] pt-3 flex items-center justify-between">
-            <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)]">
+            <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
               Trending Konular
             </p>
             <div className="flex gap-1.5">
@@ -273,7 +276,7 @@ export default function Pulse() {
                   key={c}
                   onClick={() => setCatFilter(c)}
                   className={[
-                    "border px-2 py-0.5 font-mono text-[7px] uppercase tracking-widest transition-all",
+                    "border px-2 py-0.5 font-mono text-label uppercase tracking-widest transition-all",
                     catFilter === c
                       ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--bone)]"
                       : "border-[var(--ink)]/10 text-[var(--ink-muted)] hover:border-[var(--ink)]/25",
@@ -295,30 +298,30 @@ export default function Pulse() {
         <div className="space-y-6">
           {/* Weekly activity */}
           <section className="border border-[var(--ink)]/[0.08] p-4">
-            <p className="mb-4 font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)]">
+            <p className="mb-4 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
               Haftalık Aktivite
             </p>
             <ActivityColumns />
-            <p className="mt-3 font-mono text-[8px] text-[var(--ink-subtle)]">
+            <p className="mt-3 font-mono text-label text-[var(--ink-subtle)]">
               Bu hafta %{Math.round(((WEEKLY[3].activity - WEEKLY[2].activity) / WEEKLY[2].activity) * 100)} artış
             </p>
           </section>
 
           {/* Top channels */}
           <section>
-            <p className="mb-3 font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)]">
+            <p className="mb-3 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
               En Aktif Kanallar
             </p>
             <div className="space-y-2">
               {CHANNELS.map((ch, i) => (
                 <div key={ch.name} className="flex items-center gap-3 py-1.5 border-b border-[var(--ink)]/[0.05] last:border-0">
-                  <span className="font-mono text-[8px] text-[var(--ink-subtle)] w-3">{i + 1}</span>
+                  <span className="font-mono text-label text-[var(--ink-subtle)] w-3">{i + 1}</span>
                   <Hash className="size-3 text-[var(--ink-subtle)] shrink-0" />
                   <div className="flex-1 min-w-0">
                     <p className="text-xs text-[var(--ink-strong)] truncate">{ch.name}</p>
-                    <p className="font-mono text-[7px] text-[var(--ink-subtle)] truncate">{ch.trending}</p>
+                    <p className="font-mono text-label text-[var(--ink-subtle)] truncate">{ch.trending}</p>
                   </div>
-                  <span className="shrink-0 font-mono text-[9px] text-[var(--ink-body)]">{ch.messages}</span>
+                  <span className="shrink-0 font-mono text-label text-[var(--ink-body)]">{ch.messages}</span>
                 </div>
               ))}
             </div>
@@ -326,7 +329,7 @@ export default function Pulse() {
 
           {/* Top contributors */}
           <section>
-            <p className="mb-3 font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)]">
+            <p className="mb-3 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
               Bu Hafta Öne Çıkanlar
             </p>
             <div className="space-y-2">
@@ -335,7 +338,7 @@ export default function Pulse() {
                   <PersonAvatar
                     name={c.name}
                     initials={c.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
-                    className="size-6 text-[8px]"
+                    className="size-6 text-label"
                   />
                   <div className="flex-1 min-w-0">
                     <p className="text-xs text-[var(--ink-strong)] truncate">{c.name}</p>
@@ -351,7 +354,7 @@ export default function Pulse() {
                     </div>
                   </div>
                   <div className="flex items-center gap-1 shrink-0">
-                    <span className="font-mono text-[8px] text-[var(--ink-muted)]">{c.streak}g</span>
+                    <span className="font-mono text-label text-[var(--ink-muted)]">{c.streak}g</span>
                   </div>
                 </div>
               ))}
@@ -362,7 +365,7 @@ export default function Pulse() {
 
       {/* Footer */}
       <div className="border-t border-[var(--ink)]/[0.08] pt-4">
-        <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink-subtle)]">
+        <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)]">
           <span lang="en">inner·pulse</span> — veriler anonimleştirilmiş · gerçek zamanlı · yalnızca üyeler görür
         </p>
       </div>

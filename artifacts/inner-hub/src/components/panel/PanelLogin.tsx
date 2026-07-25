@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Lockup } from "@/components/Lockup";
 import { apiUrl } from "@/lib/api";
+import { posterForVideo } from "@/lib/videoPosters";
 import { useScrubVideo } from "@/hooks/useScrubVideo";
 import { useTypewriter } from "@/hooks/useTypewriter";
 
@@ -203,7 +204,8 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
         ref={scrubVideoRef}
         muted
         playsInline
-        preload="auto"
+        poster={posterForVideo(LOGIN_VIDEO_SRC)}
+        preload="none"
         className="absolute inset-0 z-0 h-full w-full object-cover"
         style={{ objectPosition: "70% center" }}
         src={LOGIN_VIDEO_SRC}
@@ -230,7 +232,7 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
         </a>
         <a
           href="/"
-          className="animate-blur-fade-up font-mono text-[11px] uppercase tracking-widest text-white/60 transition-colors hover:text-white"
+          className="animate-blur-fade-up font-mono text-caption uppercase tracking-widest text-white/60 transition-colors hover:text-white"
           style={{ animationDelay: "150ms" }}
         >
           Ana sayfa
@@ -261,7 +263,7 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
           <button
             type="button"
             onClick={copySupportEmail}
-            className="pointer-events-auto mt-6 inline-flex items-center gap-2 rounded-full border border-white/40 px-5 py-2.5 font-mono text-[11px] uppercase tracking-widest text-white transition-colors duration-200 hover:bg-white hover:text-black"
+            className="pointer-events-auto mt-6 inline-flex items-center gap-2 rounded-full border border-white/40 px-5 py-2.5 font-mono text-caption uppercase tracking-widest text-white transition-colors duration-200 hover:bg-white hover:text-black"
           >
             {emailCopied ? "Kopyalandı" : "Bize ulaş: destek@inner.digital"}
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -320,7 +322,7 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
             style={{ animationDelay: "550ms" }}
           >
             <span className="h-px flex-1 bg-white/20" />
-            <span className="font-mono text-[10px] uppercase tracking-widest">veya</span>
+            <span className="font-mono text-label uppercase tracking-widest">veya</span>
             <span className="h-px flex-1 bg-white/20" />
           </div>
 
@@ -396,7 +398,7 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
             </div>
 
             {error && (
-              <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--error-ink)]">
+              <p className="font-mono text-label uppercase tracking-widest text-[var(--error-ink)]">
                 {error}
               </p>
             )}
@@ -425,7 +427,7 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
                   setMode(mode === "login" ? "register" : "login");
                   setError("");
                 }}
-                className="font-mono text-[11px] uppercase tracking-widest text-white/60 hover:text-white transition-colors"
+                className="font-mono text-caption uppercase tracking-widest text-white/60 hover:text-white transition-colors"
               >
                 {mode === "login" ? "Hesabın yok mu?" : "Zaten üye misin?"}
               </button>

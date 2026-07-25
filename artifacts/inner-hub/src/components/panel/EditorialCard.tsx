@@ -5,6 +5,8 @@ import { ArrowRight } from "lucide-react";
 import { Link } from "wouter";
 import { cn } from "@/lib/utils";
 import { ProceduralPortrait, type PortraitConfig } from "@/components/panel/ProceduralPortrait";
+import { HeroVideo } from "@/components/HeroVideo";
+import { posterForVideo } from "@/lib/videoPosters";
 
 type EditorialCardProps = {
   title: string;
@@ -16,6 +18,8 @@ type EditorialCardProps = {
   imageAlt?: string;
   /** Autoplaying muted loop video — takes priority over imageSrc/portrait */
   videoSrc?: string;
+  /** Optional poster; defaults via posterForVideo(videoSrc) */
+  videoPoster?: string;
   /** Live Canvas2D procedural portrait (Phosphor/D60-hero) — takes priority over imageSrc */
   portrait?: { src: string; config: PortraitConfig };
   tone?: "light" | "dark";
@@ -39,6 +43,7 @@ export function EditorialCard({
   imageSrc,
   imageAlt = "",
   videoSrc,
+  videoPoster,
   portrait,
   tone = "light",
   className,
@@ -72,13 +77,10 @@ export function EditorialCard({
       {hasMedia && (
         <div className="relative aspect-[16/10] overflow-hidden">
           {videoSrc ? (
-            <video
-              autoPlay
-              muted
-              loop
-              playsInline
-              className="size-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.03]"
+            <HeroVideo
               src={videoSrc}
+              poster={videoPoster ?? posterForVideo(videoSrc)}
+              className="size-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.03]"
             />
           ) : portrait ? (
             <ProceduralPortrait src={portrait.src} config={portrait.config} className="size-full" />
@@ -101,7 +103,7 @@ export function EditorialCard({
           {typeof index === "number" && (
             <span
               className={cn(
-                "absolute right-3 top-3 font-mono text-[10px] tabular-nums tracking-widest",
+                "absolute right-3 top-3 font-mono text-label tabular-nums tracking-widest",
                 dark ? "text-[var(--bone)]/50" : "text-[var(--bone)]",
               )}
               style={{ textShadow: "0 1px 8px rgba(0,0,0,0.5)" }}
@@ -117,7 +119,7 @@ export function EditorialCard({
           {eyebrow && (
             <p
               className={cn(
-                "font-mono text-[9px] uppercase tracking-widest",
+                "font-mono text-label uppercase tracking-widest",
                 dark ? "text-[var(--bone)]/57" : "text-[var(--ink-body)]",
               )}
             >
@@ -143,7 +145,7 @@ export function EditorialCard({
           {href && (
             <span
               className={cn(
-                "mt-auto flex items-center gap-1.5 pt-3 font-mono text-[10px] uppercase tracking-widest transition-all",
+                "mt-auto flex items-center gap-1.5 pt-3 font-mono text-label uppercase tracking-widest transition-all",
                 dark
                   ? "text-[var(--bone)]/70 group-hover:text-[var(--success-ink)]"
                   : "text-[var(--ink-muted)] group-hover:text-[var(--success-ink)]",

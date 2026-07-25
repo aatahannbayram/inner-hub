@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { FadeIn } from "@/components/FadeIn";
 import { Check, Plus, X, AlertCircle } from "lucide-react";
+import { toUpperTR } from "@/lib/tr";
 
 // ─── Initial state ────────────────────────────────────────────────────────────
 
@@ -44,7 +45,7 @@ function Section({ title, sub, children }: { title: string; sub?: string; childr
   return (
     <div className="border-t border-[var(--ink)]/[0.08] pt-6">
       <div className="mb-4">
-        <p className="font-mono text-[10px] font-semibold uppercase tracking-widest text-[var(--ink-body)]">{title}</p>
+        <p className="font-mono text-label font-semibold uppercase tracking-widest text-[var(--ink-body)]">{title}</p>
         {sub && <p className="mt-0.5 text-xs text-[var(--ink-muted)]">{sub}</p>}
       </div>
       {children}
@@ -75,17 +76,17 @@ function Field({
 }) {
   const cls = [
     "w-full border border-[var(--ink)]/[0.08] bg-transparent px-3 py-2.5 text-sm text-[var(--ink)] placeholder:text-[var(--ink-subtle)] outline-none transition-colors focus:border-[var(--ink)]/30",
-    mono ? "font-mono text-[11px]" : "font-light",
+    mono ? "font-mono text-caption" : "font-light",
   ].join(" ");
 
   return (
     <div>
-      <label className="mb-1.5 block font-mono text-[10px] font-semibold uppercase tracking-widest text-[var(--ink-strong)]">
+      <label className="mb-1.5 block font-mono text-label font-semibold uppercase tracking-widest text-[var(--ink-strong)]">
         {label}
       </label>
       {prefix ? (
         <div className="flex items-stretch border border-[var(--ink)]/[0.08] focus-within:border-[var(--ink)]/30 transition-colors">
-          <span className="flex items-center border-r border-[var(--ink)]/[0.08] bg-[var(--ink)]/[0.03] px-3 font-mono text-[10px] font-medium text-[var(--ink-body)]">
+          <span className="flex items-center border-r border-[var(--ink)]/[0.08] bg-[var(--ink)]/[0.03] px-3 font-mono text-label font-medium text-[var(--ink-body)]">
             {prefix}
           </span>
           <input
@@ -115,7 +116,7 @@ function Field({
         />
       )}
       {maxLength && (
-        <p className="mt-1 text-right font-mono text-[10px] font-medium text-[var(--ink-muted)]">
+        <p className="mt-1 text-right font-mono text-label font-medium text-[var(--ink-muted)]">
           {value.length}/{maxLength}
         </p>
       )}
@@ -138,14 +139,14 @@ function SkillEditor({ skills, onChange }: { skills: string[]; onChange: (s: str
 
   return (
     <div>
-      <label className="mb-1.5 block font-mono text-[10px] font-semibold uppercase tracking-widest text-[var(--ink-strong)]">
+      <label className="mb-1.5 block font-mono text-label font-semibold uppercase tracking-widest text-[var(--ink-strong)]">
         Uzmanlıklar
       </label>
       <div className="mb-2 flex flex-wrap gap-1.5">
         {skills.map((s) => (
           <span
             key={s}
-            className="flex items-center gap-1.5 border border-[var(--ink)]/10 px-2.5 py-1 font-mono text-[9px] uppercase tracking-widest text-[var(--ink-body)]"
+            className="flex items-center gap-1.5 border border-[var(--ink)]/10 px-2.5 py-1 font-mono text-label uppercase tracking-widest text-[var(--ink-body)]"
           >
             {s}
             <button
@@ -159,7 +160,7 @@ function SkillEditor({ skills, onChange }: { skills: string[]; onChange: (s: str
         {skills.length < 10 && (
           <div className="flex items-stretch border border-dashed border-[var(--ink)]/15">
             <input
-              className="w-28 bg-transparent px-2.5 py-1 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)] placeholder:text-[var(--ink-subtle)] outline-none"
+              className="w-28 bg-transparent px-2.5 py-1 font-mono text-label uppercase tracking-widest text-[var(--ink)] placeholder:text-[var(--ink-subtle)] outline-none"
               placeholder="Ekle..."
               value={input}
               onChange={(e) => setInput(e.target.value)}
@@ -174,7 +175,7 @@ function SkillEditor({ skills, onChange }: { skills: string[]; onChange: (s: str
           </div>
         )}
       </div>
-      <p className="font-mono text-[10px] font-medium text-[var(--ink-muted)]">Maks. 10 etiket · Enter ile ekle</p>
+      <p className="font-mono text-label font-medium text-[var(--ink-muted)]">Maks. 10 etiket · Enter ile ekle</p>
     </div>
   );
 }
@@ -217,7 +218,7 @@ function VisibilitySelector({
           </div>
           <div>
             <p className="text-sm text-[var(--ink)]">{opt.label}</p>
-            <p className="font-mono text-[10px] font-medium text-[var(--ink-muted)]">{opt.desc}</p>
+            <p className="font-mono text-label font-medium text-[var(--ink-muted)]">{opt.desc}</p>
           </div>
         </button>
       ))}
@@ -228,12 +229,13 @@ function VisibilitySelector({
 // ─── Avatar ───────────────────────────────────────────────────────────────────
 
 function Avatar({ name }: { name: string }) {
-  const initials = name
-    .split(" ")
-    .slice(0, 2)
-    .map((w) => w[0])
-    .join("")
-    .toUpperCase();
+  const initials = toUpperTR(
+    name
+      .split(" ")
+      .slice(0, 2)
+      .map((w) => w[0])
+      .join(""),
+  );
 
   return (
     <div className="flex items-center gap-4">
@@ -242,8 +244,8 @@ function Avatar({ name }: { name: string }) {
       </div>
       <div>
         <p className="mb-1 text-sm text-[var(--ink)]">Profil fotoğrafı</p>
-        <p className="font-mono text-[10px] font-medium text-[var(--ink-muted)]">JPG, PNG — maks. 2 MB</p>
-        <button className="mt-1.5 font-mono text-[9px] uppercase tracking-widest text-[var(--ink-body)] underline underline-offset-2 hover:text-[var(--ink)] transition-colors">
+        <p className="font-mono text-label font-medium text-[var(--ink-muted)]">JPG, PNG — maks. 2 MB</p>
+        <button className="mt-1.5 font-mono text-label uppercase tracking-widest text-[var(--ink-body)] underline underline-offset-2 hover:text-[var(--ink)] transition-colors">
           Değiştir
         </button>
       </div>
@@ -270,7 +272,7 @@ function CompletionBar({ pct }: { pct: number }) {
           <span className="relative block size-full bg-[var(--inner-green)]" />
         </span>
       </div>
-      <span className="shrink-0 font-mono text-[10px] font-semibold text-[var(--ink-strong)]">%{pct} tamamlandı</span>
+      <span className="shrink-0 font-mono text-label font-semibold text-[var(--ink-strong)]">%{pct} tamamlandı</span>
     </div>
   );
 }
@@ -308,7 +310,7 @@ export default function ProfilePage() {
       {/* Header */}
       <FadeIn>
         <div>
-          <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)] mb-2">
+          <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)] mb-2">
             <span lang="en">inner·hub</span>
           </p>
           <h1
@@ -347,7 +349,7 @@ export default function ProfilePage() {
             maxLength={20}
           />
           {handleError && (
-            <p className="mt-1 flex items-center gap-1.5 font-mono text-[9px] text-[var(--error-ink)]">
+            <p className="mt-1 flex items-center gap-1.5 font-mono text-label text-[var(--error-ink)]">
               <AlertCircle className="size-3" /> {handleError}
             </p>
           )}
@@ -394,9 +396,9 @@ export default function ProfilePage() {
           onClick={save}
           disabled={!!handleError}
           className={[
-            "flex items-center gap-2 border px-6 py-2.5 font-mono text-[10px] uppercase tracking-widest transition-all",
+            "flex items-center gap-2 border px-6 py-2.5 font-mono text-label uppercase tracking-widest transition-all",
             saved
-              ? "border-[var(--inner-green)]/40 bg-[var(--inner-green)]/10 text-[var(--inner-green)]"
+              ? "border-[var(--inner-green)]/40 bg-[var(--inner-green)]/10 text-[var(--success-ink)]"
               : "border-[var(--ink)] bg-[var(--ink)] text-[var(--bone)] hover:bg-[var(--ink)]/85 disabled:opacity-30",
           ].join(" ")}
         >
@@ -409,14 +411,14 @@ export default function ProfilePage() {
           )}
         </button>
         {saved && (
-          <p className="font-mono text-[9px] text-[var(--ink-muted)]">
+          <p className="font-mono text-label text-[var(--ink-muted)]">
             Değişiklikler inner·id'e yansıdı
           </p>
         )}
       </div>
 
       <div className="border-t border-[var(--ink)]/[0.08] pt-4">
-        <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink-subtle)]">
+        <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)]">
           <span lang="en">inner·hub</span> · profil · davet bazlı
         </p>
       </div>

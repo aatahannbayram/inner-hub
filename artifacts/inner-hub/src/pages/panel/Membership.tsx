@@ -117,9 +117,9 @@ function PlanCard({ plan }: { plan: Plan }) {
       {plan.badge && (
         <span
           className={[
-            "absolute right-4 top-4 border px-2 py-0.5 font-mono text-[8px] uppercase tracking-widest",
+            "absolute right-4 top-4 border px-2 py-0.5 font-mono text-label uppercase tracking-widest",
             plan.highlighted
-              ? "border-[var(--inner-green)]/50 bg-[var(--inner-green)]/20 text-[var(--inner-green)]"
+              ? "border-[var(--inner-green)]/50 bg-[var(--inner-green)]/20 text-[var(--success-ink)]"
               : "border-[var(--ink)]/15 text-[var(--ink-body)]",
           ].join(" ")}
         >
@@ -147,7 +147,7 @@ function PlanCard({ plan }: { plan: Plan }) {
         </div>
         <p
           className={[
-            "font-mono text-[10px] uppercase tracking-widest",
+            "font-mono text-label uppercase tracking-widest",
             plan.highlighted ? "text-[var(--bone)]/50" : "text-[var(--ink-body)]",
           ].join(" ")}
         >
@@ -165,7 +165,7 @@ function PlanCard({ plan }: { plan: Plan }) {
           </span>
           <span
             className={[
-              "font-mono text-[11px]",
+              "font-mono text-caption",
               plan.highlighted ? "text-[var(--bone)]/57" : "text-[var(--ink-muted)]",
             ].join(" ")}
           >
@@ -189,7 +189,7 @@ function PlanCard({ plan }: { plan: Plan }) {
             <Check
               className={[
                 "mt-0.5 size-3.5 shrink-0",
-                plan.highlighted ? "text-[var(--inner-green)]" : "text-[var(--ink-body)]",
+                plan.highlighted ? "text-[var(--success-ink)]" : "text-[var(--ink-body)]",
               ].join(" ")}
             />
             <span
@@ -206,7 +206,7 @@ function PlanCard({ plan }: { plan: Plan }) {
 
       {/* Error */}
       {error && (
-        <p className="mb-3 font-mono text-[10px] uppercase tracking-widest text-[var(--error-ink)]">
+        <p className="mb-3 font-mono text-label uppercase tracking-widest text-[var(--error-ink)]">
           {error}
         </p>
       )}
@@ -216,7 +216,7 @@ function PlanCard({ plan }: { plan: Plan }) {
         onClick={handleBuy}
         disabled={loading}
         className={[
-          "flex w-full items-center justify-between border px-5 py-3 font-mono text-[11px] uppercase tracking-widest transition-opacity disabled:opacity-40 hover:opacity-80",
+          "flex w-full items-center justify-between border px-5 py-3 font-mono text-caption uppercase tracking-widest transition-opacity disabled:opacity-40 hover:opacity-80",
           plan.highlighted
             ? "border-[var(--bone)]/20 bg-[var(--bone)] text-[var(--ink)]"
             : "border-[var(--ink)] bg-[var(--ink)] text-[var(--bone)]",
@@ -251,7 +251,7 @@ export default function Membership() {
       {/* Header */}
       <FadeIn>
         <div>
-          <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)] mb-2">
+          <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)] mb-2">
             <span lang="en">inner·hub</span>
           </p>
           <h1
@@ -285,7 +285,7 @@ export default function Membership() {
                 <Zap className="size-4 text-[var(--ink-body)]" />
               </div>
               <div>
-                <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)] mb-0.5">
+                <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)] mb-0.5">
                   Tek Seferlik
                 </p>
                 <p className="text-sm font-medium text-[var(--ink)]">{EVENT_TICKET.name}</p>
@@ -302,7 +302,7 @@ export default function Membership() {
               <button
                 onClick={handleEventTicket}
                 disabled={ticketLoading}
-                className="flex items-center gap-2 border border-[var(--ink)]/20 px-4 py-2 font-mono text-[10px] uppercase tracking-widest text-[var(--ink-muted)] transition-all hover:border-[var(--ink)] hover:text-[var(--ink)] disabled:opacity-40"
+                className="flex items-center gap-2 border border-[var(--ink)]/20 px-4 py-2 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)] transition-all hover:border-[var(--ink)] hover:text-[var(--ink)] disabled:opacity-40"
               >
                 {ticketLoading ? "Yönlendiriliyor…" : "Bilet Al"}
                 <ArrowRight className="size-3" />
@@ -310,7 +310,7 @@ export default function Membership() {
             </div>
           </div>
           {ticketError && (
-            <p className="mt-2 font-mono text-[10px] uppercase tracking-widest text-[var(--error-ink)]">
+            <p className="mt-2 font-mono text-label uppercase tracking-widest text-[var(--error-ink)]">
               {ticketError}
             </p>
           )}
@@ -319,7 +319,7 @@ export default function Membership() {
 
       {/* Trust note */}
       <div className="border-t border-[var(--ink)]/[0.08] pt-4">
-        <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink-subtle)] text-center">
+        <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)] text-center">
           Ödemeler Stripe ile güvenli şekilde işlenir · SSL şifreli · İstediğinde iptal et
         </p>
       </div>

@@ -32,7 +32,7 @@ export function DiagramCircle() {
           />
         ))}
       </svg>
-      <span className="font-mono text-[10px] uppercase tracking-widest opacity-50">34 · One circle</span>
+      <span className="font-mono text-label uppercase tracking-widest opacity-50">34 · One circle</span>
       <span className="sr-only">Thirty-four squares forming one circle.</span>
     </div>
   );

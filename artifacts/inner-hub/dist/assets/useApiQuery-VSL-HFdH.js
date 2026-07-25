@@ -1,0 +1,1 @@
+import{o as s,q as o,s as u}from"./index-ColhEG0a.js";function c(a,t,n){return s({queryKey:a,enabled:n?.enabled??!0,queryFn:async()=>{const e=await fetch(u(t),{credentials:"include"}),r=await e.json().catch(()=>({}));if(!e.ok)throw new Error(r.error??"Veri alınamadı");return r},staleTime:6e4,placeholderData:o})}export{c as u};
