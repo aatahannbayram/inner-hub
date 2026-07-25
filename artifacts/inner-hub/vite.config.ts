@@ -40,6 +40,23 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "dist"),
     emptyOutDir: true,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (!id.includes("node_modules") && !id.includes("vendor/gsap")) return;
+          if (id.includes("vendor/gsap") || id.includes("framer-motion") || id.includes("lenis")) {
+            return "motion-vendor";
+          }
+          if (id.includes("recharts") || id.includes("d3-")) return "charts-vendor";
+          if (id.includes("@radix-ui") || id.includes("react-day-picker") || id.includes("embla-carousel")) {
+            return "ui-vendor";
+          }
+          if (id.includes("react-dom") || id.includes("/react/") || id.includes("scheduler")) {
+            return "react-vendor";
+          }
+        },
+      },
+    },
   },
   server: {
     port,
