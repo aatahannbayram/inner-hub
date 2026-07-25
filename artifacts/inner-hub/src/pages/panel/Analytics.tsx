@@ -1,55 +1,48 @@
-import { useState } from "react";
+import { TrendingUp, TrendingDown, Minus, Users, MessageSquare, CalendarCheck, Sparkles } from "lucide-react";
 import { FadeIn } from "@/components/FadeIn";
-import { CurrencyValue } from "@/components/panel/CurrencyValue";
-import { TrendingUp, TrendingDown, Minus, Users, CreditCard, Activity, Zap } from "lucide-react";
-import { DemoPreviewBanner } from "@/components/panel/DemoPreviewBanner";
+import { useApiQuery } from "@/hooks/useApiQuery";
+import { LoadingBlock, ErrorState, StatCardSkeleton } from "@/components/panel/Skeletons";
 
-// ─── Mock data ─────────────────────────────────────────────────────────────────
+// ─── API tipleri ────────────────────────────────────────────────────────────
 
-const MEMBER_GROWTH = [
-  { month: "Oca", total: 8, new: 8 },
-  { month: "Şub", total: 14, new: 6 },
-  { month: "Mar", total: 19, new: 5 },
-  { month: "Nis", total: 24, new: 5 },
-  { month: "May", total: 28, new: 4 },
-  { month: "Haz", total: 34, new: 6 },
-];
-
-const REVENUE = [
-  { month: "Oca", mrr: 0 },
-  { month: "Şub", mrr: 4200 },
-  { month: "Mar", mrr: 6800 },
-  { month: "Nis", mrr: 9100 },
-  { month: "May", mrr: 11400 },
-  { month: "Haz", mrr: 14700 },
-];
-
-const ENGAGEMENT = [
-  { week: "Hf 1", dau: 12, messages: 87, events: 1 },
-  { week: "Hf 2", dau: 18, messages: 142, events: 0 },
-  { week: "Hf 3", dau: 21, messages: 198, events: 2 },
-  { week: "Hf 4", dau: 16, messages: 110, events: 1 },
-];
-
-const TOP_MEMBERS = [
-  { name: "Ata Han Bayram", handle: "atahan", contributions: 84, events: 12, joined: "Oca 2026" },
-  { name: "Selin Kaya", handle: "selinkaya", contributions: 61, events: 9, joined: "Şub 2026" },
-  { name: "Mert Öztürk", handle: "mertozturk", contributions: 47, events: 7, joined: "Şub 2026" },
-  { name: "Defne Arslan", handle: "defnearslan", contributions: 38, events: 11, joined: "Mar 2026" },
-  { name: "Kerem Yıldız", handle: "keremyildiz", contributions: 29, events: 6, joined: "Mar 2026" },
-];
-
-const CHANNEL_ACTIVITY = [
-  { name: "#genel", messages: 312, members: 34 },
-  { name: "#ai-tools", messages: 278, members: 29 },
-  { name: "#yatırım", messages: 194, members: 22 },
-  { name: "#build-in-public", messages: 156, members: 19 },
-  { name: "#hiring", messages: 88, members: 14 },
-];
+interface AnalyticsResponse {
+  membersCount: number;
+  newMembersThisMonth: number;
+  messagesThisWeek: number;
+  messagesLastWeek: number;
+  eventRegistrationsTotal: number;
+  eventRegistrationsThisWeek: number;
+  courseEnrollmentsTotal: number;
+  courseEnrollmentsThisWeek: number;
+  matchIntroductionsTotal: number;
+  matchIntroductionsThisMonth: number;
+  applicationsPending: number | null;
+  memberGrowth: { month: string; total: number }[];
+  weeklyActivity: { week: string; activeMembers: number; messages: number; registrations: number }[];
+  topMembers: { name: string; handle: string | null; contributions: number; events: number; joinedAt: string }[];
+  channelActivity: { name: string; messages: number; members: number }[];
+  empty: boolean;
+}
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 type Trend = "up" | "down" | "flat";
+
+function trendFrom(current: number, previous: number): Trend {
+  if (current > previous) return "up";
+  if (current < previous) return "down";
+  return "flat";
+}
+
+function deltaLabel(current: number, previous: number): string {
+  if (previous === 0) return current > 0 ? `+${current}` : "±0";
+  const pct = Math.round(((current - previous) / previous) * 100);
+  return `${pct > 0 ? "+" : ""}${pct}%`;
+}
+
+function memberSince(iso: string): string {
+  return new Date(iso).toLocaleDateString("tr-TR", { month: "short", year: "numeric" });
+}
 
 function TrendIcon({ trend, className }: { trend: Trend; className?: string }) {
   if (trend === "up") return <TrendingUp className={className} />;
@@ -147,43 +140,14 @@ function BarChart<T extends Record<string, number | string>>({
 
 // ─── Section ──────────────────────────────────────────────────────────────────
 
-function Section({ title, sub, children, action }: { title: string; sub?: string; children: React.ReactNode; action?: React.ReactNode }) {
+function Section({ title, sub, children }: { title: string; sub?: string; children: React.ReactNode }) {
   return (
     <div className="border-t border-[var(--ink)]/[0.08] pt-6">
-      <div className="mb-4 flex items-start justify-between">
-        <div>
-          <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">{title}</p>
-          {sub && <p className="mt-0.5 text-xs text-[var(--ink-muted)]">{sub}</p>}
-        </div>
-        {action}
+      <div className="mb-4">
+        <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">{title}</p>
+        {sub && <p className="mt-0.5 text-xs text-[var(--ink-muted)]">{sub}</p>}
       </div>
       {children}
-    </div>
-  );
-}
-
-// ─── Time range selector ──────────────────────────────────────────────────────
-
-const RANGES = ["7G", "30G", "90G", "Tümü"] as const;
-type Range = (typeof RANGES)[number];
-
-function RangeSelector({ value, onChange }: { value: Range; onChange: (r: Range) => void }) {
-  return (
-    <div className="flex">
-      {RANGES.map((r) => (
-        <button
-          key={r}
-          onClick={() => onChange(r)}
-          className={[
-            "border-y border-r first:border-l first:border-l px-3 py-1 font-mono text-label uppercase tracking-widest transition-colors",
-            value === r
-              ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--bone)]"
-              : "border-[var(--ink)]/15 text-[var(--ink-muted)] hover:text-[var(--ink)]",
-          ].join(" ")}
-        >
-          {r}
-        </button>
-      ))}
     </div>
   );
 }
@@ -191,179 +155,223 @@ function RangeSelector({ value, onChange }: { value: Range; onChange: (r: Range)
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function Analytics() {
-  const [range, setRange] = useState<Range>("30G");
+  const { data, isLoading, isError, error, refetch } = useApiQuery<AnalyticsResponse>(
+    ["analytics"],
+    "/api/analytics",
+  );
 
   return (
     <div className="space-y-8 max-w-3xl">
       {/* Header */}
       <FadeIn>
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)] mb-2">
-              <span lang="en">inner·hub</span> — Admin
-            </p>
-            <h1
-              className="font-serif font-display text-4xl md:text-5xl text-[var(--ink)]"
-              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
-            >
-              analitik
-              <span className="inline-block size-[0.35em] translate-y-[0.08em] ml-[0.05em] bg-[var(--inner-green)]" />
-            </h1>
-            <p className="mt-2 text-sm text-[var(--ink-muted)] font-light">
-              Topluluk büyümesi, gelir ve katılım metrikleri.
-            </p>
-          </div>
-          <RangeSelector value={range} onChange={setRange} />
+        <div>
+          <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)] mb-2">
+            <span lang="en">inner·hub</span> — Admin
+          </p>
+          <h1
+            className="font-serif font-display text-4xl md:text-5xl text-[var(--ink)]"
+            style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
+          >
+            analitik
+            <span className="inline-block size-[0.35em] translate-y-[0.08em] ml-[0.05em] bg-[var(--inner-green)]" />
+          </h1>
+          <p className="mt-2 text-sm text-[var(--ink-muted)] font-light">
+            Topluluk büyümesi ve katılım — canlı veritabanından, gerçek zamanlı.
+          </p>
         </div>
       </FadeIn>
 
-      <DemoPreviewBanner surface="Analitik" />
-
-      {/* KPI row */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <StatCard
-          label="Toplam Üye"
-          value="34"
-          sub="önceki aya göre"
-          trend="up"
-          delta="+6 bu ay"
-          icon={Users}
-        />
-        <StatCard
-          label="Aylık Gelir"
-          value={<CurrencyValue value="₺14.7K" />}
-          sub="MRR"
-          trend="up"
-          delta="+%29"
-          icon={CreditCard}
-        />
-        <StatCard
-          label="Aktif Üye"
-          value="21"
-          sub="bu hafta"
-          trend="up"
-          delta="%62 DAU"
-          icon={Activity}
-        />
-        <StatCard
-          label="AI Sinyali"
-          value="47"
-          sub="eşleşme bu ay"
-          trend="up"
-          delta="+12"
-          icon={Zap}
-        />
-      </div>
-
-      {/* Member growth chart */}
-      <Section title="Üye Büyümesi" sub="Kümülatif üye sayısı — aylık">
-        <div className="border border-[var(--ink)]/[0.08] p-5">
-          <div className="mb-4 flex items-baseline gap-3">
-            <span
-              className="font-serif text-4xl text-[var(--ink)]"
-              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
-            >
-              34
-            </span>
-            <span className="font-mono text-label text-[var(--success-ink)]">+6 bu ay</span>
-          </div>
-          <BarChart data={MEMBER_GROWTH} labelKey="month" valueKey="total" />
-        </div>
-      </Section>
-
-      {/* Revenue chart */}
-      <Section title="Gelir (MRR)" sub="Aylık yinelenen gelir — ₺">
-        <div className="border border-[var(--ink)]/[0.08] p-5">
-          <div className="mb-4 flex items-baseline gap-3">
-            <span
-              className="font-serif text-4xl text-[var(--ink)]"
-              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
-            >
-              <CurrencyValue value="₺14.700" />
-            </span>
-            <span className="font-mono text-label text-[var(--success-ink)]">+%29 önceki aya göre</span>
-          </div>
-          <BarChart
-            data={REVENUE}
-            labelKey="month"
-            valueKey="mrr"
-            formatValue={(v) => `₺${(v / 1000).toFixed(1)}K`}
-          />
-        </div>
-      </Section>
-
-      {/* Engagement */}
-      <Section title="Haftalık Katılım" sub="Aktif üye · mesaj · etkinlik">
-        <div className="grid grid-cols-3 gap-3">
-          {["dau", "messages", "events"].map((key, ki) => {
-            const labels = ["Aktif Üye", "Mesaj", "Etkinlik"];
-            const colors = ["var(--ink)", "var(--ink)", "var(--ink)"];
-            return (
-              <div key={key} className="border border-[var(--ink)]/[0.08] p-4">
-                <p className="mb-3 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
-                  {labels[ki]}
-                </p>
-                <BarChart
-                  data={ENGAGEMENT}
-                  labelKey="week"
-                  valueKey={key as keyof (typeof ENGAGEMENT)[0]}
-                  color={colors[ki]}
-                />
-              </div>
-            );
-          })}
-        </div>
-      </Section>
-
-      {/* Top members */}
-      <Section title="En Aktif Üyeler" sub="Katkı puanına göre">
-        <div className="border border-[var(--ink)]/[0.08]">
-          <div className="grid grid-cols-[1fr_auto_auto_auto] border-b border-[var(--ink)]/[0.08] px-4 py-2">
-            {["Üye", "Katkı", "Etkinlik", "Katıldı"].map((h) => (
-              <p key={h} className="font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)] last:text-right">
-                {h}
-              </p>
+      {isLoading && (
+        <LoadingBlock label="Analitik yükleniyor">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <StatCardSkeleton key={i} />
             ))}
           </div>
-          {TOP_MEMBERS.map((m, i) => (
-            <div
-              key={m.handle}
-              className="grid grid-cols-[1fr_auto_auto_auto] items-center gap-4 border-b border-[var(--ink)]/[0.05] px-4 py-3 last:border-0"
-            >
-              <div className="flex items-center gap-3 min-w-0">
-                <span className="font-mono text-label text-[var(--ink-subtle)] tabular-nums w-3">{i + 1}</span>
-                <div className="min-w-0">
-                  <p className="truncate text-sm text-[var(--ink)]">{m.name}</p>
-                  <p className="font-mono text-label text-[var(--ink-muted)]">@{m.handle}</p>
-                </div>
-              </div>
-              <span className="font-mono text-caption tabular-nums text-[var(--ink-body)]">{m.contributions}</span>
-              <span className="font-mono text-caption tabular-nums text-[var(--ink-body)]">{m.events}</span>
-              <span className="font-mono text-label text-[var(--ink-subtle)] text-right">{m.joined}</span>
-            </div>
-          ))}
-        </div>
-      </Section>
+        </LoadingBlock>
+      )}
 
-      {/* Channel activity */}
-      <Section title="Kanal Aktivitesi" sub="Bu ay en aktif kanallar">
-        <div className="space-y-2">
-          {CHANNEL_ACTIVITY.map((ch) => {
-            const pct = Math.round((ch.messages / CHANNEL_ACTIVITY[0].messages) * 100);
-            return (
-              <div key={ch.name} className="flex items-center gap-4">
-                <span className="w-32 shrink-0 font-mono text-label text-[var(--ink-muted)]">{ch.name}</span>
-                <div className="flex-1 h-1.5 bg-[var(--ink)]/[0.06]">
-                  <div className="h-full bg-[var(--ink)]/20" style={{ width: `${pct}%` }} />
+      {isError && (
+        <ErrorState
+          message={error instanceof Error ? error.message : "Analitik yüklenemedi"}
+          onRetry={() => refetch()}
+        />
+      )}
+
+      {data && (
+        <>
+          {/* KPI row */}
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <StatCard
+              label="Toplam Üye"
+              value={data.membersCount}
+              sub="dairenin içinde"
+              trend={data.newMembersThisMonth > 0 ? "up" : "flat"}
+              delta={data.newMembersThisMonth > 0 ? `+${data.newMembersThisMonth} bu ay` : "bu ay yeni yok"}
+              icon={Users}
+            />
+            <StatCard
+              label="Bu Hafta Mesaj"
+              value={data.messagesThisWeek}
+              sub="geçen haftaya göre"
+              trend={trendFrom(data.messagesThisWeek, data.messagesLastWeek)}
+              delta={deltaLabel(data.messagesThisWeek, data.messagesLastWeek)}
+              icon={MessageSquare}
+            />
+            <StatCard
+              label="Etkinlik Kaydı"
+              value={data.eventRegistrationsTotal}
+              sub="toplam"
+              trend={data.eventRegistrationsThisWeek > 0 ? "up" : "flat"}
+              delta={`+${data.eventRegistrationsThisWeek} bu hafta`}
+              icon={CalendarCheck}
+            />
+            <StatCard
+              label="AI Eşleşme"
+              value={data.matchIntroductionsTotal}
+              sub="toplam"
+              trend={data.matchIntroductionsThisMonth > 0 ? "up" : "flat"}
+              delta={`+${data.matchIntroductionsThisMonth} bu ay`}
+              icon={Sparkles}
+            />
+          </div>
+
+          {data.empty ? (
+            <div className="border border-[var(--ink)]/[0.08] p-8 text-center">
+              <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
+                Henüz yeterli veri yok
+              </p>
+              <p className="mt-1 text-sm text-[var(--ink-muted)]">
+                Topluluk hareketlendikçe büyüme, katılım ve aktif üye grafikleri burada dolacak.
+              </p>
+            </div>
+          ) : (
+            <>
+              {/* Member growth chart */}
+              <Section title="Üye Büyümesi" sub="Kümülatif üye sayısı — aylık, gerçek kayıt tarihlerinden">
+                <div className="border border-[var(--ink)]/[0.08] p-5">
+                  <div className="mb-4 flex items-baseline gap-3">
+                    <span
+                      className="font-serif text-4xl text-[var(--ink)]"
+                      style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
+                    >
+                      {data.membersCount}
+                    </span>
+                    {data.newMembersThisMonth > 0 && (
+                      <span className="font-mono text-label text-[var(--success-ink)]">
+                        +{data.newMembersThisMonth} bu ay
+                      </span>
+                    )}
+                  </div>
+                  <BarChart data={data.memberGrowth} labelKey="month" valueKey="total" />
                 </div>
-                <span className="w-12 shrink-0 text-right font-mono text-label text-[var(--ink-muted)] tabular-nums">
-                  {ch.messages}
-                </span>
-              </div>
-            );
-          })}
-        </div>
-      </Section>
+              </Section>
+
+              {/* Revenue — henüz gerçek veri kaynağı yok, sahte sayı uydurmak yerine dürüst not */}
+              <Section title="Gelir" sub="MRR takibi">
+                <div className="border border-[var(--ink)]/[0.08] p-5">
+                  <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
+                    Gelir takibi yakında
+                  </p>
+                  <p className="mt-1 text-sm text-[var(--ink-muted)]">
+                    Üyelik ödemeleri Stripe üzerinden işleniyor; panel içi gelir raporu henüz bağlanmadı.
+                  </p>
+                </div>
+              </Section>
+
+              {/* Engagement */}
+              <Section title="Haftalık Katılım" sub="Aktif üye · mesaj · etkinlik kaydı — son 4 hafta">
+                <div className="grid grid-cols-3 gap-3">
+                  {(["activeMembers", "messages", "registrations"] as const).map((key, ki) => {
+                    const labels = ["Aktif Üye", "Mesaj", "Kayıt"];
+                    return (
+                      <div key={key} className="border border-[var(--ink)]/[0.08] p-4">
+                        <p className="mb-3 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
+                          {labels[ki]}
+                        </p>
+                        <BarChart data={data.weeklyActivity} labelKey="week" valueKey={key} />
+                      </div>
+                    );
+                  })}
+                </div>
+              </Section>
+
+              {/* Top members */}
+              {data.topMembers.length > 0 && (
+                <Section title="En Aktif Üyeler" sub="Son 30 günde mesaj katkısına göre">
+                  <div className="border border-[var(--ink)]/[0.08]">
+                    <div className="grid grid-cols-[1fr_auto_auto_auto] border-b border-[var(--ink)]/[0.08] px-4 py-2">
+                      {["Üye", "Katkı", "Etkinlik", "Katıldı"].map((h) => (
+                        <p key={h} className="font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)] last:text-right">
+                          {h}
+                        </p>
+                      ))}
+                    </div>
+                    {data.topMembers.map((m, i) => (
+                      <div
+                        key={m.name + i}
+                        className="grid grid-cols-[1fr_auto_auto_auto] items-center gap-4 border-b border-[var(--ink)]/[0.05] px-4 py-3 last:border-0"
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <span className="font-mono text-label text-[var(--ink-subtle)] tabular-nums w-3">{i + 1}</span>
+                          <div className="min-w-0">
+                            <p className="truncate text-sm text-[var(--ink)]">{m.name}</p>
+                            {m.handle && (
+                              <p className="font-mono text-label text-[var(--ink-muted)]">
+                                @<span lang="en">{m.handle}</span>
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                        <span className="font-mono text-caption tabular-nums text-[var(--ink-body)]">{m.contributions}</span>
+                        <span className="font-mono text-caption tabular-nums text-[var(--ink-body)]">{m.events}</span>
+                        <span className="font-mono text-label text-[var(--ink-subtle)] text-right">{memberSince(m.joinedAt)}</span>
+                      </div>
+                    ))}
+                  </div>
+                </Section>
+              )}
+
+              {/* Channel activity */}
+              {data.channelActivity.length > 0 && (
+                <Section title="Kanal Aktivitesi" sub="En aktif kanallar — toplam mesaj">
+                  <div className="space-y-2">
+                    {data.channelActivity.map((ch) => {
+                      const max = data.channelActivity[0].messages || 1;
+                      const pct = Math.round((ch.messages / max) * 100);
+                      return (
+                        <div key={ch.name} className="flex items-center gap-4">
+                          <span className="w-32 shrink-0 truncate font-mono text-label text-[var(--ink-muted)]">{ch.name}</span>
+                          <div className="flex-1 h-1.5 bg-[var(--ink)]/[0.06]">
+                            <div className="h-full bg-[var(--ink)]/20" style={{ width: `${pct}%` }} />
+                          </div>
+                          <span className="w-12 shrink-0 text-right font-mono text-label text-[var(--ink-muted)] tabular-nums">
+                            {ch.messages}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </Section>
+              )}
+
+              {data.applicationsPending !== null && (
+                <Section title="Bekleyen Başvurular" sub="Admin görünümü">
+                  <div className="border border-[var(--ink)]/[0.08] p-5">
+                    <span
+                      className="font-serif text-4xl text-[var(--ink)]"
+                      style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
+                    >
+                      {data.applicationsPending}
+                    </span>
+                    <p className="mt-1 font-mono text-label text-[var(--ink-muted)]">değerlendirme bekliyor</p>
+                  </div>
+                </Section>
+              )}
+            </>
+          )}
+        </>
+      )}
 
       <div className="border-t border-[var(--ink)]/[0.08] pt-4">
         <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)]">

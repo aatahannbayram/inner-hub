@@ -53,12 +53,12 @@ export function LoadingBlock({
   children,
 }: {
   label?: string;
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }) {
   return (
     <div role="status" aria-busy="true">
       <span className="sr-only">{`${label}…`}</span>
-      <div aria-hidden="true">{children}</div>
+      {children && <div aria-hidden="true">{children}</div>}
     </div>
   );
 }
