@@ -17,6 +17,7 @@ import { AnimatedHeading } from "@/components/AnimatedHeading";
 import { cn } from "@/lib/utils";
 import { PersonAvatar } from "@/components/panel/PersonAvatar";
 import { HeroVideo } from "@/components/HeroVideo";
+import { HeroQuickStat } from "@/components/panel/HeroQuickStat";
 import { toLowerTR } from "@/lib/tr";
 import { cleanDisplayText } from "@/lib/displayText";
 import { useApiQuery } from "@/hooks/useApiQuery";
@@ -204,7 +205,13 @@ function scrollToId(id: string) {
   document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
-function MembersHero({ onTalentClick }: { onTalentClick: () => void }) {
+function MembersHero({
+  onTalentClick,
+  memberCount,
+}: {
+  onTalentClick: () => void;
+  memberCount: number;
+}) {
   return (
     <div
       className="relative -mx-4 -mt-6 overflow-hidden sm:-mx-6 lg:-mx-8 lg:-mt-8"
@@ -263,13 +270,11 @@ function MembersHero({ onTalentClick }: { onTalentClick: () => void }) {
           </div>
 
           <div className="mt-8 flex items-end justify-start lg:mt-0 lg:justify-end">
-            <FadeIn delay={1.4}>
-              <div className="liquid-glass border border-white/20 bg-black/40 px-6 py-3">
-                <span className="text-lg font-light text-white md:text-xl">
-                  Kurucular. Mühendisler. Yatırımcılar.
-                </span>
-              </div>
-            </FadeIn>
+            <HeroQuickStat
+              value={memberCount}
+              label="Dairenin içinde"
+              tagline="Kurucular. Mühendisler. Yatırımcılar."
+            />
           </div>
         </div>
       </div>
@@ -580,6 +585,7 @@ export default function Members() {
   return (
     <div className="space-y-8 max-w-5xl">
       <MembersHero
+        memberCount={members.length}
         onTalentClick={() => {
           setTab("talent");
           requestAnimationFrame(() => scrollToId("members-talent"));

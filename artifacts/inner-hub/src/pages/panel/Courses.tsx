@@ -7,6 +7,7 @@ import { HeroVideo } from "@/components/HeroVideo";
 import { useApiQuery } from "@/hooks/useApiQuery";
 import { apiUrl } from "@/lib/api";
 import { StatCardSkeleton, CourseCardSkeleton, LoadingBlock, ErrorState } from "@/components/panel/Skeletons";
+import { HeroQuickStat } from "@/components/panel/HeroQuickStat";
 import { cleanDisplayText } from "@/lib/displayText";
 
 interface Lesson {
@@ -264,7 +265,15 @@ function scrollToId(id: string) {
   document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
-function CoursesHero({ hasEnrolled }: { hasEnrolled: boolean }) {
+function CoursesHero({
+  hasEnrolled,
+  enrolledCount,
+  totalCount,
+}: {
+  hasEnrolled: boolean;
+  enrolledCount: number;
+  totalCount: number;
+}) {
   return (
     <div
       className="relative -mx-4 -mt-6 overflow-hidden sm:-mx-6 lg:-mx-8 lg:-mt-8"
@@ -326,13 +335,11 @@ function CoursesHero({ hasEnrolled }: { hasEnrolled: boolean }) {
           </div>
 
           <div className="mt-8 flex items-end justify-start lg:mt-0 lg:justify-end">
-            <FadeIn delay={1.4}>
-              <div className="liquid-glass border border-white/20 bg-black/40 px-6 py-3">
-                <span className="text-lg font-light text-white md:text-xl">
-                  Kendi Hızında. Kendi Zamanında.
-                </span>
-              </div>
-            </FadeIn>
+            <HeroQuickStat
+              value={totalCount > 0 ? `${enrolledCount}/${totalCount}` : "—"}
+              label="Kayıtlı kurs"
+              tagline="Kendi hızında, kendi zamanında."
+            />
           </div>
         </div>
       </div>
@@ -408,7 +415,11 @@ export default function CoursesPage() {
   return (
     <div className="space-y-8 max-w-4xl">
       {/* Hero */}
-      <CoursesHero hasEnrolled={enrolled.length > 0} />
+      <CoursesHero
+        hasEnrolled={enrolled.length > 0}
+        enrolledCount={enrolled.length}
+        totalCount={courses.length}
+      />
 
       {!loading && !isError && courses.length > 0 && (
         <FadeIn delay={0.02}>

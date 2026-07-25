@@ -8,6 +8,7 @@ import { CourseCardSkeleton, LoadingBlock, ErrorState } from "@/components/panel
 import { apiUrl } from "@/lib/api";
 import { cleanDisplayText } from "@/lib/displayText";
 import { Lockup } from "@/components/Lockup";
+import { HeroQuickStat } from "@/components/panel/HeroQuickStat";
 
 interface Match {
   name: string;
@@ -204,7 +205,7 @@ function scrollToId(id: string) {
   document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
-function MatchHero() {
+function MatchHero({ matchCount }: { matchCount: number }) {
   return (
     <div
       className="relative -mx-4 -mt-6 overflow-hidden sm:-mx-6 lg:-mx-8 lg:-mt-8"
@@ -263,13 +264,11 @@ function MatchHero() {
           </div>
 
           <div className="mt-8 flex items-end justify-start lg:mt-0 lg:justify-end">
-            <FadeIn delay={1.4}>
-              <div className="liquid-glass border border-white/20 bg-black/40 px-6 py-3">
-                <span className="text-lg font-light text-white md:text-xl">
-                  Co-founders. Mentors. Investors.
-                </span>
-              </div>
-            </FadeIn>
+            <HeroQuickStat
+              value={matchCount}
+              label="Eşleşme bulundu"
+              tagline="Co-founders. Mentors. Investors."
+            />
           </div>
         </div>
       </div>
@@ -347,7 +346,7 @@ export default function Match() {
   return (
     <div className="space-y-8 max-w-4xl">
       {/* Hero */}
-      <MatchHero />
+      <MatchHero matchCount={data?.matches?.length ?? 0} />
 
       {/* Utility row */}
       <FadeIn>

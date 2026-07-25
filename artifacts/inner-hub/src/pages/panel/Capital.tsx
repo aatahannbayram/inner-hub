@@ -8,6 +8,7 @@ import { useApiQuery } from "@/hooks/useApiQuery";
 import { apiUrl } from "@/lib/api";
 import { LoadingBlock, ErrorState, StatCardSkeleton } from "@/components/panel/Skeletons";
 import { Lockup } from "@/components/Lockup";
+import { HeroQuickStat } from "@/components/panel/HeroQuickStat";
 import {
   Drawer,
   DrawerContent,
@@ -527,7 +528,7 @@ function scrollToId(id: string) {
   document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
-function CapitalHero() {
+function CapitalHero({ dealCount }: { dealCount: number }) {
   return (
     <div
       className="relative -mx-4 -mt-6 overflow-hidden sm:-mx-6 lg:-mx-8 lg:-mt-8"
@@ -560,26 +561,24 @@ function CapitalHero() {
                   onClick={() => scrollToId("deal-pipeline")}
                   className="bg-white px-8 py-3 font-mono text-xs uppercase tracking-widest text-black transition-colors hover:bg-white/90"
                 >
-                  View Pipeline
+                  <span lang="en">View Pipeline</span>
                 </button>
                 <button
                   onClick={() => scrollToId("open-spvs")}
                   className="liquid-glass border border-white/20 px-8 py-3 font-mono text-xs uppercase tracking-widest text-white transition-colors hover:bg-white hover:text-black"
                 >
-                  View SPVs
+                  <span lang="en">View SPVs</span>
                 </button>
               </div>
             </FadeIn>
           </div>
 
           <div className="mt-8 flex items-end justify-start lg:mt-0 lg:justify-end">
-            <FadeIn delay={1.4}>
-              <div className="liquid-glass border border-white/20 bg-black/40 px-6 py-3">
-                <span className="text-lg font-light text-white md:text-xl">
-                  Deal Flow. SPVs. Co-Investment.
-                </span>
-              </div>
-            </FadeIn>
+            <HeroQuickStat
+              value={dealCount}
+              label="Aktif Deal"
+              tagline="Deal Flow. SPVs. Co-Investment."
+            />
           </div>
         </div>
       </div>
@@ -808,7 +807,7 @@ export default function Capital() {
   return (
     <div className="mx-auto max-w-7xl space-y-8">
       {/* Hero */}
-      <CapitalHero />
+      <CapitalHero dealCount={activeDeals} />
 
       {isLoading && deals.length === 0 && (
         <LoadingBlock label="Deal flow yükleniyor">

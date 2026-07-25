@@ -19,6 +19,7 @@ import { HeroVideo } from "@/components/HeroVideo";
 import { toLowerTR, toUpperTR } from "@/lib/tr";
 import { useApiQuery } from "@/hooks/useApiQuery";
 import { LoadingBlock, ErrorState, CourseCardSkeleton } from "@/components/panel/Skeletons";
+import { HeroQuickStat } from "@/components/panel/HeroQuickStat";
 
 type Category = "Tümü" | "Yazılım" | "Finans" | "Yaşam" | "Eğitim";
 
@@ -278,7 +279,7 @@ function scrollToId(id: string) {
   document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
-function PerksHero() {
+function PerksHero({ totalCount }: { totalCount: number }) {
   return (
     <div
       className="relative -mx-4 -mt-6 overflow-hidden sm:-mx-6 lg:-mx-8 lg:-mt-8"
@@ -335,13 +336,11 @@ function PerksHero() {
           </div>
 
           <div className="mt-8 flex items-end justify-start lg:mt-0 lg:justify-end">
-            <FadeIn delay={1.4}>
-              <div className="liquid-glass border border-white/20 bg-black/40 px-6 py-3">
-                <span className="text-lg font-light text-white md:text-xl">
-                  Yazılım. Finans. Yaşam.
-                </span>
-              </div>
-            </FadeIn>
+            <HeroQuickStat
+              value={totalCount}
+              label="Aktif ayrıcalık"
+              tagline="Yazılım. Finans. Yaşam."
+            />
           </div>
         </div>
       </div>
@@ -432,7 +431,7 @@ export default function Perks() {
   return (
     <div className="mx-auto max-w-5xl space-y-8">
       {/* Hero */}
-      <PerksHero />
+      <PerksHero totalCount={perks.length} />
 
       {isLoading ? (
         <LoadingBlock label="Ayrıcalıklar yükleniyor">

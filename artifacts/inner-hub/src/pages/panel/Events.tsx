@@ -7,6 +7,7 @@ import { useApiQuery } from "@/hooks/useApiQuery";
 import { apiUrl } from "@/lib/api";
 import { StatCardSkeleton, LoadingBlock, ErrorState } from "@/components/panel/Skeletons";
 import { HeroVideo } from "@/components/HeroVideo";
+import { HeroQuickStat } from "@/components/panel/HeroQuickStat";
 
 type ViewMode = "liste" | "takvim";
 
@@ -345,7 +346,7 @@ function scrollToId(id: string) {
   document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
-function EventsHero() {
+function EventsHero({ upcomingCount }: { upcomingCount: number }) {
   return (
     <div
       className="relative -mx-4 -mt-6 overflow-hidden sm:-mx-6 lg:-mx-8 lg:-mt-8"
@@ -401,13 +402,11 @@ function EventsHero() {
           </div>
 
           <div className="mt-8 flex items-end justify-start lg:mt-0 lg:justify-end">
-            <FadeIn delay={1.4}>
-              <div className="liquid-glass border border-white/20 bg-black/40 px-6 py-3">
-                <span className="text-lg font-light text-white md:text-xl">
-                  Buluşmalar. Workshoplar. Networking.
-                </span>
-              </div>
-            </FadeIn>
+            <HeroQuickStat
+              value={upcomingCount}
+              label="Yaklaşan etkinlik"
+              tagline="Buluşmalar. Workshoplar. Networking."
+            />
           </div>
         </div>
       </div>
@@ -503,7 +502,7 @@ export default function Events() {
   return (
     <div className="space-y-8 max-w-5xl">
       {/* Hero */}
-      <EventsHero />
+      <EventsHero upcomingCount={upcoming.length} />
 
       {!loading && !isError && events.length > 0 && (
         <FadeIn delay={0.02}>
