@@ -1,7 +1,15 @@
 import { Router } from "express";
-import { asc, desc, eq } from "drizzle-orm";
+import { and, asc, count, desc, eq, inArray } from "drizzle-orm";
 import { db } from "@workspace/db";
-import { coursesTable, eventsTable } from "@workspace/db/schema";
+import {
+  coursesTable,
+  enrollmentsTable,
+  eventRegistrationsTable,
+  eventsTable,
+  lessonsTable,
+  modulesTable,
+  progressTable,
+} from "@workspace/db/schema";
 import { requireAuth } from "../lib/auth";
 
 const router = Router();
@@ -63,15 +71,61 @@ async function ensureDemoContent() {
   }
 }
 
-// ─── GET /api/catalog/events ─────────────────────────────────────────────────
-router.get("/events", requireAuth, async (_req, res) => {
+async function progressPctForUser(userId: number, courseId: number): Promise<number> {
+  const modules = await db
+    .select({ id: modulesTable.id })
+    .from(modulesTable)
+    .where(eq(modulesTable.courseId, courseId));
+  if (modules.length === 0) return 0;
+
+  const moduleIds = modules.map((m) => m.id);
+  const lessons = await db
+    .select({ id: lessonsTable.id })
+    .from(lessonsTable)
+    .where(inArray(lessonsTable.moduleId, moduleIds));
+  if (lessons.length === 0) return 0;
+
+  const lessonIds = lessons.map((l) => l.id);
+  const [done] = await db
+    .select({ n: count() })
+    .from(progressTable)
+    .where(
+      and(
+        eq(progressTable.userId, userId),
+        eq(progressTable.completed, true),
+        inArray(progressTable.lessonId, lessonIds),
+      ),
+    );
+
+  return Math.round(((done?.n ?? 0) / lessons.length) * 100);
+}
+
+// ─── GET /api/events ─────────────────────────────────────────────────────────
+router.get("/events", requireAuth, async (req, res) => {
   try {
     await ensureDemoContent();
+    const userId = req.user!.id;
+
     const rows = await db
       .select()
       .from(eventsTable)
       .where(eq(eventsTable.isPublished, true))
       .orderBy(asc(eventsTable.startAt));
+
+    const regs = await db
+      .select()
+      .from(eventRegistrationsTable)
+      .where(eq(eventRegistrationsTable.userId, userId));
+    const mySet = new Set(regs.map((r) => r.eventId));
+
+    const counts = await db
+      .select({
+        eventId: eventRegistrationsTable.eventId,
+        n: count(),
+      })
+      .from(eventRegistrationsTable)
+      .groupBy(eventRegistrationsTable.eventId);
+    const countMap = new Map(counts.map((c) => [c.eventId, Number(c.n)]));
 
     const now = Date.now();
     res.json({
@@ -84,6 +138,9 @@ router.get("/events", requireAuth, async (_req, res) => {
         endAt: e.endAt?.toISOString() ?? e.startAt.toISOString(),
         isPast: e.startAt.getTime() < now,
         isPublished: e.isPublished,
+        capacity: 0,
+        registered: countMap.get(e.id) ?? 0,
+        isRegistered: mySet.has(e.id),
       })),
     });
   } catch (err: any) {
@@ -91,29 +148,149 @@ router.get("/events", requireAuth, async (_req, res) => {
   }
 });
 
-// ─── GET /api/catalog/courses ────────────────────────────────────────────────
-router.get("/courses", requireAuth, async (_req, res) => {
+// ─── POST /api/events/:id/register ───────────────────────────────────────────
+router.post("/events/:id/register", requireAuth, async (req, res) => {
+  try {
+    const eventId = Number(req.params.id);
+    const userId = req.user!.id;
+    if (!Number.isFinite(eventId)) {
+      res.status(400).json({ error: "Geçersiz etkinlik" });
+      return;
+    }
+
+    const [event] = await db
+      .select()
+      .from(eventsTable)
+      .where(and(eq(eventsTable.id, eventId), eq(eventsTable.isPublished, true)))
+      .limit(1);
+    if (!event) {
+      res.status(404).json({ error: "Etkinlik bulunamadı" });
+      return;
+    }
+    if (event.startAt.getTime() < Date.now()) {
+      res.status(400).json({ error: "Geçmiş etkinliğe kayıt olunamaz" });
+      return;
+    }
+
+    const [existing] = await db
+      .select()
+      .from(eventRegistrationsTable)
+      .where(
+        and(
+          eq(eventRegistrationsTable.userId, userId),
+          eq(eventRegistrationsTable.eventId, eventId),
+        ),
+      )
+      .limit(1);
+
+    if (!existing) {
+      await db.insert(eventRegistrationsTable).values({ userId, eventId });
+    }
+
+    res.json({ eventId, isRegistered: true });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message ?? "Kayıt başarısız" });
+  }
+});
+
+// ─── DELETE /api/events/:id/register ─────────────────────────────────────────
+router.delete("/events/:id/register", requireAuth, async (req, res) => {
+  try {
+    const eventId = Number(req.params.id);
+    const userId = req.user!.id;
+    if (!Number.isFinite(eventId)) {
+      res.status(400).json({ error: "Geçersiz etkinlik" });
+      return;
+    }
+
+    await db
+      .delete(eventRegistrationsTable)
+      .where(
+        and(
+          eq(eventRegistrationsTable.userId, userId),
+          eq(eventRegistrationsTable.eventId, eventId),
+        ),
+      );
+
+    res.json({ eventId, isRegistered: false });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message ?? "İptal başarısız" });
+  }
+});
+
+// ─── GET /api/courses ────────────────────────────────────────────────────────
+router.get("/courses", requireAuth, async (req, res) => {
   try {
     await ensureDemoContent();
+    const userId = req.user!.id;
+
     const rows = await db
       .select()
       .from(coursesTable)
       .where(eq(coursesTable.isPublished, true))
       .orderBy(asc(coursesTable.order), desc(coursesTable.createdAt));
 
-    res.json({
-      courses: rows.map((c) => ({
+    const enrollments = await db
+      .select()
+      .from(enrollmentsTable)
+      .where(eq(enrollmentsTable.userId, userId));
+    const enrolledIds = new Set(enrollments.map((e) => e.courseId));
+
+    const courses = await Promise.all(
+      rows.map(async (c) => ({
         id: c.id,
         title: c.title,
         description: c.description ?? "",
         term: c.term,
         order: c.order,
-        progressPct: 0,
-        isEnrolled: false,
+        isEnrolled: enrolledIds.has(c.id),
+        progressPct: enrolledIds.has(c.id) ? await progressPctForUser(userId, c.id) : 0,
       })),
-    });
+    );
+
+    res.json({ courses });
   } catch (err: any) {
     res.status(500).json({ error: err.message ?? "Kurslar yüklenemedi" });
+  }
+});
+
+// ─── POST /api/courses/:id/enroll ────────────────────────────────────────────
+router.post("/courses/:id/enroll", requireAuth, async (req, res) => {
+  try {
+    const courseId = Number(req.params.id);
+    const userId = req.user!.id;
+    if (!Number.isFinite(courseId)) {
+      res.status(400).json({ error: "Geçersiz kurs" });
+      return;
+    }
+
+    const [course] = await db
+      .select()
+      .from(coursesTable)
+      .where(and(eq(coursesTable.id, courseId), eq(coursesTable.isPublished, true)))
+      .limit(1);
+    if (!course) {
+      res.status(404).json({ error: "Kurs bulunamadı" });
+      return;
+    }
+
+    const [existing] = await db
+      .select()
+      .from(enrollmentsTable)
+      .where(and(eq(enrollmentsTable.userId, userId), eq(enrollmentsTable.courseId, courseId)))
+      .limit(1);
+
+    if (!existing) {
+      await db.insert(enrollmentsTable).values({ userId, courseId });
+    }
+
+    res.json({
+      courseId,
+      isEnrolled: true,
+      progressPct: await progressPctForUser(userId, courseId),
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message ?? "Kayıt başarısız" });
   }
 });
 

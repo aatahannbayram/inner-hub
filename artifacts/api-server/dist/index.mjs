@@ -764,8 +764,8 @@ var require_depd = __commonJS({
       return deprecate;
     }
     function eehaslisteners(emitter, type2) {
-      var count = typeof emitter.listenerCount !== "function" ? emitter.listeners(type2).length : emitter.listenerCount(type2);
-      return count > 0;
+      var count2 = typeof emitter.listenerCount !== "function" ? emitter.listeners(type2).length : emitter.listenerCount(type2);
+      return count2 > 0;
     }
     function isignored(namespace) {
       if (process.noDeprecation) {
@@ -18399,14 +18399,14 @@ var require_urlencoded = __commonJS({
       };
     }
     function parameterCount(body, limit2) {
-      let count = 0;
+      let count2 = 0;
       let index = -1;
       do {
-        count++;
-        if (count > limit2) return void 0;
+        count2++;
+        if (count2 > limit2) return void 0;
         index = body.indexOf("&", index + 1);
       } while (index !== -1);
-      return count;
+      return count2;
     }
   }
 });
@@ -21707,13 +21707,13 @@ var require_mediaType = __commonJS({
       return spec.q > 0;
     }
     function quoteCount(string4) {
-      var count = 0;
+      var count2 = 0;
       var index = 0;
       while ((index = string4.indexOf('"', index)) !== -1) {
-        count++;
+        count2++;
         index++;
       }
-      return count;
+      return count2;
     }
     function splitKeyValuePair(str) {
       var index = str.indexOf("=");
@@ -23018,8 +23018,8 @@ var require_send = __commonJS({
       }
     }
     function hasListeners(emitter, type2) {
-      var count = typeof emitter.listenerCount !== "function" ? emitter.listeners(type2).length : emitter.listenerCount(type2);
-      return count > 0;
+      var count2 = typeof emitter.listenerCount !== "function" ? emitter.listeners(type2).length : emitter.listenerCount(type2);
+      return count2 > 0;
     }
     function normalizeList(val, name) {
       var list = [].concat(val || []);
@@ -29498,11 +29498,11 @@ var require_binaryParsers = __commonJS({
         var array2 = [];
         var i2;
         if (dimension.length > 1) {
-          var count = dimension.shift();
-          for (i2 = 0; i2 < count; i2++) {
+          var count2 = dimension.shift();
+          for (i2 = 0; i2 < count2; i2++) {
             array2[i2] = parse5(dimension, elementType2);
           }
-          dimension.unshift(count);
+          dimension.unshift(count2);
         } else {
           for (i2 = 0; i2 < dimension[0]; i2++) {
             array2[i2] = parseElement(elementType2);
@@ -51349,15 +51349,15 @@ function betaEditTool(ctx) {
           throw e;
         throw new ToolError(`edit: ${fsErrorMessage(e, file_path)}`);
       }
-      const count = data.split(old_string).length - 1;
-      if (count === 0)
+      const count2 = data.split(old_string).length - 1;
+      if (count2 === 0)
         throw new ToolError(`edit: old_string not found in ${file_path}`);
       let updated;
       if (replace_all) {
         updated = data.split(old_string).join(new_string);
       } else {
-        if (count > 1)
-          throw new ToolError(`edit: old_string appears ${count} times in ${file_path} (must be unique)`);
+        if (count2 > 1)
+          throw new ToolError(`edit: old_string appears ${count2} times in ${file_path} (must be unique)`);
         updated = data.replace(old_string, () => new_string);
       }
       try {
@@ -51365,7 +51365,7 @@ function betaEditTool(ctx) {
       } catch (e) {
         throw new ToolError(`edit: write: ${fsErrorMessage(e, file_path)}`);
       }
-      return `edited ${file_path} (${replace_all ? count : 1} replacement(s))`;
+      return `edited ${file_path} (${replace_all ? count2 : 1} replacement(s))`;
     }
   });
 }
@@ -66654,8 +66654,8 @@ var require_crypto = __commonJS({
         const outputBuffer = await window.crypto.subtle.digest("SHA-256", inputBuffer);
         return base64js.fromByteArray(new Uint8Array(outputBuffer));
       }
-      randomBytesBase64(count) {
-        const array2 = new Uint8Array(count);
+      randomBytesBase64(count2) {
+        const array2 = new Uint8Array(count2);
         window.crypto.getRandomValues(array2);
         return base64js.fromByteArray(array2);
       }
@@ -66742,8 +66742,8 @@ var require_crypto2 = __commonJS({
       async sha256DigestBase64(str) {
         return crypto10.createHash("sha256").update(str).digest("base64");
       }
-      randomBytesBase64(count) {
-        return crypto10.randomBytes(count).toString("base64");
+      randomBytesBase64(count2) {
+        return crypto10.randomBytes(count2).toString("base64");
       }
       async verify(pubkey, data, signature) {
         const verifier = crypto10.createVerify("RSA-SHA256");
@@ -80159,6 +80159,11 @@ function mapRelationalRow(tablesConfig, tableConfig, row, buildQueryResultSelect
   return result;
 }
 
+// ../../node_modules/.pnpm/drizzle-orm@0.45.2_@types+pg@8.20.0_pg@8.22.0/node_modules/drizzle-orm/sql/functions/aggregate.js
+function count(expression) {
+  return sql`count(${expression || sql.raw("*")})`.mapWith(Number);
+}
+
 // ../../node_modules/.pnpm/drizzle-orm@0.45.2_@types+pg@8.20.0_pg@8.22.0/node_modules/drizzle-orm/pg-core/view-base.js
 var PgViewBase = class extends View {
   static [entityKind] = "PgViewBase";
@@ -87568,8 +87573,8 @@ function az_default() {
 }
 
 // ../../node_modules/.pnpm/zod@3.25.76/node_modules/zod/v4/locales/be.js
-function getBelarusianPlural(count, one, few, many) {
-  const absCount = Math.abs(count);
+function getBelarusianPlural(count2, one, few, many) {
+  const absCount = Math.abs(count2);
   const lastDigit = absCount % 10;
   const lastTwoDigits = absCount % 100;
   if (lastTwoDigits >= 11 && lastTwoDigits <= 19) {
@@ -90714,8 +90719,8 @@ function pt_default() {
 }
 
 // ../../node_modules/.pnpm/zod@3.25.76/node_modules/zod/v4/locales/ru.js
-function getRussianPlural(count, one, few, many) {
-  const absCount = Math.abs(count);
+function getRussianPlural(count2, one, few, many) {
+  const absCount = Math.abs(count2);
   const lastDigit = absCount % 10;
   const lastTwoDigits = absCount % 100;
   if (lastTwoDigits >= 11 && lastTwoDigits <= 19) {
@@ -113629,10 +113634,34 @@ async function ensureDemoContent() {
     ]);
   }
 }
-router6.get("/events", requireAuth, async (_req, res) => {
+async function progressPctForUser(userId, courseId) {
+  const modules = await db.select({ id: modulesTable.id }).from(modulesTable).where(eq(modulesTable.courseId, courseId));
+  if (modules.length === 0) return 0;
+  const moduleIds = modules.map((m) => m.id);
+  const lessons = await db.select({ id: lessonsTable.id }).from(lessonsTable).where(inArray(lessonsTable.moduleId, moduleIds));
+  if (lessons.length === 0) return 0;
+  const lessonIds = lessons.map((l) => l.id);
+  const [done] = await db.select({ n: count() }).from(progressTable).where(
+    and(
+      eq(progressTable.userId, userId),
+      eq(progressTable.completed, true),
+      inArray(progressTable.lessonId, lessonIds)
+    )
+  );
+  return Math.round((done?.n ?? 0) / lessons.length * 100);
+}
+router6.get("/events", requireAuth, async (req, res) => {
   try {
     await ensureDemoContent();
+    const userId = req.user.id;
     const rows = await db.select().from(eventsTable).where(eq(eventsTable.isPublished, true)).orderBy(asc(eventsTable.startAt));
+    const regs = await db.select().from(eventRegistrationsTable).where(eq(eventRegistrationsTable.userId, userId));
+    const mySet = new Set(regs.map((r) => r.eventId));
+    const counts = await db.select({
+      eventId: eventRegistrationsTable.eventId,
+      n: count()
+    }).from(eventRegistrationsTable).groupBy(eventRegistrationsTable.eventId);
+    const countMap = new Map(counts.map((c) => [c.eventId, Number(c.n)]));
     const now = Date.now();
     res.json({
       events: rows.map((e) => ({
@@ -113643,30 +113672,113 @@ router6.get("/events", requireAuth, async (_req, res) => {
         startAt: e.startAt.toISOString(),
         endAt: e.endAt?.toISOString() ?? e.startAt.toISOString(),
         isPast: e.startAt.getTime() < now,
-        isPublished: e.isPublished
+        isPublished: e.isPublished,
+        capacity: 0,
+        registered: countMap.get(e.id) ?? 0,
+        isRegistered: mySet.has(e.id)
       }))
     });
   } catch (err) {
     res.status(500).json({ error: err.message ?? "Etkinlikler y\xFCklenemedi" });
   }
 });
-router6.get("/courses", requireAuth, async (_req, res) => {
+router6.post("/events/:id/register", requireAuth, async (req, res) => {
+  try {
+    const eventId = Number(req.params.id);
+    const userId = req.user.id;
+    if (!Number.isFinite(eventId)) {
+      res.status(400).json({ error: "Ge\xE7ersiz etkinlik" });
+      return;
+    }
+    const [event] = await db.select().from(eventsTable).where(and(eq(eventsTable.id, eventId), eq(eventsTable.isPublished, true))).limit(1);
+    if (!event) {
+      res.status(404).json({ error: "Etkinlik bulunamad\u0131" });
+      return;
+    }
+    if (event.startAt.getTime() < Date.now()) {
+      res.status(400).json({ error: "Ge\xE7mi\u015F etkinli\u011Fe kay\u0131t olunamaz" });
+      return;
+    }
+    const [existing] = await db.select().from(eventRegistrationsTable).where(
+      and(
+        eq(eventRegistrationsTable.userId, userId),
+        eq(eventRegistrationsTable.eventId, eventId)
+      )
+    ).limit(1);
+    if (!existing) {
+      await db.insert(eventRegistrationsTable).values({ userId, eventId });
+    }
+    res.json({ eventId, isRegistered: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message ?? "Kay\u0131t ba\u015Far\u0131s\u0131z" });
+  }
+});
+router6.delete("/events/:id/register", requireAuth, async (req, res) => {
+  try {
+    const eventId = Number(req.params.id);
+    const userId = req.user.id;
+    if (!Number.isFinite(eventId)) {
+      res.status(400).json({ error: "Ge\xE7ersiz etkinlik" });
+      return;
+    }
+    await db.delete(eventRegistrationsTable).where(
+      and(
+        eq(eventRegistrationsTable.userId, userId),
+        eq(eventRegistrationsTable.eventId, eventId)
+      )
+    );
+    res.json({ eventId, isRegistered: false });
+  } catch (err) {
+    res.status(500).json({ error: err.message ?? "\u0130ptal ba\u015Far\u0131s\u0131z" });
+  }
+});
+router6.get("/courses", requireAuth, async (req, res) => {
   try {
     await ensureDemoContent();
+    const userId = req.user.id;
     const rows = await db.select().from(coursesTable).where(eq(coursesTable.isPublished, true)).orderBy(asc(coursesTable.order), desc(coursesTable.createdAt));
-    res.json({
-      courses: rows.map((c) => ({
+    const enrollments = await db.select().from(enrollmentsTable).where(eq(enrollmentsTable.userId, userId));
+    const enrolledIds = new Set(enrollments.map((e) => e.courseId));
+    const courses = await Promise.all(
+      rows.map(async (c) => ({
         id: c.id,
         title: c.title,
         description: c.description ?? "",
         term: c.term,
         order: c.order,
-        progressPct: 0,
-        isEnrolled: false
+        isEnrolled: enrolledIds.has(c.id),
+        progressPct: enrolledIds.has(c.id) ? await progressPctForUser(userId, c.id) : 0
       }))
-    });
+    );
+    res.json({ courses });
   } catch (err) {
     res.status(500).json({ error: err.message ?? "Kurslar y\xFCklenemedi" });
+  }
+});
+router6.post("/courses/:id/enroll", requireAuth, async (req, res) => {
+  try {
+    const courseId = Number(req.params.id);
+    const userId = req.user.id;
+    if (!Number.isFinite(courseId)) {
+      res.status(400).json({ error: "Ge\xE7ersiz kurs" });
+      return;
+    }
+    const [course] = await db.select().from(coursesTable).where(and(eq(coursesTable.id, courseId), eq(coursesTable.isPublished, true))).limit(1);
+    if (!course) {
+      res.status(404).json({ error: "Kurs bulunamad\u0131" });
+      return;
+    }
+    const [existing] = await db.select().from(enrollmentsTable).where(and(eq(enrollmentsTable.userId, userId), eq(enrollmentsTable.courseId, courseId))).limit(1);
+    if (!existing) {
+      await db.insert(enrollmentsTable).values({ userId, courseId });
+    }
+    res.json({
+      courseId,
+      isEnrolled: true,
+      progressPct: await progressPctForUser(userId, courseId)
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message ?? "Kay\u0131t ba\u015Far\u0131s\u0131z" });
   }
 });
 var catalog_default = router6;

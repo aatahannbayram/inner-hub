@@ -1,8 +1,10 @@
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { MapPin, Clock, Users, ChevronRight, CheckCircle2, CalendarDays, Sparkles } from "lucide-react";
 import { FadeIn } from "@/components/FadeIn";
 import { AnimatedHeading } from "@/components/AnimatedHeading";
 import { useApiQuery } from "@/hooks/useApiQuery";
+import { apiUrl } from "@/lib/api";
 import { StatCardSkeleton, LoadingBlock, ErrorState } from "@/components/panel/Skeletons";
 import { HeroVideo } from "@/components/HeroVideo";
 
@@ -37,6 +39,9 @@ interface RawEvent {
   startAt: string;
   endAt: string;
   isPast?: boolean;
+  capacity?: number;
+  registered?: number;
+  isRegistered?: boolean;
 }
 
 function mapApiEvent(row: RawEvent): Event {
@@ -49,9 +54,9 @@ function mapApiEvent(row: RawEvent): Event {
     endAt: row.endAt,
     location,
     type: inferType(row.title, location),
-    capacity: 0,
-    registered: 0,
-    isRegistered: false,
+    capacity: row.capacity ?? 0,
+    registered: row.registered ?? 0,
+    isRegistered: row.isRegistered ?? false,
     isPast: row.isPast ?? new Date(row.startAt).getTime() < Date.now(),
   };
 }
@@ -87,9 +92,19 @@ function spotsLeft(event: Event) {
   return event.capacity - event.registered;
 }
 
-function EventCard({ event }: { event: Event }) {
+function EventCard({
+  event,
+  busy,
+  onRegister,
+  onUnregister,
+}: {
+  event: Event;
+  busy?: boolean;
+  onRegister?: (id: number) => void;
+  onUnregister?: (id: number) => void;
+}) {
   const spots = spotsLeft(event);
-  const isFull = spots <= 0;
+  const isFull = event.capacity > 0 && spots <= 0;
 
   return (
     <div
@@ -168,11 +183,21 @@ function EventCard({ event }: { event: Event }) {
                 Kontenjan dolu
               </span>
             ) : event.isRegistered ? (
-              <button className="flex items-center gap-1.5 font-mono text-label uppercase tracking-widest text-[var(--ink-body)] hover:text-[var(--error-ink)] transition-colors">
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => onUnregister?.(event.id)}
+                className="flex items-center gap-1.5 font-mono text-label uppercase tracking-widest text-[var(--ink-body)] transition-colors hover:text-[var(--error-ink)] disabled:opacity-40"
+              >
                 Kaydı İptal Et
               </button>
             ) : (
-              <button className="flex items-center gap-1.5 border border-[var(--ink)] bg-[var(--ink)] px-4 py-2 font-mono text-label uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-80">
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => onRegister?.(event.id)}
+                className="flex items-center gap-1.5 border border-[var(--ink)] bg-[var(--ink)] px-4 py-2 font-mono text-label uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-80 disabled:opacity-40"
+              >
                 Kayıt Ol
                 <ChevronRight className="size-3" />
               </button>
@@ -387,6 +412,9 @@ function EventsStat({
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function Events() {
   const [view, setView] = useState<ViewMode>("liste");
+  const [busyId, setBusyId] = useState<number | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
   const { data, isLoading: loading, isError, error, refetch } = useApiQuery<{ events: RawEvent[] }>(
     ["events"],
     "/api/events",
@@ -401,6 +429,42 @@ export default function Events() {
     return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
   }).length;
   const registeredCount = events.filter((e) => e.isRegistered).length;
+
+  const register = async (id: number) => {
+    setBusyId(id);
+    setActionError(null);
+    try {
+      const res = await fetch(apiUrl(`/api/events/${id}/register`), {
+        method: "POST",
+        credentials: "include",
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json.error ?? "Kayıt başarısız");
+      await queryClient.invalidateQueries({ queryKey: ["events"] });
+    } catch (e: any) {
+      setActionError(e.message ?? "Kayıt başarısız");
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const unregister = async (id: number) => {
+    setBusyId(id);
+    setActionError(null);
+    try {
+      const res = await fetch(apiUrl(`/api/events/${id}/register`), {
+        method: "DELETE",
+        credentials: "include",
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json.error ?? "İptal başarısız");
+      await queryClient.invalidateQueries({ queryKey: ["events"] });
+    } catch (e: any) {
+      setActionError(e.message ?? "İptal başarısız");
+    } finally {
+      setBusyId(null);
+    }
+  };
 
   return (
     <div className="space-y-8 max-w-5xl">
@@ -464,6 +528,12 @@ export default function Events() {
         </p>
       )}
 
+      {actionError && (
+        <p className="font-mono text-label text-[var(--error-ink)]" role="alert">
+          {actionError}
+        </p>
+      )}
+
       {!loading && !isError && events.length > 0 && view === "liste" ? (
         <>
           {/* Upcoming */}
@@ -483,7 +553,15 @@ export default function Events() {
                     Yaklaşan etkinlik yok.
                   </p>
                 ) : (
-                  upcoming.map((e) => <EventCard key={e.id} event={e} />)
+                  upcoming.map((e) => (
+                    <EventCard
+                      key={e.id}
+                      event={e}
+                      busy={busyId === e.id}
+                      onRegister={register}
+                      onUnregister={unregister}
+                    />
+                  ))
                 )}
               </div>
             </section>

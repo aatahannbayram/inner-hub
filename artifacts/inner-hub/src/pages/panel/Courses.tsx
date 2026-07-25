@@ -1,9 +1,11 @@
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { ChevronDown, ChevronRight, BookOpen, CheckCircle2, Lock, Play, GraduationCap, TrendingUp } from "lucide-react";
 import { FadeIn } from "@/components/FadeIn";
 import { AnimatedHeading } from "@/components/AnimatedHeading";
 import { HeroVideo } from "@/components/HeroVideo";
 import { useApiQuery } from "@/hooks/useApiQuery";
+import { apiUrl } from "@/lib/api";
 import { StatCardSkeleton, CourseCardSkeleton, LoadingBlock, ErrorState } from "@/components/panel/Skeletons";
 
 interface Lesson {
@@ -113,7 +115,15 @@ function ModuleAccordion({ module, defaultOpen = false }: { module: Module; defa
   );
 }
 
-function CourseCard({ course }: { course: Course }) {
+function CourseCard({
+  course,
+  busy,
+  onEnroll,
+}: {
+  course: Course;
+  busy?: boolean;
+  onEnroll?: (id: number) => void;
+}) {
   const [expanded, setExpanded] = useState(false);
 
   return (
@@ -196,7 +206,12 @@ function CourseCard({ course }: { course: Course }) {
               <ChevronRight className="size-3" />
             </button>
           ) : (
-            <button className="flex items-center gap-2 border border-[var(--ink)] bg-[var(--ink)] px-4 py-2 font-mono text-label uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-80">
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => onEnroll?.(course.id)}
+              className="flex items-center gap-2 border border-[var(--ink)] bg-[var(--ink)] px-4 py-2 font-mono text-label uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-80 disabled:opacity-40"
+            >
               Kayıt Ol
               <ChevronRight className="size-3" />
             </button>
@@ -345,6 +360,9 @@ function CoursesStat({
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function CoursesPage() {
+  const queryClient = useQueryClient();
+  const [busyId, setBusyId] = useState<number | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
   const { data, isLoading, isError, error, refetch } = useApiQuery<{ courses: RawCourse[] }>(
     ["courses"],
     "/api/courses",
@@ -358,6 +376,24 @@ export default function CoursesPage() {
     enrolled.length > 0
       ? Math.round(enrolled.reduce((sum, c) => sum + c.progressPct, 0) / enrolled.length)
       : null;
+
+  const enroll = async (id: number) => {
+    setBusyId(id);
+    setActionError(null);
+    try {
+      const res = await fetch(apiUrl(`/api/courses/${id}/enroll`), {
+        method: "POST",
+        credentials: "include",
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json.error ?? "Kayıt başarısız");
+      await queryClient.invalidateQueries({ queryKey: ["courses"] });
+    } catch (e: any) {
+      setActionError(e.message ?? "Kayıt başarısız");
+    } finally {
+      setBusyId(null);
+    }
+  };
 
   return (
     <div className="space-y-8 max-w-4xl">
@@ -393,6 +429,11 @@ export default function CoursesPage() {
           message={error instanceof Error ? error.message : "Kurslar yüklenemedi"}
           onRetry={() => refetch()}
         />
+      )}
+      {actionError && (
+        <p className="font-mono text-label text-[var(--error-ink)]" role="alert">
+          {actionError}
+        </p>
       )}
       {!loading && !isError && courses.length === 0 && (
         <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
@@ -430,7 +471,12 @@ export default function CoursesPage() {
             </div>
             <div className="space-y-3 opacity-80">
               {available.map((course) => (
-                <CourseCard key={course.id} course={course} />
+                <CourseCard
+                  key={course.id}
+                  course={course}
+                  busy={busyId === course.id}
+                  onEnroll={enroll}
+                />
               ))}
             </div>
           </section>
