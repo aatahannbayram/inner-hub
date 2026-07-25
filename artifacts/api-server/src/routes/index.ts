@@ -14,6 +14,7 @@ import vaultRouter from "./vault";
 import capitalRouter from "./capital";
 import pulseRouter from "./pulse";
 import publicIdRouter from "./publicId";
+import analyticsRouter from "./analytics";
 import talentRouter from "./talent";
 
 const router: IRouter = Router();
@@ -33,6 +34,7 @@ router.use(vaultRouter);
 router.use(capitalRouter);
 router.use(pulseRouter);
 router.use(publicIdRouter);
+router.use(analyticsRouter);
 router.use(talentRouter);
 
 export default router;

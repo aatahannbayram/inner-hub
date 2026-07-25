@@ -228,6 +228,19 @@ export const capitalSpvsTable = pgTable("capital_spvs", {
 export type CapitalDeal = typeof capitalDealsTable.$inferSelect;
 export type CapitalSpv = typeof capitalSpvsTable.$inferSelect;
 
+// ─── TALENT BOARD ─────────────────────────────────────────────────────────────
+export const talentPostsTable = pgTable("talent_posts", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => usersTable.id).notNull(),
+  postType: text("post_type").notNull(), // arıyor | sunuyor
+  role: text("role").notNull(),
+  description: text("description").notNull(),
+  tags: text("tags"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export type TalentPost = typeof talentPostsTable.$inferSelect;
+
 // ─── SESSIONS (auth) ──────────────────────────────────────────────────────────
 export const sessionsTable = pgTable("sessions", {
   id: text("id").primaryKey(),

@@ -84,3 +84,18 @@ export async function ensureVaultCapitalSchema() {
     )
   `);
 }
+
+/** Talent board ilanları. */
+export async function ensureTalentSchema() {
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS talent_posts (
+      id serial PRIMARY KEY,
+      user_id integer NOT NULL REFERENCES users(id),
+      post_type text NOT NULL,
+      role text NOT NULL,
+      description text NOT NULL,
+      tags text,
+      created_at timestamp NOT NULL DEFAULT now()
+    )
+  `);
+}

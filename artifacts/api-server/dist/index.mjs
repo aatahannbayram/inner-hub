@@ -20655,27 +20655,27 @@ var require_router = __commonJS({
     var slice = Array.prototype.slice;
     var flatten = Array.prototype.flat;
     var methods = METHODS.map((method) => method.toLowerCase());
-    module.exports = Router18;
+    module.exports = Router19;
     module.exports.Route = Route;
-    function Router18(options) {
-      if (!(this instanceof Router18)) {
-        return new Router18(options);
+    function Router19(options) {
+      if (!(this instanceof Router19)) {
+        return new Router19(options);
       }
       const opts = options || {};
-      function router18(req, res, next) {
-        router18.handle(req, res, next);
+      function router19(req, res, next) {
+        router19.handle(req, res, next);
       }
-      Object.setPrototypeOf(router18, this);
-      router18.caseSensitive = opts.caseSensitive;
-      router18.mergeParams = opts.mergeParams;
-      router18.params = {};
-      router18.strict = opts.strict;
-      router18.stack = [];
-      return router18;
+      Object.setPrototypeOf(router19, this);
+      router19.caseSensitive = opts.caseSensitive;
+      router19.mergeParams = opts.mergeParams;
+      router19.params = {};
+      router19.strict = opts.strict;
+      router19.stack = [];
+      return router19;
     }
-    Router18.prototype = function() {
+    Router19.prototype = function() {
     };
-    Router18.prototype.param = function param(name, fn) {
+    Router19.prototype.param = function param(name, fn) {
       if (!name) {
         throw new TypeError("argument name is required");
       }
@@ -20695,7 +20695,7 @@ var require_router = __commonJS({
       params.push(fn);
       return this;
     };
-    Router18.prototype.handle = function handle(req, res, callback) {
+    Router19.prototype.handle = function handle(req, res, callback) {
       if (!callback) {
         throw new TypeError("argument callback is required");
       }
@@ -20822,7 +20822,7 @@ var require_router = __commonJS({
         }
       }
     };
-    Router18.prototype.use = function use(handler) {
+    Router19.prototype.use = function use(handler) {
       let offset = 0;
       let path7 = "/";
       if (typeof handler !== "function") {
@@ -20855,7 +20855,7 @@ var require_router = __commonJS({
       }
       return this;
     };
-    Router18.prototype.route = function route(path7) {
+    Router19.prototype.route = function route(path7) {
       const route2 = new Route(path7);
       const layer = new Layer(path7, {
         sensitive: this.caseSensitive,
@@ -20870,7 +20870,7 @@ var require_router = __commonJS({
       return route2;
     };
     methods.concat("all").forEach(function(method) {
-      Router18.prototype[method] = function(path7) {
+      Router19.prototype[method] = function(path7) {
         const route = this.route(path7);
         route[method].apply(route, slice.call(arguments, 1));
         return this;
@@ -21053,13 +21053,13 @@ var require_application = __commonJS({
     var compileTrust = require_utils3().compileTrust;
     var resolve4 = __require("node:path").resolve;
     var once = require_once();
-    var Router18 = require_router();
+    var Router19 = require_router();
     var slice = Array.prototype.slice;
     var flatten = Array.prototype.flat;
     var app2 = exports = module.exports = {};
     var trustProxyDefaultSymbol = "@@symbol:trust_proxy_default";
     app2.init = function init() {
-      var router18 = null;
+      var router19 = null;
       this.cache = /* @__PURE__ */ Object.create(null);
       this.engines = /* @__PURE__ */ Object.create(null);
       this.settings = /* @__PURE__ */ Object.create(null);
@@ -21068,13 +21068,13 @@ var require_application = __commonJS({
         configurable: true,
         enumerable: true,
         get: function getrouter() {
-          if (router18 === null) {
-            router18 = new Router18({
+          if (router19 === null) {
+            router19 = new Router19({
               caseSensitive: this.enabled("case sensitive routing"),
               strict: this.enabled("strict routing")
             });
           }
-          return router18;
+          return router19;
         }
       });
     };
@@ -21145,15 +21145,15 @@ var require_application = __commonJS({
       if (fns.length === 0) {
         throw new TypeError("app.use() requires a middleware function");
       }
-      var router18 = this.router;
+      var router19 = this.router;
       fns.forEach(function(fn2) {
         if (!fn2 || !fn2.handle || !fn2.set) {
-          return router18.use(path7, fn2);
+          return router19.use(path7, fn2);
         }
         debug(".use app under %s", path7);
         fn2.mountpath = path7;
         fn2.parent = this;
-        router18.use(path7, function mounted_app(req, res, next) {
+        router19.use(path7, function mounted_app(req, res, next) {
           var orig = req.app;
           fn2.handle(req, res, function(err) {
             Object.setPrototypeOf(req, orig.request);
@@ -23726,7 +23726,7 @@ var require_express = __commonJS({
     var EventEmitter2 = __require("node:events").EventEmitter;
     var mixin = require_merge_descriptors();
     var proto = require_application();
-    var Router18 = require_router();
+    var Router19 = require_router();
     var req = require_request();
     var res = require_response();
     exports = module.exports = createApplication;
@@ -23748,8 +23748,8 @@ var require_express = __commonJS({
     exports.application = proto;
     exports.request = req;
     exports.response = res;
-    exports.Route = Router18.Route;
-    exports.Router = Router18;
+    exports.Route = Router19.Route;
+    exports.Router = Router19;
     exports.json = bodyParser.json;
     exports.raw = bodyParser.raw;
     exports.static = require_serve_static();
@@ -72759,14 +72759,14 @@ var require_src6 = __commonJS({
 });
 
 // src/app.ts
-var import_express18 = __toESM(require_express2(), 1);
+var import_express19 = __toESM(require_express2(), 1);
 var import_cors = __toESM(require_lib3(), 1);
 var import_cookie_parser = __toESM(require_cookie_parser(), 1);
 var import_pino_http = __toESM(require_logger(), 1);
 import path6 from "node:path";
 
 // src/routes/index.ts
-var import_express17 = __toESM(require_express2(), 1);
+var import_express18 = __toESM(require_express2(), 1);
 
 // src/routes/health.ts
 var import_express = __toESM(require_express2(), 1);
@@ -83741,6 +83741,7 @@ __export(schema_exports, {
   selectPerkSchema: () => selectPerkSchema,
   selectUserSchema: () => selectUserSchema,
   sessionsTable: () => sessionsTable,
+  talentPostsTable: () => talentPostsTable,
   usersTable: () => usersTable,
   vaultDocumentsTable: () => vaultDocumentsTable
 });
@@ -95369,6 +95370,16 @@ var capitalSpvsTable = pgTable("capital_spvs", {
   participants: integer("participants").default(0).notNull(),
   closing: text("closing"),
   sector: text("sector"),
+  createdAt: timestamp("created_at").defaultNow().notNull()
+});
+var talentPostsTable = pgTable("talent_posts", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => usersTable.id).notNull(),
+  postType: text("post_type").notNull(),
+  // arıyor | sunuyor
+  role: text("role").notNull(),
+  description: text("description").notNull(),
+  tags: text("tags"),
   createdAt: timestamp("created_at").defaultNow().notNull()
 });
 var sessionsTable = pgTable("sessions", {
@@ -113594,6 +113605,19 @@ async function ensureVaultCapitalSchema() {
     )
   `);
 }
+async function ensureTalentSchema() {
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS talent_posts (
+      id serial PRIMARY KEY,
+      user_id integer NOT NULL REFERENCES users(id),
+      post_type text NOT NULL,
+      role text NOT NULL,
+      description text NOT NULL,
+      tags text,
+      created_at timestamp NOT NULL DEFAULT now()
+    )
+  `);
+}
 
 // src/routes/auth.ts
 var router5 = (0, import_express5.Router)();
@@ -115510,28 +115534,201 @@ router16.get("/analytics", requireAuth, async (req, res) => {
 });
 var analytics_default = router16;
 
-// src/routes/index.ts
+// src/routes/talent.ts
+var import_express17 = __toESM(require_express2(), 1);
 var router17 = (0, import_express17.Router)();
-router17.use(health_default);
-router17.use(invitations_default);
-router17.use("/payments", payments_default);
-router17.use("/ai", ai_default);
-router17.use("/auth", auth_default);
-router17.use(catalog_default);
-router17.use(applications_default);
-router17.use(community_default);
-router17.use(chat_default);
-router17.use(notifications_default);
-router17.use(match_default);
-router17.use(vault_default);
-router17.use(capital_default);
-router17.use(pulse_default);
-router17.use(publicId_default);
-router17.use(analytics_default);
-var routes_default = router17;
+function parseTags2(raw) {
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) return parsed.filter((t) => typeof t === "string").slice(0, 12);
+  } catch {
+  }
+  return raw.split(",").map((t) => t.trim()).filter(Boolean).slice(0, 12);
+}
+function initialsOf(name) {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "?";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return `${parts[0][0] ?? ""}${parts[parts.length - 1][0] ?? ""}`.toUpperCase();
+}
+function relativeTr(d) {
+  const days = Math.max(0, Math.floor((Date.now() - d.getTime()) / 864e5));
+  if (days === 0) return "bug\xFCn";
+  if (days === 1) return "1 g\xFCn \xF6nce";
+  if (days < 7) return `${days} g\xFCn \xF6nce`;
+  const weeks = Math.floor(days / 7);
+  if (weeks === 1) return "1 hafta \xF6nce";
+  if (weeks < 5) return `${weeks} hafta \xF6nce`;
+  const months = Math.floor(days / 30);
+  if (months <= 1) return "1 ay \xF6nce";
+  return `${months} ay \xF6nce`;
+}
+function mapPost(post, user, mine) {
+  return {
+    id: post.id,
+    postedBy: user.name,
+    postedByInitials: initialsOf(user.name),
+    postedByCompany: user.company || "\u2014",
+    postedByHandle: user.handle,
+    type: post.postType,
+    role: post.role,
+    description: post.description,
+    tags: parseTags2(post.tags),
+    postedAt: relativeTr(post.createdAt),
+    createdAt: post.createdAt.toISOString(),
+    mine
+  };
+}
+async function ensureTalentSeed(adminUserId) {
+  const [row] = await db.select({ id: talentPostsTable.id }).from(talentPostsTable).limit(1);
+  if (row) return;
+  await db.insert(talentPostsTable).values([
+    {
+      userId: adminUserId,
+      postType: "ar\u0131yor",
+      role: "Fullstack Developer (React + Node.js)",
+      description: "\xDCr\xFCn\xFC \u015Fekillendirmeye katk\u0131 sa\u011Flayacak fullstack developer ar\u0131yoruz. Remote, equity var.",
+      tags: JSON.stringify(["React", "Node.js", "Remote", "Equity"])
+    },
+    {
+      userId: adminUserId,
+      postType: "ar\u0131yor",
+      role: "AI/ML Engineer (Part-time)",
+      description: "Yan proje i\xE7in haftal\u0131k 10-15 saat \xE7al\u0131\u015Fabilecek ML m\xFChendisi. LLM fine-tuning deneyimi \u015Fart.",
+      tags: JSON.stringify(["AI", "LLM", "Part-time"])
+    },
+    {
+      userId: adminUserId,
+      postType: "sunuyor",
+      role: "CTO Dan\u0131\u015Fmanl\u0131\u011F\u0131 \u2014 Erken A\u015Fama Startuplar",
+      description: "Pre-seed ve seed a\u015Famas\u0131ndaki giri\u015Fimlere teknik liderlik ve m\xFChendislik ekibi kurulumu konusunda destek.",
+      tags: JSON.stringify(["CTO", "Dan\u0131\u015Fmanl\u0131k", "Teknik"])
+    },
+    {
+      userId: adminUserId,
+      postType: "sunuyor",
+      role: "Startup Hukuk Dan\u0131\u015Fmanl\u0131\u011F\u0131",
+      description: "Kurulu\u015F s\xF6zle\u015Fmeleri, SAFE/KISS notlar\u0131, yat\u0131r\u0131mc\u0131 s\xFCre\xE7lerinde inner\xB7hub \xFCyelerine %20 indirim.",
+      tags: JSON.stringify(["Hukuk", "SAFE", "Yat\u0131r\u0131m"])
+    },
+    {
+      userId: adminUserId,
+      postType: "ar\u0131yor",
+      role: "Co-founder (Sales & Marketing)",
+      description: "Yan proje i\xE7in sat\u0131\u015F ve pazarlamaya odaklanacak co-founder ar\u0131yoruz. B2B SaaS deneyimi art\u0131.",
+      tags: JSON.stringify(["Co-founder", "B2B", "Sat\u0131\u015F"])
+    }
+  ]);
+}
+router17.get("/talent", requireAuth, async (req, res) => {
+  try {
+    await ensureTalentSchema();
+    const userId = req.user.id;
+    const [admin] = await db.select({ id: usersTable.id }).from(usersTable).where(eq(usersTable.role, "admin")).limit(1);
+    await ensureTalentSeed(admin?.id ?? userId);
+    const rows = await db.select({
+      post: talentPostsTable,
+      name: usersTable.name,
+      company: usersTable.company,
+      handle: usersTable.handle
+    }).from(talentPostsTable).innerJoin(usersTable, eq(talentPostsTable.userId, usersTable.id)).orderBy(desc(talentPostsTable.createdAt));
+    res.json({
+      posts: rows.map(
+        ({ post, name, company, handle }) => mapPost(post, { name, company, handle }, post.userId === userId)
+      )
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message ?? "Talent board y\xFCklenemedi" });
+  }
+});
+router17.post("/talent", requireAuth, async (req, res) => {
+  try {
+    await ensureTalentSchema();
+    const userId = req.user.id;
+    const postType = req.body?.type === "sunuyor" || req.body?.type === "ar\u0131yor" ? req.body.type : null;
+    const role = typeof req.body?.role === "string" ? req.body.role.trim().slice(0, 160) : "";
+    const description = typeof req.body?.description === "string" ? req.body.description.trim().slice(0, 1200) : "";
+    const tags = Array.isArray(req.body?.tags) ? req.body.tags.filter((t) => typeof t === "string").slice(0, 12) : [];
+    if (!postType) {
+      res.status(400).json({ error: "T\xFCr ar\u0131yor veya sunuyor olmal\u0131" });
+      return;
+    }
+    if (!role || !description) {
+      res.status(400).json({ error: "Rol ve a\xE7\u0131klama zorunlu" });
+      return;
+    }
+    const [inserted] = await db.insert(talentPostsTable).values({
+      userId,
+      postType,
+      role,
+      description,
+      tags: JSON.stringify(tags)
+    }).returning();
+    const [user] = await db.select({ name: usersTable.name, company: usersTable.company, handle: usersTable.handle }).from(usersTable).where(eq(usersTable.id, userId)).limit(1);
+    res.status(201).json({
+      post: mapPost(
+        inserted,
+        {
+          name: user?.name ?? req.user.name,
+          company: user?.company ?? null,
+          handle: user?.handle ?? null
+        },
+        true
+      )
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message ?? "\u0130lan olu\u015Fturulamad\u0131" });
+  }
+});
+router17.delete("/talent/:id", requireAuth, async (req, res) => {
+  try {
+    await ensureTalentSchema();
+    const id = Number(req.params.id);
+    if (!Number.isFinite(id)) {
+      res.status(400).json({ error: "Ge\xE7ersiz id" });
+      return;
+    }
+    const [post] = await db.select().from(talentPostsTable).where(eq(talentPostsTable.id, id)).limit(1);
+    if (!post) {
+      res.status(404).json({ error: "\u0130lan bulunamad\u0131" });
+      return;
+    }
+    if (post.userId !== req.user.id && req.user.role !== "admin") {
+      res.status(403).json({ error: "Bu ilan\u0131 silemezsiniz" });
+      return;
+    }
+    await db.delete(talentPostsTable).where(eq(talentPostsTable.id, id));
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message ?? "\u0130lan silinemedi" });
+  }
+});
+var talent_default = router17;
+
+// src/routes/index.ts
+var router18 = (0, import_express18.Router)();
+router18.use(health_default);
+router18.use(invitations_default);
+router18.use("/payments", payments_default);
+router18.use("/ai", ai_default);
+router18.use("/auth", auth_default);
+router18.use(catalog_default);
+router18.use(applications_default);
+router18.use(community_default);
+router18.use(chat_default);
+router18.use(notifications_default);
+router18.use(match_default);
+router18.use(vault_default);
+router18.use(capital_default);
+router18.use(pulse_default);
+router18.use(publicId_default);
+router18.use(analytics_default);
+router18.use(talent_default);
+var routes_default = router18;
 
 // src/app.ts
-var app = (0, import_express18.default)();
+var app = (0, import_express19.default)();
 app.use(
   (0, import_pino_http.default)({
     logger,
@@ -115560,17 +115757,17 @@ app.use(
 );
 app.use((req, res, next) => {
   if (req.method === "PUT" && /^\/api\/vault\/\d+\/file$/.test(req.path)) {
-    return import_express18.default.raw({ type: () => true, limit: "12mb" })(req, res, next);
+    return import_express19.default.raw({ type: () => true, limit: "12mb" })(req, res, next);
   }
   next();
 });
-app.use(import_express18.default.json());
-app.use(import_express18.default.urlencoded({ extended: true }));
+app.use(import_express19.default.json());
+app.use(import_express19.default.urlencoded({ extended: true }));
 app.use((0, import_cookie_parser.default)());
 app.use(attachUser);
 app.use("/api", routes_default);
 var frontendDist = path6.join(__dirname, "..", "..", "inner-hub", "dist");
-app.use(import_express18.default.static(frontendDist));
+app.use(import_express19.default.static(frontendDist));
 app.get(/^(?!\/api).*/, (_req, res) => {
   res.sendFile(path6.join(frontendDist, "index.html"));
 });
