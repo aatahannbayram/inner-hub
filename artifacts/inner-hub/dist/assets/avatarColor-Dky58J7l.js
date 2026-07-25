@@ -1,0 +1,1 @@
+const o=["#1F4B3F","#5C3A21","#2B4570","#6B4423","#3F3B2B","#1F3A4B","#4B2B3F","#2F4B2B"];function r(a){let t=0;for(let B=0;B<a.length;B++)t=(t<<5)-t+a.charCodeAt(B),t|=0;return o[Math.abs(t)%o.length]}export{r as a};

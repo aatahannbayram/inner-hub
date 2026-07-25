@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { Switch, Route, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -8,28 +8,32 @@ import Home from "@/pages/Home";
 import Invitation from "@/pages/Invitation";
 import Requests from "@/pages/Requests";
 import { PanelShell, type PanelUser } from "@/components/panel/PanelShell";
+import { PanelPageSkeleton } from "@/components/panel/Skeletons";
 import { apiUrl } from "@/lib/api";
 import { PanelLogin } from "@/components/panel/PanelLogin";
-import Dashboard from "@/pages/panel/Dashboard";
-import Perks from "@/pages/panel/Perks";
-import Events from "@/pages/panel/Events";
-import CoursesPage from "@/pages/panel/Courses";
-import ChatPage from "@/pages/panel/Chat";
-import Members from "@/pages/panel/Members";
-import Membership from "@/pages/panel/Membership";
-import PaymentSuccess from "@/pages/panel/PaymentSuccess";
-import Signal from "@/pages/panel/Signal";
-import Match from "@/pages/panel/Match";
-import Capital from "@/pages/panel/Capital";
-import Vault from "@/pages/panel/Vault";
-import Pulse from "@/pages/panel/Pulse";
-import InnerId from "@/pages/panel/InnerId";
-import InnerApi from "@/pages/panel/InnerApi";
-import ProfilePage from "@/pages/panel/Profile";
-import Analytics from "@/pages/panel/Analytics";
-import ApplicationsPage from "@/pages/panel/Applications";
-import FAQ from "@/pages/panel/FAQ";
-import Settings from "@/pages/panel/Settings";
+
+// Panel sayfaları auth arkasında (SEO'ya tabi değil) — code-split edilir.
+// Home/Invitation/Requests eager kalır (prerender/SEO).
+const Dashboard        = lazy(() => import("@/pages/panel/Dashboard"));
+const Perks            = lazy(() => import("@/pages/panel/Perks"));
+const Events            = lazy(() => import("@/pages/panel/Events"));
+const CoursesPage       = lazy(() => import("@/pages/panel/Courses"));
+const ChatPage          = lazy(() => import("@/pages/panel/Chat"));
+const Members           = lazy(() => import("@/pages/panel/Members"));
+const Membership        = lazy(() => import("@/pages/panel/Membership"));
+const PaymentSuccess    = lazy(() => import("@/pages/panel/PaymentSuccess"));
+const Signal            = lazy(() => import("@/pages/panel/Signal"));
+const Match             = lazy(() => import("@/pages/panel/Match"));
+const Capital           = lazy(() => import("@/pages/panel/Capital"));
+const Vault             = lazy(() => import("@/pages/panel/Vault"));
+const Pulse             = lazy(() => import("@/pages/panel/Pulse"));
+const InnerId           = lazy(() => import("@/pages/panel/InnerId"));
+const InnerApi          = lazy(() => import("@/pages/panel/InnerApi"));
+const ProfilePage       = lazy(() => import("@/pages/panel/Profile"));
+const Analytics         = lazy(() => import("@/pages/panel/Analytics"));
+const ApplicationsPage  = lazy(() => import("@/pages/panel/Applications"));
+const FAQ               = lazy(() => import("@/pages/panel/FAQ"));
+const Settings          = lazy(() => import("@/pages/panel/Settings"));
 
 const queryClient = new QueryClient();
 
@@ -54,29 +58,31 @@ function PlaceholderPage({ title }: { title: string }) {
 function PanelRoutes({ user, onLogout }: { user: PanelUser; onLogout: () => void }) {
   return (
     <PanelShell user={user} onLogout={onLogout}>
-      <Switch>
-        <Route path="/panel" component={() => <Dashboard userName={user.name.split(" ")[0]} />} />
-        <Route path="/panel/chat"         component={() => <ChatPage />} />
-        <Route path="/panel/courses"      component={() => <CoursesPage />} />
-        <Route path="/panel/events"       component={() => <Events />} />
-        <Route path="/panel/members"      component={() => <Members />} />
-        <Route path="/panel/perks"        component={() => <Perks />} />
-        <Route path="/panel/signal"       component={() => <Signal />} />
-        <Route path="/panel/match"        component={() => <Match />} />
-        <Route path="/panel/capital"      component={() => <Capital />} />
-        <Route path="/panel/vault"        component={() => <Vault />} />
-        <Route path="/panel/pulse"        component={() => <Pulse />} />
-        <Route path="/panel/id"           component={() => <InnerId />} />
-        <Route path="/panel/api"          component={() => <InnerApi />} />
-        <Route path="/panel/profile"      component={() => <ProfilePage />} />
-        <Route path="/panel/faq"          component={() => <FAQ />} />
-        <Route path="/panel/membership"   component={() => <Membership />} />
-        <Route path="/panel/payment/success" component={() => <PaymentSuccess />} />
-        <Route path="/panel/applications" component={() => <ApplicationsPage />} />
-        <Route path="/panel/analytics"    component={() => <Analytics />} />
-        <Route path="/panel/settings"     component={() => <Settings />} />
-        <Route component={NotFound} />
-      </Switch>
+      <Suspense fallback={<PanelPageSkeleton />}>
+        <Switch>
+          <Route path="/panel" component={() => <Dashboard userName={user.name.split(" ")[0]} />} />
+          <Route path="/panel/chat"         component={() => <ChatPage />} />
+          <Route path="/panel/courses"      component={() => <CoursesPage />} />
+          <Route path="/panel/events"       component={() => <Events />} />
+          <Route path="/panel/members"      component={() => <Members />} />
+          <Route path="/panel/perks"        component={() => <Perks />} />
+          <Route path="/panel/signal"       component={() => <Signal />} />
+          <Route path="/panel/match"        component={() => <Match />} />
+          <Route path="/panel/capital"      component={() => <Capital />} />
+          <Route path="/panel/vault"        component={() => <Vault />} />
+          <Route path="/panel/pulse"        component={() => <Pulse />} />
+          <Route path="/panel/id"           component={() => <InnerId />} />
+          <Route path="/panel/api"          component={() => <InnerApi />} />
+          <Route path="/panel/profile"      component={() => <ProfilePage />} />
+          <Route path="/panel/faq"          component={() => <FAQ />} />
+          <Route path="/panel/membership"   component={() => <Membership />} />
+          <Route path="/panel/payment/success" component={() => <PaymentSuccess />} />
+          <Route path="/panel/applications" component={() => <ApplicationsPage />} />
+          <Route path="/panel/analytics"    component={() => <Analytics />} />
+          <Route path="/panel/settings"     component={() => <Settings />} />
+          <Route component={NotFound} />
+        </Switch>
+      </Suspense>
     </PanelShell>
   );
 }

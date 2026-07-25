@@ -40,10 +40,12 @@ const VAULT_CARD_PORTRAIT: PortraitConfig = {
   animIntensity: 60,
 };
 
-const QUICK_NAV = [
-  { label: "inner·signal'i gör", href: "/panel/signal" },
-  { label: "inner·match'e git", href: "/panel/match" },
-  { label: "inner·capital'i incele", href: "/panel/capital" },
+// brand: uppercase class Türkçe (tr) bağlamında İ/ı çevirimi uygular; marka adı
+// İngilizce kalmalı ("İNNER" değil "INNER") — bu yüzden ayrı, lang="en" ile render edilir.
+const QUICK_NAV: { brand?: string; label: string; href: string }[] = [
+  { brand: "inner·signal", label: "'i gör", href: "/panel/signal" },
+  { brand: "inner·match", label: "'e git", href: "/panel/match" },
+  { brand: "inner·capital", label: "'i incele", href: "/panel/capital" },
   { label: "Etkinlikleri gör", href: "/panel/events" },
 ];
 
@@ -185,6 +187,7 @@ function DashboardHero({ userName }: { userName: string }) {
               href={item.href}
               className="mx-[0.2em] mb-[0.4em] inline-flex items-center justify-center whitespace-nowrap rounded-full border border-black/10 bg-white px-4 py-[0.5em] font-mono text-[11px] uppercase tracking-widest text-black transition-colors duration-200 hover:bg-black hover:text-white sm:px-5 sm:text-[12px]"
             >
+              {item.brand && <span lang="en">{item.brand}</span>}
               {item.label}
             </Link>
           ))}
