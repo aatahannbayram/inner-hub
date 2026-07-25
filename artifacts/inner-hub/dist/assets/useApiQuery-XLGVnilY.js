@@ -1,1 +1,0 @@
-import{a2 as s,a3 as o,k as u}from"./index-CZZfeQAN.js";function c(r,t,n){return s({queryKey:r,enabled:n?.enabled??!0,queryFn:async()=>{const e=await fetch(u(t),{credentials:"include"}),a=await e.json().catch(()=>({}));if(!e.ok)throw new Error(a.error??"Veri alınamadı");return a},staleTime:6e4,placeholderData:o})}export{c as u};

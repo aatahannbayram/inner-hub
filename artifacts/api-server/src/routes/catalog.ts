@@ -11,6 +11,7 @@ import {
   progressTable,
 } from "@workspace/db/schema";
 import { requireAuth } from "../lib/auth";
+import { createNotification } from "./notifications";
 
 const router = Router();
 
@@ -185,6 +186,12 @@ router.post("/events/:id/register", requireAuth, async (req, res) => {
 
     if (!existing) {
       await db.insert(eventRegistrationsTable).values({ userId, eventId });
+      await createNotification({
+        userId,
+        title: "Etkinlik kaydı onaylandı",
+        body: `${event.title} için kaydın alındı.`,
+        kind: "event",
+      });
     }
 
     res.json({ eventId, isRegistered: true });
@@ -282,6 +289,12 @@ router.post("/courses/:id/enroll", requireAuth, async (req, res) => {
 
     if (!existing) {
       await db.insert(enrollmentsTable).values({ userId, courseId });
+      await createNotification({
+        userId,
+        title: "Kursa kayıt oldun",
+        body: `${course.title} kursuna kaydın tamamlandı.`,
+        kind: "signal",
+      });
     }
 
     res.json({

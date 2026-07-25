@@ -2,39 +2,47 @@
 
 import React, { createContext, useContext, useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "wouter";
+import { useQueryClient } from "@tanstack/react-query";
 import { LogOut, Menu, X, Bell, ChevronLeft, ChevronRight, Sparkles, CalendarDays, TrendingUp, UserPlus, Zap } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { PanelNav } from "./PanelNav";
 import { PanelPageTransition } from "./PanelPageTransition";
+import { useApiQuery } from "@/hooks/useApiQuery";
+import { apiUrl } from "@/lib/api";
 
 // ─── Notifications ────────────────────────────────────────────────────────────
 
-type Notif = {
+type NotifKind = "match" | "event" | "capital" | "request" | "signal";
+
+type ApiNotif = {
   id: number;
-  type: "match" | "event" | "capital" | "request" | "signal";
   title: string;
-  sub: string;
-  time: string;
-  read: boolean;
+  body: string;
+  kind: NotifKind;
+  isRead: boolean;
+  createdAt: string;
 };
 
-const NOTIF_ICONS: Record<Notif["type"], React.ComponentType<{ className?: string }>> = {
-  match:   Sparkles,
-  event:   CalendarDays,
+const NOTIF_ICONS: Record<NotifKind, React.ComponentType<{ className?: string }>> = {
+  match: Sparkles,
+  event: CalendarDays,
   capital: TrendingUp,
   request: UserPlus,
-  signal:  Zap,
+  signal: Zap,
 };
 
-const INITIAL_NOTIFS: Notif[] = [
-  { id: 1, type: "match",   title: "Yeni eşleşme", sub: "Selin Kaya ile %87 uyum saptandı",       time: "2 saat önce",  read: false },
-  { id: 2, type: "event",   title: "Etkinlik yarın", sub: "AI & HR Zirvesi — Yarın 10:00",          time: "5 saat önce",  read: false },
-  { id: 3, type: "signal",  title: "inner·signal güncellemesi", sub: "Bu haftanın 3 yeni teması hazır", time: "8 saat önce",  read: false },
-  { id: 4, type: "capital", title: "Yeni SPV açıldı", sub: "DeepTech Fund — ₺500K hedef",          time: "1 gün önce",   read: false },
-  { id: 5, type: "request", title: "Tanışma isteği", sub: "Mert Öztürk bağlantı isteği gönderdi",  time: "2 gün önce",   read: true  },
-  { id: 6, type: "match",   title: "Eşleşme onaylandı", sub: "Defne Arslan tanışmayı kabul etti",  time: "3 gün önce",   read: true  },
-];
+function relativeTimeTr(iso: string): string {
+  const diff = Date.now() - new Date(iso).getTime();
+  const m = Math.floor(diff / 60_000);
+  if (m < 1) return "az önce";
+  if (m < 60) return `${m} dk önce`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h} saat önce`;
+  const d = Math.floor(h / 24);
+  if (d < 7) return `${d} gün önce`;
+  return new Date(iso).toLocaleDateString("tr-TR", { day: "numeric", month: "short" });
+}
 
 function NotifPanel({
   onClose,
@@ -45,18 +53,50 @@ function NotifPanel({
   count: number;
   onClear: () => void;
 }) {
-  const [notifs, setNotifs] = useState<Notif[]>(INITIAL_NOTIFS);
+  const queryClient = useQueryClient();
+  const { data, isLoading, isError, refetch } = useApiQuery<{
+    notifications: ApiNotif[];
+    unreadCount: number;
+  }>(["notifications"], "/api/notifications");
+  const notifs = data?.notifications ?? [];
+  const [busy, setBusy] = useState(false);
 
-  const markAll = () => {
-    setNotifs((n) => n.map((x) => ({ ...x, read: true })));
-    onClear();
+  const markAll = async () => {
+    setBusy(true);
+    try {
+      const res = await fetch(apiUrl("/api/notifications/read-all"), {
+        method: "PATCH",
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error("okunamadı");
+      onClear();
+      await queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    } catch {
+      /* ignore */
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const markOne = async (id: number) => {
+    try {
+      const res = await fetch(apiUrl(`/api/notifications/${id}/read`), {
+        method: "PATCH",
+        credentials: "include",
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) return;
+      if (typeof json.unreadCount === "number" && json.unreadCount === 0) onClear();
+      await queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    } catch {
+      /* ignore */
+    }
   };
 
   return (
     <>
       <div className="fixed inset-0 z-40" onClick={onClose} />
       <div className="fixed right-4 top-[68px] z-50 w-80 border border-[var(--ink)]/10 bg-[var(--bone)] shadow-lg">
-        {/* Header */}
         <div className="flex items-center justify-between border-b border-[var(--ink)]/[0.08] px-4 py-3">
           <div className="flex items-center gap-2">
             <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">Bildirimler</p>
@@ -68,47 +108,72 @@ function NotifPanel({
           </div>
           {count > 0 && (
             <button
-              onClick={markAll}
-              className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)] hover:text-[var(--ink)] transition-colors"
+              type="button"
+              disabled={busy}
+              onClick={() => void markAll()}
+              className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)] transition-colors hover:text-[var(--ink)] disabled:opacity-40"
             >
               Tümünü oku
             </button>
           )}
         </div>
 
-        {/* List */}
         <div className="max-h-[400px] overflow-y-auto">
+          {isLoading && notifs.length === 0 && (
+            <p className="px-4 py-6 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
+              Yükleniyor…
+            </p>
+          )}
+          {isError && (
+            <button
+              type="button"
+              onClick={() => refetch()}
+              className="w-full px-4 py-6 text-left font-mono text-label uppercase tracking-widest text-[var(--error-ink)]"
+            >
+              Yüklenemedi — tekrar dene
+            </button>
+          )}
+          {!isLoading && !isError && notifs.length === 0 && (
+            <p className="px-4 py-6 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
+              Bildirim yok
+            </p>
+          )}
           {notifs.map((n) => {
-            const Icon = NOTIF_ICONS[n.type];
+            const Icon = NOTIF_ICONS[n.kind] ?? Zap;
             return (
-              <div
+              <button
                 key={n.id}
+                type="button"
+                onClick={() => {
+                  if (!n.isRead) void markOne(n.id);
+                }}
                 className={cn(
-                  "flex gap-3 border-b border-[var(--ink)]/[0.05] px-4 py-3 last:border-0 transition-colors",
-                  !n.read && "bg-[var(--ink)]/[0.025]",
+                  "flex w-full gap-3 border-b border-[var(--ink)]/[0.05] px-4 py-3 text-left transition-colors last:border-0",
+                  !n.isRead && "bg-[var(--ink)]/[0.025]",
                 )}
               >
                 <div className="mt-0.5 flex size-7 shrink-0 items-center justify-center bg-[var(--ink)]/[0.06]">
                   <Icon className="size-3.5 text-[var(--ink-body)]" />
                 </div>
-                <div className="flex-1 min-w-0">
+                <div className="min-w-0 flex-1">
                   <div className="flex items-start justify-between gap-2">
-                    <p className="text-xs text-[var(--ink)] font-light leading-snug">{n.title}</p>
-                    {!n.read && (
+                    <p className="text-xs font-light leading-snug text-[var(--ink)]">{n.title}</p>
+                    {!n.isRead && (
                       <span className="mt-1 size-1.5 shrink-0 rounded-full bg-[var(--inner-green)]" />
                     )}
                   </div>
-                  <p className="mt-0.5 font-mono text-label leading-snug text-[var(--ink-muted)]">{n.sub}</p>
-                  <p className="mt-1 font-mono text-label text-[var(--ink-subtle)]">{n.time}</p>
+                  <p className="mt-0.5 font-mono text-label leading-snug text-[var(--ink-muted)]">{n.body}</p>
+                  <p className="mt-1 font-mono text-label text-[var(--ink-subtle)]">
+                    {relativeTimeTr(n.createdAt)}
+                  </p>
                 </div>
-              </div>
+              </button>
             );
           })}
         </div>
 
-        {/* Footer */}
         <div className="border-t border-[var(--ink)]/[0.08] px-4 py-2.5">
-          <p className="font-mono text-label text-[var(--ink-subtle)] text-center">inner·hub · bildirimler</p>
+          <p className="text-center font-mono text-label text-[var(--ink-subtle)]">inner·hub · bildirimler</p>
         </div>
       </div>
     </>
@@ -376,10 +441,15 @@ if (typeof window !== "undefined") {
 function ShellInner({ user, children, onLogout }: PanelShellProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
-  const [notifCount, setNotifCount] = useState(user.notificationCount ?? 0);
   const [location] = useLocation();
   const mainRef = useRef<HTMLElement>(null);
   const prevLocation = useRef(location);
+  const queryClient = useQueryClient();
+  const { data: notifData } = useApiQuery<{ notifications: ApiNotif[]; unreadCount: number }>(
+    ["notifications"],
+    "/api/notifications",
+  );
+  const notifCount = notifData?.unreadCount ?? user.notificationCount ?? 0;
 
   useEffect(() => {
     const main = mainRef.current;
@@ -456,7 +526,17 @@ function ShellInner({ user, children, onLogout }: PanelShellProps) {
               <NotifPanel
                 onClose={() => setNotifOpen(false)}
                 count={notifCount}
-                onClear={() => setNotifCount(0)}
+                onClear={() => {
+                  queryClient.setQueryData(["notifications"], (prev: typeof notifData) =>
+                    prev
+                      ? {
+                          ...prev,
+                          unreadCount: 0,
+                          notifications: prev.notifications.map((n) => ({ ...n, isRead: true })),
+                        }
+                      : prev,
+                  );
+                }}
               />
             )}
 

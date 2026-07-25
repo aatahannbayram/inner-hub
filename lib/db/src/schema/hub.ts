@@ -138,7 +138,9 @@ export type Perk = typeof perksTable.$inferSelect;
 export const notificationsTable = pgTable("notifications", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").references(() => usersTable.id).notNull(),
+  title: text("title"),
   body: text("body").notNull(),
+  kind: text("kind"),
   isRead: boolean("is_read").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
