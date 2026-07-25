@@ -21,12 +21,11 @@
 | **Auth smoke** | Lokal: `admin@inner.digital` / `member@inner.digital` · şifre `inner2026` · `INVITE_PASSCODE=inner2026` |
 | **Portlar** | API `:3001`, Vite `:5173`, Postgres Docker `:5433` |
 
-**Önerilen iş bölümü (örnek):**
+**Önerilen iş bölümü:**  
+→ Güncel çakışmasız plan: [`inner-hub-parallel-tracks-2026-07-25.md`](./inner-hub-parallel-tracks-2026-07-25.md)  
+→ Cursor = public `/u/:handle` + badge · Claude = Analytics + InnerApi
 
-- **Cursor:** kalan mock yüzeyler (Analytics / InnerApi / Talent) veya bugfix prod
-- **Claude:** yeni özellik (Vault dosya upload/R2, public `/u/:handle`, badge SVG) veya admin tooling
-
-Aynı surface’e (ör. Vault) ikisi birden girmeden önce bu dosyadaki “Sıradaki” bölümünü güncelle.
+Aynı surface’e (ör. Vault) ikisi birden girmeden önce parallel-tracks dosyasını güncelle.
 
 ---
 
