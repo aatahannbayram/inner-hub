@@ -1,11 +1,8 @@
 import { useEffect, useRef } from "react";
 
-const SENSITIVITY = 0.8;
-
 /**
- * Binds a <video> element's playhead to horizontal mouse movement instead of
- * autoplaying. Seeks are queued via `onSeeked` so rapid mouse movement can't
- * flood the video element with overlapping seek requests.
+ * Mouse X konumunu video playhead'ine bağlar — karakterin bakışını takip ettirmek için.
+ * Seek'ler `onSeeked` kuyruğuyla yapılır; hızlı harekette üst üste seek birikmez.
  */
 export function useScrubVideo() {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -14,9 +11,9 @@ export function useScrubVideo() {
     const video = videoRef.current;
     if (!video) return;
 
-    let prevX: number | null = null;
     let targetTime: number | null = null;
     let seeking = false;
+    let cancelled = false;
 
     const requestSeek = (time: number) => {
       if (!video.duration || Number.isNaN(video.duration)) return;
@@ -36,24 +33,21 @@ export function useScrubVideo() {
       }
     };
 
-    const onMouseMove = (e: MouseEvent) => {
+    const scrubFromClientX = (clientX: number) => {
       if (!video.duration || Number.isNaN(video.duration)) return;
-      if (prevX === null) {
-        prevX = e.clientX;
-        return;
-      }
-      const delta = e.clientX - prevX;
-      prevX = e.clientX;
-      const offset = (delta / window.innerWidth) * SENSITIVITY * video.duration;
-      requestSeek((targetTime ?? video.currentTime) + offset);
+      const ratio = Math.min(1, Math.max(0, clientX / window.innerWidth));
+      requestSeek(ratio * video.duration);
     };
 
-    // Without autoplay, some browsers never decode/paint a frame until
-    // playback actually starts — a currentTime nudge alone isn't reliable.
-    // Kick off a muted play() and immediately pause it once a frame is
-    // available, so the poster frame shows instead of a black rectangle.
-    let cancelled = false;
+    const onMouseMove = (e: MouseEvent) => scrubFromClientX(e.clientX);
+    const onTouchMove = (e: TouchEvent) => {
+      const t = e.touches[0];
+      if (t) scrubFromClientX(t.clientX);
+    };
+
+    // İlk kareyi boya + metadata için yüklemeyi tetikle
     const paintFirstFrame = () => {
+      if (cancelled) return;
       const playPromise = video.play();
       if (playPromise && typeof playPromise.then === "function") {
         playPromise
@@ -64,21 +58,37 @@ export function useScrubVideo() {
       } else {
         video.pause();
       }
+      // Ortaya hizala (nötr bakış)
+      if (video.duration && !Number.isNaN(video.duration)) {
+        requestSeek(video.duration * 0.5);
+      }
     };
-    if (video.readyState >= 2) {
-      paintFirstFrame();
-    } else {
-      video.addEventListener("loadeddata", paintFirstFrame, { once: true });
-    }
+
+    const onLoadedMeta = () => {
+      if (!cancelled) paintFirstFrame();
+    };
 
     video.addEventListener("seeked", onSeeked);
-    window.addEventListener("mousemove", onMouseMove);
+    video.addEventListener("loadedmetadata", onLoadedMeta);
+    window.addEventListener("mousemove", onMouseMove, { passive: true });
+    window.addEventListener("touchmove", onTouchMove, { passive: true });
+
+    // preload=none olsa bile yüklemeyi başlat
+    try {
+      video.load();
+    } catch {
+      /* ignore */
+    }
+    if (video.readyState >= 1) {
+      paintFirstFrame();
+    }
 
     return () => {
       cancelled = true;
-      video.removeEventListener("loadeddata", paintFirstFrame);
       video.removeEventListener("seeked", onSeeked);
+      video.removeEventListener("loadedmetadata", onLoadedMeta);
       window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("touchmove", onTouchMove);
     };
   }, []);
 

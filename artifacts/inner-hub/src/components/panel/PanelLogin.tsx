@@ -199,34 +199,35 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
   };
 
   return (
-    <div className="relative flex h-screen flex-col overflow-hidden bg-black text-white">
+    <div className="relative flex h-svh flex-col overflow-hidden bg-black text-white">
       <video
         ref={scrubVideoRef}
         muted
         playsInline
         poster={posterForVideo(LOGIN_VIDEO_SRC)}
-        preload="none"
+        preload="auto"
         className="absolute inset-0 z-0 h-full w-full object-cover"
         style={{ objectPosition: "70% center" }}
         src={LOGIN_VIDEO_SRC}
       />
+      {/* Alt bölgede hafif blur — üstte karakter net kalsın (mouse scrub görünsün) */}
       <div
         aria-hidden="true"
-        className="bottom-blur-mask pointer-events-none absolute inset-0 z-[1] bg-black/20 backdrop-blur-xl"
+        className="bottom-blur-mask pointer-events-none absolute inset-0 z-[1] bg-black/25 backdrop-blur-md"
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-b from-black/50 via-transparent to-transparent"
+        className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-b from-black/55 via-transparent to-black/40"
       />
 
-      <header className="sticky top-0 z-20 flex h-[60px] shrink-0 items-center justify-between px-6 md:h-[72px] md:px-12 lg:px-[10%]">
+      <header className="relative z-20 flex h-[60px] shrink-0 items-center justify-between px-6 md:h-[72px] md:px-12 lg:px-[10%]">
         <a
           href="/"
           className="animate-blur-fade-up inline-flex group focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-2"
           style={{ animationDelay: "0ms" }}
         >
           <Lockup
-            className="text-white group-hover:opacity-80 transition-opacity"
+            className="text-white transition-opacity group-hover:opacity-80"
             fontSize="clamp(24px, 2.6vw, 34px)"
           />
         </a>
@@ -239,13 +240,13 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
         </a>
       </header>
 
-      {/* Ambient intro copy — floats above the scrub-video, independent of the pinned login form below */}
-      <div className="pointer-events-none absolute left-6 top-24 z-10 hidden max-w-md md:left-12 md:top-28 md:block lg:left-[10%] lg:top-32">
-        <div>
+      <main className="relative z-10 flex min-h-0 flex-1 flex-col justify-between gap-8 overflow-y-auto px-6 pb-10 pt-2 md:px-12 md:pb-16 lg:px-[10%]">
+        {/* Üst: ambient typewriter — absolute değil, form ile çakışmaz */}
+        <div className="max-w-md shrink-0">
           <p
             aria-hidden="true"
-            className="select-none mb-5 font-serif italic leading-[1.3] text-white/40"
-            style={{ fontSize: "clamp(18px, 2.4vw, 26px)", filter: "blur(3px)" }}
+            className="mb-4 select-none font-serif italic leading-[1.3] text-white/35"
+            style={{ fontSize: "clamp(16px, 2vw, 22px)", filter: "blur(2px)" }}
           >
             Sana özel bir davet,
             <br />
@@ -253,7 +254,7 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
           </p>
           <p
             className="text-white"
-            style={{ fontSize: "clamp(18px, 2.4vw, 26px)", lineHeight: 1.35, minHeight: 54 }}
+            style={{ fontSize: "clamp(17px, 2.2vw, 24px)", lineHeight: 1.4, minHeight: "2.8em" }}
           >
             {typedIntro}
             {!typedDone && (
@@ -263,7 +264,7 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
           <button
             type="button"
             onClick={copySupportEmail}
-            className="pointer-events-auto mt-6 inline-flex items-center gap-2 rounded-full border border-white/40 px-5 py-2.5 font-mono text-caption uppercase tracking-widest text-white transition-colors duration-200 hover:bg-white hover:text-black"
+            className="mt-5 inline-flex items-center gap-2 rounded-full border border-white/40 px-5 py-2.5 font-mono text-caption uppercase tracking-widest text-white transition-colors duration-200 hover:bg-white hover:text-black"
           >
             {emailCopied ? "Kopyalandı" : "Bize ulaş: destek@inner.digital"}
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -271,27 +272,29 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
               <rect x="3" y="3" width="13" height="13" rx="1.5" stroke="currentColor" strokeWidth="1.6" />
             </svg>
           </button>
+          <p className="mt-3 font-mono text-label uppercase tracking-widest text-white/35">
+            Fareyi hareket ettir — bakış seni takip eder
+          </p>
         </div>
-      </div>
 
-      <main className="relative z-10 flex min-h-0 flex-1 items-end overflow-y-auto px-6 pb-12 md:px-12 md:pb-20 lg:px-[10%]">
-        <div className="w-full max-w-md">
+        {/* Alt: login formu */}
+        <div className="w-full max-w-md shrink-0">
           <p
-            className="animate-blur-fade-up mb-6 font-mono text-xs uppercase tracking-widest text-white/60"
+            className="animate-blur-fade-up mb-4 font-mono text-xs uppercase tracking-widest text-white/60"
             style={{ animationDelay: "200ms" }}
           >
             Panel · Members only
           </p>
 
           <h1
-            className="animate-blur-fade-up font-display font-serif italic text-4xl md:text-5xl leading-[1.1] text-balance mb-4"
+            className="animate-blur-fade-up mb-3 font-display font-serif italic text-3xl leading-[1.15] text-balance md:text-5xl"
             style={{ animationDelay: "300ms" }}
           >
             Continue inside the circle.
           </h1>
 
           <p
-            className="animate-blur-fade-up mb-8 max-w-[40ch] text-lg leading-[1.6] text-white/70"
+            className="animate-blur-fade-up mb-6 max-w-[40ch] text-base leading-[1.6] text-white/70 md:text-lg"
             style={{ animationDelay: "400ms" }}
           >
             Access is by invitation. Always.
@@ -326,13 +329,10 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
             <span className="h-px flex-1 bg-white/20" />
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-5">
             {mode === "register" && (
               <>
-                <div
-                  className="animate-blur-fade-up space-y-2"
-                  style={{ animationDelay: "600ms" }}
-                >
+                <div className="animate-blur-fade-up space-y-2" style={{ animationDelay: "600ms" }}>
                   <label className="font-mono text-xs uppercase tracking-widest text-white/70">
                     Davet kodu
                   </label>
@@ -346,10 +346,7 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
                     autoComplete="off"
                   />
                 </div>
-                <div
-                  className="animate-blur-fade-up space-y-2"
-                  style={{ animationDelay: "650ms" }}
-                >
+                <div className="animate-blur-fade-up space-y-2" style={{ animationDelay: "650ms" }}>
                   <label className="font-mono text-xs uppercase tracking-widest text-white/70">
                     Ad Soyad
                   </label>
@@ -427,7 +424,7 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
                   setMode(mode === "login" ? "register" : "login");
                   setError("");
                 }}
-                className="font-mono text-caption uppercase tracking-widest text-white/60 hover:text-white transition-colors"
+                className="font-mono text-caption uppercase tracking-widest text-white/60 transition-colors hover:text-white"
               >
                 {mode === "login" ? "Hesabın yok mu?" : "Zaten üye misin?"}
               </button>
