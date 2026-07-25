@@ -353,10 +353,11 @@
 }
 
 /* Görünen boyutu değiştirmeden ≥40px dokunma hedefi (WCAG 2.5.8).
-   ::after görünmez, layout etkisi yok — sadece hit-test alanını büyütür. */
-.hit-40 {
-  position: relative;
-}
+   ::after görünmez, layout etkisi yok — sadece hit-test alanını büyütür.
+   position kasıtlı olarak burada YOK: bu kural @layer dışında (unlayered)
+   olduğu için Tailwind'in utilities katmanındaki .absolute/.fixed'i her
+   zaman ezer. Kullanan elemanın kendi className'inde relative/absolute/
+   fixed'den biri zaten olmalı — hit-40 sadece ::after'ı ekler. */
 .hit-40::after {
   content: "";
   position: absolute;

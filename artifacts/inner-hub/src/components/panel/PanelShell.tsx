@@ -226,7 +226,7 @@ function SidebarFooter({
       <button
         type="button"
         onClick={onLogout}
-        className="flex items-center gap-1.5 text-[var(--ink-body)] transition-colors hover:text-[var(--ink)]"
+        className="hit-40 relative flex items-center gap-1.5 text-[var(--ink-body)] transition-colors hover:text-[var(--ink)]"
       >
         <LogOut className="size-3.5" />
         <span className="font-mono text-[10px] uppercase tracking-widest">Çıkış Yap</span>
@@ -293,7 +293,7 @@ function DesktopSidebar({ user, onLogout }: { user: PanelUser; onLogout?: () => 
       <button
         type="button"
         onClick={toggle}
-        className="absolute -right-3 top-[72px] z-10 flex size-6 items-center justify-center border border-[var(--ink)]/[0.08] bg-[var(--bone)] text-[var(--ink-body)] transition-colors hover:text-[var(--ink)]"
+        className="hit-40 absolute -right-3 top-[72px] z-10 flex size-6 items-center justify-center border border-[var(--ink)]/[0.08] bg-[var(--bone)] text-[var(--ink-body)] transition-colors hover:text-[var(--ink)]"
         aria-label={collapsed ? "Sidebar'ı genişlet" : "Sidebar'ı daralt"}
       >
         {collapsed ? <ChevronRight className="size-3" /> : <ChevronLeft className="size-3" />}
@@ -420,7 +420,7 @@ function ShellInner({ user, children, onLogout }: PanelShellProps) {
           <button
             type="button"
             onClick={() => setMobileOpen(true)}
-            className="text-[var(--ink-body)] hover:text-[var(--ink)] lg:hidden"
+            className="hit-40 relative text-[var(--ink-body)] hover:text-[var(--ink)] lg:hidden"
             aria-label="Menüyü aç"
           >
             <Menu className="size-5" />
@@ -442,7 +442,7 @@ function ShellInner({ user, children, onLogout }: PanelShellProps) {
             <button
               type="button"
               onClick={() => setNotifOpen((o) => !o)}
-              className="relative text-[var(--ink-muted)] hover:text-[var(--ink)] transition-colors"
+              className="hit-40 relative text-[var(--ink-muted)] hover:text-[var(--ink)] transition-colors"
               aria-label="Bildirimler"
             >
               <Bell className="size-4" />

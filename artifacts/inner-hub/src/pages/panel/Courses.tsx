@@ -199,7 +199,7 @@ function CourseCard({ course }: { course: Course }) {
           )}
           <button
             onClick={() => setExpanded((v) => !v)}
-            className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)] hover:text-[var(--ink)] transition-colors"
+            className="hit-40 relative flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)] hover:text-[var(--ink)] transition-colors"
           >
             {expanded ? "Gizle" : "Müfredatı Gör"}
             {expanded ? (
