@@ -1,10 +1,19 @@
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { FadeIn } from "@/components/FadeIn";
 import { AnimatedHeading } from "@/components/AnimatedHeading";
 import { PersonAvatar } from "@/components/panel/PersonAvatar";
 import { HeroVideo } from "@/components/HeroVideo";
 import { useApiQuery } from "@/hooks/useApiQuery";
+import { apiUrl } from "@/lib/api";
 import { LoadingBlock, ErrorState, StatCardSkeleton } from "@/components/panel/Skeletons";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerDescription,
+} from "@/components/ui/drawer";
 import {
   TrendingUp,
   Users,
@@ -15,6 +24,8 @@ import {
   ArrowUpRight,
   Building2,
   Filter,
+  Plus,
+  Trash2,
 } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -178,8 +189,64 @@ function DealCard({ deal, onClick }: { deal: Deal; onClick: () => void }) {
 
 // ─── Deal detail panel ────────────────────────────────────────────────────────
 
-function DealDetail({ deal, onClose }: { deal: Deal; onClose: () => void }) {
+function DealDetail({
+  deal,
+  onClose,
+  isAdmin,
+  onChanged,
+}: {
+  deal: Deal;
+  onClose: () => void;
+  isAdmin: boolean;
+  onChanged: () => void;
+}) {
   const cfg = STAGE_CONFIG[deal.stage];
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const patchStage = async (stage: Stage) => {
+    if (!isAdmin || busy || stage === deal.stage) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await fetch(apiUrl(`/api/capital/deals/${deal.id}`), {
+        method: "PATCH",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ stage }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json.error ?? "Güncellenemedi");
+      onChanged();
+      onClose();
+    } catch (e: any) {
+      setError(e.message ?? "Güncellenemedi");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const remove = async () => {
+    if (!isAdmin || busy) return;
+    if (!window.confirm(`${deal.company} deal'ini silmek istiyor musun?`)) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await fetch(apiUrl(`/api/capital/deals/${deal.id}`), {
+        method: "DELETE",
+        credentials: "include",
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json.error ?? "Silinemedi");
+      onChanged();
+      onClose();
+    } catch (e: any) {
+      setError(e.message ?? "Silinemedi");
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-end" onClick={onClose}>
       <div
@@ -187,6 +254,7 @@ function DealDetail({ deal, onClose }: { deal: Deal; onClose: () => void }) {
         onClick={(e) => e.stopPropagation()}
       >
         <button
+          type="button"
           onClick={onClose}
           className="mb-6 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)] hover:text-[var(--ink)] transition-colors"
         >
@@ -289,15 +357,58 @@ function DealDetail({ deal, onClose }: { deal: Deal; onClose: () => void }) {
 
         {/* Actions */}
         <div className="space-y-2">
-          <button className="flex w-full items-center justify-between border border-[var(--ink)] bg-[var(--ink)] px-5 py-3 font-mono text-label uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-80">
+          <button
+            type="button"
+            className="flex w-full items-center justify-between border border-[var(--ink)] bg-[var(--ink)] px-5 py-3 font-mono text-label uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-80"
+          >
             <span>İlgileniyorum</span>
             <ArrowUpRight className="size-3.5" />
           </button>
-          <button className="flex w-full items-center justify-between border border-[var(--ink)]/15 px-5 py-3 font-mono text-label uppercase tracking-widest text-[var(--ink-body)] transition-all hover:border-[var(--ink)]/40 hover:text-[var(--ink)]">
+          <button
+            type="button"
+            className="flex w-full items-center justify-between border border-[var(--ink)]/15 px-5 py-3 font-mono text-label uppercase tracking-widest text-[var(--ink-body)] transition-all hover:border-[var(--ink)]/40 hover:text-[var(--ink)]"
+          >
             <span>Kurucuyu Tanıştır</span>
             <ChevronRight className="size-3.5" />
           </button>
         </div>
+
+        {isAdmin && (
+          <div className="mt-8 space-y-3 border-t border-[var(--ink)]/[0.08] pt-5">
+            <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">Admin</p>
+            <div className="flex flex-wrap gap-1.5">
+              {STAGES.map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  disabled={busy}
+                  onClick={() => void patchStage(s)}
+                  className={[
+                    "border px-2.5 py-1 font-mono text-label uppercase tracking-widest disabled:opacity-40",
+                    deal.stage === s
+                      ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--bone)]"
+                      : "border-[var(--ink)]/10 text-[var(--ink-muted)] hover:border-[var(--ink)]/30",
+                  ].join(" ")}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => void remove()}
+              className="flex items-center gap-1.5 border border-[var(--error-ink)]/25 px-3 py-2 font-mono text-label uppercase tracking-widest text-[var(--error-ink)] disabled:opacity-40"
+            >
+              <Trash2 className="size-3" /> Deal'i sil
+            </button>
+            {error && (
+              <p className="font-mono text-label text-[var(--error-ink)]" role="alert">
+                {error}
+              </p>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -405,17 +516,207 @@ function CapitalHero() {
   );
 }
 
+// ─── Admin compose ────────────────────────────────────────────────────────────
+
+function DealCompose({
+  open,
+  onClose,
+  onCreated,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onCreated: () => void;
+}) {
+  const [company, setCompany] = useState("");
+  const [tagline, setTagline] = useState("");
+  const [stage, setStage] = useState<Stage>("Pitch");
+  const [sector, setSector] = useState<Sector>("B2B SaaS");
+  const [raise, setRaise] = useState("");
+  const [valuation, setValuation] = useState("");
+  const [round, setRound] = useState("Pre-seed");
+  const [founders, setFounders] = useState("");
+  const [score, setScore] = useState("70");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const submit = async () => {
+    if (!company.trim() || busy) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await fetch(apiUrl("/api/capital/deals"), {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          company: company.trim(),
+          tagline: tagline.trim(),
+          stage,
+          sector,
+          raise: raise.trim(),
+          valuation: valuation.trim(),
+          round: round.trim(),
+          founders: founders.split(",").map((f) => f.trim()).filter(Boolean),
+          score: Number(score) || 50,
+        }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json.error ?? "Deal kaydedilemedi");
+      setCompany("");
+      setTagline("");
+      setRaise("");
+      setValuation("");
+      setFounders("");
+      onCreated();
+      onClose();
+    } catch (e: any) {
+      setError(e.message ?? "Deal kaydedilemedi");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <Drawer open={open} onOpenChange={(v) => !v && onClose()} shouldScaleBackground={false}>
+      <DrawerContent className="rounded-none border-[var(--ink)]/15 bg-[var(--bone)]">
+        <DrawerHeader className="px-6 pt-2 text-left">
+          <p className="mb-1 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
+            <span lang="en">inner·capital</span>
+          </p>
+          <DrawerTitle
+            className="font-serif text-2xl font-normal text-[var(--ink)]"
+            style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
+          >
+            Deal Ekle
+          </DrawerTitle>
+          <DrawerDescription className="text-[var(--ink-body)]">
+            Pipeline’a yeni deal ekle (yalnızca admin).
+          </DrawerDescription>
+        </DrawerHeader>
+        <div className="max-h-[70vh] space-y-3 overflow-y-auto px-6 pb-8">
+          <input
+            value={company}
+            onChange={(e) => setCompany(e.target.value)}
+            placeholder="Şirket"
+            className="w-full border border-[var(--ink)]/[0.08] bg-transparent px-3 py-2.5 text-sm outline-none focus:border-[var(--ink)]/30"
+          />
+          <input
+            value={tagline}
+            onChange={(e) => setTagline(e.target.value)}
+            placeholder="Kısa tagline"
+            className="w-full border border-[var(--ink)]/[0.08] bg-transparent px-3 py-2.5 text-sm outline-none focus:border-[var(--ink)]/30"
+          />
+          <div className="flex flex-wrap gap-1.5">
+            {STAGES.map((s) => (
+              <button
+                key={s}
+                type="button"
+                onClick={() => setStage(s)}
+                className={[
+                  "border px-2.5 py-1 font-mono text-label uppercase tracking-widest",
+                  stage === s
+                    ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--bone)]"
+                    : "border-[var(--ink)]/10 text-[var(--ink-muted)]",
+                ].join(" ")}
+              >
+                {s}
+              </button>
+            ))}
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {(["AI/ML", "B2B SaaS", "Fintech", "HR Tech", "DeepTech", "E-ticaret"] as Sector[]).map((s) => (
+              <button
+                key={s}
+                type="button"
+                onClick={() => setSector(s)}
+                className={[
+                  "border px-2.5 py-1 font-mono text-label uppercase tracking-widest",
+                  sector === s
+                    ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--bone)]"
+                    : "border-[var(--ink)]/10 text-[var(--ink-muted)]",
+                ].join(" ")}
+              >
+                {s}
+              </button>
+            ))}
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <input
+              value={raise}
+              onChange={(e) => setRaise(e.target.value)}
+              placeholder="Hedef ($500K)"
+              className="border border-[var(--ink)]/[0.08] bg-transparent px-3 py-2.5 text-sm outline-none focus:border-[var(--ink)]/30"
+            />
+            <input
+              value={valuation}
+              onChange={(e) => setValuation(e.target.value)}
+              placeholder="Değerleme"
+              className="border border-[var(--ink)]/[0.08] bg-transparent px-3 py-2.5 text-sm outline-none focus:border-[var(--ink)]/30"
+            />
+          </div>
+          <input
+            value={round}
+            onChange={(e) => setRound(e.target.value)}
+            placeholder="Tur (Pre-seed / Seed)"
+            className="w-full border border-[var(--ink)]/[0.08] bg-transparent px-3 py-2.5 text-sm outline-none focus:border-[var(--ink)]/30"
+          />
+          <input
+            value={founders}
+            onChange={(e) => setFounders(e.target.value)}
+            placeholder="Kurucular (virgülle)"
+            className="w-full border border-[var(--ink)]/[0.08] bg-transparent px-3 py-2.5 text-sm outline-none focus:border-[var(--ink)]/30"
+          />
+          <input
+            value={score}
+            onChange={(e) => setScore(e.target.value)}
+            placeholder="Skor 0–100"
+            inputMode="numeric"
+            className="w-full border border-[var(--ink)]/[0.08] bg-transparent px-3 py-2.5 text-sm outline-none focus:border-[var(--ink)]/30"
+          />
+          {error && (
+            <p className="font-mono text-label text-[var(--error-ink)]" role="alert">
+              {error}
+            </p>
+          )}
+          <div className="flex gap-2 pt-1">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 border border-[var(--ink)]/15 py-2.5 font-mono text-label uppercase tracking-widest text-[var(--ink-body)]"
+            >
+              İptal
+            </button>
+            <button
+              type="button"
+              disabled={busy || !company.trim()}
+              onClick={() => void submit()}
+              className="flex-1 border border-[var(--ink)] bg-[var(--ink)] py-2.5 font-mono text-label uppercase tracking-widest text-[var(--bone)] disabled:opacity-40"
+            >
+              {busy ? "Kaydediliyor…" : "Kaydet"}
+            </button>
+          </div>
+        </div>
+      </DrawerContent>
+    </Drawer>
+  );
+}
+
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function Capital() {
+  const queryClient = useQueryClient();
   const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null);
   const [sectorFilter, setSectorFilter] = useState<Sector | "Tümü">("Tümü");
   const [view, setView] = useState<"pipeline" | "liste">("pipeline");
+  const [composeOpen, setComposeOpen] = useState(false);
 
   const { data, isLoading, isError, error, refetch } = useApiQuery<CapitalResponse>(
     ["capital"],
     "/api/capital",
   );
+  const { data: meData } = useApiQuery<{ user: { role: "member" | "admin" } }>(["auth-me"], "/api/auth/me");
+  const isAdmin = meData?.user?.role === "admin";
+
   const deals = data?.deals ?? [];
   const spvs = data?.spvs ?? [];
 
@@ -428,6 +729,10 @@ export default function Capital() {
   const totalRaise = formatTotalRaise(deals);
   const activeDeals = deals.filter((d) => d.stage !== "Kapandı").length;
   const closedDeals = deals.filter((d) => d.stage === "Kapandı").length;
+
+  const invalidate = () => {
+    void queryClient.invalidateQueries({ queryKey: ["capital"] });
+  };
 
   return (
     <div className="space-y-8 max-w-5xl">
@@ -452,11 +757,23 @@ export default function Capital() {
 
       {/* View toggle */}
       <FadeIn>
-        <div className="flex items-center justify-end">
+        <div className="flex items-center justify-between gap-3">
+          {isAdmin ? (
+            <button
+              type="button"
+              onClick={() => setComposeOpen(true)}
+              className="flex items-center gap-1.5 border border-[var(--ink)] bg-[var(--ink)] px-4 py-2 font-mono text-label uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-80"
+            >
+              <Plus className="size-3.5" /> Deal Ekle
+            </button>
+          ) : (
+            <span />
+          )}
           <div className="flex border border-[var(--ink)]/15">
             {(["pipeline", "liste"] as const).map((v) => (
               <button
                 key={v}
+                type="button"
                 onClick={() => setView(v)}
                 className={[
                   "px-4 py-2 font-mono text-label uppercase tracking-widest transition-colors",
@@ -588,8 +905,19 @@ export default function Capital() {
 
       {/* Deal detail panel */}
       {selectedDeal && (
-        <DealDetail deal={selectedDeal} onClose={() => setSelectedDeal(null)} />
+        <DealDetail
+          deal={selectedDeal}
+          onClose={() => setSelectedDeal(null)}
+          isAdmin={isAdmin}
+          onChanged={invalidate}
+        />
       )}
+
+      <DealCompose
+        open={composeOpen}
+        onClose={() => setComposeOpen(false)}
+        onCreated={invalidate}
+      />
     </div>
   );
 }

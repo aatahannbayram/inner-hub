@@ -115078,6 +115078,8 @@ var vault_default = router12;
 // src/routes/capital.ts
 var import_express13 = __toESM(require_express2(), 1);
 var router13 = (0, import_express13.Router)();
+var STAGES = /* @__PURE__ */ new Set(["Pitch", "Due Diligence", "Term Sheet", "Kapand\u0131"]);
+var SECTORS = /* @__PURE__ */ new Set(["AI/ML", "B2B SaaS", "Fintech", "HR Tech", "E-ticaret", "DeepTech"]);
 function parseList(raw) {
   if (!raw) return [];
   try {
@@ -115089,6 +115091,53 @@ function parseList(raw) {
 }
 function daysAgo2(d) {
   return Math.max(0, Math.floor((Date.now() - d.getTime()) / 864e5));
+}
+function mapDeal(d) {
+  return {
+    id: d.id,
+    company: d.company,
+    tagline: d.tagline ?? "",
+    stage: d.stage,
+    sector: d.sector,
+    raise: d.raise ?? "",
+    valuation: d.valuation ?? "",
+    founders: parseList(d.founders),
+    leadInvestor: d.leadInvestor ?? void 0,
+    round: d.round ?? "",
+    score: d.score,
+    tags: parseList(d.tags),
+    updatedDays: daysAgo2(d.updatedAt),
+    spv: d.hasSpv
+  };
+}
+function normalizeDealBody(body) {
+  const company = typeof body?.company === "string" ? body.company.trim().slice(0, 120) : "";
+  const tagline = typeof body?.tagline === "string" ? body.tagline.trim().slice(0, 240) : "";
+  const stage = typeof body?.stage === "string" && STAGES.has(body.stage) ? body.stage : "Pitch";
+  const sector = typeof body?.sector === "string" && SECTORS.has(body.sector) ? body.sector : "B2B SaaS";
+  const raise = typeof body?.raise === "string" ? body.raise.trim().slice(0, 40) : "";
+  const valuation = typeof body?.valuation === "string" ? body.valuation.trim().slice(0, 40) : "";
+  const round = typeof body?.round === "string" ? body.round.trim().slice(0, 40) : "";
+  const leadInvestor = typeof body?.leadInvestor === "string" ? body.leadInvestor.trim().slice(0, 120) : "";
+  const founders = Array.isArray(body?.founders) ? body.founders.filter((f) => typeof f === "string").map((f) => f.trim()).filter(Boolean).slice(0, 8) : typeof body?.founders === "string" ? body.founders.split(",").map((f) => f.trim()).filter(Boolean).slice(0, 8) : [];
+  const tags = Array.isArray(body?.tags) ? body.tags.filter((t) => typeof t === "string").slice(0, 12) : typeof body?.tags === "string" ? body.tags.split(",").map((t) => t.trim()).filter(Boolean).slice(0, 12) : [];
+  const scoreRaw = Number(body?.score);
+  const score = Number.isFinite(scoreRaw) ? Math.max(0, Math.min(100, Math.round(scoreRaw))) : 50;
+  const hasSpv = Boolean(body?.spv ?? body?.hasSpv);
+  return {
+    company,
+    tagline: tagline || null,
+    stage,
+    sector,
+    raise: raise || null,
+    valuation: valuation || null,
+    round: round || null,
+    leadInvestor: leadInvestor || null,
+    founders: JSON.stringify(founders),
+    tags: JSON.stringify(tags),
+    score,
+    hasSpv
+  };
 }
 async function ensureCapitalSeed() {
   const [deal] = await db.select({ id: capitalDealsTable.id }).from(capitalDealsTable).limit(1);
@@ -115203,22 +115252,7 @@ router13.get("/capital", requireAuth, async (_req, res) => {
     const deals = await db.select().from(capitalDealsTable).orderBy(desc(capitalDealsTable.score));
     const spvs = await db.select().from(capitalSpvsTable).orderBy(desc(capitalSpvsTable.pct));
     res.json({
-      deals: deals.map((d) => ({
-        id: d.id,
-        company: d.company,
-        tagline: d.tagline ?? "",
-        stage: d.stage,
-        sector: d.sector,
-        raise: d.raise ?? "",
-        valuation: d.valuation ?? "",
-        founders: parseList(d.founders),
-        leadInvestor: d.leadInvestor ?? void 0,
-        round: d.round ?? "",
-        score: d.score,
-        tags: parseList(d.tags),
-        updatedDays: daysAgo2(d.updatedAt),
-        spv: d.hasSpv
-      })),
+      deals: deals.map(mapDeal),
       spvs: spvs.map((s) => ({
         id: s.id,
         name: s.name,
@@ -115232,6 +115266,94 @@ router13.get("/capital", requireAuth, async (_req, res) => {
     });
   } catch (err) {
     res.status(500).json({ error: err.message ?? "Capital y\xFCklenemedi" });
+  }
+});
+router13.post("/capital/deals", requireAuth, requireAdmin, async (req, res) => {
+  try {
+    await ensureVaultCapitalSchema();
+    const data = normalizeDealBody(req.body);
+    if (!data.company) {
+      res.status(400).json({ error: "\u015Eirket ad\u0131 zorunlu" });
+      return;
+    }
+    const [inserted] = await db.insert(capitalDealsTable).values({ ...data, updatedAt: /* @__PURE__ */ new Date() }).returning();
+    res.status(201).json({ deal: mapDeal(inserted) });
+  } catch (err) {
+    res.status(500).json({ error: err.message ?? "Deal kaydedilemedi" });
+  }
+});
+router13.patch("/capital/deals/:id", requireAuth, requireAdmin, async (req, res) => {
+  try {
+    await ensureVaultCapitalSchema();
+    const id = Number(req.params.id);
+    if (!Number.isFinite(id)) {
+      res.status(400).json({ error: "Ge\xE7ersiz id" });
+      return;
+    }
+    const [existing] = await db.select().from(capitalDealsTable).where(eq(capitalDealsTable.id, id)).limit(1);
+    if (!existing) {
+      res.status(404).json({ error: "Deal bulunamad\u0131" });
+      return;
+    }
+    const patch = { updatedAt: /* @__PURE__ */ new Date() };
+    if (typeof req.body?.company === "string" && req.body.company.trim()) {
+      patch.company = req.body.company.trim().slice(0, 120);
+    }
+    if (typeof req.body?.tagline === "string") {
+      patch.tagline = req.body.tagline.trim().slice(0, 240) || null;
+    }
+    if (typeof req.body?.stage === "string" && STAGES.has(req.body.stage)) {
+      patch.stage = req.body.stage;
+    }
+    if (typeof req.body?.sector === "string" && SECTORS.has(req.body.sector)) {
+      patch.sector = req.body.sector;
+    }
+    if (typeof req.body?.raise === "string") patch.raise = req.body.raise.trim().slice(0, 40) || null;
+    if (typeof req.body?.valuation === "string") {
+      patch.valuation = req.body.valuation.trim().slice(0, 40) || null;
+    }
+    if (typeof req.body?.round === "string") patch.round = req.body.round.trim().slice(0, 40) || null;
+    if (typeof req.body?.leadInvestor === "string") {
+      patch.leadInvestor = req.body.leadInvestor.trim().slice(0, 120) || null;
+    }
+    if (req.body?.founders !== void 0) {
+      const founders = Array.isArray(req.body.founders) ? req.body.founders.filter((f) => typeof f === "string") : String(req.body.founders).split(",").map((f) => f.trim()).filter(Boolean);
+      patch.founders = JSON.stringify(founders.slice(0, 8));
+    }
+    if (req.body?.tags !== void 0) {
+      const tags = Array.isArray(req.body.tags) ? req.body.tags.filter((t) => typeof t === "string") : String(req.body.tags).split(",").map((t) => t.trim()).filter(Boolean);
+      patch.tags = JSON.stringify(tags.slice(0, 12));
+    }
+    if (req.body?.score !== void 0) {
+      const scoreRaw = Number(req.body.score);
+      if (Number.isFinite(scoreRaw)) patch.score = Math.max(0, Math.min(100, Math.round(scoreRaw)));
+    }
+    if (req.body?.spv !== void 0 || req.body?.hasSpv !== void 0) {
+      patch.hasSpv = Boolean(req.body?.spv ?? req.body?.hasSpv);
+    }
+    const [updated] = await db.update(capitalDealsTable).set(patch).where(eq(capitalDealsTable.id, id)).returning();
+    res.json({ deal: mapDeal(updated) });
+  } catch (err) {
+    res.status(500).json({ error: err.message ?? "Deal g\xFCncellenemedi" });
+  }
+});
+router13.delete("/capital/deals/:id", requireAuth, requireAdmin, async (req, res) => {
+  try {
+    await ensureVaultCapitalSchema();
+    const id = Number(req.params.id);
+    if (!Number.isFinite(id)) {
+      res.status(400).json({ error: "Ge\xE7ersiz id" });
+      return;
+    }
+    const [existing] = await db.select({ id: capitalDealsTable.id }).from(capitalDealsTable).where(eq(capitalDealsTable.id, id)).limit(1);
+    if (!existing) {
+      res.status(404).json({ error: "Deal bulunamad\u0131" });
+      return;
+    }
+    await db.delete(capitalDealsTable).where(eq(capitalDealsTable.id, id));
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message ?? "Deal silinemedi" });
   }
 });
 var capital_default = router13;
