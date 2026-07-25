@@ -13,6 +13,7 @@ Yeniden kullanılabilir analiz playbook’ları ve Inner-Hub instance’ları.
 | [inner-hub-panel-ux-remediation-plan-2026-07-25.md](./inner-hub-panel-ux-remediation-plan-2026-07-25.md) | Plan | F1–F15 kademeli iyileştirme planı (kontrast, i18n, skeleton, video, a11y, perf) — kod önerileri + dalga bazlı uygulama sırası |
 | [inner-hub-live-panel-handoff-2026-07-25.md](./inner-hub-live-panel-handoff-2026-07-25.md) | Handoff | Canlı panel wave (API haritası, kalan mock, Cursor↔Claude paralel çalışma) |
 | [inner-hub-parallel-tracks-2026-07-25.md](./inner-hub-parallel-tracks-2026-07-25.md) | Plan | Cursor×Claude çakışmasız track’ler + Claude yapıştırma prompt’u |
+| [inner-hub-status-2026-07-25.md](./inner-hub-status-2026-07-25.md) | Durum | "Nerede kaldık" özeti — deploy durumu, Cursor'ın aktif dosyaları, bekleyen kararlar (dark theme, gsap lazy-load) |
 
 **Sıra:** önce Brand & Panel → sonra Deep UX.  
 **Paralel agent’lar:** handoff + `inner-hub-parallel-tracks-2026-07-25.md`.
