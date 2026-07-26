@@ -51,9 +51,16 @@ function loadSaved(): number[] {
   }
 }
 
-function BrandMark({ brand }: { brand: string }) {
+function BrandMark({ brand, logoUrl }: { brand: string; logoUrl?: string | null }) {
   const initials = toUpperTR(brand.replace(/[^a-zA-ZğüşıöçĞÜŞİÖÇ0-9]/g, "").slice(0, 2));
   const color = avatarColor(brand);
+  if (logoUrl) {
+    return (
+      <div className="flex size-12 shrink-0 items-center justify-center border border-[var(--ink)]/12 bg-[var(--ink)]/[0.04] p-1.5">
+        <img src={logoUrl} alt={brand} className="size-full object-contain" />
+      </div>
+    );
+  }
   return (
     <div
       className="flex size-12 shrink-0 items-center justify-center border text-[var(--bone)]"
@@ -99,7 +106,7 @@ function PerkCard({
       className="group flex h-full flex-col panel-glass p-5 text-left transition-colors duration-200 hover:border-[var(--ink)]/35 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--ink)]"
     >
       <div className="mb-4 flex items-start justify-between gap-3">
-        <BrandMark brand={perk.brand} />
+        <BrandMark brand={perk.brand} logoUrl={perk.logoUrl} />
         <span className="font-mono text-label uppercase tracking-widest text-[var(--ink)] panel-glass bg-[var(--ink)]/[0.03] px-2 py-0.5">
           {perk.badge}
         </span>
@@ -208,7 +215,7 @@ function PerkDetail({
 
         <div className="flex-1 space-y-6 overflow-y-auto p-5">
           <div className="flex items-start gap-4">
-            <BrandMark brand={perk.brand} />
+            <BrandMark brand={perk.brand} logoUrl={perk.logoUrl} />
             <div className="min-w-0">
               <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
                 <span lang="en">{perk.brand}</span>
