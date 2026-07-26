@@ -166,7 +166,7 @@ function MarqueeStrip() {
         className="pointer-events-none absolute inset-y-0 right-0 z-10 w-12 bg-gradient-to-l from-[var(--ink-fixed)] to-transparent sm:w-20"
       />
 
-      <div className="relative mx-auto max-w-[100vw] overflow-hidden border-y border-white/10 bg-[var(--bone)] py-3.5 sm:py-4">
+      <div className="relative mx-auto max-w-[100vw] overflow-hidden border-y border-white/10 bg-[var(--ink-fixed)] py-3.5 sm:py-4">
         <motion.div
           className="flex w-max items-center gap-0"
           animate={{ x: ["0%", "-33.333%"] }}
@@ -180,17 +180,17 @@ function MarqueeStrip() {
                 href="#section-03"
                 className="group flex shrink-0 items-center gap-3 px-5 sm:gap-3.5 sm:px-7"
               >
-                <span className="flex size-7 items-center justify-center bg-[var(--ink)] transition-colors group-hover:bg-[var(--inner-green)] sm:size-8">
+                <span className="flex size-7 items-center justify-center bg-white/10 transition-colors group-hover:bg-[var(--inner-green)] sm:size-8">
                   <Icon
-                    className="size-3.5 text-[var(--bone)] transition-colors group-hover:text-[var(--ink)] sm:size-4"
+                    className="size-3.5 text-[var(--bone-fixed)] transition-colors group-hover:text-[var(--ink-fixed)] sm:size-4"
                     strokeWidth={1.6}
                   />
                 </span>
                 <span className="flex flex-col gap-0.5">
-                  <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--ink)] sm:text-[11px]">
+                  <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--bone-fixed)] sm:text-[11px]">
                     {item.name}
                   </span>
-                  <span className="hidden font-mono text-[8px] uppercase tracking-[0.14em] text-[var(--ink)]/40 sm:block">
+                  <span className="hidden font-mono text-[8px] uppercase tracking-[0.14em] text-[var(--bone-fixed)]/40 sm:block">
                     {item.tag}
                   </span>
                 </span>
@@ -244,7 +244,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div lang={locale} className="min-h-screen bg-background text-foreground flex flex-col">
+    <div lang={locale} className="site-atmosphere flex min-h-screen flex-col">
       <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[9999] focus:bg-foreground focus:text-background focus:px-4 focus:py-2 font-mono text-xs uppercase tracking-widest">
         {t("common.skipToContent")}
       </a>
@@ -268,13 +268,13 @@ export default function Home() {
         </section>
 
         {/* ── 04–05 · What this is → Entry (one continuous dark, video-anchored span) ── */}
-        <div className="relative overflow-hidden bg-black border-t border-border/15">
+        <div className="relative overflow-hidden bg-[var(--ink-fixed)] border-t border-border/15">
           <div className="absolute inset-x-0 top-0 h-[85vh] md:h-[95vh] z-0" aria-hidden="true">
             <HeroVideo
               src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260406_133058_0504132a-0cf3-4450-a370-8ea3b05c95d4.mp4"
               className="h-full w-full object-cover"
             />
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/55 via-black/60 to-black" />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/55 via-black/60 to-[var(--ink-fixed)]" />
           </div>
 
           {/* 04 · What this is */}
@@ -332,7 +332,7 @@ export default function Home() {
           className="relative overflow-hidden border-t border-border/15 bg-[var(--ink-fixed)] px-4 py-20 text-[var(--bone-fixed)] transition-colors duration-700 sm:px-6 sm:py-32 md:px-12 md:py-48 lg:px-[10%]"
         >
           <div className="pointer-events-none absolute -right-24 top-0 size-[520px] bg-[var(--inner-green)]/[0.04] blur-3xl" />
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-black/40 to-transparent" />
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[var(--ink-fixed)]/40 to-transparent" />
 
           <FadeIn>
             <div className="mb-12 flex items-baseline justify-between gap-3 border-b border-white/15 pb-5 font-mono text-[10px] uppercase tracking-widest opacity-60 sm:mb-20 sm:gap-6 sm:pb-6 sm:text-xs">

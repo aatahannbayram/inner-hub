@@ -599,8 +599,8 @@ export default function Vault() {
                 );
               })}
             </CarouselContent>
-            <CarouselPrevious className="left-0 hidden border-[var(--ink)]/15 bg-[var(--bone)] sm:flex" />
-            <CarouselNext className="right-0 hidden border-[var(--ink)]/15 bg-[var(--bone)] sm:flex" />
+            <CarouselPrevious className="left-0 hidden border-white/15 bg-[var(--ink-fixed)] text-[var(--bone-fixed)] sm:flex" />
+            <CarouselNext className="right-0 hidden border-white/15 bg-[var(--ink-fixed)] text-[var(--bone-fixed)] sm:flex" />
           </Carousel>
         </div>
       </FadeIn>

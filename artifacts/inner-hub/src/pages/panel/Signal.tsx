@@ -629,11 +629,11 @@ export default function Signal() {
           {/* Insight hero */}
           <FadeIn delay={0.04}>
             <section id="signal-insight" className="scroll-mt-4">
-              <div className="relative overflow-hidden border border-white/10 bg-black/55 p-5 text-[var(--bone)] backdrop-blur-md sm:p-6 md:p-8 dark:bg-black/50">
+              <div className="relative overflow-hidden border border-white/10 bg-black/55 p-5 text-[var(--bone-fixed)] backdrop-blur-md sm:p-6 md:p-8 dark:bg-black/50">
                 <AmbientCardBackground />
                 <span
                   aria-hidden
-                  className="pointer-events-none absolute -right-3 -top-10 select-none font-serif text-[10rem] italic leading-none text-[var(--bone)]/[0.06] md:text-[13rem]"
+                  className="pointer-events-none absolute -right-3 -top-10 select-none font-serif text-[10rem] italic leading-none text-[var(--bone-fixed)]/[0.06] md:text-[13rem]"
                 >
                   &rdquo;
                 </span>
@@ -641,7 +641,7 @@ export default function Signal() {
                 <div className="relative z-10">
                   <div className="mb-4 flex flex-wrap items-center gap-2">
                     <Zap className="size-3.5 text-[var(--success-ink)]" />
-                    <span className="text-[10px] uppercase tracking-[0.16em] text-[var(--bone)]/62">
+                    <span className="text-[10px] uppercase tracking-[0.16em] text-[var(--bone-fixed)]/62">
                       {t("signal.weekInsight")}
                     </span>
                     <span className="ml-auto size-3 bg-[var(--inner-green)]" aria-hidden />
@@ -657,14 +657,14 @@ export default function Signal() {
                     <button
                       type="button"
                       onClick={copyInsight}
-                      className="inline-flex min-h-10 items-center gap-2 border border-[var(--bone-fixed)]/25 px-3 py-2 font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)]/80 transition-colors hover:border-[var(--bone)]/50 hover:text-[var(--bone)]"
+                      className="inline-flex min-h-10 items-center gap-2 border border-[var(--bone-fixed)]/25 px-3 py-2 font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)]/80 transition-colors hover:border-[var(--bone-fixed)]/50 hover:text-[var(--bone-fixed)]"
                     >
                       {copied ? <Check className="size-3" /> : <Copy className="size-3" />}
                       {copied ? t("common.copied") : t("signal.copyInsight")}
                     </button>
                     <Link
                       href="/panel/chat"
-                      className="inline-flex min-h-10 items-center gap-2 border border-[var(--bone-fixed)]/25 px-3 py-2 font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)]/80 transition-colors hover:border-[var(--bone)]/50 hover:text-[var(--bone)]"
+                      className="inline-flex min-h-10 items-center gap-2 border border-[var(--bone-fixed)]/25 px-3 py-2 font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)]/80 transition-colors hover:border-[var(--bone-fixed)]/50 hover:text-[var(--bone-fixed)]"
                     >
                       <MessageSquare className="size-3" /> {t("signal.openInChat")}
                     </Link>
@@ -673,7 +673,7 @@ export default function Signal() {
                         type="button"
                         onClick={() => generateInsightImage(false)}
                         disabled={imageLoading}
-                        className="inline-flex min-h-10 items-center gap-2 border border-[var(--bone)] bg-[var(--bone)] px-3 py-2 font-mono text-label uppercase tracking-widest text-[var(--ink)] transition-opacity hover:opacity-90 disabled:opacity-40"
+                        className="inline-flex min-h-10 items-center gap-2 border border-[var(--bone)] bg-[var(--bone-fixed)] px-3 py-2 font-mono text-label uppercase tracking-widest text-[var(--ink-fixed)] transition-opacity hover:opacity-90 disabled:opacity-40"
                       >
                         {imageLoading ? (
                           <Loader2 className="size-3 animate-spin" />
@@ -689,7 +689,7 @@ export default function Signal() {
                         type="button"
                         onClick={() => generateInsightImage(true)}
                         disabled={imageLoading}
-                        className="inline-flex min-h-10 items-center gap-2 border border-[var(--bone)]/20 px-3 py-2 font-mono text-label uppercase tracking-widest text-[var(--bone)]/62 transition-colors hover:text-[var(--bone)]/80 disabled:opacity-40"
+                        className="inline-flex min-h-10 items-center gap-2 border border-[var(--bone-fixed)]/20 px-3 py-2 font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)]/62 transition-colors hover:text-[var(--bone-fixed)]/80 disabled:opacity-40"
                       >
                         {imageLoading ? (
                           <Loader2 className="size-3 animate-spin" />
@@ -702,7 +702,7 @@ export default function Signal() {
                   </div>
 
                   {(fromCache || imageError) && (
-                    <p className="mt-3 font-mono text-label uppercase tracking-widest text-[var(--bone)]/57">
+                    <p className="mt-3 font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)]/57">
                       {imageError || (fromCache ? t("signal.fromCache") : null)}
                     </p>
                   )}
@@ -737,7 +737,7 @@ export default function Signal() {
                   <AnimatePresence>
                     {lightboxOpen && (
                       <motion.div
-                        className="fixed inset-0 z-[100] flex items-center justify-center bg-[var(--ink)]/75 p-4"
+                        className="fixed inset-0 z-[100] flex items-center justify-center bg-[var(--ink-fixed)]/75 p-4"
                         initial={reduce ? false : { opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={reduce ? undefined : { opacity: 0 }}
@@ -745,7 +745,7 @@ export default function Signal() {
                       >
                         <button
                           type="button"
-                          className="hit-40 absolute right-4 top-4 text-[var(--bone)]/70 hover:text-[var(--bone)]"
+                          className="hit-40 absolute right-4 top-4 text-[var(--bone-fixed)]/70 hover:text-[var(--bone-fixed)]"
                           onClick={() => setLightboxOpen(false)}
                           aria-label={t("common.close")}
                         >
@@ -753,7 +753,7 @@ export default function Signal() {
                         </button>
                         <motion.div
                           layoutId={reduce ? undefined : "signal-visual-frame"}
-                          className="max-h-[85vh] w-full max-w-5xl overflow-hidden border border-[var(--bone)]/10"
+                          className="max-h-[85vh] w-full max-w-5xl overflow-hidden border border-[var(--bone-fixed)]/10"
                           onClick={(e) => e.stopPropagation()}
                           transition={{ duration: reduce ? 0 : 0.4, ease: [0.16, 1, 0.3, 1] }}
                         >

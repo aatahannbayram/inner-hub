@@ -123,7 +123,7 @@ function MatchCard({
       <div className="mb-4 flex items-start gap-4">
         <div className="relative shrink-0">
           <PersonAvatar name={match.name} initials={initials} className="size-16 font-serif text-2xl italic" />
-          <div className="absolute -right-1 -top-1 flex size-5 items-center justify-center bg-[var(--bone)] panel-glass">
+          <div className="absolute -right-1 -top-1 flex size-5 items-center justify-center panel-glass">
             <Sparkles className="size-3 text-[var(--success-ink)]" />
           </div>
         </div>

@@ -416,11 +416,6 @@
   .dark .panel-card {
     transition: none;
   }
-  .panel-ambient__blob--a,
-  .panel-ambient__blob--b,
-  .panel-ambient__blob--c {
-    animation: none;
-  }
 }
 
 /** Panel kabuğu ambient — footer ink + referans texture */
@@ -451,9 +446,58 @@
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-/** Light panel: ambient kapalı — sadece dark’ta görünür */
-:root:not(.dark) .panel-ambient {
-  display: none;
+/**
+ * Cinematic surfaces (invite, login-like pages) always keep true ink/bone
+ * regardless of html.dark semantic flip — otherwise labels/CTAs go black-on-black.
+ */
+.cinematic-surface {
+  --ink: #0A0A0A;
+  --bone: #F4F1EC;
+  --ink-strong: #F4F1EC;
+  --ink-body: #B8B5AF;
+  --ink-muted: #8C8A85;
+  --ink-subtle: #7C7A75;
+  --ink-faint: #716F6A;
+  --ink-nontext: #5D5B57;
+  color: var(--bone);
+}
+
+/**
+ * Public marketing site shell — footer ile aynı: ink-fixed + soft green.
+ * Cream/bone page chrome yok; html.dark sızsa bile sabit.
+ */
+.site-atmosphere {
+  --ink: #0A0A0A;
+  --bone: #F4F1EC;
+  --ink-strong: #F4F1EC;
+  --ink-body: #B8B5AF;
+  --ink-muted: #8C8A85;
+  --ink-subtle: #7C7A75;
+  --ink-faint: #716F6A;
+  --ink-nontext: #5D5B57;
+  --background: 0 0% 4%;
+  --foreground: 39 31% 94%;
+  --muted-foreground: 39 12% 68%;
+  color: #F4F1EC;
+  background-color: var(--ink-fixed);
+  background-image:
+    radial-gradient(ellipse 50% 42% at 0% 8%, rgba(24, 255, 133, 0.055), transparent 68%),
+    radial-gradient(ellipse 40% 35% at 100% 90%, rgba(24, 255, 133, 0.03), transparent 65%);
+  background-attachment: fixed;
+}
+
+/**
+ * Dark checklist D5 — cinematic hero CTA güvenliği
+ * (bone/ink semantic flip’e karşı bone-fixed/ink-fixed)
+ */
+.dark .hero-cta-primary {
+  background: var(--bone-fixed) !important;
+  color: var(--ink-fixed) !important;
+  border-color: transparent;
+}
+.dark .hero-cta-ghost {
+  border-color: rgba(244, 241, 236, 0.25) !important;
+  color: var(--bone-fixed) !important;
 }
 
 .font-display {

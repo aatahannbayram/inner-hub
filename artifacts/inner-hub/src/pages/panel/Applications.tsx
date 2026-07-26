@@ -74,7 +74,7 @@ function DetailPanel({
 
   return (
     <>
-      <div className="fixed inset-0 z-40 bg-[var(--ink)]/20" onClick={onClose} />
+      <div className="fixed inset-0 z-40 bg-[var(--ink-fixed)]/20" onClick={onClose} />
       <div
         className="panel-glass-strong fixed bottom-0 right-0 top-0 z-50 flex w-full max-w-sm flex-col overflow-y-auto border-l border-[var(--ink)]/10"
         onClick={(e) => e.stopPropagation()}

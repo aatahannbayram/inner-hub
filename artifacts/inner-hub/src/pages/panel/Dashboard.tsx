@@ -354,7 +354,7 @@ export default function Dashboard({ userName = "Ata" }: { userName?: string }) {
             </div>
             <Link
               href="/panel/applications"
-              className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 border border-[var(--bone)]/20 bg-[var(--bone)] px-5 py-2.5 font-mono text-caption uppercase tracking-widest text-[var(--ink)] transition-opacity hover:opacity-80 sm:w-auto"
+              className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 border border-[var(--bone-fixed)]/20 bg-[var(--bone-fixed)] px-5 py-2.5 font-mono text-caption uppercase tracking-widest text-[var(--ink-fixed)] transition-opacity hover:opacity-80 sm:w-auto"
             >
               {t("dashboard.apply")} <ArrowRight className="size-3.5" />
             </Link>

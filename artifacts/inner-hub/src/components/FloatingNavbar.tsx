@@ -13,8 +13,8 @@ const LINK_KEYS = [
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
-/** Shared chrome — same black as the inset frame / letterbox. */
-export const HERO_CHROME = "#000000";
+/** Shared chrome — footer ink (hafif yeşil atmospheric), pure #000 değil */
+export const HERO_CHROME = "#0A0A0A";
 
 /**
  * Hero nav — full-width black bar matching the outer frame for visual unity.
@@ -37,7 +37,7 @@ export function FloatingNavbar() {
     >
       <div className="flex h-[56px] items-center justify-between gap-3 px-3 py-2.5 sm:h-auto sm:gap-4 sm:px-5 sm:py-3.5 md:px-6">
         <a href="/" aria-label="inner hub home" className="inline-flex shrink-0">
-          <Lockup className="text-[var(--bone)]" fontSize="clamp(22px, 5.2vw, 32px)" pulse />
+          <Lockup className="text-[var(--bone-fixed)]" fontSize="clamp(22px, 5.2vw, 32px)" pulse />
         </a>
 
         <nav
@@ -48,7 +48,7 @@ export function FloatingNavbar() {
             <a
               key={link.href}
               href={link.href}
-              className="group relative px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--bone)]/70 transition-colors duration-300 hover:text-[var(--bone)] lg:px-4 lg:text-[11px]"
+              className="group relative px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--bone-fixed)]/70 transition-colors duration-300 hover:text-[var(--bone-fixed)] lg:px-4 lg:text-[11px]"
             >
               {link.label}
               <span
@@ -63,7 +63,7 @@ export function FloatingNavbar() {
           <LocaleToggle tone="dark" className="hidden sm:inline-flex" />
           <a
             href="/invitation"
-            className="hidden items-center gap-2.5 bg-[var(--bone)] px-4 py-2 font-mono text-[10px] uppercase tracking-[0.14em] text-black transition-colors hover:bg-white sm:inline-flex lg:px-5 lg:text-[11px]"
+            className="hidden items-center gap-2.5 bg-[var(--bone-fixed)] px-4 py-2 font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--ink-fixed)] transition-colors hover:bg-white sm:inline-flex lg:px-5 lg:text-[11px]"
           >
             {t("publicNav.invitation")}
             <span className="size-1.5 bg-[var(--inner-green)]" aria-hidden />
@@ -78,14 +78,14 @@ export function FloatingNavbar() {
           >
             <span className="relative flex h-3.5 w-4 flex-col justify-between">
               <span
-                className="block h-[1.5px] w-full origin-center bg-[var(--bone)] transition-transform duration-300"
+                className="block h-[1.5px] w-full origin-center bg-[var(--bone-fixed)] transition-transform duration-300"
                 style={{
                   transitionTimingFunction: "cubic-bezier(0.77,0,0.175,1)",
                   transform: open ? "translateY(6px) rotate(45deg)" : "none",
                 }}
               />
               <span
-                className="block h-[1.5px] w-full origin-center bg-[var(--bone)] transition-transform duration-300"
+                className="block h-[1.5px] w-full origin-center bg-[var(--bone-fixed)] transition-transform duration-300"
                 style={{
                   transitionTimingFunction: "cubic-bezier(0.77,0,0.175,1)",
                   transform: open ? "translateY(-6px) rotate(-45deg)" : "none",
@@ -107,7 +107,7 @@ export function FloatingNavbar() {
             style={{ backgroundColor: HERO_CHROME }}
           >
             <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
-              <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--bone)]/50">
+              <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--bone-fixed)]/50">
                 {t("home.langSwitch")}
               </span>
               <LocaleToggle tone="dark" />
@@ -117,10 +117,10 @@ export function FloatingNavbar() {
                 key={link.href}
                 href={link.href}
                 onClick={() => setOpen(false)}
-                className="flex items-center justify-between border-b border-white/10 px-4 py-3.5 font-mono text-xs uppercase tracking-widest text-[var(--bone)]/80 transition-colors last:border-b-0 hover:text-[var(--bone)]"
+                className="flex items-center justify-between border-b border-white/10 px-4 py-3.5 font-mono text-xs uppercase tracking-widest text-[var(--bone-fixed)]/80 transition-colors last:border-b-0 hover:text-[var(--bone-fixed)]"
               >
                 <span>{link.label}</span>
-                <span className="font-mono text-[10px] text-[var(--bone)]/30">
+                <span className="font-mono text-[10px] text-[var(--bone-fixed)]/30">
                   {String(i + 1).padStart(2, "0")}
                 </span>
               </a>
@@ -128,7 +128,7 @@ export function FloatingNavbar() {
             <a
               href="/invitation"
               onClick={() => setOpen(false)}
-              className="flex items-center justify-between bg-[var(--bone)] px-4 py-3.5 font-mono text-xs uppercase tracking-widest text-black"
+              className="flex items-center justify-between bg-[var(--bone-fixed)] px-4 py-3.5 font-mono text-xs uppercase tracking-widest text-[var(--ink-fixed)]"
             >
               {t("publicNav.requestInvitation")}
               <span className="size-1.5 bg-[var(--inner-green)]" aria-hidden />

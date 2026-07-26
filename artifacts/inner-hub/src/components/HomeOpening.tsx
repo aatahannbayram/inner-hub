@@ -3,7 +3,7 @@ import { ArrowUpRight, Check } from "lucide-react";
 import { motion, useInView } from "framer-motion";
 import { WordsPullUp, WordsPullUpMultiStyle } from "@/components/WordsPullUp";
 import { ScrollTextReveal } from "@/components/ScrollTextReveal";
-import { FloatingNavbar, HERO_CHROME } from "@/components/FloatingNavbar";
+import { FloatingNavbar } from "@/components/FloatingNavbar";
 import { HeroVideo } from "@/components/HeroVideo";
 import { Lockup } from "@/components/Lockup";
 import { useT } from "@/i18n";
@@ -71,11 +71,11 @@ function HeroInset() {
   return (
     <section
       className="relative h-[100svh] p-2 sm:p-3 md:p-5 lg:p-6"
-      style={{ backgroundColor: HERO_CHROME }}
+      style={{ backgroundColor: "var(--ink-fixed)" }}
     >
       <div
         className="relative h-full w-full overflow-hidden border border-white/[0.08]"
-        style={{ backgroundColor: HERO_CHROME }}
+        style={{ backgroundColor: "var(--ink-fixed)" }}
       >
         <HeroVideo
           src={HERO_VIDEO}
@@ -101,7 +101,7 @@ function HeroInset() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.35, ease: EASE }}
-            className="mb-3 flex items-center gap-2.5 font-mono text-[9px] uppercase tracking-[0.16em] text-[var(--bone)]/55 sm:mb-6 sm:gap-3 sm:text-[11px]"
+            className="mb-3 flex items-center gap-2.5 font-mono text-[9px] uppercase tracking-[0.16em] text-[var(--bone-fixed)]/55 sm:mb-6 sm:gap-3 sm:text-[11px]"
           >
             <span className="size-2 shrink-0 bg-[var(--inner-green)] animate-beacon sm:size-1.5" />
             {t("home.heroTag")}
@@ -109,10 +109,10 @@ function HeroInset() {
 
           <div className="grid grid-cols-1 items-end gap-4 sm:gap-5 md:grid-cols-12 md:gap-10">
             <div className="min-w-0 md:col-span-8">
-              <h1 className="text-[var(--bone)]">
+              <h1 className="text-[var(--bone-fixed)]">
                 <Lockup
                   suffix="hub"
-                  className="text-[var(--bone)]"
+                  className="text-[var(--bone-fixed)]"
                   fontSize="clamp(2.75rem, 14vw, 9.5rem)"
                   pulse
                 />
@@ -125,7 +125,7 @@ function HeroInset() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.5, ease: EASE }}
-                className="max-w-[36ch] text-[13px] leading-[1.45] text-[var(--bone)]/70 sm:text-sm md:text-[15px] md:leading-[1.35]"
+                className="max-w-[36ch] text-[13px] leading-[1.45] text-[var(--bone-fixed)]/70 sm:text-sm md:text-[15px] md:leading-[1.35]"
               >
                 {t("home.heroBody")}
               </motion.p>
@@ -135,11 +135,11 @@ function HeroInset() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.7, ease: EASE }}
-                className="group inline-flex w-full min-h-11 items-center justify-between gap-2.5 bg-[var(--bone)] py-1.5 pl-4 pr-1.5 text-sm font-medium text-black transition-[gap] duration-300 hover:gap-3.5 sm:w-fit sm:min-h-0 sm:pl-5 sm:text-base"
+                className="group inline-flex w-full min-h-11 items-center justify-between gap-2.5 bg-[var(--bone-fixed)] py-1.5 pl-4 pr-1.5 text-sm font-medium text-[var(--ink-fixed)] transition-[gap] duration-300 hover:gap-3.5 sm:w-fit sm:min-h-0 sm:pl-5 sm:text-base"
               >
                 {t("home.requestInvitation")}
-                <span className="flex size-9 shrink-0 items-center justify-center bg-black transition-transform duration-300 group-hover:scale-110 sm:size-10">
-                  <ArrowUpRight className="size-4 text-[var(--bone)]" strokeWidth={1.75} />
+                <span className="flex size-9 shrink-0 items-center justify-center bg-[var(--ink-fixed)] transition-transform duration-300 group-hover:scale-110 sm:size-10">
+                  <ArrowUpRight className="size-4 text-[var(--bone-fixed)]" strokeWidth={1.75} />
                 </span>
               </motion.a>
             </div>
@@ -154,7 +154,7 @@ function AboutIdea() {
   return (
     <section
       id="section-01"
-      className="bg-[var(--ink)] px-3 py-12 sm:px-4 sm:py-16 md:px-6 md:py-28"
+      className="bg-[var(--ink-fixed)] px-3 py-12 sm:px-4 sm:py-16 md:px-6 md:py-28"
     >
       <div className="relative mx-auto max-w-6xl overflow-hidden border border-white/10">
         {/* Video only inside the rectangle */}
@@ -163,18 +163,18 @@ function AboutIdea() {
             src={IDEA_VIDEO}
             className="h-full w-full scale-[1.04] object-cover"
           />
-          <div className="absolute inset-0 bg-black/55" />
+          <div className="absolute inset-0 bg-[var(--ink-fixed)]/55" />
           <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/35 to-black/60" />
           <div className="noise-overlay absolute inset-0 opacity-[0.3] mix-blend-overlay" />
         </div>
 
         <div className="relative z-10 px-5 py-14 text-center sm:px-8 sm:py-16 md:px-12 md:py-20">
-          <p className="mb-6 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)]/60 sm:mb-8 sm:text-xs">
+          <p className="mb-6 font-mono text-[10px] uppercase tracking-widest text-[var(--bone-fixed)]/60 sm:mb-8 sm:text-xs">
             01 · The idea
           </p>
 
           <WordsPullUpMultiStyle
-            className="mx-auto max-w-3xl justify-center text-3xl leading-[0.95] text-[var(--bone)] sm:text-4xl sm:leading-[0.9] md:text-5xl lg:text-6xl xl:text-7xl"
+            className="mx-auto max-w-3xl justify-center text-3xl leading-[0.95] text-[var(--bone-fixed)] sm:text-4xl sm:leading-[0.9] md:text-5xl lg:text-6xl xl:text-7xl"
             segments={[
               { text: "AI is the center.", className: "font-normal" },
               {
@@ -190,7 +190,7 @@ function AboutIdea() {
 
           <ScrollTextReveal
             text="It starts in İstanbul. Thirty-four people, chosen one by one, form the founding circle: not members of a platform, but the people who make what comes next possible."
-            className="mx-auto mt-10 max-w-2xl text-xs leading-relaxed text-[var(--bone)]/70 sm:mt-12 sm:text-sm md:text-base"
+            className="mx-auto mt-10 max-w-2xl text-xs leading-relaxed text-[var(--bone-fixed)]/70 sm:mt-12 sm:text-sm md:text-base"
           />
         </div>
       </div>
@@ -206,13 +206,13 @@ function FoundingSeats() {
     <section
       id="section-02"
       ref={ref}
-      className="relative min-h-0 overflow-hidden bg-black px-3 py-12 sm:px-4 sm:py-16 md:min-h-svh md:px-6 md:py-24"
+      className="relative min-h-0 overflow-hidden bg-[var(--ink-fixed)] px-3 py-12 sm:px-4 sm:py-16 md:min-h-svh md:px-6 md:py-24"
     >
       <div aria-hidden className="bg-noise pointer-events-none absolute inset-0 opacity-[0.15]" />
 
       <div className="relative z-10 mx-auto max-w-7xl">
         <div className="mb-10 max-w-3xl sm:mb-12 md:mb-14">
-          <p className="mb-5 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)]/50 sm:text-xs">
+          <p className="mb-5 font-mono text-[10px] uppercase tracking-widest text-[var(--bone-fixed)]/50 sm:text-xs">
             02 · The first thirty-four
           </p>
           <WordsPullUpMultiStyle
@@ -220,7 +220,7 @@ function FoundingSeats() {
             segments={[
               {
                 text: "Founding seats for people who meet early.",
-                className: "font-normal text-[var(--bone)]",
+                className: "font-normal text-[var(--bone-fixed)]",
               },
             {
               text: "Not tickets. Not tiers. The circle.",
@@ -256,7 +256,7 @@ function FoundingSeats() {
                 </span>
                 <span className="size-2.5 bg-[var(--inner-green)] animate-beacon" aria-hidden />
               </div>
-              <h3 className="mb-4 text-lg font-medium text-[var(--bone)] sm:text-xl">{card.title}</h3>
+              <h3 className="mb-4 text-lg font-medium text-[var(--bone-fixed)] sm:text-xl">{card.title}</h3>
               <ul className="flex flex-1 flex-col gap-2.5">
                 {card.items.map((item) => (
                   <li key={item} className="flex items-start gap-2.5 text-sm text-white/55">
@@ -270,7 +270,7 @@ function FoundingSeats() {
               </ul>
               <a
                 href="/invitation"
-                className="mt-5 inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)]/70 transition-colors hover:text-[var(--bone)]"
+                className="mt-5 inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-[var(--bone-fixed)]/70 transition-colors hover:text-[var(--bone-fixed)]"
               >
                 Learn more
                 <ArrowUpRight className="size-3.5 -rotate-0" strokeWidth={1.75} />

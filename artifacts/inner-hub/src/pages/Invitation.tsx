@@ -25,7 +25,7 @@ type Role = (typeof ROLE_DEFS)[number]["value"];
 const STEP_IDS = ["role", "identity", "org", "story", "intro"] as const;
 
 const fieldClass =
-  "w-full border-0 border-b border-white/20 bg-transparent px-0 py-3.5 text-[15px] text-[var(--bone)] shadow-none placeholder:text-white/35 focus-visible:border-[var(--inner-green)] focus-visible:outline-none focus-visible:ring-0 transition-colors";
+  "w-full border-0 border-b border-white/20 bg-transparent px-0 py-3.5 text-[15px] text-[var(--bone-fixed)] shadow-none placeholder:text-white/35 focus-visible:border-[var(--inner-green)] focus-visible:outline-none focus-visible:ring-0 transition-colors";
 
 export default function Invitation() {
   const t = useT();
@@ -219,7 +219,7 @@ export default function Invitation() {
   };
 
   return (
-    <div lang={locale} className="relative flex min-h-svh flex-col overflow-hidden bg-[var(--ink)] text-[var(--bone)]">
+    <div lang={locale} className="cinematic-surface relative flex min-h-svh flex-col overflow-hidden bg-[var(--ink-fixed)] text-[var(--bone-fixed)]">
       <HeroVideo
         src={INVITE_VIDEO}
         className="fixed inset-0 z-0 h-full w-full scale-[1.03] object-cover"
@@ -236,7 +236,7 @@ export default function Invitation() {
 
       <header className="relative z-20 flex h-[60px] shrink-0 items-center justify-between px-5 md:h-[72px] md:px-10 lg:px-[8%]">
         <a href="/" className="inline-flex focus-visible:outline-none">
-          <Lockup className="text-[var(--bone)]" fontSize="clamp(22px, 2.4vw, 30px)" pulse />
+          <Lockup className="text-[var(--bone-fixed)]" fontSize="clamp(22px, 2.4vw, 30px)" pulse />
         </a>
         <div className="flex items-center gap-3">
           <LocaleToggle tone="dark" />
@@ -290,7 +290,7 @@ export default function Invitation() {
                   {t("invite.received")}
                 </span>
               </div>
-              <h1 className="mb-4 font-display font-serif italic text-4xl leading-[1.1] text-balance md:text-5xl">
+              <h1 className="mb-4 font-display font-serif italic text-4xl leading-[1.1] text-balance text-[var(--bone-fixed)] md:text-5xl">
                 {t("invite.successTitle")}
               </h1>
               <p className="max-w-[42ch] text-sm leading-relaxed text-white/60 md:text-base">
@@ -340,7 +340,7 @@ export default function Invitation() {
                       }}
                       className={`shrink-0 px-2 py-1 font-mono text-[9px] uppercase tracking-widest transition-colors sm:text-[10px] ${
                         i === step
-                          ? "text-[var(--bone)]"
+                          ? "text-[var(--bone-fixed)]"
                           : i < step
                             ? "text-[var(--inner-green)]/80 hover:text-[var(--inner-green)]"
                             : "text-white/25"
@@ -361,7 +361,7 @@ export default function Invitation() {
                     exit={{ opacity: 0, x: -14 }}
                     transition={{ duration: 0.35, ease: EASE }}
                   >
-                    <h1 className="mb-2 font-display font-serif italic text-3xl leading-[1.1] text-balance sm:text-4xl">
+                    <h1 className="mb-2 font-display font-serif italic text-3xl leading-[1.1] text-balance text-[var(--bone-fixed)] sm:text-4xl">
                       {steps[step].title}
                     </h1>
                     <p className="mb-8 max-w-[46ch] text-sm leading-relaxed text-white/55">
@@ -394,7 +394,7 @@ export default function Invitation() {
                                 ) : null}
                               </div>
                               <div>
-                                <p className="font-mono text-[11px] uppercase tracking-widest text-[var(--bone)]">
+                                <p className="font-mono text-[11px] uppercase tracking-widest text-[var(--bone-fixed)]">
                                   {r.label}
                                 </p>
                                 <p className="mt-1 text-xs leading-snug text-white/45">{r.hint}</p>
@@ -547,7 +547,7 @@ export default function Invitation() {
                               />
                             ) : null}
                             <div className="min-w-0">
-                              <p className="truncate text-sm text-[var(--bone)]">
+                              <p className="truncate text-sm text-[var(--bone-fixed)]">
                                 {organization || "Kurum belirtilmedi"}
                               </p>
                               {organizationDomain ? (
@@ -601,7 +601,7 @@ export default function Invitation() {
                     type="button"
                     onClick={goNext}
                     disabled={!canNext}
-                    className="inline-flex items-center gap-2 bg-[var(--bone)] px-5 py-2.5 font-mono text-[11px] uppercase tracking-widest text-black transition-opacity hover:opacity-90 disabled:opacity-35"
+                    className="inline-flex items-center gap-2 bg-[var(--bone-fixed)] px-5 py-2.5 font-mono text-[11px] uppercase tracking-widest text-[var(--ink-fixed)] transition-opacity hover:opacity-90 disabled:opacity-35"
                   >
                     {t("invite.continue")}
                     <ArrowUpRight className="size-3.5" />
@@ -611,7 +611,7 @@ export default function Invitation() {
                     type="button"
                     onClick={handleSubmit}
                     disabled={isPending || !role}
-                    className="inline-flex items-center gap-2 bg-[var(--bone)] px-5 py-2.5 font-mono text-[11px] uppercase tracking-widest text-black transition-opacity hover:opacity-90 disabled:opacity-35"
+                    className="inline-flex items-center gap-2 bg-[var(--bone-fixed)] px-5 py-2.5 font-mono text-[11px] uppercase tracking-widest text-[var(--ink-fixed)] transition-opacity hover:opacity-90 disabled:opacity-35"
                   >
                     {isPending ? t("invite.submitting") : t("invite.submit")}
                     {!isPending ? <ArrowUpRight className="size-3.5" /> : null}
@@ -657,7 +657,7 @@ function SummaryRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-start justify-between gap-4 border-b border-white/5 pb-2 last:border-0 last:pb-0">
       <dt className="font-mono text-[10px] uppercase tracking-widest text-white/40">{label}</dt>
-      <dd className="truncate text-right text-[var(--bone)]/85">{value}</dd>
+      <dd className="truncate text-right text-[var(--bone-fixed)]/85">{value}</dd>
     </div>
   );
 }

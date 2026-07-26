@@ -22,7 +22,7 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean
     >
       <span
         className={[
-          "absolute top-0.5 size-3.5 bg-[var(--bone)] transition-transform duration-150",
+          "absolute top-0.5 size-3.5 bg-[var(--bone-fixed)] transition-transform duration-150",
           checked ? "translate-x-[18px]" : "translate-x-0.5",
         ].join(" ")}
       />

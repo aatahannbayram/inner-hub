@@ -245,7 +245,7 @@ export function PanelOnboarding({ userName }: { userName: string }) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[90] flex items-end justify-center bg-[var(--ink)]/55 p-0 sm:items-center sm:p-6"
+          className="fixed inset-0 z-[90] flex items-end justify-center bg-[var(--ink-fixed)]/55 p-0 sm:items-center sm:p-6"
           role="dialog"
           aria-modal="true"
           aria-labelledby="onboarding-title"
@@ -255,7 +255,7 @@ export function PanelOnboarding({ userName }: { userName: string }) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 16 }}
             transition={{ duration: 0.45, ease: EASE }}
-            className="flex max-h-[92svh] w-full max-w-lg flex-col overflow-hidden border border-[var(--ink)]/10 bg-[var(--bone)] shadow-2xl sm:max-h-[85svh]"
+            className="flex max-h-[92svh] w-full max-w-lg flex-col overflow-hidden border border-white/10 panel-glass-strong shadow-2xl sm:max-h-[85svh]"
           >
             {/* Progress */}
             <div className="shrink-0 border-b border-[var(--ink)]/[0.08] px-5 pt-5 sm:px-7">
@@ -455,7 +455,7 @@ function CoachOverlay({
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3, ease: EASE }}
-        className="absolute w-[min(280px,calc(100vw-24px))] border border-[var(--ink)]/10 bg-[var(--bone)] p-4 shadow-xl"
+        className="absolute w-[min(280px,calc(100vw-24px))] border border-white/10 panel-glass-strong p-4 shadow-xl"
         style={{ top: cardTop, left: cardLeft }}
       >
         <div className="mb-2 flex items-start justify-between gap-2">

@@ -257,7 +257,7 @@ export default function InnerApi() {
             </div>
             <a
               href="#"
-              className="flex shrink-0 items-center justify-center gap-1.5 border border-[var(--bone-fixed)]/25 px-3 py-2 font-mono text-label font-semibold uppercase tracking-widest text-[var(--bone-fixed)]/70 transition-all hover:border-[var(--bone)]/50 hover:text-[var(--bone)] sm:justify-start"
+              className="flex shrink-0 items-center justify-center gap-1.5 border border-[var(--bone-fixed)]/25 px-3 py-2 font-mono text-label font-semibold uppercase tracking-widest text-[var(--bone-fixed)]/70 transition-all hover:border-[var(--bone-fixed)]/50 hover:text-[var(--bone-fixed)] sm:justify-start"
             >
               <Code2 className="size-3" /> {t("api.docs")} <ArrowUpRight className="size-2.5" />
             </a>
@@ -421,7 +421,7 @@ export default function InnerApi() {
                   className={[
                     "flex w-full items-center justify-between border px-3 py-2 font-mono text-label font-semibold uppercase tracking-widest transition-all",
                     plan.recommended
-                      ? "border-[var(--bone)]/25 text-[var(--bone)]/70 hover:border-[var(--bone)]/50 hover:text-[var(--bone)]"
+                      ? "border-[var(--bone-fixed)]/25 text-[var(--bone-fixed)]/70 hover:border-[var(--bone-fixed)]/50 hover:text-[var(--bone-fixed)]"
                       : "border-[var(--ink)]/15 text-[var(--ink-body)] hover:border-[var(--ink)] hover:text-[var(--ink)]",
                   ].join(" ")}
                 >

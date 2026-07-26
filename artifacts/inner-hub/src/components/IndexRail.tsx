@@ -53,7 +53,7 @@ export function IndexRail() {
                 aria-hidden="true"
               />
             )}
-            <span className={isActive ? "text-foreground" : "text-muted-foreground"}>{label}</span>
+            <span className={isActive ? "text-[var(--bone-fixed)]" : "text-[var(--bone-fixed)]/45"}>{label}</span>
           </a>
         );
       })}

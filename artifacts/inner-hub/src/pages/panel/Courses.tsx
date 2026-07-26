@@ -305,16 +305,16 @@ function CoursesHero({
       <div className="relative z-10 flex h-full flex-col justify-end px-6 pb-10 md:px-12 md:pb-14">
         <div className="lg:grid lg:grid-cols-2 lg:items-end lg:gap-10">
           <div>
-            <p className="mb-3 font-mono text-label uppercase tracking-widest text-[var(--bone)]/60 [text-shadow:0_1px_12px_rgba(0,0,0,0.6)]">
+            <p className="mb-3 font-mono text-label uppercase tracking-widest text-white/60 [text-shadow:0_1px_12px_rgba(0,0,0,0.6)]">
               {t("courses.heroEyebrow")}
             </p>
             <AnimatedHeading
               text={t("courses.heroHeadline")}
-              className="mb-4 font-display font-serif italic text-4xl leading-[1.1] text-[var(--bone)] [text-shadow:0_2px_24px_rgba(0,0,0,0.55)] md:text-5xl lg:text-6xl"
+              className="mb-4 font-display font-serif italic text-4xl leading-[1.1] text-white [text-shadow:0_2px_24px_rgba(0,0,0,0.55)] md:text-5xl lg:text-6xl"
               style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1" }}
             />
             <FadeIn delay={0.8}>
-              <p className="mb-6 max-w-[46ch] text-base text-[var(--bone)]/75 [text-shadow:0_1px_12px_rgba(0,0,0,0.6)] md:text-lg">
+              <p className="mb-6 max-w-[46ch] text-base text-white/75 [text-shadow:0_1px_12px_rgba(0,0,0,0.6)] md:text-lg">
                 {t("courses.heroBody")}
               </p>
             </FadeIn>
@@ -323,7 +323,7 @@ function CoursesHero({
                 {hasEnrolled && (
                   <button
                     onClick={() => scrollToId("courses-enrolled")}
-                    className="group inline-flex min-h-11 items-center gap-2 bg-[var(--bone)] px-6 py-3 font-mono text-sm uppercase tracking-widest text-[var(--ink)] transition-opacity hover:opacity-90 sm:px-8"
+                    className="group inline-flex min-h-11 items-center gap-2 bg-[var(--bone-fixed)] px-6 py-3 font-mono text-sm uppercase tracking-widest text-[var(--ink-fixed)] transition-opacity hover:opacity-90 sm:px-8"
                   >
                     {t("courses.continueCta")}
                     <ChevronRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
@@ -334,7 +334,7 @@ function CoursesHero({
                   className={
                     hasEnrolled
                       ? "liquid-glass group inline-flex min-h-11 items-center gap-2 border border-[var(--bone-fixed)]/25 px-6 py-3 font-mono text-sm uppercase tracking-widest text-[var(--bone-fixed)] transition-colors hover:bg-[var(--bone-fixed)] hover:text-[var(--ink-fixed)] sm:px-8"
-                      : "group inline-flex min-h-11 items-center gap-2 bg-[var(--bone)] px-6 py-3 font-mono text-sm uppercase tracking-widest text-[var(--ink)] transition-opacity hover:opacity-90 sm:px-8"
+                      : "group inline-flex min-h-11 items-center gap-2 bg-[var(--bone-fixed)] px-6 py-3 font-mono text-sm uppercase tracking-widest text-[var(--ink-fixed)] transition-opacity hover:opacity-90 sm:px-8"
                   }
                 >
                   {t("courses.exploreCta")}

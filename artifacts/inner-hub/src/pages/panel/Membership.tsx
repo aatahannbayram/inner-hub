@@ -176,7 +176,7 @@ function PlanCard({ plan }: { plan: Plan }) {
         className={[
           "flex w-full items-center justify-between border px-5 py-3 font-mono text-caption uppercase tracking-widest transition-opacity disabled:opacity-40 hover:opacity-80",
           plan.highlighted
-            ? "border-[var(--bone)]/20 bg-[var(--bone)] text-[var(--ink)]"
+            ? "border-[var(--bone-fixed)]/20 bg-[var(--bone-fixed)] text-[var(--ink-fixed)]"
             : "border-[var(--ink)] bg-[var(--ink)] text-[var(--bone)]",
         ].join(" ")}
       >

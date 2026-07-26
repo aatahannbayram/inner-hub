@@ -2566,7 +2566,7 @@ function IndexRail() {
                   "aria-hidden": "true"
                 }
               ),
-              /* @__PURE__ */ jsx("span", { className: isActive ? "text-foreground" : "text-muted-foreground", children: label })
+              /* @__PURE__ */ jsx("span", { className: isActive ? "text-[var(--bone-fixed)]" : "text-[var(--bone-fixed)]/45", children: label })
             ]
           },
           id
@@ -2713,7 +2713,12 @@ function HeroVideo({ src, poster, className, style }) {
     }
   );
 }
-function FeatureCard$1({ feature, index, setRef }) {
+const CARD_BG = "#212121";
+function FeatureCard$1({
+  feature,
+  index,
+  setRef
+}) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-15% 0px -15% 0px" });
   return /* @__PURE__ */ jsxs(
@@ -2724,19 +2729,28 @@ function FeatureCard$1({ feature, index, setRef }) {
         setRef(el);
       },
       "data-feature-index": index,
-      className: `border border-[var(--bone)]/15 bg-[var(--bone)]/[0.06] p-6 backdrop-blur-sm transition-all duration-700 ease-out md:p-10 ${inView ? "translate-x-0 opacity-100" : "translate-x-16 opacity-0"}`,
+      className: `border border-white/10 p-6 transition-all duration-700 ease-out md:p-8 ${inView ? "translate-x-0 opacity-100" : "translate-x-16 opacity-0"}`,
+      style: { backgroundColor: CARD_BG },
       children: [
-        /* @__PURE__ */ jsx("p", { className: "mb-4 font-mono text-label uppercase tracking-widest text-[var(--bone)]/57", children: feature.tag }),
-        /* @__PURE__ */ jsx("h3", { className: "mb-6 font-serif text-xl italic text-[var(--bone)] md:text-2xl", children: feature.name }),
-        /* @__PURE__ */ jsx("div", { className: "mb-6 aspect-video overflow-hidden bg-black/30", children: feature.media.type === "video" ? /* @__PURE__ */ jsx(
+        /* @__PURE__ */ jsx("p", { className: "mb-4 font-mono text-label uppercase tracking-widest text-white/45", children: feature.tag }),
+        /* @__PURE__ */ jsx("h3", { className: "mb-6 font-serif text-xl italic text-[var(--bone-fixed)] md:text-2xl", children: feature.name }),
+        /* @__PURE__ */ jsx("div", { className: "mb-6 aspect-video overflow-hidden bg-black/40", children: feature.media.type === "video" ? /* @__PURE__ */ jsx(
           HeroVideo,
           {
             src: feature.media.src,
             poster: posterForVideo(feature.media.src),
             className: "size-full object-cover"
           }
-        ) : /* @__PURE__ */ jsx("img", { src: feature.media.src, alt: feature.name, className: "size-full object-cover", loading: "lazy" }) }),
-        /* @__PURE__ */ jsx("p", { className: "text-sm leading-relaxed text-[var(--bone)]/60 md:text-base", children: feature.desc })
+        ) : /* @__PURE__ */ jsx(
+          "img",
+          {
+            src: feature.media.src,
+            alt: feature.name,
+            className: "size-full object-cover",
+            loading: "lazy"
+          }
+        ) }),
+        /* @__PURE__ */ jsx("p", { className: "text-sm leading-relaxed text-white/55 md:text-base", children: feature.desc })
       ]
     }
   );
@@ -2765,70 +2779,101 @@ function PlatformFeatures({
   const scrollToCard = (index) => {
     cardRefs.current.get(index)?.scrollIntoView({ behavior: "smooth", block: "center" });
   };
-  return /* @__PURE__ */ jsx("div", { className: "bg-[var(--ink)] px-6 py-20 text-[var(--bone)] md:px-12 md:py-40 lg:px-[10%] lg:py-48", children: /* @__PURE__ */ jsxs("div", { className: "grid grid-cols-1 gap-16 lg:grid-cols-[400px_1fr] lg:gap-24 xl:grid-cols-[460px_1fr] xl:gap-48", children: [
-    /* @__PURE__ */ jsxs("div", { className: "lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col lg:justify-between lg:py-32", children: [
-      /* @__PURE__ */ jsxs("div", { children: [
-        /* @__PURE__ */ jsx("p", { className: "mb-4 font-mono text-xs uppercase tracking-widest text-[var(--bone)]/57", children: "03 · The platform" }),
-        /* @__PURE__ */ jsx("h2", { className: "font-display font-serif italic text-2xl leading-[1.2] sm:text-3xl lg:text-[46px]", children: "Built for the pace of a closed circle." })
-      ] }),
-      /* @__PURE__ */ jsx("div", { className: "mt-12 hidden flex-col gap-2 lg:flex", children: features.map((f, i) => /* @__PURE__ */ jsx(
-        "button",
-        {
-          type: "button",
-          onClick: () => scrollToCard(i),
-          className: `border px-4 py-3 text-left font-mono text-xs uppercase tracking-widest transition-colors ${activeIndex === i ? "border-[var(--bone)]/20 bg-[var(--bone)]/10 text-[var(--bone)]" : "border-transparent text-[var(--bone)]/57 hover:text-[var(--bone)]/70"}`,
-          children: f.name
-        },
-        f.id
-      )) }),
-      /* @__PURE__ */ jsxs("div", { className: "mt-12 hidden lg:block", children: [
-        /* @__PURE__ */ jsx("p", { className: "mb-4 text-sm text-[var(--bone)]/60", children: "Access is by invitation. Always." }),
-        /* @__PURE__ */ jsxs(
-          "a",
+  return /* @__PURE__ */ jsxs(
+    "div",
+    {
+      className: "relative overflow-hidden px-4 py-20 text-[var(--bone-fixed)] sm:px-6 md:px-12 md:py-40 lg:px-[10%] lg:py-48",
+      style: { backgroundColor: "var(--ink-fixed)" },
+      children: [
+        /* @__PURE__ */ jsx(
+          "div",
           {
-            href: "/invitation",
-            className: "inline-flex items-center gap-2 border border-[var(--bone)] px-5 py-2.5 font-mono text-xs uppercase tracking-widest text-[var(--bone)] transition-colors hover:bg-[var(--bone)] hover:text-[var(--ink)]",
-            children: [
-              "Request an invitation ",
-              /* @__PURE__ */ jsx(ArrowRight, { className: "size-3" })
-            ]
+            "aria-hidden": true,
+            className: "pointer-events-none absolute -left-20 top-24 size-72 bg-[var(--inner-green)]/[0.05] blur-3xl"
           }
-        )
-      ] })
-    ] }),
-    /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-6", children: [
-      features.map((f, i) => /* @__PURE__ */ jsx(
-        FeatureCard$1,
-        {
-          feature: f,
-          index: i,
-          setRef: (el) => {
-            if (el) cardRefs.current.set(i, el);
-            else cardRefs.current.delete(i);
+        ),
+        /* @__PURE__ */ jsx(
+          "div",
+          {
+            "aria-hidden": true,
+            className: "pointer-events-none absolute -right-16 bottom-20 size-80 bg-[var(--inner-green)]/[0.035] blur-3xl"
           }
-        },
-        f.id
-      )),
-      restModules.length > 0 && /* @__PURE__ */ jsxs("div", { className: "mt-6 border-t border-[var(--bone)]/15 pt-10", children: [
-        /* @__PURE__ */ jsxs("p", { className: "mb-6 font-mono text-label uppercase tracking-widest text-[var(--bone)]/57", children: [
-          "+",
-          restModules.length,
-          " more tools"
-        ] }),
-        /* @__PURE__ */ jsx("div", { className: "grid grid-cols-1 gap-px bg-[var(--bone)]/10 sm:grid-cols-2", children: restModules.map((mod) => {
-          const Icon = mod.icon;
-          return /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-3 bg-[var(--ink)] p-6", children: [
-            /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between", children: [
-              /* @__PURE__ */ jsx(Icon, { className: "size-4 text-[var(--bone)]/50", strokeWidth: 1.5 }),
-              /* @__PURE__ */ jsx("span", { className: "font-mono text-label uppercase tracking-widest text-[var(--bone)]/47", children: mod.tag })
+        ),
+        /* @__PURE__ */ jsxs("div", { className: "relative z-10 grid grid-cols-1 gap-16 lg:grid-cols-[400px_1fr] lg:gap-24 xl:grid-cols-[460px_1fr] xl:gap-48", children: [
+          /* @__PURE__ */ jsxs("div", { className: "lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col lg:justify-between lg:py-32", children: [
+            /* @__PURE__ */ jsxs("div", { children: [
+              /* @__PURE__ */ jsx("p", { className: "mb-4 font-mono text-xs uppercase tracking-widest text-white/45", children: "03 · The platform" }),
+              /* @__PURE__ */ jsx("h2", { className: "font-display font-serif italic text-2xl leading-[1.2] text-[var(--bone-fixed)] sm:text-3xl lg:text-[46px]", children: "Built for the pace of a closed circle." })
             ] }),
-            /* @__PURE__ */ jsx("h4", { className: "font-serif italic text-lg text-[var(--bone)]/90", children: mod.name }),
-            /* @__PURE__ */ jsx("p", { className: "text-sm leading-relaxed text-[var(--bone)]/50", children: mod.desc })
-          ] }, mod.id);
-        }) })
-      ] })
-    ] })
-  ] }) });
+            /* @__PURE__ */ jsx("div", { className: "mt-12 hidden flex-col gap-2 lg:flex", children: features.map((f, i) => /* @__PURE__ */ jsx(
+              "button",
+              {
+                type: "button",
+                onClick: () => scrollToCard(i),
+                className: `border px-4 py-3 text-left font-mono text-xs uppercase tracking-widest transition-colors ${activeIndex === i ? "border-white/15 bg-white/[0.08] text-[var(--bone-fixed)]" : "border-transparent text-white/45 hover:text-white/70"}`,
+                children: f.name
+              },
+              f.id
+            )) }),
+            /* @__PURE__ */ jsxs("div", { className: "mt-12 hidden lg:block", children: [
+              /* @__PURE__ */ jsx("p", { className: "mb-4 text-sm text-white/55", children: "Access is by invitation. Always." }),
+              /* @__PURE__ */ jsxs(
+                "a",
+                {
+                  href: "/invitation",
+                  className: "inline-flex items-center gap-2 border border-white/25 px-5 py-2.5 font-mono text-xs uppercase tracking-widest text-[var(--bone-fixed)] transition-colors hover:border-white/50 hover:bg-[var(--bone-fixed)] hover:text-[var(--ink-fixed)]",
+                  children: [
+                    "Request an invitation ",
+                    /* @__PURE__ */ jsx(ArrowRight, { className: "size-3" })
+                  ]
+                }
+              )
+            ] })
+          ] }),
+          /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-3 sm:gap-2", children: [
+            features.map((f, i) => /* @__PURE__ */ jsx(
+              FeatureCard$1,
+              {
+                feature: f,
+                index: i,
+                setRef: (el) => {
+                  if (el) cardRefs.current.set(i, el);
+                  else cardRefs.current.delete(i);
+                }
+              },
+              f.id
+            )),
+            restModules.length > 0 && /* @__PURE__ */ jsxs("div", { className: "mt-6 border-t border-white/10 pt-10", children: [
+              /* @__PURE__ */ jsxs("p", { className: "mb-6 font-mono text-label uppercase tracking-widest text-white/45", children: [
+                "+",
+                restModules.length,
+                " more tools"
+              ] }),
+              /* @__PURE__ */ jsx("div", { className: "grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-1", children: restModules.map((mod) => {
+                const Icon = mod.icon;
+                return /* @__PURE__ */ jsxs(
+                  "div",
+                  {
+                    className: "flex flex-col gap-3 border border-white/10 p-5 sm:p-6",
+                    style: { backgroundColor: CARD_BG },
+                    children: [
+                      /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between", children: [
+                        /* @__PURE__ */ jsx(Icon, { className: "size-4 text-white/45", strokeWidth: 1.5 }),
+                        /* @__PURE__ */ jsx("span", { className: "font-mono text-label uppercase tracking-widest text-white/40", children: mod.tag })
+                      ] }),
+                      /* @__PURE__ */ jsx("h4", { className: "font-serif italic text-lg text-[var(--bone-fixed)]", children: mod.name }),
+                      /* @__PURE__ */ jsx("p", { className: "text-sm leading-relaxed text-white/50", children: mod.desc })
+                    ]
+                  },
+                  mod.id
+                );
+              }) })
+            ] })
+          ] })
+        ] })
+      ]
+    }
+  );
 }
 function _assertThisInitialized(self) {
   if (self === void 0) {
@@ -6964,7 +7009,7 @@ const LINK_KEYS = [
   { key: "next", href: "#section-07" }
 ];
 const EASE$1 = [0.16, 1, 0.3, 1];
-const HERO_CHROME = "#000000";
+const HERO_CHROME = "#0A0A0A";
 function FloatingNavbar() {
   const t = useT();
   const [open, setOpen] = useState(false);
@@ -6982,7 +7027,7 @@ function FloatingNavbar() {
       style: { backgroundColor: HERO_CHROME },
       children: [
         /* @__PURE__ */ jsxs("div", { className: "flex h-[56px] items-center justify-between gap-3 px-3 py-2.5 sm:h-auto sm:gap-4 sm:px-5 sm:py-3.5 md:px-6", children: [
-          /* @__PURE__ */ jsx("a", { href: "/", "aria-label": "inner hub home", className: "inline-flex shrink-0", children: /* @__PURE__ */ jsx(Lockup, { className: "text-[var(--bone)]", fontSize: "clamp(22px, 5.2vw, 32px)", pulse: true }) }),
+          /* @__PURE__ */ jsx("a", { href: "/", "aria-label": "inner hub home", className: "inline-flex shrink-0", children: /* @__PURE__ */ jsx(Lockup, { className: "text-[var(--bone-fixed)]", fontSize: "clamp(22px, 5.2vw, 32px)", pulse: true }) }),
           /* @__PURE__ */ jsx(
             "nav",
             {
@@ -6992,7 +7037,7 @@ function FloatingNavbar() {
                 "a",
                 {
                   href: link.href,
-                  className: "group relative px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--bone)]/70 transition-colors duration-300 hover:text-[var(--bone)] lg:px-4 lg:text-[11px]",
+                  className: "group relative px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--bone-fixed)]/70 transition-colors duration-300 hover:text-[var(--bone-fixed)] lg:px-4 lg:text-[11px]",
                   children: [
                     link.label,
                     /* @__PURE__ */ jsx(
@@ -7014,7 +7059,7 @@ function FloatingNavbar() {
               "a",
               {
                 href: "/invitation",
-                className: "hidden items-center gap-2.5 bg-[var(--bone)] px-4 py-2 font-mono text-[10px] uppercase tracking-[0.14em] text-black transition-colors hover:bg-white sm:inline-flex lg:px-5 lg:text-[11px]",
+                className: "hidden items-center gap-2.5 bg-[var(--bone-fixed)] px-4 py-2 font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--ink-fixed)] transition-colors hover:bg-white sm:inline-flex lg:px-5 lg:text-[11px]",
                 children: [
                   t("publicNav.invitation"),
                   /* @__PURE__ */ jsx("span", { className: "size-1.5 bg-[var(--inner-green)]", "aria-hidden": true })
@@ -7033,7 +7078,7 @@ function FloatingNavbar() {
                   /* @__PURE__ */ jsx(
                     "span",
                     {
-                      className: "block h-[1.5px] w-full origin-center bg-[var(--bone)] transition-transform duration-300",
+                      className: "block h-[1.5px] w-full origin-center bg-[var(--bone-fixed)] transition-transform duration-300",
                       style: {
                         transitionTimingFunction: "cubic-bezier(0.77,0,0.175,1)",
                         transform: open ? "translateY(6px) rotate(45deg)" : "none"
@@ -7043,7 +7088,7 @@ function FloatingNavbar() {
                   /* @__PURE__ */ jsx(
                     "span",
                     {
-                      className: "block h-[1.5px] w-full origin-center bg-[var(--bone)] transition-transform duration-300",
+                      className: "block h-[1.5px] w-full origin-center bg-[var(--bone-fixed)] transition-transform duration-300",
                       style: {
                         transitionTimingFunction: "cubic-bezier(0.77,0,0.175,1)",
                         transform: open ? "translateY(-6px) rotate(-45deg)" : "none"
@@ -7066,7 +7111,7 @@ function FloatingNavbar() {
             style: { backgroundColor: HERO_CHROME },
             children: [
               /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between border-b border-white/10 px-4 py-3", children: [
-                /* @__PURE__ */ jsx("span", { className: "font-mono text-[10px] uppercase tracking-widest text-[var(--bone)]/50", children: t("home.langSwitch") }),
+                /* @__PURE__ */ jsx("span", { className: "font-mono text-[10px] uppercase tracking-widest text-[var(--bone-fixed)]/50", children: t("home.langSwitch") }),
                 /* @__PURE__ */ jsx(LocaleToggle, { tone: "dark" })
               ] }),
               links.map((link, i) => /* @__PURE__ */ jsxs(
@@ -7074,10 +7119,10 @@ function FloatingNavbar() {
                 {
                   href: link.href,
                   onClick: () => setOpen(false),
-                  className: "flex items-center justify-between border-b border-white/10 px-4 py-3.5 font-mono text-xs uppercase tracking-widest text-[var(--bone)]/80 transition-colors last:border-b-0 hover:text-[var(--bone)]",
+                  className: "flex items-center justify-between border-b border-white/10 px-4 py-3.5 font-mono text-xs uppercase tracking-widest text-[var(--bone-fixed)]/80 transition-colors last:border-b-0 hover:text-[var(--bone-fixed)]",
                   children: [
                     /* @__PURE__ */ jsx("span", { children: link.label }),
-                    /* @__PURE__ */ jsx("span", { className: "font-mono text-[10px] text-[var(--bone)]/30", children: String(i + 1).padStart(2, "0") })
+                    /* @__PURE__ */ jsx("span", { className: "font-mono text-[10px] text-[var(--bone-fixed)]/30", children: String(i + 1).padStart(2, "0") })
                   ]
                 },
                 link.href
@@ -7087,7 +7132,7 @@ function FloatingNavbar() {
                 {
                   href: "/invitation",
                   onClick: () => setOpen(false),
-                  className: "flex items-center justify-between bg-[var(--bone)] px-4 py-3.5 font-mono text-xs uppercase tracking-widest text-black",
+                  className: "flex items-center justify-between bg-[var(--bone-fixed)] px-4 py-3.5 font-mono text-xs uppercase tracking-widest text-[var(--ink-fixed)]",
                   children: [
                     t("publicNav.requestInvitation"),
                     /* @__PURE__ */ jsx("span", { className: "size-1.5 bg-[var(--inner-green)]", "aria-hidden": true })
@@ -7149,12 +7194,12 @@ function HeroInset() {
     "section",
     {
       className: "relative h-[100svh] p-2 sm:p-3 md:p-5 lg:p-6",
-      style: { backgroundColor: HERO_CHROME },
+      style: { backgroundColor: "var(--ink-fixed)" },
       children: /* @__PURE__ */ jsxs(
         "div",
         {
           className: "relative h-full w-full overflow-hidden border border-white/[0.08]",
-          style: { backgroundColor: HERO_CHROME },
+          style: { backgroundColor: "var(--ink-fixed)" },
           children: [
             /* @__PURE__ */ jsx(
               HeroVideo,
@@ -7192,7 +7237,7 @@ function HeroInset() {
                   initial: { opacity: 0 },
                   animate: { opacity: 1 },
                   transition: { duration: 0.8, delay: 0.35, ease: EASE },
-                  className: "mb-3 flex items-center gap-2.5 font-mono text-[9px] uppercase tracking-[0.16em] text-[var(--bone)]/55 sm:mb-6 sm:gap-3 sm:text-[11px]",
+                  className: "mb-3 flex items-center gap-2.5 font-mono text-[9px] uppercase tracking-[0.16em] text-[var(--bone-fixed)]/55 sm:mb-6 sm:gap-3 sm:text-[11px]",
                   children: [
                     /* @__PURE__ */ jsx("span", { className: "size-2 shrink-0 bg-[var(--inner-green)] animate-beacon sm:size-1.5" }),
                     t("home.heroTag")
@@ -7201,11 +7246,11 @@ function HeroInset() {
               ),
               /* @__PURE__ */ jsxs("div", { className: "grid grid-cols-1 items-end gap-4 sm:gap-5 md:grid-cols-12 md:gap-10", children: [
                 /* @__PURE__ */ jsxs("div", { className: "min-w-0 md:col-span-8", children: [
-                  /* @__PURE__ */ jsx("h1", { className: "text-[var(--bone)]", children: /* @__PURE__ */ jsx(
+                  /* @__PURE__ */ jsx("h1", { className: "text-[var(--bone-fixed)]", children: /* @__PURE__ */ jsx(
                     Lockup,
                     {
                       suffix: "hub",
-                      className: "text-[var(--bone)]",
+                      className: "text-[var(--bone-fixed)]",
                       fontSize: "clamp(2.75rem, 14vw, 9.5rem)",
                       pulse: true
                     }
@@ -7219,7 +7264,7 @@ function HeroInset() {
                       initial: { opacity: 0, y: 20 },
                       animate: { opacity: 1, y: 0 },
                       transition: { duration: 0.8, delay: 0.5, ease: EASE },
-                      className: "max-w-[36ch] text-[13px] leading-[1.45] text-[var(--bone)]/70 sm:text-sm md:text-[15px] md:leading-[1.35]",
+                      className: "max-w-[36ch] text-[13px] leading-[1.45] text-[var(--bone-fixed)]/70 sm:text-sm md:text-[15px] md:leading-[1.35]",
                       children: t("home.heroBody")
                     }
                   ),
@@ -7230,10 +7275,10 @@ function HeroInset() {
                       initial: { opacity: 0, y: 20 },
                       animate: { opacity: 1, y: 0 },
                       transition: { duration: 0.8, delay: 0.7, ease: EASE },
-                      className: "group inline-flex w-full min-h-11 items-center justify-between gap-2.5 bg-[var(--bone)] py-1.5 pl-4 pr-1.5 text-sm font-medium text-black transition-[gap] duration-300 hover:gap-3.5 sm:w-fit sm:min-h-0 sm:pl-5 sm:text-base",
+                      className: "group inline-flex w-full min-h-11 items-center justify-between gap-2.5 bg-[var(--bone-fixed)] py-1.5 pl-4 pr-1.5 text-sm font-medium text-[var(--ink-fixed)] transition-[gap] duration-300 hover:gap-3.5 sm:w-fit sm:min-h-0 sm:pl-5 sm:text-base",
                       children: [
                         t("home.requestInvitation"),
-                        /* @__PURE__ */ jsx("span", { className: "flex size-9 shrink-0 items-center justify-center bg-black transition-transform duration-300 group-hover:scale-110 sm:size-10", children: /* @__PURE__ */ jsx(ArrowUpRight, { className: "size-4 text-[var(--bone)]", strokeWidth: 1.75 }) })
+                        /* @__PURE__ */ jsx("span", { className: "flex size-9 shrink-0 items-center justify-center bg-[var(--ink-fixed)] transition-transform duration-300 group-hover:scale-110 sm:size-10", children: /* @__PURE__ */ jsx(ArrowUpRight, { className: "size-4 text-[var(--bone-fixed)]", strokeWidth: 1.75 }) })
                       ]
                     }
                   )
@@ -7251,7 +7296,7 @@ function AboutIdea() {
     "section",
     {
       id: "section-01",
-      className: "bg-[var(--ink)] px-3 py-12 sm:px-4 sm:py-16 md:px-6 md:py-28",
+      className: "bg-[var(--ink-fixed)] px-3 py-12 sm:px-4 sm:py-16 md:px-6 md:py-28",
       children: /* @__PURE__ */ jsxs("div", { className: "relative mx-auto max-w-6xl overflow-hidden border border-white/10", children: [
         /* @__PURE__ */ jsxs("div", { className: "pointer-events-none absolute inset-0 z-0", "aria-hidden": true, children: [
           /* @__PURE__ */ jsx(
@@ -7261,16 +7306,16 @@ function AboutIdea() {
               className: "h-full w-full scale-[1.04] object-cover"
             }
           ),
-          /* @__PURE__ */ jsx("div", { className: "absolute inset-0 bg-black/55" }),
+          /* @__PURE__ */ jsx("div", { className: "absolute inset-0 bg-[var(--ink-fixed)]/55" }),
           /* @__PURE__ */ jsx("div", { className: "absolute inset-0 bg-gradient-to-b from-black/50 via-black/35 to-black/60" }),
           /* @__PURE__ */ jsx("div", { className: "noise-overlay absolute inset-0 opacity-[0.3] mix-blend-overlay" })
         ] }),
         /* @__PURE__ */ jsxs("div", { className: "relative z-10 px-5 py-14 text-center sm:px-8 sm:py-16 md:px-12 md:py-20", children: [
-          /* @__PURE__ */ jsx("p", { className: "mb-6 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)]/60 sm:mb-8 sm:text-xs", children: "01 · The idea" }),
+          /* @__PURE__ */ jsx("p", { className: "mb-6 font-mono text-[10px] uppercase tracking-widest text-[var(--bone-fixed)]/60 sm:mb-8 sm:text-xs", children: "01 · The idea" }),
           /* @__PURE__ */ jsx(
             WordsPullUpMultiStyle,
             {
-              className: "mx-auto max-w-3xl justify-center text-3xl leading-[0.95] text-[var(--bone)] sm:text-4xl sm:leading-[0.9] md:text-5xl lg:text-6xl xl:text-7xl",
+              className: "mx-auto max-w-3xl justify-center text-3xl leading-[0.95] text-[var(--bone-fixed)] sm:text-4xl sm:leading-[0.9] md:text-5xl lg:text-6xl xl:text-7xl",
               segments: [
                 { text: "AI is the center.", className: "font-normal" },
                 {
@@ -7288,7 +7333,7 @@ function AboutIdea() {
             ScrollTextReveal,
             {
               text: "It starts in İstanbul. Thirty-four people, chosen one by one, form the founding circle: not members of a platform, but the people who make what comes next possible.",
-              className: "mx-auto mt-10 max-w-2xl text-xs leading-relaxed text-[var(--bone)]/70 sm:mt-12 sm:text-sm md:text-base"
+              className: "mx-auto mt-10 max-w-2xl text-xs leading-relaxed text-[var(--bone-fixed)]/70 sm:mt-12 sm:text-sm md:text-base"
             }
           )
         ] })
@@ -7304,12 +7349,12 @@ function FoundingSeats() {
     {
       id: "section-02",
       ref,
-      className: "relative min-h-0 overflow-hidden bg-black px-3 py-12 sm:px-4 sm:py-16 md:min-h-svh md:px-6 md:py-24",
+      className: "relative min-h-0 overflow-hidden bg-[var(--ink-fixed)] px-3 py-12 sm:px-4 sm:py-16 md:min-h-svh md:px-6 md:py-24",
       children: [
         /* @__PURE__ */ jsx("div", { "aria-hidden": true, className: "bg-noise pointer-events-none absolute inset-0 opacity-[0.15]" }),
         /* @__PURE__ */ jsxs("div", { className: "relative z-10 mx-auto max-w-7xl", children: [
           /* @__PURE__ */ jsxs("div", { className: "mb-10 max-w-3xl sm:mb-12 md:mb-14", children: [
-            /* @__PURE__ */ jsx("p", { className: "mb-5 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)]/50 sm:text-xs", children: "02 · The first thirty-four" }),
+            /* @__PURE__ */ jsx("p", { className: "mb-5 font-mono text-[10px] uppercase tracking-widest text-[var(--bone-fixed)]/50 sm:text-xs", children: "02 · The first thirty-four" }),
             /* @__PURE__ */ jsx(
               WordsPullUpMultiStyle,
               {
@@ -7317,7 +7362,7 @@ function FoundingSeats() {
                 segments: [
                   {
                     text: "Founding seats for people who meet early.",
-                    className: "font-normal text-[var(--bone)]"
+                    className: "font-normal text-[var(--bone-fixed)]"
                   },
                   {
                     text: "Not tickets. Not tiers. The circle.",
@@ -7351,7 +7396,7 @@ function FoundingSeats() {
                     /* @__PURE__ */ jsx("span", { className: "font-mono text-[10px] uppercase tracking-widest text-white/40", children: card.id }),
                     /* @__PURE__ */ jsx("span", { className: "size-2.5 bg-[var(--inner-green)] animate-beacon", "aria-hidden": true })
                   ] }),
-                  /* @__PURE__ */ jsx("h3", { className: "mb-4 text-lg font-medium text-[var(--bone)] sm:text-xl", children: card.title }),
+                  /* @__PURE__ */ jsx("h3", { className: "mb-4 text-lg font-medium text-[var(--bone-fixed)] sm:text-xl", children: card.title }),
                   /* @__PURE__ */ jsx("ul", { className: "flex flex-1 flex-col gap-2.5", children: card.items.map((item) => /* @__PURE__ */ jsxs("li", { className: "flex items-start gap-2.5 text-sm text-white/55", children: [
                     /* @__PURE__ */ jsx(
                       Check,
@@ -7366,7 +7411,7 @@ function FoundingSeats() {
                     "a",
                     {
                       href: "/invitation",
-                      className: "mt-5 inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)]/70 transition-colors hover:text-[var(--bone)]",
+                      className: "mt-5 inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-[var(--bone-fixed)]/70 transition-colors hover:text-[var(--bone-fixed)]",
                       children: [
                         "Learn more",
                         /* @__PURE__ */ jsx(ArrowUpRight, { className: "size-3.5 -rotate-0", strokeWidth: 1.75 })
@@ -7556,7 +7601,7 @@ function MarqueeStrip() {
         className: "pointer-events-none absolute inset-y-0 right-0 z-10 w-12 bg-gradient-to-l from-[var(--ink-fixed)] to-transparent sm:w-20"
       }
     ),
-    /* @__PURE__ */ jsx("div", { className: "relative mx-auto max-w-[100vw] overflow-hidden border-y border-white/10 bg-[var(--bone)] py-3.5 sm:py-4", children: /* @__PURE__ */ jsx(
+    /* @__PURE__ */ jsx("div", { className: "relative mx-auto max-w-[100vw] overflow-hidden border-y border-white/10 bg-[var(--ink-fixed)] py-3.5 sm:py-4", children: /* @__PURE__ */ jsx(
       motion.div,
       {
         className: "flex w-max items-center gap-0",
@@ -7570,16 +7615,16 @@ function MarqueeStrip() {
               href: "#section-03",
               className: "group flex shrink-0 items-center gap-3 px-5 sm:gap-3.5 sm:px-7",
               children: [
-                /* @__PURE__ */ jsx("span", { className: "flex size-7 items-center justify-center bg-[var(--ink)] transition-colors group-hover:bg-[var(--inner-green)] sm:size-8", children: /* @__PURE__ */ jsx(
+                /* @__PURE__ */ jsx("span", { className: "flex size-7 items-center justify-center bg-white/10 transition-colors group-hover:bg-[var(--inner-green)] sm:size-8", children: /* @__PURE__ */ jsx(
                   Icon,
                   {
-                    className: "size-3.5 text-[var(--bone)] transition-colors group-hover:text-[var(--ink)] sm:size-4",
+                    className: "size-3.5 text-[var(--bone-fixed)] transition-colors group-hover:text-[var(--ink-fixed)] sm:size-4",
                     strokeWidth: 1.6
                   }
                 ) }),
                 /* @__PURE__ */ jsxs("span", { className: "flex flex-col gap-0.5", children: [
-                  /* @__PURE__ */ jsx("span", { className: "font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--ink)] sm:text-[11px]", children: item.name }),
-                  /* @__PURE__ */ jsx("span", { className: "hidden font-mono text-[8px] uppercase tracking-[0.14em] text-[var(--ink)]/40 sm:block", children: item.tag })
+                  /* @__PURE__ */ jsx("span", { className: "font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--bone-fixed)] sm:text-[11px]", children: item.name }),
+                  /* @__PURE__ */ jsx("span", { className: "hidden font-mono text-[8px] uppercase tracking-[0.14em] text-[var(--bone-fixed)]/40 sm:block", children: item.tag })
                 ] }),
                 /* @__PURE__ */ jsx(
                   "span",
@@ -7623,7 +7668,7 @@ function Home() {
       if (el) requestAnimationFrame(() => el.scrollIntoView({ block: "start" }));
     }
   }, []);
-  return /* @__PURE__ */ jsxs("div", { lang: locale, className: "min-h-screen bg-background text-foreground flex flex-col", children: [
+  return /* @__PURE__ */ jsxs("div", { lang: locale, className: "site-atmosphere flex min-h-screen flex-col", children: [
     /* @__PURE__ */ jsx("a", { href: "#main-content", className: "sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[9999] focus:bg-foreground focus:text-background focus:px-4 focus:py-2 font-mono text-xs uppercase tracking-widest", children: t("common.skipToContent") }),
     /* @__PURE__ */ jsx(ScrollProgress, {}),
     /* @__PURE__ */ jsx(Preloader, {}),
@@ -7633,7 +7678,7 @@ function Home() {
       /* @__PURE__ */ jsx(HomeOpening, {}),
       /* @__PURE__ */ jsx(MarqueeStrip, {}),
       /* @__PURE__ */ jsx("section", { id: "section-03", children: /* @__PURE__ */ jsx(PlatformFeatures, { features: PLATFORM_FEATURES, restModules: MODULES.slice(3) }) }),
-      /* @__PURE__ */ jsxs("div", { className: "relative overflow-hidden bg-black border-t border-border/15", children: [
+      /* @__PURE__ */ jsxs("div", { className: "relative overflow-hidden bg-[var(--ink-fixed)] border-t border-border/15", children: [
         /* @__PURE__ */ jsxs("div", { className: "absolute inset-x-0 top-0 h-[85vh] md:h-[95vh] z-0", "aria-hidden": "true", children: [
           /* @__PURE__ */ jsx(
             HeroVideo,
@@ -7642,7 +7687,7 @@ function Home() {
               className: "h-full w-full object-cover"
             }
           ),
-          /* @__PURE__ */ jsx("div", { className: "pointer-events-none absolute inset-0 bg-gradient-to-b from-black/55 via-black/60 to-black" })
+          /* @__PURE__ */ jsx("div", { className: "pointer-events-none absolute inset-0 bg-gradient-to-b from-black/55 via-black/60 to-[var(--ink-fixed)]" })
         ] }),
         /* @__PURE__ */ jsxs("section", { id: "section-04", className: "relative z-10 px-4 pt-20 pb-16 sm:px-6 sm:pt-28 sm:pb-24 md:px-12 md:pt-36 lg:px-[10%]", children: [
           /* @__PURE__ */ jsxs("div", { className: "mb-10 flex items-baseline justify-between gap-3 border-b border-white/15 pb-5 font-mono text-[10px] uppercase tracking-widest text-white/50 sm:mb-16 sm:gap-6 sm:pb-6 sm:text-xs", children: [
@@ -7695,7 +7740,7 @@ function Home() {
           className: "relative overflow-hidden border-t border-border/15 bg-[var(--ink-fixed)] px-4 py-20 text-[var(--bone-fixed)] transition-colors duration-700 sm:px-6 sm:py-32 md:px-12 md:py-48 lg:px-[10%]",
           children: [
             /* @__PURE__ */ jsx("div", { className: "pointer-events-none absolute -right-24 top-0 size-[520px] bg-[var(--inner-green)]/[0.04] blur-3xl" }),
-            /* @__PURE__ */ jsx("div", { className: "pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-black/40 to-transparent" }),
+            /* @__PURE__ */ jsx("div", { className: "pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[var(--ink-fixed)]/40 to-transparent" }),
             /* @__PURE__ */ jsx(FadeIn, { children: /* @__PURE__ */ jsxs("div", { className: "mb-12 flex items-baseline justify-between gap-3 border-b border-white/15 pb-5 font-mono text-[10px] uppercase tracking-widest opacity-60 sm:mb-20 sm:gap-6 sm:pb-6 sm:text-xs", children: [
               /* @__PURE__ */ jsx("span", { children: "06 · The gathering" }),
               /* @__PURE__ */ jsx("span", { className: "whitespace-nowrap", children: "Sep 2026 · İstanbul" })

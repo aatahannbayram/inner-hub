@@ -14,6 +14,8 @@ import { apiUrl } from "@/lib/api";
 import { PanelLogin } from "@/components/panel/PanelLogin";
 import { Lockup } from "@/components/Lockup";
 import { I18nProvider, useT } from "@/i18n";
+import { useThemeRouteSync } from "@/hooks/useTheme";
+import { useLocation } from "wouter";
 
 // Panel sayfaları auth arkasında (SEO'ya tabi değil) — code-split edilir.
 // Home/Invitation/Requests eager kalır (prerender/SEO).
@@ -154,17 +156,25 @@ function PanelApp() {
 }
 
 // ─── Router ───────────────────────────────────────────────────────────────────
+function ThemeRouteGate({ children }: { children: React.ReactNode }) {
+  const [loc] = useLocation();
+  useThemeRouteSync(loc);
+  return <>{children}</>;
+}
+
 function Router() {
   return (
-    <Switch>
-      <Route path="/"           component={Home} />
-      <Route path="/invitation" component={Invitation} />
-      <Route path="/requests"   component={Requests} />
-      <Route path="/u/:handle"  component={PublicProfile} />
-      <Route path="/panel"    component={PanelApp} />
-      <Route path="/panel/:rest+" component={PanelApp} />
-      <Route component={NotFound} />
-    </Switch>
+    <ThemeRouteGate>
+      <Switch>
+        <Route path="/"           component={Home} />
+        <Route path="/invitation" component={Invitation} />
+        <Route path="/requests"   component={Requests} />
+        <Route path="/u/:handle"  component={PublicProfile} />
+        <Route path="/panel"    component={PanelApp} />
+        <Route path="/panel/:rest+" component={PanelApp} />
+        <Route component={NotFound} />
+      </Switch>
+    </ThemeRouteGate>
   );
 }
 
