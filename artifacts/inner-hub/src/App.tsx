@@ -63,7 +63,12 @@ function PanelRoutes({ user, onLogout }: { user: PanelUser; onLogout: () => void
     <PanelShell user={user} onLogout={onLogout}>
       <Suspense fallback={<PanelPageSkeleton />}>
         <Switch>
-          <Route path="/panel" component={() => <Dashboard userName={user.name.split(" ")[0]} />} />
+          <Route
+            path="/panel"
+            component={() => (
+              <Dashboard userName={user.name.split(" ")[0]} profileCompletionPct={user.profileCompletionPct} />
+            )}
+          />
           <Route path="/panel/chat"         component={() => <ChatPage />} />
           <Route path="/panel/courses"      component={() => <CoursesPage />} />
           <Route path="/panel/events"       component={() => <Events />} />

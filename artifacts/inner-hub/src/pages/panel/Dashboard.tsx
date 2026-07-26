@@ -1,11 +1,10 @@
-import { ArrowRight, BookOpen, CalendarDays, Gift } from "lucide-react";
+import { ArrowRight, BookOpen, CalendarDays, Sparkles } from "lucide-react";
 import { Link } from "wouter";
 import { FadeIn } from "@/components/FadeIn";
 import { AsciiField } from "@/components/AsciiField";
 import { EditorialCard } from "@/components/panel/EditorialCard";
 import { AmbientCardBackground } from "@/components/panel/AmbientCardBackground";
 import { useApiQuery } from "@/hooks/useApiQuery";
-import { avatarColor } from "@/lib/avatarColor";
 import { useScrubVideo } from "@/hooks/useScrubVideo";
 import { useTypewriter } from "@/hooks/useTypewriter";
 import type { PortraitConfig } from "@/components/panel/ProceduralPortrait";
@@ -44,41 +43,64 @@ const VAULT_CARD_PORTRAIT: PortraitConfig = {
 
 const EDITORIAL_PORTRAIT = "/editorial/circle-portrait.jpg";
 
+const STAT_CARD_INTERACTIVE =
+  "outline-none transition-all duration-150 ease-out hover:bg-[var(--ink)]/[0.04] hover:border-[var(--ink)]/25 active:scale-[0.99] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--inner-green)] motion-reduce:transition-none motion-reduce:active:scale-100";
+
+const STAT_CARD_ACCENT =
+  "absolute inset-y-0 left-0 w-[2px] bg-[var(--ink)]/12 transition-colors duration-150 ease-out group-hover:bg-[var(--inner-green)] motion-reduce:transition-none";
+
 function StatCard({
   label,
-  value,
   icon: Icon,
   href,
+  value,
   sub,
+  emptyLabel,
+  emptyActionLabel,
+  ariaLabel,
 }: {
   label: string;
-  value: string | number;
   icon: React.ComponentType<{ className?: string }>;
   href: string;
-  sub: string;
+  value: number | string;
+  sub?: string;
+  emptyLabel?: string;
+  emptyActionLabel?: string;
+  ariaLabel: string;
 }) {
+  const isEmpty = typeof value === "number" && value === 0 && !!emptyLabel;
+
   return (
     <Link
       href={href}
-      className="group relative flex items-center gap-3 overflow-hidden panel-glass p-4 transition-colors hover:border-[var(--ink)]/30 sm:gap-4 sm:p-5"
+      aria-label={ariaLabel}
+      className={`group relative flex min-h-11 flex-col justify-center gap-2 overflow-hidden panel-glass px-4 py-3.5 sm:px-5 sm:py-4 ${STAT_CARD_INTERACTIVE}`}
     >
-      <span
-        aria-hidden
-        className="absolute inset-y-0 left-0 w-[3px] bg-[var(--ink)]/15 transition-colors group-hover:bg-[var(--inner-green)]"
-      />
-      <div className="ml-1 flex size-10 shrink-0 items-center justify-center panel-glass bg-[var(--ink)]/[0.03] transition-colors group-hover:border-[var(--ink)]/25">
-        <Icon className="size-4 text-[var(--ink-muted)]" />
+      <span aria-hidden className={STAT_CARD_ACCENT} />
+      <div className="flex items-center gap-1.5 pl-1">
+        <Icon aria-hidden className="size-4 shrink-0 text-[var(--ink-muted)] opacity-60" />
+        <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-[var(--ink-muted)]">{label}</p>
       </div>
-      <div className="min-w-0">
-        <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--ink-muted)]">{label}</p>
-        <p
-          className="mt-0.5 font-display font-serif text-2xl tabular-nums leading-none text-[var(--ink)] sm:text-3xl"
-          style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 400 }}
-        >
-          {value}
-        </p>
-        <p className="mt-1.5 font-mono text-[9px] uppercase tracking-widest text-[var(--ink-subtle)]">{sub}</p>
-      </div>
+
+      {isEmpty ? (
+        <div className="pl-1">
+          <p className="text-sm text-[var(--ink-body)]">{emptyLabel}</p>
+          {emptyActionLabel && (
+            <span className="mt-1 inline-flex items-center gap-1 font-mono text-[11px] uppercase tracking-[0.12em] text-[var(--ink-muted)] transition-colors duration-150 ease-out group-hover:text-[var(--ink)] motion-reduce:transition-none">
+              {emptyActionLabel} <ArrowRight className="size-3" />
+            </span>
+          )}
+        </div>
+      ) : (
+        <div className="pl-1">
+          <p className="font-sans font-semibold text-2xl tabular-nums leading-none text-[var(--ink)] sm:text-[28px]">
+            {value}
+          </p>
+          {sub && (
+            <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.12em] text-[var(--ink-muted)]">{sub}</p>
+          )}
+        </div>
+      )}
     </Link>
   );
 }
@@ -129,46 +151,46 @@ function CourseRow({ course }: { course: DashCourse }) {
 function PerkCard({
   perk,
 }: {
-  perk: { id: number; brand: string; title: string; description: string; logoUrl: string | null };
+  perk: { id: number; brand: string; title: string; description: string; logoUrl: string | null; badge: string };
 }) {
   const t = useT();
-  const color = avatarColor(perk.brand);
+  const title = cleanDisplayText(perk.title).replace(/!+\s*$/, "");
   return (
     <Link
       href="/panel/perks"
-      className="group relative flex h-full flex-col overflow-hidden panel-glass p-4 transition-colors hover:border-[var(--ink)]/28 sm:p-5"
+      aria-label={`${perk.brand} — ${title}`}
+      className={`group relative flex h-full min-h-11 flex-col overflow-hidden panel-glass p-4 sm:p-5 ${STAT_CARD_INTERACTIVE}`}
     >
-      <span
-        aria-hidden
-        className="absolute inset-y-0 left-0 w-[3px] bg-[var(--ink)]/12 transition-colors group-hover:bg-[var(--inner-green)]"
-      />
-      <div className="mb-3 flex items-center gap-3 pl-1">
-        <div
-          className="flex size-10 shrink-0 items-center justify-center text-[var(--bone)]"
-          style={{ backgroundColor: color }}
-        >
-          {perk.logoUrl ? (
-            <img src={perk.logoUrl} alt="" className="size-6 object-contain" />
-          ) : (
-            <span className="font-mono text-[10px] uppercase tracking-wide" lang="en">
-              {perk.brand.slice(0, 2)}
-            </span>
-          )}
+      <span aria-hidden className={STAT_CARD_ACCENT} />
+      <div className="mb-3 flex items-start justify-between gap-2 pl-1">
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="flex size-10 shrink-0 items-center justify-center border border-[var(--ink)]/12 bg-[var(--ink)]/[0.04] text-[var(--ink-muted)]">
+            {perk.logoUrl ? (
+              <img src={perk.logoUrl} alt="" className="size-6 object-contain" />
+            ) : (
+              <span className="font-mono text-[10px] uppercase tracking-wide" lang="en">
+                {perk.brand.slice(0, 2)}
+              </span>
+            )}
+          </div>
+          <p className="truncate font-mono text-[11px] uppercase tracking-[0.12em] text-[var(--ink-muted)]">
+            {perk.brand}
+          </p>
         </div>
-        <p className="truncate font-mono text-[9px] uppercase tracking-[0.14em] text-[var(--ink-muted)]">
-          {perk.brand}
-        </p>
+        {perk.badge && (
+          <span
+            lang="tr"
+            className="shrink-0 border border-[var(--inner-green)]/40 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.1em] text-[var(--inner-green)]"
+          >
+            {perk.badge}
+          </span>
+        )}
       </div>
-      <h3
-        className="mb-1.5 pl-1 font-display font-serif text-base leading-snug tracking-[-0.02em] text-[var(--ink)]"
-        style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1" }}
-      >
-        {cleanDisplayText(perk.title)}
-      </h3>
+      <h3 className="mb-1.5 pl-1 font-sans text-base font-medium leading-snug text-[var(--ink)]">{title}</h3>
       <p className="mb-4 flex-1 pl-1 text-sm leading-relaxed text-[var(--ink-body)] line-clamp-2">
         {perk.description}
       </p>
-      <span className="mt-auto inline-flex items-center gap-1 pl-1 font-mono text-[10px] uppercase tracking-widest text-[var(--ink-muted)] transition-colors group-hover:text-[var(--ink)]">
+      <span className="mt-auto inline-flex items-center gap-1 pl-1 font-mono text-[11px] uppercase tracking-[0.12em] text-[var(--ink-muted)] transition-colors duration-150 ease-out group-hover:text-[var(--ink)] motion-reduce:transition-none">
         {t("dashboard.details")} <ArrowRight className="size-3" />
       </span>
     </Link>
@@ -270,7 +292,13 @@ function DashboardHero({ userName }: { userName: string }) {
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 
-export default function Dashboard({ userName = "Ata" }: { userName?: string }) {
+export default function Dashboard({
+  userName = "Ata",
+  profileCompletionPct = 0,
+}: {
+  userName?: string;
+  profileCompletionPct?: number;
+}) {
   const t = useT();
   // Dashboard stats fail soft — 0 sonuç göster, hata banner'ı yok (bilinçli tasarım kararı).
   const { data: coursesData } = useApiQuery<{ courses: { id: number; title: string; progressPct?: number }[] }>(
@@ -281,7 +309,7 @@ export default function Dashboard({ userName = "Ata" }: { userName?: string }) {
     ["events"],
     "/api/events",
   );
-  const { data: perksData } = useApiQuery<{ perks: { id: number; brand: string; title: string; description: string; logoUrl: string | null }[] }>(
+  const { data: perksData } = useApiQuery<{ perks: { id: number; brand: string; title: string; description: string; logoUrl: string | null; badge: string }[] }>(
     ["perks"],
     "/api/perks",
   );
@@ -366,24 +394,39 @@ export default function Dashboard({ userName = "Ata" }: { userName?: string }) {
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-3">
           <StatCard
             label={t("dashboard.myCourses")}
-            value={courses.length}
             icon={BookOpen}
             href="/panel/courses"
+            value={courses.length}
             sub={t("dashboard.enrolled")}
+            emptyLabel={t("dashboard.noCoursesYet")}
+            emptyActionLabel={t("courses.exploreCta")}
+            ariaLabel={
+              courses.length > 0
+                ? `${t("dashboard.myCourses")}: ${courses.length} ${t("dashboard.enrolled")}`
+                : `${t("dashboard.myCourses")}: ${t("dashboard.noCoursesYet")}`
+            }
           />
           <StatCard
             label={t("nav.events")}
-            value={events.length}
             icon={CalendarDays}
             href="/panel/events"
+            value={events.length}
             sub={t("dashboard.upcoming")}
+            emptyLabel={t("dashboard.noUpcomingEvents")}
+            emptyActionLabel={t("events.openCalendar")}
+            ariaLabel={
+              events.length > 0
+                ? `${t("nav.events")}: ${events.length} ${t("dashboard.upcoming")}`
+                : `${t("nav.events")}: ${t("dashboard.noUpcomingEvents")}`
+            }
           />
           <StatCard
-            label={t("nav.perks")}
-            value={perks.length}
-            icon={Gift}
-            href="/panel/perks"
-            sub={t("dashboard.activePerks")}
+            label={t("dashboard.programProgress")}
+            icon={Sparkles}
+            href="/panel/profile"
+            value={`%${profileCompletionPct}`}
+            sub={t("courses.completed")}
+            ariaLabel={`${t("dashboard.programProgress")}: %${profileCompletionPct}`}
           />
         </div>
       </FadeIn>
@@ -414,26 +457,25 @@ export default function Dashboard({ userName = "Ata" }: { userName?: string }) {
         </FadeIn>
       )}
 
-      <FadeIn delay={0.15}>
+      <FadeIn delay={0.15} className="-mt-5">
         <section>
-          <div className="mb-4 flex items-end justify-between gap-3 border-t border-[var(--ink)]/[0.08] pt-4">
-            <div>
-              <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--ink)]">
-                {t("nav.perks")}
-              </p>
-              <p className="mt-1 text-sm text-[var(--ink-muted)]">
-                {t("dashboard.perksSubtitle")}
-              </p>
-            </div>
+          <div className="mb-3 flex items-end justify-between gap-3 border-t border-[var(--ink)]/[0.05] pt-4">
+            <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-[var(--ink)]">
+              {t("nav.perks")}
+              <span className="text-[var(--ink-muted)]">
+                {" "}
+                · {perks.length} {t("dashboard.activePerks")}
+              </span>
+            </p>
             <Link
               href="/panel/perks"
-              className="inline-flex min-h-10 shrink-0 items-center gap-1 font-mono text-[10px] uppercase tracking-widest text-[var(--ink-muted)] transition-colors hover:text-[var(--ink)]"
+              className="inline-flex min-h-10 shrink-0 items-center gap-1 font-mono text-[11px] uppercase tracking-[0.12em] text-[var(--ink-muted)] transition-colors duration-150 ease-out hover:text-[var(--ink)] motion-reduce:transition-none"
             >
               {t("dashboard.viewAll")} <ArrowRight className="size-3" />
             </Link>
           </div>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {perks.slice(0, 4).map((perk) => (
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {perks.slice(0, 3).map((perk) => (
               <PerkCard key={perk.id} perk={perk} />
             ))}
           </div>
