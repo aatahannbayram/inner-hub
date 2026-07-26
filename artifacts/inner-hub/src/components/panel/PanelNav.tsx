@@ -156,12 +156,12 @@ function NavLink({ item, collapsed }: { item: NavItem; collapsed: boolean }) {
         isActive
           ? [
               "bg-[var(--ink)] text-[var(--bone)]",
-              /* Invite dilinde dark: soft glass + green edge */
-              "dark:bg-white/[0.08] dark:text-[#F4F1EC] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]",
+              /* Invite dilinde dark: brand-green tinted glass + green edge */
+              "dark:bg-[var(--inner-green)]/[0.12] dark:text-[#F4F1EC] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]",
             ]
           : [
               "text-[var(--ink-body)] hover:bg-[var(--ink)]/[0.05] hover:text-[var(--ink)]",
-              "dark:text-white/55 dark:hover:bg-white/[0.05] dark:hover:text-white",
+              "dark:text-white/60 dark:hover:bg-white/[0.06] dark:hover:text-white",
             ],
         collapsed && "justify-center px-2",
       )}
@@ -176,7 +176,7 @@ function NavLink({ item, collapsed }: { item: NavItem; collapsed: boolean }) {
       <item.icon
         className={cn(
           "size-[15px] shrink-0",
-          isActive ? "opacity-100" : "opacity-55 group-hover:opacity-100 dark:opacity-45 dark:group-hover:opacity-90",
+          isActive ? "opacity-100" : "opacity-55 group-hover:opacity-100 dark:opacity-55 dark:group-hover:opacity-95",
         )}
         strokeWidth={1.6}
       />
