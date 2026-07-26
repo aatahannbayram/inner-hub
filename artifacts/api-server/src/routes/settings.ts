@@ -34,7 +34,7 @@ export const DEFAULT_SETTINGS_PREFS: SettingsPrefs = {
   showOnline: true,
   allowMatch: true,
   analyticsConsent: true,
-  theme: "light",
+  theme: "dark",
   lang: "tr",
   compactMode: false,
   onboardingCompleted: false,
@@ -58,7 +58,7 @@ export function parseSettingsPrefs(raw: string | null | undefined): SettingsPref
       theme:
         parsed.theme === "dark" || parsed.theme === "system" || parsed.theme === "light"
           ? parsed.theme
-          : "light",
+          : "dark",
       lang: parsed.lang === "en" ? "en" : "tr",
       compactMode: parsed.compactMode === true,
       onboardingCompleted: parsed.onboardingCompleted === true,
@@ -94,7 +94,7 @@ function sanitizeBody(body: any): SettingsPrefs {
     theme:
       body.theme === "dark" || body.theme === "system" || body.theme === "light"
         ? body.theme
-        : "light",
+        : "dark",
     lang: body.lang === "en" ? "en" : "tr",
     compactMode: body.compactMode === true,
     onboardingCompleted: body.onboardingCompleted === true,
