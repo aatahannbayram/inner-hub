@@ -18469,8 +18469,8 @@ var require_escape_html = __commonJS({
   "../../node_modules/.pnpm/escape-html@1.0.3/node_modules/escape-html/index.js"(exports, module) {
     "use strict";
     var matchHtmlRegExp = /["'&<>]/;
-    module.exports = escapeHtml;
-    function escapeHtml(string4) {
+    module.exports = escapeHtml2;
+    function escapeHtml2(string4) {
       var str = "" + string4;
       var match = matchHtmlRegExp.exec(str);
       if (!match) {
@@ -18601,13 +18601,13 @@ var require_finalhandler = __commonJS({
     "use strict";
     var debug = require_src()("finalhandler");
     var encodeUrl = require_encodeurl();
-    var escapeHtml = require_escape_html();
+    var escapeHtml2 = require_escape_html();
     var onFinished = require_on_finished();
     var parseUrl = require_parseurl();
     var statuses = require_statuses();
     var isFinished = onFinished.isFinished;
     function createHtmlDocument(message) {
-      var body = escapeHtml(message).replaceAll("\n", "<br>").replaceAll("  ", " &nbsp;");
+      var body = escapeHtml2(message).replaceAll("\n", "<br>").replaceAll("  ", " &nbsp;");
       return '<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n<title>Error</title>\n</head>\n<body>\n<pre>' + body + "</pre>\n</body>\n</html>\n";
     }
     module.exports = finalhandler;
@@ -22595,7 +22595,7 @@ var require_send = __commonJS({
     var createError = require_http_errors();
     var debug = require_src()("send");
     var encodeUrl = require_encodeurl();
-    var escapeHtml = require_escape_html();
+    var escapeHtml2 = require_escape_html();
     var etag = require_etag();
     var fresh = require_fresh();
     var fs7 = __require("fs");
@@ -22648,7 +22648,7 @@ var require_send = __commonJS({
       }
       var res = this.res;
       var msg = statuses.message[status] || String(status);
-      var doc = createHtmlDocument("Error", escapeHtml(msg));
+      var doc = createHtmlDocument("Error", escapeHtml2(msg));
       clearHeaders(res);
       if (err && err.headers) {
         setHeaders(res, err.headers);
@@ -22748,7 +22748,7 @@ var require_send = __commonJS({
         return;
       }
       var loc = encodeUrl(collapseLeadingSlashes(this.path + "/"));
-      var doc = createHtmlDocument("Redirecting", "Redirecting to " + escapeHtml(loc));
+      var doc = createHtmlDocument("Redirecting", "Redirecting to " + escapeHtml2(loc));
       res.statusCode = 301;
       res.setHeader("Content-Type", "text/html; charset=UTF-8");
       res.setHeader("Content-Length", Buffer.byteLength(doc));
@@ -23152,7 +23152,7 @@ var require_response = __commonJS({
     var createError = require_http_errors();
     var deprecate = require_depd()("express");
     var encodeUrl = require_encodeurl();
-    var escapeHtml = require_escape_html();
+    var escapeHtml2 = require_escape_html();
     var http2 = __require("node:http");
     var onFinished = require_on_finished();
     var mime = require_mime_types();
@@ -23491,7 +23491,7 @@ var require_response = __commonJS({
           body = statuses.message[status] + ". Redirecting to " + address;
         },
         html: function() {
-          var u = escapeHtml(address);
+          var u = escapeHtml2(address);
           body = "<p>" + statuses.message[status] + ". Redirecting to " + u + "</p>";
         },
         default: function() {
@@ -23619,7 +23619,7 @@ var require_serve_static = __commonJS({
   "../../node_modules/.pnpm/serve-static@2.2.1/node_modules/serve-static/index.js"(exports, module) {
     "use strict";
     var encodeUrl = require_encodeurl();
-    var escapeHtml = require_escape_html();
+    var escapeHtml2 = require_escape_html();
     var parseUrl = require_parseurl();
     var resolve4 = __require("path").resolve;
     var send = require_send();
@@ -23705,7 +23705,7 @@ var require_serve_static = __commonJS({
         originalUrl.path = null;
         originalUrl.pathname = collapseLeadingSlashes(originalUrl.pathname + "/");
         var loc = encodeUrl(url2.format(originalUrl));
-        var doc = createHtmlDocument("Redirecting", "Redirecting to " + escapeHtml(loc));
+        var doc = createHtmlDocument("Redirecting", "Redirecting to " + escapeHtml2(loc));
         res.statusCode = 301;
         res.setHeader("Content-Type", "text/html; charset=UTF-8");
         res.setHeader("Content-Length", Buffer.byteLength(doc));
@@ -29875,7 +29875,7 @@ var require_utils5 = __commonJS({
     var nodeCrypto = __require("crypto");
     module.exports = {
       postgresMd5PasswordHash,
-      randomBytes: randomBytes2,
+      randomBytes: randomBytes4,
       deriveKey,
       sha256,
       hashByName,
@@ -29885,7 +29885,7 @@ var require_utils5 = __commonJS({
     var webCrypto = nodeCrypto.webcrypto || globalThis.crypto;
     var subtleCrypto = webCrypto.subtle;
     var textEncoder = new TextEncoder();
-    function randomBytes2(length) {
+    function randomBytes4(length) {
       return webCrypto.getRandomValues(Buffer.alloc(length));
     }
     async function md52(string4) {
@@ -79673,6 +79673,115 @@ var pgTable = (name, columns, extraConfig) => {
   return pgTableWithSchema(name, columns, extraConfig, void 0);
 };
 
+// ../../node_modules/.pnpm/drizzle-orm@0.45.2_@types+pg@8.20.0_pg@8.22.0/node_modules/drizzle-orm/pg-core/indexes.js
+var IndexBuilderOn = class {
+  constructor(unique, name) {
+    this.unique = unique;
+    this.name = name;
+  }
+  static [entityKind] = "PgIndexBuilderOn";
+  on(...columns) {
+    return new IndexBuilder(
+      columns.map((it) => {
+        if (is(it, SQL)) {
+          return it;
+        }
+        it = it;
+        const clonedIndexedColumn = new IndexedColumn(it.name, !!it.keyAsName, it.columnType, it.indexConfig);
+        it.indexConfig = JSON.parse(JSON.stringify(it.defaultConfig));
+        return clonedIndexedColumn;
+      }),
+      this.unique,
+      false,
+      this.name
+    );
+  }
+  onOnly(...columns) {
+    return new IndexBuilder(
+      columns.map((it) => {
+        if (is(it, SQL)) {
+          return it;
+        }
+        it = it;
+        const clonedIndexedColumn = new IndexedColumn(it.name, !!it.keyAsName, it.columnType, it.indexConfig);
+        it.indexConfig = it.defaultConfig;
+        return clonedIndexedColumn;
+      }),
+      this.unique,
+      true,
+      this.name
+    );
+  }
+  /**
+   * Specify what index method to use. Choices are `btree`, `hash`, `gist`, `spgist`, `gin`, `brin`, or user-installed access methods like `bloom`. The default method is `btree.
+   *
+   * If you have the `pg_vector` extension installed in your database, you can use the `hnsw` and `ivfflat` options, which are predefined types.
+   *
+   * **You can always specify any string you want in the method, in case Drizzle doesn't have it natively in its types**
+   *
+   * @param method The name of the index method to be used
+   * @param columns
+   * @returns
+   */
+  using(method, ...columns) {
+    return new IndexBuilder(
+      columns.map((it) => {
+        if (is(it, SQL)) {
+          return it;
+        }
+        it = it;
+        const clonedIndexedColumn = new IndexedColumn(it.name, !!it.keyAsName, it.columnType, it.indexConfig);
+        it.indexConfig = JSON.parse(JSON.stringify(it.defaultConfig));
+        return clonedIndexedColumn;
+      }),
+      this.unique,
+      true,
+      this.name,
+      method
+    );
+  }
+};
+var IndexBuilder = class {
+  static [entityKind] = "PgIndexBuilder";
+  /** @internal */
+  config;
+  constructor(columns, unique, only, name, method = "btree") {
+    this.config = {
+      name,
+      columns,
+      unique,
+      only,
+      method
+    };
+  }
+  concurrently() {
+    this.config.concurrently = true;
+    return this;
+  }
+  with(obj) {
+    this.config.with = obj;
+    return this;
+  }
+  where(condition) {
+    this.config.where = condition;
+    return this;
+  }
+  /** @internal */
+  build(table) {
+    return new Index(this.config, table);
+  }
+};
+var Index = class {
+  static [entityKind] = "PgIndex";
+  config;
+  constructor(config2, table) {
+    this.config = { ...config2, table };
+  }
+};
+function uniqueIndex(name) {
+  return new IndexBuilderOn(true, name);
+}
+
 // ../../node_modules/.pnpm/drizzle-orm@0.45.2_@types+pg@8.20.0_pg@8.22.0/node_modules/drizzle-orm/pg-core/primary-keys.js
 var PrimaryKeyBuilder = class {
   static [entityKind] = "PgPrimaryKeyBuilder";
@@ -83730,11 +83839,13 @@ __export(schema_exports, {
   insertCourseSchema: () => insertCourseSchema,
   insertEventSchema: () => insertEventSchema,
   insertInvitationRequestSchema: () => insertInvitationRequestSchema,
+  insertInviteCodeSchema: () => insertInviteCodeSchema,
   insertMessageSchema: () => insertMessageSchema,
   insertPerkSchema: () => insertPerkSchema,
   insertUserSchema: () => insertUserSchema,
   introductionRequestsTable: () => introductionRequestsTable,
   invitationRequestsTable: () => invitationRequestsTable,
+  inviteCodesTable: () => inviteCodesTable,
   lessonsTable: () => lessonsTable,
   messagesTable: () => messagesTable,
   modulesTable: () => modulesTable,
@@ -83746,6 +83857,7 @@ __export(schema_exports, {
   selectCourseSchema: () => selectCourseSchema,
   selectEventSchema: () => selectEventSchema,
   selectInvitationRequestSchema: () => selectInvitationRequestSchema,
+  selectInviteCodeSchema: () => selectInviteCodeSchema,
   selectPerkSchema: () => selectPerkSchema,
   selectUserSchema: () => selectUserSchema,
   sessionsTable: () => sessionsTable,
@@ -95410,6 +95522,28 @@ var apiKeysTable = pgTable("api_keys", {
   lastUsedAt: timestamp("last_used_at")
 });
 
+// ../../lib/db/src/schema/inviteCodes.ts
+var inviteCodesTable = pgTable(
+  "invite_codes",
+  {
+    id: serial("id").primaryKey(),
+    code: text("code").notNull(),
+    email: text("email").notNull(),
+    invitationRequestId: integer("invitation_request_id").notNull(),
+    applicationId: integer("application_id"),
+    usedAt: timestamp("used_at"),
+    usedByUserId: integer("used_by_user_id").references(() => usersTable.id),
+    expiresAt: timestamp("expires_at"),
+    createdAt: timestamp("created_at").defaultNow().notNull()
+  },
+  (t) => [uniqueIndex("invite_codes_code_uidx").on(t.code)]
+);
+var insertInviteCodeSchema = createInsertSchema(inviteCodesTable).omit({
+  id: true,
+  createdAt: true
+});
+var selectInviteCodeSchema = createSelectSchema(inviteCodesTable);
+
 // ../../lib/db/src/index.ts
 var { Pool: Pool3 } = esm_default;
 if (!process.env.DATABASE_URL) {
@@ -95420,8 +95554,9 @@ if (!process.env.DATABASE_URL) {
 var pool = new Pool3({ connectionString: process.env.DATABASE_URL });
 var db = drizzle(pool, { schema: schema_exports });
 
-// src/lib/mailer.ts
+// src/lib/mail/transport.ts
 var import_nodemailer = __toESM(require_nodemailer(), 1);
+import { randomBytes } from "node:crypto";
 
 // src/lib/logger.ts
 var import_pino = __toESM(require_pino(), 1);
@@ -95441,9 +95576,9 @@ var logger = (0, import_pino.default)({
   }
 });
 
-// src/lib/mailer.ts
+// src/lib/mail/transport.ts
 var transporter;
-function getTransporter() {
+function getMailTransporter() {
   if (transporter !== void 0) return transporter;
   const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS } = process.env;
   if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS) {
@@ -95455,47 +95590,389 @@ function getTransporter() {
     host: SMTP_HOST,
     port: port2,
     secure: port2 === 465,
-    auth: { user: SMTP_USER, pass: SMTP_PASS }
+    auth: { user: SMTP_USER, pass: SMTP_PASS },
+    // Pool + rate limit: burst spam skorunu düşürür
+    pool: true,
+    maxConnections: 2,
+    maxMessages: 20,
+    rateDelta: 1e3,
+    rateLimit: 5
   });
   return transporter;
 }
+function appBaseUrl() {
+  return (process.env.APP_URL ?? "https://inner.digital").replace(/\/$/, "");
+}
+function mailFromAddress() {
+  return process.env.MAIL_FROM ?? process.env.SMTP_USER ?? "noreply@inner.digital";
+}
+function mailFromHeader() {
+  const name = process.env.MAIL_FROM_NAME ?? "inner hub";
+  return `"${name.replace(/"/g, "")}" <${mailFromAddress()}>`;
+}
+function mailReplyTo() {
+  return process.env.MAIL_REPLY_TO ?? "support@inner.digital";
+}
+function mailDomain() {
+  const from = mailFromAddress();
+  const at = from.lastIndexOf("@");
+  return at >= 0 ? from.slice(at + 1) : "inner.digital";
+}
+async function sendTransactionalMail(mail) {
+  const transport = getMailTransporter();
+  if (!transport) {
+    logger.info({ kind: mail.kind, to: mail.to }, "SMTP not configured \u2014 mail skipped");
+    return false;
+  }
+  const domain2 = mailDomain();
+  const messageId = `<${Date.now()}.${randomBytes(8).toString("hex")}@${domain2}>`;
+  const unsubMailto = `mailto:${mailReplyTo()}?subject=${encodeURIComponent("unsubscribe")}`;
+  try {
+    await transport.sendMail({
+      from: mailFromHeader(),
+      to: mail.to,
+      replyTo: mailReplyTo(),
+      subject: mail.subject,
+      text: mail.text,
+      html: mail.html,
+      messageId,
+      headers: {
+        "Auto-Submitted": "auto-generated",
+        "X-Auto-Response-Suppress": "All",
+        "List-Unsubscribe": `<${unsubMailto}>`,
+        "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+        "X-Inner-Mail-Kind": mail.kind ?? "transactional"
+      }
+    });
+    logger.info({ kind: mail.kind, to: mail.to, messageId }, "Transactional mail sent");
+    return true;
+  } catch (err) {
+    logger.error({ err, kind: mail.kind, to: mail.to }, "Transactional mail failed");
+    return false;
+  }
+}
+
+// src/lib/mail/layout.ts
+var INK = "#0A0A0A";
+var INK_DEEP = "#050505";
+var ATMOSPHERE = "#0B100E";
+var GLASS = "#121614";
+var BONE = "#F4F1EC";
+var GREEN = "#18FF85";
+var MUTED = "rgba(244,241,236,0.55)";
+var FAINT = "rgba(244,241,236,0.35)";
+var LINE = "rgba(255,255,255,0.12)";
+var LINE_SOFT = "rgba(255,255,255,0.08)";
+var HIGHLIGHT = "rgba(255,255,255,0.14)";
+var MAIL_BANNER_PATH = "/posters/perks-ambient.jpg";
+function escapeHtml(value) {
+  return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+function firstName(fullName) {
+  const part = fullName.trim().split(/\s+/)[0];
+  return part || fullName.trim() || "Merhaba";
+}
+function renderInnerEmailLayout(input) {
+  const {
+    preheader,
+    eyebrow,
+    title,
+    bodyHtml,
+    cta,
+    footerNote = "Bu ileti inner\xB7hub ba\u015Fvuru s\xFCrecinle ilgili otomatik bir bilgilendirmedir.",
+    appUrl: appUrl2,
+    bannerUrl
+  } = input;
+  const imageSrc = bannerUrl === null ? null : escapeHtml(bannerUrl ?? `${appUrl2.replace(/\/$/, "")}${MAIL_BANNER_PATH}`);
+  const bannerBlock = imageSrc ? `
+                <tr>
+                  <td style="padding:0;line-height:0;font-size:0;border-bottom:1px solid ${LINE_SOFT};">
+                    <a href="${escapeHtml(appUrl2)}" style="display:block;text-decoration:none;">
+                      <img src="${imageSrc}"
+                           width="560"
+                           alt="inner hub"
+                           style="display:block;width:100%;max-width:560px;height:auto;border:0;outline:none;text-decoration:none;" />
+                    </a>
+                  </td>
+                </tr>` : "";
+  const ctaBlock = cta ? `
+      <tr>
+        <td style="padding:28px 0 4px;">
+          <a href="${escapeHtml(cta.href)}"
+             style="display:inline-block;background:${BONE};color:${INK};font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:11px;letter-spacing:0.08em;text-decoration:none;padding:14px 22px;border:0;">
+            ${escapeHtml(cta.label)}&nbsp;&nbsp;\u2197
+          </a>
+        </td>
+      </tr>` : "";
+  return `<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="dark only" />
+  <meta name="supported-color-schemes" content="dark" />
+  <title>${escapeHtml(title)}</title>
+  <!--[if mso]><style>table,td{font-family:Arial,sans-serif!important}</style><![endif]-->
+</head>
+<body style="margin:0;padding:0;background:${INK_DEEP};color:${BONE};">
+  <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;mso-hide:all;">
+    ${escapeHtml(preheader)}
+  </div>
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${INK_DEEP};">
+    <tr>
+      <td align="center" style="padding:40px 16px;background:${ATMOSPHERE};">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:580px;">
+          <tr>
+            <td align="center" style="padding:0 0 18px;">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td style="width:120px;height:2px;background-color:${GREEN};opacity:0.35;font-size:0;line-height:0;">&nbsp;</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+                     style="max-width:560px;margin:0 auto;background:${GLASS};border:1px solid ${LINE};border-collapse:separate;">
+                <tr>
+                  <td style="height:1px;line-height:1px;font-size:0;background:${HIGHLIGHT};">&nbsp;</td>
+                </tr>
+                <tr>
+                  <td style="padding:26px 28px 18px;border-bottom:1px solid ${LINE_SOFT};">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td style="font-family:Georgia,'Times New Roman',serif;font-size:26px;line-height:1;color:${BONE};">
+                          inner<span style="display:inline-block;width:9px;height:9px;background:${GREEN};margin:0 3px 2px;vertical-align:middle;"></span>hub
+                        </td>
+                        <td align="right" style="font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:${FAINT};">
+                          private circle
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                ${bannerBlock}
+                <tr>
+                  <td style="padding:32px 28px 36px;background:${GLASS};">
+                    <p style="margin:0 0 14px;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:${MUTED};">
+                      ${escapeHtml(eyebrow)}
+                    </p>
+                    <h1 style="margin:0 0 18px;font-family:Georgia,'Times New Roman',serif;font-size:32px;line-height:1.15;font-weight:400;font-style:italic;color:${BONE};">
+                      ${escapeHtml(title)}
+                    </h1>
+                    <div style="font-family:Inter,Helvetica,Arial,sans-serif;font-size:15px;line-height:1.65;color:${MUTED};">
+                      ${bodyHtml}
+                    </div>
+                    ${ctaBlock}
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:18px 28px 24px;border-top:1px solid ${LINE_SOFT};background:#101310;">
+                    <p style="margin:0 0 10px;font-family:Inter,Helvetica,Arial,sans-serif;font-size:12px;line-height:1.5;color:${FAINT};">
+                      ${escapeHtml(footerNote)}
+                    </p>
+                    <p style="margin:0;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:10px;letter-spacing:0.04em;color:${FAINT};">
+                      <a href="${escapeHtml(appUrl2)}" style="color:${BONE};text-decoration:none;text-transform:none;">inner.digital</a>
+                      &nbsp;\xB7&nbsp;
+                      <a href="mailto:support@inner.digital" style="color:${MUTED};text-decoration:none;text-transform:none;">support@inner.digital</a>
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" style="padding:20px 8px 0;">
+              <p style="margin:0;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:${FAINT};">
+                \u0130stanbul \u2192 Global
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+}
+
+// src/lib/mail/templates.ts
+function roleLine(roleLabel) {
+  if (!roleLabel) return "";
+  return `<p style="margin:16px 0 0;">Ba\u015Fvuru kap\u0131s\u0131: <strong style="color:#F4F1EC;font-weight:500;">${escapeHtml(roleLabel)}</strong></p>`;
+}
+function invitationReceivedMail(ctx) {
+  const appUrl2 = appBaseUrl();
+  const name = firstName(ctx.name);
+  const subject = "inner hub \xB7 davet talebin al\u0131nd\u0131";
+  const text2 = [
+    `Merhaba ${name},`,
+    "",
+    "Davet talebin bize ula\u015Ft\u0131. Ekibimiz ba\u015Fvurunu inceliyor; k\u0131sa s\xFCre i\xE7inde d\xF6n\xFC\u015F yapaca\u011F\u0131z.",
+    "",
+    "Bu s\xFCre\xE7te ek bir \u015Fey yapman gerekmiyor. Sorun olursa: support@inner.digital",
+    "",
+    "inner hub",
+    appUrl2
+  ].join("\n");
+  const html = renderInnerEmailLayout({
+    appUrl: appUrl2,
+    preheader: "Davet talebin al\u0131nd\u0131. Ekibimiz k\u0131sa s\xFCre i\xE7inde d\xF6n\xFC\u015F yapacak.",
+    eyebrow: "Davetiye \xB7 al\u0131nd\u0131",
+    title: `${name}, talebin bizde.`,
+    bodyHtml: `
+      <p style="margin:0 0 12px;">Davet talebin ba\u015Far\u0131yla kayda ge\xE7ti. inner\xB7hub davetiye ile ilerler; her ba\u015Fvuruyu tek tek okuyoruz.</p>
+      <p style="margin:0;">\u0130nceleme tamamlan\u0131nca bu adrese yaz\u0131l\u0131 olarak haber verece\u011Fiz. Bu arada ek bir ad\u0131m gerekmiyor.</p>
+      ${roleLine(ctx.roleLabel)}
+    `,
+    cta: { label: "inner.digital", href: appUrl2 },
+    footerNote: "Bu ileti, yapt\u0131\u011F\u0131n davet talebine yan\u0131t olarak otomatik g\xF6nderildi."
+  });
+  return { subject, text: text2, html, kind: "invite.received" };
+}
+function invitationApprovedMail(ctx) {
+  const appUrl2 = appBaseUrl();
+  const panelUrl = `${appUrl2}/panel`;
+  const name = firstName(ctx.name);
+  const inviteCode = ctx.inviteCode?.trim() || "";
+  const subject = "inner hub \xB7 davetin onayland\u0131";
+  const text2 = [
+    `Merhaba ${name},`,
+    "",
+    "Davet talebin onayland\u0131. \xC7embere ho\u015F geldin.",
+    "",
+    inviteCode ? `Davet kodun: ${inviteCode}` : "Davet kodun i\xE7in support@inner.digital yaz.",
+    `Panele git, kay\u0131t ol (ayn\u0131 e-posta + davet kodu): ${panelUrl}`,
+    "",
+    "Kay\u0131t olduktan sonra sonraki giri\u015Flerde kod gerekmez.",
+    "",
+    "inner hub",
+    appUrl2
+  ].join("\n");
+  const codeHtml = inviteCode ? `
+      <p style="margin:0 0 12px;">Panele gidip <strong style="color:#F4F1EC;font-weight:500;">bu ba\u015Fvurudaki e-posta</strong> ile kay\u0131t ol. Davet kodun:</p>
+      <p style="margin:0 0 16px;padding:14px 16px;border:1px solid rgba(255,255,255,0.14);background:rgba(255,255,255,0.04);font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:18px;letter-spacing:0.12em;color:#F4F1EC;">
+        ${escapeHtml(inviteCode)}
+      </p>
+      <p style="margin:0 0 12px;font-size:13px;color:rgba(244,241,236,0.45);">Kod sana \xF6zel ve tek kullan\u0131ml\u0131k. Kay\u0131ttan sonra giri\u015Flerde gerekmez. Sorun olursa <a href="mailto:support@inner.digital" style="color:#F4F1EC;">support@inner.digital</a>.</p>
+    ` : `
+      <p style="margin:0 0 12px;">Panele gidip hesab\u0131n\u0131 olu\u015Fturabilirsin. Davet kodu i\xE7in <a href="mailto:support@inner.digital" style="color:#F4F1EC;">support@inner.digital</a> yaz.</p>
+    `;
+  const html = renderInnerEmailLayout({
+    appUrl: appUrl2,
+    preheader: inviteCode ? `Davetin onayland\u0131. Kodun: ${inviteCode}` : "Davetin onayland\u0131. Panele ge\xE7ebilirsin.",
+    eyebrow: "Davetiye \xB7 onay",
+    title: "\xC7embere ho\u015F geldin.",
+    bodyHtml: `
+      <p style="margin:0 0 12px;">Merhaba ${escapeHtml(name)}, ba\u015Fvurun onayland\u0131. inner\xB7hub art\u0131k senin i\xE7in a\xE7\u0131k.</p>
+      ${codeHtml}
+      ${roleLine(ctx.roleLabel)}
+    `,
+    cta: { label: "Panele git", href: panelUrl },
+    footerNote: "Bu ileti, davet talebinin onaylanmas\u0131 \xFCzerine otomatik g\xF6nderildi."
+  });
+  return { subject, text: text2, html, kind: "invite.approved" };
+}
+function invitationRejectedMail(ctx) {
+  const appUrl2 = appBaseUrl();
+  const name = firstName(ctx.name);
+  const subject = "inner hub \xB7 davet talebi hakk\u0131nda";
+  const text2 = [
+    `Merhaba ${name},`,
+    "",
+    "Bu turda davet talebini olumlu sonu\xE7land\u0131ramad\u0131k. Bu nihai bir kap\u0131 kapanmas\u0131 de\u011Fil; \xE7ember bilerek yava\u015F b\xFCy\xFCyor.",
+    "",
+    "Sorular\u0131n i\xE7in: support@inner.digital",
+    "",
+    "inner hub",
+    appUrl2
+  ].join("\n");
+  const html = renderInnerEmailLayout({
+    appUrl: appUrl2,
+    preheader: "Bu turda talebini olumlu sonu\xE7land\u0131ramad\u0131k.",
+    eyebrow: "Davetiye \xB7 bilgilendirme",
+    title: "Bu turda yer a\xE7amad\u0131k.",
+    bodyHtml: `
+      <p style="margin:0 0 12px;">Merhaba ${escapeHtml(name)}. Ba\u015Fvurunu dikkatle okuduk; bu d\xF6nemde \xE7embere yeni bir yer a\xE7am\u0131yoruz.</p>
+      <p style="margin:0;">Bu karar nihai bir yasak de\u011Fil; inner\xB7hub bilerek yava\u015F b\xFCy\xFCr. \u0130leride yeniden yazabilirsin. Sorun olursa <a href="mailto:support@inner.digital" style="color:#F4F1EC;">support@inner.digital</a>.</p>
+    `,
+    cta: { label: "inner.digital", href: appUrl2 },
+    footerNote: "Bu ileti, davet talebinin sonucu hakk\u0131nda otomatik g\xF6nderildi."
+  });
+  return { subject, text: text2, html, kind: "invite.rejected" };
+}
+function adminNewRequestMail(payload) {
+  const appUrl2 = appBaseUrl();
+  const requestsUrl = `${appUrl2}/requests`;
+  const role = payload.role ?? "\xB7";
+  const subject = `inner hub \xB7 yeni \xFCyelik talebi: ${payload.name}`;
+  const lines = [
+    `\u0130sim: ${payload.name}`,
+    `Email: ${payload.email}`,
+    `Kimlik: ${role}`,
+    payload.organization ? `Kurum: ${payload.organization}` : null,
+    payload.organizationDomain ? `Domain: ${payload.organizationDomain}` : null,
+    payload.linkedin ? `LinkedIn: ${payload.linkedin}` : null,
+    `Kim: ${payload.whoYouAre}`,
+    payload.link ? `Link: ${payload.link}` : null,
+    payload.whoIntroduced ? `Kim tan\u0131tt\u0131: ${payload.whoIntroduced}` : null,
+    "",
+    `\u0130ncele: ${requestsUrl}`
+  ].filter(Boolean);
+  const text2 = lines.join("\n");
+  const html = renderInnerEmailLayout({
+    appUrl: appUrl2,
+    preheader: `Yeni talep: ${payload.name}`,
+    eyebrow: "Admin \xB7 yeni talep",
+    title: payload.name,
+    bodyHtml: `
+      <p style="margin:0 0 8px;"><strong style="color:#F4F1EC;">${escapeHtml(payload.email)}</strong></p>
+      <p style="margin:0 0 16px;">Kap\u0131: ${escapeHtml(role)}</p>
+      <p style="margin:0 0 12px;white-space:pre-wrap;">${escapeHtml(payload.whoYouAre)}</p>
+      ${payload.organization ? `<p style="margin:0;">Kurum: ${escapeHtml(payload.organization)}</p>` : ""}
+    `,
+    cta: { label: "Ba\u015Fvurular\u0131 a\xE7", href: requestsUrl },
+    footerNote: "\u0130\xE7 bildirim; yaln\u0131zca ekip adresine gider."
+  });
+  return { subject, text: text2, html, kind: "admin.new_request" };
+}
+
+// src/lib/mail/index.ts
 var ROLE_LABELS = {
   builder: "Builder",
   operator: "Builder",
-  // legacy
   investor: "Yat\u0131r\u0131mc\u0131",
   founder: "Giri\u015Fimci",
   company: "\u015Eirket"
 };
+function roleLabelOf(role) {
+  if (!role) return null;
+  return ROLE_LABELS[role] ?? role;
+}
 async function notifyNewInvitationRequest(req) {
-  const mailer = getTransporter();
-  if (!mailer) {
-    logger.info("SMTP not configured, skipping invitation request email notification");
-    return;
-  }
+  const mail = adminNewRequestMail({
+    ...req,
+    role: roleLabelOf(req.role) ?? req.role
+  });
   const to = process.env.NOTIFY_EMAIL || process.env.SMTP_USER;
-  const lines = [
-    `\u0130sim: ${req.name}`,
-    `Email: ${req.email}`,
-    req.role ? `Kimlik: ${ROLE_LABELS[req.role] ?? req.role}` : null,
-    req.organization ? `Kurum: ${req.organization}` : null,
-    req.organizationDomain ? `Domain: ${req.organizationDomain}` : null,
-    req.organizationLogo ? `Logo: ${req.organizationLogo}` : null,
-    req.linkedin ? `LinkedIn: ${req.linkedin}` : null,
-    `Kim: ${req.whoYouAre}`,
-    req.link ? `Link: ${req.link}` : null,
-    req.whoIntroduced ? `Kim tan\u0131tt\u0131: ${req.whoIntroduced}` : null
-  ].filter(Boolean);
-  try {
-    await mailer.sendMail({
-      from: process.env.SMTP_USER,
-      to,
-      subject: `inner.hub \u2014 Yeni \xFCyelik talebi: ${req.name}`,
-      text: lines.join("\n")
-    });
-  } catch (err) {
-    logger.error({ err }, "Failed to send invitation request notification email");
-  }
+  if (!to) return false;
+  return sendTransactionalMail({ ...mail, to });
+}
+async function notifyApplicantInvitationReceived(ctx) {
+  const mail = invitationReceivedMail({
+    ...ctx,
+    roleLabel: ctx.roleLabel ?? null
+  });
+  return sendTransactionalMail({ ...mail, to: ctx.email });
+}
+async function notifyApplicantInvitationApproved(ctx) {
+  const mail = invitationApprovedMail(ctx);
+  return sendTransactionalMail({ ...mail, to: ctx.email });
+}
+async function notifyApplicantInvitationRejected(ctx) {
+  const mail = invitationRejectedMail(ctx);
+  return sendTransactionalMail({ ...mail, to: ctx.email });
 }
 
 // src/lib/orgLogo.ts
@@ -95718,6 +96195,11 @@ router2.post("/request", async (req, res) => {
     organization: trimmedOrg,
     organizationDomain: domain2,
     organizationLogo: logoUrl
+  });
+  void notifyApplicantInvitationReceived({
+    name: trimmedName,
+    email: trimmedEmail,
+    roleLabel: roleLabelOf(trimmedRole)
   });
   res.status(201).json({ message: "Received." });
 });
@@ -113817,6 +114299,123 @@ async function ensureApiKeysSchema() {
     )
   `);
 }
+async function ensureInviteCodesSchema() {
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS invite_codes (
+      id serial PRIMARY KEY,
+      code text NOT NULL,
+      email text NOT NULL,
+      invitation_request_id integer NOT NULL,
+      application_id integer,
+      used_at timestamp,
+      used_by_user_id integer REFERENCES users(id),
+      expires_at timestamp,
+      created_at timestamp NOT NULL DEFAULT now()
+    )
+  `);
+  await db.execute(sql`
+    CREATE UNIQUE INDEX IF NOT EXISTS invite_codes_code_uidx ON invite_codes (code)
+  `);
+  await db.execute(sql`
+    CREATE INDEX IF NOT EXISTS invite_codes_invitation_request_idx
+      ON invite_codes (invitation_request_id)
+  `);
+}
+
+// src/lib/inviteCodes.ts
+import { randomBytes as randomBytes2 } from "node:crypto";
+var CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+function normalizeEmail(email3) {
+  return email3.trim().toLowerCase();
+}
+function generateInviteCode() {
+  const bytes = randomBytes2(8);
+  let raw = "";
+  for (let i = 0; i < 8; i++) {
+    raw += CODE_ALPHABET[bytes[i] % CODE_ALPHABET.length];
+  }
+  return `${raw.slice(0, 4)}-${raw.slice(4)}`;
+}
+function normalizeInviteCode(raw) {
+  const cleaned = raw.trim().toUpperCase().replace(/[^A-Z0-9]/g, "");
+  if (cleaned.length === 8) return `${cleaned.slice(0, 4)}-${cleaned.slice(4)}`;
+  return raw.trim().toUpperCase();
+}
+var DEFAULT_TTL_MS = 30 * 24 * 60 * 60 * 1e3;
+async function issueInviteCodeForApproval(input) {
+  await ensureInviteCodesSchema();
+  const email3 = normalizeEmail(input.email);
+  const [existing] = await db.select().from(inviteCodesTable).where(
+    and(
+      eq(inviteCodesTable.invitationRequestId, input.invitationRequestId),
+      isNull(inviteCodesTable.usedAt)
+    )
+  ).limit(1);
+  if (existing) {
+    if (input.applicationId && !existing.applicationId) {
+      await db.update(inviteCodesTable).set({ applicationId: input.applicationId }).where(eq(inviteCodesTable.id, existing.id));
+    }
+    return existing.code;
+  }
+  let code = generateInviteCode();
+  for (let attempt = 0; attempt < 5; attempt++) {
+    try {
+      await db.insert(inviteCodesTable).values({
+        code,
+        email: email3,
+        invitationRequestId: input.invitationRequestId,
+        applicationId: input.applicationId ?? null,
+        expiresAt: new Date(Date.now() + DEFAULT_TTL_MS)
+      });
+      return code;
+    } catch {
+      code = generateInviteCode();
+    }
+  }
+  throw new Error("Davet kodu \xFCretilemedi");
+}
+async function revokeUnusedInviteCodes(invitationRequestId) {
+  await ensureInviteCodesSchema();
+  await db.update(inviteCodesTable).set({ usedAt: /* @__PURE__ */ new Date() }).where(
+    and(
+      eq(inviteCodesTable.invitationRequestId, invitationRequestId),
+      isNull(inviteCodesTable.usedAt)
+    )
+  );
+}
+async function validateInviteCodeForEmail(inviteCode, registeringEmail) {
+  await ensureInviteCodesSchema();
+  if (typeof inviteCode !== "string" || !inviteCode.trim()) {
+    return { ok: false, error: "Davet kodu zorunlu" };
+  }
+  const code = normalizeInviteCode(inviteCode);
+  const email3 = normalizeEmail(registeringEmail);
+  const master = process.env.INVITE_PASSCODE?.trim();
+  if (master && inviteCode.trim() === master) {
+    return { ok: true, id: -1, code: master };
+  }
+  const [row] = await db.select().from(inviteCodesTable).where(eq(inviteCodesTable.code, code)).limit(1);
+  if (!row) {
+    return { ok: false, error: "Ge\xE7ersiz davet kodu" };
+  }
+  if (row.usedAt) {
+    return { ok: false, error: "Bu davet kodu daha \xF6nce kullan\u0131lm\u0131\u015F" };
+  }
+  if (row.expiresAt && row.expiresAt.getTime() < Date.now()) {
+    return { ok: false, error: "Bu davet kodunun s\xFCresi dolmu\u015F" };
+  }
+  if (normalizeEmail(row.email) !== email3) {
+    return {
+      ok: false,
+      error: "Davet kodu bu e-posta adresi i\xE7in de\u011Fil. Ba\u015Fvurudaki e-posta ile kay\u0131t ol."
+    };
+  }
+  return { ok: true, id: row.id, code: row.code };
+}
+async function consumeInviteCode(inviteCodeId, userId) {
+  if (inviteCodeId < 0) return;
+  await db.update(inviteCodesTable).set({ usedAt: /* @__PURE__ */ new Date(), usedByUserId: userId }).where(and(eq(inviteCodesTable.id, inviteCodeId), isNull(inviteCodesTable.usedAt)));
+}
 
 // src/routes/auth.ts
 var router5 = (0, import_express5.Router)();
@@ -113848,30 +114447,12 @@ function parseSkills(raw) {
   }
   return raw.split(",").map((s) => s.trim()).filter(Boolean).slice(0, 10);
 }
-function assertInviteCode(inviteCode) {
-  const expected = process.env.INVITE_PASSCODE?.trim();
-  if (!expected) {
-    return "Davet sistemi yap\u0131land\u0131r\u0131lmam\u0131\u015F (INVITE_PASSCODE)";
-  }
-  if (typeof inviteCode !== "string" || !inviteCode.trim()) {
-    return "Davet kodu zorunlu";
-  }
-  if (inviteCode.trim() !== expected) {
-    return "Ge\xE7ersiz davet kodu";
-  }
-  return null;
-}
 router5.get("/config", (_req, res) => {
   res.json({ googleClientId: googleClientId ?? null });
 });
 router5.post("/register", async (req, res) => {
   try {
     const { email: email3, password, name, inviteCode } = req.body;
-    const inviteError = assertInviteCode(inviteCode);
-    if (inviteError) {
-      res.status(403).json({ error: inviteError });
-      return;
-    }
     if (!email3 || !password || !name) {
       res.status(400).json({ error: "Ad, e-posta ve \u015Fifre zorunlu" });
       return;
@@ -113880,7 +114461,12 @@ router5.post("/register", async (req, res) => {
       res.status(400).json({ error: "\u015Eifre en az 8 karakter olmal\u0131" });
       return;
     }
-    const normalizedEmail = email3.trim().toLowerCase();
+    const normalizedEmail = normalizeEmail(email3);
+    const invite = await validateInviteCodeForEmail(inviteCode, normalizedEmail);
+    if (!invite.ok) {
+      res.status(403).json({ error: invite.error });
+      return;
+    }
     const [existing] = await db.select({ id: usersTable.id }).from(usersTable).where(eq(usersTable.email, normalizedEmail)).limit(1);
     if (existing) {
       res.status(409).json({ error: "Bu e-posta ile zaten bir hesap var" });
@@ -113888,6 +114474,7 @@ router5.post("/register", async (req, res) => {
     }
     const passwordHash = await import_bcryptjs.default.hash(password, 12);
     const [user] = await db.insert(usersTable).values({ email: normalizedEmail, name: name.trim(), passwordHash }).returning();
+    await consumeInviteCode(invite.id, user.id);
     const sessionId = await createSession(user.id);
     res.cookie(SESSION_COOKIE, sessionId, sessionCookieOptions);
     res.status(201).json({ user: publicUser(user) });
@@ -113944,9 +114531,9 @@ router5.post("/google", async (req, res) => {
     const [existing] = await db.select().from(usersTable).where(eq(usersTable.email, normalizedEmail)).limit(1);
     let user = existing;
     if (!user) {
-      const inviteError = assertInviteCode(inviteCode);
-      if (inviteError) {
-        res.status(403).json({ error: inviteError });
+      const invite = await validateInviteCodeForEmail(inviteCode, normalizedEmail);
+      if (!invite.ok) {
+        res.status(403).json({ error: invite.error });
         return;
       }
       [user] = await db.insert(usersTable).values({
@@ -113955,6 +114542,7 @@ router5.post("/google", async (req, res) => {
         avatarUrl: payload.picture,
         googleId: payload.sub
       }).returning();
+      await consumeInviteCode(invite.id, user.id);
     } else if (!user.googleId) {
       [user] = await db.update(usersTable).set({ googleId: payload.sub, avatarUrl: user.avatarUrl ?? payload.picture }).where(eq(usersTable.id, user.id)).returning();
     }
@@ -113995,9 +114583,9 @@ router5.patch("/me", requireAuth, async (req, res) => {
     await ensureUserProfileColumns();
     const userId = req.user.id;
     const body = req.body ?? {};
-    const firstName = typeof body.firstName === "string" ? body.firstName.trim() : "";
+    const firstName2 = typeof body.firstName === "string" ? body.firstName.trim() : "";
     const lastName = typeof body.lastName === "string" ? body.lastName.trim() : "";
-    const name = `${firstName} ${lastName}`.trim() || req.user.name;
+    const name = `${firstName2} ${lastName}`.trim() || req.user.name;
     const handleRaw = typeof body.handle === "string" ? body.handle.trim().toLowerCase() : "";
     const handle = handleRaw.replace(/[^a-z0-9_]/g, "").slice(0, 20);
     const title = typeof body.title === "string" ? body.title.trim().slice(0, 50) : "";
@@ -114072,7 +114660,7 @@ var DEFAULT_SETTINGS_PREFS = {
   showOnline: true,
   allowMatch: true,
   analyticsConsent: true,
-  theme: "light",
+  theme: "dark",
   lang: "tr",
   compactMode: false,
   onboardingCompleted: false
@@ -114092,7 +114680,7 @@ function parseSettingsPrefs(raw) {
       showOnline: parsed.showOnline !== false,
       allowMatch: parsed.allowMatch !== false,
       analyticsConsent: parsed.analyticsConsent !== false,
-      theme: parsed.theme === "dark" || parsed.theme === "system" || parsed.theme === "light" ? parsed.theme : "light",
+      theme: parsed.theme === "dark" || parsed.theme === "system" || parsed.theme === "light" ? parsed.theme : "dark",
       lang: parsed.lang === "en" ? "en" : "tr",
       compactMode: parsed.compactMode === true,
       onboardingCompleted: parsed.onboardingCompleted === true
@@ -114119,7 +114707,7 @@ function sanitizeBody(body) {
     showOnline: body.showOnline !== false,
     allowMatch: body.allowMatch !== false,
     analyticsConsent: body.analyticsConsent !== false,
-    theme: body.theme === "dark" || body.theme === "system" || body.theme === "light" ? body.theme : "light",
+    theme: body.theme === "dark" || body.theme === "system" || body.theme === "light" ? body.theme : "dark",
     lang: body.lang === "en" ? "en" : "tr",
     compactMode: body.compactMode === true,
     onboardingCompleted: body.onboardingCompleted === true
@@ -114557,22 +115145,48 @@ router9.patch("/applications/:id", requireAdmin, async (req, res) => {
       res.status(400).json({ error: "Ge\xE7ersiz status" });
       return;
     }
-    const [invite] = await db.select({ id: invitationRequestsTable.id }).from(invitationRequestsTable).where(eq(invitationRequestsTable.id, invitationRequestId)).limit(1);
+    const [invite] = await db.select().from(invitationRequestsTable).where(eq(invitationRequestsTable.id, invitationRequestId)).limit(1);
     if (!invite) {
       res.status(404).json({ error: "Ba\u015Fvuru bulunamad\u0131" });
       return;
     }
     const [existing] = await db.select().from(applicationsTable).where(eq(applicationsTable.invitationRequestId, invitationRequestId)).limit(1);
+    const prevStatus = existing?.status ?? "pending";
     const reviewedAt = next === "pending" ? null : /* @__PURE__ */ new Date();
+    let applicationId = existing?.id;
     if (existing) {
       await db.update(applicationsTable).set({ status: next, reviewedAt }).where(eq(applicationsTable.id, existing.id));
     } else {
-      await db.insert(applicationsTable).values({
+      const [created] = await db.insert(applicationsTable).values({
         invitationRequestId,
         status: next,
         reviewedAt,
         term: 1
-      });
+      }).returning({ id: applicationsTable.id });
+      applicationId = created?.id;
+    }
+    if (prevStatus !== next) {
+      const applicant = {
+        name: invite.name,
+        email: invite.email,
+        roleLabel: roleLabelOf(invite.role)
+      };
+      if (next === "approved") {
+        try {
+          const inviteCode = await issueInviteCodeForApproval({
+            email: invite.email,
+            invitationRequestId,
+            applicationId
+          });
+          void notifyApplicantInvitationApproved({ ...applicant, inviteCode });
+        } catch (err) {
+          console.error("invite code issue failed", err);
+          void notifyApplicantInvitationApproved(applicant);
+        }
+      } else if (next === "rejected") {
+        void revokeUnusedInviteCodes(invitationRequestId);
+        void notifyApplicantInvitationRejected(applicant);
+      }
     }
     res.json({ id: invitationRequestId, status: toUiStatus(next) });
   } catch (err) {
@@ -115089,7 +115703,7 @@ var import_express13 = __toESM(require_express2(), 1);
 // src/lib/vaultStorage.ts
 import fs6 from "node:fs/promises";
 import path7 from "node:path";
-import { randomBytes } from "node:crypto";
+import { randomBytes as randomBytes3 } from "node:crypto";
 var MAX_BYTES = 12 * 1024 * 1024;
 var ALLOWED_MIME = /* @__PURE__ */ new Set([
   "application/pdf",
@@ -115129,7 +115743,7 @@ async function saveVaultFile(userId, originalName, buffer) {
   const root = storageRoot();
   const userDir = path7.join(root, String(userId));
   await fs6.mkdir(userDir, { recursive: true });
-  const key = `${Date.now()}-${randomBytes(6).toString("hex")}${safeExt(originalName)}`;
+  const key = `${Date.now()}-${randomBytes3(6).toString("hex")}${safeExt(originalName)}`;
   const abs = path7.join(userDir, key);
   await fs6.writeFile(abs, buffer);
   return { fileKey: `${userId}/${key}`, sizeBytes: buffer.length };
@@ -116262,10 +116876,30 @@ app.use(
     }
   })
 );
-var appUrl = process.env.APP_URL ?? "https://inner.digital";
+var appUrl = (process.env.APP_URL ?? "https://inner.digital").replace(/\/$/, "");
+function corsOrigins(canonical) {
+  const origins = /* @__PURE__ */ new Set([
+    canonical,
+    "http://localhost:5173",
+    "http://127.0.0.1:5173"
+  ]);
+  try {
+    const u = new URL(canonical);
+    if (u.hostname === "localhost" || u.hostname.startsWith("127.")) {
+      return [...origins];
+    }
+    if (u.hostname.startsWith("www.")) {
+      origins.add(`${u.protocol}//${u.hostname.slice(4)}`);
+    } else {
+      origins.add(`${u.protocol}//www.${u.hostname}`);
+    }
+  } catch {
+  }
+  return [...origins];
+}
 app.use(
   (0, import_cors.default)({
-    origin: [appUrl, "http://localhost:5173", "http://127.0.0.1:5173"],
+    origin: corsOrigins(appUrl),
     credentials: true
   })
 );

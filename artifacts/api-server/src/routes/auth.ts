@@ -13,6 +13,11 @@ import {
   requireAuth,
 } from "../lib/auth";
 import { ensureUserProfileColumns } from "../lib/ensureSchema";
+import {
+  consumeInviteCode,
+  normalizeEmail,
+  validateInviteCodeForEmail,
+} from "../lib/inviteCodes";
 
 const router = Router();
 
@@ -62,20 +67,6 @@ function parseSkills(raw: string | null | undefined): string[] {
     .slice(0, 10);
 }
 
-function assertInviteCode(inviteCode: unknown): string | null {
-  const expected = process.env.INVITE_PASSCODE?.trim();
-  if (!expected) {
-    return "Davet sistemi yapılandırılmamış (INVITE_PASSCODE)";
-  }
-  if (typeof inviteCode !== "string" || !inviteCode.trim()) {
-    return "Davet kodu zorunlu";
-  }
-  if (inviteCode.trim() !== expected) {
-    return "Geçersiz davet kodu";
-  }
-  return null;
-}
-
 // ─── GET /api/auth/config ─────────────────────────────────────────────────────
 // Frontend'in Google Sign-In butonunu render edebilmesi için public client ID.
 router.get("/config", (_req, res) => {
@@ -92,12 +83,6 @@ router.post("/register", async (req, res) => {
       inviteCode?: string;
     };
 
-    const inviteError = assertInviteCode(inviteCode);
-    if (inviteError) {
-      res.status(403).json({ error: inviteError });
-      return;
-    }
-
     if (!email || !password || !name) {
       res.status(400).json({ error: "Ad, e-posta ve şifre zorunlu" });
       return;
@@ -107,7 +92,13 @@ router.post("/register", async (req, res) => {
       return;
     }
 
-    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedEmail = normalizeEmail(email);
+    const invite = await validateInviteCodeForEmail(inviteCode, normalizedEmail);
+    if (!invite.ok) {
+      res.status(403).json({ error: invite.error });
+      return;
+    }
+
     const [existing] = await db
       .select({ id: usersTable.id })
       .from(usersTable)
@@ -123,6 +114,8 @@ router.post("/register", async (req, res) => {
       .insert(usersTable)
       .values({ email: normalizedEmail, name: name.trim(), passwordHash })
       .returning();
+
+    await consumeInviteCode(invite.id, user.id);
 
     const sessionId = await createSession(user.id);
     res.cookie(SESSION_COOKIE, sessionId, sessionCookieOptions);
@@ -204,9 +197,9 @@ router.post("/google", async (req, res) => {
 
     let user = existing;
     if (!user) {
-      const inviteError = assertInviteCode(inviteCode);
-      if (inviteError) {
-        res.status(403).json({ error: inviteError });
+      const invite = await validateInviteCodeForEmail(inviteCode, normalizedEmail);
+      if (!invite.ok) {
+        res.status(403).json({ error: invite.error });
         return;
       }
       [user] = await db
@@ -218,6 +211,7 @@ router.post("/google", async (req, res) => {
           googleId: payload.sub,
         })
         .returning();
+      await consumeInviteCode(invite.id, user.id);
     } else if (!user.googleId) {
       [user] = await db
         .update(usersTable)

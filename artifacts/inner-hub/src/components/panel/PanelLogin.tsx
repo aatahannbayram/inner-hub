@@ -108,7 +108,7 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
 
   const copySupportEmail = async () => {
     try {
-      await navigator.clipboard.writeText("destek@inner.digital");
+      await navigator.clipboard.writeText("support@inner.digital");
       setEmailCopied(true);
       window.setTimeout(() => setEmailCopied(false), 1600);
     } catch {
@@ -125,7 +125,7 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
   }, [mode]);
 
   const fieldClass =
-    "flex min-h-11 w-full rounded-none border-0 border-b border-white/25 bg-transparent px-0 py-3 text-base text-white shadow-sm placeholder:text-white/40 focus-visible:outline-none focus-visible:ring-0 focus-visible:border-white focus-visible:border-b-2 transition-[border-width] md:min-h-9 md:py-4 md:text-sm";
+    "w-full border-0 border-b border-white/20 bg-transparent px-0 py-3.5 text-[15px] text-[var(--bone-fixed)] shadow-none placeholder:text-white/35 focus-visible:border-[var(--inner-green)] focus-visible:outline-none focus-visible:ring-0 transition-colors";
 
   useEffect(() => {
     let cancelled = false;
@@ -275,7 +275,7 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
               t("common.copied")
             ) : (
               <>
-                {t("login.support")}: <span lang="en">destek@inner.digital</span>
+                {t("login.support")}: <span lang="en">support@inner.digital</span>
               </>
             )}
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -288,159 +288,161 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
           </p>
         </div>
 
-        {/* Alt: login formu */}
-        <div className="w-full max-w-md shrink-0">
-          <p
-            className="animate-blur-fade-up mb-4 font-mono text-sm uppercase tracking-widest text-white/60"
-            style={{ animationDelay: "200ms" }}
-          >
-            {t("login.membersOnly")}
-          </p>
-
-          <h1
-            className="animate-blur-fade-up mb-3 font-display font-serif italic text-3xl leading-[1.15] text-balance md:text-5xl"
-            style={{ animationDelay: "300ms" }}
-          >
-            {t("login.continueInside")}
-          </h1>
-
-          <p
-            className="animate-blur-fade-up mb-6 max-w-[40ch] text-base leading-[1.6] text-white/70 md:text-lg"
-            style={{ animationDelay: "400ms" }}
-          >
-            {t("login.accessByInvite")}
-          </p>
-
-          <div
-            className={`liquid-glass group relative mb-4 h-11 w-full animate-blur-fade-up ${googleReady ? "visible" : "invisible"}`}
-            style={{ animationDelay: "500ms" }}
-          >
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-0 flex items-center justify-center gap-3 border border-white/20 transition-all duration-300 group-hover:-translate-y-px group-hover:border-white/40 group-hover:shadow-[0_3px_0_0_var(--inner-green)]"
-            >
-              <GoogleGlyph />
-              <span className="font-mono text-xs uppercase tracking-widest text-white">
-                {googleLabel}
-              </span>
-            </div>
-            <div
-              ref={googleButtonRef}
-              className="absolute inset-0 overflow-hidden opacity-0"
-              aria-label={googleLabel}
-            />
-          </div>
-
-          <div
-            className={`animate-blur-fade-up mb-6 flex items-center gap-4 text-white/40 ${googleReady ? "" : "hidden"}`}
-            style={{ animationDelay: "550ms" }}
-          >
-            <span className="h-px flex-1 bg-white/20" />
-            <span className="font-mono text-label uppercase tracking-widest">{t("login.or")}</span>
-            <span className="h-px flex-1 bg-white/20" />
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {mode === "register" && (
-              <>
-                <div className="animate-blur-fade-up space-y-2" style={{ animationDelay: "600ms" }}>
-                  <label className="font-mono text-sm uppercase tracking-widest text-white/70">
-                    {t("login.inviteCode")}
-                  </label>
-                  <input
-                    type="text"
-                    value={inviteCode}
-                    onChange={(e) => setInviteCode(e.target.value)}
-                    placeholder={t("login.invitePlaceholder")}
-                    className={fieldClass}
-                    required
-                    autoComplete="off"
-                  />
-                </div>
-                <div className="animate-blur-fade-up space-y-2" style={{ animationDelay: "650ms" }}>
-                  <label className="font-mono text-sm uppercase tracking-widest text-white/70">
-                    {t("login.fullName")}
-                  </label>
-                  <input
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder={t("login.fullName")}
-                    className={fieldClass}
-                    required
-                    autoComplete="name"
-                  />
-                </div>
-              </>
-            )}
-
-            <div className="animate-blur-fade-up space-y-2" style={{ animationDelay: "600ms" }}>
-              <label className="font-mono text-sm uppercase tracking-widest text-white/70">
-                {t("login.email")}
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@inner.digital"
-                className={fieldClass}
-                required
-                autoComplete="email"
-              />
-            </div>
-
-            <div className="animate-blur-fade-up space-y-2" style={{ animationDelay: "650ms" }}>
-              <label className="font-mono text-sm uppercase tracking-widest text-white/70">
-                {t("login.password")}
-              </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className={fieldClass}
-                required
-                minLength={mode === "register" ? 8 : undefined}
-                autoComplete={mode === "login" ? "current-password" : "new-password"}
-              />
-            </div>
-
-            {error && (
-              <p className="font-mono text-label uppercase tracking-widest text-[var(--error-ink)]">
-                {error}
+        {/* Alt: login formu — davet sayfası glass kartı */}
+        <div
+          className="animate-blur-fade-up w-full max-w-md shrink-0 panel-glass-ink"
+          style={{ animationDelay: "200ms" }}
+        >
+          <div className="border-b border-white/10 px-5 pt-5 sm:px-7">
+            <div className="mb-3 flex items-center justify-between gap-4">
+              <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-white/50">
+                {t("login.membersOnly")}
               </p>
-            )}
+              <p className="font-mono text-[10px] uppercase tracking-widest text-white/40">
+                {mode === "login" ? "01 / 02" : "02 / 02"}
+              </p>
+            </div>
+            <div className="mb-5 h-[2px] w-full overflow-hidden bg-white/10">
+              <div
+                className="h-full bg-[var(--inner-green)] transition-[width] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                style={{ width: mode === "login" ? "50%" : "100%" }}
+              />
+            </div>
+          </div>
+
+          <div className="px-5 py-7 sm:px-7 sm:py-8">
+            <h1 className="mb-2 font-display font-serif italic text-3xl leading-[1.1] text-balance text-[var(--bone-fixed)] sm:text-4xl">
+              {t("login.continueInside")}
+            </h1>
+            <p className="mb-8 max-w-[40ch] text-sm leading-relaxed text-white/55">
+              {t("login.accessByInvite")}
+            </p>
 
             <div
-              className="animate-blur-fade-up flex flex-col items-stretch gap-4 pt-2 sm:flex-row sm:items-center sm:justify-between sm:gap-6"
-              style={{ animationDelay: "700ms" }}
+              className={`liquid-glass group relative mb-4 h-11 w-full ${googleReady ? "visible" : "invisible"}`}
             >
-              <button
-                type="submit"
-                disabled={loading}
-                className="group/btn relative inline-flex h-auto min-h-11 w-full items-center justify-center overflow-hidden rounded-none border border-white bg-white px-8 py-4 font-mono text-sm uppercase tracking-widest text-black transition-colors duration-300 hover:opacity-90 disabled:opacity-50 sm:w-auto sm:min-h-9 sm:px-12 sm:py-6 sm:text-xs"
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 flex items-center justify-center gap-3 border border-white/15 bg-white/[0.03] transition-all duration-300 group-hover:border-white/35 group-hover:bg-white/[0.06]"
               >
-                <span
-                  aria-hidden="true"
-                  className="absolute left-0 top-0 h-full w-2 -translate-x-full bg-black transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/btn:translate-x-0"
-                />
-                <span className="relative inline-block transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/btn:translate-x-1">
-                  {loading ? "..." : mode === "login" ? t("login.signIn") : t("login.createAccount")}
+                <GoogleGlyph />
+                <span className="font-mono text-[11px] uppercase tracking-widest text-[var(--bone-fixed)]">
+                  {googleLabel}
                 </span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setMode(mode === "login" ? "register" : "login");
-                  setError("");
-                }}
-                className="font-mono text-sm uppercase tracking-widest text-white/60 transition-colors hover:text-white sm:text-caption"
-              >
-                {mode === "login" ? t("login.noAccount") : t("login.haveAccount")}
-              </button>
+              </div>
+              <div
+                ref={googleButtonRef}
+                className="absolute inset-0 overflow-hidden opacity-0"
+                aria-label={googleLabel}
+              />
             </div>
-          </form>
+
+            <div
+              className={`mb-6 flex items-center gap-4 text-white/35 ${googleReady ? "" : "hidden"}`}
+            >
+              <span className="h-px flex-1 bg-white/15" />
+              <span className="font-mono text-[10px] uppercase tracking-widest">{t("login.or")}</span>
+              <span className="h-px flex-1 bg-white/15" />
+            </div>
+
+            <form id="panel-login-form" onSubmit={handleSubmit} className="space-y-5">
+              {mode === "register" && (
+                <>
+                  <div className="space-y-2">
+                    <label className="font-mono text-[10px] uppercase tracking-widest text-white/65 sm:text-[11px]">
+                      {t("login.inviteCode")}
+                      <span className="text-[var(--inner-green)]"> *</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={inviteCode}
+                      onChange={(e) => setInviteCode(e.target.value)}
+                      placeholder={t("login.invitePlaceholder")}
+                      className={fieldClass}
+                      required
+                      autoComplete="off"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="font-mono text-[10px] uppercase tracking-widest text-white/65 sm:text-[11px]">
+                      {t("login.fullName")}
+                      <span className="text-[var(--inner-green)]"> *</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder={t("login.fullName")}
+                      className={fieldClass}
+                      required
+                      autoComplete="name"
+                    />
+                  </div>
+                </>
+              )}
+
+              <div className="space-y-2">
+                <label className="font-mono text-[10px] uppercase tracking-widest text-white/65 sm:text-[11px]">
+                  {t("login.email")}
+                  <span className="text-[var(--inner-green)]"> *</span>
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@inner.digital"
+                  className={fieldClass}
+                  required
+                  autoComplete="email"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="font-mono text-[10px] uppercase tracking-widest text-white/65 sm:text-[11px]">
+                  {t("login.password")}
+                  <span className="text-[var(--inner-green)]"> *</span>
+                </label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className={fieldClass}
+                  required
+                  minLength={mode === "register" ? 8 : undefined}
+                  autoComplete={mode === "login" ? "current-password" : "new-password"}
+                />
+              </div>
+
+              {error && (
+                <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--error-ink)]">
+                  {error}
+                </p>
+              )}
+            </form>
+          </div>
+
+          <div className="flex flex-col items-stretch justify-between gap-3 border-t border-white/10 px-5 py-4 sm:flex-row sm:items-center sm:px-7">
+            <button
+              type="button"
+              onClick={() => {
+                setMode(mode === "login" ? "register" : "login");
+                setError("");
+              }}
+              className="font-mono text-[10px] uppercase tracking-widest text-white/50 transition-colors hover:text-white"
+            >
+              {mode === "login" ? t("login.noAccount") : t("login.haveAccount")}
+            </button>
+
+            <button
+              type="submit"
+              form="panel-login-form"
+              disabled={loading}
+              className="inline-flex items-center justify-center gap-2 bg-[var(--bone-fixed)] px-5 py-2.5 font-mono text-[11px] uppercase tracking-widest text-[var(--ink-fixed)] transition-opacity hover:opacity-90 disabled:opacity-35"
+            >
+              {loading ? "..." : mode === "login" ? t("login.signIn") : t("login.createAccount")}
+            </button>
+          </div>
         </div>
       </main>
     </div>

@@ -3,6 +3,15 @@ import { desc, eq, sql } from "drizzle-orm";
 import { db } from "@workspace/db";
 import { applicationsTable, invitationRequestsTable } from "@workspace/db/schema";
 import { requireAdmin } from "../lib/auth";
+import {
+  notifyApplicantInvitationApproved,
+  notifyApplicantInvitationRejected,
+  roleLabelOf,
+} from "../lib/mail";
+import {
+  issueInviteCodeForApproval,
+  revokeUnusedInviteCodes,
+} from "../lib/inviteCodes";
 
 const router = Router();
 
@@ -133,7 +142,7 @@ router.patch("/applications/:id", requireAdmin, async (req, res) => {
     }
 
     const [invite] = await db
-      .select({ id: invitationRequestsTable.id })
+      .select()
       .from(invitationRequestsTable)
       .where(eq(invitationRequestsTable.id, invitationRequestId))
       .limit(1);
@@ -149,20 +158,51 @@ router.patch("/applications/:id", requireAdmin, async (req, res) => {
       .where(eq(applicationsTable.invitationRequestId, invitationRequestId))
       .limit(1);
 
+    const prevStatus = existing?.status ?? "pending";
     const reviewedAt = next === "pending" ? null : new Date();
 
+    let applicationId = existing?.id;
     if (existing) {
       await db
         .update(applicationsTable)
         .set({ status: next, reviewedAt })
         .where(eq(applicationsTable.id, existing.id));
     } else {
-      await db.insert(applicationsTable).values({
-        invitationRequestId,
-        status: next,
-        reviewedAt,
-        term: 1,
-      });
+      const [created] = await db
+        .insert(applicationsTable)
+        .values({
+          invitationRequestId,
+          status: next,
+          reviewedAt,
+          term: 1,
+        })
+        .returning({ id: applicationsTable.id });
+      applicationId = created?.id;
+    }
+
+    // Otomasyon: yalnızca gerçek durum değişiminde başvuran maili
+    if (prevStatus !== next) {
+      const applicant = {
+        name: invite.name,
+        email: invite.email,
+        roleLabel: roleLabelOf(invite.role),
+      };
+      if (next === "approved") {
+        try {
+          const inviteCode = await issueInviteCodeForApproval({
+            email: invite.email,
+            invitationRequestId,
+            applicationId,
+          });
+          void notifyApplicantInvitationApproved({ ...applicant, inviteCode });
+        } catch (err: any) {
+          console.error("invite code issue failed", err);
+          void notifyApplicantInvitationApproved(applicant);
+        }
+      } else if (next === "rejected") {
+        void revokeUnusedInviteCodes(invitationRequestId);
+        void notifyApplicantInvitationRejected(applicant);
+      }
     }
 
     res.json({ id: invitationRequestId, status: toUiStatus(next) });

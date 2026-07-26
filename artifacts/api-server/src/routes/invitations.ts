@@ -5,7 +5,11 @@ import {
   ListRequestsQueryParams,
 } from "@workspace/api-zod";
 import { desc, sql } from "drizzle-orm";
-import { notifyNewInvitationRequest } from "../lib/mailer";
+import {
+  notifyNewInvitationRequest,
+  notifyApplicantInvitationReceived,
+  roleLabelOf,
+} from "../lib/mail";
 import {
   domainFromEmail,
   normalizeDomain,
@@ -173,6 +177,12 @@ router.post("/request", async (req, res) => {
     organization: trimmedOrg,
     organizationDomain: domain,
     organizationLogo: logoUrl,
+  });
+
+  void notifyApplicantInvitationReceived({
+    name: trimmedName,
+    email: trimmedEmail,
+    roleLabel: roleLabelOf(trimmedRole),
   });
 
   res.status(201).json({ message: "Received." });

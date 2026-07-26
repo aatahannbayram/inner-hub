@@ -112,10 +112,10 @@ export default function FAQ() {
           {t("faq.contactHint")}
         </p>
         <a
-          href="mailto:destek@inner.digital"
+          href="mailto:support@inner.digital"
           className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)] underline underline-offset-2 transition-colors hover:text-[var(--ink)]"
         >
-          <span lang="en">destek@inner.digital</span>
+          <span lang="en">support@inner.digital</span>
         </a>
       </div>
 

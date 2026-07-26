@@ -30,10 +30,33 @@ app.use(
     },
   }),
 );
-const appUrl = process.env.APP_URL ?? "https://inner.digital";
+const appUrl = (process.env.APP_URL ?? "https://inner.digital").replace(/\/$/, "");
+
+function corsOrigins(canonical: string): string[] {
+  const origins = new Set([
+    canonical,
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+  ]);
+  try {
+    const u = new URL(canonical);
+    if (u.hostname === "localhost" || u.hostname.startsWith("127.")) {
+      return [...origins];
+    }
+    if (u.hostname.startsWith("www.")) {
+      origins.add(`${u.protocol}//${u.hostname.slice(4)}`);
+    } else {
+      origins.add(`${u.protocol}//www.${u.hostname}`);
+    }
+  } catch {
+    /* ignore malformed APP_URL */
+  }
+  return [...origins];
+}
+
 app.use(
   cors({
-    origin: [appUrl, "http://localhost:5173", "http://127.0.0.1:5173"],
+    origin: corsOrigins(appUrl),
     credentials: true,
   }),
 );

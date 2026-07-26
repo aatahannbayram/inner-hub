@@ -115,3 +115,27 @@ export async function ensureApiKeysSchema() {
     )
   `);
 }
+
+/** Onay sonrası kişiye özel davet kodları. */
+export async function ensureInviteCodesSchema() {
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS invite_codes (
+      id serial PRIMARY KEY,
+      code text NOT NULL,
+      email text NOT NULL,
+      invitation_request_id integer NOT NULL,
+      application_id integer,
+      used_at timestamp,
+      used_by_user_id integer REFERENCES users(id),
+      expires_at timestamp,
+      created_at timestamp NOT NULL DEFAULT now()
+    )
+  `);
+  await db.execute(sql`
+    CREATE UNIQUE INDEX IF NOT EXISTS invite_codes_code_uidx ON invite_codes (code)
+  `);
+  await db.execute(sql`
+    CREATE INDEX IF NOT EXISTS invite_codes_invitation_request_idx
+      ON invite_codes (invitation_request_id)
+  `);
+}

@@ -16,6 +16,7 @@ import { Lockup } from "@/components/Lockup";
 import { I18nProvider, useT } from "@/i18n";
 import { useThemeRouteSync } from "@/hooks/useTheme";
 import { useLocation } from "wouter";
+import { GoogleAnalytics } from "@/components/GoogleAnalytics";
 
 // Panel sayfaları auth arkasında (SEO'ya tabi değil) — code-split edilir.
 // Home/Invitation/Requests eager kalır (prerender/SEO).
@@ -189,6 +190,7 @@ function App() {
       <I18nProvider>
         <TooltipProvider>
           <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+            <GoogleAnalytics />
             <Router />
           </WouterRouter>
           <Toaster />

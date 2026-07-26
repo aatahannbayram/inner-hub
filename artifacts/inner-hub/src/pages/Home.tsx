@@ -391,11 +391,11 @@ export default function Home() {
               {t("home.footerTagline")}
             </p>
             <a
-              href="mailto:destek@inner.digital"
+              href="mailto:support@inner.digital"
               className="inline-flex items-center gap-2 font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)]/55 transition-colors hover:text-[var(--bone-fixed)]"
             >
               <Mail className="size-3.5" />
-              destek@inner.digital
+              support@inner.digital
             </a>
           </div>
 

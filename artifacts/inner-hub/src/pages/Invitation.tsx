@@ -7,6 +7,7 @@ import { HeroVideo } from "@/components/HeroVideo";
 import { Lockup } from "@/components/Lockup";
 import { LocaleToggle, useLocale, useT } from "@/i18n";
 import { useSubmitRequest } from "@workspace/api-client-react";
+import { trackEvent } from "@/lib/analytics";
 
 const INVITE_VIDEO =
   "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260510_060007_60275ce7-030c-4668-a160-8f364ec537d3.mp4";
@@ -95,6 +96,11 @@ export default function Invitation() {
   const [whoYouAre, setWhoYouAre] = useState("");
   const [whoIntroduced, setWhoIntroduced] = useState("");
   const [fax, setFax] = useState(""); // honeypot
+
+  useEffect(() => {
+    if (!isSuccess) return;
+    trackEvent("invite_request_submitted", { role: role ?? "unknown" });
+  }, [isSuccess, role]);
 
   useEffect(() => {
     let raf = 0;
@@ -338,12 +344,12 @@ export default function Invitation() {
                       onClick={() => {
                         if (i < step) setStep(i);
                       }}
-                      className={`shrink-0 px-2 py-1 font-mono text-[9px] uppercase tracking-widest transition-colors sm:text-[10px] ${
+                      className={`shrink-0 border-b px-2 py-1 font-mono text-[9px] uppercase tracking-widest transition-colors sm:text-[10px] ${
                         i === step
-                          ? "text-[var(--bone-fixed)]"
+                          ? "border-[var(--inner-green)] text-[var(--bone-fixed)]"
                           : i < step
-                            ? "text-[var(--inner-green)]/80 hover:text-[var(--inner-green)]"
-                            : "text-white/25"
+                            ? "border-transparent text-[var(--inner-green)]/80 hover:text-[var(--inner-green)]"
+                            : "border-transparent text-white/25"
                       }`}
                     >
                       {s.id}
@@ -378,10 +384,10 @@ export default function Invitation() {
                               key={r.value}
                               type="button"
                               onClick={() => setRole(r.value)}
-                              className={`group flex flex-col items-start gap-3 border px-4 py-4 text-left transition-colors ${
+                              className={`group flex flex-col items-start gap-3 border px-4 py-4 text-left transition-all duration-300 ${
                                 active
-                                  ? "border-[var(--inner-green)] bg-[var(--inner-green)]/10"
-                                  : "border-white/15 bg-white/[0.02] hover:border-white/35 hover:bg-white/[0.04]"
+                                  ? "border-[var(--inner-green)]/70 bg-[var(--inner-green)]/[0.12] shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]"
+                                  : "border-white/12 bg-white/[0.03] backdrop-blur-sm hover:border-white/30 hover:bg-white/[0.06]"
                               }`}
                             >
                               <div className="flex w-full items-center justify-between">
@@ -534,7 +540,7 @@ export default function Invitation() {
                           />
                         </Field>
 
-                        <div className="border border-white/10 bg-white/[0.03] px-4 py-4">
+                        <div className="border border-white/12 bg-white/[0.04] px-4 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-md">
                           <p className="mb-3 font-mono text-[10px] uppercase tracking-widest text-white/40">
                             {t("invite.intro")}
                           </p>
