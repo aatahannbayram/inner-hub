@@ -426,12 +426,19 @@
   pointer-events: none;
   z-index: 0;
   background-color: var(--ink-fixed);
-  background-image:
-    radial-gradient(ellipse 45% 40% at 0% 12%, rgba(24, 255, 133, 0.05), transparent 70%),
-    url("/panel/dark-atmosphere.png");
-  background-size: auto, min(920px, 110%) auto;
-  background-position: 0 0, center 42%;
-  background-repeat: no-repeat, no-repeat;
+  background-image: radial-gradient(ellipse 45% 40% at 0% 12%, rgba(24, 255, 133, 0.05), transparent 70%);
+}
+
+.panel-ambient::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("/panel/dark-atmosphere.png");
+  background-size: min(920px, 110%) auto;
+  background-position: center 42%;
+  background-repeat: no-repeat;
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%);
 }
 
 .panel-ambient__blob {
