@@ -9,6 +9,7 @@ import { apiUrl } from "@/lib/api";
 import { cleanDisplayText } from "@/lib/displayText";
 import { Lockup } from "@/components/Lockup";
 import { HeroQuickStat } from "@/components/panel/HeroQuickStat";
+import { useT } from "@/i18n";
 
 interface Match {
   name: string;
@@ -29,6 +30,19 @@ const TYPE_CONFIG: Record<Match["matchType"], { color: string; bg: string; borde
   "Yatırımcı": { color: "text-[var(--success-ink)]", bg: "bg-[var(--inner-green)]/10", border: "border-[var(--inner-green)]/25" },
   "İş birliği": { color: "text-[var(--ink-muted)]", bg: "bg-[var(--ink)]/[0.04]", border: "border-[var(--ink)]/10" },
 };
+
+function matchTypeLabel(type: Match["matchType"], t: (key: string) => string) {
+  switch (type) {
+    case "Co-founder":
+      return t("match.typeCofounder");
+    case "Mentor":
+      return t("match.typeMentor");
+    case "Yatırımcı":
+      return t("match.typeInvestor");
+    case "İş birliği":
+      return t("match.typeCollab");
+  }
+}
 
 function ScoreBar({ score }: { score: number }) {
   return (
@@ -62,6 +76,7 @@ function MatchCard({
   index: number;
   initiallyIntroduced?: boolean;
 }) {
+  const t = useT();
   const [introduced, setIntroduced] = useState(!!initiallyIntroduced);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -90,10 +105,10 @@ function MatchCard({
         }),
       });
       const json = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(json.error ?? "Talep gönderilemedi");
+      if (!res.ok) throw new Error(json.error ?? t("match.introduceFailed"));
       setIntroduced(true);
     } catch (e: any) {
-      setError(e.message ?? "Talep gönderilemedi");
+      setError(e.message ?? t("match.introduceFailed"));
     } finally {
       setBusy(false);
     }
@@ -131,11 +146,11 @@ function MatchCard({
                 cfg.color, cfg.bg, cfg.border,
               ].join(" ")}
             >
-              {match.matchType}
+              {matchTypeLabel(match.matchType, t)}
             </span>
           </div>
           <div className="mt-3">
-            <p className="mb-1 text-xs text-[var(--ink-muted)]">Uyumluluk</p>
+            <p className="mb-1 text-xs text-[var(--ink-muted)]">{t("match.compatibility")}</p>
             <ScoreBar score={match.score} />
           </div>
         </div>
@@ -143,13 +158,13 @@ function MatchCard({
 
       {/* Why section */}
       <div className="mb-4 border-t border-[var(--ink)]/[0.06] pt-4">
-        <p className="mb-1.5 text-xs text-[var(--ink-muted)]">Neden uyumlu?</p>
+        <p className="mb-1.5 text-xs text-[var(--ink-muted)]">{t("match.whyCompatible")}</p>
         <p className="line-clamp-3 text-sm leading-relaxed text-[var(--ink-body)]">{match.why}</p>
       </div>
 
       {/* Common ground */}
       <div className="mb-5">
-        <p className="mb-2 text-xs text-[var(--ink-muted)]">Ortak zemin</p>
+        <p className="mb-2 text-xs text-[var(--ink-muted)]">{t("match.commonGround")}</p>
         <div className="flex flex-wrap gap-1.5">
           {match.commonGround.slice(0, 3).map((tag) => (
             <span
@@ -186,7 +201,7 @@ function MatchCard({
           ].join(" ")}
         >
           <span>
-            {introduced ? "Tanışma Talebi Gönderildi" : busy ? "Gönderiliyor…" : "Tanıştır"}
+            {introduced ? t("match.introduceSent") : busy ? t("match.introducing") : t("match.introduce")}
           </span>
           {introduced ? (
             <Check className="size-3 text-[var(--success-ink)]" />
@@ -206,10 +221,11 @@ function scrollToId(id: string) {
 }
 
 function MatchHero({ matchCount }: { matchCount: number }) {
+  const t = useT();
   return (
     <div
-      className="relative -mx-4 -mt-6 overflow-hidden sm:-mx-6 lg:-mx-8 lg:-mt-8"
-      style={{ height: "min(70vh, 620px)", minHeight: 440 }}
+      className="relative -mx-3 -mt-5 overflow-hidden sm:-mx-5 sm:-mt-6 lg:-mx-8 lg:-mt-8"
+      style={{ height: "min(62vh, 620px)", minHeight: 360 }}
     >
       <HeroVideo
         src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260508_215831_c6a8989c-d716-4d8d-8745-e972a2eec711.mp4"
@@ -227,47 +243,47 @@ function MatchHero({ matchCount }: { matchCount: number }) {
         className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-r from-[var(--ink-fixed)]/60 via-transparent to-transparent"
       />
 
-      <div className="relative z-10 flex h-full flex-col justify-end px-6 pb-10 md:px-12 md:pb-14">
+      <div className="relative z-10 flex h-full flex-col justify-end px-4 pb-8 sm:px-6 sm:pb-10 md:px-12 md:pb-14">
         <div className="lg:grid lg:grid-cols-2 lg:items-end lg:gap-10">
           <div>
             <div className="mb-3">
               <Lockup suffix="match" className="text-white" fontSize="clamp(1.75rem, 4vw, 2.5rem)" />
             </div>
             <AnimatedHeading
-              text={"Where trust\nfinds its people."}
-              className="mb-4 font-display font-serif italic text-4xl leading-[1.1] text-white [text-shadow:0_2px_24px_rgba(0,0,0,0.55)] md:text-5xl lg:text-6xl"
+              text={t("match.heroTitle")}
+              className="mb-4 font-display font-serif italic text-3xl leading-[1.1] text-white [text-shadow:0_2px_24px_rgba(0,0,0,0.55)] sm:text-4xl md:text-5xl lg:text-6xl"
               style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1" }}
             />
             <FadeIn delay={0.8}>
-              <p className="mb-6 max-w-[46ch] text-base text-white/75 [text-shadow:0_1px_12px_rgba(0,0,0,0.6)] md:text-lg">
-                Co-founder, mentor, and investor matching · curated inside the circle, guided by trust.
+              <p className="mb-6 max-w-[46ch] text-sm text-white/75 [text-shadow:0_1px_12px_rgba(0,0,0,0.6)] sm:text-base md:text-lg">
+                {t("match.heroBody")}
               </p>
             </FadeIn>
             <FadeIn delay={1.2}>
-              <div className="flex flex-wrap gap-4">
+              <div className="flex flex-wrap gap-3 sm:gap-4">
                 <button
                   onClick={() => scrollToId("match-results")}
-                  className="group inline-flex min-h-11 items-center gap-2 bg-white px-8 py-3 font-mono text-xs uppercase tracking-widest text-black transition-colors hover:bg-white/90"
+                  className="group inline-flex min-h-11 items-center gap-2 bg-white px-6 py-3 font-mono text-xs uppercase tracking-widest text-black transition-colors hover:bg-white/90 sm:px-8"
                 >
-                  <span lang="en">View Matches</span>
+                  {t("match.viewMatches")}
                   <ArrowRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
                 </button>
                 <button
                   onClick={() => scrollToId("match-preferences")}
-                  className="liquid-glass group inline-flex min-h-11 items-center gap-2 border border-white/20 px-8 py-3 font-mono text-xs uppercase tracking-widest text-white transition-colors hover:bg-white hover:text-black"
+                  className="liquid-glass group inline-flex min-h-11 items-center gap-2 border border-white/20 px-6 py-3 font-mono text-xs uppercase tracking-widest text-white transition-colors hover:bg-white hover:text-black sm:px-8"
                 >
-                  <span lang="en">Set Preferences</span>
+                  {t("match.setPreferences")}
                   <ArrowRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
                 </button>
               </div>
             </FadeIn>
           </div>
 
-          <div className="mt-8 flex items-end justify-start lg:mt-0 lg:justify-end">
+          <div className="mt-8 hidden items-end justify-start sm:flex lg:mt-0 lg:justify-end">
             <HeroQuickStat
               value={matchCount}
-              label="Eşleşme bulundu"
-              tagline="Co-founders. Mentors. Investors."
+              label={t("match.foundStat")}
+              tagline={t("match.heroTagline")}
             />
           </div>
         </div>
@@ -279,13 +295,19 @@ function MatchHero({ matchCount }: { matchCount: number }) {
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function Match() {
+  const t = useT();
   const [data, setData] = useState<MatchData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [preferences, setPreferences] = useState<string[]>([]);
   const [introducedNames, setIntroducedNames] = useState<Set<string>>(new Set());
 
-  const PREF_OPTIONS = ["Co-founder", "Mentor", "Yatırımcı", "İş birliği"];
+  const PREF_OPTIONS: { value: Match["matchType"]; label: string }[] = [
+    { value: "Co-founder", label: t("match.typeCofounder") },
+    { value: "Mentor", label: t("match.typeMentor") },
+    { value: "Yatırımcı", label: t("match.typeInvestor") },
+    { value: "İş birliği", label: t("match.typeCollab") },
+  ];
 
   const togglePref = (p: string) => {
     setPreferences((prev) =>
@@ -335,7 +357,7 @@ export default function Match() {
       setData(json);
       await loadIntroductions();
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Eşleşmeler alınamadı");
+      setError(e instanceof Error ? e.message : t("match.loadError"));
     } finally {
       setLoading(false);
     }
@@ -344,15 +366,15 @@ export default function Match() {
   useEffect(() => { fetchMatches(); }, []);
 
   return (
-    <div className="space-y-8 max-w-4xl">
+    <div className="mx-auto max-w-5xl space-y-8">
       {/* Hero */}
       <MatchHero matchCount={data?.matches?.length ?? 0} />
 
       {/* Utility row */}
       <FadeIn>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm text-[var(--ink-muted)] font-light">
-            Topluluktaki en uyumlu bağlantıların AI ile seçilmiş listesi.
+          <p className="hidden text-sm font-light text-[var(--ink-muted)] sm:block">
+            {t("match.pageSubtitle")}
           </p>
           <button
             onClick={fetchMatches}
@@ -360,21 +382,21 @@ export default function Match() {
             className="flex min-h-11 shrink-0 items-center gap-2 border border-[var(--ink)]/15 px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)] transition-all hover:border-[var(--ink)]/40 hover:text-[var(--ink)] disabled:opacity-30"
           >
             <RefreshCw className={`size-3 ${loading ? "animate-spin" : ""}`} />
-            Yenile
+            {t("match.refresh")}
           </button>
         </div>
       </FadeIn>
 
       {/* Preference filter */}
       <div id="match-preferences" className="scroll-mt-6">
-        <p className="mb-3 text-xs text-[var(--ink-muted)]">Arıyor olduğun</p>
+        <p className="mb-3 text-xs text-[var(--ink-muted)]">{t("match.lookingFor")}</p>
         <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {PREF_OPTIONS.map((p) => {
-            const active = preferences.includes(p);
+            const active = preferences.includes(p.value);
             return (
               <button
-                key={p}
-                onClick={() => togglePref(p)}
+                key={p.value}
+                onClick={() => togglePref(p.value)}
                 className={[
                   "shrink-0 border px-3 py-2 font-mono text-[10px] uppercase tracking-widest transition-all min-h-10",
                   active
@@ -382,7 +404,7 @@ export default function Match() {
                     : "border-[var(--ink)]/15 text-[var(--ink-body)] hover:border-[var(--ink)]/40 hover:text-[var(--ink)]",
                 ].join(" ")}
               >
-                {p}
+                {p.label}
               </button>
             );
           })}
@@ -391,14 +413,14 @@ export default function Match() {
               onClick={fetchMatches}
               className="shrink-0 border border-[var(--inner-green)]/30 bg-[var(--inner-green)]/5 px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-[var(--success-ink)] transition-all hover:bg-[var(--inner-green)]/10 min-h-10"
             >
-              Filtrele →
+              {t("match.filter")}
             </button>
           )}
         </div>
       </div>
 
       {loading ? (
-        <LoadingBlock label="AI eşleşmeleri hesaplanıyor">
+        <LoadingBlock label={t("match.loading")}>
           <div className="space-y-3">
             <CourseCardSkeleton />
             <CourseCardSkeleton />
@@ -415,9 +437,9 @@ export default function Match() {
                 className="font-display font-serif text-xl text-[var(--ink)]"
                 style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 400 }}
               >
-                {data.matches.length} eşleşme
+                {t("match.countLabel", { n: data.matches.length })}
               </h2>
-              <p className="text-xs text-[var(--ink-muted)]">AI güven skoru ile sıralandı</p>
+              <p className="text-xs text-[var(--ink-muted)]">{t("match.sortedBy")}</p>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               {data.matches.map((match, i) => (
@@ -432,40 +454,40 @@ export default function Match() {
           </div>
 
           {/* How it works */}
-          <div className="border border-[var(--ink)]/[0.06] p-5">
+          <div className="border border-[var(--ink)]/15 p-5 sm:p-6 md:p-8">
             <h2
-              className="mb-3 font-display font-serif text-lg text-[var(--ink)]"
+              className="mb-6 font-display font-serif text-lg text-[var(--ink)]"
               style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 400 }}
             >
-              Nasıl çalışır?
+              {t("match.howItWorks")}
             </h2>
-            <div className="grid gap-3 sm:grid-cols-3 text-xs text-[var(--ink-body)] leading-relaxed">
-              <div>
+            <div className="grid gap-6 sm:grid-cols-3 sm:gap-0 sm:divide-x sm:divide-[var(--ink)]/[0.08] text-xs text-[var(--ink-body)] leading-relaxed">
+              <div className="sm:pr-6">
                 <span
-                  className="mb-1 block font-display font-serif text-base text-[var(--ink)]"
+                  className="mb-1.5 block font-display font-serif text-base text-[var(--ink)]"
                   style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 400 }}
                 >
-                  01 · Profil analizi
+                  {t("match.step1Title")}
                 </span>
-                Üye sektörü, deneyimi ve topluluk etkileşimleri analiz edilir.
+                {t("match.step1Body")}
               </div>
-              <div>
+              <div className="sm:px-6">
                 <span
-                  className="mb-1 block font-display font-serif text-base text-[var(--ink)]"
+                  className="mb-1.5 block font-display font-serif text-base text-[var(--ink)]"
                   style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 400 }}
                 >
-                  02 · Vektör eşleşme
+                  {t("match.step2Title")}
                 </span>
-                Claude Haiku benzerlik skoru hesaplar, ortak zemin bulur.
+                {t("match.step2Body")}
               </div>
-              <div>
+              <div className="sm:pl-6">
                 <span
-                  className="mb-1 block font-display font-serif text-base text-[var(--ink)]"
+                  className="mb-1.5 block font-display font-serif text-base text-[var(--ink)]"
                   style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 400 }}
                 >
-                  03 · İnsan onayı
+                  {t("match.step3Title")}
                 </span>
-                "Tanıştır" butonuna basarsan inner ekibi devreye girer.
+                {t("match.step3Body")}
               </div>
             </div>
           </div>
@@ -476,7 +498,7 @@ export default function Match() {
         <p className="text-xs text-[var(--ink-subtle)]">
           <span lang="en">inner·match</span>
           {" · "}
-          claude-haiku-4-5-20251001 · haftalık güncellenir
+          {t("match.footer")}
         </p>
       </div>
     </div>

@@ -6,6 +6,7 @@ import { apiUrl } from "@/lib/api";
 import { posterForVideo } from "@/lib/videoPosters";
 import { useScrubVideo } from "@/hooks/useScrubVideo";
 import { useTypewriter } from "@/hooks/useTypewriter";
+import { useT } from "@/i18n";
 
 const LOGIN_VIDEO_SRC =
   "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260530_042513_df96a13b-6155-4f6e-8b93-c9dee66fba08.mp4";
@@ -87,6 +88,7 @@ async function apiRequest(path: string, body: unknown) {
 }
 
 export function PanelLogin({ onLogin }: PanelLoginProps) {
+  const t = useT();
   const [mode, setMode] = useState<"login" | "register">("login");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -100,9 +102,9 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
   const inviteCodeRef = useRef(inviteCode);
   const modeRef = useRef(mode);
   const scrubVideoRef = useScrubVideo();
-  const { displayed: typedIntro, done: typedDone } = useTypewriter(
-    "Girişimciler, yatırımcılar ve kuranlar için kapalı bir daire. Şimdi, sırada ne var?",
-  );
+  const { displayed: typedIntro, done: typedDone } = useTypewriter(t("login.typewriter"));
+  const ambientLines = t("login.ambientWelcome").split("\n");
+  const googleLabel = mode === "register" ? t("login.googleRegister") : t("login.googleContinue");
 
   const copySupportEmail = async () => {
     try {
@@ -123,7 +125,7 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
   }, [mode]);
 
   const fieldClass =
-    "flex h-9 w-full rounded-none border-0 border-b border-white/25 bg-transparent px-0 py-4 text-base md:text-sm text-white shadow-sm placeholder:text-white/40 focus-visible:outline-none focus-visible:ring-0 focus-visible:border-white focus-visible:border-b-2 transition-[border-width]";
+    "flex min-h-11 w-full rounded-none border-0 border-b border-white/25 bg-transparent px-0 py-3 text-base text-white shadow-sm placeholder:text-white/40 focus-visible:outline-none focus-visible:ring-0 focus-visible:border-white focus-visible:border-b-2 transition-[border-width] md:min-h-9 md:py-4 md:text-sm";
 
   useEffect(() => {
     let cancelled = false;
@@ -150,7 +152,7 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
               const { user } = await apiRequest("google", body);
               onLogin(user);
             } catch (err) {
-              setError(err instanceof Error ? err.message : "Google ile giriş başarısız.");
+              setError(err instanceof Error ? err.message : t("login.googleFailed"));
             } finally {
               setLoading(false);
             }
@@ -173,7 +175,7 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
     return () => {
       cancelled = true;
     };
-  }, [mode, onLogin]);
+  }, [mode, onLogin, t]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -192,7 +194,7 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
             });
       onLogin(user);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Bir şeyler ters gitti.");
+      setError(err instanceof Error ? err.message : t("common.errorGeneric"));
     } finally {
       setLoading(false);
     }
@@ -236,7 +238,7 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
           className="animate-blur-fade-up font-mono text-caption uppercase tracking-widest text-white/60 transition-colors hover:text-white"
           style={{ animationDelay: "150ms" }}
         >
-          Ana sayfa
+          {t("common.home")}
         </a>
       </header>
 
@@ -248,9 +250,12 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
             className="mb-4 select-none font-serif italic leading-[1.3] text-white/35"
             style={{ fontSize: "clamp(16px, 2vw, 22px)", filter: "blur(2px)" }}
           >
-            Sana özel bir davet,
-            <br />
-            inner·hub'ın dairesine hoş geldin.
+            {ambientLines.map((line, i) => (
+              <span key={i}>
+                {i > 0 && <br />}
+                {line}
+              </span>
+            ))}
           </p>
           <p
             className="text-white"
@@ -267,10 +272,10 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
             className="mt-5 inline-flex items-center gap-2 rounded-full border border-white/40 px-5 py-2.5 font-mono text-caption uppercase tracking-widest text-white transition-colors duration-200 hover:bg-white hover:text-black"
           >
             {emailCopied ? (
-              "Kopyalandı"
+              t("common.copied")
             ) : (
               <>
-                Bize ulaş: <span lang="en">destek@inner.digital</span>
+                {t("login.support")}: <span lang="en">destek@inner.digital</span>
               </>
             )}
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -279,31 +284,31 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
             </svg>
           </button>
           <p className="mt-3 font-mono text-label uppercase tracking-widest text-white/35">
-            Fareyi hareket ettir · bakış seni takip eder
+            {t("login.mouseHint")}
           </p>
         </div>
 
         {/* Alt: login formu */}
         <div className="w-full max-w-md shrink-0">
           <p
-            className="animate-blur-fade-up mb-4 font-mono text-xs uppercase tracking-widest text-white/60"
+            className="animate-blur-fade-up mb-4 font-mono text-sm uppercase tracking-widest text-white/60"
             style={{ animationDelay: "200ms" }}
           >
-            Panel · Members only
+            {t("login.membersOnly")}
           </p>
 
           <h1
             className="animate-blur-fade-up mb-3 font-display font-serif italic text-3xl leading-[1.15] text-balance md:text-5xl"
             style={{ animationDelay: "300ms" }}
           >
-            Continue inside the circle.
+            {t("login.continueInside")}
           </h1>
 
           <p
             className="animate-blur-fade-up mb-6 max-w-[40ch] text-base leading-[1.6] text-white/70 md:text-lg"
             style={{ animationDelay: "400ms" }}
           >
-            Access is by invitation. Always.
+            {t("login.accessByInvite")}
           </p>
 
           <div
@@ -316,13 +321,13 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
             >
               <GoogleGlyph />
               <span className="font-mono text-xs uppercase tracking-widest text-white">
-                {mode === "register" ? "Google ile kayıt ol" : "Google ile devam et"}
+                {googleLabel}
               </span>
             </div>
             <div
               ref={googleButtonRef}
               className="absolute inset-0 overflow-hidden opacity-0"
-              aria-label={mode === "register" ? "Google ile kayıt ol" : "Google ile devam et"}
+              aria-label={googleLabel}
             />
           </div>
 
@@ -331,7 +336,7 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
             style={{ animationDelay: "550ms" }}
           >
             <span className="h-px flex-1 bg-white/20" />
-            <span className="font-mono text-label uppercase tracking-widest">veya</span>
+            <span className="font-mono text-label uppercase tracking-widest">{t("login.or")}</span>
             <span className="h-px flex-1 bg-white/20" />
           </div>
 
@@ -339,28 +344,28 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
             {mode === "register" && (
               <>
                 <div className="animate-blur-fade-up space-y-2" style={{ animationDelay: "600ms" }}>
-                  <label className="font-mono text-xs uppercase tracking-widest text-white/70">
-                    Davet kodu
+                  <label className="font-mono text-sm uppercase tracking-widest text-white/70">
+                    {t("login.inviteCode")}
                   </label>
                   <input
                     type="text"
                     value={inviteCode}
                     onChange={(e) => setInviteCode(e.target.value)}
-                    placeholder="Davet kodunuz"
+                    placeholder={t("login.invitePlaceholder")}
                     className={fieldClass}
                     required
                     autoComplete="off"
                   />
                 </div>
                 <div className="animate-blur-fade-up space-y-2" style={{ animationDelay: "650ms" }}>
-                  <label className="font-mono text-xs uppercase tracking-widest text-white/70">
-                    Ad Soyad
+                  <label className="font-mono text-sm uppercase tracking-widest text-white/70">
+                    {t("login.fullName")}
                   </label>
                   <input
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder="Ad Soyad"
+                    placeholder={t("login.fullName")}
                     className={fieldClass}
                     required
                     autoComplete="name"
@@ -370,8 +375,8 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
             )}
 
             <div className="animate-blur-fade-up space-y-2" style={{ animationDelay: "600ms" }}>
-              <label className="font-mono text-xs uppercase tracking-widest text-white/70">
-                Email
+              <label className="font-mono text-sm uppercase tracking-widest text-white/70">
+                {t("login.email")}
               </label>
               <input
                 type="email"
@@ -385,8 +390,8 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
             </div>
 
             <div className="animate-blur-fade-up space-y-2" style={{ animationDelay: "650ms" }}>
-              <label className="font-mono text-xs uppercase tracking-widest text-white/70">
-                Şifre
+              <label className="font-mono text-sm uppercase tracking-widest text-white/70">
+                {t("login.password")}
               </label>
               <input
                 type="password"
@@ -407,20 +412,20 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
             )}
 
             <div
-              className="animate-blur-fade-up flex items-center justify-between gap-6 pt-2"
+              className="animate-blur-fade-up flex flex-col items-stretch gap-4 pt-2 sm:flex-row sm:items-center sm:justify-between sm:gap-6"
               style={{ animationDelay: "700ms" }}
             >
               <button
                 type="submit"
                 disabled={loading}
-                className="group/btn relative inline-flex h-auto min-h-9 items-center justify-center overflow-hidden rounded-none border border-white bg-white px-12 py-6 font-mono text-xs uppercase tracking-widest text-black transition-colors duration-300 hover:opacity-90 disabled:opacity-50"
+                className="group/btn relative inline-flex h-auto min-h-11 w-full items-center justify-center overflow-hidden rounded-none border border-white bg-white px-8 py-4 font-mono text-sm uppercase tracking-widest text-black transition-colors duration-300 hover:opacity-90 disabled:opacity-50 sm:w-auto sm:min-h-9 sm:px-12 sm:py-6 sm:text-xs"
               >
                 <span
                   aria-hidden="true"
                   className="absolute left-0 top-0 h-full w-2 -translate-x-full bg-black transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/btn:translate-x-0"
                 />
                 <span className="relative inline-block transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/btn:translate-x-1">
-                  {loading ? "..." : mode === "login" ? "Enter" : "Hesap oluştur"}
+                  {loading ? "..." : mode === "login" ? t("login.signIn") : t("login.createAccount")}
                 </span>
               </button>
 
@@ -430,9 +435,9 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
                   setMode(mode === "login" ? "register" : "login");
                   setError("");
                 }}
-                className="font-mono text-caption uppercase tracking-widest text-white/60 transition-colors hover:text-white"
+                className="font-mono text-sm uppercase tracking-widest text-white/60 transition-colors hover:text-white sm:text-caption"
               >
-                {mode === "login" ? "Hesabın yok mu?" : "Zaten üye misin?"}
+                {mode === "login" ? t("login.noAccount") : t("login.haveAccount")}
               </button>
             </div>
           </form>

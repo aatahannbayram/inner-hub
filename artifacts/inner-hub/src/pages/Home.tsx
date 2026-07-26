@@ -18,6 +18,7 @@ import { FadeIn } from "@/components/FadeIn";
 import { WordsPullUp } from "@/components/WordsPullUp";
 import { ScrollTextReveal } from "@/components/ScrollTextReveal";
 import { Lockup } from "@/components/Lockup";
+import { useLocale, useT } from "@/i18n";
 import { Grain } from "@/components/Grain";
 import { IndexRail } from "@/components/IndexRail";
 import { DiagramCircle } from "@/components/DiagramCircle";
@@ -232,6 +233,8 @@ function StatItem({ n, label, suffix = "" }: { n: number; label: string; suffix?
 // ─── Main ─────────────────────────────────────────────────────────────────────
 export default function Home() {
   useLenis(true);
+  const t = useT();
+  const { locale } = useLocale();
 
   useEffect(() => {
     if (window.location.hash) {
@@ -241,12 +244,9 @@ export default function Home() {
   }, []);
 
   return (
-    // Sayfa içeriği neredeyse tamamen İngilizce (marka sesi); html[lang="tr"]
-    // ile miras alınan Türkçe büyük-harf kuralları uppercase etiketlerdeki
-    // İngilizce kelimeleri bozmasın diye kök seviyede lang="en" işaretlendi.
-    <div lang="en" className="min-h-screen bg-background text-foreground flex flex-col">
+    <div lang={locale} className="min-h-screen bg-background text-foreground flex flex-col">
       <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[9999] focus:bg-foreground focus:text-background focus:px-4 focus:py-2 font-mono text-xs uppercase tracking-widest">
-        Skip to content
+        {t("common.skipToContent")}
       </a>
 
       <ScrollProgress />
@@ -388,7 +388,7 @@ export default function Home() {
           <div className="space-y-5">
             <Lockup className="text-[var(--bone)]" fontSize="clamp(28px, 4vw, 36px)" />
             <p className="max-w-[36ch] text-sm font-light leading-relaxed text-[var(--bone)]/70">
-              A private circle for founders, operators, and investors who prefer signal over noise.
+              {t("home.footerTagline")}
             </p>
             <a
               href="mailto:destek@inner.digital"
@@ -401,15 +401,15 @@ export default function Home() {
 
           <div>
             <p className="mb-4 font-mono text-label uppercase tracking-widest text-[var(--bone)]/40">
-              Navigate
+              {t("home.footerNavigate")}
             </p>
             <ul className="space-y-2.5">
               {[
-                { label: "Platform", href: "#section-03" },
-                { label: "Gathering", href: "#section-06" },
-                { label: "What's next", href: "#section-07" },
-                { label: "Panel", href: "/panel" },
-                { label: "Invitation", href: "/invitation" },
+                { label: t("publicNav.platform"), href: "#section-03" },
+                { label: t("publicNav.gathering"), href: "#section-06" },
+                { label: t("publicNav.next"), href: "#section-07" },
+                { label: t("home.panel"), href: "/panel" },
+                { label: t("publicNav.invitation"), href: "/invitation" },
               ].map((l) => (
                 <li key={l.href}>
                   <a
@@ -425,7 +425,7 @@ export default function Home() {
 
           <div>
             <p className="mb-4 font-mono text-label uppercase tracking-widest text-[var(--bone)]/40">
-              Connect
+              {t("home.footerConnect")}
             </p>
             <div className="mb-6 flex items-center gap-4">
               <a

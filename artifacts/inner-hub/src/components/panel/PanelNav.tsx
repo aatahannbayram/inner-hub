@@ -23,19 +23,22 @@ import {
   UserCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Lockup } from "@/components/Lockup";
+import { useT } from "@/i18n";
 
 type NavItem = {
   href: string;
-  label: string;
-  icon: React.ComponentType<{ className?: string }>;
-  roles?: ("member" | "admin")[];
-  badge?: number;
-  /** inner■{mark} ürün etiketi (· yerine yeşil kare) */
+  labelKey: string;
+  icon: React.ComponentType<{ className?: string; strokeWidth?: number }>;
   mark?: string;
+  badge?: number;
 };
 
-/** Hover/focus prefetch — F12 lazy chunk'larını tıklamadan önce ısıtır */
+type NavSection = {
+  id: string;
+  titleKey: string;
+  items: NavItem[];
+};
+
 const PREFETCH: Record<string, () => Promise<unknown>> = {
   "/panel": () => import("@/pages/panel/Dashboard"),
   "/panel/chat": () => import("@/pages/panel/Chat"),
@@ -58,48 +61,78 @@ const PREFETCH: Record<string, () => Promise<unknown>> = {
   "/panel/settings": () => import("@/pages/panel/Settings"),
 };
 
-const navItems: NavItem[] = [
-  { href: "/panel", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/panel/chat", label: "Topluluk Chat", icon: MessageSquare },
-  { href: "/panel/courses", label: "Kurslarım", icon: BookOpen },
-  { href: "/panel/events", label: "Etkinlikler", icon: CalendarDays },
-  { href: "/panel/members", label: "Katılımcılar", icon: Users },
-  { href: "/panel/perks", label: "Ayrıcalıklar", icon: Gift },
-  { href: "/panel/signal", label: "inner signal", mark: "signal", icon: Zap },
-  { href: "/panel/match", label: "inner match", mark: "match", icon: Sparkles },
-  { href: "/panel/capital", label: "inner capital", mark: "capital", icon: TrendingUp },
-  { href: "/panel/vault", label: "inner vault", mark: "vault", icon: BookMarked },
-  { href: "/panel/pulse", label: "inner pulse", mark: "pulse", icon: Activity },
-  { href: "/panel/id", label: "inner id", mark: "id", icon: Fingerprint },
-  { href: "/panel/api", label: "inner api", mark: "api", icon: Webhook },
-  { href: "/panel/profile", label: "Profilim", icon: UserCircle },
-  { href: "/panel/faq", label: "SSS", icon: HelpCircle },
-  { href: "/panel/membership", label: "Üyelik", icon: CreditCard },
+const SECTION_DEFS: NavSection[] = [
+  {
+    id: "main",
+    titleKey: "nav.sectionMain",
+    items: [
+      { href: "/panel", labelKey: "nav.dashboard", icon: LayoutDashboard },
+      { href: "/panel/chat", labelKey: "nav.community", icon: MessageSquare },
+      { href: "/panel/courses", labelKey: "nav.courses", icon: BookOpen },
+      { href: "/panel/events", labelKey: "nav.events", icon: CalendarDays },
+      { href: "/panel/members", labelKey: "nav.members", icon: Users },
+      { href: "/panel/perks", labelKey: "nav.perks", icon: Gift },
+    ],
+  },
+  {
+    id: "platform",
+    titleKey: "nav.sectionPlatform",
+    items: [
+      { href: "/panel/signal", labelKey: "nav.dashboard", mark: "signal", icon: Zap },
+      { href: "/panel/match", labelKey: "nav.dashboard", mark: "match", icon: Sparkles },
+      { href: "/panel/capital", labelKey: "nav.dashboard", mark: "capital", icon: TrendingUp },
+      { href: "/panel/vault", labelKey: "nav.dashboard", mark: "vault", icon: BookMarked },
+      { href: "/panel/pulse", labelKey: "nav.dashboard", mark: "pulse", icon: Activity },
+      { href: "/panel/id", labelKey: "nav.dashboard", mark: "id", icon: Fingerprint },
+      { href: "/panel/api", labelKey: "nav.dashboard", mark: "api", icon: Webhook },
+    ],
+  },
+  {
+    id: "account",
+    titleKey: "nav.sectionAccount",
+    items: [
+      { href: "/panel/profile", labelKey: "nav.profile", icon: UserCircle },
+      { href: "/panel/membership", labelKey: "nav.membership", icon: CreditCard },
+      { href: "/panel/faq", labelKey: "nav.faq", icon: HelpCircle },
+    ],
+  },
 ];
 
-const adminItems: NavItem[] = [
-  { href: "/panel/applications", label: "Başvurular", icon: ClipboardList },
-  { href: "/panel/analytics", label: "Analitik", icon: BarChart3 },
-  { href: "/panel/settings", label: "Ayarlar", icon: Settings },
-];
+const ADMIN_SECTION: NavSection = {
+  id: "admin",
+  titleKey: "nav.sectionAdmin",
+  items: [
+    { href: "/panel/applications", labelKey: "nav.applications", icon: ClipboardList },
+    { href: "/panel/analytics", labelKey: "nav.analytics", icon: BarChart3 },
+    { href: "/panel/settings", labelKey: "nav.settings", icon: Settings },
+  ],
+};
 
 type PanelNavProps = {
   role?: "member" | "admin";
   collapsed?: boolean;
 };
 
-function NavLink({
-  item,
-  collapsed,
-}: {
-  item: NavItem;
-  collapsed: boolean;
-}) {
+function ProductLabel({ mark, active }: { mark: string; active: boolean }) {
+  return (
+    <span
+      lang="en"
+      className="inline-flex min-w-0 items-baseline truncate text-[13px] font-medium tracking-tight leading-none"
+    >
+      <span className={cn("shrink-0", active ? "text-[var(--bone)]/50" : "text-[var(--ink-muted)]")}>
+        inner.
+      </span>
+      <span className="truncate">{mark}</span>
+    </span>
+  );
+}
+
+function NavLink({ item, collapsed }: { item: NavItem; collapsed: boolean }) {
+  const t = useT();
   const [location] = useLocation();
+  const label = t(item.labelKey);
   const isActive =
-    item.href === "/panel"
-      ? location === "/panel"
-      : location.startsWith(item.href);
+    item.href === "/panel" ? location === "/panel" : location.startsWith(item.href);
 
   return (
     <Link
@@ -112,62 +145,63 @@ function NavLink({
         void PREFETCH[item.href]?.();
       }}
       className={cn(
-        "group flex items-center gap-3 rounded-none px-3 py-2.5 text-sm transition-colors duration-150",
+        "group flex min-h-10 items-center gap-2.5 rounded-none px-2.5 py-2.5 text-sm transition-colors duration-150",
         isActive
           ? "bg-[var(--ink)] text-[var(--bone)]"
-          : "text-[var(--ink-body)] hover:bg-[var(--ink)]/[0.06] hover:text-[var(--ink)]",
+          : "text-[var(--ink-body)] hover:bg-[var(--ink)]/[0.05] hover:text-[var(--ink)]",
         collapsed && "justify-center px-2",
       )}
-      title={collapsed ? item.label : undefined}
+      title={collapsed ? (item.mark ? `inner.${item.mark}` : label) : undefined}
     >
       <item.icon
         className={cn(
-          "size-4 shrink-0",
-          isActive ? "opacity-100" : "opacity-60 group-hover:opacity-100",
+          "size-[15px] shrink-0",
+          isActive ? "opacity-100" : "opacity-55 group-hover:opacity-100",
         )}
+        strokeWidth={1.6}
       />
-      {!collapsed && (
-        item.mark ? (
-          <Lockup
-            suffix={item.mark}
-            className={cn(
-              "min-w-0 truncate text-[0.95em] leading-none",
-              isActive ? "text-[var(--bone)]" : "text-inherit",
-            )}
-          />
+      {!collapsed &&
+        (item.mark ? (
+          <ProductLabel mark={item.mark} active={isActive} />
         ) : (
-          <span className="truncate font-light tracking-wide">{item.label}</span>
-        )
-      )}
+          <span className="truncate text-[13px] font-medium tracking-tight">{label}</span>
+        ))}
       {!collapsed && item.badge ? (
-        <span className="ml-auto font-mono text-label tabular-nums">
-          {item.badge}
-        </span>
+        <span className="ml-auto font-mono text-[10px] tabular-nums opacity-70">{item.badge}</span>
       ) : null}
     </Link>
   );
 }
 
-export function PanelNav({ role = "member", collapsed = false }: PanelNavProps) {
+function Section({ section, collapsed }: { section: NavSection; collapsed: boolean }) {
+  const t = useT();
   return (
-    <nav className="flex flex-col gap-0.5">
-      {navItems.map((item) => (
-        <NavLink key={item.href} item={item} collapsed={collapsed} />
-      ))}
-
-      {role === "admin" && (
-        <>
-          <div
-            className={cn(
-              "my-3 border-t border-[var(--ink)]/10",
-              collapsed && "mx-2",
-            )}
-          />
-          {adminItems.map((item) => (
-            <NavLink key={item.href} item={item} collapsed={collapsed} />
-          ))}
-        </>
+    <div className="mb-4 last:mb-0">
+      {!collapsed ? (
+        <p className="mb-1.5 px-2.5 font-mono text-[9px] uppercase tracking-[0.18em] text-[var(--ink-muted)]">
+          {t(section.titleKey)}
+        </p>
+      ) : (
+        <div className="mx-auto mb-1.5 h-px w-4 bg-[var(--ink)]/15" aria-hidden />
       )}
+      <div className="flex flex-col gap-px">
+        {section.items.map((item) => (
+          <NavLink key={item.href} item={item} collapsed={collapsed} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export function PanelNav({ role = "member", collapsed = false }: PanelNavProps) {
+  const t = useT();
+  const sections = role === "admin" ? [...SECTION_DEFS, ADMIN_SECTION] : SECTION_DEFS;
+
+  return (
+    <nav className="flex flex-col" aria-label={t("nav.sectionMain")}>
+      {sections.map((section) => (
+        <Section key={section.id} section={section} collapsed={collapsed} />
+      ))}
     </nav>
   );
 }

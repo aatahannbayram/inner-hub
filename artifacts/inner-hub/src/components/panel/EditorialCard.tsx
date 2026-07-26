@@ -63,7 +63,7 @@ export function EditorialCard({
       className={cn(
         "group relative flex h-full flex-col overflow-hidden border transition-colors duration-300",
         dark
-          ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--bone)] hover:border-[var(--ink)]"
+          ? "border-[var(--ink)]/15 bg-[var(--ink)] text-[var(--bone)] hover:border-[var(--ink)]/28"
           : "border-[var(--ink)]/[0.08] bg-[var(--bone)] text-[var(--ink)] hover:border-[var(--ink)]/25",
         className,
       )}

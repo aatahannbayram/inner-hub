@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type ComponentType } from "react";
+import { useCallback, useEffect, useMemo, useState, type ComponentType } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowUpRight,
@@ -12,6 +12,7 @@ import {
   X,
 } from "lucide-react";
 import { apiUrl } from "@/lib/api";
+import { useT } from "@/i18n";
 
 const LS_KEY = "inner_onboarding_v1";
 const EASE = [0.16, 1, 0.3, 1] as const;
@@ -26,44 +27,6 @@ type WizardStep = {
   icon: ComponentType<{ className?: string; strokeWidth?: number }>;
 };
 
-const WIZARD: WizardStep[] = [
-  {
-    id: "welcome",
-    eyebrow: "01 · Hoş geldin",
-    title: "Circle’a girdin.",
-    body: "inner·hub paneli; sinyal, eşleşme, sermaye ve topluluk · hepsi tek yerde. Kısa bir tur seni hızlandırır.",
-    icon: Sparkles,
-  },
-  {
-    id: "dashboard",
-    eyebrow: "02 · Dashboard",
-    title: "Üssün burası.",
-    body: "Özet kartlar, yaklaşan etkinlikler ve hızlı geçişler. Her şeyin nabzını buradan tutarsın.",
-    icon: LayoutDashboard,
-  },
-  {
-    id: "signal",
-    eyebrow: "03 · Signal & Match",
-    title: "Doğru insan, doğru fırsat.",
-    body: "inner·signal fırsatları öne çıkarır; inner·match güven temelli bağlantılar kurmana yardım eder.",
-    icon: Zap,
-  },
-  {
-    id: "community",
-    eyebrow: "04 · Topluluk",
-    title: "Chat, üyeler, etkinlikler.",
-    body: "Soldaki menüden Topluluk Chat, Katılımcılar ve Etkinlikler’e geç. Circle burada canlı kalır.",
-    icon: Users,
-  },
-  {
-    id: "profile",
-    eyebrow: "05 · Profil",
-    title: "Kendini görünür kıl.",
-    body: "Profilini tamamladıkça eşleşme ve güven artar. Sol alttaki tamamlanma çubuğu seni hatırlatır.",
-    icon: UserCircle,
-  },
-];
-
 type CoachTip = {
   id: string;
   target: string; // data-onboarding value
@@ -71,30 +34,6 @@ type CoachTip = {
   body: string;
   prefer: "bottom" | "right" | "left" | "top";
 };
-
-const COACH: CoachTip[] = [
-  {
-    id: "nav",
-    target: "nav",
-    title: "Ana menü",
-    body: "Tüm modüller burada. Dar ekranda hamburger ile açılır.",
-    prefer: "right",
-  },
-  {
-    id: "notif",
-    target: "notifications",
-    title: "Bildirimler",
-    body: "Match, etkinlik ve sermaye sinyalleri buraya düşer.",
-    prefer: "bottom",
-  },
-  {
-    id: "main",
-    target: "main",
-    title: "İçerik alanı",
-    body: "Seçtiğin sayfa burada açılır. Dashboard ile başla · gerisi menüde.",
-    prefer: "top",
-  },
-];
 
 function readLocalDone(): boolean {
   try {
@@ -115,11 +54,80 @@ function writeLocalDone() {
 type Phase = "loading" | "wizard" | "coach" | "done";
 
 export function PanelOnboarding({ userName }: { userName: string }) {
+  const t = useT();
   const [phase, setPhase] = useState<Phase>("loading");
   const [step, setStep] = useState(0);
   const [coachIdx, setCoachIdx] = useState(0);
   const [spot, setSpot] = useState<DOMRect | null>(null);
   const firstName = userName.trim().split(/\s+/)[0] || "orada";
+
+  const wizard = useMemo<WizardStep[]>(
+    () => [
+      {
+        id: "welcome",
+        eyebrow: t("onboarding.welcomeEyebrow"),
+        title: t("onboarding.welcomeTitle"),
+        body: t("onboarding.welcomeBody"),
+        icon: Sparkles,
+      },
+      {
+        id: "dashboard",
+        eyebrow: t("onboarding.dashEyebrow"),
+        title: t("onboarding.dashTitle"),
+        body: t("onboarding.dashBody"),
+        icon: LayoutDashboard,
+      },
+      {
+        id: "signal",
+        eyebrow: t("onboarding.signalEyebrow"),
+        title: t("onboarding.signalTitle"),
+        body: t("onboarding.signalBody"),
+        icon: Zap,
+      },
+      {
+        id: "community",
+        eyebrow: t("onboarding.communityEyebrow"),
+        title: t("onboarding.communityTitle"),
+        body: t("onboarding.communityBody"),
+        icon: Users,
+      },
+      {
+        id: "profile",
+        eyebrow: t("onboarding.profileEyebrow"),
+        title: t("onboarding.profileTitle"),
+        body: t("onboarding.profileBody"),
+        icon: UserCircle,
+      },
+    ],
+    [t],
+  );
+
+  const coach = useMemo<CoachTip[]>(
+    () => [
+      {
+        id: "nav",
+        target: "nav",
+        title: t("onboarding.coachNavTitle"),
+        body: t("onboarding.coachNavBody"),
+        prefer: "right",
+      },
+      {
+        id: "notif",
+        target: "notifications",
+        title: t("onboarding.coachNotifTitle"),
+        body: t("onboarding.coachNotifBody"),
+        prefer: "bottom",
+      },
+      {
+        id: "main",
+        target: "main",
+        title: t("onboarding.coachMainTitle"),
+        body: t("onboarding.coachMainBody"),
+        prefer: "top",
+      },
+    ],
+    [t],
+  );
 
   useEffect(() => {
     if (readLocalDone()) {
@@ -179,7 +187,7 @@ export function PanelOnboarding({ userName }: { userName: string }) {
   useEffect(() => {
     if (phase !== "coach") return;
     setSpot(null);
-    const tip = COACH[coachIdx];
+    const tip = coach[coachIdx];
     if (!tip) {
       void persistDone();
       return;
@@ -195,7 +203,7 @@ export function PanelOnboarding({ userName }: { userName: string }) {
         return r.width > 2 && r.height > 2 && style.visibility !== "hidden" && style.display !== "none";
       });
       if (!el) {
-        if (coachIdx < COACH.length - 1) setCoachIdx((i) => i + 1);
+        if (coachIdx < coach.length - 1) setCoachIdx((i) => i + 1);
         else void persistDone();
         return;
       }
@@ -203,15 +211,15 @@ export function PanelOnboarding({ userName }: { userName: string }) {
     };
 
     // Allow layout to settle (esp. mobile)
-    const t = window.setTimeout(measure, 40);
+    const timer = window.setTimeout(measure, 40);
     window.addEventListener("resize", measure);
     window.addEventListener("scroll", measure, true);
     return () => {
-      window.clearTimeout(t);
+      window.clearTimeout(timer);
       window.removeEventListener("resize", measure);
       window.removeEventListener("scroll", measure, true);
     };
-  }, [phase, coachIdx, persistDone]);
+  }, [phase, coachIdx, coach, persistDone]);
 
   // Lock scroll while onboarding is open
   useEffect(() => {
@@ -225,8 +233,8 @@ export function PanelOnboarding({ userName }: { userName: string }) {
 
   if (phase === "loading" || phase === "done") return null;
 
-  const progress = ((step + 1) / WIZARD.length) * 100;
-  const current = WIZARD[step];
+  const progress = ((step + 1) / wizard.length) * 100;
+  const current = wizard[step];
   const Icon = current.icon;
 
   return (
@@ -260,7 +268,7 @@ export function PanelOnboarding({ userName }: { userName: string }) {
                   onClick={skipAll}
                   className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-muted)] transition-colors hover:text-[var(--ink)]"
                 >
-                  Atla
+                  {t("onboarding.skip")}
                 </button>
               </div>
               <div className="h-[2px] w-full overflow-hidden bg-[var(--ink)]/[0.08]">
@@ -271,7 +279,7 @@ export function PanelOnboarding({ userName }: { userName: string }) {
                 />
               </div>
               <div className="mt-3 flex gap-1 overflow-x-auto pb-4">
-                {WIZARD.map((s, i) => (
+                {wizard.map((s, i) => (
                   <span
                     key={s.id}
                     className={`shrink-0 font-mono text-[9px] uppercase tracking-widest sm:text-[10px] ${
@@ -283,7 +291,7 @@ export function PanelOnboarding({ userName }: { userName: string }) {
                     }`}
                   >
                     {String(i + 1).padStart(2, "0")}
-                    {i < WIZARD.length - 1 ? <span className="mx-1.5 text-[var(--ink-subtle)]">·</span> : null}
+                    {i < wizard.length - 1 ? <span className="mx-1.5 text-[var(--ink-subtle)]">·</span> : null}
                   </span>
                 ))}
               </div>
@@ -335,13 +343,13 @@ export function PanelOnboarding({ userName }: { userName: string }) {
               >
                 Geri
               </button>
-              {step < WIZARD.length - 1 ? (
+              {step < wizard.length - 1 ? (
                 <button
                   type="button"
                   onClick={() => setStep((s) => s + 1)}
                   className="inline-flex items-center gap-2 bg-[var(--ink)] px-5 py-2.5 font-mono text-[11px] uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-90"
                 >
-                  Devam
+                  {t("onboarding.next")}
                   <ArrowUpRight className="size-3.5" />
                 </button>
               ) : (
@@ -350,7 +358,7 @@ export function PanelOnboarding({ userName }: { userName: string }) {
                   onClick={finishWizard}
                   className="inline-flex items-center gap-2 bg-[var(--ink)] px-5 py-2.5 font-mono text-[11px] uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-90"
                 >
-                  Arayüzü göster
+                  {t("onboarding.start")}
                   <ArrowUpRight className="size-3.5" />
                 </button>
               )}
@@ -362,12 +370,12 @@ export function PanelOnboarding({ userName }: { userName: string }) {
       {phase === "coach" && spot ? (
         <CoachOverlay
           key={`coach-${coachIdx}`}
-          tip={COACH[coachIdx]}
+          tip={coach[coachIdx]}
           spot={spot}
           index={coachIdx}
-          total={COACH.length}
+          total={coach.length}
           onNext={() => {
-            if (coachIdx >= COACH.length - 1) void persistDone();
+            if (coachIdx >= coach.length - 1) void persistDone();
             else setCoachIdx((i) => i + 1);
           }}
           onSkip={skipAll}
@@ -392,6 +400,7 @@ function CoachOverlay({
   onNext: () => void;
   onSkip: () => void;
 }) {
+  const t = useT();
   const pad = 6;
   const hole = {
     top: Math.max(8, spot.top - pad),
@@ -457,7 +466,7 @@ function CoachOverlay({
             type="button"
             onClick={onSkip}
             className="text-[var(--ink-muted)] hover:text-[var(--ink)]"
-            aria-label="Kapat"
+            aria-label={t("onboarding.skip")}
           >
             <X className="size-3.5" />
           </button>
@@ -483,7 +492,7 @@ function CoachOverlay({
             onClick={onNext}
             className="ml-auto inline-flex items-center gap-1.5 bg-[var(--ink)] px-3.5 py-2 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)]"
           >
-            {index >= total - 1 ? "Bitir" : "Sonraki"}
+            {index >= total - 1 ? t("onboarding.done") : t("onboarding.next")}
             <ArrowUpRight className="size-3" />
           </button>
         </div>

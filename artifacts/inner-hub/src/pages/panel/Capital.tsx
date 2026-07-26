@@ -28,6 +28,7 @@ import {
   Plus,
   Trash2,
 } from "lucide-react";
+import { useT } from "@/i18n";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -89,30 +90,31 @@ function formatTotalRaise(deals: Deal[]): string {
 
 const STAGES: Stage[] = ["Pitch", "Due Diligence", "Term Sheet", "Kapandı"];
 
-const STAGE_CONFIG: Record<Stage, { dot: string; border: string; accent: string; label: string }> = {
+function stageDisplayLabel(stage: Stage, t: ReturnType<typeof useT>): string {
+  if (stage === "Kapandı") return t("capital.stageClosed");
+  return stage;
+}
+
+const STAGE_CONFIG: Record<Stage, { dot: string; border: string; accent: string }> = {
   Pitch: {
     dot: "bg-[var(--ink)]/30",
     border: "border-[var(--ink)]/12",
     accent: "bg-[var(--ink)]/25",
-    label: "Pitch",
   },
   "Due Diligence": {
     dot: "bg-amber-400",
     border: "border-amber-300/60",
     accent: "bg-amber-400",
-    label: "Due Diligence",
   },
   "Term Sheet": {
     dot: "bg-[var(--inner-green)]",
     border: "border-[var(--inner-green)]/35",
     accent: "bg-[var(--inner-green)]",
-    label: "Term Sheet",
   },
   Kapandı: {
     dot: "bg-[var(--ink)]",
     border: "border-[var(--ink)]/20",
     accent: "bg-[var(--ink)]",
-    label: "Kapandı",
   },
 };
 
@@ -158,6 +160,7 @@ function DealCard({
   /** Liste görünümünde aşama rozeti göster; pipeline sütununda gereksiz. */
   showStage?: boolean;
 }) {
+  const t = useT();
   const cfg = STAGE_CONFIG[deal.stage];
   const visibleTags = deal.tags.slice(0, 2);
 
@@ -190,27 +193,27 @@ function DealCard({
           <span className={`mt-0.5 inline-flex shrink-0 items-center gap-1.5 border px-2 py-0.5 ${cfg.border}`}>
             <span className={`size-1.5 ${cfg.dot}`} />
             <span className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)]">
-              {cfg.label}
+              {stageDisplayLabel(deal.stage, t)}
             </span>
           </span>
         ) : (
           <span className="shrink-0 font-mono text-[9px] uppercase tracking-widest text-[var(--ink-subtle)]">
-            {deal.updatedDays === 0 ? "bugün" : `${deal.updatedDays}g`}
+            {deal.updatedDays === 0 ? t("capital.today") : t("capital.daysAgoShort", { n: deal.updatedDays })}
           </span>
         )}
       </div>
 
       <div className="mb-3 grid grid-cols-2 gap-px border border-[var(--ink)]/[0.08] bg-[var(--ink)]/[0.08] pl-1 sm:grid-cols-3">
         <div className="bg-[var(--bone)] px-2.5 py-2">
-          <p className="font-mono text-[8px] uppercase tracking-[0.14em] text-[var(--ink-muted)]">Hedef</p>
+          <p className="font-mono text-[8px] uppercase tracking-[0.14em] text-[var(--ink-muted)]">{t("capital.target")}</p>
           <p className="mt-0.5 truncate font-mono text-xs font-medium text-[var(--ink)]">{deal.raise || "·"}</p>
         </div>
         <div className="bg-[var(--bone)] px-2.5 py-2">
-          <p className="font-mono text-[8px] uppercase tracking-[0.14em] text-[var(--ink-muted)]">Değerleme</p>
+          <p className="font-mono text-[8px] uppercase tracking-[0.14em] text-[var(--ink-muted)]">{t("capital.valuation")}</p>
           <p className="mt-0.5 truncate font-mono text-xs font-medium text-[var(--ink)]">{deal.valuation || "·"}</p>
         </div>
         <div className="col-span-2 bg-[var(--bone)] px-2.5 py-2 sm:col-span-1">
-          <p className="font-mono text-[8px] uppercase tracking-[0.14em] text-[var(--ink-muted)]">Skor</p>
+          <p className="font-mono text-[8px] uppercase tracking-[0.14em] text-[var(--ink-muted)]">{t("capital.score")}</p>
           <div className="mt-1.5 flex items-center gap-2">
             <div className="h-1 flex-1 bg-[var(--ink)]/[0.08]">
               <div className="h-full bg-[var(--inner-green)]" style={{ width: `${deal.score}%` }} />
@@ -222,12 +225,12 @@ function DealCard({
 
       <div className="flex items-center justify-between gap-2 pl-1">
         <div className="flex min-w-0 flex-wrap gap-1">
-          {visibleTags.map((t) => (
+          {visibleTags.map((tag) => (
             <span
-              key={t}
+              key={tag}
               className="border border-[var(--ink)]/10 px-1.5 py-0.5 font-mono text-[9px] text-[var(--ink-muted)]"
             >
-              {t}
+              {tag}
             </span>
           ))}
           {deal.spv && (
@@ -237,7 +240,7 @@ function DealCard({
           )}
         </div>
         <span className="inline-flex shrink-0 items-center gap-0.5 font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)] opacity-0 transition-opacity group-hover:opacity-100">
-          Detay <ChevronRight className="size-3" />
+          {t("capital.detail")} <ChevronRight className="size-3" />
         </span>
       </div>
     </button>
@@ -257,6 +260,7 @@ function DealDetail({
   isAdmin: boolean;
   onChanged: () => void;
 }) {
+  const t = useT();
   const cfg = STAGE_CONFIG[deal.stage];
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -273,11 +277,11 @@ function DealDetail({
         body: JSON.stringify({ stage }),
       });
       const json = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(json.error ?? "Güncellenemedi");
+      if (!res.ok) throw new Error(json.error ?? t("capital.updateFailed"));
       onChanged();
       onClose();
     } catch (e: any) {
-      setError(e.message ?? "Güncellenemedi");
+      setError(e.message ?? t("capital.updateFailed"));
     } finally {
       setBusy(false);
     }
@@ -285,7 +289,7 @@ function DealDetail({
 
   const remove = async () => {
     if (!isAdmin || busy) return;
-    if (!window.confirm(`${deal.company} deal'ini silmek istiyor musun?`)) return;
+    if (!window.confirm(t("capital.confirmDelete", { company: deal.company }))) return;
     setBusy(true);
     setError(null);
     try {
@@ -294,11 +298,11 @@ function DealDetail({
         credentials: "include",
       });
       const json = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(json.error ?? "Silinemedi");
+      if (!res.ok) throw new Error(json.error ?? t("capital.deleteFailed"));
       onChanged();
       onClose();
     } catch (e: any) {
-      setError(e.message ?? "Silinemedi");
+      setError(e.message ?? t("capital.deleteFailed"));
     } finally {
       setBusy(false);
     }
@@ -307,20 +311,20 @@ function DealDetail({
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-end" onClick={onClose}>
       <div
-        className="relative h-full w-full max-w-md overflow-y-auto border-l border-[var(--ink)]/10 bg-[var(--bone)] p-7 shadow-2xl"
+        className="relative h-full w-full max-w-md overflow-y-auto border-l border-[var(--ink)]/15 bg-[var(--bone)] p-5 shadow-2xl sm:p-7"
         onClick={(e) => e.stopPropagation()}
       >
         <button
           type="button"
           onClick={onClose}
-          className="mb-6 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)] hover:text-[var(--ink)] transition-colors"
+          className="mb-6 min-h-10 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)] hover:text-[var(--ink)] transition-colors"
         >
-          ← Kapat
+          {t("capital.close")}
         </button>
 
         <div className="mb-1 flex items-center gap-2">
           <div className={`size-2 rounded-full ${cfg.dot}`} />
-          <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">{deal.stage}</span>
+          <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">{stageDisplayLabel(deal.stage, t)}</span>
         </div>
         <h2
           className="font-serif text-3xl text-[var(--ink)] mb-1"
@@ -331,14 +335,14 @@ function DealDetail({
         <p className="text-sm text-[var(--ink-muted)] mb-6">{deal.tagline}</p>
 
         {/* Metrics */}
-        <div className="mb-6 grid grid-cols-3 gap-3">
+        <div className="mb-6 grid grid-cols-3 gap-2 sm:gap-3">
           {[
-            { l: "Hedef", v: deal.raise },
-            { l: "Değerleme", v: deal.valuation },
-            { l: "Tur", v: deal.round },
+            { key: "capital.target", v: deal.raise },
+            { key: "capital.valuation", v: deal.valuation },
+            { key: "capital.round", v: deal.round },
           ].map((m) => (
-            <div key={m.l} className="border border-[var(--ink)]/[0.08] p-3">
-              <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">{m.l}</p>
+            <div key={m.key} className="border border-[var(--ink)]/[0.08] p-3">
+              <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">{t(m.key)}</p>
               <p className="mt-0.5 font-mono text-sm text-[var(--ink)]">{m.v}</p>
             </div>
           ))}
@@ -347,7 +351,7 @@ function DealDetail({
         {/* Score bar */}
         <div className="mb-6">
           <div className="mb-1 flex justify-between">
-            <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">İç Değerlendirme Skoru</span>
+            <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">{t("capital.internalScore")}</span>
             <span className="font-mono text-label text-[var(--ink-muted)]">{deal.score}/100</span>
           </div>
           <div className="h-1.5 bg-[var(--ink)]/[0.06]">
@@ -357,7 +361,7 @@ function DealDetail({
 
         {/* Founders */}
         <div className="mb-5">
-          <p className="mb-2 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">Kurucular</p>
+          <p className="mb-2 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">{t("capital.founders")}</p>
           <div className="space-y-2">
             {deal.founders.map((f) => (
               <div key={f} className="flex items-center gap-3">
@@ -375,7 +379,7 @@ function DealDetail({
         {/* Lead investor */}
         {deal.leadInvestor && (
           <div className="mb-5">
-            <p className="mb-2 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">Lead Yatırımcı</p>
+            <p className="mb-2 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">{t("capital.leadInvestor")}</p>
             <div className="flex items-center gap-3">
               <PersonAvatar
                 name={deal.leadInvestor}
@@ -389,7 +393,7 @@ function DealDetail({
 
         {/* Sector */}
         <div className="mb-5">
-          <p className="mb-2 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">Sektör</p>
+          <p className="mb-2 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">{t("capital.sector")}</p>
           <span className="border border-[var(--ink)]/10 px-2.5 py-1 font-mono text-label text-[var(--ink-muted)]">
             {deal.sector}
           </span>
@@ -397,16 +401,16 @@ function DealDetail({
 
         {/* Tags */}
         <div className="mb-8">
-          <p className="mb-2 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">Etiketler</p>
+          <p className="mb-2 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">{t("capital.tags")}</p>
           <div className="flex flex-wrap gap-1.5">
-            {deal.tags.map((t) => (
-              <span key={t} className="border border-[var(--ink)]/10 px-2 py-0.5 font-mono text-label text-[var(--ink-body)]">
-                {t}
+            {deal.tags.map((tag) => (
+              <span key={tag} className="border border-[var(--ink)]/10 px-2 py-0.5 font-mono text-label text-[var(--ink-body)]">
+                {tag}
               </span>
             ))}
             {deal.spv && (
               <span className="border border-[var(--inner-green)]/30 bg-[var(--inner-green)]/5 px-2 py-0.5 font-mono text-label text-[var(--success-ink)]">
-                SPV açık
+                {t("capital.spvOpen")}
               </span>
             )}
           </div>
@@ -416,23 +420,23 @@ function DealDetail({
         <div className="space-y-2">
           <button
             type="button"
-            className="flex w-full items-center justify-between border border-[var(--ink)] bg-[var(--ink)] px-5 py-3 font-mono text-label uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-80"
+            className="flex w-full items-center justify-between border border-[var(--ink)]/15 bg-[var(--ink)] px-5 py-3 font-mono text-label uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-80 min-h-11"
           >
-            <span>İlgileniyorum</span>
+            <span>{t("capital.interested")}</span>
             <ArrowUpRight className="size-3.5" />
           </button>
           <button
             type="button"
-            className="flex w-full items-center justify-between border border-[var(--ink)]/15 px-5 py-3 font-mono text-label uppercase tracking-widest text-[var(--ink-body)] transition-all hover:border-[var(--ink)]/40 hover:text-[var(--ink)]"
+            className="flex w-full min-h-11 items-center justify-between border border-[var(--ink)]/15 px-5 py-3 font-mono text-label uppercase tracking-widest text-[var(--ink-body)] transition-all hover:border-[var(--ink)]/40 hover:text-[var(--ink)]"
           >
-            <span>Kurucuyu Tanıştır</span>
+            <span>{t("capital.introduceFounder")}</span>
             <ChevronRight className="size-3.5" />
           </button>
         </div>
 
         {isAdmin && (
           <div className="mt-8 space-y-3 border-t border-[var(--ink)]/[0.08] pt-5">
-            <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">Admin</p>
+            <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">{t("capital.admin")}</p>
             <div className="flex flex-wrap gap-1.5">
               {STAGES.map((s) => (
                 <button
@@ -447,7 +451,7 @@ function DealDetail({
                       : "border-[var(--ink)]/10 text-[var(--ink-muted)] hover:border-[var(--ink)]/30",
                   ].join(" ")}
                 >
-                  {s}
+                  {stageDisplayLabel(s, t)}
                 </button>
               ))}
             </div>
@@ -457,7 +461,7 @@ function DealDetail({
               onClick={() => void remove()}
               className="flex items-center gap-1.5 border border-[var(--error-ink)]/25 px-3 py-2 font-mono text-label uppercase tracking-widest text-[var(--error-ink)] disabled:opacity-40"
             >
-              <Trash2 className="size-3" /> Deal'i sil
+              <Trash2 className="size-3" /> {t("capital.deleteDeal")}
             </button>
             {error && (
               <p className="font-mono text-label text-[var(--error-ink)]" role="alert">
@@ -474,6 +478,7 @@ function DealDetail({
 // ─── SPV card ─────────────────────────────────────────────────────────────────
 
 function SpvCard({ spv }: { spv: SPV }) {
+  const t = useT();
   return (
     <div className="border border-[var(--ink)]/[0.1] bg-[var(--bone)] p-5">
       <div className="mb-4 flex items-start justify-between gap-3">
@@ -487,9 +492,9 @@ function SpvCard({ spv }: { spv: SPV }) {
           <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.12em] text-[var(--ink-muted)]">
             {spv.sector}
             <span className="mx-1.5 text-[var(--ink)]/20">·</span>
-            {spv.participants} katılımcı
+            {t("capital.participants", { n: spv.participants })}
             <span className="mx-1.5 text-[var(--ink)]/20">·</span>
-            Kapanış {spv.closing}
+            {t("capital.closing", { date: spv.closing })}
           </p>
         </div>
       </div>
@@ -514,9 +519,9 @@ function SpvCard({ spv }: { spv: SPV }) {
       </div>
       <button
         type="button"
-        className="inline-flex min-h-10 items-center gap-1.5 bg-[var(--ink)] px-4 py-2 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-85"
+        className="inline-flex min-h-11 items-center gap-1.5 bg-[var(--ink)] px-4 py-2 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-85"
       >
-        SPV&apos;ye Katıl <ExternalLink className="size-3" />
+        {t("capital.joinSpv")} <ExternalLink className="size-3" />
       </button>
     </div>
   );
@@ -529,55 +534,56 @@ function scrollToId(id: string) {
 }
 
 function CapitalHero({ dealCount }: { dealCount: number }) {
+  const t = useT();
   return (
     <div
-      className="relative -mx-4 -mt-6 overflow-hidden sm:-mx-6 lg:-mx-8 lg:-mt-8"
-      style={{ height: "min(70vh, 620px)", minHeight: 440 }}
+      className="relative -mx-3 -mt-5 overflow-hidden sm:-mx-5 sm:-mt-6 lg:-mx-8 lg:-mt-8"
+      style={{ height: "min(62vh, 620px)", minHeight: 360 }}
     >
       <HeroVideo
         src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260403_050628_c4e32401-fab4-4a27-b7a8-6e9291cd5959.mp4"
         className="absolute inset-0 h-full w-full object-cover"
       />
 
-      <div className="relative z-10 flex h-full flex-col justify-end px-6 pb-10 md:px-12 md:pb-14">
+      <div className="relative z-10 flex h-full flex-col justify-end px-4 pb-8 sm:px-6 sm:pb-10 md:px-12 md:pb-14">
         <div className="lg:grid lg:grid-cols-2 lg:items-end lg:gap-10">
           <div>
             <div className="mb-3">
               <Lockup suffix="capital" className="text-white" fontSize="clamp(1.75rem, 4vw, 2.5rem)" />
             </div>
             <AnimatedHeading
-              text={"Where conviction\nmeets capital."}
-              className="mb-4 font-display font-serif italic text-4xl leading-[1.1] text-white [text-shadow:0_2px_24px_rgba(0,0,0,0.55)] md:text-5xl lg:text-6xl"
+              text={t("capital.heroHeadline")}
+              className="mb-4 font-display font-serif italic text-3xl leading-[1.1] text-white [text-shadow:0_2px_24px_rgba(0,0,0,0.55)] sm:text-4xl md:text-5xl lg:text-6xl"
               style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1" }}
             />
             <FadeIn delay={0.8}>
-              <p className="mb-6 max-w-[46ch] text-base text-white/75 [text-shadow:0_1px_12px_rgba(0,0,0,0.6)] md:text-lg">
-                Private deal flow, SPVs, and co-investment. Curated inside the circle, invited by trust.
+              <p className="mb-6 max-w-[46ch] text-sm text-white/75 [text-shadow:0_1px_12px_rgba(0,0,0,0.6)] sm:text-base md:text-lg">
+                {t("capital.heroBody")}
               </p>
             </FadeIn>
             <FadeIn delay={1.2}>
-              <div className="flex flex-wrap gap-4">
+              <div className="flex flex-wrap gap-3 sm:gap-4">
                 <button
                   onClick={() => scrollToId("deal-pipeline")}
-                  className="bg-white px-8 py-3 font-mono text-xs uppercase tracking-widest text-black transition-colors hover:bg-white/90"
+                  className="inline-flex min-h-11 items-center bg-white px-6 py-3 font-mono text-xs uppercase tracking-widest text-black transition-colors hover:bg-white/90 sm:px-8"
                 >
-                  <span lang="en">View Pipeline</span>
+                  <span lang="en">{t("capital.viewPipeline")}</span>
                 </button>
                 <button
                   onClick={() => scrollToId("open-spvs")}
-                  className="liquid-glass border border-white/20 px-8 py-3 font-mono text-xs uppercase tracking-widest text-white transition-colors hover:bg-white hover:text-black"
+                  className="liquid-glass inline-flex min-h-11 items-center border border-white/20 px-6 py-3 font-mono text-xs uppercase tracking-widest text-white transition-colors hover:bg-white hover:text-black sm:px-8"
                 >
-                  <span lang="en">View SPVs</span>
+                  <span lang="en">{t("capital.viewSpvs")}</span>
                 </button>
               </div>
             </FadeIn>
           </div>
 
-          <div className="mt-8 flex items-end justify-start lg:mt-0 lg:justify-end">
+          <div className="mt-8 hidden items-end justify-start sm:flex lg:mt-0 lg:justify-end">
             <HeroQuickStat
               value={dealCount}
-              label="Aktif Deal"
-              tagline="Deal Flow. SPVs. Co-Investment."
+              label={t("capital.activeDeals")}
+              tagline={t("capital.heroTagline")}
             />
           </div>
         </div>
@@ -597,6 +603,7 @@ function DealCompose({
   onClose: () => void;
   onCreated: () => void;
 }) {
+  const t = useT();
   const [company, setCompany] = useState("");
   const [tagline, setTagline] = useState("");
   const [stage, setStage] = useState<Stage>("Pitch");
@@ -631,7 +638,7 @@ function DealCompose({
         }),
       });
       const json = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(json.error ?? "Deal kaydedilemedi");
+      if (!res.ok) throw new Error(json.error ?? t("capital.saveFailed"));
       setCompany("");
       setTagline("");
       setRaise("");
@@ -640,7 +647,7 @@ function DealCompose({
       onCreated();
       onClose();
     } catch (e: any) {
-      setError(e.message ?? "Deal kaydedilemedi");
+      setError(e.message ?? t("capital.saveFailed"));
     } finally {
       setBusy(false);
     }
@@ -657,23 +664,23 @@ function DealCompose({
             className="font-serif text-2xl font-normal text-[var(--ink)]"
             style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
           >
-            Deal Ekle
+            {t("capital.composeTitle")}
           </DrawerTitle>
           <DrawerDescription className="text-[var(--ink-body)]">
-            Pipeline’a yeni deal ekle (yalnızca admin).
+            {t("capital.composeSub")}
           </DrawerDescription>
         </DrawerHeader>
         <div className="max-h-[70vh] space-y-3 overflow-y-auto px-6 pb-8">
           <input
             value={company}
             onChange={(e) => setCompany(e.target.value)}
-            placeholder="Şirket"
+            placeholder={t("capital.phCompany")}
             className="w-full border border-[var(--ink)]/[0.08] bg-transparent px-3 py-2.5 text-sm outline-none focus:border-[var(--ink)]/30"
           />
           <input
             value={tagline}
             onChange={(e) => setTagline(e.target.value)}
-            placeholder="Kısa tagline"
+            placeholder={t("capital.phTagline")}
             className="w-full border border-[var(--ink)]/[0.08] bg-transparent px-3 py-2.5 text-sm outline-none focus:border-[var(--ink)]/30"
           />
           <div className="flex flex-wrap gap-1.5">
@@ -689,7 +696,7 @@ function DealCompose({
                     : "border-[var(--ink)]/10 text-[var(--ink-muted)]",
                 ].join(" ")}
               >
-                {s}
+                {stageDisplayLabel(s, t)}
               </button>
             ))}
           </div>
@@ -714,32 +721,32 @@ function DealCompose({
             <input
               value={raise}
               onChange={(e) => setRaise(e.target.value)}
-              placeholder="Hedef ($500K)"
+              placeholder={t("capital.phRaise")}
               className="border border-[var(--ink)]/[0.08] bg-transparent px-3 py-2.5 text-sm outline-none focus:border-[var(--ink)]/30"
             />
             <input
               value={valuation}
               onChange={(e) => setValuation(e.target.value)}
-              placeholder="Değerleme"
+              placeholder={t("capital.phValuation")}
               className="border border-[var(--ink)]/[0.08] bg-transparent px-3 py-2.5 text-sm outline-none focus:border-[var(--ink)]/30"
             />
           </div>
           <input
             value={round}
             onChange={(e) => setRound(e.target.value)}
-            placeholder="Tur (Pre-seed / Seed)"
+            placeholder={t("capital.phRound")}
             className="w-full border border-[var(--ink)]/[0.08] bg-transparent px-3 py-2.5 text-sm outline-none focus:border-[var(--ink)]/30"
           />
           <input
             value={founders}
             onChange={(e) => setFounders(e.target.value)}
-            placeholder="Kurucular (virgülle)"
+            placeholder={t("capital.phFounders")}
             className="w-full border border-[var(--ink)]/[0.08] bg-transparent px-3 py-2.5 text-sm outline-none focus:border-[var(--ink)]/30"
           />
           <input
             value={score}
             onChange={(e) => setScore(e.target.value)}
-            placeholder="Skor 0–100"
+            placeholder={t("capital.phScore")}
             inputMode="numeric"
             className="w-full border border-[var(--ink)]/[0.08] bg-transparent px-3 py-2.5 text-sm outline-none focus:border-[var(--ink)]/30"
           />
@@ -754,15 +761,15 @@ function DealCompose({
               onClick={onClose}
               className="flex-1 border border-[var(--ink)]/15 py-2.5 font-mono text-label uppercase tracking-widest text-[var(--ink-body)]"
             >
-              İptal
+              {t("common.cancel")}
             </button>
             <button
               type="button"
               disabled={busy || !company.trim()}
               onClick={() => void submit()}
-              className="flex-1 border border-[var(--ink)] bg-[var(--ink)] py-2.5 font-mono text-label uppercase tracking-widest text-[var(--bone)] disabled:opacity-40"
+              className="flex-1 min-h-11 border border-[var(--ink)]/15 bg-[var(--ink)] py-2.5 font-mono text-label uppercase tracking-widest text-[var(--bone)] disabled:opacity-40"
             >
-              {busy ? "Kaydediliyor…" : "Kaydet"}
+              {busy ? t("common.saving") : t("common.save")}
             </button>
           </div>
         </div>
@@ -774,9 +781,10 @@ function DealCompose({
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function Capital() {
+  const t = useT();
   const queryClient = useQueryClient();
   const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null);
-  const [sectorFilter, setSectorFilter] = useState<Sector | "Tümü">("Tümü");
+  const [sectorFilter, setSectorFilter] = useState<Sector | "all">("all");
   const [view, setView] = useState<"pipeline" | "liste">("pipeline");
   const [composeOpen, setComposeOpen] = useState(false);
 
@@ -790,9 +798,9 @@ export default function Capital() {
   const deals = data?.deals ?? [];
   const spvs = data?.spvs ?? [];
 
-  const sectors: (Sector | "Tümü")[] = ["Tümü", "AI/ML", "B2B SaaS", "Fintech", "HR Tech", "DeepTech", "E-ticaret"];
+  const sectors: (Sector | "all")[] = ["all", "AI/ML", "B2B SaaS", "Fintech", "HR Tech", "DeepTech", "E-ticaret"];
 
-  const filtered = sectorFilter === "Tümü"
+  const filtered = sectorFilter === "all"
     ? deals
     : deals.filter((d) => d.sector === sectorFilter);
 
@@ -810,7 +818,7 @@ export default function Capital() {
       <CapitalHero dealCount={activeDeals} />
 
       {isLoading && deals.length === 0 && (
-        <LoadingBlock label="Deal flow yükleniyor">
+        <LoadingBlock label={t("capital.loading")}>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {Array.from({ length: 4 }).map((_, i) => (
               <StatCardSkeleton key={i} />
@@ -820,7 +828,7 @@ export default function Capital() {
       )}
       {isError && (
         <ErrorState
-          message={error instanceof Error ? error.message : "Capital yüklenemedi"}
+          message={error instanceof Error ? error.message : t("capital.loadError")}
           onRetry={() => refetch()}
         />
       )}
@@ -832,12 +840,12 @@ export default function Capital() {
             <button
               type="button"
               onClick={() => setComposeOpen(true)}
-              className="inline-flex min-h-10 items-center gap-1.5 bg-[var(--ink)] px-4 py-2 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-85"
+              className="inline-flex min-h-11 items-center gap-1.5 bg-[var(--ink)] px-4 py-2 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-85"
             >
-              <Plus className="size-3.5" /> Deal Ekle
+              <Plus className="size-3.5" /> {t("capital.addDeal")}
             </button>
           ) : (
-            <p className="text-sm text-[var(--ink-muted)]">Kapalı deal flow · yalnızca daire üyeleri</p>
+            <p className="text-sm text-[var(--ink-muted)]">{t("capital.membersOnly")}</p>
           )}
           <div className="flex border border-[var(--ink)]/15">
             {(["pipeline", "liste"] as const).map((v) => (
@@ -852,7 +860,7 @@ export default function Capital() {
                     : "text-[var(--ink-body)] hover:text-[var(--ink)]",
                 ].join(" ")}
               >
-                {v === "pipeline" ? "Pipeline" : "Liste"}
+                {v === "pipeline" ? t("capital.viewPipelineTab") : t("capital.viewListTab")}
               </button>
             ))}
           </div>
@@ -861,10 +869,10 @@ export default function Capital() {
 
       {/* Stats row */}
       <div className="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4">
-        <StatCard label="Aktif Deal" value={String(activeDeals)} sub="pipeline'da" icon={TrendingUp} />
-        <StatCard label="Toplam Hedef" value={totalRaise} sub="aktif turlar" icon={DollarSign} />
-        <StatCard label="Kapanan" value={String(closedDeals)} sub="inner portföyü" icon={Building2} />
-        <StatCard label="SPV" value={String(spvs.length)} sub="açık yatırım aracı" icon={Users} />
+        <StatCard label={t("capital.statActive")} value={String(activeDeals)} sub={t("capital.statActiveSub")} icon={TrendingUp} />
+        <StatCard label={t("capital.statRaise")} value={totalRaise} sub={t("capital.statRaiseSub")} icon={DollarSign} />
+        <StatCard label={t("capital.statClosed")} value={String(closedDeals)} sub={t("capital.statClosedSub")} icon={Building2} />
+        <StatCard label={t("capital.statSpv")} value={String(spvs.length)} sub={t("capital.statSpvSub")} icon={Users} />
       </div>
 
       {/* Sector filter */}
@@ -876,13 +884,13 @@ export default function Capital() {
             type="button"
             onClick={() => setSectorFilter(s)}
             className={[
-              "shrink-0 border px-3 py-1.5 font-mono text-[10px] uppercase tracking-widest transition-colors",
+              "shrink-0 min-h-10 border px-3 py-1.5 font-mono text-[10px] uppercase tracking-widest transition-colors",
               sectorFilter === s
                 ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--bone)]"
                 : "border-[var(--ink)]/12 text-[var(--ink-muted)] hover:border-[var(--ink)]/30 hover:text-[var(--ink)]",
             ].join(" ")}
           >
-            {s}
+            {s === "all" ? t("common.all") : s}
           </button>
         ))}
       </div>
@@ -903,7 +911,7 @@ export default function Capital() {
                     <div className="flex items-center gap-2">
                       <span className={`size-2 ${cfg.dot}`} />
                       <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--ink)]">
-                        {stage}
+                        {stageDisplayLabel(stage, t)}
                       </span>
                     </div>
                     <span className="flex size-5 items-center justify-center bg-[var(--ink)] font-mono text-[10px] text-[var(--bone)]">
@@ -914,7 +922,7 @@ export default function Capital() {
                     {stageDeals.length === 0 ? (
                       <div className="border border-dashed border-[var(--ink)]/[0.1] px-4 py-8 text-center">
                         <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-subtle)]">
-                          Boş
+                          {t("capital.emptyColumn")}
                         </p>
                       </div>
                     ) : (
@@ -931,12 +939,20 @@ export default function Capital() {
           /* Liste view */
           <div className="space-y-2">
             <div className="hidden items-center gap-4 border-b border-[var(--ink)]/[0.1] pb-2 md:grid md:grid-cols-[1.4fr_0.8fr_0.6fr_0.6fr_auto]">
-              {["Şirket", "Sektör", "Hedef", "Değerleme", "Aşama"].map((h) => (
+              {(
+                [
+                  "capital.colCompany",
+                  "capital.colSector",
+                  "capital.colTarget",
+                  "capital.colValuation",
+                  "capital.colStage",
+                ] as const
+              ).map((h) => (
                 <span
                   key={h}
                   className="font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--ink-muted)]"
                 >
-                  {h}
+                  {t(h)}
                 </span>
               ))}
             </div>
@@ -961,7 +977,7 @@ export default function Capital() {
                   <div className={`inline-flex w-fit items-center gap-1.5 border px-2 py-0.5 ${cfg.border}`}>
                     <span className={`size-1.5 ${cfg.dot}`} />
                     <span className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink-body)]">
-                      {cfg.label}
+                      {stageDisplayLabel(deal.stage, t)}
                     </span>
                   </div>
                 </button>
@@ -975,10 +991,10 @@ export default function Capital() {
       <section id="open-spvs" className="scroll-mt-6">
         <div className="mb-4 border-t border-[var(--ink)]/[0.08] pt-4">
           <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--ink)]">
-            Açık SPV&apos;ler
+            {t("capital.openSpvs")}
           </p>
           <p className="mt-1 text-sm text-[var(--ink-muted)]">
-            Özel amaçlı araçlarla toplu yatırım katılımı
+            {t("capital.openSpvsSub")}
           </p>
         </div>
         <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
@@ -993,7 +1009,7 @@ export default function Capital() {
         <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-subtle)]">
           <span lang="en">inner·capital</span>
           {" · "}
-          yalnızca <span lang="en">inner·hub</span> üyeleri için · bilgi amaçlıdır, yatırım tavsiyesi değildir
+          {t("capital.disclaimer")}
         </p>
       </div>
 

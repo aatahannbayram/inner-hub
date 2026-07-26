@@ -3,7 +3,7 @@ import { renderToString } from "react-dom/server";
 import { Router } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import * as React from "react";
-import { useRef, Fragment, useState, useEffect } from "react";
+import { createContext, useState, useCallback, useEffect, useMemo, useContext, useRef, Fragment } from "react";
 import * as TooltipPrimitive from "@radix-ui/react-tooltip";
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
@@ -27,6 +27,2296 @@ const TooltipContent = React.forwardRef(({ className, sideOffset = 4, ...props }
   }
 ) }));
 TooltipContent.displayName = TooltipPrimitive.Content.displayName;
+const DEFAULT_LOCALE = "tr";
+const LOCALE_STORAGE_KEY = "inner.locale";
+function isLocale(v) {
+  return v === "tr" || v === "en";
+}
+function readStoredLocale() {
+  try {
+    const v = localStorage.getItem(LOCALE_STORAGE_KEY);
+    return isLocale(v) ? v : null;
+  } catch {
+    return null;
+  }
+}
+function writeStoredLocale(locale) {
+  try {
+    localStorage.setItem(LOCALE_STORAGE_KEY, locale);
+  } catch {
+  }
+}
+function detectBrowserLocale() {
+  try {
+    const lang = navigator.language?.toLowerCase() ?? "";
+    if (lang.startsWith("tr")) return "tr";
+    if (lang.startsWith("en")) return "en";
+  } catch {
+  }
+  return DEFAULT_LOCALE;
+}
+function getByPath(obj, path) {
+  const parts = path.split(".");
+  let cur = obj;
+  for (const p of parts) {
+    if (cur == null || typeof cur !== "object") return void 0;
+    cur = cur[p];
+  }
+  return typeof cur === "string" ? cur : void 0;
+}
+function interpolate$1(template, values) {
+  if (!values) return template;
+  return template.replace(
+    /\{(\w+)\}/g,
+    (_, key) => values[key] !== void 0 ? String(values[key]) : `{${key}}`
+  );
+}
+const tr = {
+  common: {
+    save: "Kaydet",
+    saving: "Kaydediliyor…",
+    saved: "Kaydedildi",
+    cancel: "İptal",
+    edit: "Düzenle",
+    delete: "Sil",
+    copy: "Kopyala",
+    copied: "Kopyalandı",
+    loading: "Yükleniyor…",
+    retry: "Tekrar dene",
+    back: "Geri",
+    next: "İleri",
+    close: "Kapat",
+    view: "Görüntüle",
+    open: "Aç",
+    search: "Ara",
+    all: "Tümü",
+    soon: "Yakında",
+    member: "Üye",
+    admin: "Admin",
+    logout: "Çıkış",
+    logoutLong: "Çıkış yap",
+    online: "online",
+    errorGeneric: "Bir şeyler ters gitti",
+    comingSoon: "Bu sayfa yakında hazır olacak.",
+    home: "Ana sayfa",
+    skipToContent: "İçeriğe atla",
+    yes: "Evet",
+    no: "Hayır",
+    searchPlaceholder: "Ara…"
+  },
+  nav: {
+    sectionMain: "Ana",
+    sectionPlatform: "Platform",
+    sectionAccount: "Hesap",
+    sectionAdmin: "Admin",
+    dashboard: "Dashboard",
+    community: "Topluluk",
+    courses: "Kurslar",
+    events: "Etkinlikler",
+    members: "Katılımcılar",
+    perks: "Ayrıcalıklar",
+    profile: "Profil",
+    membership: "Üyelik",
+    faq: "SSS",
+    applications: "Başvurular",
+    analytics: "Analitik",
+    settings: "Ayarlar"
+  },
+  shell: {
+    notifications: "Bildirimler",
+    markAllRead: "Tümünü oku",
+    noNotifications: "Bildirim yok",
+    profileCompletion: "Profil tamamlanma",
+    openMenu: "Menüyü aç",
+    closeMenu: "Menüyü kapat",
+    collapseSidebar: "Kenar çubuğunu daralt",
+    expandSidebar: "Kenar çubuğunu genişlet",
+    justNow: "az önce",
+    minutesAgo: "{n} dk önce",
+    hoursAgo: "{n} saat önce",
+    daysAgo: "{n} gün önce"
+  },
+  settings: {
+    title: "ayarlar",
+    subtitle: "Hesap ve platform tercihlerini yönet.",
+    loading: "Ayarlar yükleniyor",
+    loadError: "Ayarlar alınamadı",
+    saveError: "Kaydedilemedi",
+    prefsUpdated: "Tercihler güncellendi",
+    sectionNotif: "Bildirimler",
+    sectionNotifSub: "Hangi olaylarda bildirim almak istediğini seç",
+    notifMatch: "inner·match önerileri",
+    notifMatchSub: "Yeni eşleşme geldiğinde",
+    notifEvents: "Etkinlik hatırlatmaları",
+    notifEventsSub: "Katıldığın etkinliklerden 1 gün önce",
+    notifMessages: "Chat mesajları",
+    notifMessagesSub: "@bahsedilme ve DM",
+    notifCapital: "inner·capital güncellemeleri",
+    notifCapitalSub: "SPV ve deal flow aktivitesi",
+    notifDigest: "Haftalık digest",
+    notifDigestSub: "Haftanın özeti her Pazartesi",
+    notifEmail: "E-posta bildirimleri",
+    notifEmailSub: "Platform bildirimlerini e-posta ile al",
+    sectionPrivacy: "Gizlilik",
+    sectionPrivacySub: "Platform içinde görünürlüğünü kontrol et",
+    showOnline: "Çevrimiçi durumu göster",
+    showOnlineSub: "Diğer üyeler seni ONLINE olarak görür",
+    allowMatch: "inner·match'e dahil ol",
+    allowMatchSub: "AI eşleştirme motorunda göründüğünde",
+    analyticsConsent: "Anonim analitik",
+    analyticsConsentSub: "Platform iyileştirmesi için anonim kullanım verisi",
+    sectionAppearance: "Görünüm",
+    sectionAppearanceSub: "Platform arayüz tercihleri",
+    theme: "Tema",
+    themeSub: "Açık, koyu veya sistem tercihi",
+    themeLight: "Açık",
+    themeDark: "Koyu",
+    themeSystem: "Sistem",
+    compactMode: "Kompakt mod",
+    compactModeSub: "Daha yoğun içerik düzeni",
+    sectionLang: "Dil",
+    sectionLangSub: "Platform arayüz dili",
+    uiLang: "Arayüz dili",
+    langTr: "Türkçe",
+    langEn: "English",
+    danger: "Tehlikeli Alan",
+    suspend: "Hesabı askıya al",
+    suspendSub: "Üyeliğini geçici olarak durdur",
+    logoutSub: "Bu cihazdan oturumu kapat",
+    footer: "ayarlar"
+  },
+  publicNav: {
+    idea: "Fikir",
+    circle: "Çember",
+    platform: "Platform",
+    gathering: "Buluşma",
+    next: "Sıradaki",
+    invitation: "Davetiye",
+    requestInvitation: "Davetiye talep et",
+    primaryNav: "Ana menü",
+    openMenu: "Menüyü aç",
+    closeMenu: "Menüyü kapat"
+  },
+  home: {
+    heroTag: "İstanbul → Global · Est. 2026",
+    heroBody: "Kurucular, builder’lar ve yatırımcılardan oluşan özel bir çember. Yer veya statüyle değil; erken buluşup sonraki adımı inşa etme açlığıyla bağlı.",
+    requestInvitation: "Davetiye talep et",
+    ideaEyebrow: "01 · Fikir",
+    ideaTitle: "Özel bir çember.",
+    ideaBody: "inner·hub, davetle girilen bir ağdır. Kurucular, builder’lar ve yatırımcılar buraya erken sinyal, derin bağlantı ve birlikte inşa etmek için gelir.",
+    seatsEyebrow: "02 · Kurucu koltuklar",
+    seatsTitle: "Kimler için.",
+    seatFounders: "Kurucular.",
+    seatFounders1: "AI ve ötesinde girişim kuranlar",
+    seatFounders2: "Gürültü gelmeden shipping edenler",
+    seatFounders3: "Kalabalık değil, birlikte üreten ortak arayanlar",
+    seatFounders4: "Tek tek seçilir. Açık başvuru yok",
+    seatBuilders: "Builder’lar.",
+    seatBuilders1: "Ciddi AI alanında mühendis ve araştırmacılar",
+    seatBuilders2: "Demo değil derinlik. Bileşik zanaat",
+    seatBuilders3: "Sinyal önce çember içinde paylaşılır",
+    seatInvestors: "Yatırımcılar.",
+    seatInvestors1: "Melekler ve venture operatörleri",
+    seatInvestors2: "Erken inanç, sabırlı sermaye",
+    seatInvestors3: "Erişim biletle değil güvenle şekillenir",
+    circleStartsHere: "Çemberin burada başlar.",
+    learnMore: "Daha fazla",
+    seatsFooter: "Bu otuz dört kişi sadece üye değil. inner·hub’ın kurucu üyeleri.",
+    whatThisIs: "Bu nedir",
+    byInvitation: "Davetiye ile",
+    theGathering: "Buluşma",
+    whatsNext: "Sırada ne var",
+    people: "Kişi",
+    days: "Gün",
+    modules: "Modül",
+    footerTagline: "Davetli üyelik. Erken sinyal. Birlikte inşa.",
+    footerNavigate: "Gezin",
+    footerConnect: "Bağlan",
+    footerRights: "© 2026 inner·hub",
+    langSwitch: "Dil",
+    panel: "Panel"
+  },
+  invite: {
+    preparing: "Davetiye hazırlanıyor",
+    access: "inner · erişim",
+    homeLink: "Ana sayfa",
+    requestTitle: "Davetiye talep et",
+    received: "Alındı",
+    successTitle: "Uygunsa, sizinle iletişime geçeriz",
+    successBody: "Her talebi dikkatle inceliyoruz. Otomatik yanıt yok. Önemli olduğunda gerçek bir cevap.",
+    backHome: "Ana sayfaya dön",
+    howEnter: "Nasıl giriyorsun?",
+    roleFounder: "Girişimci",
+    roleFounderEn: "Founder",
+    roleFounderHint: "Bir şeyler kuruyor. Erken veya ölçekleniyor.",
+    roleInvestor: "Yatırımcı",
+    roleInvestorEn: "Investor",
+    roleInvestorHint: "Melek, fon veya sermaye ayıran operatör.",
+    roleBuilder: "Builder",
+    roleBuilderEn: "Builder",
+    roleBuilderHint: "Mühendis, araştırmacı veya operatör. Stack’in içinde üretenler.",
+    roleCompany: "Şirket",
+    roleCompanyEn: "Company",
+    roleCompanyHint: "Çembere birlikte girmek isteyen ekip.",
+    fullName: "Ad Soyad",
+    email: "E-posta",
+    org: "Kurum",
+    linkedin: "LinkedIn",
+    city: "Şehir",
+    story: "Hikâyen",
+    intro: "Kısa tanıtım",
+    submit: "Gönder",
+    submitting: "Gönderiliyor…",
+    continue: "Devam",
+    stepRole: "Nasıl giriyorsun?",
+    stepIdentity: "Kime ulaşalım?",
+    stepOrg: "Hangi kurum?",
+    stepStory: "Ne inşa ediyorsun?",
+    stepIntro: "Bizi nasıl buldun?",
+    copyRole: "Yatırımcı, girişimci, builder veya şirket. Her giriş ayrı bir kapı.",
+    copyIdentity: "Doğrudan sana ulaşabileceğimiz bilgiler. Spam yok; sadece gerçek yanıt.",
+    copyOrgInvestor: "Fon veya kurum adın + domain. Logoyu otomatik getiririz.",
+    copyOrgCompany: "Şirket adın ve domainin. Logo sisteme kaydolur.",
+    copyOrgDefault: "Varsa kurumunu ekle. Domain ile logo otomatik yüklenir.",
+    copyStory: "Kısa tut. Net tut. Circle bunu okuyacak.",
+    copyIntro: "Çoğu kişi davetle gelir. Kendi bulduysan da sorun değil. Söylemen yeterli.",
+    phName: "Adınız ve soyadınız",
+    phEmail: "you@company.com",
+    orgLabel: "Kurum / Fon / Şirket",
+    orgDomain: "Kurum domaini",
+    forLogo: "Logo için",
+    required: "Zorunlu",
+    optional: "Opsiyonel",
+    logoFound: "Logo bulundu",
+    logoAuto: "Logo otomatik çekilir",
+    logoHint: "Domain girildiğinde sistem kurum logosunu getirir ve kaydeder.",
+    storyLabel: "Hikâyen",
+    introLabel: "Kısa tanıtım",
+    phStory: "Ne kuruyorsun, neden şimdi?",
+    phIntro: "Bir isim, bir bağ… veya kendi buldum",
+    phOrg: "Sequoia, a16z, Acme AI…",
+    phDomain: "sequoiacap.com"
+  },
+  homeWhatsNext: {
+    eyebrow: "07 · Sırada ne var · Zamanla",
+    titleBefore: "Sıradaki zaten",
+    titleEm: "oluşuyor.",
+    body: "Gerçek olduğunda duyururuz.\nÇember genişler: buluşmalar, sermaye ve araçlar. Bilinçli bir adım bir adım.",
+    access: "Erişim davetiye ile. Her zaman.",
+    accessShort: "Yalnızca davetiye.",
+    cta: "Davetiye talep et"
+  },
+  onboarding: {
+    welcomeEyebrow: "01 · Hoş geldin",
+    welcomeTitle: "Circle’a girdin.",
+    welcomeBody: "inner·hub paneli; sinyal, eşleşme, sermaye ve topluluk · hepsi tek yerde. Kısa bir tur seni hızlandırır.",
+    dashEyebrow: "02 · Dashboard",
+    dashTitle: "Üssün burası.",
+    dashBody: "Özet kartlar, yaklaşan etkinlikler ve hızlı geçişler. Her şeyin nabzını buradan tutarsın.",
+    signalEyebrow: "03 · Signal & Match",
+    signalTitle: "Doğru insan, doğru fırsat.",
+    signalBody: "inner·signal fırsatları öne çıkarır; inner·match güven temelli bağlantılar kurmana yardım eder.",
+    communityEyebrow: "04 · Topluluk",
+    communityTitle: "Chat, üyeler, etkinlikler.",
+    communityBody: "Soldaki menüden Topluluk Chat, Katılımcılar ve Etkinlikler’e geç. Circle burada canlı kalır.",
+    profileEyebrow: "05 · Profil",
+    profileTitle: "Kendini görünür kıl.",
+    profileBody: "Profilini tamamladıkça eşleşme ve güven artar. Sol alttaki tamamlanma çubuğu seni hatırlatır.",
+    coachNavTitle: "Ana menü",
+    coachNavBody: "Tüm modüller burada. Dar ekranda hamburger ile açılır.",
+    coachNotifTitle: "Bildirimler",
+    coachNotifBody: "Match, etkinlik ve sermaye sinyalleri buraya düşer.",
+    coachMainTitle: "İçerik alanı",
+    coachMainBody: "Seçtiğin sayfa burada açılır. Dashboard ile başla · gerisi menüde.",
+    skip: "Atla",
+    next: "Devam",
+    done: "Bitir",
+    start: "Tura başla"
+  },
+  login: {
+    continueInside: "Çemberin içine devam et.",
+    accessByInvite: "Erişim davetiye ile. Her zaman.",
+    membersOnly: "Panel · Members only",
+    googleContinue: "Google ile devam et",
+    googleRegister: "Google ile kayıt ol",
+    or: "veya",
+    inviteCode: "Davet kodu",
+    invitePlaceholder: "Davet kodunuz",
+    fullName: "Ad Soyad",
+    email: "E-posta",
+    password: "Şifre",
+    signIn: "Enter",
+    createAccount: "Hesap oluştur",
+    register: "Kayıt ol",
+    haveAccount: "Zaten üye misin?",
+    noAccount: "Hesabın yok mu?",
+    support: "Bize ulaş",
+    typewriter: "Girişimciler, yatırımcılar ve kuranlar için kapalı bir daire. Şimdi, sırada ne var?",
+    ambientWelcome: "Sana özel bir davet,\ninner·hub'ın dairesine hoş geldin.",
+    mouseHint: "Fareyi hareket ettir · bakış seni takip eder",
+    googleFailed: "Google ile giriş başarısız."
+  },
+  id: {
+    eyebrow: "Taşınabilir kimlik",
+    subtitle: "Doğrulanmış kimliğin. Profilini paylaş, platform bağlarını buradan yönet.",
+    editProfile: "Profili düzenle",
+    publicProfile: "Herkese açık profil",
+    completion: "Tamamlanma",
+    connections: "Bağlantı",
+    skills: "Uzmanlıklar",
+    platformLinks: "Platform bağlantıları",
+    platformLinksHint: "LinkedIn, GitHub ve site hesabını inner·id’ye bağla",
+    badgeEmbed: "Rozet & embed",
+    badgeEmbedHint: "Platformuna göre snippet'i seç ve kopyala",
+    verified: "Kimlik doğrulandı",
+    verifiedBody: "inner·id, davetli üyelik oturumuna bağlıdır. Platform bağlantıları profil kaydında saklanır; rozet snippet’leri handle’ına göre üretilir.",
+    footer: "taşınabilir kimlik · davet bazlı · inner·hub ekosistemi",
+    profileCompletion: "Profil tamamlanma",
+    memberSince: "Üye · {date}",
+    scanVerify: "Tara · doğrula",
+    connected: "Bağlı",
+    empty: "Boş",
+    connect: "Bağla",
+    unlink: "Bağlantıyı kaldır",
+    noSkills: "Henüz uzmanlık yok.",
+    addInProfile: "Profilde ekle",
+    setHandle: "Kalıcı handle için Profil sayfasından kullanıcı adı belirle.",
+    loading: "inner·id yükleniyor",
+    loadError: "Kimlik yüklenemedi",
+    tierMember: "Üye",
+    tierFounder: "Kurucu Üye",
+    badgeMember: "Üye",
+    badgeFounder: "Kurucu",
+    personalSite: "Kişisel site",
+    linkedinDesc: "Profilinde inner·hub üyeliğini doğrulat",
+    githubDesc: "README'ne rozet ekle, profili verify et",
+    websiteDesc: "HTML embed kodu ile siteye entegre et",
+    none: "Yok",
+    removeFailed: "Kaldırılamadı",
+    saveFailed: "Kaydedilemedi"
+  },
+  dashboard: {
+    title: "Dashboard",
+    greetingMorning: "Günaydın",
+    greetingAfternoon: "İyi günler",
+    greetingEvening: "İyi akşamlar",
+    greetingFallback: "Merhaba",
+    greetingLine: "Selam, {name}. Daire hareketli. Peki bugün ne inşa ediyoruz?",
+    ambientLine: "İyi seçilenler burada buluşur,\n{name}, bugün de aralarındasın.",
+    subtitle: "Çemberdeki günün özeti.",
+    quickActions: "Hızlı aksiyonlar",
+    openMatch: "inner·match",
+    goToSignal: "'i gör",
+    goToMatch: "'e git",
+    goToCapital: "'i incele",
+    openEvents: "Etkinlikleri gör",
+    openChat: "Chat",
+    openSignal: "inner·signal",
+    emptyFeed: "Henüz bir aktivite yok.",
+    emptyFeedHint: "Etkinliklere katıl veya profilini tamamla.",
+    completeProfile: "Profilini tamamla",
+    viewAll: "Tümü",
+    featured: "Öne çıkan",
+    signalEyebrow: "Bu hafta",
+    signalDesc: "Topluluk hafızasından çıkan sinyaller ve bağlantı önerileri.",
+    vaultEyebrow: "Bilgi tabanı",
+    vaultDesc: "Pitch deck’ler, araştırmalar ve notlar · yalnızca daire içinde.",
+    newTerm: "Yeni Dönem",
+    enrollCourse2: "2. Kursa Kayıt Ol",
+    termApplicationsOpen: "2. dönem başvuruları açık",
+    apply: "Başvur",
+    myCourses: "Kurslarım",
+    enrolled: "kayıtlı",
+    upcoming: "yaklaşan",
+    activePerks: "aktif fırsat",
+    continueFrom: "Kaldığın yerden devam et",
+    notStarted: "Henüz başlanmadı",
+    inProgress: "Devam ediyor",
+    completed: "Tamamlandı",
+    continue: "Devam et",
+    details: "Detay",
+    perksSubtitle: "Program katılımcılarına özel fırsatlar",
+    gatheringEyebrow: "Sep 2026 · İstanbul",
+    gatheringDesc: "Otuz dört kişi. İki gün. Bir daire. İlk buluşma."
+  },
+  events: {
+    title: "Etkinlikler",
+    subtitle: "Topluluk buluşmaları, workshoplar ve networking etkinlikleri.",
+    heroTitle: "Where the circle\ngathers in person.",
+    heroBody: "Topluluk buluşmaları, workshoplar ve networking. Dairenin içinde, güvenle kurulan bağlar.",
+    seeUpcoming: "Yaklaşanları Gör",
+    openCalendar: "Takvimi Aç",
+    upcomingStat: "Yaklaşan etkinlik",
+    heroTagline: "Buluşmalar. Workshoplar. Networking.",
+    rsvp: "Katılacağım",
+    rsvpCancel: "Kaydı İptal Et",
+    full: "Kontenjan dolu",
+    join: "Kayıt Ol",
+    joined: "Kayıtlı",
+    empty: "Yaklaşan etkinlik yok.",
+    emptyPublished: "Henüz yayınlanmış etkinlik yok.",
+    emptyHint: "Yeni bir buluşma duyurulduğunda burada görünür.",
+    filterAll: "Tümü",
+    filterUpcoming: "Yaklaşan",
+    filterPast: "Geçmiş",
+    filterJoined: "Katıldıklarım",
+    seatsLeft: "{n} yer kaldı",
+    list: "Liste",
+    calendar: "Takvim",
+    loading: "Etkinlikler yükleniyor",
+    loadError: "Etkinlikler yüklenemedi",
+    upcomingSection: "Yaklaşan Etkinlikler",
+    pastSection: "Geçmiş Etkinlikler",
+    typeGathering: "Buluşma",
+    typeWorkshop: "Workshop",
+    typeOnline: "Online",
+    locationSoon: "Konum yakında",
+    peopleCount: "{registered}/{capacity} kişi",
+    thisMonth: "Bu Ay",
+    onCalendar: "takvimde",
+    youreRegistered: "Kayıtlısın",
+    atEvent: "etkinlikte",
+    past: "Geçmiş",
+    completed: "tamamlandı",
+    planned: "planlanan etkinlik",
+    registerFailed: "Kayıt başarısız",
+    cancelFailed: "İptal başarısız",
+    dayMon: "Pzt",
+    dayTue: "Sal",
+    dayWed: "Çar",
+    dayThu: "Per",
+    dayFri: "Cum",
+    daySat: "Cmt",
+    daySun: "Paz"
+  },
+  match: {
+    title: "inner·match",
+    subtitle: "Tercihlerine göre uyumlu üyeler.",
+    prefsTitle: "Tercihler",
+    prefsLookingFor: "Ne arıyorsun",
+    prefsIndustry: "Sektör",
+    prefsStage: "Aşama",
+    prefsLocation: "Konum",
+    prefsSave: "Tercihleri kaydet",
+    compatibility: "Uyumluluk",
+    compatibilityScore: "%{n} uyum",
+    introduce: "Tanıştır",
+    introduceSent: "Tanışma talebi gönderildi",
+    empty: "Henüz eşleşme yok.",
+    emptyHint: "Tercihlerini güncelle; yeni öneriler gelecek.",
+    refresh: "Yenile",
+    heroTitle: "Where trust\nfinds its people.",
+    heroBody: "Co-founder, mentor ve yatırımcı eşleşmesi · dairenin içinde, güvenle seçilmiş.",
+    viewMatches: "Eşleşmeleri Gör",
+    setPreferences: "Tercihleri Ayarla",
+    foundStat: "Eşleşme bulundu",
+    heroTagline: "Co-founders. Mentors. Investors.",
+    pageSubtitle: "Topluluktaki en uyumlu bağlantıların AI ile seçilmiş listesi.",
+    lookingFor: "Arıyor olduğun",
+    filter: "Filtrele →",
+    loading: "AI eşleşmeleri hesaplanıyor",
+    loadError: "Eşleşmeler alınamadı",
+    countLabel: "{n} eşleşme",
+    sortedBy: "AI güven skoru ile sıralandı",
+    howItWorks: "Nasıl çalışır?",
+    step1Title: "01 · Profil analizi",
+    step1Body: "Üye sektörü, deneyimi ve topluluk etkileşimleri analiz edilir.",
+    step2Title: "02 · Vektör eşleşme",
+    step2Body: "Claude Haiku benzerlik skoru hesaplar, ortak zemin bulur.",
+    step3Title: "03 · İnsan onayı",
+    step3Body: "“Tanıştır” butonuna basarsan inner ekibi devreye girer.",
+    whyCompatible: "Neden uyumlu?",
+    commonGround: "Ortak zemin",
+    introducing: "Gönderiliyor…",
+    introduceFailed: "Talep gönderilemedi",
+    typeCofounder: "Co-founder",
+    typeMentor: "Mentor",
+    typeInvestor: "Yatırımcı",
+    typeCollab: "İş birliği",
+    footer: "claude-haiku-4-5-20251001 · haftalık güncellenir"
+  },
+  capital: {
+    title: "inner·capital",
+    subtitle: "Deal flow ve kurucu tanıştırmaları.",
+    heroHeadline: "Where conviction\nmeets capital.",
+    heroBody: "Private deal flow, SPVs, and co-investment. Curated inside the circle, invited by trust.",
+    viewPipeline: "View Pipeline",
+    viewSpvs: "View SPVs",
+    activeDeals: "Aktif Deal",
+    heroTagline: "Deal Flow. SPVs. Co-Investment.",
+    loading: "Deal flow yükleniyor",
+    loadError: "Capital yüklenemedi",
+    addDeal: "Deal Ekle",
+    membersOnly: "Kapalı deal flow · yalnızca daire üyeleri",
+    viewPipelineTab: "Pipeline",
+    viewListTab: "Liste",
+    statActive: "Aktif Deal",
+    statActiveSub: "pipeline'da",
+    statRaise: "Toplam Hedef",
+    statRaiseSub: "aktif turlar",
+    statClosed: "Kapanan",
+    statClosedSub: "inner portföyü",
+    statSpv: "SPV",
+    statSpvSub: "açık yatırım aracı",
+    stageClosed: "Kapandı",
+    today: "bugün",
+    daysAgoShort: "{n}g",
+    target: "Hedef",
+    valuation: "Değerleme",
+    score: "Skor",
+    detail: "Detay",
+    close: "← Kapat",
+    round: "Tur",
+    internalScore: "İç Değerlendirme Skoru",
+    founders: "Kurucular",
+    leadInvestor: "Lead Yatırımcı",
+    sector: "Sektör",
+    tags: "Etiketler",
+    spvOpen: "SPV açık",
+    interested: "İlgileniyorum",
+    introduceFounder: "Kurucuyu Tanıştır",
+    admin: "Admin",
+    deleteDeal: "Deal'i sil",
+    confirmDelete: "{company} deal'ini silmek istiyor musun?",
+    updateFailed: "Güncellenemedi",
+    deleteFailed: "Silinemedi",
+    participants: "{n} katılımcı",
+    closing: "Kapanış {date}",
+    joinSpv: "SPV'ye Katıl",
+    emptyColumn: "Boş",
+    colCompany: "Şirket",
+    colSector: "Sektör",
+    colTarget: "Hedef",
+    colValuation: "Değerleme",
+    colStage: "Aşama",
+    openSpvs: "Açık SPV'ler",
+    openSpvsSub: "Özel amaçlı araçlarla toplu yatırım katılımı",
+    disclaimer: "yalnızca inner·hub üyeleri için · bilgi amaçlıdır, yatırım tavsiyesi değildir",
+    empty: "Açık fırsat yok.",
+    viewDeal: "Detayı gör",
+    composeTitle: "Deal Ekle",
+    composeSub: "Pipeline'a yeni deal ekle (yalnızca admin).",
+    phCompany: "Şirket",
+    phTagline: "Kısa tagline",
+    phRaise: "Hedef ($500K)",
+    phValuation: "Değerleme",
+    phRound: "Tur (Pre-seed / Seed)",
+    phFounders: "Kurucular (virgülle)",
+    phScore: "Skor 0–100",
+    saveFailed: "Deal kaydedilemedi"
+  },
+  vault: {
+    title: "inner·vault",
+    eyebrow: "Knowledge base",
+    subtitle: "Topluluğun özel bilgi tabanı. Paylaş, öğren, referans al.",
+    share: "Paylaş",
+    loading: "Vault yükleniyor",
+    loadError: "Vault yüklenemedi",
+    heroLabel: "D60 · arşivin haritası",
+    heroQuote: "Her belge, dairenin bir katmanı.",
+    statTotal: "Toplam Belge",
+    statMine: "Paylaşımlarım",
+    statViews: "Görüntülenme",
+    featured: "Öne çıkan",
+    searchPlaceholder: "Belge, etiket veya yazar ara…",
+    empty: "Belge bulunamadı.",
+    emptyHint: "Yüklenen kaynaklar burada listelenir.",
+    private: "Özel",
+    community: "Topluluk",
+    inviteOnly: "Davetli",
+    mine: "benim",
+    file: "dosya",
+    pages: "{n} sayfa",
+    views: "{n} görüntülenme",
+    today: "bugün",
+    daysAgo: "{n}g önce",
+    download: "İndir",
+    downloadFailed: "İndirme başarısız",
+    uploadTitle: "Belge Paylaş",
+    uploadSub: "Metadata + isteğe bağlı dosya (PDF, Office, görsel · en fazla 12 MB)",
+    phTitle: "Başlık",
+    phExcerpt: "Kısa özet",
+    fileOptional: "Dosya (opsiyonel)",
+    filePick: "PDF, DOCX, PPTX, PNG… seç",
+    accessLevel: "Erişim Seviyesi",
+    fileTooLarge: "Dosya en fazla 12 MB olabilir",
+    saveFailed: "Kaydedilemedi",
+    uploadFailed: "Dosya yüklenemedi",
+    save: "Kaydet",
+    saved: "Kaydedildi",
+    footer: "yalnızca üyeler",
+    typePitch: "Pitch Deck",
+    typeResearch: "Araştırma",
+    typeNote: "Not",
+    typeTemplate: "Şablon",
+    typeCode: "Kod",
+    typeReport: "Rapor"
+  },
+  signal: {
+    title: "inner·signal",
+    eyebrow: "AI layer",
+    subtitle: "Topluluk hafızasından senin için çıkarılan sinyaller. Oku, kaydet, harekete geç.",
+    insight: "İçgörü",
+    themes: "Temalar",
+    people: "Bağlantılar",
+    activity: "Aktivite",
+    refresh: "Güncelle",
+    analyzing: "Analiz…",
+    loading: "Sinyaller analiz ediliyor",
+    lastUpdated: "Son güncelleme · {date}",
+    empty: "Henüz sinyal yok.",
+    emptyHint: "Yeni içgörüler oluştukça burada görünür.",
+    emptyConnections: "Bu hafta bağlantı önerisi yok.",
+    activeSignal: "Aktif Sinyal",
+    weeklyTheme: "haftalık tema",
+    rising: "Yükselen",
+    momentumHigh: "momentum yüksek",
+    connection: "Bağlantı",
+    suggestedThisWeek: "bu hafta önerilen",
+    avgMatch: "Ort. Uyum",
+    matchScoreLabel: "eşleşme skoru",
+    weekInsight: "Bu haftanın içgörüsü",
+    copyInsight: "İçgörüyü kopyala",
+    openInChat: "Chat’te aç",
+    followInChat: "Chat'te takip et",
+    generateVisual: "Görsel üret · 720p",
+    generating: "Üretiliyor · {status}",
+    queued: "kuyruk",
+    regenerate: "Yeniden üret",
+    fromCache: "Görsel önbellekten · ekstra kredi yok",
+    visualReady: "Görsel hazır. Yeniden üretmek kredi harcar.",
+    confirmGenerate: "Tek görsel üretilir (720p, kredi-tasarruflu). Devam?",
+    confirmRegenerate: "Yeniden üretim ~0.25–1 kredi harcar. Devam?",
+    expandEditorial: "Büyüt · editorial",
+    visualAlt: "Haftalık sinyal görseli",
+    weeklyThemes: "Haftalık temalar",
+    weeklyThemesSub: "Topluluktan çıkan bu haftanın sinyalleri",
+    meetThisWeek: "Bu hafta tanış",
+    meetThisWeekSub: "Uyum skoruna göre önerilen bağlantılar",
+    compatibilityPct: "Uyum %{n}",
+    requestIntro: "Tanışma talebi",
+    momentumRising: "Yükselen",
+    momentumStable: "Stabil",
+    momentumFalling: "Düşen",
+    activityMap: "Aktivite haritası",
+    activityMapSub: "Son 5 haftalık topluluk yoğunluğu · gösterge amaçlı",
+    low: "Az",
+    high: "Çok",
+    interactions: "{n} etkileşim",
+    week4: "4h",
+    week3: "3h",
+    week2: "2h",
+    week1: "1h",
+    weekThis: "Bu",
+    dayMon: "Pzt",
+    dayTue: "Sal",
+    dayWed: "Çar",
+    dayThu: "Per",
+    dayFri: "Cum",
+    daySat: "Cmt",
+    daySun: "Paz",
+    fetchError: "Sinyal alınamadı",
+    footer: "Claude + Higgsfield · haftalık güncellenir · görsel üretimi kredi kullanır"
+  },
+  profile: {
+    title: "profil",
+    subtitle: "inner·hub'daki kimliğini yönet.",
+    save: "Kaydet",
+    saving: "Kaydediliyor…",
+    saved: "Kaydedildi",
+    visibility: "Profil görünürlüğü",
+    visibilityPublic: "Herkese açık",
+    visibilityMembers: "Yalnızca üyeler",
+    visibilityPrivate: "Gizli",
+    visibilityHint: "Profilinin kim tarafından görüleceğini belirle.",
+    visibilityPublicDesc: "Herkes profilini görebilir",
+    visibilityMembersDesc: "inner·hub üyeleri görebilir",
+    visibilityPrivateDesc: "Yalnızca sen görürsün",
+    loading: "Profil yükleniyor",
+    loadError: "Profil yüklenemedi",
+    completionPct: "%{n} tamamlandı",
+    photo: "Profil fotoğrafı",
+    photoSoon: "Yakında · avatar URL ile",
+    sectionBasics: "Temel bilgiler",
+    sectionSkills: "Uzmanlıklar",
+    sectionSkillsSub: "inner·id kartında ve eşleşmelerde görünür",
+    sectionSocial: "Sosyal linkler",
+    sectionSocialSub: "inner·id rozetine bağlanır",
+    firstName: "Ad",
+    lastName: "Soyad",
+    handle: "Kullanıcı adı",
+    role: "Rol / ünvan",
+    company: "Şirket",
+    bio: "Biyografi",
+    placeholderFirstName: "Adın",
+    placeholderLastName: "Soyadın",
+    placeholderHandle: "handle",
+    placeholderRole: "Kurucu, CPO…",
+    placeholderCompany: "Şirket adı",
+    placeholderBio: "Kısa bir tanıtım yaz…",
+    placeholderLinkedin: "profiladın",
+    placeholderGithub: "kullanıcıadı",
+    placeholderWebsite: "siteadresin.com",
+    placeholderTwitter: "kullanıcıadı",
+    personalSite: "Kişisel site",
+    twitter: "X / Twitter",
+    skills: "Uzmanlıklar",
+    skillAdd: "Ekle…",
+    skillsHint: "Maks. 10 etiket · Enter ile ekle",
+    handleError: "Yalnızca küçük harf, rakam ve alt çizgi",
+    changesSaved: "Değişiklikler kaydedildi",
+    saveError: "Kaydedilemedi",
+    footer: "profil · davet bazlı"
+  },
+  faq: {
+    title: "sss",
+    subtitle: "Sıkça sorulan sorular.",
+    loading: "SSS yükleniyor",
+    loadError: "SSS yüklenemedi",
+    empty: "Henüz SSS yok.",
+    noAnswer: "Cevap bulamadın mı?",
+    contactHint: "Topluluk Chat'ten bize ulaş veya e-posta gönder.",
+    footer: "sık sorulan sorular"
+  },
+  membership: {
+    title: "Üyelik",
+    subtitle: "inner·hub'a katıl. Yıllık planını seç, toplulukla büyü.",
+    popular: "En Popüler",
+    buy: "Satın Al",
+    redirecting: "Yönlendiriliyor…",
+    current: "Mevcut plan",
+    perMonth: "/ ay",
+    perYear: "/ yıl",
+    oneTime: "Tek Seferlik",
+    eventTicket: "Etkinlik Bileti",
+    eventTicketDesc: "Tek seferlik etkinlik erişimi. Üye olmadan da katılabilirsin.",
+    buyTicket: "Bilet Al",
+    checkoutFailed: "Ödeme başlatılamadı",
+    trust: "Ödemeler Stripe ile güvenli şekilde işlenir · SSL şifreli · İstediğinde iptal et",
+    planAnnual: "Yıllık Üyelik",
+    planAnnualDesc: "inner·hub'a tam erişim. Etkinlikler, kurslar, ayrıcalıklar ve topluluk.",
+    planFounder: "Kurucu Üyelik",
+    planFounderDesc: "inner·hub'un ilk katmanı. Kurucu topluluğa özel ekstra avantajlar.",
+    feat1: "Tüm etkinliklere öncelikli kayıt",
+    feat2: "Tüm kurs içeriklerine erişim",
+    feat3: "Ayrıcalıklar kataloğu",
+    feat4: "Topluluk chat kanalları",
+    feat5: "Katılımcı dizini",
+    feat6: "Talent Board ilanları",
+    feat7: "Aylık networking kahvaltısı",
+    featF1: "Yıllık üyeliğin tüm özellikleri",
+    featF2: "Kurucu rozeti ve profil etiketi",
+    featF3: "inner·capital deal flow erişimi",
+    featF4: "Özel kurucu dinner davetleri",
+    featF5: "inner·studio öncelikli danışmanlık",
+    featF6: "Demo Day'e sunum hakkı",
+    featF7: "Co-founder matching önceliği",
+    paymentSuccessTitle: "Ödeme alındı",
+    paymentSuccessEvent: "Etkinlik kaydın onaylandı.",
+    paymentSuccessMembership: "{plan} aktif.",
+    paymentSuccessEmail: " Onay {email} adresine gönderildi.",
+    paymentVerifyFailed: "Ödeme doğrulanamadı",
+    backToMembership: "← Üyelik sayfasına dön",
+    backToPanel: "Panele dön",
+    planFallback: "Üyelik"
+  },
+  chat: {
+    title: "Chat",
+    subtitle: "Kanallar ve doğrudan mesajlar.",
+    channels: "Kanallar",
+    empty: "Henüz mesaj yok.",
+    emptyHint: "İlk mesajı sen gönder.",
+    emptyChannels: "Henüz kanal yok.",
+    emptyChannel: "#{name} henüz boş",
+    placeholder: "#{name} kanalına mesaj gönder…",
+    send: "Gönder",
+    sendHint: "Enter ile gönder · Shift+Enter yeni satır",
+    loadingChannels: "Kanallar yükleniyor",
+    loadChannelsError: "Kanallar yüklenemedi",
+    loadingMessages: "Mesajlar yükleniyor",
+    loadMessagesError: "Mesajlar yüklenemedi",
+    sendError: "Mesaj gönderilemedi",
+    aiDigest: "AI Özet · #{name}",
+    aiDigestHint: "Yeterli mesaj birikince kanal özeti burada görünecek."
+  },
+  courses: {
+    title: "Kurslar",
+    subtitle: "Öğrenme yolları ve oturumlar.",
+    heroEyebrow: "Kurslarım",
+    heroHeadline: "Where knowledge\nmeets momentum.",
+    heroBody: "inner·hub eğitim içerikleri · kendi hızında, kendi zamanında, dairenin bilgisiyle.",
+    heroStat: "Kayıtlı kurs",
+    heroTagline: "Kendi hızında, kendi zamanında.",
+    continueCta: "Devam Et",
+    exploreCta: "Kursları Keşfet",
+    enroll: "Kayıt Ol",
+    continue: "Devam Et",
+    start: "Başla",
+    completed: "tamamlandı",
+    inProgress: "Devam ediyor",
+    empty: "Henüz yayınlanmış kurs yok.",
+    loading: "Kurslar yükleniyor",
+    loadError: "Kurslar yüklenemedi",
+    enrollFailed: "Kayıt başarısız",
+    enrollRequired: "Kayıt gerekli",
+    hide: "Gizle",
+    viewCurriculum: "Müfredatı Gör",
+    curriculumSoon: "Müfredat yakında yayınlanacak.",
+    lessons: "{done}/{total} ders",
+    tag: "Kurs",
+    education: "Eğitim",
+    term: "Dönem {n}",
+    myEnrolled: "Kayıtlı Kurslarım",
+    otherCourses: "Diğer Kurslar",
+    statEnrolled: "Kayıtlı Kurs",
+    statEnrolledSub: "devam ediyor",
+    statProgress: "Ort. İlerleme",
+    statProgressSub: "kayıtlı kurslarda",
+    statOther: "Diğer Kurslar",
+    statOtherSub: "keşfedilmeyi bekliyor",
+    statTotal: "Toplam",
+    statTotalSub: "inner·hub kataloğu"
+  },
+  members: {
+    title: "Katılımcılar",
+    subtitle: "Topluluk üyeleri ve iş birliği fırsatları.",
+    heroBody: "Kurucular, mühendisler, yatırımcılar · daire içinde birbirini bulur ve büyür.",
+    heroHeadline: "Where builders\nfind each other.",
+    viewMembers: "Üyeleri Gör",
+    talentBoard: "Talent Board",
+    heroStat: "Dairenin içinde",
+    heroTagline: "Kurucular. Mühendisler. Yatırımcılar.",
+    about: "Hakkında",
+    skills: "Uzmanlık",
+    noBio: "Bio henüz eklenmedi.",
+    message: "Mesaj",
+    connect: "Bağlan",
+    publish: "Yayınla",
+    published: "Yayınlandı",
+    empty: "Üye bulunamadı.",
+    searchPlaceholder: "İsim, şirket veya uzmanlık…",
+    searchTalent: "Rol veya beceri ara…",
+    loading: "Üyeler yükleniyor",
+    loadError: "Üyeler alınamadı",
+    tabMembers: "Üyeler",
+    memberCount: "{n} üye",
+    liveSoon: "canlı durum yakında",
+    talentLoading: "Talent board yükleniyor",
+    talentError: "Talent board alınamadı",
+    postCount: "{n} ilan",
+    postCta: "İlan Ver",
+    talentEmpty: "Henüz ilan yok · ilk ilanı sen ver.",
+    talentFooter: "Başarılı eşleşmelerde platform %10 komisyon alır · inner·hub Talent Board",
+    connectViaPanel: "Panel üzerinden bağlan",
+    profile: "Profil",
+    deletePost: "İlanı sil",
+    typeSeeking: "arıyor",
+    typeOffering: "sunuyor",
+    composeTitle: "İlan Ver",
+    composeSub: "Arıyorsan veya sunuyorsan daireye duyur.",
+    phRole: "Rol / başlık",
+    phDesc: "Kısa açıklama",
+    phTags: "Etiketler (virgülle)",
+    createFailed: "İlan oluşturulamadı",
+    statTotal: "Toplam Üye",
+    statTotalSub: "dairenin içinde",
+    statProfile: "Profil",
+    statProfileSub: "bio dolu",
+    statTalent: "Talent İlanı",
+    statTalentSub: "canlı",
+    statAdmin: "Admin",
+    statAdminSub: "yönetim"
+  },
+  perks: {
+    title: "Ayrıcalıklar",
+    subtitle: "Üyelere özel fırsatlar.",
+    heroHeadline: "Perks worth\nbeing inside for.",
+    heroBody: "Program katılımcılarına özel yazılım, finans ve yaşam fırsatları. Kodu al, partnerde kullan.",
+    featuredCta: "Öne Çıkanlar",
+    allCta: "Tüm Fırsatlar",
+    heroStat: "Aktif ayrıcalık",
+    heroTagline: "Yazılım. Finans. Yaşam.",
+    saved: "Kaydedilenler",
+    howTo: "Nasıl kullanılır",
+    empty: "Sonuç yok",
+    emptyHint: "Filtreyi veya aramayı temizleyip tekrar deneyin.",
+    showAll: "Tümünü göster",
+    claim: "Talep et",
+    loading: "Ayrıcalıklar yükleniyor",
+    loadError: "Ayrıcalıklar alınamadı",
+    review: "İncele",
+    hasCode: "Kod var",
+    perkLabel: "Ayrıcalık",
+    expires: "Son: {date}",
+    activationCode: "Aktivasyon kodu",
+    goPartner: "Partner sitesine git",
+    unsave: "Kaydedilenlerden çıkar",
+    saveForLater: "Daha sonra için kaydet",
+    featured: "Öne çıkan",
+    openDetail: "Detayı aç",
+    searchPlaceholder: "Marka, teklif veya kod ara…",
+    count: "{n} ayrıcalık",
+    footer: "Yeni ayrıcalıklar her ay ekleniyor · Öneri için Slack veya destek kanalını kullanın.",
+    catSoftware: "Yazılım",
+    catFinance: "Finans",
+    catLife: "Yaşam",
+    catEducation: "Eğitim",
+    statTotal: "Toplam Fırsat",
+    statTotalSub: "aktif ayrıcalık",
+    statFeatured: "Öne Çıkan",
+    statFeaturedSub: "bu dönem",
+    statCategory: "Kategori",
+    statCategorySub: "yazılım · finans · yaşam",
+    statSaved: "Kaydettiğin",
+    statSavedSub: "favorilerinde",
+    step1Title: "Seç",
+    step1Body: "Kategori veya aramayla fırsatı bulun.",
+    step2Title: "Kod al",
+    step2Body: "Detayda aktivasyon kodunu kopyalayın.",
+    step3Title: "Kullan",
+    step3Body: "Partner sitesinde kodu uygulayın."
+  },
+  pulse: {
+    title: "Pulse",
+    eyebrow: "Community pulse",
+    subtitle: "Topluluğun anonim nabzı. Bu hafta ne konuşuluyor?",
+    live: "Canlı",
+    loading: "Pulse yükleniyor",
+    loadError: "Pulse yüklenemedi",
+    heroLabel: "Phosphor · canlı sinyal",
+    heroQuote: "Daire her an nefes alıyor.",
+    empty: "Henüz nabız verisi yok",
+    emptyHint: "Bu hafta kanallarda henüz yeterli mesaj yok. Sohbet başladıkça trendler ve aktivite burada görünecek.",
+    emptyActivity: "Henüz aktivite yok",
+    statMessages: "Bu Hafta Mesaj",
+    statMessagesSub: "{n} kanalda",
+    statActive: "Aktif Üye",
+    statActiveSub: "toplulukta",
+    statTrends: "Trend Konu",
+    statTrendsSub: "takip ediliyor",
+    statScore: "Aktivite Skoru",
+    statScoreSub: "bu hafta",
+    trending: "Trending Konular",
+    noTrends: "Bu kategoride trend yok",
+    weeklyActivity: "Haftalık Aktivite",
+    topChannels: "En Aktif Kanallar",
+    noChannels: "Kanal verisi yok",
+    topContributors: "Bu Hafta Öne Çıkanlar",
+    noContributors: "Henüz katkı yok",
+    streakDays: "{n}g",
+    firstActivity: "Bu hafta ilk aktivite",
+    sameLevel: "Geçen haftayla aynı seviye",
+    weekUp: "Bu hafta %{n} artış",
+    weekDown: "Bu hafta %{n} azalış",
+    catTech: "teknoloji",
+    catBiz: "iş",
+    catInvest: "yatırım",
+    catCulture: "kültür",
+    footer: "veriler anonimleştirilmiş · gerçek zamanlı · yalnızca üyeler görür"
+  },
+  api: {
+    title: "inner·api",
+    eyebrow: "Platform API",
+    subtitle: "Topluluk altyapısına programatik erişim. Kendi ürününe entegre et.",
+    docs: "Dokümantasyon",
+    keys: "API Anahtarların",
+    keysHint: "Anahtarları güvende tut · kimseyle paylaşma",
+    loading: "Anahtarlar yükleniyor",
+    loadError: "Anahtarlar yüklenemedi",
+    empty: "Henüz bir API anahtarın yok.",
+    createKey: "Yeni Anahtar",
+    creating: "Oluşturuluyor…",
+    revokeKey: "İptal et",
+    copyKey: "Kopyala",
+    keyCreated: "Yeni anahtar oluşturuldu",
+    keyCreatedHint: "Bu anahtar bir daha gösterilmeyecek. Şimdi kopyala ve güvenli bir yere kaydet.",
+    deleteKey: "Anahtarı sil",
+    confirmDelete: "Emin misin?",
+    deleting: "Siliniyor…",
+    abort: "Vazgeç",
+    createdAt: "oluşturuldu {date}",
+    lastUsed: "son kullanım {date}",
+    deleteFailed: "Silinemedi",
+    createFailed: "Anahtar oluşturulamadı",
+    phKeyName: "Anahtar adı (ör. prod-server)",
+    endpoints: "Endpoint'ler",
+    plans: "API Planları",
+    recommended: "Önerilen",
+    requests: "{n} istek",
+    contactSupport: "Destekle İletişime Geç",
+    free: "Ücretsiz",
+    unlimited: "Sınırsız",
+    perMonth: "/ ay",
+    warning: "inner·api beta aşamasındadır. Anahtar oluşturma ve silme canlı çalışır; kullanım/rate-limit takibi ve faturalandırma henüz bağlanmadı. Plan yükseltmesi için destek ekibiyle iletişime geç.",
+    footer: "v1 · REST · JSON · Bearer Auth · inner·hub ekosistemi",
+    epMembers: "Topluluk üyelerini listele (anonim)",
+    epMember: "Üye profilini getir ve kimliği doğrula",
+    epMatch: "AI eşleştirme algoritmasını çağır",
+    epPulse: "Topluluk sinyal verilerini getir",
+    epVerify: "inner·id kimlik doğrulama",
+    epWebhook: "Topluluk event'lerine webhook al",
+    planStarterF1: "Temel üye sorgusu",
+    planStarterF2: "Kimlik doğrulama",
+    planStarterF3: "E-posta desteği",
+    planBuilderF1: "Tüm endpoint'ler",
+    planBuilderF2: "inner·match API",
+    planBuilderF3: "Webhook desteği",
+    planBuilderF4: "Öncelikli destek",
+    planScaleF1: "White-label",
+    planScaleF2: "Özel SLA",
+    planScaleF3: "Dedicated destek",
+    planScaleF4: "inner·pulse ham veri",
+    reqStarter: "1.000 / ay",
+    reqBuilder: "50.000 / ay"
+  },
+  applications: {
+    title: "başvurular",
+    subtitle: "Davet taleplerini incele; onay / red kalıcı kaydedilir.",
+    admin: "Admin",
+    pending: "Beklemede",
+    approve: "Onayla",
+    reject: "Reddet",
+    empty: "Henüz başvuru yok",
+    noResults: "Sonuç bulunamadı",
+    approved: "Onaylandı",
+    rejected: "Reddedildi",
+    loading: "Başvurular yükleniyor",
+    loadError: "Başvurular alınamadı",
+    detail: "Başvuru Detayı",
+    why: "Neden inner·hub?",
+    appliedAt: "Başvuru Tarihi",
+    referrer: "Referans",
+    none: "Yok",
+    searchPlaceholder: "Ad, e-posta, etiket…",
+    updateFailed: "Durum güncellenemedi",
+    footer: "başvurular · yalnızca admin"
+  },
+  analytics: {
+    title: "analitik",
+    subtitle: "Topluluk büyümesi ve katılım · canlı veritabanından, gerçek zamanlı.",
+    admin: "Admin",
+    totalMembers: "Toplam Üye",
+    activeMembers: "Aktif Üye",
+    newThisWeek: "Bu hafta yeni",
+    empty: "Henüz yeterli veri yok",
+    emptyHint: "Topluluk hareketlendikçe büyüme, katılım ve aktif üye grafikleri burada dolacak.",
+    loading: "Analitik yükleniyor",
+    loadError: "Analitik yüklenemedi",
+    membersInCircle: "dairenin içinde",
+    newThisMonth: "+{n} bu ay",
+    noNewThisMonth: "bu ay yeni yok",
+    messagesThisWeek: "Bu Hafta Mesaj",
+    vsLastWeek: "geçen haftaya göre",
+    eventRegs: "Etkinlik Kaydı",
+    total: "toplam",
+    thisWeekDelta: "+{n} bu hafta",
+    aiMatch: "AI Eşleşme",
+    thisMonthDelta: "+{n} bu ay",
+    memberGrowth: "Üye Büyümesi",
+    memberGrowthSub: "Kümülatif üye sayısı · aylık, gerçek kayıt tarihlerinden",
+    revenue: "Gelir",
+    revenueSub: "MRR takibi",
+    revenueSoon: "Gelir takibi yakında",
+    revenueHint: "Üyelik ödemeleri Stripe üzerinden işleniyor; panel içi gelir raporu henüz bağlanmadı.",
+    weeklyEngagement: "Haftalık Katılım",
+    weeklyEngagementSub: "Aktif üye · mesaj · etkinlik kaydı · son 4 hafta",
+    messages: "Mesaj",
+    registrations: "Kayıt",
+    topMembers: "En Aktif Üyeler",
+    topMembersSub: "Son 30 günde mesaj katkısına göre",
+    colMember: "Üye",
+    colContribution: "Katkı",
+    colEvent: "Etkinlik",
+    colJoined: "Katıldı",
+    channelActivity: "Kanal Aktivitesi",
+    channelActivitySub: "En aktif kanallar · toplam mesaj",
+    pendingApps: "Bekleyen Başvurular",
+    pendingAppsSub: "Admin görünümü",
+    awaitingReview: "değerlendirme bekliyor",
+    footer: "analitik · yalnızca admin"
+  },
+  publicProfile: {
+    title: "Profil",
+    enterPanel: "Panele gir",
+    loading: "Profil yükleniyor…",
+    notFound: "Profil bulunamadı",
+    membersOnly: "Üyelere özel",
+    membersOnlyBody: "@{handle} profili yalnızca inner·hub üyelerine açık. Görüntülemek için giriş yap.",
+    login: "Giriş yap",
+    loadError: "Yüklenemedi",
+    networkError: "Ağ hatası",
+    skills: "Uzmanlıklar",
+    links: "Bağlantılar",
+    memberSince: "Üye · {date}",
+    verifiedNote: "Bu kimlik inner·hub davetli üyeliğine bağlıdır. Rozet:"
+  },
+  notFound: {
+    title: "404 Sayfa bulunamadı",
+    body: "Aradığın sayfa taşınmış veya hiç var olmamış olabilir.",
+    backHome: "Ana sayfaya dön"
+  }
+};
+const en = {
+  common: {
+    save: "Save",
+    saving: "Saving…",
+    saved: "Saved",
+    cancel: "Cancel",
+    edit: "Edit",
+    delete: "Delete",
+    copy: "Copy",
+    copied: "Copied",
+    loading: "Loading…",
+    retry: "Retry",
+    back: "Back",
+    next: "Next",
+    close: "Close",
+    view: "View",
+    open: "Open",
+    search: "Search",
+    all: "All",
+    soon: "Soon",
+    member: "Member",
+    admin: "Admin",
+    logout: "Log out",
+    logoutLong: "Sign out",
+    online: "online",
+    errorGeneric: "Something went wrong",
+    comingSoon: "This page will be ready soon.",
+    home: "Home",
+    skipToContent: "Skip to content",
+    yes: "Yes",
+    no: "No",
+    searchPlaceholder: "Search…"
+  },
+  nav: {
+    sectionMain: "Main",
+    sectionPlatform: "Platform",
+    sectionAccount: "Account",
+    sectionAdmin: "Admin",
+    dashboard: "Dashboard",
+    community: "Community",
+    courses: "Courses",
+    events: "Events",
+    members: "Members",
+    perks: "Perks",
+    profile: "Profile",
+    membership: "Membership",
+    faq: "FAQ",
+    applications: "Applications",
+    analytics: "Analytics",
+    settings: "Settings"
+  },
+  shell: {
+    notifications: "Notifications",
+    markAllRead: "Mark all read",
+    noNotifications: "No notifications",
+    profileCompletion: "Profile completion",
+    openMenu: "Open menu",
+    closeMenu: "Close menu",
+    collapseSidebar: "Collapse sidebar",
+    expandSidebar: "Expand sidebar",
+    justNow: "just now",
+    minutesAgo: "{n}m ago",
+    hoursAgo: "{n}h ago",
+    daysAgo: "{n}d ago"
+  },
+  settings: {
+    title: "settings",
+    subtitle: "Manage account and platform preferences.",
+    loading: "Loading settings",
+    loadError: "Could not load settings",
+    saveError: "Could not save",
+    prefsUpdated: "Preferences updated",
+    sectionNotif: "Notifications",
+    sectionNotifSub: "Choose which events you want alerts for",
+    notifMatch: "inner·match suggestions",
+    notifMatchSub: "When a new match arrives",
+    notifEvents: "Event reminders",
+    notifEventsSub: "One day before events you joined",
+    notifMessages: "Chat messages",
+    notifMessagesSub: "@mentions and DMs",
+    notifCapital: "inner·capital updates",
+    notifCapitalSub: "SPV and deal-flow activity",
+    notifDigest: "Weekly digest",
+    notifDigestSub: "Week summary every Monday",
+    notifEmail: "Email notifications",
+    notifEmailSub: "Receive platform alerts by email",
+    sectionPrivacy: "Privacy",
+    sectionPrivacySub: "Control how you appear inside the platform",
+    showOnline: "Show online status",
+    showOnlineSub: "Other members see you as ONLINE",
+    allowMatch: "Include me in inner·match",
+    allowMatchSub: "Appear in the AI matching engine",
+    analyticsConsent: "Anonymous analytics",
+    analyticsConsentSub: "Anonymous usage data to improve the platform",
+    sectionAppearance: "Appearance",
+    sectionAppearanceSub: "Interface preferences",
+    theme: "Theme",
+    themeSub: "Light, dark, or system preference",
+    themeLight: "Light",
+    themeDark: "Dark",
+    themeSystem: "System",
+    compactMode: "Compact mode",
+    compactModeSub: "Denser content layout",
+    sectionLang: "Language",
+    sectionLangSub: "Platform interface language",
+    uiLang: "Interface language",
+    langTr: "Türkçe",
+    langEn: "English",
+    danger: "Danger zone",
+    suspend: "Suspend account",
+    suspendSub: "Temporarily pause your membership",
+    logoutSub: "Sign out on this device",
+    footer: "settings"
+  },
+  publicNav: {
+    idea: "Idea",
+    circle: "Circle",
+    platform: "Platform",
+    gathering: "Gathering",
+    next: "Next",
+    invitation: "Invitation",
+    requestInvitation: "Request an invitation",
+    primaryNav: "Primary",
+    openMenu: "Open menu",
+    closeMenu: "Close menu"
+  },
+  home: {
+    heroTag: "Istanbul → Global · Est. 2026",
+    heroBody: "A private circle of founders, builders, and investors. Bound not by place or status, but by hunger to meet early and build what comes next.",
+    requestInvitation: "Request an invitation",
+    ideaEyebrow: "01 · The idea",
+    ideaTitle: "A private circle.",
+    ideaBody: "inner·hub is an invite-only network. Founders, builders, and investors come here for early signal, deep connection, and building together.",
+    seatsEyebrow: "02 · Founding seats",
+    seatsTitle: "Who it's for.",
+    seatFounders: "Founders.",
+    seatFounders1: "Building startups in AI and beyond",
+    seatFounders2: "Shipping before the noise arrives",
+    seatFounders3: "Looking for co-builders, not crowds",
+    seatFounders4: "Chosen one by one. Never open apply",
+    seatBuilders: "Builders.",
+    seatBuilders1: "Engineers and researchers in serious AI",
+    seatBuilders2: "Depth over demos. Craft that compounds",
+    seatBuilders3: "Signal shared inside the circle first",
+    seatInvestors: "Investors.",
+    seatInvestors1: "Angels and venture operators",
+    seatInvestors2: "Early conviction, patient capital",
+    seatInvestors3: "Access shaped by trust, not tickets",
+    circleStartsHere: "Your circle starts here.",
+    learnMore: "Learn more",
+    seatsFooter: "These thirty-four are not just members. They are the founding members of inner.hub.",
+    whatThisIs: "What this is",
+    byInvitation: "By invitation",
+    theGathering: "The gathering",
+    whatsNext: "What's next",
+    people: "People",
+    days: "Days",
+    modules: "Modules",
+    footerTagline: "Invite-only. Early signal. Build together.",
+    footerNavigate: "Navigate",
+    footerConnect: "Connect",
+    footerRights: "© 2026 inner·hub",
+    langSwitch: "Language",
+    panel: "Panel"
+  },
+  invite: {
+    preparing: "Preparing invitation",
+    access: "inner · access",
+    homeLink: "Home",
+    requestTitle: "Request an invitation",
+    received: "Received",
+    successTitle: "If it fits, we will be in touch",
+    successBody: "We review every request carefully. No automated replies. Only a real answer when it matters.",
+    backHome: "Back to home",
+    howEnter: "How do you enter?",
+    roleFounder: "Founder",
+    roleFounderEn: "Founder",
+    roleFounderHint: "Building something. Early or scaling.",
+    roleInvestor: "Investor",
+    roleInvestorEn: "Investor",
+    roleInvestorHint: "Angel, fund, or operator allocating capital.",
+    roleBuilder: "Builder",
+    roleBuilderEn: "Builder",
+    roleBuilderHint: "Engineer, researcher, or operator. Building inside the stack.",
+    roleCompany: "Company",
+    roleCompanyEn: "Company",
+    roleCompanyHint: "Team looking to enter the circle together.",
+    fullName: "Full name",
+    email: "Email",
+    org: "Organization",
+    linkedin: "LinkedIn",
+    city: "City",
+    story: "Your story",
+    intro: "Short intro",
+    submit: "Submit",
+    submitting: "Submitting…",
+    continue: "Continue",
+    stepRole: "How do you enter?",
+    stepIdentity: "Who should we reach?",
+    stepOrg: "Which organization?",
+    stepStory: "What are you building?",
+    stepIntro: "How did you find us?",
+    copyRole: "Investor, founder, builder, or company. Each entry is a different door.",
+    copyIdentity: "Details so we can reach you directly. No spam — only a real reply.",
+    copyOrgInvestor: "Your fund or firm + domain. We'll fetch the logo automatically.",
+    copyOrgCompany: "Your company name and domain. The logo is saved to the system.",
+    copyOrgDefault: "Add your org if you have one. Domain pulls the logo automatically.",
+    copyStory: "Keep it short. Keep it clear. The circle will read this.",
+    copyIntro: "Most people arrive by invite. If you found us yourself, that's fine — just say so.",
+    phName: "Your full name",
+    phEmail: "you@company.com",
+    orgLabel: "Org / Fund / Company",
+    orgDomain: "Organization domain",
+    forLogo: "For logo",
+    required: "Required",
+    optional: "Optional",
+    logoFound: "Logo found",
+    logoAuto: "Logo fetched automatically",
+    logoHint: "When you enter a domain, we fetch and store the organization logo.",
+    storyLabel: "Your story",
+    introLabel: "Short intro",
+    phStory: "What are you building, and why now?",
+    phIntro: "A name, a link… or I found you myself",
+    phOrg: "Sequoia, a16z, Acme AI…",
+    phDomain: "sequoiacap.com"
+  },
+  homeWhatsNext: {
+    eyebrow: "07 · What's next · In time",
+    titleBefore: "What's next is already",
+    titleEm: "forming.",
+    body: "We announce things when they are real.\nThe circle expands: gatherings, capital, and tools. One deliberate step at a time.",
+    access: "Access is by invitation. Always.",
+    accessShort: "By invitation only.",
+    cta: "Request an invitation"
+  },
+  onboarding: {
+    welcomeEyebrow: "01 · Welcome",
+    welcomeTitle: "You're in the circle.",
+    welcomeBody: "The inner·hub panel: signal, match, capital, and community · all in one place. A short tour gets you moving.",
+    dashEyebrow: "02 · Dashboard",
+    dashTitle: "This is your base.",
+    dashBody: "Summary cards, upcoming events, and quick jumps. Keep the pulse from here.",
+    signalEyebrow: "03 · Signal & Match",
+    signalTitle: "Right people, right opportunities.",
+    signalBody: "inner·signal surfaces opportunities; inner·match helps you build trust-based connections.",
+    communityEyebrow: "04 · Community",
+    communityTitle: "Chat, members, events.",
+    communityBody: "From the left menu open Community Chat, Members, and Events. The circle stays alive here.",
+    profileEyebrow: "05 · Profile",
+    profileTitle: "Make yourself visible.",
+    profileBody: "As you complete your profile, matching and trust improve. The completion bar bottom-left reminds you.",
+    coachNavTitle: "Main menu",
+    coachNavBody: "All modules live here. On small screens, open via the hamburger.",
+    coachNotifTitle: "Notifications",
+    coachNotifBody: "Match, event, and capital signals land here.",
+    coachMainTitle: "Content area",
+    coachMainBody: "Your selected page opens here. Start with Dashboard · the rest is in the menu.",
+    skip: "Skip",
+    next: "Continue",
+    done: "Finish",
+    start: "Start tour"
+  },
+  login: {
+    continueInside: "Continue inside the circle.",
+    accessByInvite: "Access is by invitation. Always.",
+    membersOnly: "Panel · Members only",
+    googleContinue: "Continue with Google",
+    googleRegister: "Sign up with Google",
+    or: "or",
+    inviteCode: "Invite code",
+    invitePlaceholder: "Your invite code",
+    fullName: "Full name",
+    email: "Email",
+    password: "Password",
+    signIn: "Enter",
+    createAccount: "Create account",
+    register: "Register",
+    haveAccount: "Already a member?",
+    noAccount: "Don't have an account?",
+    support: "Contact us",
+    typewriter: "A closed circle for founders, investors, and builders. So — what's next?",
+    ambientWelcome: "A personal invitation,\nwelcome to the inner·hub circle.",
+    mouseHint: "Move your mouse · the gaze follows you",
+    googleFailed: "Google sign-in failed."
+  },
+  id: {
+    eyebrow: "Portable identity",
+    subtitle: "Your verified identity. Share your profile and manage platform links here.",
+    editProfile: "Edit profile",
+    publicProfile: "Public profile",
+    completion: "Completion",
+    connections: "Links",
+    skills: "Expertise",
+    platformLinks: "Platform connections",
+    platformLinksHint: "Connect LinkedIn, GitHub, and your site to inner·id",
+    badgeEmbed: "Badge & embed",
+    badgeEmbedHint: "Pick a snippet for your platform and copy it",
+    verified: "Identity verified",
+    verifiedBody: "inner·id is tied to your invite-based session. Platform links are stored on your profile; badge snippets are generated from your handle.",
+    footer: "portable identity · invite-based · inner·hub ecosystem",
+    profileCompletion: "Profile completion",
+    memberSince: "Member · {date}",
+    scanVerify: "Scan · verify",
+    connected: "Connected",
+    empty: "Empty",
+    connect: "Connect",
+    unlink: "Remove link",
+    noSkills: "No expertise yet.",
+    addInProfile: "Add in profile",
+    setHandle: "Set a username on Profile for a permanent handle.",
+    loading: "Loading inner·id",
+    loadError: "Could not load identity",
+    tierMember: "Member",
+    tierFounder: "Founding member",
+    badgeMember: "Member",
+    badgeFounder: "Founder",
+    personalSite: "Personal site",
+    linkedinDesc: "Verify your inner·hub membership on your profile",
+    githubDesc: "Add the badge to your README and verify the profile",
+    websiteDesc: "Integrate with the HTML embed snippet",
+    none: "None",
+    removeFailed: "Could not remove",
+    saveFailed: "Could not save"
+  },
+  dashboard: {
+    title: "Dashboard",
+    greetingMorning: "Good morning",
+    greetingAfternoon: "Good afternoon",
+    greetingEvening: "Good evening",
+    greetingFallback: "Hello",
+    greetingLine: "Hey, {name}. The circle is moving. What are we building today?",
+    ambientLine: "The well-chosen gather here,\n{name}, you're among them today.",
+    subtitle: "Your day inside the circle.",
+    quickActions: "Quick actions",
+    openMatch: "inner·match",
+    goToSignal: " — view",
+    goToMatch: " — go",
+    goToCapital: " — explore",
+    openEvents: "See events",
+    openChat: "Chat",
+    openSignal: "inner·signal",
+    emptyFeed: "No activity yet.",
+    emptyFeedHint: "Join events or complete your profile.",
+    completeProfile: "Complete your profile",
+    viewAll: "All",
+    featured: "Featured",
+    signalEyebrow: "This week",
+    signalDesc: "Signals and connection suggestions from community memory.",
+    vaultEyebrow: "Knowledge base",
+    vaultDesc: "Pitch decks, research, and notes · inside the circle only.",
+    newTerm: "New term",
+    enrollCourse2: "Enroll in Course 2",
+    termApplicationsOpen: "Term 2 applications are open",
+    apply: "Apply",
+    myCourses: "My courses",
+    enrolled: "enrolled",
+    upcoming: "upcoming",
+    activePerks: "active offers",
+    continueFrom: "Pick up where you left off",
+    notStarted: "Not started yet",
+    inProgress: "In progress",
+    completed: "Completed",
+    continue: "Continue",
+    details: "Details",
+    perksSubtitle: "Offers exclusive to program members",
+    gatheringEyebrow: "Sep 2026 · Istanbul",
+    gatheringDesc: "Thirty-four people. Two days. One circle. First gathering."
+  },
+  events: {
+    title: "Events",
+    subtitle: "Community gatherings, workshops, and networking events.",
+    heroTitle: "Where the circle\ngathers in person.",
+    heroBody: "Community gatherings, workshops, and networking. Bonds built with trust, inside the circle.",
+    seeUpcoming: "See upcoming",
+    openCalendar: "Open calendar",
+    upcomingStat: "Upcoming events",
+    heroTagline: "Gatherings. Workshops. Networking.",
+    rsvp: "RSVP",
+    rsvpCancel: "Cancel registration",
+    full: "Sold out",
+    join: "Register",
+    joined: "Registered",
+    empty: "No upcoming events.",
+    emptyPublished: "No published events yet.",
+    emptyHint: "New gatherings will show up here.",
+    filterAll: "All",
+    filterUpcoming: "Upcoming",
+    filterPast: "Past",
+    filterJoined: "Joined",
+    seatsLeft: "{n} seats left",
+    list: "List",
+    calendar: "Calendar",
+    loading: "Loading events",
+    loadError: "Could not load events",
+    upcomingSection: "Upcoming events",
+    pastSection: "Past events",
+    typeGathering: "Gathering",
+    typeWorkshop: "Workshop",
+    typeOnline: "Online",
+    locationSoon: "Location soon",
+    peopleCount: "{registered}/{capacity} people",
+    thisMonth: "This month",
+    onCalendar: "on the calendar",
+    youreRegistered: "You're in",
+    atEvent: "at events",
+    past: "Past",
+    completed: "completed",
+    planned: "planned events",
+    registerFailed: "Registration failed",
+    cancelFailed: "Cancellation failed",
+    dayMon: "Mon",
+    dayTue: "Tue",
+    dayWed: "Wed",
+    dayThu: "Thu",
+    dayFri: "Fri",
+    daySat: "Sat",
+    daySun: "Sun"
+  },
+  match: {
+    title: "inner·match",
+    subtitle: "Members matched to your preferences.",
+    prefsTitle: "Preferences",
+    prefsLookingFor: "Looking for",
+    prefsIndustry: "Industry",
+    prefsStage: "Stage",
+    prefsLocation: "Location",
+    prefsSave: "Save preferences",
+    compatibility: "Compatibility",
+    compatibilityScore: "{n}% match",
+    introduce: "Introduce",
+    introduceSent: "Introduction request sent",
+    empty: "No matches yet.",
+    emptyHint: "Update your preferences for new suggestions.",
+    refresh: "Refresh",
+    heroTitle: "Where trust\nfinds its people.",
+    heroBody: "Co-founder, mentor, and investor matching · curated inside the circle, guided by trust.",
+    viewMatches: "View Matches",
+    setPreferences: "Set Preferences",
+    foundStat: "Matches found",
+    heroTagline: "Co-founders. Mentors. Investors.",
+    pageSubtitle: "AI-curated list of the best-fit connections in the community.",
+    lookingFor: "Looking for",
+    filter: "Filter →",
+    loading: "Computing AI matches",
+    loadError: "Could not load matches",
+    countLabel: "{n} matches",
+    sortedBy: "Ranked by AI confidence",
+    howItWorks: "How it works?",
+    step1Title: "01 · Profile analysis",
+    step1Body: "Member sector, experience, and community interactions are analyzed.",
+    step2Title: "02 · Vector matching",
+    step2Body: "Claude Haiku scores similarity and finds common ground.",
+    step3Title: "03 · Human approval",
+    step3Body: "When you tap “Introduce”, the inner team steps in.",
+    whyCompatible: "Why compatible?",
+    commonGround: "Common ground",
+    introducing: "Sending…",
+    introduceFailed: "Could not send request",
+    typeCofounder: "Co-founder",
+    typeMentor: "Mentor",
+    typeInvestor: "Investor",
+    typeCollab: "Collaboration",
+    footer: "claude-haiku-4-5-20251001 · updated weekly"
+  },
+  capital: {
+    title: "inner·capital",
+    subtitle: "Deal flow and founder introductions.",
+    heroHeadline: "Where conviction\nmeets capital.",
+    heroBody: "Private deal flow, SPVs, and co-investment. Curated inside the circle, invited by trust.",
+    viewPipeline: "View Pipeline",
+    viewSpvs: "View SPVs",
+    activeDeals: "Active deals",
+    heroTagline: "Deal Flow. SPVs. Co-Investment.",
+    loading: "Loading deal flow",
+    loadError: "Could not load capital",
+    addDeal: "Add deal",
+    membersOnly: "Private deal flow · circle members only",
+    viewPipelineTab: "Pipeline",
+    viewListTab: "List",
+    statActive: "Active deals",
+    statActiveSub: "in pipeline",
+    statRaise: "Total raise",
+    statRaiseSub: "active rounds",
+    statClosed: "Closed",
+    statClosedSub: "inner portfolio",
+    statSpv: "SPV",
+    statSpvSub: "open vehicles",
+    stageClosed: "Closed",
+    today: "today",
+    daysAgoShort: "{n}d",
+    target: "Target",
+    valuation: "Valuation",
+    score: "Score",
+    detail: "Details",
+    close: "← Close",
+    round: "Round",
+    internalScore: "Internal score",
+    founders: "Founders",
+    leadInvestor: "Lead investor",
+    sector: "Sector",
+    tags: "Tags",
+    spvOpen: "SPV open",
+    interested: "Interested",
+    introduceFounder: "Introduce founder",
+    admin: "Admin",
+    deleteDeal: "Delete deal",
+    confirmDelete: "Delete the {company} deal?",
+    updateFailed: "Could not update",
+    deleteFailed: "Could not delete",
+    participants: "{n} participants",
+    closing: "Closes {date}",
+    joinSpv: "Join SPV",
+    emptyColumn: "Empty",
+    colCompany: "Company",
+    colSector: "Sector",
+    colTarget: "Target",
+    colValuation: "Valuation",
+    colStage: "Stage",
+    openSpvs: "Open SPVs",
+    openSpvsSub: "Pooled investment via special-purpose vehicles",
+    disclaimer: "for inner·hub members only · informational, not investment advice",
+    empty: "No open opportunities.",
+    viewDeal: "View details",
+    composeTitle: "Add deal",
+    composeSub: "Add a deal to the pipeline (admin only).",
+    phCompany: "Company",
+    phTagline: "Short tagline",
+    phRaise: "Target ($500K)",
+    phValuation: "Valuation",
+    phRound: "Round (Pre-seed / Seed)",
+    phFounders: "Founders (comma-separated)",
+    phScore: "Score 0–100",
+    saveFailed: "Could not save deal"
+  },
+  vault: {
+    title: "inner·vault",
+    eyebrow: "Knowledge base",
+    subtitle: "The circle's private knowledge base. Share, learn, reference.",
+    share: "Share",
+    loading: "Loading vault",
+    loadError: "Could not load vault",
+    heroLabel: "D60 · archive map",
+    heroQuote: "Every document is a layer of the circle.",
+    statTotal: "Total docs",
+    statMine: "My shares",
+    statViews: "Views",
+    featured: "Featured",
+    searchPlaceholder: "Search docs, tags, or authors…",
+    empty: "No documents found.",
+    emptyHint: "Uploaded resources will appear here.",
+    private: "Private",
+    community: "Community",
+    inviteOnly: "Invite only",
+    mine: "mine",
+    file: "file",
+    pages: "{n} pages",
+    views: "{n} views",
+    today: "today",
+    daysAgo: "{n}d ago",
+    download: "Download",
+    downloadFailed: "Download failed",
+    uploadTitle: "Share document",
+    uploadSub: "Metadata + optional file (PDF, Office, image · max 12 MB)",
+    phTitle: "Title",
+    phExcerpt: "Short summary",
+    fileOptional: "File (optional)",
+    filePick: "Choose PDF, DOCX, PPTX, PNG…",
+    accessLevel: "Access level",
+    fileTooLarge: "File must be 12 MB or smaller",
+    saveFailed: "Could not save",
+    uploadFailed: "Could not upload file",
+    save: "Save",
+    saved: "Saved",
+    footer: "members only",
+    typePitch: "Pitch Deck",
+    typeResearch: "Research",
+    typeNote: "Note",
+    typeTemplate: "Template",
+    typeCode: "Code",
+    typeReport: "Report"
+  },
+  signal: {
+    title: "inner·signal",
+    eyebrow: "AI layer",
+    subtitle: "Signals drawn from community memory for you. Read, save, act.",
+    insight: "Insight",
+    themes: "Themes",
+    people: "Connections",
+    activity: "Activity",
+    refresh: "Refresh",
+    analyzing: "Analyzing…",
+    loading: "Analyzing signals",
+    lastUpdated: "Last updated · {date}",
+    empty: "No signals yet.",
+    emptyHint: "New insights will appear here as they form.",
+    emptyConnections: "No connection suggestions this week.",
+    activeSignal: "Active signal",
+    weeklyTheme: "weekly themes",
+    rising: "Rising",
+    momentumHigh: "high momentum",
+    connection: "Connection",
+    suggestedThisWeek: "suggested this week",
+    avgMatch: "Avg. match",
+    matchScoreLabel: "match score",
+    weekInsight: "This week's insight",
+    copyInsight: "Copy insight",
+    openInChat: "Open in Chat",
+    followInChat: "Follow in Chat",
+    generateVisual: "Generate visual · 720p",
+    generating: "Generating · {status}",
+    queued: "queued",
+    regenerate: "Regenerate",
+    fromCache: "Visual from cache · no extra credit",
+    visualReady: "Visual ready. Regenerating uses credits.",
+    confirmGenerate: "One visual will be generated (720p, credit-efficient). Continue?",
+    confirmRegenerate: "Regeneration uses ~0.25–1 credits. Continue?",
+    expandEditorial: "Expand · editorial",
+    visualAlt: "Weekly signal visual",
+    weeklyThemes: "Weekly themes",
+    weeklyThemesSub: "This week's signals from the community",
+    meetThisWeek: "Meet this week",
+    meetThisWeekSub: "Connections suggested by match score",
+    compatibilityPct: "Match {n}%",
+    requestIntro: "Request intro",
+    momentumRising: "Rising",
+    momentumStable: "Stable",
+    momentumFalling: "Falling",
+    activityMap: "Activity map",
+    activityMapSub: "Community density over the last 5 weeks · indicative",
+    low: "Low",
+    high: "High",
+    interactions: "{n} interactions",
+    week4: "4w",
+    week3: "3w",
+    week2: "2w",
+    week1: "1w",
+    weekThis: "Now",
+    dayMon: "Mon",
+    dayTue: "Tue",
+    dayWed: "Wed",
+    dayThu: "Thu",
+    dayFri: "Fri",
+    daySat: "Sat",
+    daySun: "Sun",
+    fetchError: "Could not fetch signal",
+    footer: "Claude + Higgsfield · updated weekly · visuals use credits"
+  },
+  profile: {
+    title: "profile",
+    subtitle: "Manage your identity inside inner·hub.",
+    save: "Save",
+    saving: "Saving…",
+    saved: "Saved",
+    visibility: "Profile visibility",
+    visibilityPublic: "Public",
+    visibilityMembers: "Members only",
+    visibilityPrivate: "Private",
+    visibilityHint: "Choose who can see your profile.",
+    visibilityPublicDesc: "Anyone can see your profile",
+    visibilityMembersDesc: "inner·hub members can see it",
+    visibilityPrivateDesc: "Only you can see it",
+    loading: "Loading profile",
+    loadError: "Could not load profile",
+    completionPct: "{n}% complete",
+    photo: "Profile photo",
+    photoSoon: "Soon · via avatar URL",
+    sectionBasics: "Basic info",
+    sectionSkills: "Expertise",
+    sectionSkillsSub: "Shown on your inner·id card and in matches",
+    sectionSocial: "Social links",
+    sectionSocialSub: "Connected to your inner·id badge",
+    firstName: "First name",
+    lastName: "Last name",
+    handle: "Username",
+    role: "Role / title",
+    company: "Company",
+    bio: "Bio",
+    placeholderFirstName: "Your first name",
+    placeholderLastName: "Your last name",
+    placeholderHandle: "handle",
+    placeholderRole: "Founder, CPO…",
+    placeholderCompany: "Company name",
+    placeholderBio: "Write a short intro…",
+    placeholderLinkedin: "your-profile",
+    placeholderGithub: "username",
+    placeholderWebsite: "yoursite.com",
+    placeholderTwitter: "username",
+    personalSite: "Personal site",
+    twitter: "X / Twitter",
+    skills: "Expertise",
+    skillAdd: "Add…",
+    skillsHint: "Max. 10 tags · press Enter to add",
+    handleError: "Lowercase letters, numbers, and underscore only",
+    changesSaved: "Changes saved",
+    saveError: "Could not save",
+    footer: "profile · invite-based"
+  },
+  faq: {
+    title: "faq",
+    subtitle: "Frequently asked questions.",
+    loading: "Loading FAQ",
+    loadError: "Could not load FAQ",
+    empty: "No FAQ yet.",
+    noAnswer: "Didn't find an answer?",
+    contactHint: "Reach us via community Chat or email.",
+    footer: "frequently asked questions"
+  },
+  membership: {
+    title: "Membership",
+    subtitle: "Join inner·hub. Pick a yearly plan and grow with the circle.",
+    popular: "Most popular",
+    buy: "Buy",
+    redirecting: "Redirecting…",
+    current: "Current plan",
+    perMonth: "/ month",
+    perYear: "/ year",
+    oneTime: "One-time",
+    eventTicket: "Event ticket",
+    eventTicketDesc: "Single-event access. Join without a membership.",
+    buyTicket: "Get ticket",
+    checkoutFailed: "Could not start checkout",
+    trust: "Payments processed securely by Stripe · SSL encrypted · Cancel anytime",
+    planAnnual: "Annual membership",
+    planAnnualDesc: "Full access to inner·hub. Events, courses, perks, and community.",
+    planFounder: "Founder membership",
+    planFounderDesc: "The first layer of inner·hub. Extra benefits for founding members.",
+    feat1: "Priority registration for all events",
+    feat2: "Access to all course content",
+    feat3: "Perks catalog",
+    feat4: "Community chat channels",
+    feat5: "Member directory",
+    feat6: "Talent Board posts",
+    feat7: "Monthly networking breakfast",
+    featF1: "Everything in annual membership",
+    featF2: "Founder badge and profile tag",
+    featF3: "inner·capital deal flow access",
+    featF4: "Private founder dinner invites",
+    featF5: "Priority inner·studio advising",
+    featF6: "Demo Day presentation rights",
+    featF7: "Co-founder matching priority",
+    paymentSuccessTitle: "Payment received",
+    paymentSuccessEvent: "Your event registration is confirmed.",
+    paymentSuccessMembership: "{plan} is active.",
+    paymentSuccessEmail: " Confirmation sent to {email}.",
+    paymentVerifyFailed: "Could not verify payment",
+    backToMembership: "← Back to membership",
+    backToPanel: "Back to panel",
+    planFallback: "Membership"
+  },
+  chat: {
+    title: "Chat",
+    subtitle: "Channels and direct messages.",
+    channels: "Channels",
+    empty: "No messages yet.",
+    emptyHint: "Send the first message.",
+    emptyChannels: "No channels yet.",
+    emptyChannel: "#{name} is empty",
+    placeholder: "Message #{name}…",
+    send: "Send",
+    sendHint: "Enter to send · Shift+Enter for a new line",
+    loadingChannels: "Loading channels",
+    loadChannelsError: "Could not load channels",
+    loadingMessages: "Loading messages",
+    loadMessagesError: "Could not load messages",
+    sendError: "Could not send message",
+    aiDigest: "AI digest · #{name}",
+    aiDigestHint: "Channel summary will appear here once enough messages accumulate."
+  },
+  courses: {
+    title: "Courses",
+    subtitle: "Learning paths and sessions.",
+    heroEyebrow: "My courses",
+    heroHeadline: "Where knowledge\nmeets momentum.",
+    heroBody: "inner·hub learning · at your pace, on your time, with the circle's knowledge.",
+    heroStat: "Enrolled courses",
+    heroTagline: "At your pace, on your time.",
+    continueCta: "Continue",
+    exploreCta: "Explore courses",
+    enroll: "Enroll",
+    continue: "Continue",
+    start: "Start",
+    completed: "completed",
+    inProgress: "In progress",
+    empty: "No published courses yet.",
+    loading: "Loading courses",
+    loadError: "Could not load courses",
+    enrollFailed: "Enrollment failed",
+    enrollRequired: "Enrollment required",
+    hide: "Hide",
+    viewCurriculum: "View curriculum",
+    curriculumSoon: "Curriculum coming soon.",
+    lessons: "{done}/{total} lessons",
+    tag: "Course",
+    education: "Education",
+    term: "Term {n}",
+    myEnrolled: "My enrolled courses",
+    otherCourses: "Other courses",
+    statEnrolled: "Enrolled",
+    statEnrolledSub: "in progress",
+    statProgress: "Avg. progress",
+    statProgressSub: "across enrolled",
+    statOther: "Other courses",
+    statOtherSub: "waiting to explore",
+    statTotal: "Total",
+    statTotalSub: "inner·hub catalog"
+  },
+  members: {
+    title: "Members",
+    subtitle: "Community members and collaboration opportunities.",
+    heroBody: "Founders, engineers, investors · find each other and grow inside the circle.",
+    heroHeadline: "Where builders\nfind each other.",
+    viewMembers: "View members",
+    talentBoard: "Talent Board",
+    heroStat: "Inside the circle",
+    heroTagline: "Founders. Engineers. Investors.",
+    about: "About",
+    skills: "Skills",
+    noBio: "No bio yet.",
+    message: "Message",
+    connect: "Connect",
+    publish: "Publish",
+    published: "Published",
+    empty: "No members found.",
+    searchPlaceholder: "Name, company, or skill…",
+    searchTalent: "Search role or skill…",
+    loading: "Loading members",
+    loadError: "Could not load members",
+    tabMembers: "Members",
+    memberCount: "{n} members",
+    liveSoon: "live status soon",
+    talentLoading: "Loading talent board",
+    talentError: "Could not load talent board",
+    postCount: "{n} posts",
+    postCta: "Post",
+    talentEmpty: "No posts yet · be the first.",
+    talentFooter: "Successful matches take a 10% platform fee · inner·hub Talent Board",
+    connectViaPanel: "Connect via panel",
+    profile: "Profile",
+    deletePost: "Delete post",
+    typeSeeking: "seeking",
+    typeOffering: "offering",
+    composeTitle: "Post",
+    composeSub: "Announce what you're seeking or offering to the circle.",
+    phRole: "Role / title",
+    phDesc: "Short description",
+    phTags: "Tags (comma-separated)",
+    createFailed: "Could not create post",
+    statTotal: "Total members",
+    statTotalSub: "inside the circle",
+    statProfile: "Profiles",
+    statProfileSub: "with bio",
+    statTalent: "Talent posts",
+    statTalentSub: "live",
+    statAdmin: "Admin",
+    statAdminSub: "ops"
+  },
+  perks: {
+    title: "Perks",
+    subtitle: "Member-only opportunities.",
+    heroHeadline: "Perks worth\nbeing inside for.",
+    heroBody: "Software, finance, and lifestyle deals for program members. Grab the code, use it with the partner.",
+    featuredCta: "Featured",
+    allCta: "All deals",
+    heroStat: "Active perks",
+    heroTagline: "Software. Finance. Lifestyle.",
+    saved: "Saved",
+    howTo: "How to use",
+    empty: "No results",
+    emptyHint: "Clear filters or search and try again.",
+    showAll: "Show all",
+    claim: "Claim",
+    loading: "Loading perks",
+    loadError: "Could not load perks",
+    review: "Review",
+    hasCode: "Has code",
+    perkLabel: "Perk",
+    expires: "Ends: {date}",
+    activationCode: "Activation code",
+    goPartner: "Go to partner site",
+    unsave: "Remove from saved",
+    saveForLater: "Save for later",
+    featured: "Featured",
+    openDetail: "Open details",
+    searchPlaceholder: "Search brand, offer, or code…",
+    count: "{n} perks",
+    footer: "New perks added monthly · Suggest via Slack or support.",
+    catSoftware: "Software",
+    catFinance: "Finance",
+    catLife: "Lifestyle",
+    catEducation: "Education",
+    statTotal: "Total deals",
+    statTotalSub: "active perks",
+    statFeatured: "Featured",
+    statFeaturedSub: "this period",
+    statCategory: "Categories",
+    statCategorySub: "software · finance · life",
+    statSaved: "Saved",
+    statSavedSub: "in favorites",
+    step1Title: "Pick",
+    step1Body: "Find a deal by category or search.",
+    step2Title: "Get code",
+    step2Body: "Copy the activation code in details.",
+    step3Title: "Use",
+    step3Body: "Apply the code on the partner site."
+  },
+  pulse: {
+    title: "Pulse",
+    eyebrow: "Community pulse",
+    subtitle: "The circle's anonymous pulse. What's being talked about this week?",
+    live: "Live",
+    loading: "Loading pulse",
+    loadError: "Could not load pulse",
+    heroLabel: "Phosphor · live signal",
+    heroQuote: "The circle is breathing.",
+    empty: "No pulse data yet",
+    emptyHint: "Not enough channel messages this week. Trends and activity will appear as chat picks up.",
+    emptyActivity: "No activity yet",
+    statMessages: "Messages this week",
+    statMessagesSub: "across {n} channels",
+    statActive: "Active members",
+    statActiveSub: "in community",
+    statTrends: "Trending topics",
+    statTrendsSub: "tracked",
+    statScore: "Activity score",
+    statScoreSub: "this week",
+    trending: "Trending topics",
+    noTrends: "No trends in this category",
+    weeklyActivity: "Weekly activity",
+    topChannels: "Top channels",
+    noChannels: "No channel data",
+    topContributors: "Highlights this week",
+    noContributors: "No contributions yet",
+    streakDays: "{n}d",
+    firstActivity: "First activity this week",
+    sameLevel: "Same level as last week",
+    weekUp: "Up {n}% this week",
+    weekDown: "Down {n}% this week",
+    catTech: "tech",
+    catBiz: "biz",
+    catInvest: "invest",
+    catCulture: "culture",
+    footer: "anonymized · real-time · members only"
+  },
+  api: {
+    title: "inner·api",
+    eyebrow: "Platform API",
+    subtitle: "Programmatic access to the community stack. Integrate into your product.",
+    docs: "Documentation",
+    keys: "Your API keys",
+    keysHint: "Keep keys safe · never share them",
+    loading: "Loading keys",
+    loadError: "Could not load keys",
+    empty: "You don't have an API key yet.",
+    createKey: "New key",
+    creating: "Creating…",
+    revokeKey: "Revoke",
+    copyKey: "Copy",
+    keyCreated: "New key created",
+    keyCreatedHint: "This key won't be shown again. Copy it now and store it safely.",
+    deleteKey: "Delete key",
+    confirmDelete: "Are you sure?",
+    deleting: "Deleting…",
+    abort: "Cancel",
+    createdAt: "created {date}",
+    lastUsed: "last used {date}",
+    deleteFailed: "Could not delete",
+    createFailed: "Could not create key",
+    phKeyName: "Key name (e.g. prod-server)",
+    endpoints: "Endpoints",
+    plans: "API plans",
+    recommended: "Recommended",
+    requests: "{n} requests",
+    contactSupport: "Contact support",
+    free: "Free",
+    unlimited: "Unlimited",
+    perMonth: "/ month",
+    warning: "inner·api is in beta. Key create/delete works live; usage/rate-limit tracking and billing are not wired yet. Contact support to upgrade a plan.",
+    footer: "v1 · REST · JSON · Bearer Auth · inner·hub ecosystem",
+    epMembers: "List community members (anonymous)",
+    epMember: "Fetch and verify a member profile",
+    epMatch: "Call the AI matching algorithm",
+    epPulse: "Fetch community signal data",
+    epVerify: "inner·id identity verification",
+    epWebhook: "Receive webhooks for community events",
+    planStarterF1: "Basic member query",
+    planStarterF2: "Identity verification",
+    planStarterF3: "Email support",
+    planBuilderF1: "All endpoints",
+    planBuilderF2: "inner·match API",
+    planBuilderF3: "Webhook support",
+    planBuilderF4: "Priority support",
+    planScaleF1: "White-label",
+    planScaleF2: "Özel SLA",
+    planScaleF3: "Dedicated support",
+    planScaleF4: "inner·pulse raw data",
+    reqStarter: "1,000 / month",
+    reqBuilder: "50,000 / month"
+  },
+  applications: {
+    title: "applications",
+    subtitle: "Review invitation requests; approve / reject is persisted.",
+    admin: "Admin",
+    pending: "Pending",
+    approve: "Approve",
+    reject: "Reject",
+    empty: "No applications yet",
+    noResults: "No results found",
+    approved: "Approved",
+    rejected: "Rejected",
+    loading: "Loading applications",
+    loadError: "Could not load applications",
+    detail: "Application detail",
+    why: "Why inner·hub?",
+    appliedAt: "Applied",
+    referrer: "Referrer",
+    none: "None",
+    searchPlaceholder: "Name, email, tag…",
+    updateFailed: "Could not update status",
+    footer: "applications · admin only"
+  },
+  analytics: {
+    title: "analytics",
+    subtitle: "Community growth and engagement · live from the database.",
+    admin: "Admin",
+    totalMembers: "Total members",
+    activeMembers: "Active members",
+    newThisWeek: "New this week",
+    empty: "Not enough data yet",
+    emptyHint: "As the community moves, growth, engagement, and active-member charts will fill in.",
+    loading: "Loading analytics",
+    loadError: "Could not load analytics",
+    membersInCircle: "inside the circle",
+    newThisMonth: "+{n} this month",
+    noNewThisMonth: "none new this month",
+    messagesThisWeek: "Messages this week",
+    vsLastWeek: "vs last week",
+    eventRegs: "Event registrations",
+    total: "total",
+    thisWeekDelta: "+{n} this week",
+    aiMatch: "AI matches",
+    thisMonthDelta: "+{n} this month",
+    memberGrowth: "Member growth",
+    memberGrowthSub: "Cumulative members · monthly from real join dates",
+    revenue: "Revenue",
+    revenueSub: "MRR tracking",
+    revenueSoon: "Revenue tracking soon",
+    revenueHint: "Membership payments run through Stripe; in-panel revenue reporting is not wired yet.",
+    weeklyEngagement: "Weekly engagement",
+    weeklyEngagementSub: "Active members · messages · event regs · last 4 weeks",
+    messages: "Messages",
+    registrations: "Registrations",
+    topMembers: "Most active members",
+    topMembersSub: "By message contribution in the last 30 days",
+    colMember: "Member",
+    colContribution: "Contribution",
+    colEvent: "Events",
+    colJoined: "Joined",
+    channelActivity: "Channel activity",
+    channelActivitySub: "Top channels · total messages",
+    pendingApps: "Pending applications",
+    pendingAppsSub: "Admin view",
+    awaitingReview: "awaiting review",
+    footer: "analytics · admin only"
+  },
+  publicProfile: {
+    title: "Profile",
+    enterPanel: "Enter panel",
+    loading: "Loading profile…",
+    notFound: "Profile not found",
+    membersOnly: "Members only",
+    membersOnlyBody: "@{handle}'s profile is only visible to inner·hub members. Sign in to view.",
+    login: "Sign in",
+    loadError: "Could not load",
+    networkError: "Network error",
+    skills: "Skills",
+    links: "Links",
+    memberSince: "Member · {date}",
+    verifiedNote: "This identity is tied to inner·hub invite-only membership. Badge:"
+  },
+  notFound: {
+    title: "404 Page not found",
+    body: "The page you’re looking for may have moved or never existed.",
+    backHome: "Back to home"
+  }
+};
+const dictionaries = { tr, en };
+const I18nContext = createContext(null);
+function resolveInitialLocale() {
+  if (typeof window === "undefined") return DEFAULT_LOCALE;
+  return readStoredLocale() ?? detectBrowserLocale();
+}
+function I18nProvider({ children }) {
+  const [locale, setLocaleState] = useState(resolveInitialLocale);
+  const setLocale = useCallback((next) => {
+    if (!isLocale(next)) return;
+    setLocaleState(next);
+    writeStoredLocale(next);
+  }, []);
+  useEffect(() => {
+    document.documentElement.lang = locale;
+  }, [locale]);
+  const messages = dictionaries[locale];
+  const t = useCallback(
+    (key, values) => {
+      const raw = getByPath(messages, key) ?? getByPath(dictionaries.en, key) ?? getByPath(dictionaries.tr, key) ?? key;
+      return interpolate$1(raw, values);
+    },
+    [messages]
+  );
+  const value = useMemo(
+    () => ({ locale, setLocale, t, messages }),
+    [locale, setLocale, t, messages]
+  );
+  return /* @__PURE__ */ jsx(I18nContext.Provider, { value, children });
+}
+function useI18n() {
+  const ctx = useContext(I18nContext);
+  if (!ctx) throw new Error("useI18n must be used within I18nProvider");
+  return ctx;
+}
+function useT() {
+  return useI18n().t;
+}
+function useLocale() {
+  const { locale, setLocale } = useI18n();
+  return { locale, setLocale };
+}
+function LocaleToggle({
+  className = "",
+  tone = "dark"
+}) {
+  const { locale, setLocale } = useLocale();
+  const btn = (code, label) => {
+    const active = locale === code;
+    const base = tone === "dark" ? active ? "bg-[var(--bone)] text-black" : "text-[var(--bone)]/55 hover:text-[var(--bone)]" : active ? "bg-[var(--ink)] text-[var(--bone)]" : "text-[var(--ink-muted)] hover:text-[var(--ink)]";
+    return /* @__PURE__ */ jsx(
+      "button",
+      {
+        type: "button",
+        lang: code,
+        onClick: () => setLocale(code),
+        "aria-pressed": active,
+        className: `px-2 py-1 font-mono text-[10px] uppercase tracking-widest transition-colors ${base}`,
+        children: label
+      },
+      code
+    );
+  };
+  return /* @__PURE__ */ jsxs(
+    "div",
+    {
+      role: "group",
+      "aria-label": "Language",
+      className: `inline-flex items-center border ${tone === "dark" ? "border-white/15" : "border-[var(--ink)]/15"} ${className}`,
+      children: [
+        btn("tr", "TR"),
+        btn("en", "EN")
+      ]
+    }
+  );
+}
 const ease = [0.16, 1, 0.3, 1];
 function FadeIn({
   children,
@@ -179,23 +2469,14 @@ function ScrollTextReveal({
 }
 function BeaconSquare({
   className = "",
-  size = "0.28em",
+  size = "0.42em",
   pulse = false
 }) {
   return /* @__PURE__ */ jsx(
     "span",
     {
-      className: [
-        "inline-block shrink-0 bg-[#18FF85]",
-        pulse ? "animate-beacon" : "",
-        className
-      ].filter(Boolean).join(" "),
-      style: {
-        width: size,
-        height: size,
-        marginBottom: "0.08em",
-        verticalAlign: "baseline"
-      },
+      className: `inline-block shrink-0 self-end bg-[#18FF85] animate-beacon ${pulse ? "beacon-pulse-glow" : ""} ${className}`,
+      style: { width: size, height: size, marginBottom: "0.05em" },
       "aria-hidden": true
     }
   );
@@ -208,28 +2489,28 @@ function Lockup({
   compact = false,
   /** @deprecated `compact` kullan */
   showHub = true,
-  /** Yanıp sönme — yalnızca logo (nav ürün adlarında kapalı) */
+  /** Birincil logo yerleşimlerinde yeşil kareye yumuşak glow ekler. */
   pulse = false
 }) {
   const isCompact = compact || !showHub;
-  const label = isCompact ? "inner.hub" : `inner.${suffix}`;
+  const label = isCompact ? "innerhub" : `inner ${suffix}`;
   const textStyle = {
     fontFamily: "'Fraunces', serif",
     fontStyle: "normal",
     fontWeight: 300,
     fontVariationSettings: "'opsz' 144, 'WONK' 1",
-    letterSpacing: "-0.02em",
+    letterSpacing: "-0.015em",
     ...fontSize ? { fontSize } : {}
   };
   if (isCompact) {
     return /* @__PURE__ */ jsxs("span", { lang: "en", className: `inline-flex items-baseline leading-none ${className}`, "aria-label": label, children: [
       /* @__PURE__ */ jsx("span", { style: textStyle, children: "i" }),
-      /* @__PURE__ */ jsx(BeaconSquare, { className: "ml-[0.08em]", size: "0.32em", pulse })
+      /* @__PURE__ */ jsx(BeaconSquare, { className: "ml-[0.06em]", size: "0.42em", pulse })
     ] });
   }
   return /* @__PURE__ */ jsxs("span", { lang: "en", className: `inline-flex items-baseline leading-none ${className}`, "aria-label": label, children: [
     /* @__PURE__ */ jsx("span", { style: textStyle, children: "inner" }),
-    /* @__PURE__ */ jsx(BeaconSquare, { className: "mx-[0.06em]", size: "0.28em", pulse }),
+    /* @__PURE__ */ jsx(BeaconSquare, { className: "mx-[0.12em]", size: "0.42em", pulse }),
     /* @__PURE__ */ jsx("span", { style: textStyle, children: suffix })
   ] });
 }
@@ -4554,13 +6835,15 @@ var gsapWithCSS = gsap.registerPlugin(CSSPlugin) || gsap;
 gsapWithCSS.core.Tween;
 const NEXT_VIDEO = "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260510_060007_60275ce7-030c-4668-a160-8f364ec537d3.mp4";
 function WhatsNextCinematic() {
+  const t = useT();
   const videoWrapRef = useRef(null);
   const [ready, setReady] = useState(false);
   const reduceMotion = useRef(false);
+  const bodyLines = t("homeWhatsNext.body").split("\n");
   useEffect(() => {
     reduceMotion.current = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const t = window.setTimeout(() => setReady(true), 40);
-    return () => window.clearTimeout(t);
+    const timer = window.setTimeout(() => setReady(true), 40);
+    return () => window.clearTimeout(timer);
   }, []);
   useEffect(() => {
     const wrap3 = videoWrapRef.current;
@@ -4631,17 +6914,19 @@ function WhatsNextCinematic() {
             children: [
               /* @__PURE__ */ jsxs("div", { className: "mb-6 flex items-center gap-3 font-mono text-[10px] uppercase tracking-widest text-white/60 sm:mb-8 sm:text-xs", children: [
                 /* @__PURE__ */ jsx("span", { className: "size-2 shrink-0 bg-[var(--inner-green)] animate-beacon sm:size-1.5" }),
-                "07 · What's next · In time"
+                t("homeWhatsNext.eyebrow")
               ] }),
               /* @__PURE__ */ jsxs("h2", { className: "max-w-[14ch] text-balance font-display font-serif italic text-4xl leading-[1.05] sm:text-5xl md:text-7xl lg:text-8xl", children: [
-                "What's next is already",
+                t("homeWhatsNext.titleBefore"),
                 " ",
-                /* @__PURE__ */ jsx("span", { className: "italic", children: "forming." })
+                /* @__PURE__ */ jsx("span", { className: "italic", children: t("homeWhatsNext.titleEm") })
               ] }),
               /* @__PURE__ */ jsxs("p", { className: "mt-8 max-w-[48ch] text-base leading-[1.6] text-white/70 sm:mt-10 sm:text-lg md:mt-12 md:text-xl", children: [
-                "We announce things when they are real.",
-                /* @__PURE__ */ jsx("br", { className: "hidden sm:block" }),
-                "The circle expands: gatherings, capital, and tools. One deliberate step at a time."
+                bodyLines[0],
+                bodyLines[1] ? /* @__PURE__ */ jsxs(Fragment$1, { children: [
+                  /* @__PURE__ */ jsx("br", { className: "hidden sm:block" }),
+                  bodyLines[1]
+                ] }) : null
               ] }),
               /* @__PURE__ */ jsxs(
                 "div",
@@ -4651,14 +6936,14 @@ function WhatsNextCinematic() {
                     ready ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
                   ].join(" "),
                   children: [
-                    /* @__PURE__ */ jsx("p", { className: "hidden flex-1 text-sm font-medium text-white sm:block", children: "Access is by invitation. Always." }),
-                    /* @__PURE__ */ jsx("p", { className: "flex-1 px-1 pt-2 text-sm font-medium text-white sm:hidden sm:px-0 sm:pt-0", children: "By invitation only." }),
+                    /* @__PURE__ */ jsx("p", { className: "hidden flex-1 text-sm font-medium text-white sm:block", children: t("homeWhatsNext.access") }),
+                    /* @__PURE__ */ jsx("p", { className: "flex-1 px-1 pt-2 text-sm font-medium text-white sm:hidden sm:px-0 sm:pt-0", children: t("homeWhatsNext.accessShort") }),
                     /* @__PURE__ */ jsx(
                       "a",
                       {
                         href: "/invitation",
                         className: "shrink-0 whitespace-nowrap bg-white px-5 py-3 text-center font-mono text-xs uppercase tracking-widest text-black transition-colors hover:bg-white/90 sm:py-2.5",
-                        children: "Request an invitation"
+                        children: t("homeWhatsNext.cta")
                       }
                     )
                   ]
@@ -4671,17 +6956,22 @@ function WhatsNextCinematic() {
     }
   );
 }
-const LINKS = [
-  { label: "Idea", href: "#section-01" },
-  { label: "Circle", href: "#section-02" },
-  { label: "Platform", href: "#section-03" },
-  { label: "Gathering", href: "#section-06" },
-  { label: "Next", href: "#section-07" }
+const LINK_KEYS = [
+  { key: "idea", href: "#section-01" },
+  { key: "circle", href: "#section-02" },
+  { key: "platform", href: "#section-03" },
+  { key: "gathering", href: "#section-06" },
+  { key: "next", href: "#section-07" }
 ];
 const EASE$1 = [0.16, 1, 0.3, 1];
 const HERO_CHROME = "#000000";
 function FloatingNavbar() {
+  const t = useT();
   const [open, setOpen] = useState(false);
+  const links = LINK_KEYS.map((link) => ({
+    href: link.href,
+    label: t(`publicNav.${link.key}`)
+  }));
   return /* @__PURE__ */ jsxs(
     motion.header,
     {
@@ -4696,9 +6986,9 @@ function FloatingNavbar() {
           /* @__PURE__ */ jsx(
             "nav",
             {
-              "aria-label": "Primary",
+              "aria-label": t("publicNav.primaryNav"),
               className: "absolute left-1/2 hidden -translate-x-1/2 items-center gap-0.5 md:flex lg:gap-1",
-              children: LINKS.map((link) => /* @__PURE__ */ jsxs(
+              children: links.map((link) => /* @__PURE__ */ jsxs(
                 "a",
                 {
                   href: link.href,
@@ -4719,13 +7009,14 @@ function FloatingNavbar() {
             }
           ),
           /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-2", children: [
+            /* @__PURE__ */ jsx(LocaleToggle, { tone: "dark", className: "hidden sm:inline-flex" }),
             /* @__PURE__ */ jsxs(
               "a",
               {
                 href: "/invitation",
                 className: "hidden items-center gap-2.5 bg-[var(--bone)] px-4 py-2 font-mono text-[10px] uppercase tracking-[0.14em] text-black transition-colors hover:bg-white sm:inline-flex lg:px-5 lg:text-[11px]",
                 children: [
-                  "Invitation",
+                  t("publicNav.invitation"),
                   /* @__PURE__ */ jsx("span", { className: "size-1.5 bg-[var(--inner-green)]", "aria-hidden": true })
                 ]
               }
@@ -4734,7 +7025,7 @@ function FloatingNavbar() {
               "button",
               {
                 type: "button",
-                "aria-label": open ? "Menüyü kapat" : "Menüyü aç",
+                "aria-label": open ? t("publicNav.closeMenu") : t("publicNav.openMenu"),
                 "aria-expanded": open,
                 onClick: () => setOpen((v) => !v),
                 className: "flex items-center justify-center p-1.5 md:hidden",
@@ -4774,7 +7065,11 @@ function FloatingNavbar() {
             className: "border-t border-white/10 md:hidden",
             style: { backgroundColor: HERO_CHROME },
             children: [
-              LINKS.map((link, i) => /* @__PURE__ */ jsxs(
+              /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between border-b border-white/10 px-4 py-3", children: [
+                /* @__PURE__ */ jsx("span", { className: "font-mono text-[10px] uppercase tracking-widest text-[var(--bone)]/50", children: t("home.langSwitch") }),
+                /* @__PURE__ */ jsx(LocaleToggle, { tone: "dark" })
+              ] }),
+              links.map((link, i) => /* @__PURE__ */ jsxs(
                 "a",
                 {
                   href: link.href,
@@ -4785,7 +7080,7 @@ function FloatingNavbar() {
                     /* @__PURE__ */ jsx("span", { className: "font-mono text-[10px] text-[var(--bone)]/30", children: String(i + 1).padStart(2, "0") })
                   ]
                 },
-                link.label
+                link.href
               )),
               /* @__PURE__ */ jsxs(
                 "a",
@@ -4794,7 +7089,7 @@ function FloatingNavbar() {
                   onClick: () => setOpen(false),
                   className: "flex items-center justify-between bg-[var(--bone)] px-4 py-3.5 font-mono text-xs uppercase tracking-widest text-black",
                   children: [
-                    "Request an invitation",
+                    t("publicNav.requestInvitation"),
                     /* @__PURE__ */ jsx("span", { className: "size-1.5 bg-[var(--inner-green)]", "aria-hidden": true })
                   ]
                 }
@@ -4849,6 +7144,7 @@ function HomeOpening() {
   ] });
 }
 function HeroInset() {
+  const t = useT();
   return /* @__PURE__ */ jsx(
     "section",
     {
@@ -4899,7 +7195,7 @@ function HeroInset() {
                   className: "mb-3 flex items-center gap-2.5 font-mono text-[9px] uppercase tracking-[0.16em] text-[var(--bone)]/55 sm:mb-6 sm:gap-3 sm:text-[11px]",
                   children: [
                     /* @__PURE__ */ jsx("span", { className: "size-2 shrink-0 bg-[var(--inner-green)] animate-beacon sm:size-1.5" }),
-                    "İstanbul → Global · Est. 2026"
+                    t("home.heroTag")
                   ]
                 }
               ),
@@ -4924,7 +7220,7 @@ function HeroInset() {
                       animate: { opacity: 1, y: 0 },
                       transition: { duration: 0.8, delay: 0.5, ease: EASE },
                       className: "max-w-[36ch] text-[13px] leading-[1.45] text-[var(--bone)]/70 sm:text-sm md:text-[15px] md:leading-[1.35]",
-                      children: "A private circle of founders, builders, and investors. Bound not by place or status, but by hunger to meet early and build what comes next."
+                      children: t("home.heroBody")
                     }
                   ),
                   /* @__PURE__ */ jsxs(
@@ -4936,7 +7232,7 @@ function HeroInset() {
                       transition: { duration: 0.8, delay: 0.7, ease: EASE },
                       className: "group inline-flex w-full min-h-11 items-center justify-between gap-2.5 bg-[var(--bone)] py-1.5 pl-4 pr-1.5 text-sm font-medium text-black transition-[gap] duration-300 hover:gap-3.5 sm:w-fit sm:min-h-0 sm:pl-5 sm:text-base",
                       children: [
-                        "Request an invitation",
+                        t("home.requestInvitation"),
                         /* @__PURE__ */ jsx("span", { className: "flex size-9 shrink-0 items-center justify-center bg-black transition-transform duration-300 group-hover:scale-110 sm:size-10", children: /* @__PURE__ */ jsx(ArrowUpRight, { className: "size-4 text-[var(--bone)]", strokeWidth: 1.75 }) })
                       ]
                     }
@@ -5319,211 +7615,208 @@ function StatItem({ n, label, suffix = "" }) {
 }
 function Home() {
   useLenis(true);
+  const t = useT();
+  const { locale } = useLocale();
   useEffect(() => {
     if (window.location.hash) {
       const el = document.getElementById(window.location.hash.slice(1));
       if (el) requestAnimationFrame(() => el.scrollIntoView({ block: "start" }));
     }
   }, []);
-  return (
-    // Sayfa içeriği neredeyse tamamen İngilizce (marka sesi); html[lang="tr"]
-    // ile miras alınan Türkçe büyük-harf kuralları uppercase etiketlerdeki
-    // İngilizce kelimeleri bozmasın diye kök seviyede lang="en" işaretlendi.
-    /* @__PURE__ */ jsxs("div", { lang: "en", className: "min-h-screen bg-background text-foreground flex flex-col", children: [
-      /* @__PURE__ */ jsx("a", { href: "#main-content", className: "sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[9999] focus:bg-foreground focus:text-background focus:px-4 focus:py-2 font-mono text-xs uppercase tracking-widest", children: "Skip to content" }),
-      /* @__PURE__ */ jsx(ScrollProgress, {}),
-      /* @__PURE__ */ jsx(Preloader, {}),
-      /* @__PURE__ */ jsx(Grain, {}),
-      /* @__PURE__ */ jsx(IndexRail, {}),
-      /* @__PURE__ */ jsxs("main", { id: "main-content", className: "flex-grow", children: [
-        /* @__PURE__ */ jsx(HomeOpening, {}),
-        /* @__PURE__ */ jsx(MarqueeStrip, {}),
-        /* @__PURE__ */ jsx("section", { id: "section-03", children: /* @__PURE__ */ jsx(PlatformFeatures, { features: PLATFORM_FEATURES, restModules: MODULES.slice(3) }) }),
-        /* @__PURE__ */ jsxs("div", { className: "relative overflow-hidden bg-black border-t border-border/15", children: [
-          /* @__PURE__ */ jsxs("div", { className: "absolute inset-x-0 top-0 h-[85vh] md:h-[95vh] z-0", "aria-hidden": "true", children: [
-            /* @__PURE__ */ jsx(
-              HeroVideo,
-              {
-                src: "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260406_133058_0504132a-0cf3-4450-a370-8ea3b05c95d4.mp4",
-                className: "h-full w-full object-cover"
-              }
-            ),
-            /* @__PURE__ */ jsx("div", { className: "pointer-events-none absolute inset-0 bg-gradient-to-b from-black/55 via-black/60 to-black" })
-          ] }),
-          /* @__PURE__ */ jsxs("section", { id: "section-04", className: "relative z-10 px-4 pt-20 pb-16 sm:px-6 sm:pt-28 sm:pb-24 md:px-12 md:pt-36 lg:px-[10%]", children: [
-            /* @__PURE__ */ jsxs("div", { className: "mb-10 flex items-baseline justify-between gap-3 border-b border-white/15 pb-5 font-mono text-[10px] uppercase tracking-widest text-white/50 sm:mb-16 sm:gap-6 sm:pb-6 sm:text-xs", children: [
-              /* @__PURE__ */ jsx("span", { children: "04 · What this is" }),
-              /* @__PURE__ */ jsx("span", { className: "whitespace-nowrap", children: "The point" })
-            ] }),
-            /* @__PURE__ */ jsx(
-              WordsPullUp,
-              {
-                text: "Big things start here.",
-                className: "font-display font-serif italic text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-[var(--bone)] max-w-3xl mb-8 sm:mb-10 text-balance"
-              }
-            ),
-            /* @__PURE__ */ jsx(
-              ScrollTextReveal,
-              {
-                text: "New ideas are discussed here, tested here, and supported here by people who can actually build them and fund them.",
-                className: "max-w-[46ch] text-[var(--bone)]",
-                style: { fontSize: "clamp(17px, 2.4vw, 26px)", lineHeight: 1.55, opacity: 0.85 }
-              }
-            )
-          ] }),
-          /* @__PURE__ */ jsxs("section", { id: "section-05", className: "relative z-10 px-4 pt-6 pb-24 sm:px-6 sm:pt-8 sm:pb-32 md:px-12 md:pb-48 lg:px-[10%]", children: [
-            /* @__PURE__ */ jsxs("div", { className: "mb-10 flex items-baseline justify-between gap-3 border-b border-white/15 pb-5 font-mono text-[10px] uppercase tracking-widest text-white/50 sm:mb-16 sm:gap-6 sm:pb-6 sm:text-xs", children: [
-              /* @__PURE__ */ jsx("span", { children: "05 · Entry" }),
-              /* @__PURE__ */ jsx("span", { className: "whitespace-nowrap", children: "By invitation" })
-            ] }),
-            /* @__PURE__ */ jsx(
-              WordsPullUp,
-              {
-                text: "Entry is by invitation. Always.",
-                className: "font-display font-serif italic text-3xl sm:text-4xl md:text-5xl max-w-2xl mb-6 sm:mb-8 text-balance text-[var(--bone)]"
-              }
-            ),
-            /* @__PURE__ */ jsx(FadeIn, { delay: 0.2, children: /* @__PURE__ */ jsx("p", { className: "mb-12 max-w-[65ch] text-base leading-[1.7] text-[var(--bone)]/80 sm:mb-20 sm:text-lg", children: "There are no tickets, no tiers, and no public list. Members are put forward from inside the circle, considered with care, and invited personally." }) }),
-            /* @__PURE__ */ jsx("div", { className: "max-w-3xl", children: [
-              { label: "Your name", line: "Someone inside the circle puts your name forward." },
-              { label: "Consideration", line: "We take our time. Fit beats fame." },
-              { label: "Invitation", line: "If it is right, you hear from us directly." }
-            ].map((item, i) => /* @__PURE__ */ jsx(FadeIn, { delay: i * 0.1, children: /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-2 border-t border-white/15 py-5 last:border-b md:flex-row md:items-baseline md:gap-12 md:py-6", children: [
-              /* @__PURE__ */ jsx("div", { className: "w-full flex-shrink-0 font-mono text-[10px] uppercase tracking-widest text-white/50 sm:text-xs md:w-48", children: item.label }),
-              /* @__PURE__ */ jsx("p", { className: "text-base text-[var(--bone)]/90 sm:text-lg", children: item.line })
-            ] }) }, item.label)) })
-          ] })
+  return /* @__PURE__ */ jsxs("div", { lang: locale, className: "min-h-screen bg-background text-foreground flex flex-col", children: [
+    /* @__PURE__ */ jsx("a", { href: "#main-content", className: "sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[9999] focus:bg-foreground focus:text-background focus:px-4 focus:py-2 font-mono text-xs uppercase tracking-widest", children: t("common.skipToContent") }),
+    /* @__PURE__ */ jsx(ScrollProgress, {}),
+    /* @__PURE__ */ jsx(Preloader, {}),
+    /* @__PURE__ */ jsx(Grain, {}),
+    /* @__PURE__ */ jsx(IndexRail, {}),
+    /* @__PURE__ */ jsxs("main", { id: "main-content", className: "flex-grow", children: [
+      /* @__PURE__ */ jsx(HomeOpening, {}),
+      /* @__PURE__ */ jsx(MarqueeStrip, {}),
+      /* @__PURE__ */ jsx("section", { id: "section-03", children: /* @__PURE__ */ jsx(PlatformFeatures, { features: PLATFORM_FEATURES, restModules: MODULES.slice(3) }) }),
+      /* @__PURE__ */ jsxs("div", { className: "relative overflow-hidden bg-black border-t border-border/15", children: [
+        /* @__PURE__ */ jsxs("div", { className: "absolute inset-x-0 top-0 h-[85vh] md:h-[95vh] z-0", "aria-hidden": "true", children: [
+          /* @__PURE__ */ jsx(
+            HeroVideo,
+            {
+              src: "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260406_133058_0504132a-0cf3-4450-a370-8ea3b05c95d4.mp4",
+              className: "h-full w-full object-cover"
+            }
+          ),
+          /* @__PURE__ */ jsx("div", { className: "pointer-events-none absolute inset-0 bg-gradient-to-b from-black/55 via-black/60 to-black" })
         ] }),
-        /* @__PURE__ */ jsxs(
-          "section",
-          {
-            id: "section-06",
-            className: "relative overflow-hidden border-t border-border/15 bg-[var(--ink)] px-4 py-20 text-[var(--bone)] transition-colors duration-700 sm:px-6 sm:py-32 md:px-12 md:py-48 lg:px-[10%]",
-            children: [
-              /* @__PURE__ */ jsx("div", { className: "pointer-events-none absolute -right-24 top-0 size-[520px] bg-[var(--inner-green)]/[0.04] blur-3xl" }),
-              /* @__PURE__ */ jsx("div", { className: "pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-black/40 to-transparent" }),
-              /* @__PURE__ */ jsx(FadeIn, { children: /* @__PURE__ */ jsxs("div", { className: "mb-12 flex items-baseline justify-between gap-3 border-b border-white/15 pb-5 font-mono text-[10px] uppercase tracking-widest opacity-60 sm:mb-20 sm:gap-6 sm:pb-6 sm:text-xs", children: [
-                /* @__PURE__ */ jsx("span", { children: "06 · The gathering" }),
-                /* @__PURE__ */ jsx("span", { className: "whitespace-nowrap", children: "Sep 2026 · İstanbul" })
-              ] }) }),
-              /* @__PURE__ */ jsx(
-                WordsPullUp,
-                {
-                  text: "The first inner.hub gathering. İstanbul, September 2026.",
-                  className: "mb-12 max-w-3xl text-balance font-display font-serif italic text-3xl sm:mb-20 sm:text-4xl md:mb-24 md:text-5xl lg:text-6xl"
-                }
-              ),
-              /* @__PURE__ */ jsxs("div", { className: "mb-12 flex flex-col gap-12 sm:mb-20 sm:gap-16 lg:mb-24 lg:flex-row lg:items-center", children: [
-                /* @__PURE__ */ jsxs("div", { className: "grid min-w-0 grid-cols-3 gap-3 sm:gap-6 md:gap-10 lg:flex-1", children: [
-                  /* @__PURE__ */ jsx(StatItem, { n: 34, label: "People" }),
-                  /* @__PURE__ */ jsx(StatItem, { n: 2, label: "Days" }),
-                  /* @__PURE__ */ jsx(StatItem, { n: 8, label: "Modules" })
-                ] }),
-                /* @__PURE__ */ jsx(FadeIn, { delay: 0.2, className: "flex-shrink-0", children: /* @__PURE__ */ jsx(DiagramCircle, {}) })
-              ] }),
-              /* @__PURE__ */ jsx(FadeIn, { delay: 0.15, children: /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-6 sm:gap-8 md:flex-row md:items-end md:justify-between", children: [
-                /* @__PURE__ */ jsx("p", { className: "max-w-2xl text-balance font-serif text-xl opacity-80 sm:text-2xl md:text-3xl", children: "Thirty-four people. Two days. One circle. The first of many." }),
-                /* @__PURE__ */ jsxs(
-                  "a",
-                  {
-                    href: "#section-07",
-                    className: "group inline-flex min-h-11 items-center justify-center gap-2 border border-white/25 px-5 py-3 font-mono text-xs uppercase tracking-widest text-[var(--bone)] transition-colors hover:border-white/60 hover:bg-white hover:text-black sm:min-h-0 sm:justify-start",
-                    children: [
-                      "What's next",
-                      /* @__PURE__ */ jsx(ArrowUpRight, { className: "size-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" })
-                    ]
-                  }
-                )
-              ] }) })
-            ]
-          }
-        ),
-        /* @__PURE__ */ jsx(WhatsNextCinematic, {})
+        /* @__PURE__ */ jsxs("section", { id: "section-04", className: "relative z-10 px-4 pt-20 pb-16 sm:px-6 sm:pt-28 sm:pb-24 md:px-12 md:pt-36 lg:px-[10%]", children: [
+          /* @__PURE__ */ jsxs("div", { className: "mb-10 flex items-baseline justify-between gap-3 border-b border-white/15 pb-5 font-mono text-[10px] uppercase tracking-widest text-white/50 sm:mb-16 sm:gap-6 sm:pb-6 sm:text-xs", children: [
+            /* @__PURE__ */ jsx("span", { children: "04 · What this is" }),
+            /* @__PURE__ */ jsx("span", { className: "whitespace-nowrap", children: "The point" })
+          ] }),
+          /* @__PURE__ */ jsx(
+            WordsPullUp,
+            {
+              text: "Big things start here.",
+              className: "font-display font-serif italic text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-[var(--bone)] max-w-3xl mb-8 sm:mb-10 text-balance"
+            }
+          ),
+          /* @__PURE__ */ jsx(
+            ScrollTextReveal,
+            {
+              text: "New ideas are discussed here, tested here, and supported here by people who can actually build them and fund them.",
+              className: "max-w-[46ch] text-[var(--bone)]",
+              style: { fontSize: "clamp(17px, 2.4vw, 26px)", lineHeight: 1.55, opacity: 0.85 }
+            }
+          )
+        ] }),
+        /* @__PURE__ */ jsxs("section", { id: "section-05", className: "relative z-10 px-4 pt-6 pb-24 sm:px-6 sm:pt-8 sm:pb-32 md:px-12 md:pb-48 lg:px-[10%]", children: [
+          /* @__PURE__ */ jsxs("div", { className: "mb-10 flex items-baseline justify-between gap-3 border-b border-white/15 pb-5 font-mono text-[10px] uppercase tracking-widest text-white/50 sm:mb-16 sm:gap-6 sm:pb-6 sm:text-xs", children: [
+            /* @__PURE__ */ jsx("span", { children: "05 · Entry" }),
+            /* @__PURE__ */ jsx("span", { className: "whitespace-nowrap", children: "By invitation" })
+          ] }),
+          /* @__PURE__ */ jsx(
+            WordsPullUp,
+            {
+              text: "Entry is by invitation. Always.",
+              className: "font-display font-serif italic text-3xl sm:text-4xl md:text-5xl max-w-2xl mb-6 sm:mb-8 text-balance text-[var(--bone)]"
+            }
+          ),
+          /* @__PURE__ */ jsx(FadeIn, { delay: 0.2, children: /* @__PURE__ */ jsx("p", { className: "mb-12 max-w-[65ch] text-base leading-[1.7] text-[var(--bone)]/80 sm:mb-20 sm:text-lg", children: "There are no tickets, no tiers, and no public list. Members are put forward from inside the circle, considered with care, and invited personally." }) }),
+          /* @__PURE__ */ jsx("div", { className: "max-w-3xl", children: [
+            { label: "Your name", line: "Someone inside the circle puts your name forward." },
+            { label: "Consideration", line: "We take our time. Fit beats fame." },
+            { label: "Invitation", line: "If it is right, you hear from us directly." }
+          ].map((item, i) => /* @__PURE__ */ jsx(FadeIn, { delay: i * 0.1, children: /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-2 border-t border-white/15 py-5 last:border-b md:flex-row md:items-baseline md:gap-12 md:py-6", children: [
+            /* @__PURE__ */ jsx("div", { className: "w-full flex-shrink-0 font-mono text-[10px] uppercase tracking-widest text-white/50 sm:text-xs md:w-48", children: item.label }),
+            /* @__PURE__ */ jsx("p", { className: "text-base text-[var(--bone)]/90 sm:text-lg", children: item.line })
+          ] }) }, item.label)) })
+        ] })
       ] }),
       /* @__PURE__ */ jsxs(
-        "footer",
+        "section",
         {
-          id: "site-footer",
-          className: "relative overflow-hidden border-t border-white/10 bg-[var(--ink)] px-4 pb-8 pt-12 text-[var(--bone)] sm:px-6 sm:pt-16 md:px-12 md:pt-20 lg:px-[10%]",
+          id: "section-06",
+          className: "relative overflow-hidden border-t border-border/15 bg-[var(--ink)] px-4 py-20 text-[var(--bone)] transition-colors duration-700 sm:px-6 sm:py-32 md:px-12 md:py-48 lg:px-[10%]",
           children: [
-            /* @__PURE__ */ jsx("div", { className: "pointer-events-none absolute -left-20 top-10 size-72 bg-[var(--inner-green)]/[0.05] blur-3xl" }),
-            /* @__PURE__ */ jsxs("div", { className: "relative z-10 grid gap-12 lg:grid-cols-[1.2fr_1fr_1fr]", children: [
-              /* @__PURE__ */ jsxs("div", { className: "space-y-5", children: [
-                /* @__PURE__ */ jsx(Lockup, { className: "text-[var(--bone)]", fontSize: "clamp(28px, 4vw, 36px)", pulse: true }),
-                /* @__PURE__ */ jsx("p", { className: "max-w-[36ch] text-sm font-light leading-relaxed text-[var(--bone)]/70", children: "A private circle for founders, operators, and investors who prefer signal over noise." }),
-                /* @__PURE__ */ jsxs(
+            /* @__PURE__ */ jsx("div", { className: "pointer-events-none absolute -right-24 top-0 size-[520px] bg-[var(--inner-green)]/[0.04] blur-3xl" }),
+            /* @__PURE__ */ jsx("div", { className: "pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-black/40 to-transparent" }),
+            /* @__PURE__ */ jsx(FadeIn, { children: /* @__PURE__ */ jsxs("div", { className: "mb-12 flex items-baseline justify-between gap-3 border-b border-white/15 pb-5 font-mono text-[10px] uppercase tracking-widest opacity-60 sm:mb-20 sm:gap-6 sm:pb-6 sm:text-xs", children: [
+              /* @__PURE__ */ jsx("span", { children: "06 · The gathering" }),
+              /* @__PURE__ */ jsx("span", { className: "whitespace-nowrap", children: "Sep 2026 · İstanbul" })
+            ] }) }),
+            /* @__PURE__ */ jsx(
+              WordsPullUp,
+              {
+                text: "The first inner.hub gathering. İstanbul, September 2026.",
+                className: "mb-12 max-w-3xl text-balance font-display font-serif italic text-3xl sm:mb-20 sm:text-4xl md:mb-24 md:text-5xl lg:text-6xl"
+              }
+            ),
+            /* @__PURE__ */ jsxs("div", { className: "mb-12 flex flex-col gap-12 sm:mb-20 sm:gap-16 lg:mb-24 lg:flex-row lg:items-center", children: [
+              /* @__PURE__ */ jsxs("div", { className: "grid min-w-0 grid-cols-3 gap-3 sm:gap-6 md:gap-10 lg:flex-1", children: [
+                /* @__PURE__ */ jsx(StatItem, { n: 34, label: "People" }),
+                /* @__PURE__ */ jsx(StatItem, { n: 2, label: "Days" }),
+                /* @__PURE__ */ jsx(StatItem, { n: 8, label: "Modules" })
+              ] }),
+              /* @__PURE__ */ jsx(FadeIn, { delay: 0.2, className: "flex-shrink-0", children: /* @__PURE__ */ jsx(DiagramCircle, {}) })
+            ] }),
+            /* @__PURE__ */ jsx(FadeIn, { delay: 0.15, children: /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-6 sm:gap-8 md:flex-row md:items-end md:justify-between", children: [
+              /* @__PURE__ */ jsx("p", { className: "max-w-2xl text-balance font-serif text-xl opacity-80 sm:text-2xl md:text-3xl", children: "Thirty-four people. Two days. One circle. The first of many." }),
+              /* @__PURE__ */ jsxs(
+                "a",
+                {
+                  href: "#section-07",
+                  className: "group inline-flex min-h-11 items-center justify-center gap-2 border border-white/25 px-5 py-3 font-mono text-xs uppercase tracking-widest text-[var(--bone)] transition-colors hover:border-white/60 hover:bg-white hover:text-black sm:min-h-0 sm:justify-start",
+                  children: [
+                    "What's next",
+                    /* @__PURE__ */ jsx(ArrowUpRight, { className: "size-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" })
+                  ]
+                }
+              )
+            ] }) })
+          ]
+        }
+      ),
+      /* @__PURE__ */ jsx(WhatsNextCinematic, {})
+    ] }),
+    /* @__PURE__ */ jsxs(
+      "footer",
+      {
+        id: "site-footer",
+        className: "relative overflow-hidden border-t border-white/10 bg-[var(--ink)] px-4 pb-8 pt-12 text-[var(--bone)] sm:px-6 sm:pt-16 md:px-12 md:pt-20 lg:px-[10%]",
+        children: [
+          /* @__PURE__ */ jsx("div", { className: "pointer-events-none absolute -left-20 top-10 size-72 bg-[var(--inner-green)]/[0.05] blur-3xl" }),
+          /* @__PURE__ */ jsxs("div", { className: "relative z-10 grid gap-12 lg:grid-cols-[1.2fr_1fr_1fr]", children: [
+            /* @__PURE__ */ jsxs("div", { className: "space-y-5", children: [
+              /* @__PURE__ */ jsx(Lockup, { className: "text-[var(--bone)]", fontSize: "clamp(28px, 4vw, 36px)" }),
+              /* @__PURE__ */ jsx("p", { className: "max-w-[36ch] text-sm font-light leading-relaxed text-[var(--bone)]/70", children: t("home.footerTagline") }),
+              /* @__PURE__ */ jsxs(
+                "a",
+                {
+                  href: "mailto:destek@inner.digital",
+                  className: "inline-flex items-center gap-2 font-mono text-label uppercase tracking-widest text-[var(--bone)]/55 transition-colors hover:text-[var(--bone)]",
+                  children: [
+                    /* @__PURE__ */ jsx(Mail, { className: "size-3.5" }),
+                    "destek@inner.digital"
+                  ]
+                }
+              )
+            ] }),
+            /* @__PURE__ */ jsxs("div", { children: [
+              /* @__PURE__ */ jsx("p", { className: "mb-4 font-mono text-label uppercase tracking-widest text-[var(--bone)]/40", children: t("home.footerNavigate") }),
+              /* @__PURE__ */ jsx("ul", { className: "space-y-2.5", children: [
+                { label: t("publicNav.platform"), href: "#section-03" },
+                { label: t("publicNav.gathering"), href: "#section-06" },
+                { label: t("publicNav.next"), href: "#section-07" },
+                { label: t("home.panel"), href: "/panel" },
+                { label: t("publicNav.invitation"), href: "/invitation" }
+              ].map((l) => /* @__PURE__ */ jsx("li", { children: /* @__PURE__ */ jsx(
+                "a",
+                {
+                  href: l.href,
+                  className: "font-mono text-caption uppercase tracking-widest text-[var(--bone)]/65 transition-colors hover:text-[var(--bone)]",
+                  children: l.label
+                }
+              ) }, l.href)) })
+            ] }),
+            /* @__PURE__ */ jsxs("div", { children: [
+              /* @__PURE__ */ jsx("p", { className: "mb-4 font-mono text-label uppercase tracking-widest text-[var(--bone)]/40", children: t("home.footerConnect") }),
+              /* @__PURE__ */ jsxs("div", { className: "mb-6 flex items-center gap-4", children: [
+                /* @__PURE__ */ jsx(
                   "a",
                   {
-                    href: "mailto:destek@inner.digital",
-                    className: "inline-flex items-center gap-2 font-mono text-label uppercase tracking-widest text-[var(--bone)]/55 transition-colors hover:text-[var(--bone)]",
-                    children: [
-                      /* @__PURE__ */ jsx(Mail, { className: "size-3.5" }),
-                      "destek@inner.digital"
-                    ]
+                    href: "https://www.linkedin.com",
+                    target: "_blank",
+                    rel: "noopener noreferrer",
+                    "aria-label": "inner on LinkedIn",
+                    className: "border border-white/15 p-2.5 text-[var(--bone)]/60 transition-colors hover:border-white/35 hover:text-[var(--bone)]",
+                    children: /* @__PURE__ */ jsx(Linkedin, { size: 18, strokeWidth: 1.5 })
+                  }
+                ),
+                /* @__PURE__ */ jsx(
+                  "a",
+                  {
+                    href: "https://www.instagram.com",
+                    target: "_blank",
+                    rel: "noopener noreferrer",
+                    "aria-label": "inner on Instagram",
+                    className: "border border-white/15 p-2.5 text-[var(--bone)]/60 transition-colors hover:border-white/35 hover:text-[var(--bone)]",
+                    children: /* @__PURE__ */ jsx(Instagram, { size: 18, strokeWidth: 1.5 })
                   }
                 )
               ] }),
-              /* @__PURE__ */ jsxs("div", { children: [
-                /* @__PURE__ */ jsx("p", { className: "mb-4 font-mono text-label uppercase tracking-widest text-[var(--bone)]/40", children: "Navigate" }),
-                /* @__PURE__ */ jsx("ul", { className: "space-y-2.5", children: [
-                  { label: "Platform", href: "#section-03" },
-                  { label: "Gathering", href: "#section-06" },
-                  { label: "What's next", href: "#section-07" },
-                  { label: "Panel", href: "/panel" },
-                  { label: "Invitation", href: "/invitation" }
-                ].map((l) => /* @__PURE__ */ jsx("li", { children: /* @__PURE__ */ jsx(
-                  "a",
-                  {
-                    href: l.href,
-                    className: "font-mono text-caption uppercase tracking-widest text-[var(--bone)]/65 transition-colors hover:text-[var(--bone)]",
-                    children: l.label
-                  }
-                ) }, l.href)) })
-              ] }),
-              /* @__PURE__ */ jsxs("div", { children: [
-                /* @__PURE__ */ jsx("p", { className: "mb-4 font-mono text-label uppercase tracking-widest text-[var(--bone)]/40", children: "Connect" }),
-                /* @__PURE__ */ jsxs("div", { className: "mb-6 flex items-center gap-4", children: [
-                  /* @__PURE__ */ jsx(
-                    "a",
-                    {
-                      href: "https://www.linkedin.com",
-                      target: "_blank",
-                      rel: "noopener noreferrer",
-                      "aria-label": "inner on LinkedIn",
-                      className: "border border-white/15 p-2.5 text-[var(--bone)]/60 transition-colors hover:border-white/35 hover:text-[var(--bone)]",
-                      children: /* @__PURE__ */ jsx(Linkedin, { size: 18, strokeWidth: 1.5 })
-                    }
-                  ),
-                  /* @__PURE__ */ jsx(
-                    "a",
-                    {
-                      href: "https://www.instagram.com",
-                      target: "_blank",
-                      rel: "noopener noreferrer",
-                      "aria-label": "inner on Instagram",
-                      className: "border border-white/15 p-2.5 text-[var(--bone)]/60 transition-colors hover:border-white/35 hover:text-[var(--bone)]",
-                      children: /* @__PURE__ */ jsx(Instagram, { size: 18, strokeWidth: 1.5 })
-                    }
-                  )
-                ] }),
-                /* @__PURE__ */ jsx("p", { className: "font-mono text-label uppercase tracking-widest text-[var(--bone)]/35", children: "İstanbul → Global" })
-              ] })
-            ] }),
-            /* @__PURE__ */ jsxs("div", { className: "relative z-10 mt-14 flex flex-col gap-6 border-t border-white/10 pt-6 md:flex-row md:items-end md:justify-between", children: [
-              /* @__PURE__ */ jsx("p", { className: "font-mono text-label uppercase tracking-widest text-[var(--bone)]/35", children: "© 2026 inner.hub · All rights reserved" }),
-              /* @__PURE__ */ jsx("div", { className: "leading-none text-[var(--bone)]", "aria-hidden": "true", children: /* @__PURE__ */ jsx(Lockup, { fontSize: "clamp(2.75rem, 10vw, 7.5rem)", pulse: true }) })
-            ] }),
-            /* @__PURE__ */ jsx("span", { className: "sr-only", children: "inner.hub" })
-          ]
-        }
-      )
-    ] })
-  );
+              /* @__PURE__ */ jsx("p", { className: "font-mono text-label uppercase tracking-widest text-[var(--bone)]/35", children: "İstanbul → Global" })
+            ] })
+          ] }),
+          /* @__PURE__ */ jsxs("div", { className: "relative z-10 mt-14 flex flex-col gap-6 border-t border-white/10 pt-6 md:flex-row md:items-end md:justify-between", children: [
+            /* @__PURE__ */ jsx("p", { className: "font-mono text-label uppercase tracking-widest text-[var(--bone)]/35", children: "© 2026 inner hub · All rights reserved" }),
+            /* @__PURE__ */ jsx("div", { className: "leading-none text-[var(--bone)]", "aria-hidden": "true", children: /* @__PURE__ */ jsx(Lockup, { fontSize: "clamp(2.75rem, 10vw, 7.5rem)" }) })
+          ] }),
+          /* @__PURE__ */ jsx("span", { className: "sr-only", children: "inner hub" })
+        ]
+      }
+    )
+  ] });
 }
 function render3() {
   const queryClient = new QueryClient();
   return renderToString(
-    /* @__PURE__ */ jsx(QueryClientProvider, { client: queryClient, children: /* @__PURE__ */ jsx(TooltipProvider, { children: /* @__PURE__ */ jsx(Router, { ssrPath: "/", children: /* @__PURE__ */ jsx(Home, {}) }) }) })
+    /* @__PURE__ */ jsx(QueryClientProvider, { client: queryClient, children: /* @__PURE__ */ jsx(I18nProvider, { children: /* @__PURE__ */ jsx(TooltipProvider, { children: /* @__PURE__ */ jsx(Router, { ssrPath: "/", children: /* @__PURE__ */ jsx(Home, {}) }) }) }) })
   );
 }
 export {

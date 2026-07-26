@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, ArrowUpRight, Building2, Check, Rocket, TrendingUp, Wrench } from "lucide-react";
 import { HeroVideo } from "@/components/HeroVideo";
 import { Lockup } from "@/components/Lockup";
+import { LocaleToggle, useLocale, useT } from "@/i18n";
 import { useSubmitRequest } from "@workspace/api-client-react";
 
 const INVITE_VIDEO =
@@ -12,53 +13,71 @@ const INVITE_VIDEO =
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
-const ROLES = [
-  {
-    value: "founder",
-    label: "Girişimci",
-    en: "Founder",
-    hint: "Building something. Early or scaling.",
-    icon: Rocket,
-  },
-  {
-    value: "investor",
-    label: "Yatırımcı",
-    en: "Investor",
-    hint: "Angel, fund, or operator allocating capital.",
-    icon: TrendingUp,
-  },
-  {
-    value: "builder",
-    label: "Builder",
-    en: "Builder",
-    hint: "Engineer, researcher veya operatör. Stack’in içinde üretenler.",
-    icon: Wrench,
-  },
-  {
-    value: "company",
-    label: "Şirket",
-    en: "Company",
-    hint: "Team looking to enter the circle together.",
-    icon: Building2,
-  },
-] as const;
+const ROLE_DEFS = [
+  { value: "founder" as const, icon: Rocket },
+  { value: "investor" as const, icon: TrendingUp },
+  { value: "builder" as const, icon: Wrench },
+  { value: "company" as const, icon: Building2 },
+];
 
-type Role = (typeof ROLES)[number]["value"];
+type Role = (typeof ROLE_DEFS)[number]["value"];
 
-/** Steps after boot: 0 role → 1 identity → 2 presence → 3 story → 4 intro */
-const STEPS = [
-  { id: "role", title: "How do you enter?" },
-  { id: "identity", title: "Who should we reach?" },
-  { id: "org", title: "Which organization?" },
-  { id: "story", title: "What are you building?" },
-  { id: "intro", title: "How did you find us?" },
-] as const;
+const STEP_IDS = ["role", "identity", "org", "story", "intro"] as const;
 
 const fieldClass =
   "w-full border-0 border-b border-white/20 bg-transparent px-0 py-3.5 text-[15px] text-[var(--bone)] shadow-none placeholder:text-white/35 focus-visible:border-[var(--inner-green)] focus-visible:outline-none focus-visible:ring-0 transition-colors";
 
 export default function Invitation() {
+  const t = useT();
+  const { locale } = useLocale();
   const { mutate: submitRequest, isSuccess, isError, isPending } = useSubmitRequest();
+
+  const roles = useMemo(
+    () =>
+      ROLE_DEFS.map((r) => ({
+        ...r,
+        label:
+          r.value === "founder"
+            ? t("invite.roleFounder")
+            : r.value === "investor"
+              ? t("invite.roleInvestor")
+              : r.value === "builder"
+                ? t("invite.roleBuilder")
+                : t("invite.roleCompany"),
+        hint:
+          r.value === "founder"
+            ? t("invite.roleFounderHint")
+            : r.value === "investor"
+              ? t("invite.roleInvestorHint")
+              : r.value === "builder"
+                ? t("invite.roleBuilderHint")
+                : t("invite.roleCompanyHint"),
+      })),
+    [t],
+  );
+
+  const steps = useMemo(
+    () => [
+      { id: STEP_IDS[0], title: t("invite.stepRole") },
+      { id: STEP_IDS[1], title: t("invite.stepIdentity") },
+      { id: STEP_IDS[2], title: t("invite.stepOrg") },
+      { id: STEP_IDS[3], title: t("invite.stepStory") },
+      { id: STEP_IDS[4], title: t("invite.stepIntro") },
+    ],
+    [t],
+  );
+
+  const stepCopy = (s: number, r: Role | null) => {
+    if (s === 0) return t("invite.copyRole");
+    if (s === 1) return t("invite.copyIdentity");
+    if (s === 2) {
+      if (r === "investor") return t("invite.copyOrgInvestor");
+      if (r === "company") return t("invite.copyOrgCompany");
+      return t("invite.copyOrgDefault");
+    }
+    if (s === 3) return t("invite.copyStory");
+    return t("invite.copyIntro");
+  };
 
   const [booting, setBooting] = useState(true);
   const [bootProgress, setBootProgress] = useState(0);
@@ -146,7 +165,7 @@ export default function Invitation() {
     };
   }, [organizationDomain]);
 
-  const progress = useMemo(() => ((step + 1) / STEPS.length) * 100, [step]);
+  const progress = useMemo(() => ((step + 1) / steps.length) * 100, [step, steps.length]);
 
   const orgRequired = role === "investor" || role === "company";
 
@@ -164,7 +183,7 @@ export default function Invitation() {
 
   const goNext = () => {
     if (!canNext) return;
-    if (step < STEPS.length - 1) setStep((s) => s + 1);
+    if (step < steps.length - 1) setStep((s) => s + 1);
   };
 
   const goBack = () => {
@@ -195,12 +214,12 @@ export default function Invitation() {
     if (e.key !== "Enter" || e.shiftKey) return;
     if ((e.target as HTMLElement).tagName === "TEXTAREA") return;
     e.preventDefault();
-    if (step < STEPS.length - 1) goNext();
+    if (step < steps.length - 1) goNext();
     else handleSubmit();
   };
 
   return (
-    <div lang="en" className="relative flex min-h-svh flex-col overflow-hidden bg-[var(--ink)] text-[var(--bone)]">
+    <div lang={locale} className="relative flex min-h-svh flex-col overflow-hidden bg-[var(--ink)] text-[var(--bone)]">
       <HeroVideo
         src={INVITE_VIDEO}
         className="fixed inset-0 z-0 h-full w-full scale-[1.03] object-cover"
@@ -217,14 +236,17 @@ export default function Invitation() {
 
       <header className="relative z-20 flex h-[60px] shrink-0 items-center justify-between px-5 md:h-[72px] md:px-10 lg:px-[8%]">
         <a href="/" className="inline-flex focus-visible:outline-none">
-          <Lockup className="text-[var(--bone)]" fontSize="clamp(22px, 2.4vw, 30px)" />
+          <Lockup className="text-[var(--bone)]" fontSize="clamp(22px, 2.4vw, 30px)" pulse />
         </a>
-        <a
-          href="/"
-          className="font-mono text-[10px] uppercase tracking-widest text-white/55 transition-colors hover:text-white sm:text-xs"
-        >
-          Ana sayfa
-        </a>
+        <div className="flex items-center gap-3">
+          <LocaleToggle tone="dark" />
+          <a
+            href="/"
+            className="font-mono text-[10px] uppercase tracking-widest text-white/55 transition-colors hover:text-white sm:text-xs"
+          >
+            {t("invite.homeLink")}
+          </a>
+        </div>
       </header>
 
       <main className="relative z-10 flex flex-1 items-center justify-center px-4 py-10 sm:px-6 md:px-10 md:py-14">
@@ -239,7 +261,7 @@ export default function Invitation() {
               className="w-full max-w-md"
             >
               <p className="mb-4 font-mono text-[10px] uppercase tracking-[0.18em] text-white/50">
-                Preparing invitation
+                {t("invite.preparing")}
               </p>
               <div className="mb-3 h-[2px] w-full overflow-hidden bg-white/15">
                 <motion.div
@@ -248,7 +270,7 @@ export default function Invitation() {
                 />
               </div>
               <div className="flex items-baseline justify-between font-mono text-[11px] uppercase tracking-widest text-white/45">
-                <span>inner · access</span>
+                <span>{t("invite.access")}</span>
                 <span>{bootProgress}%</span>
               </div>
             </motion.div>
@@ -264,20 +286,21 @@ export default function Invitation() {
                 <span className="flex size-7 items-center justify-center bg-[var(--inner-green)]">
                   <Check className="size-3.5 text-black" strokeWidth={2.5} />
                 </span>
-                <span className="font-mono text-xs uppercase tracking-widest text-white/60">Received</span>
+                <span className="font-mono text-xs uppercase tracking-widest text-white/60">
+                  {t("invite.received")}
+                </span>
               </div>
               <h1 className="mb-4 font-display font-serif italic text-4xl leading-[1.1] text-balance md:text-5xl">
-                If it fits, we will be in touch.
+                {t("invite.successTitle")}
               </h1>
               <p className="max-w-[42ch] text-sm leading-relaxed text-white/60 md:text-base">
-                We review every request carefully. No automated replies. Only a real answer when it
-                matters.
+                {t("invite.successBody")}
               </p>
               <a
                 href="/"
                 className="mt-8 inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-[var(--bone)]/70 transition-colors hover:text-[var(--bone)]"
               >
-                Back to home
+                {t("invite.backHome")}
                 <ArrowUpRight className="size-3.5" />
               </a>
             </motion.div>
@@ -294,10 +317,10 @@ export default function Invitation() {
               <div className="border-b border-white/10 px-5 pt-5 sm:px-7">
                 <div className="mb-3 flex items-center justify-between gap-4">
                   <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-white/50">
-                    Request an invitation
+                    {t("invite.requestTitle")}
                   </p>
                   <p className="font-mono text-[10px] uppercase tracking-widest text-white/40">
-                    {String(step + 1).padStart(2, "0")} / {String(STEPS.length).padStart(2, "0")}
+                    {String(step + 1).padStart(2, "0")} / {String(steps.length).padStart(2, "0")}
                   </p>
                 </div>
                 <div className="h-[2px] w-full overflow-hidden bg-white/10">
@@ -308,7 +331,7 @@ export default function Invitation() {
                   />
                 </div>
                 <div className="mt-4 flex gap-1.5 overflow-x-auto pb-4">
-                  {STEPS.map((s, i) => (
+                  {steps.map((s, i) => (
                     <button
                       key={s.id}
                       type="button"
@@ -339,7 +362,7 @@ export default function Invitation() {
                     transition={{ duration: 0.35, ease: EASE }}
                   >
                     <h1 className="mb-2 font-display font-serif italic text-3xl leading-[1.1] text-balance sm:text-4xl">
-                      {STEPS[step].title}
+                      {steps[step].title}
                     </h1>
                     <p className="mb-8 max-w-[46ch] text-sm leading-relaxed text-white/55">
                       {stepCopy(step, role)}
@@ -347,7 +370,7 @@ export default function Invitation() {
 
                     {step === 0 && (
                       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                        {ROLES.map((r) => {
+                        {roles.map((r) => {
                           const Icon = r.icon;
                           const active = role === r.value;
                           return (
@@ -384,23 +407,23 @@ export default function Invitation() {
 
                     {step === 1 && (
                       <div className="space-y-6">
-                        <Field label="Ad Soyad" required>
+                        <Field label={t("invite.fullName")} required>
                           <input
                             type="text"
                             value={name}
                             onChange={(e) => setName(e.target.value)}
-                            placeholder="Adınız ve soyadınız"
+                            placeholder={t("invite.phName")}
                             className={fieldClass}
                             autoComplete="name"
                             autoFocus
                           />
                         </Field>
-                        <Field label="Email" required>
+                        <Field label={t("invite.email")} required>
                           <input
                             type="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            placeholder="you@company.com"
+                            placeholder={t("invite.phEmail")}
                             className={fieldClass}
                             autoComplete="email"
                           />
@@ -426,42 +449,42 @@ export default function Invitation() {
                           </div>
                           <div className="min-w-0 flex-1">
                             <p className="font-mono text-[10px] uppercase tracking-widest text-white/45">
-                              {organizationLogo ? "Logo bulundu" : "Logo otomatik çekilir"}
+                              {organizationLogo ? t("invite.logoFound") : t("invite.logoAuto")}
                             </p>
                             <p className="mt-1 text-xs leading-snug text-white/50">
-                              Domain girildiğinde sistem kurum logosunu getirir ve kaydeder. VS ve büyük şirketler için.
+                              {t("invite.logoHint")}
                             </p>
                           </div>
                         </div>
 
                         <Field
-                          label="Kurum / Fon / Şirket"
-                          hint={orgRequired ? "Zorunlu" : "Opsiyonel"}
+                          label={t("invite.orgLabel")}
+                          hint={orgRequired ? t("invite.required") : t("invite.optional")}
                           required={orgRequired}
                         >
                           <input
                             type="text"
                             value={organization}
                             onChange={(e) => setOrganization(e.target.value)}
-                            placeholder="Sequoia, a16z, Acme AI…"
+                            placeholder={t("invite.phOrg")}
                             className={fieldClass}
                             autoComplete="organization"
                             autoFocus
                           />
                         </Field>
 
-                        <Field label="Kurum domaini" hint="Logo için">
+                        <Field label={t("invite.orgDomain")} hint={t("invite.forLogo")}>
                           <input
                             type="text"
                             value={organizationDomain}
                             onChange={(e) => setOrganizationDomain(e.target.value)}
-                            placeholder="sequoiacap.com"
+                            placeholder={t("invite.phDomain")}
                             className={fieldClass}
                             autoComplete="off"
                           />
                         </Field>
 
-                        <Field label="LinkedIn" hint="Opsiyonel">
+                        <Field label={t("invite.linkedin")} hint={t("invite.optional")}>
                           <input
                             type="url"
                             value={linkedin}
@@ -472,7 +495,7 @@ export default function Invitation() {
                           />
                         </Field>
 
-                        <Field label="Website / Portfolyo" hint="Opsiyonel">
+                        <Field label={t("invite.org")} hint={t("invite.optional")}>
                           <input
                             type="url"
                             value={link}
@@ -486,41 +509,25 @@ export default function Invitation() {
                     )}
 
                     {step === 3 && (
-                      <Field
-                        label={
-                          role === "investor"
-                            ? "Ne arıyorsun / nasıl katkı sağlıyorsun?"
-                            : role === "company"
-                              ? "Takımınız ne üzerine çalışıyor?"
-                              : "Kimsin / Ne inşa ediyorsun?"
-                        }
-                        required
-                      >
+                      <Field label={t("invite.storyLabel")} required>
                         <textarea
                           value={whoYouAre}
                           onChange={(e) => setWhoYouAre(e.target.value)}
-                          placeholder={
-                            role === "investor"
-                              ? "Yatırım tezin, aşama tercihin ve neden inner.hub..."
-                              : "Kısa ama net: işin, niyetin, şu anki aşaman."
-                          }
+                          placeholder={t("invite.phStory")}
                           className={`${fieldClass} min-h-[140px] resize-none py-3 leading-relaxed`}
                           autoFocus
                         />
-                        <p className="mt-2 font-mono text-[10px] tracking-widest text-white/35">
-                          {whoYouAre.trim().length} karakter · en az 12
-                        </p>
                       </Field>
                     )}
 
                     {step === 4 && (
                       <div className="space-y-6">
-                        <Field label="Seni kim tanıttı?" hint="Opsiyonel">
+                        <Field label={t("invite.introLabel")} hint={t("invite.optional")}>
                           <input
                             type="text"
                             value={whoIntroduced}
                             onChange={(e) => setWhoIntroduced(e.target.value)}
-                            placeholder="Bir üye adı, ya da boş bırak"
+                            placeholder={t("invite.phIntro")}
                             className={fieldClass}
                             autoComplete="off"
                             autoFocus
@@ -529,7 +536,7 @@ export default function Invitation() {
 
                         <div className="border border-white/10 bg-white/[0.03] px-4 py-4">
                           <p className="mb-3 font-mono text-[10px] uppercase tracking-widest text-white/40">
-                            Özet
+                            {t("invite.intro")}
                           </p>
                           <div className="mb-3 flex items-center gap-3">
                             {organizationLogo ? (
@@ -549,7 +556,7 @@ export default function Invitation() {
                             </div>
                           </div>
                           <dl className="space-y-2 text-sm">
-                            <SummaryRow label="Rol" value={ROLES.find((r) => r.value === role)?.label ?? "·"} />
+                            <SummaryRow label={t("invite.howEnter")} value={roles.find((r) => r.value === role)?.label ?? "·"} />
                             <SummaryRow label="İsim" value={name || "·"} />
                             <SummaryRow label="Email" value={email || "·"} />
                             {linkedin ? <SummaryRow label="LinkedIn" value={linkedin} /> : null}
@@ -586,17 +593,17 @@ export default function Invitation() {
                   className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-white/50 transition-colors hover:text-white disabled:invisible"
                 >
                   <ArrowLeft className="size-3.5" />
-                  Geri
+                  {t("common.back")}
                 </button>
 
-                {step < STEPS.length - 1 ? (
+                {step < steps.length - 1 ? (
                   <button
                     type="button"
                     onClick={goNext}
                     disabled={!canNext}
                     className="inline-flex items-center gap-2 bg-[var(--bone)] px-5 py-2.5 font-mono text-[11px] uppercase tracking-widest text-black transition-opacity hover:opacity-90 disabled:opacity-35"
                   >
-                    Devam
+                    {t("invite.continue")}
                     <ArrowUpRight className="size-3.5" />
                   </button>
                 ) : (
@@ -606,7 +613,7 @@ export default function Invitation() {
                     disabled={isPending || !role}
                     className="inline-flex items-center gap-2 bg-[var(--bone)] px-5 py-2.5 font-mono text-[11px] uppercase tracking-widest text-black transition-opacity hover:opacity-90 disabled:opacity-35"
                   >
-                    {isPending ? "Gönderiliyor…" : "Gönder"}
+                    {isPending ? t("invite.submitting") : t("invite.submit")}
                     {!isPending ? <ArrowUpRight className="size-3.5" /> : null}
                   </button>
                 )}
@@ -617,18 +624,6 @@ export default function Invitation() {
       </main>
     </div>
   );
-}
-
-function stepCopy(step: number, role: Role | null) {
-  if (step === 0) return "Yatırımcı, girişimci, builder veya şirket. Her giriş ayrı bir kapı.";
-  if (step === 1) return "Doğrudan sana ulaşabileceğimiz bilgiler. Spam yok; sadece gerçek yanıt.";
-  if (step === 2) {
-    if (role === "investor") return "Fon veya kurum adın + domain. Logoyu otomatik getiririz.";
-    if (role === "company") return "Şirket adın ve domainin. Logo sisteme kaydolur.";
-    return "Varsa kurumunu ekle. Domain ile logo otomatik yüklenir.";
-  }
-  if (step === 3) return "Kısa tut. Net tut. Circle bunu okuyacak.";
-  return "Çoğu kişi davetle gelir. Kendi bulduysan da sorun değil. Söylemen yeterli.";
 }
 
 function Field({

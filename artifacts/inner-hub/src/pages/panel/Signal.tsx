@@ -24,6 +24,7 @@ import { PersonAvatar } from "@/components/panel/PersonAvatar";
 import { CourseCardSkeleton, LoadingBlock, ErrorState } from "@/components/panel/Skeletons";
 import { apiUrl } from "@/lib/api";
 import { cleanDisplayText } from "@/lib/displayText";
+import { useT, useLocale } from "@/i18n";
 
 interface Theme {
   topic: string;
@@ -51,25 +52,22 @@ const ACTIVITY_DATA = [
   [2, 3, 8, 12, 7, 4, 2],
 ];
 
-const DAYS = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"];
-const WEEKS = ["4h", "3h", "2h", "1h", "Bu"];
-
 const MOMENTUM_CONFIG = {
   yüksek: {
     icon: TrendingUp,
-    label: "Yükselen",
-    tone: "border-[var(--ink)] bg-[var(--ink)] text-[var(--bone)]",
+    labelKey: "signal.momentumRising",
+    tone: "border-[var(--ink)]/15 bg-[var(--ink)] text-[var(--bone)]",
     accent: "var(--inner-green)",
   },
   orta: {
     icon: Minus,
-    label: "Stabil",
+    labelKey: "signal.momentumStable",
     tone: "border-[var(--ink)]/15 text-[var(--ink-body)]",
-    accent: "rgba(10,10,10,0.22)",
+    accent: "color-mix(in srgb, var(--ink) 22%, transparent)",
   },
   düşük: {
     icon: TrendingDown,
-    label: "Düşen",
+    labelKey: "signal.momentumFalling",
     tone: "border-[var(--error)]/30 text-[var(--error-ink)]",
     accent: "var(--error)",
   },
@@ -78,7 +76,25 @@ const MOMENTUM_CONFIG = {
 type SectionId = "insight" | "themes" | "people" | "activity";
 
 function ActivityHeatmap() {
+  const t = useT();
   const maxVal = Math.max(...ACTIVITY_DATA.flat());
+  const days = [
+    t("signal.dayMon"),
+    t("signal.dayTue"),
+    t("signal.dayWed"),
+    t("signal.dayThu"),
+    t("signal.dayFri"),
+    t("signal.daySat"),
+    t("signal.daySun"),
+  ];
+  const weeks = [
+    t("signal.week4"),
+    t("signal.week3"),
+    t("signal.week2"),
+    t("signal.week1"),
+    t("signal.weekThis"),
+  ];
+
   return (
     <div>
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
@@ -87,23 +103,23 @@ function ActivityHeatmap() {
             className="font-display font-serif text-lg text-[var(--ink)]"
             style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 400 }}
           >
-            Aktivite haritası
+            {t("signal.activityMap")}
           </p>
           <p className="mt-0.5 text-xs text-[var(--ink-muted)]">
-            Son 5 haftalık topluluk yoğunluğu · gösterge amaçlı
+            {t("signal.activityMapSub")}
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <span className="font-mono text-label text-[var(--ink-subtle)]">Az</span>
+          <span className="font-mono text-label text-[var(--ink-subtle)]">{t("signal.low")}</span>
           {[0.15, 0.3, 0.5, 0.7, 1].map((o, i) => (
             <span key={i} className="size-2.5 bg-[var(--ink)]" style={{ opacity: o }} />
           ))}
-          <span className="font-mono text-label text-[var(--ink-subtle)]">Çok</span>
+          <span className="font-mono text-label text-[var(--ink-subtle)]">{t("signal.high")}</span>
         </div>
       </div>
       <div className="flex gap-1">
         <div className="flex flex-col justify-between py-0.5 pr-2">
-          {WEEKS.map((w) => (
+          {weeks.map((w) => (
             <span key={w} className="font-mono text-label leading-none text-[var(--ink-subtle)]">
               {w}
             </span>
@@ -111,7 +127,7 @@ function ActivityHeatmap() {
         </div>
         <div className="flex-1">
           <div className="mb-1 grid grid-cols-7 gap-1">
-            {DAYS.map((d) => (
+            {days.map((d) => (
               <span key={d} className="text-center font-mono text-label text-[var(--ink-subtle)]">
                 {d}
               </span>
@@ -125,7 +141,7 @@ function ActivityHeatmap() {
                     key={di}
                     className="h-5 bg-[var(--ink)] transition-opacity"
                     style={{ opacity: val === 0 ? 0.04 : (val / maxVal) * 0.85 + 0.15 }}
-                    title={`${val} etkileşim`}
+                    title={t("signal.interactions", { n: val })}
                   />
                 ))}
               </div>
@@ -202,6 +218,7 @@ function SignalStat({
 }
 
 function ThemeCard({ theme, index }: { theme: Theme; index: number }) {
+  const t = useT();
   const cfg = MOMENTUM_CONFIG[theme.momentum];
   const Icon = cfg.icon;
   const rising = theme.momentum === "yüksek";
@@ -234,7 +251,7 @@ function ThemeCard({ theme, index }: { theme: Theme; index: number }) {
               ].join(" ")}
             >
               <Icon className="size-2.5" />
-              {cfg.label}
+              {t(cfg.labelKey)}
             </span>
           </div>
           <h3
@@ -253,7 +270,7 @@ function ThemeCard({ theme, index }: { theme: Theme; index: number }) {
           className="inline-flex min-h-10 shrink-0 items-center justify-center gap-1.5 border border-[var(--ink)]/15 px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)] transition-colors hover:border-[var(--ink)] hover:bg-[var(--ink)] hover:text-[var(--bone)] sm:self-center"
         >
           <MessageSquare className="size-3" />
-          Chat&apos;te takip et
+          {t("signal.followInChat")}
           <ArrowRight className="size-3" />
         </Link>
       </div>
@@ -262,6 +279,7 @@ function ThemeCard({ theme, index }: { theme: Theme; index: number }) {
 }
 
 function ConnectionCard({ conn }: { conn: Connection }) {
+  const t = useT();
   return (
     <article className="group relative flex h-full flex-col overflow-hidden border border-[var(--ink)]/[0.1] bg-[var(--bone)] p-4 transition-colors hover:border-[var(--ink)]/28 sm:p-5">
       <span
@@ -290,7 +308,7 @@ function ConnectionCard({ conn }: { conn: Connection }) {
             <ScoreRing score={conn.matchScore} />
           </div>
           <p className="mt-0.5 font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)]">
-            Uyum %{conn.matchScore}
+            {t("signal.compatibilityPct", { n: conn.matchScore })}
           </p>
         </div>
       </div>
@@ -303,7 +321,7 @@ function ConnectionCard({ conn }: { conn: Connection }) {
         href="/panel/match"
         className="mt-auto inline-flex min-h-11 w-full items-center justify-center gap-1.5 bg-[var(--ink)] px-4 py-2.5 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-85"
       >
-        Tanışma talebi
+        {t("signal.requestIntro")}
         <ArrowRight className="size-3" />
       </Link>
     </article>
@@ -339,6 +357,8 @@ function scrollToSection(id: SectionId) {
 }
 
 export default function Signal() {
+  const t = useT();
+  const { locale } = useLocale();
   const [data, setData] = useState<SignalData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -387,7 +407,7 @@ export default function Signal() {
         setFromCache(false);
       }
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Sinyal alınamadı");
+      setError(e instanceof Error ? e.message : t("signal.fetchError"));
     } finally {
       setLoading(false);
     }
@@ -419,14 +439,12 @@ export default function Signal() {
     if (!data?.insight) return;
 
     if (imageUrl && !force) {
-      setImageError("Görsel hazır. Yeniden üretmek kredi harcar.");
+      setImageError(t("signal.visualReady"));
       return;
     }
 
     const ok = window.confirm(
-      force
-        ? "Yeniden üretim ~0.25–1 kredi harcar. Devam?"
-        : "Tek görsel üretilir (720p, kredi-tasarruflu). Devam?",
+      force ? t("signal.confirmRegenerate") : t("signal.confirmGenerate"),
     );
     if (!ok) return;
 
@@ -495,17 +513,26 @@ export default function Signal() {
   }, [lightboxOpen]);
 
   const jumps: { id: SectionId; label: string }[] = [
-    { id: "insight", label: "İçgörü" },
-    { id: "themes", label: "Temalar" },
-    { id: "people", label: "Bağlantılar" },
-    { id: "activity", label: "Aktivite" },
+    { id: "insight", label: t("signal.insight") },
+    { id: "themes", label: t("signal.themes") },
+    { id: "people", label: t("signal.people") },
+    { id: "activity", label: t("signal.activity") },
   ];
 
-  const risingCount = data?.weeklyThemes.filter((t) => t.momentum === "yüksek").length ?? 0;
+  const risingCount = data?.weeklyThemes.filter((theme) => theme.momentum === "yüksek").length ?? 0;
   const avgMatchScore =
     data && data.connections.length > 0
       ? Math.round(data.connections.reduce((sum, c) => sum + c.matchScore, 0) / data.connections.length)
       : null;
+
+  const updatedLabel = updatedAt
+    ? updatedAt.toLocaleString(locale === "en" ? "en-US" : "tr-TR", {
+        day: "numeric",
+        month: "short",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : "";
 
   return (
     <div className="mx-auto max-w-4xl space-y-8">
@@ -513,7 +540,7 @@ export default function Signal() {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="mb-2 font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
-              AI layer
+              {t("signal.eyebrow")}
             </p>
             <h1
               className="font-display font-serif text-4xl text-[var(--ink)] md:text-5xl"
@@ -522,17 +549,11 @@ export default function Signal() {
               <Lockup suffix="signal" className="text-[var(--ink)]" />
             </h1>
             <p className="mt-2 max-w-[42ch] text-sm font-light text-[var(--ink-muted)]">
-              Topluluk hafızasından senin için çıkarılan sinyaller. Oku, kaydet, harekete geç.
+              {t("signal.subtitle")}
             </p>
             {updatedAt && !loading && (
               <p className="mt-2 text-xs text-[var(--ink-muted)]">
-                Son güncelleme ·{" "}
-                {updatedAt.toLocaleString("tr-TR", {
-                  day: "numeric",
-                  month: "short",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
+                {t("signal.lastUpdated", { date: updatedLabel })}
               </p>
             )}
           </div>
@@ -540,10 +561,10 @@ export default function Signal() {
             type="button"
             onClick={fetchSignal}
             disabled={loading}
-            className="inline-flex min-h-11 shrink-0 items-center gap-2 border border-[var(--ink)] bg-[var(--ink)] px-4 py-2.5 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-85 disabled:opacity-35"
+            className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 border border-[var(--ink)]/15 bg-[var(--ink)] px-4 py-2.5 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-85 disabled:opacity-35 sm:w-auto"
           >
             <RefreshCw className={`size-3 ${loading ? "animate-spin" : ""}`} />
-            {loading ? "Analiz…" : "Güncelle"}
+            {loading ? t("signal.analyzing") : t("signal.refresh")}
           </button>
         </div>
       </FadeIn>
@@ -551,13 +572,13 @@ export default function Signal() {
       {!loading && data && (
         <FadeIn delay={0.02}>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <SignalStat label="Aktif Sinyal" value={String(data.weeklyThemes.length)} sub="haftalık tema" icon={Zap} />
-            <SignalStat label="Yükselen" value={String(risingCount)} sub="momentum yüksek" icon={TrendingUp} />
-            <SignalStat label="Bağlantı" value={String(data.connections.length)} sub="bu hafta önerilen" icon={Users} />
+            <SignalStat label={t("signal.activeSignal")} value={String(data.weeklyThemes.length)} sub={t("signal.weeklyTheme")} icon={Zap} />
+            <SignalStat label={t("signal.rising")} value={String(risingCount)} sub={t("signal.momentumHigh")} icon={TrendingUp} />
+            <SignalStat label={t("signal.connection")} value={String(data.connections.length)} sub={t("signal.suggestedThisWeek")} icon={Users} />
             <SignalStat
-              label="Ort. Uyum"
+              label={t("signal.avgMatch")}
               value={avgMatchScore !== null ? String(avgMatchScore) : "·"}
-              sub="eşleşme skoru"
+              sub={t("signal.matchScoreLabel")}
               icon={Target}
             />
           </div>
@@ -590,7 +611,7 @@ export default function Signal() {
       )}
 
       {loading ? (
-        <LoadingBlock label="Sinyaller analiz ediliyor">
+        <LoadingBlock label={t("signal.loading")}>
           <div className="space-y-3">
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               <CourseCardSkeleton />
@@ -608,7 +629,7 @@ export default function Signal() {
           {/* Insight hero */}
           <FadeIn delay={0.04}>
             <section id="signal-insight" className="scroll-mt-4">
-              <div className="relative overflow-hidden border border-[var(--ink)] bg-[var(--ink)] p-6 text-[var(--bone)] md:p-8">
+              <div className="relative overflow-hidden border border-[var(--ink)]/15 bg-[var(--ink)] p-5 text-[var(--bone)] sm:p-6 md:p-8">
                 <AmbientCardBackground />
                 <span
                   aria-hidden
@@ -621,12 +642,12 @@ export default function Signal() {
                   <div className="mb-4 flex flex-wrap items-center gap-2">
                     <Zap className="size-3.5 text-[var(--success-ink)]" />
                     <span className="text-[10px] uppercase tracking-[0.16em] text-[var(--bone)]/62">
-                      Bu haftanın içgörüsü
+                      {t("signal.weekInsight")}
                     </span>
                     <span className="ml-auto size-3 bg-[var(--inner-green)]" aria-hidden />
                   </div>
                   <p
-                    className="max-w-[38ch] font-serif text-2xl leading-snug md:text-3xl"
+                    className="max-w-[38ch] font-serif text-xl leading-snug sm:text-2xl md:text-3xl"
                     style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 300 }}
                   >
                     {data.insight}
@@ -636,23 +657,23 @@ export default function Signal() {
                     <button
                       type="button"
                       onClick={copyInsight}
-                      className="inline-flex items-center gap-2 border border-[var(--bone)]/25 px-3 py-2 font-mono text-label uppercase tracking-widest text-[var(--bone)]/80 transition-colors hover:border-[var(--bone)]/50 hover:text-[var(--bone)]"
+                      className="inline-flex min-h-10 items-center gap-2 border border-[var(--bone)]/25 px-3 py-2 font-mono text-label uppercase tracking-widest text-[var(--bone)]/80 transition-colors hover:border-[var(--bone)]/50 hover:text-[var(--bone)]"
                     >
                       {copied ? <Check className="size-3" /> : <Copy className="size-3" />}
-                      {copied ? "Kopyalandı" : "İçgörüyü kopyala"}
+                      {copied ? t("common.copied") : t("signal.copyInsight")}
                     </button>
                     <Link
                       href="/panel/chat"
-                      className="inline-flex items-center gap-2 border border-[var(--bone)]/25 px-3 py-2 font-mono text-label uppercase tracking-widest text-[var(--bone)]/80 transition-colors hover:border-[var(--bone)]/50 hover:text-[var(--bone)]"
+                      className="inline-flex min-h-10 items-center gap-2 border border-[var(--bone)]/25 px-3 py-2 font-mono text-label uppercase tracking-widest text-[var(--bone)]/80 transition-colors hover:border-[var(--bone)]/50 hover:text-[var(--bone)]"
                     >
-                      <MessageSquare className="size-3" /> Chat’te aç
+                      <MessageSquare className="size-3" /> {t("signal.openInChat")}
                     </Link>
                     {!imageUrl ? (
                       <button
                         type="button"
                         onClick={() => generateInsightImage(false)}
                         disabled={imageLoading}
-                        className="inline-flex items-center gap-2 border border-[var(--bone)] bg-[var(--bone)] px-3 py-2 font-mono text-label uppercase tracking-widest text-[var(--ink)] transition-opacity hover:opacity-90 disabled:opacity-40"
+                        className="inline-flex min-h-10 items-center gap-2 border border-[var(--bone)] bg-[var(--bone)] px-3 py-2 font-mono text-label uppercase tracking-widest text-[var(--ink)] transition-opacity hover:opacity-90 disabled:opacity-40"
                       >
                         {imageLoading ? (
                           <Loader2 className="size-3 animate-spin" />
@@ -660,29 +681,29 @@ export default function Signal() {
                           <ImageIcon className="size-3" />
                         )}
                         {imageLoading
-                          ? `Üretiliyor · ${imageStatus || "kuyruk"}`
-                          : "Görsel üret · 720p"}
+                          ? t("signal.generating", { status: imageStatus || t("signal.queued") })
+                          : t("signal.generateVisual")}
                       </button>
                     ) : (
                       <button
                         type="button"
                         onClick={() => generateInsightImage(true)}
                         disabled={imageLoading}
-                        className="inline-flex items-center gap-2 border border-[var(--bone)]/20 px-3 py-2 font-mono text-label uppercase tracking-widest text-[var(--bone)]/62 transition-colors hover:text-[var(--bone)]/80 disabled:opacity-40"
+                        className="inline-flex min-h-10 items-center gap-2 border border-[var(--bone)]/20 px-3 py-2 font-mono text-label uppercase tracking-widest text-[var(--bone)]/62 transition-colors hover:text-[var(--bone)]/80 disabled:opacity-40"
                       >
                         {imageLoading ? (
                           <Loader2 className="size-3 animate-spin" />
                         ) : (
                           <RefreshCw className="size-3" />
                         )}
-                        Yeniden üret
+                        {t("signal.regenerate")}
                       </button>
                     )}
                   </div>
 
                   {(fromCache || imageError) && (
                     <p className="mt-3 font-mono text-label uppercase tracking-widest text-[var(--bone)]/57">
-                      {imageError || (fromCache ? "Görsel önbellekten · ekstra kredi yok" : null)}
+                      {imageError || (fromCache ? t("signal.fromCache") : null)}
                     </p>
                   )}
                 </div>
@@ -702,12 +723,12 @@ export default function Signal() {
                     >
                       <img
                         src={imageUrl}
-                        alt="Haftalık sinyal görseli"
+                        alt={t("signal.visualAlt")}
                         className="aspect-[21/9] w-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.02]"
                       />
                       <span className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-[var(--ink-fixed)]/60 to-transparent px-4 py-3">
                         <span className="font-mono text-label uppercase tracking-widest text-white/85">
-                          Büyüt · editorial
+                          {t("signal.expandEditorial")}
                         </span>
                       </span>
                     </motion.button>
@@ -724,9 +745,9 @@ export default function Signal() {
                       >
                         <button
                           type="button"
-                          className="absolute right-4 top-4 text-[var(--bone)]/70 hover:text-[var(--bone)]"
+                          className="hit-40 absolute right-4 top-4 text-[var(--bone)]/70 hover:text-[var(--bone)]"
                           onClick={() => setLightboxOpen(false)}
-                          aria-label="Kapat"
+                          aria-label={t("common.close")}
                         >
                           <X className="size-5" />
                         </button>
@@ -738,7 +759,7 @@ export default function Signal() {
                         >
                           <img
                             src={imageUrl}
-                            alt="Haftalık sinyal görseli"
+                            alt={t("signal.visualAlt")}
                             className="max-h-[85vh] w-full object-contain"
                           />
                         </motion.div>
@@ -756,10 +777,10 @@ export default function Signal() {
               <div className="mb-4 flex items-end justify-between gap-3 border-t border-[var(--ink)]/[0.08] pt-4">
                 <div>
                   <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--ink)]">
-                    Haftalık temalar
+                    {t("signal.weeklyThemes")}
                   </p>
                   <p className="mt-1 text-sm text-[var(--ink-muted)]">
-                    Topluluktan çıkan bu haftanın sinyalleri
+                    {t("signal.weeklyThemesSub")}
                   </p>
                 </div>
                 <span className="flex size-6 shrink-0 items-center justify-center bg-[var(--ink)] font-mono text-[10px] text-[var(--bone)]">
@@ -780,21 +801,21 @@ export default function Signal() {
               <div className="mb-4 flex items-end justify-between gap-3 border-t border-[var(--ink)]/[0.08] pt-4">
                 <div>
                   <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--ink)]">
-                    Bu hafta tanış
+                    {t("signal.meetThisWeek")}
                   </p>
                   <p className="mt-1 text-sm text-[var(--ink-muted)]">
-                    Uyum skoruna göre önerilen bağlantılar
+                    {t("signal.meetThisWeekSub")}
                   </p>
                 </div>
                 <Link
                   href="/panel/match"
-                  className="inline-flex min-h-9 shrink-0 items-center gap-1 font-mono text-[10px] uppercase tracking-widest text-[var(--ink-muted)] transition-colors hover:text-[var(--ink)]"
+                  className="inline-flex min-h-10 shrink-0 items-center gap-1 font-mono text-[10px] uppercase tracking-widest text-[var(--ink-muted)] transition-colors hover:text-[var(--ink)]"
                 >
                   Match <ArrowRight className="size-3" />
                 </Link>
               </div>
               {data.connections.length === 0 ? (
-                <p className="text-sm text-[var(--ink-muted)]">Bu hafta bağlantı önerisi yok.</p>
+                <p className="text-sm text-[var(--ink-muted)]">{t("signal.emptyConnections")}</p>
               ) : (
                 <div className="grid gap-3 sm:grid-cols-2">
                   {data.connections.map((conn, i) => (
@@ -809,7 +830,7 @@ export default function Signal() {
           <FadeIn delay={0.1}>
             <section
               id="signal-activity"
-              className="scroll-mt-4 border border-[var(--ink)]/[0.08] p-5"
+              className="scroll-mt-4 overflow-x-auto border border-[var(--ink)]/15 p-4 sm:p-5"
             >
               <ActivityHeatmap />
             </section>
@@ -821,7 +842,7 @@ export default function Signal() {
         <p className="text-xs text-[var(--ink-subtle)]">
           <span lang="en">inner·signal</span>
           {" · "}
-          Claude + Higgsfield · haftalık güncellenir · görsel üretimi kredi kullanır
+          {t("signal.footer")}
         </p>
       </div>
     </div>

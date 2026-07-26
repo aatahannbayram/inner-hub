@@ -4,6 +4,7 @@ import { FadeIn } from "@/components/FadeIn";
 import { ChevronDown } from "lucide-react";
 import { useApiQuery } from "@/hooks/useApiQuery";
 import { ErrorState, LoadingBlock } from "@/components/panel/Skeletons";
+import { useT } from "@/i18n";
 
 type FaqCategory = {
   category: string;
@@ -33,6 +34,7 @@ function AccordionItem({ q, a }: { q: string; a: string }) {
 }
 
 export default function FAQ() {
+  const t = useT();
   const { data, isLoading, isError, error, refetch } = useApiQuery<{ categories: FaqCategory[] }>(
     ["faq"],
     "/api/faq",
@@ -43,7 +45,7 @@ export default function FAQ() {
   const active = categories.find((c) => c.category === current) ?? categories[0];
 
   return (
-    <div className="max-w-xl space-y-8">
+    <div className="min-w-0 max-w-xl space-y-8 overflow-x-hidden">
       <FadeIn>
         <div>
           <div className="mb-2 font-mono text-label uppercase tracking-widest text-[var(--ink-body)]"><Lockup suffix="hub" className="text-[var(--ink)]" fontSize="1.15rem" /></div>
@@ -51,24 +53,24 @@ export default function FAQ() {
             className="font-serif font-display text-4xl text-[var(--ink)] md:text-5xl"
             style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
           >
-            sss
+            {t("faq.title")}
 
           </h1>
-          <p className="mt-2 text-sm font-light text-[var(--ink-muted)]">Sıkça sorulan sorular.</p>
+          <p className="mt-2 text-sm font-light text-[var(--ink-muted)]">{t("faq.subtitle")}</p>
         </div>
       </FadeIn>
 
-      {isLoading && categories.length === 0 && <LoadingBlock label="SSS yükleniyor" />}
+      {isLoading && categories.length === 0 && <LoadingBlock label={t("faq.loading")} />}
       {isError && (
         <ErrorState
-          message={error instanceof Error ? error.message : "SSS yüklenemedi"}
+          message={error instanceof Error ? error.message : t("faq.loadError")}
           onRetry={() => refetch()}
         />
       )}
 
       {!isLoading && !isError && categories.length === 0 && (
         <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
-          Henüz SSS yok.
+          {t("faq.empty")}
         </p>
       )}
 
@@ -104,10 +106,10 @@ export default function FAQ() {
 
       <div className="border border-[var(--ink)]/[0.08] p-5">
         <p className="mb-1 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
-          Cevap bulamadın mı?
+          {t("faq.noAnswer")}
         </p>
         <p className="mb-3 text-sm font-light text-[var(--ink-muted)]">
-          Topluluk Chat'ten bize ulaş veya e-posta gönder.
+          {t("faq.contactHint")}
         </p>
         <a
           href="mailto:destek@inner.digital"
@@ -119,7 +121,7 @@ export default function FAQ() {
 
       <div className="border-t border-[var(--ink)]/[0.08] pt-4">
         <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)]">
-          <span lang="en">inner·hub</span> · sık sorulan sorular
+          <span lang="en">inner·hub</span> · {t("faq.footer")}
         </p>
       </div>
     </div>

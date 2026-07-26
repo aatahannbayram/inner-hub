@@ -30,6 +30,7 @@ import {
   DrawerTitle,
   DrawerDescription,
 } from "@/components/ui/drawer";
+import { useT } from "@/i18n";
 
 type Tab = "uyeler" | "talent";
 
@@ -62,48 +63,55 @@ interface TalentPost {
 function MemberCard({ member, onSelect }: { member: Member; onSelect: (m: Member) => void }) {
   return (
     <div
-      className="flex flex-col border border-[var(--ink)]/[0.08] p-4 sm:p-5 transition-all duration-200 hover:border-[var(--ink)]/20 cursor-pointer"
+      className="group flex flex-col overflow-hidden border border-[var(--ink)]/[0.08] transition-all duration-200 hover:border-[var(--ink)]/20 cursor-pointer"
       onClick={() => onSelect(member)}
     >
-      <div className="mb-3 flex items-start gap-3">
-        <div className="relative shrink-0">
-          <PersonAvatar name={member.name} initials={member.initials} className="size-10 text-caption" />
-          {member.isAvailable && (
-            <span className="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full border-2 border-[var(--bone)] bg-[var(--inner-green)]" />
-          )}
-        </div>
-        <div className="min-w-0 flex-1">
-          <p
-            className="truncate font-serif text-base text-[var(--ink)] leading-snug"
-            style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
-          >
-            {member.name}
-          </p>
-          {(member.title || member.company) && (
-            <p className="mt-1 truncate text-xs text-[var(--ink-muted)]">
-              {[cleanDisplayText(member.title), member.company].filter(Boolean).join(" · ")}
-            </p>
-          )}
-        </div>
+      <div className="relative aspect-square w-full overflow-hidden bg-[var(--ink)]/[0.04]">
+        <PersonAvatar
+          name={member.name}
+          initials={member.initials}
+          className="size-full text-3xl transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.03]"
+        />
+        {member.isAvailable && (
+          <span className="absolute bottom-2.5 right-2.5 size-3 rounded-full border-2 border-[var(--bone)] bg-[var(--inner-green)]" />
+        )}
       </div>
-      {member.bio ? (
-        <p className="mb-3 line-clamp-2 flex-1 text-sm leading-relaxed text-[var(--ink-muted)]">{member.bio}</p>
-      ) : null}
-      <div className="flex flex-wrap gap-1">
-        {member.tags.slice(0, 3).map((tag) => (
-          <span
-            key={tag}
-            className="border border-[var(--ink)]/10 px-1.5 py-0.5 font-mono text-label uppercase tracking-wide text-[var(--ink-body)]"
-          >
-            {tag}
-          </span>
-        ))}
+      <div className="flex flex-1 flex-col p-4 sm:p-5">
+        <p
+          className="truncate font-serif text-lg text-[var(--ink)] leading-snug"
+          style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
+        >
+          {member.name}
+        </p>
+        {(member.title || member.company) && (
+          <p className="mt-1 truncate text-xs text-[var(--ink-muted)]">
+            {[cleanDisplayText(member.title), member.company].filter(Boolean).join(" · ")}
+          </p>
+        )}
+        {member.bio ? (
+          <p className="mt-3 line-clamp-2 flex-1 text-sm leading-relaxed text-[var(--ink-muted)]">{member.bio}</p>
+        ) : (
+          <div className="flex-1" />
+        )}
+        {member.tags.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-1">
+            {member.tags.slice(0, 3).map((tag) => (
+              <span
+                key={tag}
+                className="border border-[var(--ink)]/10 px-1.5 py-0.5 font-mono text-label uppercase tracking-wide text-[var(--ink-body)]"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
 function MemberDetailPanel({ member, onClose }: { member: Member; onClose: () => void }) {
+  const t = useT();
   useEffect(() => {
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -142,19 +150,19 @@ function MemberDetailPanel({ member, onClose }: { member: Member; onClose: () =>
             type="button"
             onClick={onClose}
             className="border border-[var(--ink)]/10 p-2 text-[var(--ink-muted)] hover:text-[var(--ink)]"
-            aria-label="Kapat"
+            aria-label={t("common.close")}
           >
             <X className="size-4" />
           </button>
         </div>
         <div className="flex-1 space-y-5 overflow-y-auto p-5">
           <div>
-            <p className="mb-2 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">Hakkında</p>
-            <p className="text-sm leading-relaxed text-[var(--ink-body)]">{member.bio || "Bio henüz eklenmedi."}</p>
+            <p className="mb-2 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">{t("members.about")}</p>
+            <p className="text-sm leading-relaxed text-[var(--ink-body)]">{member.bio || t("members.noBio")}</p>
           </div>
           {member.tags.length > 0 && (
             <div>
-              <p className="mb-2 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">Uzmanlık</p>
+              <p className="mb-2 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">{t("members.skills")}</p>
               <div className="flex flex-wrap gap-1.5">
                 {member.tags.map((tag) => (
                   <span
@@ -187,13 +195,13 @@ function MemberDetailPanel({ member, onClose }: { member: Member; onClose: () =>
             type="button"
             className="flex flex-1 items-center justify-center gap-1.5 border-r border-[var(--ink)]/[0.08] py-3.5 font-mono text-label uppercase tracking-widest text-[var(--ink)] hover:bg-[var(--ink)]/[0.04]"
           >
-            <MessageSquare className="size-3.5" /> Mesaj
+            <MessageSquare className="size-3.5" /> {t("members.message")}
           </button>
           <button
             type="button"
             className="flex flex-1 items-center justify-center gap-1.5 py-3.5 font-mono text-label uppercase tracking-widest text-[var(--ink)] hover:bg-[var(--ink)]/[0.04]"
           >
-            <UserPlus className="size-3.5" /> Bağlan
+            <UserPlus className="size-3.5" /> {t("members.connect")}
           </button>
         </div>
       </div>
@@ -212,6 +220,7 @@ function MembersHero({
   onTalentClick: () => void;
   memberCount: number;
 }) {
+  const t = useT();
   return (
     <div
       className="relative -mx-4 -mt-6 overflow-hidden sm:-mx-6 lg:-mx-8 lg:-mt-8"
@@ -224,45 +233,45 @@ function MembersHero({
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-[1] bg-[var(--ink-fixed)]/40" />
       <div
         aria-hidden="true"
-        className="bottom-blur-mask pointer-events-none absolute inset-0 z-[1] bg-black/20 backdrop-blur-xl"
+        className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-t from-[var(--ink-fixed)]/85 via-[var(--ink-fixed)]/25 to-transparent"
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-b from-black/50 via-transparent to-transparent"
+        className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-r from-[var(--ink-fixed)]/60 via-transparent to-transparent"
       />
 
       <div className="relative z-10 flex h-full flex-col justify-end px-6 pb-10 md:px-12 md:pb-14">
         <div className="lg:grid lg:grid-cols-2 lg:items-end lg:gap-10">
           <div>
-            <p className="mb-3 font-mono text-label uppercase tracking-widest text-white/60 [text-shadow:0_1px_12px_rgba(0,0,0,0.6)]">
-              Katılımcılar
+            <p className="mb-3 font-mono text-label uppercase tracking-widest text-[var(--bone)]/60 [text-shadow:0_1px_12px_rgba(0,0,0,0.6)]">
+              {t("members.title")}
             </p>
             <AnimatedHeading
               text={"Where builders\nfind each other."}
-              className="mb-4 font-display font-serif italic text-4xl leading-[1.1] text-white [text-shadow:0_2px_24px_rgba(0,0,0,0.55)] md:text-5xl lg:text-6xl"
+              className="mb-4 font-display font-serif italic text-4xl leading-[1.1] text-[var(--bone)] [text-shadow:0_2px_24px_rgba(0,0,0,0.55)] md:text-5xl lg:text-6xl"
               style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1" }}
             />
             <FadeIn delay={0.8}>
-              <p className="mb-6 max-w-[46ch] text-base text-white/75 [text-shadow:0_1px_12px_rgba(0,0,0,0.6)] md:text-lg">
-                Kurucular, mühendisler, yatırımcılar · daire içinde birbirini bulur ve büyür.
+              <p className="mb-6 max-w-[46ch] text-base text-[var(--bone)]/75 [text-shadow:0_1px_12px_rgba(0,0,0,0.6)] md:text-lg">
+                {t("members.heroBody")}
               </p>
             </FadeIn>
             <FadeIn delay={1.2}>
-              <div className="flex flex-wrap gap-4">
+              <div className="flex flex-wrap gap-3 sm:gap-4">
                 <button
                   type="button"
                   onClick={() => scrollToId("members-grid")}
-                  className="group inline-flex items-center gap-2 bg-white px-8 py-3 font-mono text-xs uppercase tracking-widest text-black transition-colors hover:bg-white/90"
+                  className="group inline-flex min-h-11 items-center gap-2 bg-[var(--bone)] px-6 py-3 font-mono text-sm uppercase tracking-widest text-[var(--ink)] transition-opacity hover:opacity-90 sm:px-8"
                 >
-                  Üyeleri Gör
+                  {t("members.viewMembers")}
                   <ArrowRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
                 </button>
                 <button
                   type="button"
                   onClick={onTalentClick}
-                  className="liquid-glass group inline-flex items-center gap-2 border border-white/20 px-8 py-3 font-mono text-xs uppercase tracking-widest text-white transition-colors hover:bg-white hover:text-black"
+                  className="liquid-glass group inline-flex min-h-11 items-center gap-2 border border-[var(--bone)]/25 px-6 py-3 font-mono text-sm uppercase tracking-widest text-[var(--bone)] transition-colors hover:bg-[var(--bone)] hover:text-[var(--ink)] sm:px-8"
                 >
-                  Talent Board
+                  {t("members.talentBoard")}
                   <ArrowRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
                 </button>
               </div>
@@ -272,8 +281,8 @@ function MembersHero({
           <div className="mt-8 flex items-end justify-start lg:mt-0 lg:justify-end">
             <HeroQuickStat
               value={memberCount}
-              label="Dairenin içinde"
-              tagline="Kurucular. Mühendisler. Yatırımcılar."
+              label={t("members.heroStat")}
+              tagline={t("members.heroTagline")}
             />
           </div>
         </div>
@@ -317,6 +326,7 @@ function TalentCard({
   post: TalentPost;
   onDeleted: () => void;
 }) {
+  const t = useT();
   const [busy, setBusy] = useState(false);
 
   const remove = async () => {
@@ -345,9 +355,9 @@ function TalentCard({
         <div className="flex min-w-0 items-center gap-2.5">
           <PersonAvatar name={post.postedBy} initials={post.postedByInitials} className="size-8 shrink-0 text-label" />
           <div className="min-w-0">
-            <p className="truncate text-xs font-medium text-[var(--ink)]">{post.postedBy}</p>
+            <p className="truncate text-sm font-medium text-[var(--ink)]">{post.postedBy}</p>
             {post.postedByCompany ? (
-              <p className="truncate text-xs text-[var(--ink-muted)]">{post.postedByCompany}</p>
+              <p className="truncate text-sm text-[var(--ink-muted)]">{post.postedByCompany}</p>
             ) : null}
           </div>
         </div>
@@ -359,7 +369,7 @@ function TalentCard({
               : "border-[var(--inner-green)]/30 bg-[var(--inner-green)]/10 text-[var(--ink-body)]",
           )}
         >
-          {post.type}
+          {post.type === "arıyor" ? t("members.typeSeeking") : t("members.typeOffering")}
         </span>
       </div>
 
@@ -391,7 +401,7 @@ function TalentCard({
               onClick={() => void remove()}
               disabled={busy}
               className="border border-[var(--ink)]/10 p-1.5 text-[var(--ink-muted)] hover:text-[var(--error-ink)] disabled:opacity-40"
-              aria-label="İlanı sil"
+              aria-label={t("members.deletePost")}
             >
               <Trash2 className="size-3" />
             </button>
@@ -401,11 +411,11 @@ function TalentCard({
               href={`/u/${post.postedByHandle}`}
               className="flex items-center gap-1.5 border border-[var(--ink)] bg-[var(--ink)] px-3 py-1.5 font-mono text-label uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-80"
             >
-              Profil <ArrowRight className="size-2.5" />
+              {t("members.profile")} <ArrowRight className="size-2.5" />
             </a>
           ) : (
             <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)]">
-              Panel üzerinden bağlan
+              {t("members.connectViaPanel")}
             </span>
           )}
         </div>
@@ -423,6 +433,7 @@ function TalentCompose({
   onClose: () => void;
   onCreated: () => void;
 }) {
+  const t = useT();
   const [type, setType] = useState<"arıyor" | "sunuyor">("arıyor");
   const [role, setRole] = useState("");
   const [description, setDescription] = useState("");
@@ -479,39 +490,39 @@ function TalentCompose({
         </DrawerHeader>
         <div className="space-y-4 px-6 pb-8">
           <div className="flex gap-2">
-            {(["arıyor", "sunuyor"] as const).map((t) => (
+            {(["arıyor", "sunuyor"] as const).map((ty) => (
               <button
-                key={t}
+                key={ty}
                 type="button"
-                onClick={() => setType(t)}
+                onClick={() => setType(ty)}
                 className={cn(
                   "border px-3 py-1.5 font-mono text-label uppercase tracking-widest",
-                  type === t
+                  type === ty
                     ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--bone)]"
                     : "border-[var(--ink)]/10 text-[var(--ink-muted)]",
                 )}
               >
-                {t}
+                {ty === "arıyor" ? t("members.typeSeeking") : t("members.typeOffering")}
               </button>
             ))}
           </div>
           <input
             value={role}
             onChange={(e) => setRole(e.target.value)}
-            placeholder="Rol / başlık"
+            placeholder={t("members.phRole")}
             className="w-full border border-[var(--ink)]/[0.08] bg-transparent px-3 py-2.5 text-sm outline-none focus:border-[var(--ink)]/30"
           />
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="Kısa açıklama"
+            placeholder={t("members.phDesc")}
             rows={4}
             className="w-full resize-none border border-[var(--ink)]/[0.08] bg-transparent px-3 py-2.5 text-sm outline-none focus:border-[var(--ink)]/30"
           />
           <input
             value={tagsRaw}
             onChange={(e) => setTagsRaw(e.target.value)}
-            placeholder="Etiketler (virgülle)"
+            placeholder={t("members.phTags")}
             className="w-full border border-[var(--ink)]/[0.08] bg-transparent px-3 py-2.5 text-sm outline-none focus:border-[var(--ink)]/30"
           />
           {error && (
@@ -525,7 +536,7 @@ function TalentCompose({
               onClick={onClose}
               className="flex-1 border border-[var(--ink)]/15 py-2.5 font-mono text-label uppercase tracking-widest text-[var(--ink-body)]"
             >
-              İptal
+              {t("common.cancel")}
             </button>
             <button
               type="button"
@@ -533,7 +544,7 @@ function TalentCompose({
               onClick={() => void submit()}
               className="flex-1 border border-[var(--ink)] bg-[var(--ink)] py-2.5 font-mono text-label uppercase tracking-widest text-[var(--bone)] disabled:opacity-40"
             >
-              {busy ? "Kaydediliyor…" : "Yayınla"}
+              {busy ? t("common.saving") : t("members.publish")}
             </button>
           </div>
         </div>
@@ -543,6 +554,7 @@ function TalentCompose({
 }
 
 export default function Members() {
+  const t = useT();
   const queryClient = useQueryClient();
   const [tab, setTab] = useState<Tab>("uyeler");
   const [search, setSearch] = useState("");
@@ -583,7 +595,7 @@ export default function Members() {
   };
 
   return (
-    <div className="space-y-8 max-w-5xl">
+    <div className="min-w-0 space-y-8 max-w-5xl overflow-x-hidden">
       <MembersHero
         memberCount={members.length}
         onTalentClick={() => {
@@ -593,7 +605,7 @@ export default function Members() {
       />
 
       {isLoading && tab === "uyeler" ? (
-        <LoadingBlock label="Üyeler yükleniyor">
+        <LoadingBlock label={t("members.loading")}>
           <div className="grid gap-3 sm:grid-cols-2">
             <CourseCardSkeleton />
             <CourseCardSkeleton />
@@ -601,30 +613,30 @@ export default function Members() {
         </LoadingBlock>
       ) : isError && tab === "uyeler" ? (
         <ErrorState
-          message={error instanceof Error ? error.message : "Üyeler alınamadı"}
+          message={error instanceof Error ? error.message : t("members.loadError")}
           onRetry={() => refetch()}
         />
       ) : (
         <>
           <FadeIn delay={0.02}>
             <div className="grid grid-cols-2 gap-2 sm:gap-3 sm:grid-cols-4">
-              <MembersStat label="Toplam Üye" value={String(members.length)} sub="dairenin içinde" icon={Users2} />
+              <MembersStat label={t("members.statTotal")} value={String(members.length)} sub={t("members.statTotalSub")} icon={Users2} />
               <MembersStat
-                label="Profil"
+                label={t("members.statProfile")}
                 value={String(members.filter((m) => m.bio).length)}
-                sub="bio dolu"
+                sub={t("members.statProfileSub")}
                 icon={Users2}
               />
               <MembersStat
-                label="Talent İlanı"
+                label={t("members.statTalent")}
                 value={String(talentPosts.length)}
-                sub="canlı"
+                sub={t("members.statTalentSub")}
                 icon={Tag}
               />
               <MembersStat
-                label="Admin"
+                label={t("members.statAdmin")}
                 value={String(members.filter((m) => m.title === "Admin").length)}
-                sub="yönetim"
+                sub={t("members.statAdminSub")}
                 icon={CheckCircle2}
               />
             </div>
@@ -632,7 +644,7 @@ export default function Members() {
 
           <FadeIn delay={0.03}>
             <p className="text-sm font-light text-[var(--ink-muted)]">
-              Topluluk üyeleri ve iş birliği fırsatları.
+              {t("members.subtitle")}
             </p>
           </FadeIn>
 
@@ -649,7 +661,7 @@ export default function Members() {
                       : "text-[var(--ink-body)] hover:text-[var(--ink)]",
                   )}
                 >
-                  Üyeler
+                  {t("members.tabMembers")}
                 </button>
                 <button
                   type="button"
@@ -661,7 +673,7 @@ export default function Members() {
                       : "text-[var(--ink-body)] hover:text-[var(--ink)]",
                   )}
                 >
-                  Talent Board
+                  {t("members.talentBoard")}
                 </button>
               </div>
 
@@ -671,7 +683,7 @@ export default function Members() {
                   type="text"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  placeholder={tab === "uyeler" ? "İsim, şirket veya uzmanlık…" : "Rol veya beceri ara…"}
+                  placeholder={tab === "uyeler" ? t("members.searchPlaceholder") : t("members.searchTalent")}
                   className="border border-[var(--ink)]/15 bg-transparent py-2 pl-9 pr-4 font-mono text-caption text-[var(--ink)] placeholder:text-[var(--ink-muted)] focus:border-[var(--ink)]/40 focus:outline-none transition-colors"
                 />
               </div>
@@ -683,11 +695,11 @@ export default function Members() {
               <div>
                 <div className="mb-4 flex items-center gap-3">
                   <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
-                    {filteredMembers.length} üye
+                    {t("members.memberCount", { n: filteredMembers.length })}
                   </span>
                   <span className="flex items-center gap-1.5 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
                     <span className="size-1.5 rounded-full bg-[var(--ink-subtle)]" />
-                    canlı durum yakında
+                    {t("members.liveSoon")}
                   </span>
                 </div>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -697,29 +709,29 @@ export default function Members() {
                 </div>
               </div>
             ) : talentLoading ? (
-              <LoadingBlock label="Talent board yükleniyor" />
+              <LoadingBlock label={t("members.talentLoading")} />
             ) : talentError ? (
               <ErrorState
-                message={talentErr instanceof Error ? talentErr.message : "Talent board alınamadı"}
+                message={talentErr instanceof Error ? talentErr.message : t("members.talentError")}
                 onRetry={() => refetchTalent()}
               />
             ) : (
               <div>
                 <div className="mb-4 flex items-center justify-between">
                   <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
-                    {filteredTalent.length} ilan
+                    {t("members.postCount", { n: filteredTalent.length })}
                   </span>
                   <button
                     type="button"
                     onClick={() => setComposeOpen(true)}
                     className="flex items-center gap-1.5 border border-[var(--ink)] bg-[var(--ink)] px-4 py-2 font-mono text-label uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-80"
                   >
-                    <Tag className="size-3" /> İlan Ver
+                    <Tag className="size-3" /> {t("members.postCta")}
                   </button>
                 </div>
                 {filteredTalent.length === 0 ? (
                   <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
-                    Henüz ilan yok · ilk ilanı sen ver.
+                    {t("members.talentEmpty")}
                   </p>
                 ) : (
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -730,8 +742,7 @@ export default function Members() {
                 )}
                 <div className="mt-6 border-t border-[var(--ink)]/[0.08] pt-4">
                   <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)]">
-                    Başarılı eşleşmelerde platform %10 komisyon alır ·{" "}
-                    <span lang="en">inner·hub</span> Talent Board
+                    {t("members.talentFooter")}
                   </p>
                 </div>
               </div>

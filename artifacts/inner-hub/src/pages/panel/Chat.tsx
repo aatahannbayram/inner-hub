@@ -7,6 +7,7 @@ import { PersonAvatar } from "@/components/panel/PersonAvatar";
 import { useApiQuery } from "@/hooks/useApiQuery";
 import { apiUrl } from "@/lib/api";
 import { LoadingBlock, ErrorState } from "@/components/panel/Skeletons";
+import { useT } from "@/i18n";
 
 const CHANNEL_SUGGESTIONS: Record<string, string[]> = {
   genel: ["Merhaba herkese 👋", "Bu hafta ne çalışıyorsunuz?", "Bir etkinlik önerim var"],
@@ -37,6 +38,7 @@ interface ApiMessage {
 }
 
 function AiDigestEmpty({ channelLabel }: { channelLabel: string }) {
+  const t = useT();
   return (
     <div className="relative mx-4 mb-4 overflow-hidden border border-[var(--ink)]/[0.12] bg-[var(--ink)]/[0.03] p-4">
       <AmbientCardBackground />
@@ -46,10 +48,10 @@ function AiDigestEmpty({ channelLabel }: { channelLabel: string }) {
         </div>
         <div className="min-w-0 flex-1">
           <p className="mb-1 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
-            AI Özet · #{channelLabel}
+            {t("chat.aiDigest", { name: channelLabel })}
           </p>
           <p className="text-sm leading-relaxed text-[var(--ink-body)]">
-            Yeterli mesaj birikince kanal özeti burada görünecek.
+            {t("chat.aiDigestHint")}
           </p>
         </div>
       </div>
@@ -64,6 +66,7 @@ function MessageBubble({
   msg: ApiMessage;
   prevAuthorUserId?: number;
 }) {
+  const t = useT();
   const showHeader = prevAuthorUserId !== msg.authorUserId;
 
   return (
@@ -83,7 +86,7 @@ function MessageBubble({
             <span className="text-sm font-medium text-[var(--ink)]">{msg.authorName}</span>
             {msg.authorRole === "admin" && (
               <span className="border border-[var(--inner-green)]/30 px-1 font-mono text-label uppercase tracking-widest text-[var(--success-ink)]">
-                Admin
+                {t("common.admin")}
               </span>
             )}
             <span className="font-mono text-label text-[var(--ink-muted)]">{msg.timestamp}</span>
@@ -96,6 +99,7 @@ function MessageBubble({
 }
 
 export default function ChatPage() {
+  const t = useT();
   const queryClient = useQueryClient();
   const [activeChannelId, setActiveChannelId] = useState<number | null>(null);
   const [draft, setDraft] = useState("");
@@ -155,11 +159,11 @@ export default function ChatPage() {
         body: JSON.stringify({ body: text }),
       });
       const json = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(json.error ?? "Mesaj gönderilemedi");
+      if (!res.ok) throw new Error(json.error ?? t("chat.sendError"));
       setDraft("");
       await queryClient.invalidateQueries({ queryKey: ["channel-messages", resolvedChannelId] });
     } catch (e: any) {
-      setSendError(e.message ?? "Mesaj gönderilemedi");
+      setSendError(e.message ?? t("chat.sendError"));
     } finally {
       setSending(false);
     }
@@ -168,7 +172,7 @@ export default function ChatPage() {
   if (channelsLoading && channels.length === 0) {
     return (
       <div className="p-6">
-        <LoadingBlock label="Kanallar yükleniyor" />
+        <LoadingBlock label={t("chat.loadingChannels")} />
       </div>
     );
   }
@@ -177,7 +181,7 @@ export default function ChatPage() {
     return (
       <div className="p-6">
         <ErrorState
-          message={channelsErr instanceof Error ? channelsErr.message : "Kanallar yüklenemedi"}
+          message={channelsErr instanceof Error ? channelsErr.message : t("chat.loadChannelsError")}
           onRetry={() => refetchChannels()}
         />
       </div>
@@ -188,18 +192,18 @@ export default function ChatPage() {
     return (
       <div className="p-6">
         <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
-          Henüz kanal yok.
+          {t("chat.emptyChannels")}
         </p>
       </div>
     );
   }
 
   return (
-    <div className="-mx-4 -my-6 flex h-[calc(100svh-60px)] min-h-0 flex-col sm:-mx-6 lg:-mx-8 lg:-my-8">
+    <div className="-mx-4 -my-6 flex h-[calc(100svh-60px)] min-h-0 min-w-0 flex-col overflow-x-hidden sm:-mx-6 lg:-mx-8 lg:-my-8">
       <div className="flex min-h-0 flex-1">
         <aside className="hidden w-[220px] shrink-0 flex-col border-r border-[var(--ink)]/[0.08] bg-[var(--bone)] md:flex">
           <div className="border-b border-[var(--ink)]/[0.08] px-4 py-3">
-            <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">Kanallar</p>
+            <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">{t("chat.channels")}</p>
           </div>
           <div className="flex-1 overflow-y-auto py-2">
             {channels.map((ch) => (
@@ -226,38 +230,57 @@ export default function ChatPage() {
         </aside>
 
         <div className="flex min-w-0 flex-1 flex-col">
-          <div className="flex h-[52px] items-center justify-between border-b border-[var(--ink)]/[0.08] px-4">
-            <div className="flex items-center gap-2">
+          <div className="flex h-[52px] min-w-0 items-center justify-between gap-2 border-b border-[var(--ink)]/[0.08] px-4">
+            <div className="flex min-w-0 items-center gap-2">
               {channel.type === "announcement" ? (
-                <Volume2 className="size-4 text-[var(--ink-body)]" />
+                <Volume2 className="size-4 shrink-0 text-[var(--ink-body)]" />
               ) : (
-                <Hash className="size-4 text-[var(--ink-body)]" />
+                <Hash className="size-4 shrink-0 text-[var(--ink-body)]" />
               )}
-              <span className="font-serif text-sm text-[var(--ink)]">{channel.name}</span>
-              <span className="hidden text-xs text-[var(--ink-muted)] sm:block">
+              <span className="truncate font-serif text-sm text-[var(--ink)]">{channel.name}</span>
+              <span className="hidden truncate text-sm text-[var(--ink-muted)] sm:block">
                 {channel.description ? ` · ${channel.description}` : ""}
               </span>
             </div>
             <button
               type="button"
-              className="text-[var(--ink-muted)] transition-colors hover:text-[var(--ink)]"
-              aria-label="Ara"
+              className="shrink-0 text-[var(--ink-muted)] transition-colors hover:text-[var(--ink)]"
+              aria-label={t("common.search")}
             >
               <Search className="size-4" />
             </button>
+          </div>
+
+          <div className="flex gap-1 overflow-x-auto border-b border-[var(--ink)]/[0.08] px-2 py-2 md:hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {channels.map((ch) => (
+              <button
+                key={ch.id}
+                type="button"
+                onClick={() => setActiveChannelId(ch.id)}
+                className={cn(
+                  "flex shrink-0 items-center gap-1.5 whitespace-nowrap px-3 py-1.5 font-mono text-sm transition-colors",
+                  resolvedChannelId === ch.id
+                    ? "bg-[var(--ink)] text-[var(--bone)]"
+                    : "text-[var(--ink-muted)] hover:bg-[var(--ink)]/[0.04] hover:text-[var(--ink)]",
+                )}
+              >
+                {ch.type === "announcement" ? <Volume2 className="size-3" /> : <Hash className="size-3" />}
+                {ch.name}
+              </button>
+            ))}
           </div>
 
           <div ref={messagesRef} className="flex-1 overflow-y-auto py-4">
             {channelMessages.length === 0 && !messagesLoading && <AiDigestEmpty channelLabel={channel.name} />}
             {messagesLoading && channelMessages.length === 0 && (
               <div className="px-4">
-                <LoadingBlock label="Mesajlar yükleniyor" />
+                <LoadingBlock label={t("chat.loadingMessages")} />
               </div>
             )}
             {messagesError && (
               <div className="px-4">
                 <ErrorState
-                  message={messagesErr instanceof Error ? messagesErr.message : "Mesajlar yüklenemedi"}
+                  message={messagesErr instanceof Error ? messagesErr.message : t("chat.loadMessagesError")}
                   onRetry={() => refetchMessages()}
                 />
               </div>
@@ -267,9 +290,9 @@ export default function ChatPage() {
                 <div className="text-center">
                   <Hash className="mx-auto mb-3 size-8 text-[var(--ink-subtle)]" />
                   <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
-                    #{channel.name} henüz boş
+                    {t("chat.emptyChannel", { name: channel.name })}
                   </p>
-                  <p className="mt-1 text-sm text-[var(--ink-muted)]">İlk mesajı sen gönder.</p>
+                  <p className="mt-1 text-sm text-[var(--ink-muted)]">{t("chat.emptyHint")}</p>
                 </div>
               </div>
             ) : (
@@ -316,10 +339,10 @@ export default function ChatPage() {
                     void handleSend();
                   }
                 }}
-                placeholder={`#${channel.name} kanalına mesaj gönder…`}
+                placeholder={t("chat.placeholder", { name: channel.name })}
                 rows={1}
                 disabled={sending}
-                className="flex-1 resize-none bg-transparent font-sans text-sm text-[var(--ink)] placeholder:text-[var(--ink-muted)] focus:outline-none disabled:opacity-50"
+                className="min-w-0 flex-1 resize-none bg-transparent font-sans text-base text-[var(--ink)] placeholder:text-[var(--ink-muted)] focus:outline-none disabled:opacity-50 sm:text-sm"
                 style={{ lineHeight: "1.5" }}
               />
               <button
@@ -327,13 +350,13 @@ export default function ChatPage() {
                 onClick={() => void handleSend()}
                 disabled={!draft.trim() || sending}
                 className="flex size-8 shrink-0 items-center justify-center bg-[var(--ink)] text-[var(--bone)] transition-opacity hover:opacity-80 disabled:opacity-25"
-                aria-label="Gönder"
+                aria-label={t("chat.send")}
               >
                 <Send className="size-3.5" />
               </button>
             </div>
             <p className="mt-1.5 font-mono text-label text-[var(--ink-subtle)]">
-              Enter ile gönder · Shift+Enter yeni satır
+              {t("chat.sendHint")}
             </p>
           </div>
         </div>

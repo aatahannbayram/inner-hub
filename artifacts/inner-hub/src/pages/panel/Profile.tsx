@@ -6,6 +6,7 @@ import { toUpperTR } from "@/lib/tr";
 import { useApiQuery } from "@/hooks/useApiQuery";
 import { apiUrl } from "@/lib/api";
 import { ErrorState, LoadingBlock } from "@/components/panel/Skeletons";
+import { useT } from "@/i18n";
 
 type Profile = {
   firstName: string;
@@ -187,6 +188,7 @@ function Field({
 }
 
 function SkillEditor({ skills, onChange }: { skills: string[]; onChange: (s: string[]) => void }) {
+  const t = useT();
   const [input, setInput] = useState("");
 
   const add = () => {
@@ -200,7 +202,7 @@ function SkillEditor({ skills, onChange }: { skills: string[]; onChange: (s: str
   return (
     <div>
       <label className="mb-1.5 block font-mono text-label font-semibold uppercase tracking-widest text-[var(--ink-strong)]">
-        Uzmanlıklar
+        {t("profile.skills")}
       </label>
       <div className="mb-2 flex flex-wrap gap-1.5">
         {skills.map((s) => (
@@ -222,7 +224,7 @@ function SkillEditor({ skills, onChange }: { skills: string[]; onChange: (s: str
           <div className="flex items-stretch border border-dashed border-[var(--ink)]/15">
             <input
               className="w-28 bg-transparent px-2.5 py-1 font-mono text-label uppercase tracking-widest text-[var(--ink)] placeholder:text-[var(--ink-subtle)] outline-none"
-              placeholder="Ekle..."
+              placeholder={t("profile.skillAdd")}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && add()}
@@ -237,16 +239,10 @@ function SkillEditor({ skills, onChange }: { skills: string[]; onChange: (s: str
           </div>
         )}
       </div>
-      <p className="font-mono text-label font-medium text-[var(--ink-muted)]">Maks. 10 etiket · Enter ile ekle</p>
+      <p className="font-mono text-label font-medium text-[var(--ink-muted)]">{t("profile.skillsHint")}</p>
     </div>
   );
 }
-
-const VISIBILITY_OPTIONS = [
-  { value: "public", label: "Herkese Açık", desc: "Herkes profilini görebilir" },
-  { value: "members", label: "Yalnızca Üyeler", desc: "inner·hub üyeleri görebilir" },
-  { value: "private", label: "Gizli", desc: "Yalnızca sen görürsün" },
-] as const;
 
 function VisibilitySelector({
   value,
@@ -255,9 +251,16 @@ function VisibilitySelector({
   value: Profile["visibility"];
   onChange: (v: Profile["visibility"]) => void;
 }) {
+  const t = useT();
+  const options = [
+    { value: "public" as const, label: t("profile.visibilityPublic"), desc: t("profile.visibilityPublicDesc") },
+    { value: "members" as const, label: t("profile.visibilityMembers"), desc: t("profile.visibilityMembersDesc") },
+    { value: "private" as const, label: t("profile.visibilityPrivate"), desc: t("profile.visibilityPrivateDesc") },
+  ];
+
   return (
     <div className="flex flex-col gap-1.5">
-      {VISIBILITY_OPTIONS.map((opt) => (
+      {options.map((opt) => (
         <button
           key={opt.value}
           type="button"
@@ -288,6 +291,7 @@ function VisibilitySelector({
 }
 
 function Avatar({ name }: { name: string }) {
+  const t = useT();
   const initials = toUpperTR(
     name
       .split(" ")
@@ -302,14 +306,15 @@ function Avatar({ name }: { name: string }) {
         {initials || "?"}
       </div>
       <div>
-        <p className="mb-1 text-sm text-[var(--ink)]">Profil fotoğrafı</p>
-        <p className="font-mono text-label font-medium text-[var(--ink-muted)]">Yakında · avatar URL ile</p>
+        <p className="mb-1 text-sm text-[var(--ink)]">{t("profile.photo")}</p>
+        <p className="font-mono text-label font-medium text-[var(--ink-muted)]">{t("profile.photoSoon")}</p>
       </div>
     </div>
   );
 }
 
 function CompletionBar({ pct }: { pct: number }) {
+  const t = useT();
   return (
     <div className="flex items-center gap-3">
       <div className="relative h-1.5 flex-1 overflow-visible bg-[var(--ink)]/[0.08]">
@@ -325,12 +330,15 @@ function CompletionBar({ pct }: { pct: number }) {
           <span className="relative block size-full bg-[var(--inner-green)]" />
         </span>
       </div>
-      <span className="shrink-0 font-mono text-label font-semibold text-[var(--ink-strong)]">%{pct} tamamlandı</span>
+      <span className="shrink-0 font-mono text-label font-semibold text-[var(--ink-strong)]">
+        {t("profile.completionPct", { n: pct })}
+      </span>
     </div>
   );
 }
 
 export default function ProfilePage() {
+  const t = useT();
   const { data, isLoading, isError, error, refetch } = useApiQuery<{ user: ApiUser }>(
     ["auth-me"],
     "/api/auth/me",
@@ -356,7 +364,7 @@ export default function ProfilePage() {
 
   const validateHandle = (v: string) => {
     const clean = v.toLowerCase().replace(/[^a-z0-9_]/g, "");
-    if (v !== clean) setHandleError("Yalnızca küçük harf, rakam ve alt çizgi");
+    if (v !== clean) setHandleError(t("profile.handleError"));
     else setHandleError("");
     set("handle", clean);
   };
@@ -386,13 +394,13 @@ export default function ProfilePage() {
         }),
       });
       const json = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(json.error ?? "Kaydedilemedi");
+      if (!res.ok) throw new Error(json.error ?? t("profile.saveError"));
       if (json.user) setProfile(mapUserToProfile(json.user));
       setSaved(true);
       window.dispatchEvent(new CustomEvent("inner-profile-updated", { detail: json.user }));
       setTimeout(() => setSaved(false), 3000);
     } catch (e: any) {
-      setSaveError(e.message ?? "Kaydedilemedi");
+      setSaveError(e.message ?? t("profile.saveError"));
     } finally {
       setSaving(false);
     }
@@ -404,7 +412,7 @@ export default function ProfilePage() {
   if (isLoading && !hydrated) {
     return (
       <div className="max-w-xl">
-        <LoadingBlock label="Profil yükleniyor" />
+        <LoadingBlock label={t("profile.loading")} />
       </div>
     );
   }
@@ -413,7 +421,7 @@ export default function ProfilePage() {
     return (
       <div className="max-w-xl">
         <ErrorState
-          message={error instanceof Error ? error.message : "Profil yüklenemedi"}
+          message={error instanceof Error ? error.message : t("profile.loadError")}
           onRetry={() => refetch()}
         />
       </div>
@@ -421,7 +429,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="max-w-xl space-y-8">
+    <div className="min-w-0 max-w-xl space-y-8 overflow-x-hidden">
       <FadeIn>
         <div>
           <div className="mb-2 font-mono text-label uppercase tracking-widest text-[var(--ink-body)]"><Lockup suffix="hub" className="text-[var(--ink)]" fontSize="1.15rem" /></div>
@@ -429,28 +437,28 @@ export default function ProfilePage() {
             className="font-serif font-display text-4xl text-[var(--ink)] md:text-5xl"
             style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
           >
-            profil
+            {t("profile.title")}
 
           </h1>
-          <p className="mt-2 text-sm font-light text-[var(--ink-muted)]">inner·hub'daki kimliğini yönet.</p>
+          <p className="mt-2 text-sm font-light text-[var(--ink-muted)]">{t("profile.subtitle")}</p>
         </div>
       </FadeIn>
 
       <CompletionBar pct={completion} />
-      <Avatar name={fullName || "Üye"} />
+      <Avatar name={fullName || t("common.member")} />
 
-      <Section title="Temel Bilgiler">
-        <div className="grid grid-cols-2 gap-3">
-          <Field label="Ad" value={profile.firstName} onChange={(v) => set("firstName", v)} placeholder="Adın" maxLength={40} />
-          <Field label="Soyad" value={profile.lastName} onChange={(v) => set("lastName", v)} placeholder="Soyadın" maxLength={40} />
+      <Section title={t("profile.sectionBasics")}>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <Field label={t("profile.firstName")} value={profile.firstName} onChange={(v) => set("firstName", v)} placeholder={t("profile.placeholderFirstName")} maxLength={40} />
+          <Field label={t("profile.lastName")} value={profile.lastName} onChange={(v) => set("lastName", v)} placeholder={t("profile.placeholderLastName")} maxLength={40} />
         </div>
         <div className="mt-3">
           <Field
-            label="Kullanıcı adı"
+            label={t("profile.handle")}
             value={profile.handle}
             onChange={validateHandle}
             prefix="inner.digital/u/"
-            placeholder="handle"
+            placeholder={t("profile.placeholderHandle")}
             mono
             maxLength={20}
           />
@@ -460,40 +468,40 @@ export default function ProfilePage() {
             </p>
           )}
         </div>
-        <div className="mt-3 grid grid-cols-2 gap-3">
-          <Field label="Rol / Ünvan" value={profile.role} onChange={(v) => set("role", v)} placeholder="Kurucu, CPO..." maxLength={50} />
-          <Field label="Şirket" value={profile.company} onChange={(v) => set("company", v)} placeholder="Şirket adı" maxLength={50} />
+        <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <Field label={t("profile.role")} value={profile.role} onChange={(v) => set("role", v)} placeholder={t("profile.placeholderRole")} maxLength={50} />
+          <Field label={t("profile.company")} value={profile.company} onChange={(v) => set("company", v)} placeholder={t("profile.placeholderCompany")} maxLength={50} />
         </div>
         <div className="mt-3">
           <Field
-            label="Biyografi"
+            label={t("profile.bio")}
             value={profile.bio}
             onChange={(v) => set("bio", v)}
-            placeholder="Kısa bir tanıtım yaz..."
+            placeholder={t("profile.placeholderBio")}
             textarea
             maxLength={160}
           />
         </div>
       </Section>
 
-      <Section title="Uzmanlıklar" sub="inner·id kartında ve eşleşmelerde görünür">
+      <Section title={t("profile.sectionSkills")} sub={t("profile.sectionSkillsSub")}>
         <SkillEditor skills={profile.skills} onChange={(s) => set("skills", s)} />
       </Section>
 
-      <Section title="Sosyal Linkler" sub="inner·id rozetine bağlanır">
+      <Section title={t("profile.sectionSocial")} sub={t("profile.sectionSocialSub")}>
         <div className="space-y-3">
-          <Field label="LinkedIn" value={profile.linkedin} onChange={(v) => set("linkedin", v)} prefix="linkedin.com/in/" placeholder="profiladın" mono />
-          <Field label="GitHub" value={profile.github} onChange={(v) => set("github", v)} prefix="github.com/" placeholder="kullanıcıadı" mono />
-          <Field label="Kişisel site" value={profile.website} onChange={(v) => set("website", v)} prefix="https://" placeholder="siteadresin.com" mono />
-          <Field label="X / Twitter" value={profile.twitter} onChange={(v) => set("twitter", v)} prefix="x.com/" placeholder="kullanıcıadı" mono />
+          <Field label="LinkedIn" value={profile.linkedin} onChange={(v) => set("linkedin", v)} prefix="linkedin.com/in/" placeholder={t("profile.placeholderLinkedin")} mono />
+          <Field label="GitHub" value={profile.github} onChange={(v) => set("github", v)} prefix="github.com/" placeholder={t("profile.placeholderGithub")} mono />
+          <Field label={t("profile.personalSite")} value={profile.website} onChange={(v) => set("website", v)} prefix="https://" placeholder={t("profile.placeholderWebsite")} mono />
+          <Field label={t("profile.twitter")} value={profile.twitter} onChange={(v) => set("twitter", v)} prefix="x.com/" placeholder={t("profile.placeholderTwitter")} mono />
         </div>
       </Section>
 
-      <Section title="Profil Görünürlüğü" sub="Profilinin kim tarafından görüleceğini belirle">
+      <Section title={t("profile.visibility")} sub={t("profile.visibilityHint")}>
         <VisibilitySelector value={profile.visibility} onChange={(v) => set("visibility", v)} />
       </Section>
 
-      <div className="flex items-center gap-4 border-t border-[var(--ink)]/[0.08] pt-6">
+      <div className="flex flex-wrap items-center gap-4 border-t border-[var(--ink)]/[0.08] pt-6">
         <button
           type="button"
           onClick={() => void save()}
@@ -507,16 +515,16 @@ export default function ProfilePage() {
         >
           {saved ? (
             <>
-              <Check className="size-3" /> Kaydedildi
+              <Check className="size-3" /> {t("common.saved")}
             </>
           ) : saving ? (
-            "Kaydediliyor…"
+            t("common.saving")
           ) : (
-            "Kaydet"
+            t("common.save")
           )}
         </button>
         {saved && (
-          <p className="font-mono text-label text-[var(--ink-muted)]">Değişiklikler kaydedildi</p>
+          <p className="font-mono text-label text-[var(--ink-muted)]">{t("profile.changesSaved")}</p>
         )}
         {saveError && (
           <p className="font-mono text-label text-[var(--error-ink)]" role="alert">
@@ -527,7 +535,7 @@ export default function ProfilePage() {
 
       <div className="border-t border-[var(--ink)]/[0.08] pt-4">
         <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)]">
-          <span lang="en">inner·hub</span> · profil · davet bazlı
+          <span lang="en">inner·hub</span> · {t("profile.footer")}
         </p>
       </div>
     </div>

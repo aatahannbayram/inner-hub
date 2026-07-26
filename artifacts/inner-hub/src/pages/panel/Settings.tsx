@@ -5,6 +5,8 @@ import { useApiQuery } from "@/hooks/useApiQuery";
 import { apiUrl } from "@/lib/api";
 import { ErrorState, LoadingBlock } from "@/components/panel/Skeletons";
 import { Check, Bell, Shield, Palette, Globe, LogOut, AlertTriangle } from "lucide-react";
+import { useLocale, useT } from "@/i18n";
+import { useTheme, type ThemeMode } from "@/hooks/useTheme";
 
 // ─── Toggle ───────────────────────────────────────────────────────────────────
 
@@ -141,6 +143,9 @@ const DEFAULT_PREFS: SettingsPrefs = {
 };
 
 export default function Settings() {
+  const t = useT();
+  const { setLocale } = useLocale();
+  const { setMode: setThemeMode } = useTheme();
   const { data, isLoading, isError, error, refetch } = useApiQuery<{ prefs: SettingsPrefs }>(
     ["settings"],
     "/api/settings",
@@ -164,6 +169,11 @@ export default function Settings() {
     setSaved(false);
   };
 
+  const patchTheme = (v: ThemeMode) => {
+    patch("theme", v);
+    setThemeMode(v);
+  };
+
   const save = async () => {
     if (busy) return;
     setBusy(true);
@@ -176,12 +186,12 @@ export default function Settings() {
         body: JSON.stringify({ prefs }),
       });
       const json = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(json.error ?? "Kaydedilemedi");
+      if (!res.ok) throw new Error(json.error ?? t("settings.saveError"));
       if (json.prefs) setPrefs({ ...DEFAULT_PREFS, ...json.prefs });
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
     } catch (e: any) {
-      setSaveError(e.message ?? "Kaydedilemedi");
+      setSaveError(e.message ?? t("settings.saveError"));
     } finally {
       setBusy(false);
     }
@@ -197,12 +207,12 @@ export default function Settings() {
   };
 
   if (isLoading && !hydrated) {
-    return <LoadingBlock label="Ayarlar yükleniyor" />;
+    return <LoadingBlock label={t("settings.loading")} />;
   }
   if (isError && !hydrated) {
     return (
       <ErrorState
-        message={error instanceof Error ? error.message : "Ayarlar alınamadı"}
+        message={error instanceof Error ? error.message : t("settings.loadError")}
         onRetry={() => refetch()}
       />
     );
@@ -212,86 +222,88 @@ export default function Settings() {
     <div className="max-w-lg space-y-8">
       <FadeIn>
         <div>
-          <div className="mb-2 font-mono text-label uppercase tracking-widest text-[var(--ink-body)]"><Lockup suffix="hub" className="text-[var(--ink)]" fontSize="1.15rem" /></div>
+          <div className="mb-2 font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
+            <Lockup suffix="hub" className="text-[var(--ink)]" fontSize="1.15rem" />
+          </div>
           <h1
             className="font-serif font-display text-4xl text-[var(--ink)] md:text-5xl"
             style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
           >
-            ayarlar
-
+            {t("settings.title")}
           </h1>
-          <p className="mt-2 text-sm font-light text-[var(--ink-muted)]">
-            Hesap ve platform tercihlerini yönet.
-          </p>
+          <p className="mt-2 text-sm font-light text-[var(--ink-muted)]">{t("settings.subtitle")}</p>
         </div>
       </FadeIn>
 
-      <Section icon={Bell} title="Bildirimler" sub="Hangi olaylarda bildirim almak istediğini seç">
+      <Section icon={Bell} title={t("settings.sectionNotif")} sub={t("settings.sectionNotifSub")}>
         <div className="border border-[var(--ink)]/[0.08] px-4">
-          <SettingRow label="inner·match önerileri" sub="Yeni eşleşme geldiğinde">
+          <SettingRow label={t("settings.notifMatch")} sub={t("settings.notifMatchSub")}>
             <Toggle checked={prefs.notifMatch} onChange={(v) => patch("notifMatch", v)} />
           </SettingRow>
-          <SettingRow label="Etkinlik hatırlatmaları" sub="Katıldığın etkinliklerden 1 gün önce">
+          <SettingRow label={t("settings.notifEvents")} sub={t("settings.notifEventsSub")}>
             <Toggle checked={prefs.notifEvents} onChange={(v) => patch("notifEvents", v)} />
           </SettingRow>
-          <SettingRow label="Chat mesajları" sub="@bahsedilme ve DM">
+          <SettingRow label={t("settings.notifMessages")} sub={t("settings.notifMessagesSub")}>
             <Toggle checked={prefs.notifMessages} onChange={(v) => patch("notifMessages", v)} />
           </SettingRow>
-          <SettingRow label="inner·capital güncellemeleri" sub="SPV ve deal flow aktivitesi">
+          <SettingRow label={t("settings.notifCapital")} sub={t("settings.notifCapitalSub")}>
             <Toggle checked={prefs.notifCapital} onChange={(v) => patch("notifCapital", v)} />
           </SettingRow>
-          <SettingRow label="Haftalık digest" sub="Haftanın özeti her Pazartesi">
+          <SettingRow label={t("settings.notifDigest")} sub={t("settings.notifDigestSub")}>
             <Toggle checked={prefs.notifDigest} onChange={(v) => patch("notifDigest", v)} />
           </SettingRow>
-          <SettingRow label="E-posta bildirimleri" sub="Platform bildirimlerini e-posta ile al">
+          <SettingRow label={t("settings.notifEmail")} sub={t("settings.notifEmailSub")}>
             <Toggle checked={prefs.notifEmail} onChange={(v) => patch("notifEmail", v)} />
           </SettingRow>
         </div>
       </Section>
 
-      <Section icon={Shield} title="Gizlilik" sub="Platform içinde görünürlüğünü kontrol et">
+      <Section icon={Shield} title={t("settings.sectionPrivacy")} sub={t("settings.sectionPrivacySub")}>
         <div className="border border-[var(--ink)]/[0.08] px-4">
-          <SettingRow label="Çevrimiçi durumu göster" sub="Diğer üyeler seni ONLINE olarak görür">
+          <SettingRow label={t("settings.showOnline")} sub={t("settings.showOnlineSub")}>
             <Toggle checked={prefs.showOnline} onChange={(v) => patch("showOnline", v)} />
           </SettingRow>
-          <SettingRow label="inner·match'e dahil ol" sub="AI eşleştirme motorunda göründüğünde">
+          <SettingRow label={t("settings.allowMatch")} sub={t("settings.allowMatchSub")}>
             <Toggle checked={prefs.allowMatch} onChange={(v) => patch("allowMatch", v)} />
           </SettingRow>
-          <SettingRow label="Anonim analitik" sub="Platform iyileştirmesi için anonim kullanım verisi">
+          <SettingRow label={t("settings.analyticsConsent")} sub={t("settings.analyticsConsentSub")}>
             <Toggle checked={prefs.analyticsConsent} onChange={(v) => patch("analyticsConsent", v)} />
           </SettingRow>
         </div>
       </Section>
 
-      <Section icon={Palette} title="Görünüm" sub="Platform arayüz tercihleri">
+      <Section icon={Palette} title={t("settings.sectionAppearance")} sub={t("settings.sectionAppearanceSub")}>
         <div className="border border-[var(--ink)]/[0.08] px-4">
-          <SettingRow label="Tema" sub="Renk modu (kayıt edilir; koyu tema yakında)">
+          <SettingRow label={t("settings.theme")} sub={t("settings.themeSub")}>
             <RadioGroup<Theme>
               options={[
-                { value: "light", label: "Açık" },
-                { value: "dark", label: "Koyu" },
-                { value: "system", label: "Sistem" },
+                { value: "light", label: t("settings.themeLight") },
+                { value: "dark", label: t("settings.themeDark") },
+                { value: "system", label: t("settings.themeSystem") },
               ]}
               value={prefs.theme}
-              onChange={(v) => patch("theme", v)}
+              onChange={(v) => patchTheme(v)}
             />
           </SettingRow>
-          <SettingRow label="Kompakt mod" sub="Daha yoğun içerik düzeni">
+          <SettingRow label={t("settings.compactMode")} sub={t("settings.compactModeSub")}>
             <Toggle checked={prefs.compactMode} onChange={(v) => patch("compactMode", v)} />
           </SettingRow>
         </div>
       </Section>
 
-      <Section icon={Globe} title="Dil" sub="Platform arayüz dili">
+      <Section icon={Globe} title={t("settings.sectionLang")} sub={t("settings.sectionLangSub")}>
         <div className="border border-[var(--ink)]/[0.08] px-4">
-          <SettingRow label="Arayüz dili">
+          <SettingRow label={t("settings.uiLang")}>
             <RadioGroup<Lang>
               options={[
-                { value: "tr", label: "Türkçe" },
-                { value: "en", label: "English" },
+                { value: "tr", label: t("settings.langTr") },
+                { value: "en", label: t("settings.langEn") },
               ]}
               value={prefs.lang}
-              onChange={(v) => patch("lang", v)}
+              onChange={(v) => {
+                patch("lang", v);
+                setLocale(v);
+              }}
             />
           </SettingRow>
         </div>
@@ -311,16 +323,16 @@ export default function Settings() {
         >
           {saved ? (
             <>
-              <Check className="size-3" /> Kaydedildi
+              <Check className="size-3" /> {t("common.saved")}
             </>
           ) : busy ? (
-            "Kaydediliyor…"
+            t("common.saving")
           ) : (
-            "Kaydet"
+            t("common.save")
           )}
         </button>
         {saved && (
-          <p className="font-mono text-label text-[var(--ink-muted)]">Tercihler güncellendi</p>
+          <p className="font-mono text-label text-[var(--ink-muted)]">{t("settings.prefsUpdated")}</p>
         )}
         {saveError && (
           <p className="font-mono text-label text-[var(--error-ink)]" role="alert">
@@ -333,34 +345,34 @@ export default function Settings() {
         <div className="mb-3 flex items-center gap-2">
           <AlertTriangle className="size-3.5 text-[var(--error-ink)]" />
           <p className="font-mono text-label uppercase tracking-widest text-[var(--error-ink)]">
-            Tehlikeli Alan
+            {t("settings.danger")}
           </p>
         </div>
         <div className="space-y-3">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="text-sm font-light text-[var(--ink)]">Hesabı askıya al</p>
-              <p className="font-mono text-label text-[var(--ink-muted)]">Üyeliğini geçici olarak durdur</p>
+              <p className="text-sm font-light text-[var(--ink)]">{t("settings.suspend")}</p>
+              <p className="font-mono text-label text-[var(--ink-muted)]">{t("settings.suspendSub")}</p>
             </div>
             <button
               type="button"
               disabled
               className="border border-[var(--error)]/20 px-4 py-2 font-mono text-label uppercase tracking-widest text-[var(--error-ink)] opacity-40"
             >
-              Yakında
+              {t("common.soon")}
             </button>
           </div>
           <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="text-sm font-light text-[var(--ink)]">Çıkış yap</p>
-              <p className="font-mono text-label text-[var(--ink-muted)]">Bu cihazdan oturumu kapat</p>
+              <p className="text-sm font-light text-[var(--ink)]">{t("common.logoutLong")}</p>
+              <p className="font-mono text-label text-[var(--ink-muted)]">{t("settings.logoutSub")}</p>
             </div>
             <button
               type="button"
               onClick={() => void logout()}
               className="hit-40 relative flex items-center gap-1.5 border border-[var(--ink)]/10 px-4 py-2 font-mono text-label uppercase tracking-widest text-[var(--ink-body)] transition-colors hover:text-[var(--ink)]"
             >
-              <LogOut className="size-3" /> Çıkış
+              <LogOut className="size-3" /> {t("common.logout")}
             </button>
           </div>
         </div>
@@ -368,7 +380,7 @@ export default function Settings() {
 
       <div className="border-t border-[var(--ink)]/[0.08] pt-4">
         <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)]">
-          <span lang="en">inner·hub</span> · ayarlar
+          <span lang="en">inner·hub</span> · {t("settings.footer")}
         </p>
       </div>
     </div>

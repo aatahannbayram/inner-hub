@@ -7,6 +7,7 @@ import { useApiQuery } from "@/hooks/useApiQuery";
 import { apiUrl } from "@/lib/api";
 import { LoadingBlock, ErrorState, CourseCardSkeleton } from "@/components/panel/Skeletons";
 import { Lockup } from "@/components/Lockup";
+import { useT } from "@/i18n";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -28,16 +29,15 @@ type Application = {
   tags: string[];
 };
 
-// ─── Status config ────────────────────────────────────────────────────────────
-
-const STATUS_CONFIG: Record<AppStatus, { label: string; color: string; bg: string }> = {
-  beklemede: { label: "Beklemede", color: "text-[var(--ink-muted)]", bg: "bg-[var(--ink)]/[0.06]" },
-  onaylandı: { label: "Onaylandı", color: "text-[var(--success-ink)]", bg: "bg-[var(--inner-green)]/10" },
-  reddedildi: { label: "Reddedildi", color: "text-[var(--error-ink)]", bg: "bg-[var(--error)]/10" },
+const STATUS_STYLE: Record<AppStatus, { color: string; bg: string; labelKey: string }> = {
+  beklemede: { labelKey: "applications.pending", color: "text-[var(--ink-muted)]", bg: "bg-[var(--ink)]/[0.06]" },
+  onaylandı: { labelKey: "applications.approved", color: "text-[var(--success-ink)]", bg: "bg-[var(--inner-green)]/10" },
+  reddedildi: { labelKey: "applications.rejected", color: "text-[var(--error-ink)]", bg: "bg-[var(--error)]/10" },
 };
 
 function StatusBadge({ status }: { status: AppStatus }) {
-  const cfg = STATUS_CONFIG[status];
+  const t = useT();
+  const cfg = STATUS_STYLE[status];
   return (
     <span
       className={`inline-flex items-center gap-1 px-2 py-0.5 font-mono text-label uppercase tracking-widest ${cfg.color} ${cfg.bg}`}
@@ -45,7 +45,7 @@ function StatusBadge({ status }: { status: AppStatus }) {
       {status === "beklemede" && <Clock className="size-2.5" />}
       {status === "onaylandı" && <Check className="size-2.5" />}
       {status === "reddedildi" && <X className="size-2.5" />}
-      {cfg.label}
+      {t(cfg.labelKey)}
     </span>
   );
 }
@@ -63,6 +63,7 @@ function DetailPanel({
   onReject: () => void;
   busy: boolean;
 }) {
+  const t = useT();
   useEffect(() => {
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -79,12 +80,12 @@ function DetailPanel({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-[var(--ink)]/[0.08] px-5 py-4">
-          <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">Başvuru Detayı</p>
+          <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">{t("applications.detail")}</p>
           <button
             onClick={onClose}
             className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)] hover:text-[var(--ink)] transition-colors"
           >
-            ← Kapat
+            {t("capital.close")}
           </button>
         </div>
 
@@ -96,7 +97,7 @@ function DetailPanel({
                   <img
                     src={app.companyLogo}
                     alt=""
-                    className="size-10 shrink-0 border border-[var(--ink)]/10 bg-white object-contain p-1"
+                    className="size-10 shrink-0 border border-[var(--ink)]/10 bg-[var(--bone)] object-contain p-1"
                   />
                 ) : null}
                 <div className="min-w-0">
@@ -120,12 +121,12 @@ function DetailPanel({
 
           {app.tags.length > 0 && (
             <div className="flex flex-wrap gap-1.5">
-              {app.tags.map((t) => (
+              {app.tags.map((tag) => (
                 <span
-                  key={t}
+                  key={tag}
                   className="border border-[var(--ink)]/10 px-2 py-0.5 font-mono text-label uppercase tracking-widest text-[var(--ink-body)]"
                 >
-                  {t}
+                  {tag}
                 </span>
               ))}
             </div>
@@ -133,24 +134,24 @@ function DetailPanel({
 
           <div className="border-l-2 border-[var(--ink)]/10 pl-4">
             <p className="mb-1 font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)]">
-              Neden <span lang="en">inner·hub</span>?
+              {t("applications.why")}
             </p>
             <p className="text-sm font-light leading-relaxed text-[var(--ink-strong)]">{app.why}</p>
           </div>
 
           <div className="space-y-2 border border-[var(--ink)]/[0.08] p-3">
             <div className="flex justify-between">
-              <span className="font-mono text-label text-[var(--ink-muted)]">Başvuru Tarihi</span>
+              <span className="font-mono text-label text-[var(--ink-muted)]">{t("applications.appliedAt")}</span>
               <span className="font-mono text-label text-[var(--ink-muted)]">{app.appliedAt}</span>
             </div>
             <div className="flex justify-between">
-              <span className="font-mono text-label text-[var(--ink-muted)]">Referans</span>
-              <span className="font-mono text-label text-[var(--ink-muted)]">{app.referrer ?? "Yok"}</span>
+              <span className="font-mono text-label text-[var(--ink-muted)]">{t("applications.referrer")}</span>
+              <span className="font-mono text-label text-[var(--ink-muted)]">{app.referrer ?? t("applications.none")}</span>
             </div>
             <div className="flex justify-between gap-3">
               <span className="font-mono text-label text-[var(--ink-muted)]">LinkedIn</span>
               <span className="max-w-[140px] truncate font-mono text-label text-[var(--ink-muted)]">
-                {app.linkedinUrl || "Yok"}
+                {app.linkedinUrl || t("applications.none")}
               </span>
             </div>
           </div>
@@ -163,14 +164,14 @@ function DetailPanel({
               onClick={onReject}
               className="flex-1 border-r border-[var(--ink)]/[0.08] py-3.5 font-mono text-label uppercase tracking-widest text-[var(--ink-body)] transition-colors hover:bg-[var(--error)]/5 hover:text-[var(--error-ink)] disabled:opacity-40"
             >
-              Reddet
+              {t("applications.reject")}
             </button>
             <button
               disabled={busy}
               onClick={onApprove}
               className="flex-1 py-3.5 font-mono text-label uppercase tracking-widest text-[var(--ink)] transition-colors hover:bg-[var(--inner-green)]/10 hover:text-[var(--success-ink)] disabled:opacity-40"
             >
-              Onayla
+              {t("applications.approve")}
             </button>
           </div>
         )}
@@ -179,10 +180,17 @@ function DetailPanel({
   );
 }
 
-const FILTER_OPTIONS = ["Tümü", "Beklemede", "Onaylandı", "Reddedildi"] as const;
-type Filter = (typeof FILTER_OPTIONS)[number];
+type FilterId = "all" | AppStatus;
+
+const FILTERS: { id: FilterId; labelKey: string }[] = [
+  { id: "all", labelKey: "common.all" },
+  { id: "beklemede", labelKey: "applications.pending" },
+  { id: "onaylandı", labelKey: "applications.approved" },
+  { id: "reddedildi", labelKey: "applications.rejected" },
+];
 
 export default function ApplicationsPage() {
+  const t = useT();
   const queryClient = useQueryClient();
   const { data, isLoading, isError, error, refetch } = useApiQuery<{ applications: Application[] }>(
     ["applications"],
@@ -191,24 +199,20 @@ export default function ApplicationsPage() {
 
   const apps = data?.applications ?? [];
   const [selected, setSelected] = useState<Application | null>(null);
-  const [filter, setFilter] = useState<Filter>("Tümü");
+  const [filter, setFilter] = useState<FilterId>("all");
   const [search, setSearch] = useState("");
   const [busy, setBusy] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
 
-  const counts = {
-    Tümü: apps.length,
-    Beklemede: apps.filter((a) => a.status === "beklemede").length,
-    Onaylandı: apps.filter((a) => a.status === "onaylandı").length,
-    Reddedildi: apps.filter((a) => a.status === "reddedildi").length,
+  const counts: Record<FilterId, number> = {
+    all: apps.length,
+    beklemede: apps.filter((a) => a.status === "beklemede").length,
+    onaylandı: apps.filter((a) => a.status === "onaylandı").length,
+    reddedildi: apps.filter((a) => a.status === "reddedildi").length,
   };
 
   const filtered = apps.filter((a) => {
-    const matchFilter =
-      filter === "Tümü" ||
-      (filter === "Beklemede" && a.status === "beklemede") ||
-      (filter === "Onaylandı" && a.status === "onaylandı") ||
-      (filter === "Reddedildi" && a.status === "reddedildi");
+    const matchFilter = filter === "all" || a.status === filter;
     const q = toLowerTR(search);
     const matchSearch =
       !q ||
@@ -230,38 +234,38 @@ export default function ApplicationsPage() {
         body: JSON.stringify({ status }),
       });
       const json = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(json.error ?? "Durum güncellenemedi");
+      if (!res.ok) throw new Error(json.error ?? t("applications.updateFailed"));
       await queryClient.invalidateQueries({ queryKey: ["applications"] });
       setSelected((prev) => (prev?.id === id ? { ...prev, status } : prev));
     } catch (e: any) {
-      setActionError(e.message ?? "Durum güncellenemedi");
+      setActionError(e.message ?? t("applications.updateFailed"));
     } finally {
       setBusy(false);
     }
   };
 
   return (
-    <div className="max-w-2xl space-y-6">
+    <div className="min-w-0 max-w-2xl space-y-6 overflow-x-hidden">
       <FadeIn>
         <div>
           <div className="mb-2 flex flex-wrap items-center gap-2">
             <Lockup suffix="hub" className="text-[var(--ink)]" fontSize="1.15rem" />
-            <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">Admin</span>
+            <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">{t("applications.admin")}</span>
           </div>
           <h1
             className="font-serif font-display text-4xl text-[var(--ink)] md:text-5xl"
             style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
           >
-            başvurular
+            {t("applications.title")}
           </h1>
           <p className="mt-2 text-sm font-light text-[var(--ink-muted)]">
-            Davet taleplerini incele; onay / red kalıcı kaydedilir.
+            {t("applications.subtitle")}
           </p>
         </div>
       </FadeIn>
 
       {isLoading ? (
-        <LoadingBlock label="Başvurular yükleniyor">
+        <LoadingBlock label={t("applications.loading")}>
           <div className="space-y-2">
             <CourseCardSkeleton />
             <CourseCardSkeleton />
@@ -269,17 +273,17 @@ export default function ApplicationsPage() {
           </div>
         </LoadingBlock>
       ) : isError ? (
-        <ErrorState message={error instanceof Error ? error.message : "Başvurular alınamadı"} onRetry={() => refetch()} />
+        <ErrorState message={error instanceof Error ? error.message : t("applications.loadError")} onRetry={() => refetch()} />
       ) : (
         <>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
             {[
-              { label: "Beklemede", val: counts.Beklemede, color: "text-[var(--ink)]" },
-              { label: "Onaylandı", val: counts.Onaylandı, color: "text-[var(--success-ink)]" },
-              { label: "Reddedildi", val: counts.Reddedildi, color: "text-[var(--error-ink)]" },
+              { labelKey: "applications.pending", val: counts.beklemede, color: "text-[var(--ink)]" },
+              { labelKey: "applications.approved", val: counts.onaylandı, color: "text-[var(--success-ink)]" },
+              { labelKey: "applications.rejected", val: counts.reddedildi, color: "text-[var(--error-ink)]" },
             ].map((s) => (
-              <div key={s.label} className="border border-[var(--ink)]/[0.08] p-4">
-                <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">{s.label}</p>
+              <div key={s.labelKey} className="border border-[var(--ink)]/[0.08] p-4">
+                <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">{t(s.labelKey)}</p>
                 <p
                   className={`mt-1 font-serif text-2xl ${s.color}`}
                   style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
@@ -290,30 +294,30 @@ export default function ApplicationsPage() {
             ))}
           </div>
 
-          <div className="flex items-center gap-3">
-            <div className="flex">
-              {FILTER_OPTIONS.map((f) => (
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="-mx-px flex overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:overflow-visible">
+              {FILTERS.map((f) => (
                 <button
-                  key={f}
-                  onClick={() => setFilter(f)}
+                  key={f.id}
+                  onClick={() => setFilter(f.id)}
                   className={[
-                    "border-y border-r px-3 py-1.5 font-mono text-label uppercase tracking-widest transition-colors first:border-l",
-                    filter === f
+                    "shrink-0 border-y border-r px-3 py-2 font-mono text-sm uppercase tracking-widest transition-colors first:border-l sm:py-1.5 sm:text-label",
+                    filter === f.id
                       ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--bone)]"
                       : "border-[var(--ink)]/15 text-[var(--ink-muted)] hover:text-[var(--ink)]",
                   ].join(" ")}
                 >
-                  {f}
-                  <span className="ml-1 opacity-50">{counts[f]}</span>
+                  {t(f.labelKey)}
+                  <span className="ml-1 opacity-50">{counts[f.id]}</span>
                 </button>
               ))}
             </div>
 
-            <div className="flex flex-1 items-center gap-2 border border-[var(--ink)]/[0.08] px-3 py-1.5">
-              <Search className="size-3 shrink-0 text-[var(--ink-subtle)]" />
+            <div className="flex min-w-0 flex-1 items-center gap-2 border border-[var(--ink)]/[0.08] px-3 py-2 sm:py-1.5">
+              <Search className="size-3.5 shrink-0 text-[var(--ink-subtle)]" />
               <input
-                className="flex-1 bg-transparent font-light text-xs text-[var(--ink)] outline-none placeholder:text-[var(--ink-subtle)]"
-                placeholder="Ad, e-posta, etiket…"
+                className="min-w-0 flex-1 bg-transparent text-sm font-light text-[var(--ink)] outline-none placeholder:text-[var(--ink-subtle)]"
+                placeholder={t("applications.searchPlaceholder")}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
@@ -331,7 +335,7 @@ export default function ApplicationsPage() {
               <div className="px-5 py-10 text-center">
                 <SlidersHorizontal className="mx-auto mb-3 size-6 text-[var(--ink-subtle)]" />
                 <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)]">
-                  {apps.length === 0 ? "Henüz başvuru yok" : "Sonuç bulunamadı"}
+                  {apps.length === 0 ? t("applications.empty") : t("applications.noResults")}
                 </p>
               </div>
             ) : (
@@ -344,7 +348,7 @@ export default function ApplicationsPage() {
                     i < filtered.length - 1 ? "border-b border-[var(--ink)]/[0.05]" : "",
                   ].join(" ")}
                 >
-                  <div className="flex size-8 shrink-0 items-center justify-center overflow-hidden border border-[var(--ink)]/[0.08] bg-white font-mono text-label text-[var(--ink-body)]">
+                  <div className="flex size-8 shrink-0 items-center justify-center overflow-hidden border border-[var(--ink)]/[0.08] bg-[var(--bone)] font-mono text-label text-[var(--ink-body)]">
                     {app.companyLogo ? (
                       <img src={app.companyLogo} alt="" className="size-full object-contain p-0.5" />
                     ) : (
@@ -376,12 +380,12 @@ export default function ApplicationsPage() {
                   </div>
 
                   <div className="hidden gap-1 sm:flex">
-                    {app.tags.slice(0, 2).map((t) => (
+                    {app.tags.slice(0, 2).map((tag) => (
                       <span
-                        key={t}
+                        key={tag}
                         className="border border-[var(--ink)]/[0.08] px-2 py-0.5 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]"
                       >
-                        {t}
+                        {tag}
                       </span>
                     ))}
                   </div>
@@ -401,7 +405,7 @@ export default function ApplicationsPage() {
 
       <div className="border-t border-[var(--ink)]/[0.08] pt-4">
         <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)]">
-          <span lang="en">inner·hub</span> · başvurular · yalnızca admin
+          <span lang="en">inner·hub</span> · {t("applications.footer")}
         </p>
       </div>
 

@@ -12,6 +12,9 @@ import { PanelOnboarding } from "./PanelOnboarding";
 import { useApiQuery } from "@/hooks/useApiQuery";
 import { apiUrl } from "@/lib/api";
 import { Lockup } from "@/components/Lockup";
+import { LocaleSyncFromSettings, useLocale, useT } from "@/i18n";
+import { ThemeSyncFromSettings } from "@/components/ThemeSyncFromSettings";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 // ─── Notifications ────────────────────────────────────────────────────────────
 
@@ -34,16 +37,23 @@ const NOTIF_ICONS: Record<NotifKind, React.ComponentType<{ className?: string }>
   signal: Zap,
 };
 
-function relativeTimeTr(iso: string): string {
+function relativeTime(
+  iso: string,
+  t: (key: string, values?: Record<string, string | number>) => string,
+  locale: string,
+): string {
   const diff = Date.now() - new Date(iso).getTime();
   const m = Math.floor(diff / 60_000);
-  if (m < 1) return "az önce";
-  if (m < 60) return `${m} dk önce`;
+  if (m < 1) return t("shell.justNow");
+  if (m < 60) return t("shell.minutesAgo", { n: m });
   const h = Math.floor(m / 60);
-  if (h < 24) return `${h} saat önce`;
+  if (h < 24) return t("shell.hoursAgo", { n: h });
   const d = Math.floor(h / 24);
-  if (d < 7) return `${d} gün önce`;
-  return new Date(iso).toLocaleDateString("tr-TR", { day: "numeric", month: "short" });
+  if (d < 7) return t("shell.daysAgo", { n: d });
+  return new Date(iso).toLocaleDateString(locale === "en" ? "en-US" : "tr-TR", {
+    day: "numeric",
+    month: "short",
+  });
 }
 
 function NotifPanel({
@@ -55,6 +65,8 @@ function NotifPanel({
   count: number;
   onClear: () => void;
 }) {
+  const t = useT();
+  const { locale } = useLocale();
   const queryClient = useQueryClient();
   const { data, isLoading, isError, refetch } = useApiQuery<{
     notifications: ApiNotif[];
@@ -101,7 +113,9 @@ function NotifPanel({
       <div className="fixed right-4 top-[68px] z-50 w-80 border border-[var(--ink)]/10 bg-[var(--bone)] shadow-lg">
         <div className="flex items-center justify-between border-b border-[var(--ink)]/[0.08] px-4 py-3">
           <div className="flex items-center gap-2">
-            <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">Bildirimler</p>
+            <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
+              {t("shell.notifications")}
+            </p>
             {count > 0 && (
               <span className="flex size-4 items-center justify-center bg-[var(--ink)] font-mono text-label text-[var(--bone)]">
                 {count}
@@ -115,7 +129,7 @@ function NotifPanel({
               onClick={() => void markAll()}
               className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)] transition-colors hover:text-[var(--ink)] disabled:opacity-40"
             >
-              Tümünü oku
+              {t("shell.markAllRead")}
             </button>
           )}
         </div>
@@ -137,7 +151,7 @@ function NotifPanel({
           )}
           {!isLoading && !isError && notifs.length === 0 && (
             <p className="px-4 py-6 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
-              Bildirim yok
+              {t("shell.noNotifications")}
             </p>
           )}
           {notifs.map((n) => {
@@ -166,7 +180,7 @@ function NotifPanel({
                   </div>
                   <p className="mt-0.5 font-mono text-label leading-snug text-[var(--ink-muted)]">{n.body}</p>
                   <p className="mt-1 font-mono text-label text-[var(--ink-subtle)]">
-                    {relativeTimeTr(n.createdAt)}
+                    {relativeTime(n.createdAt, t, locale)}
                   </p>
                 </div>
               </button>
@@ -228,13 +242,14 @@ function SidebarFooter({
   collapsed: boolean;
   onLogout?: () => void;
 }) {
+  const t = useT();
   if (collapsed) {
     return (
       <button
         type="button"
         onClick={onLogout}
         className="flex w-full justify-center p-2 text-[var(--ink-body)] transition-colors hover:text-[var(--ink)]"
-        title="Çıkış yap"
+        title={t("common.logoutLong")}
       >
         <LogOut className="size-4" />
       </button>
@@ -245,14 +260,14 @@ function SidebarFooter({
       <div className="space-y-0.5">
         <p className="truncate text-sm font-medium text-[var(--ink)]">{user.name}</p>
         <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
-          {user.role === "admin" ? "Admin" : "Üye"}
+          {user.role === "admin" ? t("common.admin") : t("common.member")}
         </p>
       </div>
       {user.profileCompletionPct < 100 && (
         <div className="space-y-1.5">
           <div className="flex justify-between">
             <span className="font-mono text-label font-semibold uppercase tracking-widest text-[var(--ink-strong)]">
-              Profil tamamlanma
+              {t("shell.profileCompletion")}
             </span>
             <span className="font-mono text-label font-semibold tabular-nums text-[var(--ink-strong)]">
               %{user.profileCompletionPct}
@@ -272,7 +287,7 @@ function SidebarFooter({
         className="hit-40 relative flex items-center gap-1.5 text-[var(--ink-body)] transition-colors hover:text-[var(--ink)]"
       >
         <LogOut className="size-3.5" />
-        <span className="font-mono text-label uppercase tracking-widest">Çıkış Yap</span>
+        <span className="font-mono text-label uppercase tracking-widest">{t("common.logoutLong")}</span>
       </button>
     </div>
   );
@@ -303,7 +318,7 @@ function DesktopSidebar({ user, onLogout }: { user: PanelUser; onLogout?: () => 
       data-onboarding="nav"
       className={cn(
         "relative hidden h-full shrink-0 flex-col border-r border-[var(--ink)]/[0.08] bg-[var(--bone)] transition-all duration-300 ease-expo lg:flex",
-        collapsed ? "w-[60px]" : "w-[220px]",
+        collapsed ? "w-[56px]" : "w-[220px] xl:w-[240px]",
       )}
     >
       {/* Header */}
@@ -418,6 +433,7 @@ if (typeof window !== "undefined") {
 }
 
 function ShellInner({ user, children, onLogout }: PanelShellProps) {
+  const t = useT();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [location] = useLocation();
@@ -449,11 +465,13 @@ function ShellInner({ user, children, onLogout }: PanelShellProps) {
 
   return (
     <div className="flex h-svh overflow-hidden bg-[var(--bone)] text-[var(--ink)]">
+      <LocaleSyncFromSettings />
+      <ThemeSyncFromSettings />
       <a
         href="#panel-main"
         className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:bg-[var(--ink)] focus:text-[var(--bone)] focus:px-4 focus:py-2"
       >
-        İçeriğe atla
+        {t("common.skipToContent")}
       </a>
       <DesktopSidebar user={user} onLogout={onLogout} />
       <MobileDrawer
@@ -465,13 +483,13 @@ function ShellInner({ user, children, onLogout }: PanelShellProps) {
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         {/* Top bar */}
-        <header className="z-40 flex h-[60px] shrink-0 items-center justify-between border-b border-[var(--ink)]/[0.08] bg-[var(--bone)]/90 px-4 backdrop-blur-md sm:px-6">
+        <header className="z-40 flex h-14 shrink-0 items-center justify-between border-b border-[var(--ink)]/[0.08] bg-[var(--bone)]/90 px-3 backdrop-blur-md sm:h-[60px] sm:px-5 lg:px-6">
           <button
             type="button"
             data-onboarding="nav"
             onClick={() => setMobileOpen(true)}
             className="hit-40 relative text-[var(--ink-body)] hover:text-[var(--ink)] lg:hidden"
-            aria-label="Menüyü aç"
+            aria-label={t("shell.openMenu")}
           >
             <Menu className="size-5" />
           </button>
@@ -479,12 +497,13 @@ function ShellInner({ user, children, onLogout }: PanelShellProps) {
             <BrandMark collapsed={false} />
           </div>
 
-          <div className="ml-auto flex items-center gap-3">
+          <div className="ml-auto flex items-center gap-2 sm:gap-3">
+            <ThemeToggle />
             {/* Online indicator */}
-            <div className="flex items-center gap-1.5">
+            <div className="hidden items-center gap-1.5 sm:flex">
               <span className="size-1.5 rounded-full bg-[var(--inner-green)] animate-beacon" />
-              <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)] hidden sm:block">
-                <span lang="en">online</span>
+              <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
+                {t("common.online")}
               </span>
             </div>
 
@@ -494,7 +513,7 @@ function ShellInner({ user, children, onLogout }: PanelShellProps) {
               data-onboarding="notifications"
               onClick={() => setNotifOpen((o) => !o)}
               className="hit-40 relative text-[var(--ink-muted)] hover:text-[var(--ink)] transition-colors"
-              aria-label="Bildirimler"
+              aria-label={t("shell.notifications")}
             >
               <Bell className="size-4" />
               {notifCount > 0 && (
@@ -542,7 +561,7 @@ function ShellInner({ user, children, onLogout }: PanelShellProps) {
           ref={mainRef}
           tabIndex={-1}
           data-onboarding="main"
-          className="min-h-0 min-w-0 flex-1 overflow-y-auto px-4 py-6 outline-none sm:px-6 lg:px-8 lg:py-8"
+          className="min-h-0 min-w-0 flex-1 overflow-y-auto px-3 py-5 outline-none sm:px-5 sm:py-6 lg:px-8 lg:py-8"
         >
           <PanelPageTransition>{children}</PanelPageTransition>
         </main>

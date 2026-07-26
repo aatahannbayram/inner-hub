@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
+import { useT } from "@/i18n";
 
 const NEXT_VIDEO =
   "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260510_060007_60275ce7-030c-4668-a160-8f364ec537d3.mp4";
@@ -10,14 +11,16 @@ const NEXT_VIDEO =
  * sharp CTA bar, no rounded pills.
  */
 export function WhatsNextCinematic() {
+  const t = useT();
   const videoWrapRef = useRef<HTMLDivElement>(null);
   const [ready, setReady] = useState(false);
   const reduceMotion = useRef(false);
+  const bodyLines = t("homeWhatsNext.body").split("\n");
 
   useEffect(() => {
     reduceMotion.current = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const t = window.setTimeout(() => setReady(true), 40);
-    return () => window.clearTimeout(t);
+    const timer = window.setTimeout(() => setReady(true), 40);
+    return () => window.clearTimeout(timer);
   }, []);
 
   useEffect(() => {
@@ -58,7 +61,6 @@ export function WhatsNextCinematic() {
       id="section-07"
       className="relative flex min-h-svh flex-col justify-end overflow-hidden bg-black px-4 pb-12 text-white sm:px-6 sm:pb-16 md:px-12 md:pb-24 lg:px-[10%]"
     >
-      {/* Video + parallax */}
       <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
         <div ref={videoWrapRef} className="absolute inset-0 origin-center scale-[1.08] will-change-transform">
           <video
@@ -89,18 +91,22 @@ export function WhatsNextCinematic() {
       >
         <div className="mb-6 flex items-center gap-3 font-mono text-[10px] uppercase tracking-widest text-white/60 sm:mb-8 sm:text-xs">
           <span className="size-2 shrink-0 bg-[var(--inner-green)] animate-beacon sm:size-1.5" />
-          07 · What&apos;s next · In time
+          {t("homeWhatsNext.eyebrow")}
         </div>
 
         <h2 className="max-w-[14ch] text-balance font-display font-serif italic text-4xl leading-[1.05] sm:text-5xl md:text-7xl lg:text-8xl">
-          What&apos;s next is already{" "}
-          <span className="italic">forming.</span>
+          {t("homeWhatsNext.titleBefore")}{" "}
+          <span className="italic">{t("homeWhatsNext.titleEm")}</span>
         </h2>
 
         <p className="mt-8 max-w-[48ch] text-base leading-[1.6] text-white/70 sm:mt-10 sm:text-lg md:mt-12 md:text-xl">
-          We announce things when they are real.
-          <br className="hidden sm:block" />
-          The circle expands: gatherings, capital, and tools. One deliberate step at a time.
+          {bodyLines[0]}
+          {bodyLines[1] ? (
+            <>
+              <br className="hidden sm:block" />
+              {bodyLines[1]}
+            </>
+          ) : null}
         </p>
 
         <div
@@ -110,14 +116,16 @@ export function WhatsNextCinematic() {
           ].join(" ")}
         >
           <p className="hidden flex-1 text-sm font-medium text-white sm:block">
-            Access is by invitation. Always.
+            {t("homeWhatsNext.access")}
           </p>
-          <p className="flex-1 px-1 pt-2 text-sm font-medium text-white sm:hidden sm:px-0 sm:pt-0">By invitation only.</p>
+          <p className="flex-1 px-1 pt-2 text-sm font-medium text-white sm:hidden sm:px-0 sm:pt-0">
+            {t("homeWhatsNext.accessShort")}
+          </p>
           <a
             href="/invitation"
             className="shrink-0 whitespace-nowrap bg-white px-5 py-3 text-center font-mono text-xs uppercase tracking-widest text-black transition-colors hover:bg-white/90 sm:py-2.5"
           >
-            Request an invitation
+            {t("homeWhatsNext.cta")}
           </a>
         </div>
       </div>

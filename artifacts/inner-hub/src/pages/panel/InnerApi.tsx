@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Lockup } from "@/components/Lockup";
 import { useQueryClient } from "@tanstack/react-query";
 import { FadeIn } from "@/components/FadeIn";
@@ -19,6 +19,7 @@ import {
 import { useApiQuery } from "@/hooks/useApiQuery";
 import { apiUrl } from "@/lib/api";
 import { LoadingBlock, ErrorState } from "@/components/panel/Skeletons";
+import { useT, useLocale } from "@/i18n";
 
 // ─── API tipleri ────────────────────────────────────────────────────────────
 
@@ -30,87 +31,20 @@ interface ApiKeyRow {
   lastUsedAt: string | null;
 }
 
-// ─── Dokümantasyon — sabit içerik, kullanıcıya özel veri değil ────────────────
+// ─── Dokümantasyon — sabit yapı; metinler bileşen içinde i18n ile ─────────────
 
-const ENDPOINTS = [
-  {
-    method: "GET",
-    path: "/v1/members",
-    desc: "Topluluk üyelerini listele (anonim)",
-    rate: "100/saat",
-    status: "stable",
-  },
-  {
-    method: "GET",
-    path: "/v1/members/:handle",
-    desc: "Üye profilini getir ve kimliği doğrula",
-    rate: "500/saat",
-    status: "stable",
-  },
-  {
-    method: "POST",
-    path: "/v1/match",
-    desc: "AI eşleştirme algoritmasını çağır",
-    rate: "20/saat",
-    status: "beta",
-  },
-  {
-    method: "GET",
-    path: "/v1/pulse",
-    desc: "Topluluk sinyal verilerini getir",
-    rate: "60/saat",
-    status: "stable",
-  },
-  {
-    method: "POST",
-    path: "/v1/verify",
-    desc: "inner·id kimlik doğrulama",
-    rate: "200/saat",
-    status: "stable",
-  },
-  {
-    method: "POST",
-    path: "/v1/events/webhook",
-    desc: "Topluluk event'lerine webhook al",
-    rate: "∞",
-    status: "beta",
-  },
-];
-
-const PLANS = [
-  {
-    name: "Starter",
-    price: "Ücretsiz",
-    period: "",
-    requests: "1.000 / ay",
-    features: ["Temel üye sorgusu", "Kimlik doğrulama", "E-posta desteği"],
-    recommended: false,
-  },
-  {
-    name: "Builder",
-    price: "₺299",
-    period: "/ ay",
-    requests: "50.000 / ay",
-    features: ["Tüm endpoint'ler", "inner·match API", "Webhook desteği", "Öncelikli destek"],
-    recommended: true,
-  },
-  {
-    name: "Scale",
-    price: "₺999",
-    period: "/ ay",
-    requests: "Sınırsız",
-    features: ["White-label", "Özel SLA", "Dedicated destek", "inner·pulse ham veri"],
-    recommended: false,
-  },
-];
-
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString("tr-TR", { day: "numeric", month: "short", year: "numeric" });
+function formatDate(iso: string, locale: string): string {
+  return new Date(iso).toLocaleDateString(locale === "tr" ? "tr-TR" : "en-US", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
 }
 
 // ─── Anahtar oluşturma — plaintext yalnızca bu anda görünür ───────────────────
 
 function NewKeyReveal({ plaintext, onDone }: { plaintext: string; onDone: () => void }) {
+  const t = useT();
   const [copied, setCopied] = useState(false);
   const copy = async () => {
     try {
@@ -125,10 +59,10 @@ function NewKeyReveal({ plaintext, onDone }: { plaintext: string; onDone: () => 
   return (
     <div className="border border-[var(--inner-green)]/30 bg-[var(--inner-green)]/5 p-4">
       <p className="font-mono text-label font-semibold uppercase tracking-widest text-[var(--success-ink)]">
-        Yeni anahtar oluşturuldu
+        {t("api.keyCreated")}
       </p>
       <p className="mt-1 text-xs font-medium text-[var(--ink-muted)]">
-        Bu anahtar bir daha gösterilmeyecek. Şimdi kopyala ve güvenli bir yere kaydet.
+        {t("api.keyCreatedHint")}
       </p>
       <div className="mt-3 flex items-center gap-2 border border-[var(--ink)]/[0.08] bg-[var(--bone)] px-3 py-2.5">
         <code className="flex-1 overflow-x-auto font-mono text-label font-medium text-[var(--ink-strong)] whitespace-nowrap">
@@ -139,14 +73,14 @@ function NewKeyReveal({ plaintext, onDone }: { plaintext: string; onDone: () => 
           className="flex shrink-0 items-center gap-1.5 font-mono text-label font-semibold uppercase tracking-widest text-[var(--ink-body)] hover:text-[var(--ink)] transition-colors"
         >
           {copied ? <Check className="size-3.5 text-[var(--success-ink)]" /> : <Copy className="size-3.5" />}
-          {copied ? "Kopyalandı" : "Kopyala"}
+          {copied ? t("common.copied") : t("common.copy")}
         </button>
       </div>
       <button
         onClick={onDone}
         className="mt-3 font-mono text-label font-semibold uppercase tracking-widest text-[var(--ink-muted)] hover:text-[var(--ink)] transition-colors"
       >
-        Kapat
+        {t("common.close")}
       </button>
     </div>
   );
@@ -155,6 +89,8 @@ function NewKeyReveal({ plaintext, onDone }: { plaintext: string; onDone: () => 
 // ─── Tek anahtar satırı ────────────────────────────────────────────────────────
 
 function ApiKeyRowView({ apiKey, onDeleted }: { apiKey: ApiKeyRow; onDeleted: () => void }) {
+  const t = useT();
+  const { locale } = useLocale();
   const [confirming, setConfirming] = useState(false);
   const [busy, setBusy] = useState(false);
 
@@ -162,7 +98,7 @@ function ApiKeyRowView({ apiKey, onDeleted }: { apiKey: ApiKeyRow; onDeleted: ()
     setBusy(true);
     try {
       const res = await fetch(apiUrl(`/api/api-keys/${apiKey.id}`), { method: "DELETE", credentials: "include" });
-      if (!res.ok) throw new Error("Silinemedi");
+      if (!res.ok) throw new Error(t("api.deleteFailed"));
       onDeleted();
     } catch {
       setBusy(false);
@@ -176,8 +112,8 @@ function ApiKeyRowView({ apiKey, onDeleted }: { apiKey: ApiKeyRow; onDeleted: ()
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm text-[var(--ink)]">{apiKey.name}</p>
         <p className="font-mono text-label font-medium text-[var(--ink-muted)]">
-          <span lang="en">{apiKey.prefix}</span> · oluşturuldu {formatDate(apiKey.createdAt)}
-          {apiKey.lastUsedAt && ` · son kullanım ${formatDate(apiKey.lastUsedAt)}`}
+          <span lang="en">{apiKey.prefix}</span> · {t("api.createdAt", { date: formatDate(apiKey.createdAt, locale) })}
+          {apiKey.lastUsedAt && ` · ${t("api.lastUsed", { date: formatDate(apiKey.lastUsedAt, locale) })}`}
         </p>
       </div>
       {confirming ? (
@@ -187,21 +123,21 @@ function ApiKeyRowView({ apiKey, onDeleted }: { apiKey: ApiKeyRow; onDeleted: ()
             onClick={() => void remove()}
             className="font-mono text-label font-semibold uppercase tracking-widest text-[var(--error-ink)] disabled:opacity-40"
           >
-            {busy ? "Siliniyor…" : "Emin misin?"}
+            {busy ? t("api.deleting") : t("api.confirmDelete")}
           </button>
           <button
             disabled={busy}
             onClick={() => setConfirming(false)}
             className="font-mono text-label font-medium uppercase tracking-widest text-[var(--ink-muted)]"
           >
-            Vazgeç
+            {t("api.abort")}
           </button>
         </div>
       ) : (
         <button
           onClick={() => setConfirming(true)}
           className="shrink-0 p-1.5 text-[var(--ink-muted)] hover:text-[var(--error-ink)] transition-colors"
-          title="Anahtarı sil"
+          title={t("api.deleteKey")}
         >
           <Trash2 className="size-3.5" />
         </button>
@@ -213,7 +149,55 @@ function ApiKeyRowView({ apiKey, onDeleted }: { apiKey: ApiKeyRow; onDeleted: ()
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function InnerApi() {
+  const t = useT();
   const queryClient = useQueryClient();
+
+  const ENDPOINTS = useMemo(
+    () => [
+      { method: "GET" as const, path: "/v1/members", desc: t("api.epMembers"), rate: "100/saat", status: "stable" as const },
+      { method: "GET" as const, path: "/v1/members/:handle", desc: t("api.epMember"), rate: "500/saat", status: "stable" as const },
+      { method: "POST" as const, path: "/v1/match", desc: t("api.epMatch"), rate: "20/saat", status: "beta" as const },
+      { method: "GET" as const, path: "/v1/pulse", desc: t("api.epPulse"), rate: "60/saat", status: "stable" as const },
+      { method: "POST" as const, path: "/v1/verify", desc: t("api.epVerify"), rate: "200/saat", status: "stable" as const },
+      { method: "POST" as const, path: "/v1/events/webhook", desc: t("api.epWebhook"), rate: "∞", status: "beta" as const },
+    ],
+    [t],
+  );
+
+  const PLANS = useMemo(
+    () => [
+      {
+        name: "Starter",
+        price: t("api.free"),
+        period: "",
+        requests: t("api.reqStarter"),
+        features: [t("api.planStarterF1"), t("api.planStarterF2"), t("api.planStarterF3")],
+        recommended: false,
+      },
+      {
+        name: "Builder",
+        price: "₺299",
+        period: t("api.perMonth"),
+        requests: t("api.reqBuilder"),
+        features: [
+          t("api.planBuilderF1"),
+          t("api.planBuilderF2"),
+          t("api.planBuilderF3"),
+          t("api.planBuilderF4"),
+        ],
+        recommended: true,
+      },
+      {
+        name: "Scale",
+        price: "₺999",
+        period: t("api.perMonth"),
+        requests: t("api.unlimited"),
+        features: [t("api.planScaleF1"), t("api.planScaleF2"), t("api.planScaleF3"), t("api.planScaleF4")],
+        recommended: false,
+      },
+    ],
+    [t],
+  );
   const { data, isLoading, isError, error, refetch } = useApiQuery<{ keys: ApiKeyRow[] }>(
     ["api-keys"],
     "/api/api-keys",
@@ -236,12 +220,12 @@ export default function InnerApi() {
         body: JSON.stringify({ name }),
       });
       const json = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(json.error ?? "Anahtar oluşturulamadı");
+      if (!res.ok) throw new Error(json.error ?? t("api.createFailed"));
       setRevealedKey(json.key);
       setNewKeyName("");
       await queryClient.invalidateQueries({ queryKey: ["api-keys"] });
     } catch (e) {
-      setCreateError(e instanceof Error ? e.message : "Anahtar oluşturulamadı");
+      setCreateError(e instanceof Error ? e.message : t("api.createFailed"));
     } finally {
       setCreating(false);
     }
@@ -250,7 +234,7 @@ export default function InnerApi() {
   const keys = data?.keys ?? [];
 
   return (
-    <div className="space-y-8 max-w-4xl">
+    <div className="min-w-0 space-y-8 max-w-4xl overflow-x-hidden">
       {/* Hero banner */}
       <FadeIn>
         <div className="relative overflow-hidden border border-[var(--ink)]/[0.08] bg-[var(--ink)] p-6 text-[var(--bone)] sm:p-8">
@@ -259,7 +243,7 @@ export default function InnerApi() {
           <div className="relative z-10 flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <p className="font-mono text-label font-semibold uppercase tracking-widest text-[var(--bone)]/60 mb-2">
-                Platform API
+                {t("api.eyebrow")}
               </p>
               <h1
                 className="font-serif font-display text-3xl text-[var(--bone)] sm:text-4xl md:text-5xl"
@@ -268,14 +252,14 @@ export default function InnerApi() {
                 <Lockup suffix="api" className="text-[var(--bone)]" />
               </h1>
               <p className="mt-2 max-w-md text-sm text-[var(--bone)]/65 font-light">
-                Topluluk altyapısına programatik erişim. Kendi ürününe entegre et.
+                {t("api.subtitle")}
               </p>
             </div>
             <a
               href="#"
               className="flex shrink-0 items-center justify-center gap-1.5 border border-[var(--bone)]/25 px-3 py-2 font-mono text-label font-semibold uppercase tracking-widest text-[var(--bone)]/70 transition-all hover:border-[var(--bone)]/50 hover:text-[var(--bone)] sm:justify-start"
             >
-              <Code2 className="size-3" /> Dokümantasyon <ArrowUpRight className="size-2.5" />
+              <Code2 className="size-3" /> {t("api.docs")} <ArrowUpRight className="size-2.5" />
             </a>
           </div>
         </div>
@@ -284,13 +268,13 @@ export default function InnerApi() {
       {/* API Keys */}
       <section>
         <div className="mb-3 border-t border-[var(--ink)]/[0.08] pt-3">
-          <p className="font-mono text-label font-semibold uppercase tracking-widest text-[var(--ink-body)]">API Anahtarların</p>
-          <p className="mt-0.5 text-xs font-medium text-[var(--ink-muted)]">Anahtarları güvende tut · kimseyle paylaşma</p>
+          <p className="font-mono text-label font-semibold uppercase tracking-widest text-[var(--ink-body)]">{t("api.keys")}</p>
+          <p className="mt-0.5 text-sm font-medium text-[var(--ink-muted)]">{t("api.keysHint")}</p>
         </div>
 
-        {isLoading && <LoadingBlock label="Anahtarlar yükleniyor" />}
+        {isLoading && <LoadingBlock label={t("api.loading")} />}
         {isError && (
-          <ErrorState message={error instanceof Error ? error.message : "Anahtarlar yüklenemedi"} onRetry={() => refetch()} />
+          <ErrorState message={error instanceof Error ? error.message : t("api.loadError")} onRetry={() => refetch()} />
         )}
 
         {!isLoading && !isError && (
@@ -299,7 +283,7 @@ export default function InnerApi() {
 
             {keys.length === 0 && !revealedKey && (
               <p className="border border-[var(--ink)]/[0.08] px-4 py-3 text-sm text-[var(--ink-muted)]">
-                Henüz bir API anahtarın yok.
+                {t("api.empty")}
               </p>
             )}
 
@@ -316,7 +300,7 @@ export default function InnerApi() {
                 value={newKeyName}
                 onChange={(e) => setNewKeyName(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && void createKey()}
-                placeholder="Anahtar adı (ör. prod-server)"
+                placeholder={t("api.phKeyName")}
                 className="flex-1 bg-transparent font-mono text-caption text-[var(--ink)] outline-none placeholder:text-[var(--ink-subtle)]"
               />
               <button
@@ -324,7 +308,7 @@ export default function InnerApi() {
                 onClick={() => void createKey()}
                 className="flex shrink-0 items-center gap-1.5 border border-[var(--ink)] bg-[var(--ink)] px-3 py-1.5 font-mono text-label font-semibold uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-80 disabled:opacity-40"
               >
-                <Plus className="size-3" /> {creating ? "Oluşturuluyor…" : "Yeni Anahtar"}
+                <Plus className="size-3" /> {creating ? t("api.creating") : t("api.createKey")}
               </button>
             </div>
             {createError && (
@@ -339,7 +323,7 @@ export default function InnerApi() {
       {/* Endpoints */}
       <section>
         <div className="mb-4 border-t border-[var(--ink)]/[0.08] pt-3">
-          <p className="font-mono text-label font-semibold uppercase tracking-widest text-[var(--ink-body)]">Endpoint'ler</p>
+          <p className="font-mono text-label font-semibold uppercase tracking-widest text-[var(--ink-body)]">{t("api.endpoints")}</p>
         </div>
         <div className="space-y-1">
           {ENDPOINTS.map((ep) => (
@@ -352,7 +336,7 @@ export default function InnerApi() {
                   className={`border px-2 py-0.5 font-mono text-label font-semibold uppercase tracking-widest ${
                     ep.method === "GET"
                       ? "text-[var(--success-ink)] border-[var(--inner-green)]/30 bg-[var(--inner-green)]/8"
-                      : "text-amber-700 border-amber-300/50 bg-amber-50/60"
+                      : "text-[var(--ink-body)] border-[var(--ink)]/25 bg-[var(--ink)]/[0.06]"
                   }`}
                 >
                   {ep.method}
@@ -361,15 +345,15 @@ export default function InnerApi() {
                   className={`border px-1.5 py-0.5 font-mono text-label font-semibold uppercase tracking-widest ${
                     ep.status === "stable"
                       ? "text-[var(--ink-body)] border-[var(--ink)]/15"
-                      : "text-amber-700 border-amber-300/50"
+                      : "text-[var(--ink-muted)] border-[var(--ink)]/20 bg-[var(--ink)]/[0.04]"
                   }`}
                 >
                   {ep.status}
                 </span>
                 <span className="ml-auto font-mono text-label font-medium text-[var(--ink-muted)] shrink-0">{ep.rate}</span>
               </div>
-              <p className="font-mono text-label font-medium text-[var(--ink-strong)] truncate">{ep.path}</p>
-              <p className="text-xs text-[var(--ink-muted)] truncate">{ep.desc}</p>
+              <p className="font-mono text-label font-medium text-[var(--ink-strong)] break-all sm:truncate">{ep.path}</p>
+              <p className="text-sm text-[var(--ink-muted)] truncate">{ep.desc}</p>
             </div>
           ))}
         </div>
@@ -378,7 +362,7 @@ export default function InnerApi() {
       {/* Pricing plans */}
       <section>
         <div className="mb-4 border-t border-[var(--ink)]/[0.08] pt-3">
-          <p className="font-mono text-label font-semibold uppercase tracking-widest text-[var(--ink-body)]">API Planları</p>
+          <p className="font-mono text-label font-semibold uppercase tracking-widest text-[var(--ink-body)]">{t("api.plans")}</p>
         </div>
         <div className="grid gap-3 sm:grid-cols-3">
           {PLANS.map((plan) => (
@@ -404,7 +388,7 @@ export default function InnerApi() {
                   </p>
                   {plan.recommended && (
                     <span className="border border-[var(--inner-green)]/40 px-1.5 py-0.5 font-mono text-label font-semibold uppercase tracking-widest text-[var(--success-ink)]">
-                      Önerilen
+                      {t("api.recommended")}
                     </span>
                   )}
                 </div>
@@ -422,13 +406,13 @@ export default function InnerApi() {
                   )}
                 </div>
                 <p className={`mb-3 font-mono text-label font-medium ${plan.recommended ? "text-[var(--bone)]/65" : "text-[var(--ink-body)]"}`}>
-                  {plan.requests} istek
+                  {t("api.requests", { n: plan.requests })}
                 </p>
                 <ul className="mb-4 space-y-1.5">
                   {plan.features.map((f) => (
                     <li key={f} className="flex items-start gap-2">
                       <CheckCircle2 className={`mt-0.5 size-3 shrink-0 ${plan.recommended ? "text-[var(--success-ink)]" : "text-[var(--ink-muted)]"}`} />
-                      <span className={`text-xs font-medium ${plan.recommended ? "text-[var(--bone)]/70" : "text-[var(--ink-body)]"}`}>{f}</span>
+                      <span className={`text-sm font-medium ${plan.recommended ? "text-[var(--bone)]/70" : "text-[var(--ink-body)]"}`}>{f}</span>
                     </li>
                   ))}
                 </ul>
@@ -441,7 +425,7 @@ export default function InnerApi() {
                       : "border-[var(--ink)]/15 text-[var(--ink-body)] hover:border-[var(--ink)] hover:text-[var(--ink)]",
                   ].join(" ")}
                 >
-                  <span>Destekle İletişime Geç</span>
+                  <span>{t("api.contactSupport")}</span>
                   <ArrowUpRight className="size-3" />
                 </a>
               </div>
@@ -454,14 +438,13 @@ export default function InnerApi() {
       <div className="flex items-start gap-3 border border-[var(--ink)]/[0.08] p-4">
         <AlertCircle className="size-4 shrink-0 text-[var(--ink-muted)] mt-0.5" />
         <p className="text-sm leading-relaxed font-medium text-[var(--ink-body)]">
-          inner·api beta aşamasındadır. Anahtar oluşturma ve silme canlı çalışır; kullanım/rate-limit takibi ve
-          faturalandırma henüz bağlanmadı. Plan yükseltmesi için destek ekibiyle iletişime geç.
+          {t("api.warning")}
         </p>
       </div>
 
       <div className="border-t border-[var(--ink)]/[0.08] pt-4">
         <p className="font-mono text-label font-medium uppercase tracking-widest text-[var(--ink-subtle)]">
-          <span lang="en">inner·api</span> v1 · REST · JSON · Bearer Auth · <span lang="en">inner·hub</span> ekosistemi
+          <span lang="en">inner·api</span> {t("api.footer")} · <span lang="en">inner·hub</span> ekosistemi
         </p>
       </div>
     </div>

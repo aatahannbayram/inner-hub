@@ -221,7 +221,7 @@
   }
   ::selection {
     background-color: var(--inner-green);
-    color: var(--ink);
+    color: var(--ink-fixed);
   }
   :focus-visible {
     outline: 2px solid var(--ink);
@@ -230,6 +230,16 @@
   section[id] {
     scroll-margin-top: 100px;
   }
+}
+
+/* Panel dark: soft elevation without purple glow bias */
+.dark .panel-surface {
+  background: color-mix(in srgb, var(--bone) 100%, transparent);
+  border-color: color-mix(in srgb, var(--ink) 12%, transparent);
+}
+
+.dark ::selection {
+  color: #0A0A0A;
 }
 
 .font-display {
@@ -318,6 +328,19 @@
   animation: beacon 1.05s ease-in-out infinite;
 }
 
+@keyframes beacon-glow {
+  0%, 45% { box-shadow: 0 0 6px 1px rgba(24, 255, 133, 0.55); }
+  50%, 55% { box-shadow: 0 0 0 0 rgba(24, 255, 133, 0); }
+  60%, 100% { box-shadow: 0 0 6px 1px rgba(24, 255, 133, 0.55); }
+}
+
+.beacon-pulse-glow {
+  animation-name: beacon, beacon-glow;
+  animation-duration: 1.05s, 1.05s;
+  animation-timing-function: ease-in-out, ease-in-out;
+  animation-iteration-count: infinite, infinite;
+}
+
 @keyframes blink {
   0%, 100% { opacity: 1; }
   50% { opacity: 0; }
@@ -380,6 +403,9 @@
 
 @media (prefers-reduced-motion: reduce) {
   .animate-beacon {
+    animation: none;
+  }
+  .beacon-pulse-glow {
     animation: none;
   }
   .animate-diagram-spin {

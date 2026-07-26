@@ -8,6 +8,7 @@ import { apiUrl } from "@/lib/api";
 import { StatCardSkeleton, LoadingBlock, ErrorState } from "@/components/panel/Skeletons";
 import { HeroVideo } from "@/components/HeroVideo";
 import { HeroQuickStat } from "@/components/panel/HeroQuickStat";
+import { useT, useLocale } from "@/i18n";
 
 type ViewMode = "liste" | "takvim";
 
@@ -62,31 +63,20 @@ function mapApiEvent(row: RawEvent): Event {
   };
 }
 
-const TYPE_LABELS: Record<Event["type"], string> = {
-  gathering: "Buluşma",
-  workshop: "Workshop",
-  online: "Online",
-};
-
-function formatDate(iso: string) {
-  const d = new Date(iso);
-  return d.toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" });
+function localeTag(locale: string) {
+  return locale === "en" ? "en-US" : "tr-TR";
 }
 
-function formatTime(iso: string) {
-  return new Date(iso).toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" });
-}
-
-function formatMonth(iso: string) {
-  return new Date(iso).toLocaleDateString("tr-TR", { month: "long", year: "numeric" });
+function formatTime(iso: string, locale: string) {
+  return new Date(iso).toLocaleTimeString(localeTag(locale), { hour: "2-digit", minute: "2-digit" });
 }
 
 function formatDay(iso: string) {
   return new Date(iso).getDate();
 }
 
-function formatWeekday(iso: string) {
-  return new Date(iso).toLocaleDateString("tr-TR", { weekday: "short" });
+function formatWeekday(iso: string, locale: string) {
+  return new Date(iso).toLocaleDateString(localeTag(locale), { weekday: "short" });
 }
 
 function spotsLeft(event: Event) {
@@ -101,6 +91,12 @@ function displayTitle(title: string) {
     .trim();
 }
 
+function typeLabel(type: Event["type"], t: (key: string) => string) {
+  if (type === "workshop") return t("events.typeWorkshop");
+  if (type === "online") return t("events.typeOnline");
+  return t("events.typeGathering");
+}
+
 function EventCard({
   event,
   busy,
@@ -112,10 +108,13 @@ function EventCard({
   onRegister?: (id: number) => void;
   onUnregister?: (id: number) => void;
 }) {
+  const t = useT();
+  const { locale } = useLocale();
   const spots = spotsLeft(event);
   const isFull = event.capacity > 0 && spots <= 0;
   const title = displayTitle(event.title);
-  const monthShort = new Date(event.startAt).toLocaleDateString("tr-TR", { month: "short" });
+  const monthShort = new Date(event.startAt).toLocaleDateString(localeTag(locale), { month: "short" });
+  const label = typeLabel(event.type, t);
 
   return (
     <article
@@ -137,7 +136,7 @@ function EventCard({
       <div className="flex items-center gap-3 sm:flex-col sm:items-center sm:justify-center sm:gap-0 sm:border sm:border-[var(--ink)]/[0.08] sm:px-2 sm:py-3 sm:text-center">
         <div className="flex size-14 shrink-0 flex-col items-center justify-center border border-[var(--ink)]/[0.1] bg-[var(--ink)]/[0.03] sm:size-auto sm:border-0 sm:bg-transparent">
           <span className="font-mono text-[9px] uppercase tracking-[0.16em] text-[var(--ink-muted)]">
-            {formatWeekday(event.startAt)}
+            {formatWeekday(event.startAt, locale)}
           </span>
           <span
             className="font-display font-serif text-[1.75rem] leading-none text-[var(--ink)] sm:text-3xl"
@@ -152,9 +151,9 @@ function EventCard({
         <div className="min-w-0 sm:hidden">
           <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-[var(--ink-muted)]">
             {event.type === "online" ? (
-              <span lang="en">{TYPE_LABELS[event.type]}</span>
+              <span lang="en">{label}</span>
             ) : (
-              TYPE_LABELS[event.type]
+              label
             )}
           </p>
           <h3 className="font-display font-serif text-lg leading-tight text-[var(--ink)]">{title}</h3>
@@ -167,9 +166,9 @@ function EventCard({
           <div className="min-w-0">
             <p className="mb-1 hidden font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--ink-muted)] sm:block">
               {event.type === "online" ? (
-                <span lang="en">{TYPE_LABELS[event.type]}</span>
+                <span lang="en">{label}</span>
               ) : (
-                TYPE_LABELS[event.type]
+                label
               )}
             </p>
             <h3 className="hidden font-display font-serif text-xl leading-snug tracking-[-0.02em] text-[var(--ink)] sm:block md:text-[1.35rem]">
@@ -183,7 +182,7 @@ function EventCard({
           </div>
           {event.isRegistered && (
             <span className="inline-flex shrink-0 items-center gap-1 border border-[var(--inner-green)]/35 bg-[var(--inner-green)]/10 px-2 py-1 font-mono text-[9px] uppercase tracking-widest text-[var(--success-ink)]">
-              <CheckCircle2 className="size-2.5" /> Kayıtlı
+              <CheckCircle2 className="size-2.5" /> {t("events.joined")}
             </span>
           )}
         </div>
@@ -193,19 +192,22 @@ function EventCard({
             <li className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.12em]">
               <Clock className="size-3 shrink-0 text-[var(--ink-muted)]" aria-hidden />
               <span>
-                {formatTime(event.startAt)}
+                {formatTime(event.startAt, locale)}
                 <span className="mx-1 text-[var(--ink-muted)]">·</span>
-                {formatTime(event.endAt)}
+                {formatTime(event.endAt, locale)}
               </span>
             </li>
             <li className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.12em]">
               <MapPin className="size-3 shrink-0 text-[var(--ink-muted)]" aria-hidden />
-              {event.location ? <span lang="en">{event.location}</span> : "Konum yakında"}
+              {event.location ? <span lang="en">{event.location}</span> : t("events.locationSoon")}
             </li>
             {event.capacity > 0 && (
               <li className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.12em]">
                 <Users className="size-3 shrink-0 text-[var(--ink-muted)]" aria-hidden />
-                {event.registered}/{event.capacity} kişi
+                {t("events.peopleCount", {
+                  registered: event.registered,
+                  capacity: event.capacity,
+                })}
               </li>
             )}
           </ul>
@@ -214,25 +216,25 @@ function EventCard({
             <div className="shrink-0">
               {event.capacity > 0 && isFull ? (
                 <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-muted)]">
-                  Kontenjan dolu
+                  {t("events.full")}
                 </span>
               ) : event.isRegistered ? (
                 <button
                   type="button"
                   disabled={busy}
                   onClick={() => onUnregister?.(event.id)}
-                  className="min-h-10 w-full px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)] transition-colors hover:text-[var(--error-ink)] disabled:opacity-40 sm:min-h-0 sm:w-auto"
+                  className="min-h-10 w-full px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)] transition-colors hover:text-[var(--error-ink)] disabled:opacity-40 sm:w-auto"
                 >
-                  Kaydı İptal Et
+                  {t("events.rsvpCancel")}
                 </button>
               ) : (
                 <button
                   type="button"
                   disabled={busy}
                   onClick={() => onRegister?.(event.id)}
-                  className="inline-flex min-h-11 w-full items-center justify-center gap-1.5 bg-[var(--ink)] px-5 py-2.5 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-85 disabled:opacity-40 sm:min-h-0 sm:w-auto"
+                  className="inline-flex min-h-11 w-full items-center justify-center gap-1.5 bg-[var(--ink)] px-5 py-2.5 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-85 disabled:opacity-40 sm:w-auto"
                 >
-                  Kayıt Ol
+                  {t("events.join")}
                   <ChevronRight className="size-3" />
                 </button>
               )}
@@ -245,9 +247,18 @@ function EventCard({
 }
 
 // ─── Calendar view ────────────────────────────────────────────────────────────
-const DAYS = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"];
 
 function CalendarView({ events }: { events: Event[] }) {
+  const t = useT();
+  const days = [
+    t("events.dayMon"),
+    t("events.dayTue"),
+    t("events.dayWed"),
+    t("events.dayThu"),
+    t("events.dayFri"),
+    t("events.daySat"),
+    t("events.daySun"),
+  ];
   const today = new Date("2026-07-04");
   const year = today.getFullYear();
   const month = today.getMonth();
@@ -275,17 +286,18 @@ function CalendarView({ events }: { events: Event[] }) {
   });
 
   return (
-    <div className="border border-[var(--ink)]/[0.08]">
+    <div className="overflow-x-auto border border-[var(--ink)]/[0.08]">
       {/* Header row */}
-      <div className="grid grid-cols-7 border-b border-[var(--ink)]/[0.08]">
-        {DAYS.map((d) => (
+      <div className="grid min-w-[520px] grid-cols-7 border-b border-[var(--ink)]/[0.08]">
+        {days.map((d) => (
           <div key={d} className="p-2 text-center font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
-            {d}
+            <span className="sm:hidden">{d.slice(0, 1)}</span>
+            <span className="hidden sm:inline">{d}</span>
           </div>
         ))}
       </div>
       {/* Day cells */}
-      <div className="grid grid-cols-7">
+      <div className="grid min-w-[520px] grid-cols-7">
         {cells.map((day, i) => {
           const isToday = day === today.getDate();
           const dayEvents = day ? eventsByDay[day] ?? [] : [];
@@ -347,10 +359,11 @@ function scrollToId(id: string) {
 }
 
 function EventsHero({ upcomingCount }: { upcomingCount: number }) {
+  const t = useT();
   return (
     <div
-      className="relative -mx-4 -mt-6 overflow-hidden sm:-mx-6 lg:-mx-8 lg:-mt-8"
-      style={{ height: "min(70vh, 620px)", minHeight: 440 }}
+      className="relative -mx-3 -mt-5 overflow-hidden sm:-mx-5 sm:-mt-6 lg:-mx-8 lg:-mt-8"
+      style={{ height: "min(62vh, 620px)", minHeight: 360 }}
     >
       <HeroVideo
         src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260403_050628_c4e32401-fab4-4a27-b7a8-6e9291cd5959.mp4"
@@ -365,47 +378,47 @@ function EventsHero({ upcomingCount }: { upcomingCount: number }) {
         className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-b from-black/50 via-transparent to-transparent"
       />
 
-      <div className="relative z-10 flex h-full flex-col justify-end px-6 pb-10 md:px-12 md:pb-14">
+      <div className="relative z-10 flex h-full flex-col justify-end px-4 pb-8 sm:px-6 sm:pb-10 md:px-12 md:pb-14">
         <div className="lg:grid lg:grid-cols-2 lg:items-end lg:gap-10">
           <div>
             <p className="mb-3 font-mono text-label uppercase tracking-widest text-white/60 [text-shadow:0_1px_12px_rgba(0,0,0,0.6)]">
-              Etkinlikler
+              {t("events.title")}
             </p>
             <AnimatedHeading
-              text={"Where the circle\ngathers in person."}
-              className="mb-4 font-display font-serif italic text-4xl leading-[1.1] text-white [text-shadow:0_2px_24px_rgba(0,0,0,0.55)] md:text-5xl lg:text-6xl"
+              text={t("events.heroTitle")}
+              className="mb-4 font-display font-serif italic text-3xl leading-[1.1] text-white [text-shadow:0_2px_24px_rgba(0,0,0,0.55)] sm:text-4xl md:text-5xl lg:text-6xl"
               style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1" }}
             />
             <FadeIn delay={0.8}>
-              <p className="mb-6 max-w-[46ch] text-base text-white/75 [text-shadow:0_1px_12px_rgba(0,0,0,0.6)] md:text-lg">
-                Topluluk buluşmaları, workshoplar ve networking. Dairenin içinde, güvenle kurulan bağlar.
+              <p className="mb-6 max-w-[46ch] text-sm text-white/75 [text-shadow:0_1px_12px_rgba(0,0,0,0.6)] sm:text-base md:text-lg">
+                {t("events.heroBody")}
               </p>
             </FadeIn>
             <FadeIn delay={1.2}>
-              <div className="flex flex-wrap gap-4">
+              <div className="flex flex-wrap gap-3 sm:gap-4">
                 <button
                   onClick={() => scrollToId("events-upcoming")}
-                  className="group inline-flex items-center gap-2 bg-white px-8 py-3 font-mono text-xs uppercase tracking-widest text-black transition-colors hover:bg-white/90"
+                  className="group inline-flex min-h-11 items-center gap-2 bg-white px-6 py-3 font-mono text-xs uppercase tracking-widest text-black transition-colors hover:bg-white/90 sm:px-8"
                 >
-                  Yaklaşanları Gör
+                  {t("events.seeUpcoming")}
                   <ChevronRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
                 </button>
                 <button
                   onClick={() => scrollToId("events-calendar-toggle")}
-                  className="liquid-glass group inline-flex items-center gap-2 border border-white/20 px-8 py-3 font-mono text-xs uppercase tracking-widest text-white transition-colors hover:bg-white hover:text-black"
+                  className="liquid-glass group inline-flex min-h-11 items-center gap-2 border border-white/20 px-6 py-3 font-mono text-xs uppercase tracking-widest text-white transition-colors hover:bg-white hover:text-black sm:px-8"
                 >
-                  Takvimi Aç
+                  {t("events.openCalendar")}
                   <ChevronRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
                 </button>
               </div>
             </FadeIn>
           </div>
 
-          <div className="mt-8 flex items-end justify-start lg:mt-0 lg:justify-end">
+          <div className="mt-8 hidden items-end justify-start sm:flex lg:mt-0 lg:justify-end">
             <HeroQuickStat
               value={upcomingCount}
-              label="Yaklaşan etkinlik"
-              tagline="Buluşmalar. Workshoplar. Networking."
+              label={t("events.upcomingStat")}
+              tagline={t("events.heroTagline")}
             />
           </div>
         </div>
@@ -444,6 +457,7 @@ function EventsStat({
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function Events() {
+  const t = useT();
   const [view, setView] = useState<ViewMode>("liste");
   const [busyId, setBusyId] = useState<number | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -472,10 +486,10 @@ export default function Events() {
         credentials: "include",
       });
       const json = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(json.error ?? "Kayıt başarısız");
+      if (!res.ok) throw new Error(json.error ?? t("events.registerFailed"));
       await queryClient.invalidateQueries({ queryKey: ["events"] });
     } catch (e: any) {
-      setActionError(e.message ?? "Kayıt başarısız");
+      setActionError(e.message ?? t("events.registerFailed"));
     } finally {
       setBusyId(null);
     }
@@ -490,10 +504,10 @@ export default function Events() {
         credentials: "include",
       });
       const json = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(json.error ?? "İptal başarısız");
+      if (!res.ok) throw new Error(json.error ?? t("events.cancelFailed"));
       await queryClient.invalidateQueries({ queryKey: ["events"] });
     } catch (e: any) {
-      setActionError(e.message ?? "İptal başarısız");
+      setActionError(e.message ?? t("events.cancelFailed"));
     } finally {
       setBusyId(null);
     }
@@ -507,33 +521,33 @@ export default function Events() {
       {!loading && !isError && events.length > 0 && (
         <FadeIn delay={0.02}>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <EventsStat label="Yaklaşan" value={String(upcoming.length)} sub="planlanan etkinlik" icon={CalendarDays} />
-            <EventsStat label="Bu Ay" value={String(thisMonth)} sub="takvimde" icon={Sparkles} />
-            <EventsStat label="Kayıtlısın" value={String(registeredCount)} sub="etkinlikte" icon={CheckCircle2} />
-            <EventsStat label="Geçmiş" value={String(past.length)} sub="tamamlandı" icon={Clock} />
+            <EventsStat label={t("events.filterUpcoming")} value={String(upcoming.length)} sub={t("events.planned")} icon={CalendarDays} />
+            <EventsStat label={t("events.thisMonth")} value={String(thisMonth)} sub={t("events.onCalendar")} icon={Sparkles} />
+            <EventsStat label={t("events.youreRegistered")} value={String(registeredCount)} sub={t("events.atEvent")} icon={CheckCircle2} />
+            <EventsStat label={t("events.past")} value={String(past.length)} sub={t("events.completed")} icon={Clock} />
           </div>
         </FadeIn>
       )}
 
       {/* View toggle */}
       <FadeIn delay={0.03}>
-        <div className="flex items-center justify-between gap-4">
-          <p className="text-sm text-[var(--ink-muted)] font-light">
-            Topluluk buluşmaları, workshoplar ve networking etkinlikleri.
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+          <p className="hidden text-sm font-light text-[var(--ink-muted)] sm:block">
+            {t("events.subtitle")}
           </p>
-          <div id="events-calendar-toggle" className="flex shrink-0 scroll-mt-6 border border-[var(--ink)]/15">
+          <div id="events-calendar-toggle" className="flex w-full shrink-0 scroll-mt-6 border border-[var(--ink)]/15 sm:w-auto">
             {(["liste", "takvim"] as ViewMode[]).map((v) => (
               <button
                 key={v}
                 onClick={() => setView(v)}
                 className={[
-                  "px-4 py-2 font-mono text-label uppercase tracking-widest transition-colors",
+                  "min-h-10 flex-1 px-4 py-2 font-mono text-label uppercase tracking-widest transition-colors sm:flex-none",
                   view === v
                     ? "bg-[var(--ink)] text-[var(--bone)]"
                     : "text-[var(--ink-body)] hover:text-[var(--ink)]",
                 ].join(" ")}
               >
-                {v === "liste" ? "Liste" : "Takvim"}
+                {v === "liste" ? t("events.list") : t("events.calendar")}
               </button>
             ))}
           </div>
@@ -541,7 +555,7 @@ export default function Events() {
       </FadeIn>
 
       {loading && (
-        <LoadingBlock label="Etkinlikler yükleniyor">
+        <LoadingBlock label={t("events.loading")}>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {Array.from({ length: 4 }).map((_, i) => (
               <StatCardSkeleton key={i} />
@@ -551,13 +565,13 @@ export default function Events() {
       )}
       {isError && (
         <ErrorState
-          message={error instanceof Error ? error.message : "Etkinlikler yüklenemedi"}
+          message={error instanceof Error ? error.message : t("events.loadError")}
           onRetry={() => refetch()}
         />
       )}
       {!loading && !isError && events.length === 0 && (
         <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
-          Henüz yayınlanmış etkinlik yok.
+          {t("events.emptyPublished")}
         </p>
       )}
 
@@ -574,7 +588,7 @@ export default function Events() {
             <section id="events-upcoming" className="scroll-mt-6">
               <div className="mb-4 flex items-center gap-3 border-t border-[var(--ink)]/[0.08] pt-4">
                 <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--ink)]">
-                  Yaklaşan Etkinlikler
+                  {t("events.upcomingSection")}
                 </p>
                 <span className="flex size-5 items-center justify-center bg-[var(--ink)] font-mono text-[10px] text-[var(--bone)]">
                   {upcoming.length}
@@ -583,7 +597,7 @@ export default function Events() {
               <div className="space-y-3">
                 {upcoming.length === 0 ? (
                   <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
-                    Yaklaşan etkinlik yok.
+                    {t("events.empty")}
                   </p>
                 ) : (
                   upcoming.map((e) => (
@@ -606,7 +620,7 @@ export default function Events() {
               <section>
                 <div className="mb-4 border-t border-[var(--ink)]/[0.08] pt-4">
                   <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--ink-muted)]">
-                    Geçmiş Etkinlikler
+                    {t("events.pastSection")}
                   </p>
                 </div>
                 <div className="space-y-3">
@@ -625,7 +639,7 @@ export default function Events() {
           <section>
             <div className="mb-3 border-t border-[var(--ink)]/[0.08] pt-3">
               <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
-                Takvim
+                {t("events.calendar")}
               </p>
             </div>
             <CalendarView events={events} />

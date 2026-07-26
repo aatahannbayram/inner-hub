@@ -20,6 +20,7 @@ import { toLowerTR, toUpperTR } from "@/lib/tr";
 import { useApiQuery } from "@/hooks/useApiQuery";
 import { LoadingBlock, ErrorState, CourseCardSkeleton } from "@/components/panel/Skeletons";
 import { HeroQuickStat } from "@/components/panel/HeroQuickStat";
+import { useT, useLocale } from "@/i18n";
 
 type Category = "Tümü" | "Yazılım" | "Finans" | "Yaşam" | "Eğitim";
 
@@ -64,13 +65,21 @@ function BrandMark({ brand }: { brand: string }) {
   );
 }
 
-function formatExpiry(iso?: string) {
+function formatExpiry(iso: string | undefined, locale: string) {
   if (!iso) return null;
-  return new Date(iso).toLocaleDateString("tr-TR", {
+  return new Date(iso).toLocaleDateString(locale === "en" ? "en-US" : "tr-TR", {
     day: "numeric",
     month: "long",
     year: "numeric",
   });
+}
+
+function catLabel(cat: Category, t: (k: string) => string) {
+  if (cat === "Tümü") return t("common.all");
+  if (cat === "Yazılım") return t("perks.catSoftware");
+  if (cat === "Finans") return t("perks.catFinance");
+  if (cat === "Yaşam") return t("perks.catLife");
+  return t("perks.catEducation");
 }
 
 function PerkCard({
@@ -82,6 +91,7 @@ function PerkCard({
   saved: boolean;
   onOpen: () => void;
 }) {
+  const t = useT();
   return (
     <button
       type="button"
@@ -96,7 +106,7 @@ function PerkCard({
       </div>
 
       <p className="mb-1 text-xs text-[var(--ink-muted)]">
-        <span lang="en">{perk.brand}</span> · {perk.category}
+        <span lang="en">{perk.brand}</span> · {catLabel(perk.category, t)}
       </p>
       <p
         className="mb-2 font-serif text-base leading-snug text-[var(--ink)] group-hover:underline decoration-[var(--ink)]/20 underline-offset-4"
@@ -110,15 +120,15 @@ function PerkCard({
 
       <div className="mt-auto flex items-center justify-between border-t border-[var(--ink)]/[0.08] pt-3">
         <span className="inline-flex items-center gap-1.5 font-mono text-label uppercase tracking-widest text-[var(--ink-body)] transition-colors group-hover:text-[var(--ink)]">
-          İncele <ArrowRight className="size-3 transition-transform group-hover:translate-x-0.5" />
+          {t("perks.review")} <ArrowRight className="size-3 transition-transform group-hover:translate-x-0.5" />
         </span>
         {saved ? (
           <span className="font-mono text-label uppercase tracking-widest text-[var(--success-ink)]">
-            Kaydedildi
+            {t("common.saved")}
           </span>
         ) : perk.code ? (
           <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
-            Kod var
+            {t("perks.hasCode")}
           </span>
         ) : null}
       </div>
@@ -137,6 +147,8 @@ function PerkDetail({
   onClose: () => void;
   onToggleSave: () => void;
 }) {
+  const t = useT();
+  const { locale } = useLocale();
   const [copied, setCopied] = useState(false);
   const reduce = useReducedMotion();
 
@@ -164,7 +176,7 @@ function PerkDetail({
     }
   };
 
-  const expiry = formatExpiry(perk.expiresAt);
+  const expiry = formatExpiry(perk.expiresAt, locale);
 
   return (
     <>
@@ -181,7 +193,7 @@ function PerkDetail({
       >
         <div className="flex items-center justify-between border-b border-[var(--ink)]/[0.08] px-5 py-4">
           <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
-            Ayrıcalık · {perk.category}
+            {t("perks.perkLabel")} · {catLabel(perk.category, t)}
           </p>
           <button
             type="button"
@@ -189,7 +201,7 @@ function PerkDetail({
             className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)] transition-colors hover:text-[var(--ink)]"
           >
             <span className="inline-flex items-center gap-1.5">
-              <X className="size-3" /> Kapat
+              <X className="size-3" /> {t("common.close")}
             </span>
           </button>
         </div>
@@ -217,7 +229,7 @@ function PerkDetail({
             </span>
             {expiry && (
               <span className="border border-[var(--ink)]/10 px-2 py-1 font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
-                Son: {expiry}
+                {t("perks.expires", { date: expiry })}
               </span>
             )}
           </div>
@@ -226,7 +238,7 @@ function PerkDetail({
 
           <div className="border border-[var(--ink)]/[0.08] p-4">
             <p className="mb-2 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
-              Nasıl kullanılır
+              {t("perks.howTo")}
             </p>
             <p className="text-sm leading-relaxed text-[var(--ink-body)]">{perk.howTo}</p>
           </div>
@@ -234,7 +246,7 @@ function PerkDetail({
           {perk.code && (
             <div className="border border-[var(--ink)] bg-[var(--ink)] p-4 text-[var(--bone)]">
               <p className="mb-2 font-mono text-label uppercase tracking-widest text-[var(--bone)]/62">
-                Aktivasyon kodu
+                {t("perks.activationCode")}
               </p>
               <div className="flex items-center justify-between gap-3">
                 <code className="font-mono text-sm tracking-wider text-[var(--bone)]">{perk.code}</code>
@@ -244,7 +256,7 @@ function PerkDetail({
                   className="inline-flex items-center gap-1.5 border border-[var(--bone)]/25 px-3 py-2 font-mono text-label uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-80"
                 >
                   {copied ? <Check className="size-3" /> : <Copy className="size-3" />}
-                  {copied ? "Kopyalandı" : "Kopyala"}
+                  {copied ? t("common.copied") : t("common.copy")}
                 </button>
               </div>
             </div>
@@ -258,14 +270,14 @@ function PerkDetail({
             rel="noopener noreferrer"
             className="flex w-full items-center justify-center gap-2 border border-[var(--ink)] bg-[var(--ink)] px-4 py-3 font-mono text-caption uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-85"
           >
-            Partner sitesine git <ExternalLink className="size-3.5" />
+            {t("perks.goPartner")} <ExternalLink className="size-3.5" />
           </a>
           <button
             type="button"
             onClick={onToggleSave}
             className="flex w-full items-center justify-center gap-2 border border-[var(--ink)]/20 px-4 py-3 font-mono text-caption uppercase tracking-widest text-[var(--ink-strong)] transition-colors hover:border-[var(--ink)] hover:text-[var(--ink)]"
           >
-            {saved ? "Kaydedilenlerden çıkar" : "Daha sonra için kaydet"}
+            {saved ? t("perks.unsave") : t("perks.saveForLater")}
           </button>
         </div>
       </motion.aside>
@@ -280,6 +292,7 @@ function scrollToId(id: string) {
 }
 
 function PerksHero({ totalCount }: { totalCount: number }) {
+  const t = useT();
   return (
     <div
       className="relative -mx-4 -mt-6 overflow-hidden sm:-mx-6 lg:-mx-8 lg:-mt-8"
@@ -292,43 +305,43 @@ function PerksHero({ totalCount }: { totalCount: number }) {
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-[1] bg-[var(--ink-fixed)]/40" />
       <div
         aria-hidden="true"
-        className="bottom-blur-mask pointer-events-none absolute inset-0 z-[1] bg-black/20 backdrop-blur-xl"
+        className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-t from-[var(--ink-fixed)]/85 via-[var(--ink-fixed)]/25 to-transparent"
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-b from-black/50 via-transparent to-transparent"
+        className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-r from-[var(--ink-fixed)]/60 via-transparent to-transparent"
       />
 
       <div className="relative z-10 flex h-full flex-col justify-end px-6 pb-10 md:px-12 md:pb-14">
         <div className="lg:grid lg:grid-cols-2 lg:items-end lg:gap-10">
           <div>
-            <p className="mb-3 font-mono text-label uppercase tracking-widest text-white/60 [text-shadow:0_1px_12px_rgba(0,0,0,0.6)]">
-              Ayrıcalıklar
+            <p className="mb-3 font-mono text-label uppercase tracking-widest text-[var(--bone)]/60 [text-shadow:0_1px_12px_rgba(0,0,0,0.6)]">
+              {t("perks.title")}
             </p>
             <AnimatedHeading
               text={"Perks worth\nbeing inside for."}
-              className="mb-4 font-display font-serif italic text-4xl leading-[1.1] text-white [text-shadow:0_2px_24px_rgba(0,0,0,0.55)] md:text-5xl lg:text-6xl"
+              className="mb-4 font-display font-serif italic text-4xl leading-[1.1] text-[var(--bone)] [text-shadow:0_2px_24px_rgba(0,0,0,0.55)] md:text-5xl lg:text-6xl"
               style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1" }}
             />
             <FadeIn delay={0.8}>
-              <p className="mb-6 max-w-[46ch] text-base text-white/75 [text-shadow:0_1px_12px_rgba(0,0,0,0.6)] md:text-lg">
-                Program katılımcılarına özel yazılım, finans ve yaşam fırsatları. Kodu al, partnerde kullan.
+              <p className="mb-6 max-w-[46ch] text-base text-[var(--bone)]/75 [text-shadow:0_1px_12px_rgba(0,0,0,0.6)] md:text-lg">
+                {t("perks.heroBody")}
               </p>
             </FadeIn>
             <FadeIn delay={1.2}>
-              <div className="flex flex-wrap gap-4">
+              <div className="flex flex-wrap gap-3 sm:gap-4">
                 <button
                   onClick={() => scrollToId("perks-featured")}
-                  className="group inline-flex items-center gap-2 bg-white px-8 py-3 font-mono text-xs uppercase tracking-widest text-black transition-colors hover:bg-white/90"
+                  className="group inline-flex min-h-11 items-center gap-2 bg-[var(--bone)] px-6 py-3 font-mono text-sm uppercase tracking-widest text-[var(--ink)] transition-opacity hover:opacity-90 sm:px-8"
                 >
-                  Öne Çıkanlar
+                  {t("perks.featuredCta")}
                   <ArrowRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
                 </button>
                 <button
                   onClick={() => scrollToId("perks-all")}
-                  className="liquid-glass group inline-flex items-center gap-2 border border-white/20 px-8 py-3 font-mono text-xs uppercase tracking-widest text-white transition-colors hover:bg-white hover:text-black"
+                  className="liquid-glass group inline-flex min-h-11 items-center gap-2 border border-[var(--bone)]/25 px-6 py-3 font-mono text-sm uppercase tracking-widest text-[var(--bone)] transition-colors hover:bg-[var(--bone)] hover:text-[var(--ink)] sm:px-8"
                 >
-                  Tüm Fırsatlar
+                  {t("perks.allCta")}
                   <ArrowRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
                 </button>
               </div>
@@ -338,8 +351,8 @@ function PerksHero({ totalCount }: { totalCount: number }) {
           <div className="mt-8 flex items-end justify-start lg:mt-0 lg:justify-end">
             <HeroQuickStat
               value={totalCount}
-              label="Aktif ayrıcalık"
-              tagline="Yazılım. Finans. Yaşam."
+              label={t("perks.heroStat")}
+              tagline={t("perks.heroTagline")}
             />
           </div>
         </div>
@@ -377,6 +390,7 @@ function PerksStat({
 }
 
 export default function Perks() {
+  const t = useT();
   const [active, setActive] = useState<Category>("Tümü");
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<Perk | null>(null);
@@ -429,12 +443,12 @@ export default function Perks() {
   };
 
   return (
-    <div className="mx-auto max-w-5xl space-y-8">
+    <div className="mx-auto min-w-0 max-w-5xl space-y-8 overflow-x-hidden">
       {/* Hero */}
       <PerksHero totalCount={perks.length} />
 
       {isLoading ? (
-        <LoadingBlock label="Ayrıcalıklar yükleniyor">
+        <LoadingBlock label={t("perks.loading")}>
           <div className="grid gap-3 sm:grid-cols-2">
             <CourseCardSkeleton />
             <CourseCardSkeleton />
@@ -442,26 +456,26 @@ export default function Perks() {
         </LoadingBlock>
       ) : isError ? (
         <ErrorState
-          message={error instanceof Error ? error.message : "Ayrıcalıklar alınamadı"}
+          message={error instanceof Error ? error.message : t("perks.loadError")}
           onRetry={() => refetch()}
         />
       ) : (
         <>
       <FadeIn delay={0.01}>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <PerksStat label="Toplam Fırsat" value={String(perks.length)} sub="aktif ayrıcalık" icon={Gift} />
-          <PerksStat label="Öne Çıkan" value={String(featured.length)} sub="bu dönem" icon={Sparkles} />
-          <PerksStat label="Kategori" value={String(CATEGORIES.length - 1)} sub="yazılım · finans · yaşam" icon={Layers} />
-          <PerksStat label="Kaydettiğin" value={String(savedIds.length)} sub="favorilerinde" icon={Check} />
+          <PerksStat label={t("perks.statTotal")} value={String(perks.length)} sub={t("perks.statTotalSub")} icon={Gift} />
+          <PerksStat label={t("perks.statFeatured")} value={String(featured.length)} sub={t("perks.statFeaturedSub")} icon={Sparkles} />
+          <PerksStat label={t("perks.statCategory")} value={String(CATEGORIES.length - 1)} sub={t("perks.statCategorySub")} icon={Layers} />
+          <PerksStat label={t("perks.statSaved")} value={String(savedIds.length)} sub={t("perks.statSavedSub")} icon={Check} />
         </div>
       </FadeIn>
 
       <FadeIn delay={0.03}>
         <div className="grid grid-cols-1 gap-px border border-[var(--ink)]/[0.08] bg-[var(--ink)]/[0.08] sm:grid-cols-3">
           {[
-            { step: "01", title: "Seç", body: "Kategori veya aramayla fırsatı bulun." },
-            { step: "02", title: "Kod al", body: "Detayda aktivasyon kodunu kopyalayın." },
-            { step: "03", title: "Kullan", body: "Partner sitesinde kodu uygulayın." },
+            { step: "01", title: t("perks.step1Title"), body: t("perks.step1Body") },
+            { step: "02", title: t("perks.step2Title"), body: t("perks.step2Body") },
+            { step: "03", title: t("perks.step3Title"), body: t("perks.step3Body") },
           ].map((s) => (
             <div key={s.step} className="bg-[var(--bone)] p-4">
               <p className="mb-1 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
@@ -479,7 +493,7 @@ export default function Perks() {
           <section id="perks-featured" className="scroll-mt-6">
             <div className="mb-3 flex items-baseline justify-between border-t border-[var(--ink)]/[0.08] pt-3">
               <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
-                Öne çıkan
+                {t("perks.featured")}
               </p>
             </div>
             <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
@@ -503,7 +517,7 @@ export default function Perks() {
                     </h2>
                   </div>
                   <span className="relative z-10 mt-4 inline-flex items-center gap-1.5 font-mono text-label uppercase tracking-widest text-[var(--bone)]/70 transition-colors group-hover:text-[var(--bone)]">
-                    Detayı aç <ArrowRight className="size-3" />
+                    {t("perks.openDetail")} <ArrowRight className="size-3" />
                   </span>
                   <span className="pointer-events-none absolute bottom-3 right-3 z-10 size-8 bg-[var(--inner-green)]" />
                 </button>
@@ -521,7 +535,7 @@ export default function Perks() {
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Marka, teklif veya kod ara…"
+              placeholder={t("perks.searchPlaceholder")}
               className="w-full border-0 border-b border-[var(--ink)]/15 bg-transparent py-3 pl-6 font-light text-sm text-[var(--ink)] placeholder:text-[var(--ink-muted)] focus-visible:border-[var(--ink)] focus-visible:outline-none"
             />
           </div>
@@ -539,7 +553,7 @@ export default function Perks() {
                     : "border-[var(--ink)]/15 text-[var(--ink-muted)] hover:border-[var(--ink)]/40 hover:text-[var(--ink)]",
                 ].join(" ")}
               >
-                {cat}
+                {catLabel(cat, t)}
                 <span className="ml-1.5 opacity-50">{counts[cat]}</span>
               </button>
             ))}
@@ -553,11 +567,11 @@ export default function Perks() {
                   : "border-[var(--ink)]/15 text-[var(--ink-muted)] hover:border-[var(--ink)]/40 hover:text-[var(--ink)]",
               ].join(" ")}
             >
-              Kaydedilenler
+              {t("perks.saved")}
               <span className="ml-1.5 opacity-50">{savedIds.length}</span>
             </button>
             <span className="ml-auto font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
-              {filtered.length} ayrıcalık
+              {t("perks.count", { n: filtered.length })}
             </span>
           </div>
         </div>
@@ -568,10 +582,10 @@ export default function Perks() {
         {filtered.length === 0 ? (
           <div className="border border-[var(--ink)]/[0.08] px-6 py-14 text-center">
             <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
-              Sonuç yok
+              {t("perks.empty")}
             </p>
             <p className="mt-2 text-sm text-[var(--ink-muted)]">
-              Filtreyi veya aramayı temizleyip tekrar deneyin.
+              {t("perks.emptyHint")}
             </p>
             <button
               type="button"
@@ -582,7 +596,7 @@ export default function Perks() {
               }}
               className="mt-5 inline-flex border border-[var(--ink)] px-4 py-2 font-mono text-label uppercase tracking-widest text-[var(--ink)]"
             >
-              Tümünü göster
+              {t("perks.showAll")}
             </button>
           </div>
         ) : (
@@ -602,7 +616,7 @@ export default function Perks() {
       <FadeIn delay={0.1}>
         <div className="border-t border-[var(--ink)]/[0.08] pt-4">
           <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)]">
-            Yeni ayrıcalıklar her ay ekleniyor · Öneri için Slack veya destek kanalını kullanın.
+            {t("perks.footer")}
           </p>
         </div>
       </FadeIn>

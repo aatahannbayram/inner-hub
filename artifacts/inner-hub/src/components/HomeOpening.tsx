@@ -6,6 +6,7 @@ import { ScrollTextReveal } from "@/components/ScrollTextReveal";
 import { FloatingNavbar, HERO_CHROME } from "@/components/FloatingNavbar";
 import { HeroVideo } from "@/components/HeroVideo";
 import { Lockup } from "@/components/Lockup";
+import { useT } from "@/i18n";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 const CARD_EASE = [0.22, 1, 0.36, 1] as const;
@@ -66,6 +67,7 @@ export function HomeOpening() {
 }
 
 function HeroInset() {
+  const t = useT();
   return (
     <section
       className="relative h-[100svh] p-2 sm:p-3 md:p-5 lg:p-6"
@@ -102,7 +104,7 @@ function HeroInset() {
             className="mb-3 flex items-center gap-2.5 font-mono text-[9px] uppercase tracking-[0.16em] text-[var(--bone)]/55 sm:mb-6 sm:gap-3 sm:text-[11px]"
           >
             <span className="size-2 shrink-0 bg-[var(--inner-green)] animate-beacon sm:size-1.5" />
-            İstanbul → Global · Est. 2026
+            {t("home.heroTag")}
           </motion.div>
 
           <div className="grid grid-cols-1 items-end gap-4 sm:gap-5 md:grid-cols-12 md:gap-10">
@@ -112,9 +114,10 @@ function HeroInset() {
                   suffix="hub"
                   className="text-[var(--bone)]"
                   fontSize="clamp(2.75rem, 14vw, 9.5rem)"
+                  pulse
                 />
               </h1>
-              <p className="sr-only">inner hub private circle</p>
+              <p className="sr-only">inner.hub private circle</p>
             </div>
 
             <div className="flex flex-col gap-3.5 sm:gap-5 md:col-span-4 md:pb-3">
@@ -124,8 +127,7 @@ function HeroInset() {
                 transition={{ duration: 0.8, delay: 0.5, ease: EASE }}
                 className="max-w-[36ch] text-[13px] leading-[1.45] text-[var(--bone)]/70 sm:text-sm md:text-[15px] md:leading-[1.35]"
               >
-                A private circle of founders, builders, and investors. Bound not by place or
-                status, but by hunger to meet early and build what comes next.
+                {t("home.heroBody")}
               </motion.p>
 
               <motion.a
@@ -135,7 +137,7 @@ function HeroInset() {
                 transition={{ duration: 0.8, delay: 0.7, ease: EASE }}
                 className="group inline-flex w-full min-h-11 items-center justify-between gap-2.5 bg-[var(--bone)] py-1.5 pl-4 pr-1.5 text-sm font-medium text-black transition-[gap] duration-300 hover:gap-3.5 sm:w-fit sm:min-h-0 sm:pl-5 sm:text-base"
               >
-                Request an invitation
+                {t("home.requestInvitation")}
                 <span className="flex size-9 shrink-0 items-center justify-center bg-black transition-transform duration-300 group-hover:scale-110 sm:size-10">
                   <ArrowUpRight className="size-4 text-[var(--bone)]" strokeWidth={1.75} />
                 </span>

@@ -13,6 +13,8 @@ import { PanelPageSkeleton } from "@/components/panel/Skeletons";
 import { apiUrl } from "@/lib/api";
 import { PanelLogin } from "@/components/panel/PanelLogin";
 import { Lockup } from "@/components/Lockup";
+import { I18nProvider, useT } from "@/i18n";
+import { ThemeProvider } from "@/hooks/useTheme";
 
 // Panel sayfaları auth arkasında (SEO'ya tabi değil) — code-split edilir.
 // Home/Invitation/Requests eager kalır (prerender/SEO).
@@ -40,6 +42,7 @@ const Settings          = lazy(() => import("@/pages/panel/Settings"));
 const queryClient = new QueryClient();
 
 function PlaceholderPage({ title }: { title: string }) {
+  const t = useT();
   return (
     <div className="flex flex-col gap-3">
       <Lockup suffix="hub" className="text-[var(--ink)]" fontSize="1.15rem" />
@@ -49,7 +52,7 @@ function PlaceholderPage({ title }: { title: string }) {
       >
         {title}
       </h1>
-      <p className="text-sm text-[var(--ink-muted)] font-light">Bu sayfa yakında hazır olacak.</p>
+      <p className="text-sm text-[var(--ink-muted)] font-light">{t("common.comingSoon")}</p>
     </div>
   );
 }
@@ -169,12 +172,16 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-          <Router />
-        </WouterRouter>
-        <Toaster />
-      </TooltipProvider>
+      <I18nProvider>
+        <ThemeProvider>
+          <TooltipProvider>
+            <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+              <Router />
+            </WouterRouter>
+            <Toaster />
+          </TooltipProvider>
+        </ThemeProvider>
+      </I18nProvider>
     </QueryClientProvider>
   );
 }

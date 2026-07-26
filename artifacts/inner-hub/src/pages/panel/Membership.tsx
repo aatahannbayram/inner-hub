@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Lockup } from "@/components/Lockup";
 import { Check, ArrowRight, Zap, Star, Crown } from "lucide-react";
 import { FadeIn } from "@/components/FadeIn";
 import { CurrencyValue } from "@/components/panel/CurrencyValue";
 import { AmbientCardBackground } from "@/components/panel/AmbientCardBackground";
+import { useT } from "@/i18n";
 
 interface Plan {
   id: "annual" | "founder";
@@ -16,51 +17,6 @@ interface Plan {
   badge?: string;
   highlighted?: boolean;
 }
-
-const PLANS: Plan[] = [
-  {
-    id: "annual",
-    icon: Star,
-    name: "Yıllık Üyelik",
-    price: "₺499",
-    period: "/ yıl",
-    description: "inner·hub'a tam erişim. Etkinlikler, kurslar, ayrıcalıklar ve topluluk.",
-    features: [
-      "Tüm etkinliklere öncelikli kayıt",
-      "Tüm kurs içeriklerine erişim",
-      "Ayrıcalıklar kataloğu",
-      "Topluluk chat kanalları",
-      "Katılımcı dizini",
-      "Talent Board ilanları",
-      "Aylık networking kahvaltısı",
-    ],
-    highlighted: true,
-    badge: "En Popüler",
-  },
-  {
-    id: "founder",
-    icon: Crown,
-    name: "Kurucu Üyelik",
-    price: "₺999",
-    period: "/ yıl",
-    description: "inner·hub'un ilk katmanı. Kurucu topluluğa özel ekstra avantajlar.",
-    features: [
-      "Yıllık üyeliğin tüm özellikleri",
-      "Kurucu rozeti ve profil etiketi",
-      "inner·capital deal flow erişimi",
-      "Özel kurucu dinner davetleri",
-      "inner·studio öncelikli danışmanlık",
-      "Demo Day'e sunum hakkı",
-      "Co-founder matching önceliği",
-    ],
-  },
-];
-
-const EVENT_TICKET = {
-  name: "Etkinlik Bileti",
-  price: "₺199",
-  description: "Tek seferlik etkinlik erişimi. Üye olmadan da katılabilirsin.",
-};
 
 async function createCheckoutSession(
   type: "membership" | "event",
@@ -81,7 +37,7 @@ async function createCheckoutSession(
 
   if (!res.ok) {
     const err = await res.json();
-    throw new Error(err.error ?? "Ödeme başlatılamadı");
+    throw new Error(err.error ?? "checkout");
   }
 
   const { url } = await res.json();
@@ -89,6 +45,7 @@ async function createCheckoutSession(
 }
 
 function PlanCard({ plan }: { plan: Plan }) {
+  const t = useT();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const Icon = plan.icon;
@@ -99,7 +56,7 @@ function PlanCard({ plan }: { plan: Plan }) {
     try {
       await createCheckoutSession("membership", plan.id);
     } catch (e: any) {
-      setError(e.message);
+      setError(e.message === "checkout" ? t("membership.checkoutFailed") : e.message);
     } finally {
       setLoading(false);
     }
@@ -195,7 +152,7 @@ function PlanCard({ plan }: { plan: Plan }) {
             />
             <span
               className={[
-                "text-xs",
+                "text-sm",
                 plan.highlighted ? "text-[var(--bone)]/70" : "text-[var(--ink-body)]",
               ].join(" ")}
             >
@@ -223,7 +180,7 @@ function PlanCard({ plan }: { plan: Plan }) {
             : "border-[var(--ink)] bg-[var(--ink)] text-[var(--bone)]",
         ].join(" ")}
       >
-        <span>{loading ? "Yönlendiriliyor…" : "Satın Al"}</span>
+        <span>{loading ? t("membership.redirecting") : t("membership.buy")}</span>
         <ArrowRight className="size-3.5" />
       </button>
       </div>
@@ -232,8 +189,51 @@ function PlanCard({ plan }: { plan: Plan }) {
 }
 
 export default function Membership() {
+  const t = useT();
   const [ticketLoading, setTicketLoading] = useState(false);
   const [ticketError, setTicketError] = useState("");
+
+  const PLANS: Plan[] = useMemo(
+    () => [
+      {
+        id: "annual",
+        icon: Star,
+        name: t("membership.planAnnual"),
+        price: "₺499",
+        period: t("membership.perYear"),
+        description: t("membership.planAnnualDesc"),
+        features: [
+          t("membership.feat1"),
+          t("membership.feat2"),
+          t("membership.feat3"),
+          t("membership.feat4"),
+          t("membership.feat5"),
+          t("membership.feat6"),
+          t("membership.feat7"),
+        ],
+        highlighted: true,
+        badge: t("membership.popular"),
+      },
+      {
+        id: "founder",
+        icon: Crown,
+        name: t("membership.planFounder"),
+        price: "₺999",
+        period: t("membership.perYear"),
+        description: t("membership.planFounderDesc"),
+        features: [
+          t("membership.featF1"),
+          t("membership.featF2"),
+          t("membership.featF3"),
+          t("membership.featF4"),
+          t("membership.featF5"),
+          t("membership.featF6"),
+          t("membership.featF7"),
+        ],
+      },
+    ],
+    [t],
+  );
 
   const handleEventTicket = async () => {
     setTicketLoading(true);
@@ -241,14 +241,14 @@ export default function Membership() {
     try {
       await createCheckoutSession("event", undefined, 1);
     } catch (e: any) {
-      setTicketError(e.message);
+      setTicketError(e.message === "checkout" ? t("membership.checkoutFailed") : e.message);
     } finally {
       setTicketLoading(false);
     }
   };
 
   return (
-    <div className="space-y-10 max-w-4xl">
+    <div className="min-w-0 space-y-10 max-w-4xl overflow-x-hidden">
       {/* Header */}
       <FadeIn>
         <div>
@@ -257,11 +257,10 @@ export default function Membership() {
             className="font-serif font-display text-4xl md:text-5xl text-[var(--ink)]"
             style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
           >
-            Üyelik
-
+            {t("membership.title")}
           </h1>
           <p className="mt-2 text-sm text-[var(--ink-muted)] font-light">
-            inner·hub'a katıl. Yıllık planını seç, toplulukla büyü.
+            {t("membership.subtitle")}
           </p>
         </div>
       </FadeIn>
@@ -285,10 +284,10 @@ export default function Membership() {
               </div>
               <div>
                 <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)] mb-0.5">
-                  Tek Seferlik
+                  {t("membership.oneTime")}
                 </p>
-                <p className="text-sm font-medium text-[var(--ink)]">{EVENT_TICKET.name}</p>
-                <p className="text-xs text-[var(--ink-muted)] mt-0.5">{EVENT_TICKET.description}</p>
+                <p className="text-sm font-medium text-[var(--ink)]">{t("membership.eventTicket")}</p>
+                <p className="mt-0.5 text-sm text-[var(--ink-muted)]">{t("membership.eventTicketDesc")}</p>
               </div>
             </div>
             <div className="flex items-center gap-4 shrink-0">
@@ -296,14 +295,14 @@ export default function Membership() {
                 className="font-serif text-2xl text-[var(--ink)]"
                 style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
               >
-                <CurrencyValue value={EVENT_TICKET.price} />
+                <CurrencyValue value="₺199" />
               </span>
               <button
                 onClick={handleEventTicket}
                 disabled={ticketLoading}
                 className="flex items-center gap-2 border border-[var(--ink)]/20 px-4 py-2 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)] transition-all hover:border-[var(--ink)] hover:text-[var(--ink)] disabled:opacity-40"
               >
-                {ticketLoading ? "Yönlendiriliyor…" : "Bilet Al"}
+                {ticketLoading ? t("membership.redirecting") : t("membership.buyTicket")}
                 <ArrowRight className="size-3" />
               </button>
             </div>
@@ -319,7 +318,7 @@ export default function Membership() {
       {/* Trust note */}
       <div className="border-t border-[var(--ink)]/[0.08] pt-4">
         <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)] text-center">
-          Ödemeler Stripe ile güvenli şekilde işlenir · SSL şifreli · İstediğinde iptal et
+          {t("membership.trust")}
         </p>
       </div>
     </div>

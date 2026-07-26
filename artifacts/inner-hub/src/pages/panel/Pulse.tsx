@@ -15,6 +15,7 @@ import { ProceduralPortrait, type PortraitConfig } from "@/components/panel/Proc
 import { PersonAvatar } from "@/components/panel/PersonAvatar";
 import { useApiQuery } from "@/hooks/useApiQuery";
 import { LoadingBlock, ErrorState } from "@/components/panel/Skeletons";
+import { useT } from "@/i18n";
 
 const PHOSPHOR_CONFIG: PortraitConfig = {
   renderMode: "characters",
@@ -80,6 +81,15 @@ interface PulseResponse {
   empty?: boolean;
 }
 
+const CAT_LABEL_KEYS: Record<Trend["category"], string> = {
+  teknoloji: "pulse.catTech",
+  iş: "pulse.catBiz",
+  yatırım: "pulse.catInvest",
+  kültür: "pulse.catCulture",
+};
+
+type CatFilter = Trend["category"] | "all";
+
 const CAT_COLORS: Record<Trend["category"], string> = {
   teknoloji: "text-[var(--ink)] bg-[var(--ink)]/[0.06] border-[var(--ink)]/10",
   iş: "text-[var(--ink-body)] bg-[var(--ink)]/[0.03] border-[var(--ink)]/8",
@@ -99,7 +109,17 @@ function MiniBar({ pct, color = "var(--ink)" }: { pct: number; color?: string })
 
 // ─── Trend row ────────────────────────────────────────────────────────────────
 
-function TrendRow({ trend, rank, maxMentions }: { trend: Trend; rank: number; maxMentions: number }) {
+function TrendRow({
+  trend,
+  rank,
+  maxMentions,
+  categoryLabel,
+}: {
+  trend: Trend;
+  rank: number;
+  maxMentions: number;
+  categoryLabel: string;
+}) {
   const isUp = trend.delta > 0;
   const isFlat = trend.delta === 0;
   const DeltaIcon = isFlat ? Minus : isUp ? TrendingUp : TrendingDown;
@@ -112,7 +132,7 @@ function TrendRow({ trend, rank, maxMentions }: { trend: Trend; rank: number; ma
         <div className="flex items-center gap-2 mb-1">
           <p className="font-serif text-sm text-[var(--ink)] truncate" style={{ fontWeight: 400 }}>{trend.topic}</p>
           <span className={`shrink-0 border px-1.5 py-0.5 font-mono text-label uppercase tracking-widest ${CAT_COLORS[trend.category]}`}>
-            {trend.category}
+            {categoryLabel}
           </span>
         </div>
         <MiniBar pct={maxMentions > 0 ? (trend.mentions / maxMentions) * 100 : 0} color={isUp ? "var(--inner-green)" : "var(--ink)"} />
@@ -130,10 +150,10 @@ function TrendRow({ trend, rank, maxMentions }: { trend: Trend; rank: number; ma
 
 // ─── Activity columns ─────────────────────────────────────────────────────────
 
-function ActivityColumns({ weekly }: { weekly: WeeklySnapshot[] }) {
+function ActivityColumns({ weekly, emptyLabel }: { weekly: WeeklySnapshot[]; emptyLabel: string }) {
   if (weekly.length === 0) {
     return (
-      <p className="font-mono text-label text-[var(--ink-subtle)] py-6 text-center">Henüz aktivite yok</p>
+      <p className="font-mono text-label text-[var(--ink-subtle)] py-6 text-center">{emptyLabel}</p>
     );
   }
   const max = Math.max(...weekly.map((w) => w.activity), 1);
@@ -156,20 +176,21 @@ function ActivityColumns({ weekly }: { weekly: WeeklySnapshot[] }) {
   );
 }
 
-function weeklyChangeText(weekly: WeeklySnapshot[]): string | null {
+function weeklyChangeText(weekly: WeeklySnapshot[], t: ReturnType<typeof useT>): string | null {
   if (weekly.length < 2) return null;
   const prev = weekly[weekly.length - 2].activity;
   const curr = weekly[weekly.length - 1].activity;
-  if (prev === 0) return curr > 0 ? "Bu hafta ilk aktivite" : null;
+  if (prev === 0) return curr > 0 ? t("pulse.firstActivity") : null;
   const pct = Math.round(((curr - prev) / prev) * 100);
-  if (pct === 0) return "Geçen haftayla aynı seviye";
-  return `Bu hafta %${Math.abs(pct)} ${pct > 0 ? "artış" : "azalış"}`;
+  if (pct === 0) return t("pulse.sameLevel");
+  return pct > 0 ? t("pulse.weekUp", { n: Math.abs(pct) }) : t("pulse.weekDown", { n: Math.abs(pct) });
 }
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function Pulse() {
-  const [catFilter, setCatFilter] = useState<Trend["category"] | "Tümü">("Tümü");
+  const t = useT();
+  const [catFilter, setCatFilter] = useState<CatFilter>("all");
 
   const { data, isLoading, isError, error, refetch, isSuccess } = useApiQuery<PulseResponse>(
     ["pulse"],
@@ -181,26 +202,28 @@ export default function Pulse() {
   const weekly = data?.weekly ?? [];
   const topContributors = data?.topContributors ?? [];
 
-  const filtered = catFilter === "Tümü"
+  const filtered = catFilter === "all"
     ? trends
-    : trends.filter((t) => t.category === catFilter);
+    : trends.filter((tr) => tr.category === catFilter);
 
-  const maxMentions = filtered.length > 0 ? Math.max(...filtered.map((t) => t.mentions)) : 1;
+  const maxMentions = filtered.length > 0 ? Math.max(...filtered.map((tr) => tr.mentions)) : 1;
   const totalMessages = data?.totalMessages ?? 0;
   const activeMembers = data?.activeMembers ?? 0;
   const weeklyActivity = data?.weeklyActivity ?? 0;
   const showEmpty = isSuccess && (data?.empty || trends.length === 0);
   const topMax = topContributors[0]?.contributions ?? 1;
-  const weekChange = weeklyChangeText(weekly);
+  const weekChange = weeklyChangeText(weekly, t);
+
+  const catFilters: CatFilter[] = ["all", "teknoloji", "iş", "yatırım", "kültür"];
 
   return (
-    <div className="space-y-8 max-w-4xl">
+    <div className="min-w-0 space-y-8 max-w-4xl overflow-x-hidden">
       {/* Header */}
       <FadeIn>
-        <div className="flex items-start justify-between">
-          <div>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="min-w-0">
             <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)] mb-2">
-              Community pulse
+              {t("pulse.eyebrow")}
             </p>
             <h1
               className="font-serif font-display text-4xl md:text-5xl text-[var(--ink)]"
@@ -209,20 +232,20 @@ export default function Pulse() {
               <Lockup suffix="pulse" className="text-[var(--ink)]" />
             </h1>
             <p className="mt-2 text-sm text-[var(--ink-muted)] font-light">
-              Topluluğun anonim nabzı. Bu hafta ne konuşuluyor?
+              {t("pulse.subtitle")}
             </p>
           </div>
-          <div className="flex items-center gap-2 border border-[var(--ink)]/15 bg-[var(--ink)]/[0.03] px-3 py-2">
+          <div className="flex shrink-0 items-center gap-2 border border-[var(--ink)]/15 bg-[var(--ink)]/[0.03] px-3 py-2">
             <Radio className={`size-3 ${isSuccess ? "text-[var(--success-ink)]" : "text-[var(--ink-muted)]"}`} />
             <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
-              {isSuccess ? "Canlı" : "…"}
+              {isSuccess ? t("pulse.live") : "…"}
             </span>
           </div>
         </div>
       </FadeIn>
 
       {isLoading && !data && (
-        <LoadingBlock label="Pulse yükleniyor">
+        <LoadingBlock label={t("pulse.loading")}>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {Array.from({ length: 4 }).map((_, i) => (
               <div key={i} className="h-20 animate-pulse border border-[var(--ink)]/[0.06] bg-[var(--ink)]/[0.03]" />
@@ -232,7 +255,7 @@ export default function Pulse() {
       )}
       {isError && (
         <ErrorState
-          message={error instanceof Error ? error.message : "Pulse yüklenemedi"}
+          message={error instanceof Error ? error.message : t("pulse.loadError")}
           onRetry={() => refetch()}
         />
       )}
@@ -247,10 +270,10 @@ export default function Pulse() {
           />
           <div className="pointer-events-none absolute inset-0 flex flex-col justify-end p-6 md:p-8">
             <p className="mb-1 font-mono text-label uppercase tracking-widest text-[var(--success-ink)]/70">
-              Phosphor · canlı sinyal
+              {t("pulse.heroLabel")}
             </p>
             <p className="max-w-[26ch] font-serif text-2xl text-[var(--bone)] md:text-3xl" style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 300 }}>
-              Daire her an nefes alıyor.
+              {t("pulse.heroQuote")}
             </p>
           </div>
         </div>
@@ -259,10 +282,10 @@ export default function Pulse() {
       {showEmpty && (
         <div className="border border-dashed border-[var(--ink)]/15 p-8 text-center">
           <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)] mb-2">
-            Henüz nabız verisi yok
+            {t("pulse.empty")}
           </p>
           <p className="text-sm text-[var(--ink-body)] max-w-md mx-auto">
-            Bu hafta kanallarda henüz yeterli mesaj yok. Sohbet başladıkça trendler ve aktivite burada görünecek.
+            {t("pulse.emptyHint")}
           </p>
         </div>
       )}
@@ -272,10 +295,10 @@ export default function Pulse() {
           {/* Top stats */}
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {[
-              { label: "Bu Hafta Mesaj", value: totalMessages, icon: MessageSquare, sub: `${channels.length} kanalda` },
-              { label: "Aktif Üye", value: activeMembers, icon: Users, sub: "toplulukta" },
-              { label: "Trend Konu", value: trends.length, icon: TrendingUp, sub: "takip ediliyor" },
-              { label: "Aktivite Skoru", value: weeklyActivity, icon: ArrowUp, sub: "bu hafta" },
+              { label: t("pulse.statMessages"), value: totalMessages, icon: MessageSquare, sub: t("pulse.statMessagesSub", { n: channels.length }) },
+              { label: t("pulse.statActive"), value: activeMembers, icon: Users, sub: t("pulse.statActiveSub") },
+              { label: t("pulse.statTrends"), value: trends.length, icon: TrendingUp, sub: t("pulse.statTrendsSub") },
+              { label: t("pulse.statScore"), value: weeklyActivity, icon: ArrowUp, sub: t("pulse.statScoreSub") },
             ].map((s) => (
               <div key={s.label} className="border border-[var(--ink)]/[0.08] p-4">
                 <div className="mb-2 flex items-center justify-between">
@@ -294,36 +317,42 @@ export default function Pulse() {
           </div>
 
           {/* Two-column layout */}
-          <div className="grid gap-6 lg:grid-cols-[1fr_280px]">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
             {/* Trends */}
             <section>
-              <div className="mb-4 border-t border-[var(--ink)]/[0.08] pt-3 flex items-center justify-between">
+              <div className="mb-4 flex flex-col gap-3 border-t border-[var(--ink)]/[0.08] pt-3 sm:flex-row sm:items-center sm:justify-between">
                 <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
-                  Trending Konular
+                  {t("pulse.trending")}
                 </p>
-                <div className="flex gap-1.5">
-                  {(["Tümü", "teknoloji", "iş", "yatırım", "kültür"] as const).map((c) => (
+                <div className="-mx-1 flex gap-1.5 overflow-x-auto px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                  {catFilters.map((c) => (
                     <button
                       key={c}
                       onClick={() => setCatFilter(c)}
                       className={[
-                        "border px-2 py-0.5 font-mono text-label uppercase tracking-widest transition-all",
+                        "shrink-0 border px-2 py-1 font-mono text-sm uppercase tracking-widest transition-all sm:py-0.5 sm:text-label",
                         catFilter === c
                           ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--bone)]"
                           : "border-[var(--ink)]/10 text-[var(--ink-muted)] hover:border-[var(--ink)]/25",
                       ].join(" ")}
                     >
-                      {c}
+                      {c === "all" ? t("common.all") : t(CAT_LABEL_KEYS[c])}
                     </button>
                   ))}
                 </div>
               </div>
               <div>
                 {filtered.length === 0 ? (
-                  <p className="font-mono text-label text-[var(--ink-subtle)] py-4">Bu kategoride trend yok</p>
+                  <p className="font-mono text-label text-[var(--ink-subtle)] py-4">{t("pulse.noTrends")}</p>
                 ) : (
                   filtered.map((trend, i) => (
-                    <TrendRow key={trend.topic} trend={trend} rank={i + 1} maxMentions={maxMentions} />
+                    <TrendRow
+                      key={trend.topic}
+                      trend={trend}
+                      rank={i + 1}
+                      maxMentions={maxMentions}
+                      categoryLabel={t(CAT_LABEL_KEYS[trend.category])}
+                    />
                   ))
                 )}
               </div>
@@ -333,10 +362,10 @@ export default function Pulse() {
             <div className="space-y-6">
               {/* Weekly activity */}
               <section className="border border-[var(--ink)]/[0.08] p-4">
-                <p className="mb-4 text-xs uppercase tracking-widest text-[var(--ink-muted)]">
-                  Haftalık Aktivite
+                <p className="mb-4 text-sm uppercase tracking-widest text-[var(--ink-muted)]">
+                  {t("pulse.weeklyActivity")}
                 </p>
-                <ActivityColumns weekly={weekly} />
+                <ActivityColumns weekly={weekly} emptyLabel={t("pulse.emptyActivity")} />
                 {weekChange && (
                   <p className="mt-3 font-mono text-label text-[var(--ink-subtle)]">
                     {weekChange}
@@ -347,11 +376,11 @@ export default function Pulse() {
               {/* Top channels */}
               <section>
                 <p className="mb-3 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
-                  En Aktif Kanallar
+                  {t("pulse.topChannels")}
                 </p>
                 <div className="space-y-2">
                   {channels.length === 0 ? (
-                    <p className="font-mono text-label text-[var(--ink-subtle)]">Kanal verisi yok</p>
+                    <p className="font-mono text-label text-[var(--ink-subtle)]">{t("pulse.noChannels")}</p>
                   ) : (
                     channels.map((ch, i) => (
                       <div key={ch.name} className="flex items-center gap-3 py-1.5 border-b border-[var(--ink)]/[0.05] last:border-0">
@@ -371,11 +400,11 @@ export default function Pulse() {
               {/* Top contributors */}
               <section>
                 <p className="mb-3 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
-                  Bu Hafta Öne Çıkanlar
+                  {t("pulse.topContributors")}
                 </p>
                 <div className="space-y-2">
                   {topContributors.length === 0 ? (
-                    <p className="font-mono text-label text-[var(--ink-subtle)]">Henüz katkı yok</p>
+                    <p className="font-mono text-label text-[var(--ink-subtle)]">{t("pulse.noContributors")}</p>
                   ) : (
                     topContributors.map((c, i) => (
                       <div key={c.name} className="flex items-center gap-3">
@@ -385,7 +414,7 @@ export default function Pulse() {
                           className="size-6 text-label"
                         />
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs text-[var(--ink-strong)] truncate">{c.name}</p>
+                          <p className="text-sm text-[var(--ink-strong)] truncate">{c.name}</p>
                           <div className="mt-0.5 h-0.5 bg-[var(--ink)]/[0.06]">
                             <div
                               className="h-full"
@@ -398,7 +427,7 @@ export default function Pulse() {
                           </div>
                         </div>
                         <div className="flex items-center gap-1 shrink-0">
-                          <span className="font-mono text-label text-[var(--ink-muted)]">{c.streak}g</span>
+                          <span className="font-mono text-label text-[var(--ink-muted)]">{t("pulse.streakDays", { n: c.streak })}</span>
                         </div>
                       </div>
                     ))
@@ -413,7 +442,7 @@ export default function Pulse() {
       {/* Footer */}
       <div className="border-t border-[var(--ink)]/[0.08] pt-4">
         <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)]">
-          <span lang="en">inner·pulse</span> · veriler anonimleştirilmiş · gerçek zamanlı · yalnızca üyeler görür
+          <span lang="en">inner·pulse</span> · {t("pulse.footer")}
         </p>
       </div>
     </div>

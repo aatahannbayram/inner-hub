@@ -3,6 +3,7 @@ import { FadeIn } from "@/components/FadeIn";
 import { useApiQuery } from "@/hooks/useApiQuery";
 import { LoadingBlock, ErrorState, StatCardSkeleton } from "@/components/panel/Skeletons";
 import { Lockup } from "@/components/Lockup";
+import { useT, useLocale } from "@/i18n";
 
 // ─── API tipleri ────────────────────────────────────────────────────────────
 
@@ -41,8 +42,11 @@ function deltaLabel(current: number, previous: number): string {
   return `${pct > 0 ? "+" : ""}${pct}%`;
 }
 
-function memberSince(iso: string): string {
-  return new Date(iso).toLocaleDateString("tr-TR", { month: "short", year: "numeric" });
+function memberSince(iso: string, locale: string): string {
+  return new Date(iso).toLocaleDateString(locale === "tr" ? "tr-TR" : "en-US", {
+    month: "short",
+    year: "numeric",
+  });
 }
 
 function TrendIcon({ trend, className }: { trend: Trend; className?: string }) {
@@ -156,34 +160,36 @@ function Section({ title, sub, children }: { title: string; sub?: string; childr
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function Analytics() {
+  const t = useT();
+  const { locale } = useLocale();
   const { data, isLoading, isError, error, refetch } = useApiQuery<AnalyticsResponse>(
     ["analytics"],
     "/api/analytics",
   );
 
   return (
-    <div className="space-y-8 max-w-3xl">
+    <div className="min-w-0 space-y-8 max-w-3xl overflow-x-hidden">
       {/* Header */}
       <FadeIn>
         <div>
           <div className="mb-2 flex flex-wrap items-center gap-2">
             <Lockup suffix="hub" className="text-[var(--ink)]" fontSize="1.15rem" />
-            <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">Admin</span>
+            <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">{t("analytics.admin")}</span>
           </div>
           <h1
             className="font-serif font-display text-4xl md:text-5xl text-[var(--ink)]"
             style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
           >
-            analitik
+            {t("analytics.title")}
           </h1>
           <p className="mt-2 text-sm text-[var(--ink-muted)] font-light">
-            Topluluk büyümesi ve katılım · canlı veritabanından, gerçek zamanlı.
+            {t("analytics.subtitle")}
           </p>
         </div>
       </FadeIn>
 
       {isLoading && (
-        <LoadingBlock label="Analitik yükleniyor">
+        <LoadingBlock label={t("analytics.loading")}>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {Array.from({ length: 4 }).map((_, i) => (
               <StatCardSkeleton key={i} />
@@ -194,7 +200,7 @@ export default function Analytics() {
 
       {isError && (
         <ErrorState
-          message={error instanceof Error ? error.message : "Analitik yüklenemedi"}
+          message={error instanceof Error ? error.message : t("analytics.loadError")}
           onRetry={() => refetch()}
         />
       )}
@@ -204,35 +210,39 @@ export default function Analytics() {
           {/* KPI row */}
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <StatCard
-              label="Toplam Üye"
+              label={t("analytics.totalMembers")}
               value={data.membersCount}
-              sub="dairenin içinde"
+              sub={t("analytics.membersInCircle")}
               trend={data.newMembersThisMonth > 0 ? "up" : "flat"}
-              delta={data.newMembersThisMonth > 0 ? `+${data.newMembersThisMonth} bu ay` : "bu ay yeni yok"}
+              delta={
+                data.newMembersThisMonth > 0
+                  ? t("analytics.newThisMonth", { n: data.newMembersThisMonth })
+                  : t("analytics.noNewThisMonth")
+              }
               icon={Users}
             />
             <StatCard
-              label="Bu Hafta Mesaj"
+              label={t("analytics.messagesThisWeek")}
               value={data.messagesThisWeek}
-              sub="geçen haftaya göre"
+              sub={t("analytics.vsLastWeek")}
               trend={trendFrom(data.messagesThisWeek, data.messagesLastWeek)}
               delta={deltaLabel(data.messagesThisWeek, data.messagesLastWeek)}
               icon={MessageSquare}
             />
             <StatCard
-              label="Etkinlik Kaydı"
+              label={t("analytics.eventRegs")}
               value={data.eventRegistrationsTotal}
-              sub="toplam"
+              sub={t("analytics.total")}
               trend={data.eventRegistrationsThisWeek > 0 ? "up" : "flat"}
-              delta={`+${data.eventRegistrationsThisWeek} bu hafta`}
+              delta={t("analytics.thisWeekDelta", { n: data.eventRegistrationsThisWeek })}
               icon={CalendarCheck}
             />
             <StatCard
-              label="AI Eşleşme"
+              label={t("analytics.aiMatch")}
               value={data.matchIntroductionsTotal}
-              sub="toplam"
+              sub={t("analytics.total")}
               trend={data.matchIntroductionsThisMonth > 0 ? "up" : "flat"}
-              delta={`+${data.matchIntroductionsThisMonth} bu ay`}
+              delta={t("analytics.thisMonthDelta", { n: data.matchIntroductionsThisMonth })}
               icon={Sparkles}
             />
           </div>
@@ -240,16 +250,16 @@ export default function Analytics() {
           {data.empty ? (
             <div className="border border-[var(--ink)]/[0.08] p-8 text-center">
               <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
-                Henüz yeterli veri yok
+                {t("analytics.empty")}
               </p>
               <p className="mt-1 text-sm text-[var(--ink-muted)]">
-                Topluluk hareketlendikçe büyüme, katılım ve aktif üye grafikleri burada dolacak.
+                {t("analytics.emptyHint")}
               </p>
             </div>
           ) : (
             <>
               {/* Member growth chart */}
-              <Section title="Üye Büyümesi" sub="Kümülatif üye sayısı · aylık, gerçek kayıt tarihlerinden">
+              <Section title={t("analytics.memberGrowth")} sub={t("analytics.memberGrowthSub")}>
                 <div className="border border-[var(--ink)]/[0.08] p-5">
                   <div className="mb-4 flex items-baseline gap-3">
                     <span
@@ -260,7 +270,7 @@ export default function Analytics() {
                     </span>
                     {data.newMembersThisMonth > 0 && (
                       <span className="font-mono text-label text-[var(--success-ink)]">
-                        +{data.newMembersThisMonth} bu ay
+                        {t("analytics.newThisMonth", { n: data.newMembersThisMonth })}
                       </span>
                     )}
                   </div>
@@ -269,26 +279,30 @@ export default function Analytics() {
               </Section>
 
               {/* Revenue — henüz gerçek veri kaynağı yok, sahte sayı uydurmak yerine dürüst not */}
-              <Section title="Gelir" sub="MRR takibi">
+              <Section title={t("analytics.revenue")} sub={t("analytics.revenueSub")}>
                 <div className="border border-[var(--ink)]/[0.08] p-5">
                   <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
-                    Gelir takibi yakında
+                    {t("analytics.revenueSoon")}
                   </p>
                   <p className="mt-1 text-sm text-[var(--ink-muted)]">
-                    Üyelik ödemeleri Stripe üzerinden işleniyor; panel içi gelir raporu henüz bağlanmadı.
+                    {t("analytics.revenueHint")}
                   </p>
                 </div>
               </Section>
 
               {/* Engagement */}
-              <Section title="Haftalık Katılım" sub="Aktif üye · mesaj · etkinlik kaydı · son 4 hafta">
-                <div className="grid grid-cols-3 gap-3">
+              <Section title={t("analytics.weeklyEngagement")} sub={t("analytics.weeklyEngagementSub")}>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                   {(["activeMembers", "messages", "registrations"] as const).map((key, ki) => {
-                    const labels = ["Aktif Üye", "Mesaj", "Kayıt"];
+                    const labelKeys = [
+                      "analytics.activeMembers",
+                      "analytics.messages",
+                      "analytics.registrations",
+                    ] as const;
                     return (
                       <div key={key} className="border border-[var(--ink)]/[0.08] p-4">
                         <p className="mb-3 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
-                          {labels[ki]}
+                          {t(labelKeys[ki])}
                         </p>
                         <BarChart data={data.weeklyActivity} labelKey="week" valueKey={key} />
                       </div>
@@ -299,19 +313,27 @@ export default function Analytics() {
 
               {/* Top members */}
               {data.topMembers.length > 0 && (
-                <Section title="En Aktif Üyeler" sub="Son 30 günde mesaj katkısına göre">
+                <Section title={t("analytics.topMembers")} sub={t("analytics.topMembersSub")}>
                   <div className="border border-[var(--ink)]/[0.08]">
-                    <div className="grid grid-cols-[1fr_auto_auto_auto] border-b border-[var(--ink)]/[0.08] px-4 py-2">
-                      {["Üye", "Katkı", "Etkinlik", "Katıldı"].map((h) => (
+                  <div className="overflow-x-auto">
+                    <div className="grid min-w-[520px] grid-cols-[1fr_auto_auto_auto] border-b border-[var(--ink)]/[0.08] px-4 py-2">
+                      {(
+                        [
+                          "analytics.colMember",
+                          "analytics.colContribution",
+                          "analytics.colEvent",
+                          "analytics.colJoined",
+                        ] as const
+                      ).map((h) => (
                         <p key={h} className="font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)] last:text-right">
-                          {h}
+                          {t(h)}
                         </p>
                       ))}
                     </div>
                     {data.topMembers.map((m, i) => (
                       <div
                         key={m.name + i}
-                        className="grid grid-cols-[1fr_auto_auto_auto] items-center gap-4 border-b border-[var(--ink)]/[0.05] px-4 py-3 last:border-0"
+                        className="grid min-w-[520px] grid-cols-[1fr_auto_auto_auto] items-center gap-4 border-b border-[var(--ink)]/[0.05] px-4 py-3 last:border-0"
                       >
                         <div className="flex items-center gap-3 min-w-0">
                           <span className="font-mono text-label text-[var(--ink-subtle)] tabular-nums w-3">{i + 1}</span>
@@ -326,23 +348,24 @@ export default function Analytics() {
                         </div>
                         <span className="font-mono text-caption tabular-nums text-[var(--ink-body)]">{m.contributions}</span>
                         <span className="font-mono text-caption tabular-nums text-[var(--ink-body)]">{m.events}</span>
-                        <span className="font-mono text-label text-[var(--ink-subtle)] text-right">{memberSince(m.joinedAt)}</span>
+                        <span className="font-mono text-label text-[var(--ink-subtle)] text-right">{memberSince(m.joinedAt, locale)}</span>
                       </div>
                     ))}
+                  </div>
                   </div>
                 </Section>
               )}
 
               {/* Channel activity */}
               {data.channelActivity.length > 0 && (
-                <Section title="Kanal Aktivitesi" sub="En aktif kanallar · toplam mesaj">
+                <Section title={t("analytics.channelActivity")} sub={t("analytics.channelActivitySub")}>
                   <div className="space-y-2">
                     {data.channelActivity.map((ch) => {
                       const max = data.channelActivity[0].messages || 1;
                       const pct = Math.round((ch.messages / max) * 100);
                       return (
-                        <div key={ch.name} className="flex items-center gap-4">
-                          <span className="w-32 shrink-0 truncate font-mono text-label text-[var(--ink-muted)]">{ch.name}</span>
+                        <div key={ch.name} className="flex min-w-0 items-center gap-3 sm:gap-4">
+                          <span className="w-24 shrink-0 truncate font-mono text-sm text-[var(--ink-muted)] sm:w-32 sm:text-label">{ch.name}</span>
                           <div className="flex-1 h-1.5 bg-[var(--ink)]/[0.06]">
                             <div className="h-full bg-[var(--ink)]/20" style={{ width: `${pct}%` }} />
                           </div>
@@ -357,7 +380,7 @@ export default function Analytics() {
               )}
 
               {data.applicationsPending !== null && (
-                <Section title="Bekleyen Başvurular" sub="Admin görünümü">
+                <Section title={t("analytics.pendingApps")} sub={t("analytics.pendingAppsSub")}>
                   <div className="border border-[var(--ink)]/[0.08] p-5">
                     <span
                       className="font-serif text-4xl text-[var(--ink)]"
@@ -365,7 +388,7 @@ export default function Analytics() {
                     >
                       {data.applicationsPending}
                     </span>
-                    <p className="mt-1 font-mono text-label text-[var(--ink-muted)]">değerlendirme bekliyor</p>
+                    <p className="mt-1 font-mono text-label text-[var(--ink-muted)]">{t("analytics.awaitingReview")}</p>
                   </div>
                 </Section>
               )}
@@ -376,7 +399,7 @@ export default function Analytics() {
 
       <div className="border-t border-[var(--ink)]/[0.08] pt-4">
         <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)]">
-          <span lang="en">inner·hub</span> · analitik · yalnızca admin
+          <span lang="en">inner·hub</span> · {t("analytics.footer")}
         </p>
       </div>
     </div>

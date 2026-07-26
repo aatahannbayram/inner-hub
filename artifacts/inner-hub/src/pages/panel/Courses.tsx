@@ -9,6 +9,7 @@ import { apiUrl } from "@/lib/api";
 import { StatCardSkeleton, CourseCardSkeleton, LoadingBlock, ErrorState } from "@/components/panel/Skeletons";
 import { HeroQuickStat } from "@/components/panel/HeroQuickStat";
 import { cleanDisplayText } from "@/lib/displayText";
+import { useT } from "@/i18n";
 
 interface Lesson {
   id: number;
@@ -48,19 +49,19 @@ interface RawCourse {
   isEnrolled?: boolean;
 }
 
-function mapApiCourse(row: RawCourse): Course {
+function mapApiCourse(row: RawCourse, t: ReturnType<typeof useT>): Course {
   return {
     id: row.id,
     title: row.title,
     description: row.description ?? "",
     instructor: "inner·hub",
-    instructorTitle: row.term ? `Dönem ${row.term}` : "Eğitim",
+    instructorTitle: row.term ? t("courses.term", { n: row.term }) : t("courses.education"),
     progressPct: row.progressPct ?? 0,
     totalLessons: 0,
     completedLessons: 0,
     totalDuration: "",
     isEnrolled: row.isEnrolled ?? false,
-    tag: "Kurs",
+    tag: t("courses.tag"),
     modules: [],
   };
 }
@@ -126,6 +127,7 @@ function CourseCard({
   busy?: boolean;
   onEnroll?: (id: number) => void;
 }) {
+  const t = useT();
   const [expanded, setExpanded] = useState(false);
 
   return (
@@ -144,7 +146,7 @@ function CourseCard({
               </span>
               {!course.isEnrolled && (
                 <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
-                  Kayıt gerekli
+                  {t("courses.enrollRequired")}
                 </span>
               )}
             </div>
@@ -167,7 +169,7 @@ function CourseCard({
               %{course.progressPct}
             </p>
             <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
-              tamamlandı
+              {t("courses.completed")}
             </p>
           </div>
         </div>
@@ -198,7 +200,7 @@ function CourseCard({
               {course.totalLessons > 0 && (
                 <span className="flex items-center gap-1">
                   <BookOpen className="size-3" />
-                  {course.completedLessons}/{course.totalLessons} ders
+                  {t("courses.lessons", { done: course.completedLessons, total: course.totalLessons })}
                 </span>
               )}
               {course.totalDuration ? <span>{course.totalDuration}</span> : null}
@@ -213,7 +215,7 @@ function CourseCard({
               onClick={() => setExpanded((v) => !v)}
               className="flex items-center gap-2 border border-[var(--ink)] bg-[var(--ink)] px-4 py-2 font-mono text-label uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-80"
             >
-              {course.progressPct > 0 ? "Devam Et" : "Başla"}
+              {course.progressPct > 0 ? t("courses.continue") : t("courses.start")}
               <ChevronRight className="size-3" />
             </button>
           ) : (
@@ -223,7 +225,7 @@ function CourseCard({
               onClick={() => onEnroll?.(course.id)}
               className="flex items-center gap-2 border border-[var(--ink)] bg-[var(--ink)] px-4 py-2 font-mono text-label uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-80 disabled:opacity-40"
             >
-              Kayıt Ol
+              {t("courses.enroll")}
               <ChevronRight className="size-3" />
             </button>
           )}
@@ -231,7 +233,7 @@ function CourseCard({
             onClick={() => setExpanded((v) => !v)}
             className="hit-40 relative flex items-center gap-1.5 font-mono text-label uppercase tracking-widest text-[var(--ink-body)] hover:text-[var(--ink)] transition-colors"
           >
-            {expanded ? "Gizle" : "Müfredatı Gör"}
+            {expanded ? t("courses.hide") : t("courses.viewCurriculum")}
             {expanded ? (
               <ChevronDown className="size-3" />
             ) : (
@@ -246,7 +248,7 @@ function CourseCard({
         <div className="border-t border-[var(--ink)]/[0.08]">
           {course.modules.length === 0 ? (
             <p className="px-4 py-3 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
-              Müfredat yakında yayınlanacak.
+              {t("courses.curriculumSoon")}
             </p>
           ) : (
             course.modules.map((mod, i) => (
@@ -274,6 +276,7 @@ function CoursesHero({
   enrolledCount: number;
   totalCount: number;
 }) {
+  const t = useT();
   return (
     <div
       className="relative -mx-4 -mt-6 overflow-hidden sm:-mx-6 lg:-mx-8 lg:-mt-8"
@@ -288,34 +291,41 @@ function CoursesHero({
           metin için yeterli kontrast, blur'un sürekli GPU maliyeti olmadan. */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-[1]"
-        style={{ background: "linear-gradient(180deg, rgba(0,0,0,.15) 0%, rgba(0,0,0,.35) 55%, rgba(0,0,0,.75) 100%)" }}
+        className="pointer-events-none absolute inset-0 z-[1] bg-[var(--ink-fixed)]/40"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-t from-[var(--ink-fixed)]/85 via-[var(--ink-fixed)]/25 to-transparent"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-r from-[var(--ink-fixed)]/55 via-transparent to-transparent"
       />
 
       <div className="relative z-10 flex h-full flex-col justify-end px-6 pb-10 md:px-12 md:pb-14">
         <div className="lg:grid lg:grid-cols-2 lg:items-end lg:gap-10">
           <div>
-            <p className="mb-3 font-mono text-label uppercase tracking-widest text-white/60 [text-shadow:0_1px_12px_rgba(0,0,0,0.6)]">
-              Kurslarım
+            <p className="mb-3 font-mono text-label uppercase tracking-widest text-[var(--bone)]/60 [text-shadow:0_1px_12px_rgba(0,0,0,0.6)]">
+              {t("courses.heroEyebrow")}
             </p>
             <AnimatedHeading
-              text={"Where knowledge\nmeets momentum."}
-              className="mb-4 font-display font-serif italic text-4xl leading-[1.1] text-white [text-shadow:0_2px_24px_rgba(0,0,0,0.55)] md:text-5xl lg:text-6xl"
+              text={t("courses.heroHeadline")}
+              className="mb-4 font-display font-serif italic text-4xl leading-[1.1] text-[var(--bone)] [text-shadow:0_2px_24px_rgba(0,0,0,0.55)] md:text-5xl lg:text-6xl"
               style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1" }}
             />
             <FadeIn delay={0.8}>
-              <p className="mb-6 max-w-[46ch] text-base text-white/75 [text-shadow:0_1px_12px_rgba(0,0,0,0.6)] md:text-lg">
-                inner·hub eğitim içerikleri · kendi hızında, kendi zamanında, dairenin bilgisiyle.
+              <p className="mb-6 max-w-[46ch] text-base text-[var(--bone)]/75 [text-shadow:0_1px_12px_rgba(0,0,0,0.6)] md:text-lg">
+                {t("courses.heroBody")}
               </p>
             </FadeIn>
             <FadeIn delay={1.2}>
-              <div className="flex flex-wrap gap-4">
+              <div className="flex flex-wrap gap-3 sm:gap-4">
                 {hasEnrolled && (
                   <button
                     onClick={() => scrollToId("courses-enrolled")}
-                    className="group inline-flex items-center gap-2 bg-white px-8 py-3 font-mono text-xs uppercase tracking-widest text-black transition-colors hover:bg-white/90"
+                    className="group inline-flex min-h-11 items-center gap-2 bg-[var(--bone)] px-6 py-3 font-mono text-sm uppercase tracking-widest text-[var(--ink)] transition-opacity hover:opacity-90 sm:px-8"
                   >
-                    Devam Et
+                    {t("courses.continueCta")}
                     <ChevronRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
                   </button>
                 )}
@@ -323,11 +333,11 @@ function CoursesHero({
                   onClick={() => scrollToId("courses-available")}
                   className={
                     hasEnrolled
-                      ? "liquid-glass group inline-flex items-center gap-2 border border-white/20 px-8 py-3 font-mono text-xs uppercase tracking-widest text-white transition-colors hover:bg-white hover:text-black"
-                      : "group inline-flex items-center gap-2 bg-white px-8 py-3 font-mono text-xs uppercase tracking-widest text-black transition-colors hover:bg-white/90"
+                      ? "liquid-glass group inline-flex min-h-11 items-center gap-2 border border-[var(--bone)]/25 px-6 py-3 font-mono text-sm uppercase tracking-widest text-[var(--bone)] transition-colors hover:bg-[var(--bone)] hover:text-[var(--ink)] sm:px-8"
+                      : "group inline-flex min-h-11 items-center gap-2 bg-[var(--bone)] px-6 py-3 font-mono text-sm uppercase tracking-widest text-[var(--ink)] transition-opacity hover:opacity-90 sm:px-8"
                   }
                 >
-                  Kursları Keşfet
+                  {t("courses.exploreCta")}
                   <ChevronRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
                 </button>
               </div>
@@ -337,8 +347,8 @@ function CoursesHero({
           <div className="mt-8 flex items-end justify-start lg:mt-0 lg:justify-end">
             <HeroQuickStat
               value={totalCount > 0 ? `${enrolledCount}/${totalCount}` : "—"}
-              label="Kayıtlı kurs"
-              tagline="Kendi hızında, kendi zamanında."
+              label={t("courses.heroStat")}
+              tagline={t("courses.heroTagline")}
             />
           </div>
         </div>
@@ -377,6 +387,7 @@ function CoursesStat({
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function CoursesPage() {
+  const t = useT();
   const queryClient = useQueryClient();
   const [busyId, setBusyId] = useState<number | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -384,7 +395,7 @@ export default function CoursesPage() {
     ["courses"],
     "/api/courses",
   );
-  const courses = (data?.courses ?? []).map(mapApiCourse);
+  const courses = (data?.courses ?? []).map((row) => mapApiCourse(row, t));
   const loading = isLoading;
 
   const enrolled = courses.filter((c) => c.isEnrolled);
@@ -403,17 +414,17 @@ export default function CoursesPage() {
         credentials: "include",
       });
       const json = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(json.error ?? "Kayıt başarısız");
+      if (!res.ok) throw new Error(json.error ?? t("courses.enrollFailed"));
       await queryClient.invalidateQueries({ queryKey: ["courses"] });
     } catch (e: any) {
-      setActionError(e.message ?? "Kayıt başarısız");
+      setActionError(e.message ?? t("courses.enrollFailed"));
     } finally {
       setBusyId(null);
     }
   };
 
   return (
-    <div className="space-y-8 max-w-4xl">
+    <div className="min-w-0 space-y-8 max-w-4xl overflow-x-hidden">
       {/* Hero */}
       <CoursesHero
         hasEnrolled={enrolled.length > 0}
@@ -424,16 +435,16 @@ export default function CoursesPage() {
       {!loading && !isError && courses.length > 0 && (
         <FadeIn delay={0.02}>
           <div className="grid grid-cols-2 gap-2 sm:gap-3 sm:grid-cols-4">
-            <CoursesStat label="Kayıtlı Kurs" value={String(enrolled.length)} sub="devam ediyor" icon={GraduationCap} />
-            <CoursesStat label="Ort. İlerleme" value={avgProgress !== null ? `%${avgProgress}` : "·"} sub="kayıtlı kurslarda" icon={TrendingUp} />
-            <CoursesStat label="Diğer Kurslar" value={String(available.length)} sub="keşfedilmeyi bekliyor" icon={BookOpen} />
-            <CoursesStat label="Toplam" value={String(courses.length)} sub="inner·hub kataloğu" icon={Play} />
+            <CoursesStat label={t("courses.statEnrolled")} value={String(enrolled.length)} sub={t("courses.statEnrolledSub")} icon={GraduationCap} />
+            <CoursesStat label={t("courses.statProgress")} value={avgProgress !== null ? `%${avgProgress}` : "·"} sub={t("courses.statProgressSub")} icon={TrendingUp} />
+            <CoursesStat label={t("courses.statOther")} value={String(available.length)} sub={t("courses.statOtherSub")} icon={BookOpen} />
+            <CoursesStat label={t("courses.statTotal")} value={String(courses.length)} sub={t("courses.statTotalSub")} icon={Play} />
           </div>
         </FadeIn>
       )}
 
       {loading && (
-        <LoadingBlock label="Kurslar yükleniyor">
+        <LoadingBlock label={t("courses.loading")}>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {Array.from({ length: 4 }).map((_, i) => (
               <StatCardSkeleton key={i} />
@@ -447,7 +458,7 @@ export default function CoursesPage() {
       )}
       {isError && (
         <ErrorState
-          message={error instanceof Error ? error.message : "Kurslar yüklenemedi"}
+          message={error instanceof Error ? error.message : t("courses.loadError")}
           onRetry={() => refetch()}
         />
       )}
@@ -458,7 +469,7 @@ export default function CoursesPage() {
       )}
       {!loading && !isError && courses.length === 0 && (
         <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
-          Henüz yayınlanmış kurs yok.
+          {t("courses.empty")}
         </p>
       )}
 
@@ -467,7 +478,7 @@ export default function CoursesPage() {
           <section id="courses-enrolled" className="scroll-mt-6">
             <div className="mb-3 flex items-center gap-3 border-t border-[var(--ink)]/[0.08] pt-3">
               <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
-                Kayıtlı Kurslarım
+                {t("courses.myEnrolled")}
               </p>
               <span className="flex size-4 items-center justify-center bg-[var(--ink)] font-mono text-label text-[var(--bone)]">
                 {enrolled.length}
@@ -487,7 +498,7 @@ export default function CoursesPage() {
           <section id="courses-available" className="scroll-mt-6">
             <div className="mb-3 border-t border-[var(--ink)]/[0.08] pt-3">
               <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
-                Diğer Kurslar
+                {t("courses.otherCourses")}
               </p>
             </div>
             <div className="space-y-3 opacity-80">
