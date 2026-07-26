@@ -277,9 +277,9 @@ export default function Membership() {
       {/* Event ticket section */}
       <div>
         <div className="border-t border-[var(--ink)]/[0.08] pt-8">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border border-[var(--ink)]/[0.08] p-5">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between panel-glass p-5">
             <div className="flex items-start gap-4">
-              <div className="flex size-9 items-center justify-center border border-[var(--ink)]/10">
+              <div className="flex size-9 items-center justify-center panel-glass">
                 <Zap className="size-4 text-[var(--ink-body)]" />
               </div>
               <div>
@@ -300,7 +300,7 @@ export default function Membership() {
               <button
                 onClick={handleEventTicket}
                 disabled={ticketLoading}
-                className="flex items-center gap-2 border border-[var(--ink)]/20 px-4 py-2 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)] transition-all hover:border-[var(--ink)] hover:text-[var(--ink)] disabled:opacity-40"
+                className="flex items-center gap-2 panel-glass px-4 py-2 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)] transition-all hover:border-[var(--ink)] hover:text-[var(--ink)] disabled:opacity-40"
               >
                 {ticketLoading ? t("membership.redirecting") : t("membership.buyTicket")}
                 <ArrowRight className="size-3" />

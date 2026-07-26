@@ -112,7 +112,7 @@ function SuccessView({
 
       <Link
         href="/panel"
-        className="inline-flex items-center gap-2 border border-[var(--ink)] bg-[var(--ink)] px-5 py-3 font-mono text-caption uppercase tracking-widest text-[var(--bone)]"
+        className="inline-flex items-center gap-2 panel-glass-ink px-5 py-3 font-mono text-caption uppercase tracking-widest text-[var(--bone)]"
       >
         {t("membership.backToPanel")} <ArrowRight className="size-3.5" />
       </Link>

@@ -76,7 +76,7 @@ function DetailPanel({
     <>
       <div className="fixed inset-0 z-40 bg-[var(--ink)]/20" onClick={onClose} />
       <div
-        className="fixed bottom-0 right-0 top-0 z-50 flex w-full max-w-sm flex-col overflow-y-auto border-l border-[var(--ink)]/10 bg-[var(--bone)]"
+        className="panel-glass-strong fixed bottom-0 right-0 top-0 z-50 flex w-full max-w-sm flex-col overflow-y-auto border-l border-[var(--ink)]/10"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-[var(--ink)]/[0.08] px-5 py-4">
@@ -97,7 +97,7 @@ function DetailPanel({
                   <img
                     src={app.companyLogo}
                     alt=""
-                    className="size-10 shrink-0 border border-[var(--ink)]/10 bg-[var(--bone)] object-contain p-1"
+                    className="size-10 shrink-0 panel-glass object-contain p-1"
                   />
                 ) : null}
                 <div className="min-w-0">
@@ -124,7 +124,7 @@ function DetailPanel({
               {app.tags.map((tag) => (
                 <span
                   key={tag}
-                  className="border border-[var(--ink)]/10 px-2 py-0.5 font-mono text-label uppercase tracking-widest text-[var(--ink-body)]"
+                  className="panel-glass px-2 py-0.5 font-mono text-label uppercase tracking-widest text-[var(--ink-body)]"
                 >
                   {tag}
                 </span>
@@ -139,7 +139,7 @@ function DetailPanel({
             <p className="text-sm font-light leading-relaxed text-[var(--ink-strong)]">{app.why}</p>
           </div>
 
-          <div className="space-y-2 border border-[var(--ink)]/[0.08] p-3">
+          <div className="space-y-2 panel-glass p-3">
             <div className="flex justify-between">
               <span className="font-mono text-label text-[var(--ink-muted)]">{t("applications.appliedAt")}</span>
               <span className="font-mono text-label text-[var(--ink-muted)]">{app.appliedAt}</span>
@@ -282,7 +282,7 @@ export default function ApplicationsPage() {
               { labelKey: "applications.approved", val: counts.onaylandı, color: "text-[var(--success-ink)]" },
               { labelKey: "applications.rejected", val: counts.reddedildi, color: "text-[var(--error-ink)]" },
             ].map((s) => (
-              <div key={s.labelKey} className="border border-[var(--ink)]/[0.08] p-4">
+              <div key={s.labelKey} className="panel-glass p-4">
                 <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">{t(s.labelKey)}</p>
                 <p
                   className={`mt-1 font-serif text-2xl ${s.color}`}
@@ -313,7 +313,7 @@ export default function ApplicationsPage() {
               ))}
             </div>
 
-            <div className="flex min-w-0 flex-1 items-center gap-2 border border-[var(--ink)]/[0.08] px-3 py-2 sm:py-1.5">
+            <div className="flex min-w-0 flex-1 items-center gap-2 panel-glass px-3 py-2 sm:py-1.5">
               <Search className="size-3.5 shrink-0 text-[var(--ink-subtle)]" />
               <input
                 className="min-w-0 flex-1 bg-transparent text-sm font-light text-[var(--ink)] outline-none placeholder:text-[var(--ink-subtle)]"
@@ -330,7 +330,7 @@ export default function ApplicationsPage() {
             </p>
           )}
 
-          <div className="border border-[var(--ink)]/[0.08]">
+          <div className="panel-glass">
             {filtered.length === 0 ? (
               <div className="px-5 py-10 text-center">
                 <SlidersHorizontal className="mx-auto mb-3 size-6 text-[var(--ink-subtle)]" />
@@ -348,7 +348,7 @@ export default function ApplicationsPage() {
                     i < filtered.length - 1 ? "border-b border-[var(--ink)]/[0.05]" : "",
                   ].join(" ")}
                 >
-                  <div className="flex size-8 shrink-0 items-center justify-center overflow-hidden border border-[var(--ink)]/[0.08] bg-[var(--bone)] font-mono text-label text-[var(--ink-body)]">
+                  <div className="flex size-8 shrink-0 items-center justify-center overflow-hidden panel-glass font-mono text-label text-[var(--ink-body)]">
                     {app.companyLogo ? (
                       <img src={app.companyLogo} alt="" className="size-full object-contain p-0.5" />
                     ) : (
@@ -383,7 +383,7 @@ export default function ApplicationsPage() {
                     {app.tags.slice(0, 2).map((tag) => (
                       <span
                         key={tag}
-                        className="border border-[var(--ink)]/[0.08] px-2 py-0.5 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]"
+                        className="panel-glass px-2 py-0.5 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]"
                       >
                         {tag}
                       </span>

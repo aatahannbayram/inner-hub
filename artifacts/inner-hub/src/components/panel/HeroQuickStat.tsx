@@ -17,7 +17,7 @@ export function HeroQuickStat({
 }) {
   return (
     <FadeIn delay={delay}>
-      <div className="liquid-glass flex max-w-md flex-col divide-y divide-white/15 border border-white/20 bg-black/40 sm:flex-row sm:divide-x sm:divide-y-0">
+      <div className="liquid-glass panel-glass-ink flex max-w-md flex-col divide-y divide-white/15 sm:flex-row sm:divide-x sm:divide-y-0">
         <div className="px-6 py-4">
           <p
             className="font-serif text-3xl leading-none text-white md:text-4xl"

@@ -201,7 +201,7 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
   };
 
   return (
-    <div className="relative flex h-svh flex-col overflow-hidden bg-black text-white">
+    <div className="relative flex h-svh flex-col overflow-hidden bg-[#12100e] text-white">
       <video
         ref={scrubVideoRef}
         muted

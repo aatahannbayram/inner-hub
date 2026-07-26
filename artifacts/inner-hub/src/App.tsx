@@ -14,7 +14,6 @@ import { apiUrl } from "@/lib/api";
 import { PanelLogin } from "@/components/panel/PanelLogin";
 import { Lockup } from "@/components/Lockup";
 import { I18nProvider, useT } from "@/i18n";
-import { ThemeProvider } from "@/hooks/useTheme";
 
 // Panel sayfaları auth arkasında (SEO'ya tabi değil) — code-split edilir.
 // Home/Invitation/Requests eager kalır (prerender/SEO).
@@ -173,14 +172,12 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <I18nProvider>
-        <ThemeProvider>
-          <TooltipProvider>
-            <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-              <Router />
-            </WouterRouter>
-            <Toaster />
-          </TooltipProvider>
-        </ThemeProvider>
+        <TooltipProvider>
+          <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+            <Router />
+          </WouterRouter>
+          <Toaster />
+        </TooltipProvider>
       </I18nProvider>
     </QueryClientProvider>
   );

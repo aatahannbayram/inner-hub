@@ -119,10 +119,10 @@ function EventCard({
   return (
     <article
       className={[
-        "group relative grid gap-4 overflow-hidden border bg-[var(--bone)] p-4 transition-colors duration-200 sm:grid-cols-[5.5rem_1fr] sm:gap-5 sm:p-5",
+        "group relative grid gap-4 overflow-hidden panel-glass p-4 transition-colors duration-200 sm:grid-cols-[5.5rem_1fr] sm:gap-5 sm:p-5",
         event.isPast
-          ? "border-[var(--ink)]/[0.06] opacity-55"
-          : "border-[var(--ink)]/[0.1] hover:border-[var(--ink)]/25",
+          ? "opacity-55"
+          : "hover:border-[var(--ink)]/25",
       ].join(" ")}
     >
       {!event.isPast && (
@@ -134,7 +134,7 @@ function EventCard({
 
       {/* Date */}
       <div className="flex items-center gap-3 sm:flex-col sm:items-center sm:justify-center sm:gap-0 sm:border sm:border-[var(--ink)]/[0.08] sm:px-2 sm:py-3 sm:text-center">
-        <div className="flex size-14 shrink-0 flex-col items-center justify-center border border-[var(--ink)]/[0.1] bg-[var(--ink)]/[0.03] sm:size-auto sm:border-0 sm:bg-transparent">
+        <div className="flex size-14 shrink-0 flex-col items-center justify-center panel-glass bg-[var(--ink)]/[0.03] sm:size-auto sm:border-0 sm:bg-transparent">
           <span className="font-mono text-[9px] uppercase tracking-[0.16em] text-[var(--ink-muted)]">
             {formatWeekday(event.startAt, locale)}
           </span>
@@ -286,7 +286,7 @@ function CalendarView({ events }: { events: Event[] }) {
   });
 
   return (
-    <div className="overflow-x-auto border border-[var(--ink)]/[0.08]">
+    <div className="overflow-x-auto panel-glass">
       {/* Header row */}
       <div className="grid min-w-[520px] grid-cols-7 border-b border-[var(--ink)]/[0.08]">
         {days.map((d) => (
@@ -439,7 +439,7 @@ function EventsStat({
   icon: React.ComponentType<{ className?: string }>;
 }) {
   return (
-    <div className="border border-[var(--ink)]/[0.08] p-4">
+    <div className="panel-glass p-4">
       <div className="mb-2 flex items-center justify-between">
         <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">{label}</p>
         <Icon className="size-3.5 text-[var(--ink-subtle)]" />
@@ -535,7 +535,7 @@ export default function Events() {
           <p className="hidden text-sm font-light text-[var(--ink-muted)] sm:block">
             {t("events.subtitle")}
           </p>
-          <div id="events-calendar-toggle" className="flex w-full shrink-0 scroll-mt-6 border border-[var(--ink)]/15 sm:w-auto">
+          <div id="events-calendar-toggle" className="flex w-full shrink-0 scroll-mt-6 panel-glass sm:w-auto">
             {(["liste", "takvim"] as ViewMode[]).map((v) => (
               <button
                 key={v}

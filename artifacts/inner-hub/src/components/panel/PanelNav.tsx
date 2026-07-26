@@ -119,7 +119,14 @@ function ProductLabel({ mark, active }: { mark: string; active: boolean }) {
       lang="en"
       className="inline-flex min-w-0 items-baseline truncate text-[13px] font-medium tracking-tight leading-none"
     >
-      <span className={cn("shrink-0", active ? "text-[var(--bone)]/50" : "text-[var(--ink-muted)]")}>
+      <span
+        className={cn(
+          "shrink-0",
+          active
+            ? "text-[var(--ink)]/45 dark:text-white/45"
+            : "text-[var(--ink-muted)] dark:text-white/35",
+        )}
+      >
         inner.
       </span>
       <span className="truncate">{mark}</span>
@@ -145,18 +152,31 @@ function NavLink({ item, collapsed }: { item: NavItem; collapsed: boolean }) {
         void PREFETCH[item.href]?.();
       }}
       className={cn(
-        "group flex min-h-10 items-center gap-2.5 rounded-none px-2.5 py-2.5 text-sm transition-colors duration-150",
+        "group relative flex min-h-10 items-center gap-2.5 rounded-none px-2.5 py-2.5 text-sm transition-colors duration-150",
         isActive
-          ? "bg-[var(--ink)] text-[var(--bone)]"
-          : "text-[var(--ink-body)] hover:bg-[var(--ink)]/[0.05] hover:text-[var(--ink)]",
+          ? [
+              "bg-[var(--ink)] text-[var(--bone)]",
+              /* Invite dilinde dark: soft glass + green edge */
+              "dark:bg-white/[0.08] dark:text-[#F4F1EC] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]",
+            ]
+          : [
+              "text-[var(--ink-body)] hover:bg-[var(--ink)]/[0.05] hover:text-[var(--ink)]",
+              "dark:text-white/55 dark:hover:bg-white/[0.05] dark:hover:text-white",
+            ],
         collapsed && "justify-center px-2",
       )}
       title={collapsed ? (item.mark ? `inner.${item.mark}` : label) : undefined}
     >
+      {isActive ? (
+        <span
+          aria-hidden
+          className="absolute inset-y-0 left-0 w-[2px] bg-[var(--inner-green)] dark:w-[3px]"
+        />
+      ) : null}
       <item.icon
         className={cn(
           "size-[15px] shrink-0",
-          isActive ? "opacity-100" : "opacity-55 group-hover:opacity-100",
+          isActive ? "opacity-100" : "opacity-55 group-hover:opacity-100 dark:opacity-45 dark:group-hover:opacity-90",
         )}
         strokeWidth={1.6}
       />
@@ -176,15 +196,15 @@ function NavLink({ item, collapsed }: { item: NavItem; collapsed: boolean }) {
 function Section({ section, collapsed }: { section: NavSection; collapsed: boolean }) {
   const t = useT();
   return (
-    <div className="mb-4 last:mb-0">
+    <div className="mb-5 last:mb-0">
       {!collapsed ? (
-        <p className="mb-1.5 px-2.5 font-mono text-[9px] uppercase tracking-[0.18em] text-[var(--ink-muted)]">
+        <p className="mb-2 px-2.5 font-mono text-[9px] uppercase tracking-[0.2em] text-[var(--ink-muted)] dark:text-white/40">
           {t(section.titleKey)}
         </p>
       ) : (
-        <div className="mx-auto mb-1.5 h-px w-4 bg-[var(--ink)]/15" aria-hidden />
+        <div className="mx-auto mb-2 h-px w-4 bg-[var(--ink)]/15 dark:bg-white/15" aria-hidden />
       )}
-      <div className="flex flex-col gap-px">
+      <div className="flex flex-col gap-0.5">
         {section.items.map((item) => (
           <NavLink key={item.href} item={item} collapsed={collapsed} />
         ))}

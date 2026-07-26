@@ -280,7 +280,7 @@ export default function Invitation() {
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.55, ease: EASE }}
-              className="w-full max-w-lg border border-white/10 bg-black/50 px-6 py-10 backdrop-blur-md sm:px-8 sm:py-12"
+              className="w-full max-w-lg panel-glass-ink px-6 py-10 sm:px-8 sm:py-12"
             >
               <div className="mb-6 flex items-center gap-3">
                 <span className="flex size-7 items-center justify-center bg-[var(--inner-green)]">
@@ -298,7 +298,7 @@ export default function Invitation() {
               </p>
               <a
                 href="/"
-                className="mt-8 inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-[var(--bone)]/70 transition-colors hover:text-[var(--bone)]"
+                className="mt-8 inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-[var(--bone-fixed)]/70 transition-colors hover:text-[var(--bone-fixed)]"
               >
                 {t("invite.backHome")}
                 <ArrowUpRight className="size-3.5" />
@@ -310,7 +310,7 @@ export default function Invitation() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, ease: EASE }}
-              className="w-full max-w-xl border border-white/10 bg-black/55 backdrop-blur-md"
+              className="w-full max-w-xl panel-glass-ink"
               onKeyDown={onKeyDown}
             >
               {/* Progress */}

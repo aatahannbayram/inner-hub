@@ -116,14 +116,14 @@ function MatchCard({
 
   return (
     <div
-      className="relative flex flex-col border border-[var(--ink)]/[0.08] border-l-[3px] bg-[var(--bone)] p-5 transition-all duration-200 hover:border-[var(--ink)]/20"
+      className="relative flex flex-col panel-glass border-l-[3px] p-5 transition-all duration-200 hover:border-[var(--ink)]/20"
       style={{ animationDelay: `${index * 0.07}s`, borderLeftColor: TYPE_ACCENT[match.matchType] }}
     >
       {/* Header */}
       <div className="mb-4 flex items-start gap-4">
         <div className="relative shrink-0">
           <PersonAvatar name={match.name} initials={initials} className="size-16 font-serif text-2xl italic" />
-          <div className="absolute -right-1 -top-1 flex size-5 items-center justify-center bg-[var(--bone)] border border-[var(--ink)]/10">
+          <div className="absolute -right-1 -top-1 flex size-5 items-center justify-center bg-[var(--bone)] panel-glass">
             <Sparkles className="size-3 text-[var(--success-ink)]" />
           </div>
         </div>
@@ -169,7 +169,7 @@ function MatchCard({
           {match.commonGround.slice(0, 3).map((tag) => (
             <span
               key={tag}
-              className="border border-[var(--ink)]/10 px-2 py-0.5 text-xs text-[var(--ink-body)]"
+              className="panel-glass px-2 py-0.5 text-xs text-[var(--ink-body)]"
             >
               {tag}
             </span>
@@ -379,7 +379,7 @@ export default function Match() {
           <button
             onClick={fetchMatches}
             disabled={loading}
-            className="flex min-h-11 shrink-0 items-center gap-2 border border-[var(--ink)]/15 px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)] transition-all hover:border-[var(--ink)]/40 hover:text-[var(--ink)] disabled:opacity-30"
+            className="flex min-h-11 shrink-0 items-center gap-2 panel-glass px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)] transition-all hover:border-[var(--ink)]/40 hover:text-[var(--ink)] disabled:opacity-30"
           >
             <RefreshCw className={`size-3 ${loading ? "animate-spin" : ""}`} />
             {t("match.refresh")}
@@ -454,7 +454,7 @@ export default function Match() {
           </div>
 
           {/* How it works */}
-          <div className="border border-[var(--ink)]/15 p-5 sm:p-6 md:p-8">
+          <div className="panel-glass p-5 sm:p-6 md:p-8">
             <h2
               className="mb-6 font-display font-serif text-lg text-[var(--ink)]"
               style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 400 }}

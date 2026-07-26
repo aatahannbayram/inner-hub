@@ -96,11 +96,11 @@ function PerkCard({
     <button
       type="button"
       onClick={onOpen}
-      className="group flex h-full flex-col border border-[var(--ink)]/[0.08] bg-[var(--bone)] p-5 text-left transition-colors duration-200 hover:border-[var(--ink)]/35 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--ink)]"
+      className="group flex h-full flex-col panel-glass p-5 text-left transition-colors duration-200 hover:border-[var(--ink)]/35 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--ink)]"
     >
       <div className="mb-4 flex items-start justify-between gap-3">
         <BrandMark brand={perk.brand} />
-        <span className="font-mono text-label uppercase tracking-widest text-[var(--ink)] border border-[var(--ink)]/15 bg-[var(--ink)]/[0.03] px-2 py-0.5">
+        <span className="font-mono text-label uppercase tracking-widest text-[var(--ink)] panel-glass bg-[var(--ink)]/[0.03] px-2 py-0.5">
           {perk.badge}
         </span>
       </div>
@@ -189,7 +189,7 @@ function PerkDetail({
         animate={{ x: 0, opacity: 1 }}
         exit={reduce ? undefined : { x: 16, opacity: 0 }}
         transition={{ duration: reduce ? 0 : 0.28, ease: [0.16, 1, 0.3, 1] }}
-        className="fixed bottom-0 right-0 top-0 z-50 flex w-full max-w-md flex-col border-l border-[var(--ink)]/10 bg-[var(--bone)]"
+        className="panel-glass-strong fixed bottom-0 right-0 top-0 z-50 flex w-full max-w-md flex-col border-l border-[var(--ink)]/10"
       >
         <div className="flex items-center justify-between border-b border-[var(--ink)]/[0.08] px-5 py-4">
           <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
@@ -228,7 +228,7 @@ function PerkDetail({
               {perk.badge}
             </span>
             {expiry && (
-              <span className="border border-[var(--ink)]/10 px-2 py-1 font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
+              <span className="panel-glass px-2 py-1 font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
                 {t("perks.expires", { date: expiry })}
               </span>
             )}
@@ -236,7 +236,7 @@ function PerkDetail({
 
           <p className="text-sm font-light leading-relaxed text-[var(--ink-strong)]">{perk.description}</p>
 
-          <div className="border border-[var(--ink)]/[0.08] p-4">
+          <div className="panel-glass p-4">
             <p className="mb-2 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
               {t("perks.howTo")}
             </p>
@@ -244,7 +244,7 @@ function PerkDetail({
           </div>
 
           {perk.code && (
-            <div className="border border-[var(--ink)] bg-[var(--ink)] p-4 text-[var(--bone)]">
+            <div className="panel-glass-ink p-4 text-[var(--bone)]">
               <p className="mb-2 font-mono text-label uppercase tracking-widest text-[var(--bone)]/62">
                 {t("perks.activationCode")}
               </p>
@@ -253,7 +253,7 @@ function PerkDetail({
                 <button
                   type="button"
                   onClick={copyCode}
-                  className="inline-flex items-center gap-1.5 border border-[var(--bone)]/25 px-3 py-2 font-mono text-label uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-80"
+                  className="inline-flex items-center gap-1.5 border border-[var(--bone-fixed)]/25 px-3 py-2 font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)] transition-opacity hover:opacity-80"
                 >
                   {copied ? <Check className="size-3" /> : <Copy className="size-3" />}
                   {copied ? t("common.copied") : t("common.copy")}
@@ -268,14 +268,14 @@ function PerkDetail({
             href={perk.partnerUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex w-full items-center justify-center gap-2 border border-[var(--ink)] bg-[var(--ink)] px-4 py-3 font-mono text-caption uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-85"
+            className="flex w-full items-center justify-center gap-2 panel-glass-ink px-4 py-3 font-mono text-caption uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-85"
           >
             {t("perks.goPartner")} <ExternalLink className="size-3.5" />
           </a>
           <button
             type="button"
             onClick={onToggleSave}
-            className="flex w-full items-center justify-center gap-2 border border-[var(--ink)]/20 px-4 py-3 font-mono text-caption uppercase tracking-widest text-[var(--ink-strong)] transition-colors hover:border-[var(--ink)] hover:text-[var(--ink)]"
+            className="flex w-full items-center justify-center gap-2 panel-glass px-4 py-3 font-mono text-caption uppercase tracking-widest text-[var(--ink-strong)] transition-colors hover:border-[var(--ink)] hover:text-[var(--ink)]"
           >
             {saved ? t("perks.unsave") : t("perks.saveForLater")}
           </button>
@@ -339,7 +339,7 @@ function PerksHero({ totalCount }: { totalCount: number }) {
                 </button>
                 <button
                   onClick={() => scrollToId("perks-all")}
-                  className="liquid-glass group inline-flex min-h-11 items-center gap-2 border border-[var(--bone)]/25 px-6 py-3 font-mono text-sm uppercase tracking-widest text-[var(--bone)] transition-colors hover:bg-[var(--bone)] hover:text-[var(--ink)] sm:px-8"
+                  className="liquid-glass group inline-flex min-h-11 items-center gap-2 border border-[var(--bone-fixed)]/25 px-6 py-3 font-mono text-sm uppercase tracking-widest text-[var(--bone-fixed)] transition-colors hover:bg-[var(--bone-fixed)] hover:text-[var(--ink-fixed)] sm:px-8"
                 >
                   {t("perks.allCta")}
                   <ArrowRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
@@ -373,7 +373,7 @@ function PerksStat({
   icon: React.ComponentType<{ className?: string }>;
 }) {
   return (
-    <div className="border border-[var(--ink)]/[0.08] p-4">
+    <div className="panel-glass p-4">
       <div className="mb-2 flex items-center justify-between">
         <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">{label}</p>
         <Icon className="size-3.5 text-[var(--ink-subtle)]" />
@@ -471,13 +471,13 @@ export default function Perks() {
       </FadeIn>
 
       <FadeIn delay={0.03}>
-        <div className="grid grid-cols-1 gap-px border border-[var(--ink)]/[0.08] bg-[var(--ink)]/[0.08] sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-px panel-glass bg-[var(--ink)]/[0.08] sm:grid-cols-3">
           {[
             { step: "01", title: t("perks.step1Title"), body: t("perks.step1Body") },
             { step: "02", title: t("perks.step2Title"), body: t("perks.step2Body") },
             { step: "03", title: t("perks.step3Title"), body: t("perks.step3Body") },
           ].map((s) => (
-            <div key={s.step} className="bg-[var(--bone)] p-4">
+            <div key={s.step} className="panel-glass p-4">
               <p className="mb-1 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
                 {s.step}
               </p>
@@ -502,7 +502,7 @@ export default function Perks() {
                   key={perk.id}
                   type="button"
                   onClick={() => setSelected(perk)}
-                  className="group relative flex min-h-[160px] flex-col justify-between overflow-hidden border border-[var(--ink)] bg-[var(--ink)] p-5 text-left text-[var(--bone)] transition-opacity hover:opacity-95 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--ink)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bone)]"
+                  className="group relative flex min-h-[160px] flex-col justify-between overflow-hidden panel-glass-ink p-5 text-left text-[var(--bone)] transition-opacity hover:opacity-95 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--ink)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bone)]"
                 >
                   <AmbientCardBackground />
                   <div className="relative z-10">
@@ -580,7 +580,7 @@ export default function Perks() {
       <FadeIn delay={0.08}>
         <div id="perks-all" className="scroll-mt-6" />
         {filtered.length === 0 ? (
-          <div className="border border-[var(--ink)]/[0.08] px-6 py-14 text-center">
+          <div className="panel-glass px-6 py-14 text-center">
             <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
               {t("perks.empty")}
             </p>

@@ -60,13 +60,13 @@ function StatCard({
   return (
     <Link
       href={href}
-      className="group relative flex items-center gap-3 overflow-hidden border border-[var(--ink)]/[0.1] bg-[var(--bone)] p-4 transition-colors hover:border-[var(--ink)]/30 sm:gap-4 sm:p-5"
+      className="group relative flex items-center gap-3 overflow-hidden panel-glass p-4 transition-colors hover:border-[var(--ink)]/30 sm:gap-4 sm:p-5"
     >
       <span
         aria-hidden
         className="absolute inset-y-0 left-0 w-[3px] bg-[var(--ink)]/15 transition-colors group-hover:bg-[var(--inner-green)]"
       />
-      <div className="ml-1 flex size-10 shrink-0 items-center justify-center border border-[var(--ink)]/[0.1] bg-[var(--ink)]/[0.03] transition-colors group-hover:border-[var(--ink)]/25">
+      <div className="ml-1 flex size-10 shrink-0 items-center justify-center panel-glass bg-[var(--ink)]/[0.03] transition-colors group-hover:border-[var(--ink)]/25">
         <Icon className="size-4 text-[var(--ink-muted)]" />
       </div>
       <div className="min-w-0">
@@ -92,7 +92,7 @@ function CourseRow({ course }: { course: DashCourse }) {
   return (
     <Link
       href="/panel/courses"
-      className="group relative flex flex-col gap-3 overflow-hidden border border-[var(--ink)]/[0.1] bg-[var(--bone)] p-4 transition-colors hover:border-[var(--ink)]/28 sm:flex-row sm:items-center sm:gap-5 sm:p-5"
+      className="group relative flex flex-col gap-3 overflow-hidden panel-glass p-4 transition-colors hover:border-[var(--ink)]/28 sm:flex-row sm:items-center sm:gap-5 sm:p-5"
     >
       <span
         aria-hidden
@@ -136,7 +136,7 @@ function PerkCard({
   return (
     <Link
       href="/panel/perks"
-      className="group relative flex h-full flex-col overflow-hidden border border-[var(--ink)]/[0.1] bg-[var(--bone)] p-4 transition-colors hover:border-[var(--ink)]/28 sm:p-5"
+      className="group relative flex h-full flex-col overflow-hidden panel-glass p-4 transition-colors hover:border-[var(--ink)]/28 sm:p-5"
     >
       <span
         aria-hidden
@@ -339,7 +339,7 @@ export default function Dashboard({ userName = "Ata" }: { userName?: string }) {
       </FadeIn>
 
       <FadeIn delay={0.08}>
-        <div className="relative overflow-hidden border border-[var(--ink)]/15 bg-[var(--ink)] p-5 text-[var(--bone)] sm:p-6">
+        <div className="relative overflow-hidden panel-glass-ink p-5 text-[var(--bone)] sm:p-6">
           <AsciiField tone="dark" />
           <AmbientCardBackground />
           <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

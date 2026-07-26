@@ -20,12 +20,12 @@ function Shimmer({ className }: { className?: string }) {
 
 /** Ölçülmüş gerçek yükseklik: istatistik kartı 105px. */
 export function StatCardSkeleton() {
-  return <Shimmer className="h-[105px] border border-[var(--ink)]/[0.08]" />;
+  return <Shimmer className="panel-skeleton h-[105px] border border-[var(--ink)]/[0.08]" />;
 }
 
 /** Ölçülmüş gerçek yükseklik: kurs listesi satırı 207px. */
 export function CourseCardSkeleton() {
-  return <Shimmer className="h-[207px] border border-[var(--ink)]/[0.08]" />;
+  return <Shimmer className="panel-skeleton h-[207px] border border-[var(--ink)]/[0.08]" />;
 }
 
 /** Route-level Suspense fallback (kod bölme). Panel kabuğu zaten mount

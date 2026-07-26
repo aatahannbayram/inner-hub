@@ -211,7 +211,7 @@ export default function MemberProfile() {
       </Link>
 
       {/* Profile card */}
-      <div className="border border-[var(--ink)]/[0.08] p-6">
+      <div className="panel-glass p-6">
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-start gap-4">
             {/* Avatar */}
@@ -239,7 +239,7 @@ export default function MemberProfile() {
           </div>
 
           {/* Tier */}
-          <span className="shrink-0 border border-[var(--ink)]/10 px-2.5 py-1 font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
+          <span className="shrink-0 panel-glass px-2.5 py-1 font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
             {member.tier}
           </span>
         </div>
@@ -275,7 +275,7 @@ export default function MemberProfile() {
         <p className="mb-2 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">Uzmanlıklar</p>
         <div className="flex flex-wrap gap-1.5">
           {member.tags.map((t) => (
-            <span key={t} className="border border-[var(--ink)]/10 px-2.5 py-1 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
+            <span key={t} className="panel-glass px-2.5 py-1 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
               {t}
             </span>
           ))}
@@ -283,7 +283,7 @@ export default function MemberProfile() {
       </div>
 
       {/* Expertise */}
-      <div className="border border-[var(--ink)]/[0.08] p-5">
+      <div className="panel-glass p-5">
         <p className="mb-3 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">Yetkinlik Alanları</p>
         <div className="space-y-1.5">
           {member.expertise.map((e, i) => (
@@ -307,19 +307,19 @@ export default function MemberProfile() {
           <div className="flex gap-2">
             {member.linkedin && (
               <a href={`https://${member.linkedin}`} target="_blank" rel="noopener noreferrer"
-                className="flex items-center gap-1.5 border border-[var(--ink)]/10 px-3 py-2 font-mono text-label text-[var(--ink-body)] hover:text-[var(--ink)] hover:border-[var(--ink)]/20 transition-colors">
+                className="flex items-center gap-1.5 panel-glass px-3 py-2 font-mono text-label text-[var(--ink-body)] hover:text-[var(--ink)] hover:border-[var(--ink)]/20 transition-colors">
                 <Linkedin className="size-3" /> LinkedIn
               </a>
             )}
             {member.github && (
               <a href={`https://${member.github}`} target="_blank" rel="noopener noreferrer"
-                className="flex items-center gap-1.5 border border-[var(--ink)]/10 px-3 py-2 font-mono text-label text-[var(--ink-body)] hover:text-[var(--ink)] hover:border-[var(--ink)]/20 transition-colors">
+                className="flex items-center gap-1.5 panel-glass px-3 py-2 font-mono text-label text-[var(--ink-body)] hover:text-[var(--ink)] hover:border-[var(--ink)]/20 transition-colors">
                 <Github className="size-3" /> GitHub
               </a>
             )}
             {member.website && (
               <a href={`https://${member.website}`} target="_blank" rel="noopener noreferrer"
-                className="flex items-center gap-1.5 border border-[var(--ink)]/10 px-3 py-2 font-mono text-label text-[var(--ink-body)] hover:text-[var(--ink)] hover:border-[var(--ink)]/20 transition-colors">
+                className="flex items-center gap-1.5 panel-glass px-3 py-2 font-mono text-label text-[var(--ink-body)] hover:text-[var(--ink)] hover:border-[var(--ink)]/20 transition-colors">
                 <Globe className="size-3" /> Site
               </a>
             )}
@@ -332,7 +332,7 @@ export default function MemberProfile() {
         <button className="flex flex-1 items-center justify-center gap-2 border border-[var(--ink)] bg-[var(--ink)] py-3 font-mono text-label uppercase tracking-widest text-[var(--bone)] hover:bg-[var(--ink)]/85 transition-colors">
           <UserPlus className="size-3.5" /> Bağlan
         </button>
-        <button className="flex flex-1 items-center justify-center gap-2 border border-[var(--ink)]/15 py-3 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)] hover:border-[var(--ink)]/30 hover:text-[var(--ink)] transition-colors">
+        <button className="flex flex-1 items-center justify-center gap-2 panel-glass py-3 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)] hover:border-[var(--ink)]/30 hover:text-[var(--ink)] transition-colors">
           <MessageSquare className="size-3.5" /> Mesaj
         </button>
       </div>

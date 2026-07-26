@@ -15,6 +15,7 @@ import { Lockup } from "@/components/Lockup";
 import { LocaleSyncFromSettings, useLocale, useT } from "@/i18n";
 import { ThemeSyncFromSettings } from "@/components/ThemeSyncFromSettings";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { PanelAmbient } from "@/components/panel/PanelAmbient";
 
 // ─── Notifications ────────────────────────────────────────────────────────────
 
@@ -110,7 +111,7 @@ function NotifPanel({
   return (
     <>
       <div className="fixed inset-0 z-40" onClick={onClose} />
-      <div className="fixed right-4 top-[68px] z-50 w-80 border border-[var(--ink)]/10 bg-[var(--bone)] shadow-lg">
+      <div className="panel-glass-strong fixed right-4 top-[68px] z-50 w-80 shadow-lg">
         <div className="flex items-center justify-between border-b border-[var(--ink)]/[0.08] px-4 py-3">
           <div className="flex items-center gap-2">
             <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
@@ -257,23 +258,23 @@ function SidebarFooter({
   }
   return (
     <div className="space-y-3">
-      <div className="space-y-0.5">
-        <p className="truncate text-sm font-medium text-[var(--ink)]">{user.name}</p>
-        <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
+          <div className="space-y-0.5">
+        <p className="truncate text-sm font-medium text-[var(--ink)] dark:text-[#F4F1EC]">{user.name}</p>
+        <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)] dark:text-white/45">
           {user.role === "admin" ? t("common.admin") : t("common.member")}
         </p>
       </div>
       {user.profileCompletionPct < 100 && (
         <div className="space-y-1.5">
           <div className="flex justify-between">
-            <span className="font-mono text-label font-semibold uppercase tracking-widest text-[var(--ink-strong)]">
+            <span className="font-mono text-label font-semibold uppercase tracking-widest text-[var(--ink-strong)] dark:text-white/55">
               {t("shell.profileCompletion")}
             </span>
-            <span className="font-mono text-label font-semibold tabular-nums text-[var(--ink-strong)]">
+            <span className="font-mono text-label font-semibold tabular-nums text-[var(--ink-strong)] dark:text-white/55">
               %{user.profileCompletionPct}
             </span>
           </div>
-          <div className="relative h-1 w-full overflow-visible bg-[var(--ink)]/10">
+          <div className="relative h-1 w-full overflow-visible bg-[var(--ink)]/10 dark:bg-white/10">
             <div
               className="h-full bg-[var(--inner-green)] shadow-[0_0_6px_var(--inner-green)] transition-all duration-700"
               style={{ width: `${user.profileCompletionPct}%` }}
@@ -284,7 +285,7 @@ function SidebarFooter({
       <button
         type="button"
         onClick={onLogout}
-        className="hit-40 relative flex items-center gap-1.5 text-[var(--ink-body)] transition-colors hover:text-[var(--ink)]"
+        className="hit-40 relative flex items-center gap-1.5 text-[var(--ink-body)] transition-colors hover:text-[var(--ink)] dark:text-white/50 dark:hover:text-white"
       >
         <LogOut className="size-3.5" />
         <span className="font-mono text-label uppercase tracking-widest">{t("common.logoutLong")}</span>
@@ -317,14 +318,14 @@ function DesktopSidebar({ user, onLogout }: { user: PanelUser; onLogout?: () => 
     <aside
       data-onboarding="nav"
       className={cn(
-        "relative hidden h-full shrink-0 flex-col border-r border-[var(--ink)]/[0.08] bg-[var(--bone)] transition-all duration-300 ease-expo lg:flex",
+        "relative z-[1] hidden h-full shrink-0 flex-col border-r border-[var(--ink)]/[0.08] panel-glass-strong transition-all duration-300 ease-expo lg:flex dark:border-white/10",
         collapsed ? "w-[56px]" : "w-[220px] xl:w-[240px]",
       )}
     >
       {/* Header */}
       <div
         className={cn(
-          "flex h-[60px] items-center border-b border-[var(--ink)]/[0.08] px-4",
+          "flex h-[60px] items-center border-b border-[var(--ink)]/[0.08] px-4 dark:border-white/10",
           collapsed && "justify-center px-0",
         )}
       >
@@ -341,7 +342,7 @@ function DesktopSidebar({ user, onLogout }: { user: PanelUser; onLogout?: () => 
       {/* Footer */}
       <div
         className={cn(
-          "border-t border-[var(--ink)]/[0.08] p-4",
+          "border-t border-[var(--ink)]/[0.08] p-4 dark:border-white/10",
           collapsed && "flex justify-center p-2",
         )}
       >
@@ -352,7 +353,7 @@ function DesktopSidebar({ user, onLogout }: { user: PanelUser; onLogout?: () => 
       <button
         type="button"
         onClick={toggle}
-        className="hit-40 absolute -right-3 top-[72px] z-10 flex size-6 items-center justify-center border border-[var(--ink)]/[0.08] bg-[var(--bone)] text-[var(--ink-body)] transition-colors hover:text-[var(--ink)]"
+        className="hit-40 panel-glass absolute -right-3 top-[72px] z-10 flex size-6 items-center justify-center text-[var(--ink-body)] transition-colors hover:text-[var(--ink)] dark:border-white/15 dark:text-white/55 dark:hover:text-white"
         aria-label={collapsed ? "Sidebar'ı genişlet" : "Sidebar'ı daralt"}
       >
         {collapsed ? <ChevronRight className="size-3" /> : <ChevronLeft className="size-3" />}
@@ -401,7 +402,7 @@ function MobileDrawer({
             animate={{ x: 0 }}
             exit={{ x: "-100%" }}
             transition={{ type: "spring", stiffness: 380, damping: 36 }}
-            className="fixed inset-y-0 left-0 z-[90] flex w-[min(280px,85vw)] flex-col border-r border-[var(--ink)]/[0.08] bg-[var(--bone)] lg:hidden"
+            className="panel-glass-strong fixed inset-y-0 left-0 z-[90] flex w-[min(280px,85vw)] flex-col border-r border-[var(--ink)]/[0.08] lg:hidden"
           >
             <div className="flex h-[60px] items-center justify-between border-b border-[var(--ink)]/[0.08] px-4">
               <BrandMark collapsed={false} />
@@ -464,7 +465,8 @@ function ShellInner({ user, children, onLogout }: PanelShellProps) {
   }, [location]);
 
   return (
-    <div className="flex h-svh overflow-hidden bg-[var(--bone)] text-[var(--ink)]">
+    <div className="relative flex h-svh overflow-hidden bg-[var(--bone)] text-[var(--ink)] dark:bg-transparent">
+      <PanelAmbient />
       <LocaleSyncFromSettings />
       <ThemeSyncFromSettings />
       <a
@@ -481,9 +483,9 @@ function ShellInner({ user, children, onLogout }: PanelShellProps) {
         onLogout={onLogout}
       />
 
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+      <div className="relative z-[1] flex min-h-0 min-w-0 flex-1 flex-col">
         {/* Top bar */}
-        <header className="z-40 flex h-14 shrink-0 items-center justify-between border-b border-[var(--ink)]/[0.08] bg-[var(--bone)]/90 px-3 backdrop-blur-md sm:h-[60px] sm:px-5 lg:px-6">
+        <header className="z-40 flex h-14 shrink-0 items-center justify-between border-b border-[var(--ink)]/[0.08] panel-glass-strong px-3 sm:h-[60px] sm:px-5 lg:px-6 dark:border-white/10">
           <button
             type="button"
             data-onboarding="nav"
@@ -502,7 +504,7 @@ function ShellInner({ user, children, onLogout }: PanelShellProps) {
             {/* Online indicator */}
             <div className="hidden items-center gap-1.5 sm:flex">
               <span className="size-1.5 rounded-full bg-[var(--inner-green)] animate-beacon" />
-              <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
+              <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)] dark:text-white/45">
                 {t("common.online")}
               </span>
             </div>
@@ -512,12 +514,12 @@ function ShellInner({ user, children, onLogout }: PanelShellProps) {
               type="button"
               data-onboarding="notifications"
               onClick={() => setNotifOpen((o) => !o)}
-              className="hit-40 relative text-[var(--ink-muted)] hover:text-[var(--ink)] transition-colors"
+              className="hit-40 relative text-[var(--ink-muted)] transition-colors hover:text-[var(--ink)] dark:text-white/45 dark:hover:text-white"
               aria-label={t("shell.notifications")}
             >
               <Bell className="size-4" />
               {notifCount > 0 && (
-                <span className="absolute -right-1 -top-1 flex size-3.5 items-center justify-center bg-[var(--ink)] font-mono text-label text-[var(--bone)]">
+                <span className="absolute -right-1 -top-1 flex size-3.5 items-center justify-center bg-[var(--inner-green)] font-mono text-label text-black">
                   {notifCount}
                 </span>
               )}
@@ -548,7 +550,7 @@ function ShellInner({ user, children, onLogout }: PanelShellProps) {
                 className="size-7 object-cover"
               />
             ) : (
-              <div className="flex size-7 items-center justify-center bg-[var(--ink)] font-mono text-label uppercase text-[var(--bone)]">
+              <div className="flex size-7 items-center justify-center border border-white/10 bg-[var(--ink)] font-mono text-label uppercase text-[var(--bone)] dark:bg-white/10 dark:text-[#F4F1EC]">
                 {user.name.slice(0, 2)}
               </div>
             )}
@@ -561,7 +563,7 @@ function ShellInner({ user, children, onLogout }: PanelShellProps) {
           ref={mainRef}
           tabIndex={-1}
           data-onboarding="main"
-          className="min-h-0 min-w-0 flex-1 overflow-y-auto px-3 py-5 outline-none sm:px-5 sm:py-6 lg:px-8 lg:py-8"
+          className="min-h-0 min-w-0 flex-1 overflow-y-auto px-3 py-5 outline-none sm:px-5 sm:py-6 lg:px-8 lg:py-8 dark:[scrollbar-color:rgba(255,255,255,0.15)_transparent]"
         >
           <PanelPageTransition>{children}</PanelPageTransition>
         </main>

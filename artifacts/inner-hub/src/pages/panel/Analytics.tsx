@@ -76,7 +76,7 @@ function StatCard({
     trend === "up" ? "text-[var(--success-ink)]" : trend === "down" ? "text-[var(--error-ink)]" : "text-[var(--ink-muted)]";
 
   return (
-    <div className="border border-[var(--ink)]/[0.08] p-5">
+    <div className="panel-glass p-5">
       <div className="mb-3 flex items-center justify-between">
         <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">{label}</p>
         <Icon className="size-3.5 text-[var(--ink-subtle)]" />
@@ -248,7 +248,7 @@ export default function Analytics() {
           </div>
 
           {data.empty ? (
-            <div className="border border-[var(--ink)]/[0.08] p-8 text-center">
+            <div className="panel-glass p-8 text-center">
               <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
                 {t("analytics.empty")}
               </p>
@@ -260,7 +260,7 @@ export default function Analytics() {
             <>
               {/* Member growth chart */}
               <Section title={t("analytics.memberGrowth")} sub={t("analytics.memberGrowthSub")}>
-                <div className="border border-[var(--ink)]/[0.08] p-5">
+                <div className="panel-glass p-5">
                   <div className="mb-4 flex items-baseline gap-3">
                     <span
                       className="font-serif text-4xl text-[var(--ink)]"
@@ -280,7 +280,7 @@ export default function Analytics() {
 
               {/* Revenue — henüz gerçek veri kaynağı yok, sahte sayı uydurmak yerine dürüst not */}
               <Section title={t("analytics.revenue")} sub={t("analytics.revenueSub")}>
-                <div className="border border-[var(--ink)]/[0.08] p-5">
+                <div className="panel-glass p-5">
                   <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
                     {t("analytics.revenueSoon")}
                   </p>
@@ -300,7 +300,7 @@ export default function Analytics() {
                       "analytics.registrations",
                     ] as const;
                     return (
-                      <div key={key} className="border border-[var(--ink)]/[0.08] p-4">
+                      <div key={key} className="panel-glass p-4">
                         <p className="mb-3 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
                           {t(labelKeys[ki])}
                         </p>
@@ -314,7 +314,7 @@ export default function Analytics() {
               {/* Top members */}
               {data.topMembers.length > 0 && (
                 <Section title={t("analytics.topMembers")} sub={t("analytics.topMembersSub")}>
-                  <div className="border border-[var(--ink)]/[0.08]">
+                  <div className="panel-glass">
                   <div className="overflow-x-auto">
                     <div className="grid min-w-[520px] grid-cols-[1fr_auto_auto_auto] border-b border-[var(--ink)]/[0.08] px-4 py-2">
                       {(
@@ -381,7 +381,7 @@ export default function Analytics() {
 
               {data.applicationsPending !== null && (
                 <Section title={t("analytics.pendingApps")} sub={t("analytics.pendingAppsSub")}>
-                  <div className="border border-[var(--ink)]/[0.08] p-5">
+                  <div className="panel-glass p-5">
                     <span
                       className="font-serif text-4xl text-[var(--ink)]"
                       style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}

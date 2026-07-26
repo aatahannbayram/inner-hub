@@ -104,31 +104,31 @@ function IdCard({
   ].filter(Boolean);
 
   return (
-    <div className="relative overflow-hidden border border-[var(--ink)]/15 bg-[var(--ink)] p-6 text-[var(--bone)]">
+    <div className="relative overflow-hidden panel-glass-ink p-6">
       <AmbientCardBackground />
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.04]"
         style={{
           backgroundImage:
-            "repeating-linear-gradient(0deg,transparent,transparent 23px,var(--bone) 23px,var(--bone) 24px),repeating-linear-gradient(90deg,transparent,transparent 23px,var(--bone) 23px,var(--bone) 24px)",
+            "repeating-linear-gradient(0deg,transparent,transparent 23px,var(--bone-fixed) 23px,var(--bone-fixed) 24px),repeating-linear-gradient(90deg,transparent,transparent 23px,var(--bone-fixed) 23px,var(--bone-fixed) 24px)",
         }}
       />
 
       <div className="relative flex items-start justify-between gap-4">
         <div className="flex-1">
           <div className="mb-4 flex items-center gap-2">
-            <span className="font-mono text-label uppercase tracking-widest text-[var(--bone)]/47">
+            <span className="font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)]/47">
               <span lang="en">inner·id</span>
             </span>
-            <span className="font-mono text-label text-[var(--bone)]/37">·</span>
-            <span className="font-mono text-label uppercase tracking-widest text-[var(--bone)]/47">
+            <span className="font-mono text-label text-[var(--bone-fixed)]/37">·</span>
+            <span className="font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)]/47">
               #{String(user.id).padStart(3, "0")}
             </span>
           </div>
 
           <div className="mb-1 flex items-center gap-2">
             <span
-              className="font-serif text-3xl text-[var(--bone)]"
+              className="font-serif text-3xl text-[var(--bone-fixed)]"
               style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
             >
               {user.name}
@@ -136,7 +136,7 @@ function IdCard({
             <CheckCircle2 className="size-4 shrink-0 text-[var(--success-ink)]" />
           </div>
 
-          <p className="mb-4 font-mono text-caption text-[var(--bone)]/57">
+          <p className="mb-4 font-mono text-caption text-[var(--bone-fixed)]/57">
             @{handle}
             {user.title || user.company
               ? ` · ${[user.title, user.company].filter(Boolean).join(", ")}`
@@ -147,7 +147,7 @@ function IdCard({
             {badges.map((b) => (
               <span
                 key={b}
-                className="border border-[var(--bone)]/15 px-2 py-0.5 font-mono text-label uppercase tracking-widest text-[var(--bone)]/50"
+                className="border border-[var(--bone-fixed)]/15 px-2 py-0.5 font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)]/50"
               >
                 {b}
               </span>
@@ -156,8 +156,8 @@ function IdCard({
         </div>
 
         <div className="flex shrink-0 flex-col items-end gap-3">
-          <div className="flex size-16 items-center justify-center border border-[var(--bone)]/15 bg-[var(--bone)]/5">
-            <QrCode className="size-8 text-[var(--bone)]/42" />
+          <div className="flex size-16 items-center justify-center border border-[var(--bone-fixed)]/15 bg-[var(--bone-fixed)]/5">
+            <QrCode className="size-8 text-[var(--bone-fixed)]/42" />
           </div>
           <span className="border border-[var(--inner-green)]/40 bg-[var(--inner-green)]/10 px-2.5 py-1 font-mono text-label uppercase tracking-widest text-[var(--success-ink)]">
             {tier}
@@ -165,14 +165,14 @@ function IdCard({
         </div>
       </div>
 
-      <div className="relative mt-5 flex items-center justify-between border-t border-[var(--bone)]/[0.08] pt-4">
+      <div className="relative mt-5 flex items-center justify-between border-t border-[var(--bone-fixed)]/[0.08] pt-4">
         <div>
-          <p className="font-mono text-label uppercase tracking-widest text-[var(--bone)]/42">
+          <p className="font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)]/42">
             {t("id.profileCompletion")}
           </p>
-          <p className="font-mono text-sm text-[var(--bone)]/70">%{user.profileCompletionPct ?? 0}</p>
+          <p className="font-mono text-sm text-[var(--bone-fixed)]/70">%{user.profileCompletionPct ?? 0}</p>
         </div>
-        <p className="font-mono text-label text-[var(--bone)]/37">
+        <p className="font-mono text-label text-[var(--bone-fixed)]/37">
           {t("id.memberSince", {
             date: formatMemberSince(user.createdAt, locale, t("id.none")),
           })}
@@ -200,7 +200,7 @@ function EmbedSection({ handle, name }: { handle: string; name: string }) {
   };
 
   return (
-    <div className="border border-[var(--ink)]/[0.08]">
+    <div className="panel-glass">
       <div className="flex border-b border-[var(--ink)]/[0.08]">
         {(Object.keys(snippets) as SnippetTab[]).map((snippetTab) => (
           <button
@@ -293,13 +293,13 @@ function PlatformBindRow({
   };
 
   return (
-    <div className="border border-[var(--ink)]/[0.08] p-4 transition-all hover:border-[var(--ink)]/20">
+    <div className="panel-glass p-4 transition-all hover:border-[var(--ink)]/20">
       <div className="flex items-center gap-4">
         <div
           className={
             brandColor
               ? "flex size-9 shrink-0 items-center justify-center border"
-              : "flex size-9 shrink-0 items-center justify-center border border-[var(--ink)]/10"
+              : "flex size-9 shrink-0 items-center justify-center panel-glass"
           }
           style={brandColor ? { backgroundColor: brandColor, borderColor: brandColor } : undefined}
         >
@@ -335,7 +335,7 @@ function PlatformBindRow({
 
       {editing && (
         <div className="mt-3 space-y-2 border-t border-[var(--ink)]/[0.06] pt-3">
-          <div className="flex items-stretch border border-[var(--ink)]/[0.08] focus-within:border-[var(--ink)]/30">
+          <div className="flex items-stretch panel-glass focus-within:border-[var(--ink)]/30">
             <span className="flex items-center border-r border-[var(--ink)]/[0.08] bg-[var(--ink)]/[0.03] px-3 font-mono text-label text-[var(--ink-body)]">
               {prefix}
             </span>
@@ -357,7 +357,7 @@ function PlatformBindRow({
               type="button"
               disabled={busy || !draft.trim()}
               onClick={() => void save()}
-              className="flex items-center gap-1.5 border border-[var(--ink)] bg-[var(--ink)] px-3 py-1.5 font-mono text-label uppercase tracking-widest text-[var(--bone)] disabled:opacity-40"
+              className="flex items-center gap-1.5 panel-glass-ink px-3 py-1.5 font-mono text-label uppercase tracking-widest text-[var(--bone)] disabled:opacity-40"
             >
               <Check className="size-3" /> {busy ? t("common.saving") : t("common.save")}
             </button>
@@ -365,7 +365,7 @@ function PlatformBindRow({
               type="button"
               disabled={busy}
               onClick={() => setEditing(false)}
-              className="flex items-center gap-1.5 border border-[var(--ink)]/15 px-3 py-1.5 font-mono text-label uppercase tracking-widest text-[var(--ink-body)]"
+              className="flex items-center gap-1.5 panel-glass px-3 py-1.5 font-mono text-label uppercase tracking-widest text-[var(--ink-body)]"
             >
               <X className="size-3" /> {t("common.cancel")}
             </button>
@@ -473,7 +473,7 @@ export default function InnerId() {
           </div>
           <Link
             href="/panel/profile"
-            className="flex shrink-0 items-center gap-1.5 self-start border border-[var(--ink)]/15 px-3 py-2 font-mono text-label uppercase tracking-widest text-[var(--ink-body)] transition-colors hover:border-[var(--ink)]/40 hover:text-[var(--ink)]"
+            className="flex shrink-0 items-center gap-1.5 self-start panel-glass px-3 py-2 font-mono text-label uppercase tracking-widest text-[var(--ink-body)] transition-colors hover:border-[var(--ink)]/40 hover:text-[var(--ink)]"
           >
             <Link2 className="size-3" /> {t("id.editProfile")}
           </Link>
@@ -486,7 +486,7 @@ export default function InnerId() {
         <p className="mb-2 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
           {t("id.publicProfile")}
         </p>
-        <div className="flex flex-col gap-3 border border-[var(--ink)]/[0.08] px-4 py-3 sm:flex-row sm:items-center sm:gap-2">
+        <div className="flex flex-col gap-3 panel-glass px-4 py-3 sm:flex-row sm:items-center sm:gap-2">
           <Globe className="size-3.5 shrink-0 text-[var(--ink-subtle)]" />
           <span className="min-w-0 flex-1 break-all font-mono text-sm text-[var(--ink-body)] sm:text-caption">{publicUrl}</span>
           <div className="flex shrink-0 items-center gap-3">
@@ -540,7 +540,7 @@ export default function InnerId() {
             {skills.map((s) => (
               <span
                 key={s}
-                className="border border-[var(--ink)]/10 px-3 py-1.5 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]"
+                className="panel-glass px-3 py-1.5 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]"
               >
                 {s}
               </span>

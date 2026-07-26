@@ -236,7 +236,7 @@ export default function Settings() {
       </FadeIn>
 
       <Section icon={Bell} title={t("settings.sectionNotif")} sub={t("settings.sectionNotifSub")}>
-        <div className="border border-[var(--ink)]/[0.08] px-4">
+        <div className="panel-glass px-4">
           <SettingRow label={t("settings.notifMatch")} sub={t("settings.notifMatchSub")}>
             <Toggle checked={prefs.notifMatch} onChange={(v) => patch("notifMatch", v)} />
           </SettingRow>
@@ -259,7 +259,7 @@ export default function Settings() {
       </Section>
 
       <Section icon={Shield} title={t("settings.sectionPrivacy")} sub={t("settings.sectionPrivacySub")}>
-        <div className="border border-[var(--ink)]/[0.08] px-4">
+        <div className="panel-glass px-4">
           <SettingRow label={t("settings.showOnline")} sub={t("settings.showOnlineSub")}>
             <Toggle checked={prefs.showOnline} onChange={(v) => patch("showOnline", v)} />
           </SettingRow>
@@ -273,7 +273,7 @@ export default function Settings() {
       </Section>
 
       <Section icon={Palette} title={t("settings.sectionAppearance")} sub={t("settings.sectionAppearanceSub")}>
-        <div className="border border-[var(--ink)]/[0.08] px-4">
+        <div className="panel-glass px-4">
           <SettingRow label={t("settings.theme")} sub={t("settings.themeSub")}>
             <RadioGroup<Theme>
               options={[
@@ -292,7 +292,7 @@ export default function Settings() {
       </Section>
 
       <Section icon={Globe} title={t("settings.sectionLang")} sub={t("settings.sectionLangSub")}>
-        <div className="border border-[var(--ink)]/[0.08] px-4">
+        <div className="panel-glass px-4">
           <SettingRow label={t("settings.uiLang")}>
             <RadioGroup<Lang>
               options={[
@@ -370,7 +370,7 @@ export default function Settings() {
             <button
               type="button"
               onClick={() => void logout()}
-              className="hit-40 relative flex items-center gap-1.5 border border-[var(--ink)]/10 px-4 py-2 font-mono text-label uppercase tracking-widest text-[var(--ink-body)] transition-colors hover:text-[var(--ink)]"
+              className="hit-40 relative flex items-center gap-1.5 panel-glass px-4 py-2 font-mono text-label uppercase tracking-widest text-[var(--ink-body)] transition-colors hover:text-[var(--ink)]"
             >
               <LogOut className="size-3" /> {t("common.logout")}
             </button>

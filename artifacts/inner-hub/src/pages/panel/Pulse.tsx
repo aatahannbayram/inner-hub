@@ -235,7 +235,7 @@ export default function Pulse() {
               {t("pulse.subtitle")}
             </p>
           </div>
-          <div className="flex shrink-0 items-center gap-2 border border-[var(--ink)]/15 bg-[var(--ink)]/[0.03] px-3 py-2">
+          <div className="flex shrink-0 items-center gap-2 panel-glass bg-[var(--ink)]/[0.03] px-3 py-2">
             <Radio className={`size-3 ${isSuccess ? "text-[var(--success-ink)]" : "text-[var(--ink-muted)]"}`} />
             <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
               {isSuccess ? t("pulse.live") : "…"}
@@ -248,7 +248,7 @@ export default function Pulse() {
         <LoadingBlock label={t("pulse.loading")}>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="h-20 animate-pulse border border-[var(--ink)]/[0.06] bg-[var(--ink)]/[0.03]" />
+              <div key={i} className="h-20 animate-pulse panel-glass" />
             ))}
           </div>
         </LoadingBlock>
@@ -262,7 +262,7 @@ export default function Pulse() {
 
       {/* Phosphor portrait — the community's pulse, rendered as a live signal */}
       <FadeIn delay={0.03}>
-        <div className="relative overflow-hidden border border-[var(--ink)]/[0.08]">
+        <div className="relative overflow-hidden panel-glass">
           <ProceduralPortrait
             src="/editorial/circle-portrait.jpg"
             config={PHOSPHOR_CONFIG}
@@ -300,7 +300,7 @@ export default function Pulse() {
               { label: t("pulse.statTrends"), value: trends.length, icon: TrendingUp, sub: t("pulse.statTrendsSub") },
               { label: t("pulse.statScore"), value: weeklyActivity, icon: ArrowUp, sub: t("pulse.statScoreSub") },
             ].map((s) => (
-              <div key={s.label} className="border border-[var(--ink)]/[0.08] p-4">
+              <div key={s.label} className="panel-glass p-4">
                 <div className="mb-2 flex items-center justify-between">
                   <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)]">{s.label}</p>
                   <s.icon className="size-3 text-[var(--ink-subtle)]" />
@@ -361,7 +361,7 @@ export default function Pulse() {
             {/* Right sidebar */}
             <div className="space-y-6">
               {/* Weekly activity */}
-              <section className="border border-[var(--ink)]/[0.08] p-4">
+              <section className="panel-glass p-4">
                 <p className="mb-4 text-sm uppercase tracking-widest text-[var(--ink-muted)]">
                   {t("pulse.weeklyActivity")}
                 </p>

@@ -64,7 +64,7 @@ function NewKeyReveal({ plaintext, onDone }: { plaintext: string; onDone: () => 
       <p className="mt-1 text-xs font-medium text-[var(--ink-muted)]">
         {t("api.keyCreatedHint")}
       </p>
-      <div className="mt-3 flex items-center gap-2 border border-[var(--ink)]/[0.08] bg-[var(--bone)] px-3 py-2.5">
+      <div className="mt-3 flex items-center gap-2 panel-glass px-3 py-2.5">
         <code className="flex-1 overflow-x-auto font-mono text-label font-medium text-[var(--ink-strong)] whitespace-nowrap">
           {plaintext}
         </code>
@@ -107,7 +107,7 @@ function ApiKeyRowView({ apiKey, onDeleted }: { apiKey: ApiKeyRow; onDeleted: ()
   };
 
   return (
-    <div className="flex items-center gap-3 border border-[var(--ink)]/[0.08] px-4 py-3">
+    <div className="flex items-center gap-3 panel-glass px-4 py-3">
       <KeyRound className="size-3.5 shrink-0 text-[var(--ink-subtle)]" />
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm text-[var(--ink)]">{apiKey.name}</p>
@@ -237,7 +237,7 @@ export default function InnerApi() {
     <div className="min-w-0 space-y-8 max-w-4xl overflow-x-hidden">
       {/* Hero banner */}
       <FadeIn>
-        <div className="relative overflow-hidden border border-[var(--ink)]/[0.08] bg-[var(--ink)] p-6 text-[var(--bone)] sm:p-8">
+        <div className="relative overflow-hidden panel-glass-ink p-6 text-[var(--bone)] sm:p-8">
           <AsciiField tone="dark" />
           <AmbientCardBackground />
           <div className="relative z-10 flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
@@ -257,7 +257,7 @@ export default function InnerApi() {
             </div>
             <a
               href="#"
-              className="flex shrink-0 items-center justify-center gap-1.5 border border-[var(--bone)]/25 px-3 py-2 font-mono text-label font-semibold uppercase tracking-widest text-[var(--bone)]/70 transition-all hover:border-[var(--bone)]/50 hover:text-[var(--bone)] sm:justify-start"
+              className="flex shrink-0 items-center justify-center gap-1.5 border border-[var(--bone-fixed)]/25 px-3 py-2 font-mono text-label font-semibold uppercase tracking-widest text-[var(--bone-fixed)]/70 transition-all hover:border-[var(--bone)]/50 hover:text-[var(--bone)] sm:justify-start"
             >
               <Code2 className="size-3" /> {t("api.docs")} <ArrowUpRight className="size-2.5" />
             </a>
@@ -282,7 +282,7 @@ export default function InnerApi() {
             {revealedKey && <NewKeyReveal plaintext={revealedKey} onDone={() => setRevealedKey(null)} />}
 
             {keys.length === 0 && !revealedKey && (
-              <p className="border border-[var(--ink)]/[0.08] px-4 py-3 text-sm text-[var(--ink-muted)]">
+              <p className="panel-glass px-4 py-3 text-sm text-[var(--ink-muted)]">
                 {t("api.empty")}
               </p>
             )}
@@ -306,7 +306,7 @@ export default function InnerApi() {
               <button
                 disabled={creating || !newKeyName.trim()}
                 onClick={() => void createKey()}
-                className="flex shrink-0 items-center gap-1.5 border border-[var(--ink)] bg-[var(--ink)] px-3 py-1.5 font-mono text-label font-semibold uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-80 disabled:opacity-40"
+                className="flex shrink-0 items-center gap-1.5 panel-glass-ink px-3 py-1.5 font-mono text-label font-semibold uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-80 disabled:opacity-40"
               >
                 <Plus className="size-3" /> {creating ? t("api.creating") : t("api.createKey")}
               </button>
@@ -329,7 +329,7 @@ export default function InnerApi() {
           {ENDPOINTS.map((ep) => (
             <div
               key={ep.path}
-              className="border border-[var(--ink)]/[0.06] px-4 py-3 transition-colors hover:border-[var(--ink)]/15"
+              className="panel-glass px-4 py-3 transition-colors hover:border-[var(--ink)]/15"
             >
               <div className="mb-1.5 flex flex-wrap items-center gap-2">
                 <span
@@ -435,7 +435,7 @@ export default function InnerApi() {
       </section>
 
       {/* Warning note */}
-      <div className="flex items-start gap-3 border border-[var(--ink)]/[0.08] p-4">
+      <div className="flex items-start gap-3 panel-glass p-4">
         <AlertCircle className="size-4 shrink-0 text-[var(--ink-muted)] mt-0.5" />
         <p className="text-sm leading-relaxed font-medium text-[var(--ink-body)]">
           {t("api.warning")}

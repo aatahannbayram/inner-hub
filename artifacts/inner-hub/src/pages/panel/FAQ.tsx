@@ -95,7 +95,7 @@ export default function FAQ() {
           </div>
 
           {active && (
-            <div className="border border-[var(--ink)]/[0.08] px-5">
+            <div className="panel-glass px-5">
               {active.items.map((item) => (
                 <AccordionItem key={item.question} q={item.question} a={item.answer} />
               ))}
@@ -104,7 +104,7 @@ export default function FAQ() {
         </>
       )}
 
-      <div className="border border-[var(--ink)]/[0.08] p-5">
+      <div className="panel-glass p-5">
         <p className="mb-1 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
           {t("faq.noAnswer")}
         </p>

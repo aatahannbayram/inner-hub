@@ -138,7 +138,7 @@ function Field({
   maxLength?: number;
 }) {
   const cls = [
-    "w-full border border-[var(--ink)]/[0.08] bg-transparent px-3 py-2.5 text-sm text-[var(--ink)] placeholder:text-[var(--ink-subtle)] outline-none transition-colors focus:border-[var(--ink)]/30",
+    "w-full panel-glass bg-transparent px-3 py-2.5 text-sm text-[var(--ink)] placeholder:text-[var(--ink-subtle)] outline-none transition-colors focus:border-[var(--ink)]/30",
     mono ? "font-mono text-caption" : "font-light",
   ].join(" ");
 
@@ -148,7 +148,7 @@ function Field({
         {label}
       </label>
       {prefix ? (
-        <div className="flex items-stretch border border-[var(--ink)]/[0.08] transition-colors focus-within:border-[var(--ink)]/30">
+        <div className="flex items-stretch panel-glass transition-colors focus-within:border-[var(--ink)]/30">
           <span className="flex items-center border-r border-[var(--ink)]/[0.08] bg-[var(--ink)]/[0.03] px-3 font-mono text-label font-medium text-[var(--ink-body)]">
             {prefix}
           </span>
@@ -208,7 +208,7 @@ function SkillEditor({ skills, onChange }: { skills: string[]; onChange: (s: str
         {skills.map((s) => (
           <span
             key={s}
-            className="flex items-center gap-1.5 border border-[var(--ink)]/10 px-2.5 py-1 font-mono text-label uppercase tracking-widest text-[var(--ink-body)]"
+            className="flex items-center gap-1.5 panel-glass px-2.5 py-1 font-mono text-label uppercase tracking-widest text-[var(--ink-body)]"
           >
             {s}
             <button

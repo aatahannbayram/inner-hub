@@ -169,12 +169,12 @@ function DocCard({ doc }: { doc: VaultDoc }) {
   };
 
   return (
-    <article className="group relative flex h-full flex-col overflow-hidden border border-[var(--ink)]/[0.1] bg-[var(--bone)] p-4 transition-colors hover:border-[var(--ink)]/28 sm:p-5">
+    <article className="group relative flex h-full flex-col overflow-hidden panel-glass p-4 transition-colors hover:border-[var(--ink)]/28 sm:p-5">
       <span aria-hidden className="absolute inset-y-0 left-0 w-[3px] bg-[var(--ink)]/15 transition-colors group-hover:bg-[var(--inner-green)]" />
 
       <div className="mb-3 flex items-start justify-between gap-3 pl-1">
         <div className="flex min-w-0 items-start gap-3">
-          <div className="mt-0.5 flex size-9 shrink-0 items-center justify-center border border-[var(--ink)]/[0.1] bg-[var(--ink)]/[0.03]">
+          <div className="mt-0.5 flex size-9 shrink-0 items-center justify-center panel-glass bg-[var(--ink)]/[0.03]">
             <TypeIcon className="size-3.5 text-[var(--ink-muted)]" />
           </div>
           <div className="min-w-0">
@@ -202,7 +202,7 @@ function DocCard({ doc }: { doc: VaultDoc }) {
       ) : null}
 
       {doc.hasFile && (
-        <div className="mb-3 ml-1 flex items-center gap-2 border border-[var(--ink)]/[0.08] bg-[var(--ink)]/[0.02] px-2.5 py-2">
+        <div className="mb-3 ml-1 flex items-center gap-2 panel-glass bg-[var(--ink)]/[0.02] px-2.5 py-2">
           <Paperclip className="size-3 shrink-0 text-[var(--ink-muted)]" />
           <span className="min-w-0 truncate font-mono text-[10px] text-[var(--ink)]">
             {doc.fileName || t("vault.file")}
@@ -220,7 +220,7 @@ function DocCard({ doc }: { doc: VaultDoc }) {
           {tags.map((t) => (
             <span
               key={t}
-              className="border border-[var(--ink)]/10 px-1.5 py-0.5 font-mono text-[9px] text-[var(--ink-muted)]"
+              className="panel-glass px-1.5 py-0.5 font-mono text-[9px] text-[var(--ink-muted)]"
             >
               {t}
             </span>
@@ -330,7 +330,7 @@ function UploadPrompt({
 
   return (
     <Drawer open={open} onOpenChange={(v) => !v && onClose()} shouldScaleBackground={false}>
-      <DrawerContent className="rounded-none border-[var(--ink)]/15 bg-[var(--bone)]">
+      <DrawerContent className="rounded-none panel-glass-strong border-white/10">
         <DrawerHeader className="px-6 pt-2 text-left">
           <p className="mb-1 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]"><span lang="en">inner·vault</span></p>
           <DrawerTitle
@@ -349,14 +349,14 @@ function UploadPrompt({
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder={t("vault.phTitle")}
-            className="w-full border border-[var(--ink)]/[0.08] bg-transparent px-3 py-2.5 text-sm outline-none focus:border-[var(--ink)]/30"
+            className="w-full panel-glass bg-transparent px-3 py-2.5 text-sm outline-none focus:border-[var(--ink)]/30"
           />
           <textarea
             value={excerpt}
             onChange={(e) => setExcerpt(e.target.value)}
             placeholder={t("vault.phExcerpt")}
             rows={3}
-            className="w-full resize-none border border-[var(--ink)]/[0.08] bg-transparent px-3 py-2.5 text-sm outline-none focus:border-[var(--ink)]/30"
+            className="w-full resize-none panel-glass bg-transparent px-3 py-2.5 text-sm outline-none focus:border-[var(--ink)]/30"
           />
           <label className="flex cursor-pointer flex-col gap-1 border border-dashed border-[var(--ink)]/20 px-3 py-3 transition-colors hover:border-[var(--ink)]/40">
             <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
@@ -421,7 +421,7 @@ function UploadPrompt({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 min-h-11 border border-[var(--ink)]/15 py-2.5 font-mono text-label uppercase tracking-widest text-[var(--ink-body)] transition-all hover:border-[var(--ink)]/30 hover:text-[var(--ink)]"
+              className="flex-1 min-h-11 panel-glass py-2.5 font-mono text-label uppercase tracking-widest text-[var(--ink-body)] transition-all hover:border-[var(--ink)]/30 hover:text-[var(--ink)]"
             >
               {t("common.cancel")}
             </button>
@@ -429,7 +429,7 @@ function UploadPrompt({
               type="button"
               disabled={busy || !title.trim()}
               onClick={() => void submit()}
-              className="flex flex-1 min-h-11 items-center justify-between border border-[var(--ink)]/15 bg-[var(--ink)] px-4 py-2.5 font-mono text-label uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-80 disabled:opacity-40"
+              className="flex flex-1 min-h-11 items-center justify-between border border-[var(--ink)] bg-[var(--ink)] px-4 py-2.5 font-mono text-label uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-80 disabled:opacity-40"
             >
               <span>{busy ? t("common.saving") : t("vault.save")}</span>
               <ChevronRight className="size-3" />
@@ -480,7 +480,7 @@ export default function Vault() {
               {t("vault.eyebrow")}
             </p>
             <h1
-              className="font-display font-serif text-4xl text-[var(--ink)] md:text-5xl"
+              className="font-display font-serif text-3xl text-[var(--ink)] sm:text-4xl md:text-5xl"
               style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 300 }}
             >
               <Lockup suffix="vault" className="text-[var(--ink)]" />
@@ -510,7 +510,7 @@ export default function Vault() {
 
       {/* D60-hero portrait — topographic contour rendering of the archive's depth */}
       <FadeIn delay={0.03}>
-        <div className="relative overflow-hidden border border-[var(--ink)]/[0.08] bg-[var(--bone)]">
+        <div className="relative overflow-hidden panel-glass">
           <ProceduralPortrait
             src="/editorial/circle-portrait.jpg"
             config={D60_HERO_CONFIG}
@@ -534,7 +534,7 @@ export default function Vault() {
           { label: t("vault.statMine"), value: myDocs },
           { label: t("vault.statViews"), value: totalViews },
         ].map((s) => (
-          <div key={s.label} className="border border-[var(--ink)]/[0.1] p-3 sm:p-4">
+          <div key={s.label} className="panel-glass p-3 sm:p-4">
             <p className="font-mono text-[9px] uppercase tracking-[0.14em] text-[var(--ink-muted)] sm:text-[10px]">
               {s.label}
             </p>
@@ -615,7 +615,7 @@ export default function Vault() {
             placeholder={t("vault.searchPlaceholder")}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="w-full border border-[var(--ink)]/[0.1] bg-transparent py-3 pl-9 pr-4 text-sm font-light text-[var(--ink)] outline-none transition-colors placeholder:text-[var(--ink-subtle)] focus:border-[var(--ink)]/30"
+            className="w-full panel-glass bg-transparent py-3 pl-9 pr-4 text-sm font-light text-[var(--ink)] outline-none transition-colors placeholder:text-[var(--ink-subtle)] focus:border-[var(--ink)]/30"
           />
         </div>
         <div className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">

@@ -7541,19 +7541,19 @@ const MARQUEE_MODULES = MODULES.map((m) => ({
 }));
 function MarqueeStrip() {
   const loop = [...MARQUEE_MODULES, ...MARQUEE_MODULES, ...MARQUEE_MODULES];
-  return /* @__PURE__ */ jsxs("div", { className: "relative z-10 overflow-hidden bg-[var(--ink)] py-3 sm:py-4", children: [
+  return /* @__PURE__ */ jsxs("div", { className: "relative z-10 overflow-hidden bg-[var(--ink-fixed)] py-3 sm:py-4", children: [
     /* @__PURE__ */ jsx(
       "div",
       {
         "aria-hidden": true,
-        className: "pointer-events-none absolute inset-y-0 left-0 z-10 w-12 bg-gradient-to-r from-[var(--ink)] to-transparent sm:w-20"
+        className: "pointer-events-none absolute inset-y-0 left-0 z-10 w-12 bg-gradient-to-r from-[var(--ink-fixed)] to-transparent sm:w-20"
       }
     ),
     /* @__PURE__ */ jsx(
       "div",
       {
         "aria-hidden": true,
-        className: "pointer-events-none absolute inset-y-0 right-0 z-10 w-12 bg-gradient-to-l from-[var(--ink)] to-transparent sm:w-20"
+        className: "pointer-events-none absolute inset-y-0 right-0 z-10 w-12 bg-gradient-to-l from-[var(--ink-fixed)] to-transparent sm:w-20"
       }
     ),
     /* @__PURE__ */ jsx("div", { className: "relative mx-auto max-w-[100vw] overflow-hidden border-y border-white/10 bg-[var(--bone)] py-3.5 sm:py-4", children: /* @__PURE__ */ jsx(
@@ -7609,8 +7609,8 @@ function ScrollProgress() {
 }
 function StatItem({ n, label, suffix = "" }) {
   return /* @__PURE__ */ jsxs("div", { className: "flex flex-col items-start", children: [
-    /* @__PURE__ */ jsx("span", { className: "font-display font-serif italic text-4xl leading-none mb-2 text-[var(--bone)] sm:mb-3 sm:text-5xl md:text-7xl", children: /* @__PURE__ */ jsx(Counter, { to: n, suffix }) }),
-    /* @__PURE__ */ jsx("span", { className: "font-mono text-[9px] uppercase tracking-widest opacity-40 text-[var(--bone)] sm:text-label", children: label })
+    /* @__PURE__ */ jsx("span", { className: "font-display font-serif italic text-4xl leading-none mb-2 text-[var(--bone-fixed)] sm:mb-3 sm:text-5xl md:text-7xl", children: /* @__PURE__ */ jsx(Counter, { to: n, suffix }) }),
+    /* @__PURE__ */ jsx("span", { className: "font-mono text-[9px] uppercase tracking-widest opacity-40 text-[var(--bone-fixed)] sm:text-label", children: label })
   ] });
 }
 function Home() {
@@ -7653,14 +7653,14 @@ function Home() {
             WordsPullUp,
             {
               text: "Big things start here.",
-              className: "font-display font-serif italic text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-[var(--bone)] max-w-3xl mb-8 sm:mb-10 text-balance"
+              className: "font-display font-serif italic text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-[var(--bone-fixed)] max-w-3xl mb-8 sm:mb-10 text-balance"
             }
           ),
           /* @__PURE__ */ jsx(
             ScrollTextReveal,
             {
               text: "New ideas are discussed here, tested here, and supported here by people who can actually build them and fund them.",
-              className: "max-w-[46ch] text-[var(--bone)]",
+              className: "max-w-[46ch] text-[var(--bone-fixed)]",
               style: { fontSize: "clamp(17px, 2.4vw, 26px)", lineHeight: 1.55, opacity: 0.85 }
             }
           )
@@ -7674,17 +7674,17 @@ function Home() {
             WordsPullUp,
             {
               text: "Entry is by invitation. Always.",
-              className: "font-display font-serif italic text-3xl sm:text-4xl md:text-5xl max-w-2xl mb-6 sm:mb-8 text-balance text-[var(--bone)]"
+              className: "font-display font-serif italic text-3xl sm:text-4xl md:text-5xl max-w-2xl mb-6 sm:mb-8 text-balance text-[var(--bone-fixed)]"
             }
           ),
-          /* @__PURE__ */ jsx(FadeIn, { delay: 0.2, children: /* @__PURE__ */ jsx("p", { className: "mb-12 max-w-[65ch] text-base leading-[1.7] text-[var(--bone)]/80 sm:mb-20 sm:text-lg", children: "There are no tickets, no tiers, and no public list. Members are put forward from inside the circle, considered with care, and invited personally." }) }),
+          /* @__PURE__ */ jsx(FadeIn, { delay: 0.2, children: /* @__PURE__ */ jsx("p", { className: "mb-12 max-w-[65ch] text-base leading-[1.7] text-[var(--bone-fixed)]/80 sm:mb-20 sm:text-lg", children: "There are no tickets, no tiers, and no public list. Members are put forward from inside the circle, considered with care, and invited personally." }) }),
           /* @__PURE__ */ jsx("div", { className: "max-w-3xl", children: [
             { label: "Your name", line: "Someone inside the circle puts your name forward." },
             { label: "Consideration", line: "We take our time. Fit beats fame." },
             { label: "Invitation", line: "If it is right, you hear from us directly." }
           ].map((item, i) => /* @__PURE__ */ jsx(FadeIn, { delay: i * 0.1, children: /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-2 border-t border-white/15 py-5 last:border-b md:flex-row md:items-baseline md:gap-12 md:py-6", children: [
             /* @__PURE__ */ jsx("div", { className: "w-full flex-shrink-0 font-mono text-[10px] uppercase tracking-widest text-white/50 sm:text-xs md:w-48", children: item.label }),
-            /* @__PURE__ */ jsx("p", { className: "text-base text-[var(--bone)]/90 sm:text-lg", children: item.line })
+            /* @__PURE__ */ jsx("p", { className: "text-base text-[var(--bone-fixed)]/90 sm:text-lg", children: item.line })
           ] }) }, item.label)) })
         ] })
       ] }),
@@ -7692,7 +7692,7 @@ function Home() {
         "section",
         {
           id: "section-06",
-          className: "relative overflow-hidden border-t border-border/15 bg-[var(--ink)] px-4 py-20 text-[var(--bone)] transition-colors duration-700 sm:px-6 sm:py-32 md:px-12 md:py-48 lg:px-[10%]",
+          className: "relative overflow-hidden border-t border-border/15 bg-[var(--ink-fixed)] px-4 py-20 text-[var(--bone-fixed)] transition-colors duration-700 sm:px-6 sm:py-32 md:px-12 md:py-48 lg:px-[10%]",
           children: [
             /* @__PURE__ */ jsx("div", { className: "pointer-events-none absolute -right-24 top-0 size-[520px] bg-[var(--inner-green)]/[0.04] blur-3xl" }),
             /* @__PURE__ */ jsx("div", { className: "pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-black/40 to-transparent" }),
@@ -7721,7 +7721,7 @@ function Home() {
                 "a",
                 {
                   href: "#section-07",
-                  className: "group inline-flex min-h-11 items-center justify-center gap-2 border border-white/25 px-5 py-3 font-mono text-xs uppercase tracking-widest text-[var(--bone)] transition-colors hover:border-white/60 hover:bg-white hover:text-black sm:min-h-0 sm:justify-start",
+                  className: "group inline-flex min-h-11 items-center justify-center gap-2 border border-white/25 px-5 py-3 font-mono text-xs uppercase tracking-widest text-[var(--bone-fixed)] transition-colors hover:border-white/60 hover:bg-white hover:text-black sm:min-h-0 sm:justify-start",
                   children: [
                     "What's next",
                     /* @__PURE__ */ jsx(ArrowUpRight, { className: "size-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" })
@@ -7738,18 +7738,18 @@ function Home() {
       "footer",
       {
         id: "site-footer",
-        className: "relative overflow-hidden border-t border-white/10 bg-[var(--ink)] px-4 pb-8 pt-12 text-[var(--bone)] sm:px-6 sm:pt-16 md:px-12 md:pt-20 lg:px-[10%]",
+        className: "relative overflow-hidden border-t border-white/10 bg-[var(--ink-fixed)] px-4 pb-8 pt-12 text-[var(--bone-fixed)] sm:px-6 sm:pt-16 md:px-12 md:pt-20 lg:px-[10%]",
         children: [
           /* @__PURE__ */ jsx("div", { className: "pointer-events-none absolute -left-20 top-10 size-72 bg-[var(--inner-green)]/[0.05] blur-3xl" }),
           /* @__PURE__ */ jsxs("div", { className: "relative z-10 grid gap-12 lg:grid-cols-[1.2fr_1fr_1fr]", children: [
             /* @__PURE__ */ jsxs("div", { className: "space-y-5", children: [
-              /* @__PURE__ */ jsx(Lockup, { className: "text-[var(--bone)]", fontSize: "clamp(28px, 4vw, 36px)" }),
-              /* @__PURE__ */ jsx("p", { className: "max-w-[36ch] text-sm font-light leading-relaxed text-[var(--bone)]/70", children: t("home.footerTagline") }),
+              /* @__PURE__ */ jsx(Lockup, { className: "text-[var(--bone-fixed)]", fontSize: "clamp(28px, 4vw, 36px)" }),
+              /* @__PURE__ */ jsx("p", { className: "max-w-[36ch] text-sm font-light leading-relaxed text-[var(--bone-fixed)]/70", children: t("home.footerTagline") }),
               /* @__PURE__ */ jsxs(
                 "a",
                 {
                   href: "mailto:destek@inner.digital",
-                  className: "inline-flex items-center gap-2 font-mono text-label uppercase tracking-widest text-[var(--bone)]/55 transition-colors hover:text-[var(--bone)]",
+                  className: "inline-flex items-center gap-2 font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)]/55 transition-colors hover:text-[var(--bone-fixed)]",
                   children: [
                     /* @__PURE__ */ jsx(Mail, { className: "size-3.5" }),
                     "destek@inner.digital"
@@ -7758,7 +7758,7 @@ function Home() {
               )
             ] }),
             /* @__PURE__ */ jsxs("div", { children: [
-              /* @__PURE__ */ jsx("p", { className: "mb-4 font-mono text-label uppercase tracking-widest text-[var(--bone)]/40", children: t("home.footerNavigate") }),
+              /* @__PURE__ */ jsx("p", { className: "mb-4 font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)]/40", children: t("home.footerNavigate") }),
               /* @__PURE__ */ jsx("ul", { className: "space-y-2.5", children: [
                 { label: t("publicNav.platform"), href: "#section-03" },
                 { label: t("publicNav.gathering"), href: "#section-06" },
@@ -7769,13 +7769,13 @@ function Home() {
                 "a",
                 {
                   href: l.href,
-                  className: "font-mono text-caption uppercase tracking-widest text-[var(--bone)]/65 transition-colors hover:text-[var(--bone)]",
+                  className: "font-mono text-caption uppercase tracking-widest text-[var(--bone-fixed)]/65 transition-colors hover:text-[var(--bone-fixed)]",
                   children: l.label
                 }
               ) }, l.href)) })
             ] }),
             /* @__PURE__ */ jsxs("div", { children: [
-              /* @__PURE__ */ jsx("p", { className: "mb-4 font-mono text-label uppercase tracking-widest text-[var(--bone)]/40", children: t("home.footerConnect") }),
+              /* @__PURE__ */ jsx("p", { className: "mb-4 font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)]/40", children: t("home.footerConnect") }),
               /* @__PURE__ */ jsxs("div", { className: "mb-6 flex items-center gap-4", children: [
                 /* @__PURE__ */ jsx(
                   "a",
@@ -7784,7 +7784,7 @@ function Home() {
                     target: "_blank",
                     rel: "noopener noreferrer",
                     "aria-label": "inner on LinkedIn",
-                    className: "border border-white/15 p-2.5 text-[var(--bone)]/60 transition-colors hover:border-white/35 hover:text-[var(--bone)]",
+                    className: "border border-white/15 p-2.5 text-[var(--bone-fixed)]/60 transition-colors hover:border-white/35 hover:text-[var(--bone-fixed)]",
                     children: /* @__PURE__ */ jsx(Linkedin, { size: 18, strokeWidth: 1.5 })
                   }
                 ),
@@ -7795,17 +7795,17 @@ function Home() {
                     target: "_blank",
                     rel: "noopener noreferrer",
                     "aria-label": "inner on Instagram",
-                    className: "border border-white/15 p-2.5 text-[var(--bone)]/60 transition-colors hover:border-white/35 hover:text-[var(--bone)]",
+                    className: "border border-white/15 p-2.5 text-[var(--bone-fixed)]/60 transition-colors hover:border-white/35 hover:text-[var(--bone-fixed)]",
                     children: /* @__PURE__ */ jsx(Instagram, { size: 18, strokeWidth: 1.5 })
                   }
                 )
               ] }),
-              /* @__PURE__ */ jsx("p", { className: "font-mono text-label uppercase tracking-widest text-[var(--bone)]/35", children: "İstanbul → Global" })
+              /* @__PURE__ */ jsx("p", { className: "font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)]/35", children: "İstanbul → Global" })
             ] })
           ] }),
           /* @__PURE__ */ jsxs("div", { className: "relative z-10 mt-14 flex flex-col gap-6 border-t border-white/10 pt-6 md:flex-row md:items-end md:justify-between", children: [
-            /* @__PURE__ */ jsx("p", { className: "font-mono text-label uppercase tracking-widest text-[var(--bone)]/35", children: "© 2026 inner hub · All rights reserved" }),
-            /* @__PURE__ */ jsx("div", { className: "leading-none text-[var(--bone)]", "aria-hidden": "true", children: /* @__PURE__ */ jsx(Lockup, { fontSize: "clamp(2.75rem, 10vw, 7.5rem)" }) })
+            /* @__PURE__ */ jsx("p", { className: "font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)]/35", children: "© 2026 inner hub · All rights reserved" }),
+            /* @__PURE__ */ jsx("div", { className: "leading-none text-[var(--bone-fixed)]", "aria-hidden": "true", children: /* @__PURE__ */ jsx(Lockup, { fontSize: "clamp(2.75rem, 10vw, 7.5rem)" }) })
           ] }),
           /* @__PURE__ */ jsx("span", { className: "sr-only", children: "inner hub" })
         ]

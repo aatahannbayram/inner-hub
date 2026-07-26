@@ -63,7 +63,7 @@ interface TalentPost {
 function MemberCard({ member, onSelect }: { member: Member; onSelect: (m: Member) => void }) {
   return (
     <div
-      className="group flex flex-col overflow-hidden border border-[var(--ink)]/[0.08] transition-all duration-200 hover:border-[var(--ink)]/20 cursor-pointer"
+      className="group flex flex-col overflow-hidden panel-glass transition-all duration-200 hover:border-white/20 cursor-pointer dark:hover:border-white/20"
       onClick={() => onSelect(member)}
     >
       <div className="relative aspect-square w-full overflow-hidden bg-[var(--ink)]/[0.04]">
@@ -98,7 +98,7 @@ function MemberCard({ member, onSelect }: { member: Member; onSelect: (m: Member
             {member.tags.slice(0, 3).map((tag) => (
               <span
                 key={tag}
-                className="border border-[var(--ink)]/10 px-1.5 py-0.5 font-mono text-label uppercase tracking-wide text-[var(--ink-body)]"
+                className="panel-glass px-1.5 py-0.5 font-mono text-label uppercase tracking-wide text-[var(--ink-body)]"
               >
                 {tag}
               </span>
@@ -128,7 +128,7 @@ function MemberDetailPanel({ member, onClose }: { member: Member; onClose: () =>
   return (
     <>
       <div className="fixed inset-0 z-40 bg-[var(--ink)]/40" onClick={onClose} aria-hidden />
-      <div className="fixed inset-y-0 right-0 z-50 flex w-full max-w-md flex-col border-l border-[var(--ink)]/15 bg-[var(--bone)] shadow-none">
+      <div className="panel-glass-strong fixed inset-y-0 right-0 z-50 flex w-full max-w-md flex-col border-l border-[var(--ink)]/15 shadow-none">
         <div className="flex items-start justify-between border-b border-[var(--ink)]/[0.08] p-5">
           <div className="flex items-start gap-3">
             <PersonAvatar name={member.name} initials={member.initials} className="size-12 text-sm" />
@@ -149,7 +149,7 @@ function MemberDetailPanel({ member, onClose }: { member: Member; onClose: () =>
           <button
             type="button"
             onClick={onClose}
-            className="border border-[var(--ink)]/10 p-2 text-[var(--ink-muted)] hover:text-[var(--ink)]"
+            className="panel-glass p-2 text-[var(--ink-muted)] hover:text-[var(--ink)]"
             aria-label={t("common.close")}
           >
             <X className="size-4" />
@@ -167,7 +167,7 @@ function MemberDetailPanel({ member, onClose }: { member: Member; onClose: () =>
                 {member.tags.map((tag) => (
                   <span
                     key={tag}
-                    className="border border-[var(--ink)]/10 px-2 py-1 font-mono text-label uppercase tracking-wide text-[var(--ink-body)]"
+                    className="panel-glass px-2 py-1 font-mono text-label uppercase tracking-wide text-[var(--ink-body)]"
                   >
                     {tag}
                   </span>
@@ -269,7 +269,7 @@ function MembersHero({
                 <button
                   type="button"
                   onClick={onTalentClick}
-                  className="liquid-glass group inline-flex min-h-11 items-center gap-2 border border-[var(--bone)]/25 px-6 py-3 font-mono text-sm uppercase tracking-widest text-[var(--bone)] transition-colors hover:bg-[var(--bone)] hover:text-[var(--ink)] sm:px-8"
+                  className="liquid-glass group inline-flex min-h-11 items-center gap-2 border border-[var(--bone-fixed)]/25 px-6 py-3 font-mono text-sm uppercase tracking-widest text-[var(--bone-fixed)] transition-colors hover:bg-[var(--bone-fixed)] hover:text-[var(--ink-fixed)] sm:px-8"
                 >
                   {t("members.talentBoard")}
                   <ArrowRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
@@ -303,18 +303,18 @@ function MembersStat({
   icon: React.ComponentType<{ className?: string }>;
 }) {
   return (
-    <div className="border border-[var(--ink)]/[0.08] p-4">
+    <div className="panel-glass p-4">
       <div className="mb-2 flex items-center justify-between">
-        <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">{label}</p>
-        <Icon className="size-3.5 text-[var(--ink-subtle)]" />
+        <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)] dark:text-white/45">{label}</p>
+        <Icon className="size-3.5 text-[var(--ink-subtle)] dark:text-white/35" />
       </div>
       <p
-        className="font-serif text-2xl text-[var(--ink)]"
+        className="font-serif text-2xl text-[var(--ink)] dark:text-[#F4F1EC]"
         style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
       >
         {value}
       </p>
-      <p className="mt-1 font-mono text-label text-[var(--ink-muted)]">{sub}</p>
+      <p className="mt-1 font-mono text-label text-[var(--ink-muted)] dark:text-white/40">{sub}</p>
     </div>
   );
 }
@@ -350,7 +350,7 @@ function TalentCard({
   };
 
   return (
-    <div className="border border-[var(--ink)]/[0.08] p-4 sm:p-5 transition-all duration-200 hover:border-[var(--ink)]/20">
+    <div className="panel-glass p-4 sm:p-5 transition-all duration-200 hover:border-white/20">
       <div className="mb-3 flex items-start justify-between gap-3">
         <div className="flex min-w-0 items-center gap-2.5">
           <PersonAvatar name={post.postedBy} initials={post.postedByInitials} className="size-8 shrink-0 text-label" />
@@ -385,7 +385,7 @@ function TalentCard({
         {post.tags.slice(0, 3).map((tag) => (
           <span
             key={tag}
-            className="border border-[var(--ink)]/10 px-1.5 py-0.5 font-mono text-label uppercase tracking-wide text-[var(--ink-body)]"
+            className="panel-glass px-1.5 py-0.5 font-mono text-label uppercase tracking-wide text-[var(--ink-body)]"
           >
             {tag}
           </span>
@@ -400,7 +400,7 @@ function TalentCard({
               type="button"
               onClick={() => void remove()}
               disabled={busy}
-              className="border border-[var(--ink)]/10 p-1.5 text-[var(--ink-muted)] hover:text-[var(--error-ink)] disabled:opacity-40"
+              className="panel-glass p-1.5 text-[var(--ink-muted)] hover:text-[var(--error-ink)] disabled:opacity-40"
               aria-label={t("members.deletePost")}
             >
               <Trash2 className="size-3" />
@@ -409,7 +409,7 @@ function TalentCard({
           {post.postedByHandle ? (
             <a
               href={`/u/${post.postedByHandle}`}
-              className="flex items-center gap-1.5 border border-[var(--ink)] bg-[var(--ink)] px-3 py-1.5 font-mono text-label uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-80"
+              className="flex items-center gap-1.5 panel-glass-ink px-3 py-1.5 font-mono text-label uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-80"
             >
               {t("members.profile")} <ArrowRight className="size-2.5" />
             </a>
@@ -473,7 +473,7 @@ function TalentCompose({
 
   return (
     <Drawer open={open} onOpenChange={(v) => !v && onClose()} shouldScaleBackground={false}>
-      <DrawerContent className="rounded-none border-[var(--ink)]/15 bg-[var(--bone)]">
+      <DrawerContent className="rounded-none panel-glass-strong border-white/10">
         <DrawerHeader className="px-6 pt-2 text-left">
           <p className="mb-1 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
             Talent Board
@@ -510,20 +510,20 @@ function TalentCompose({
             value={role}
             onChange={(e) => setRole(e.target.value)}
             placeholder={t("members.phRole")}
-            className="w-full border border-[var(--ink)]/[0.08] bg-transparent px-3 py-2.5 text-sm outline-none focus:border-[var(--ink)]/30"
+            className="w-full panel-glass bg-transparent px-3 py-2.5 text-sm outline-none focus:border-[var(--ink)]/30"
           />
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder={t("members.phDesc")}
             rows={4}
-            className="w-full resize-none border border-[var(--ink)]/[0.08] bg-transparent px-3 py-2.5 text-sm outline-none focus:border-[var(--ink)]/30"
+            className="w-full resize-none panel-glass bg-transparent px-3 py-2.5 text-sm outline-none focus:border-[var(--ink)]/30"
           />
           <input
             value={tagsRaw}
             onChange={(e) => setTagsRaw(e.target.value)}
             placeholder={t("members.phTags")}
-            className="w-full border border-[var(--ink)]/[0.08] bg-transparent px-3 py-2.5 text-sm outline-none focus:border-[var(--ink)]/30"
+            className="w-full panel-glass bg-transparent px-3 py-2.5 text-sm outline-none focus:border-[var(--ink)]/30"
           />
           {error && (
             <p className="font-mono text-label text-[var(--error-ink)]" role="alert">
@@ -534,7 +534,7 @@ function TalentCompose({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 border border-[var(--ink)]/15 py-2.5 font-mono text-label uppercase tracking-widest text-[var(--ink-body)]"
+              className="flex-1 panel-glass py-2.5 font-mono text-label uppercase tracking-widest text-[var(--ink-body)]"
             >
               {t("common.cancel")}
             </button>
@@ -542,7 +542,7 @@ function TalentCompose({
               type="button"
               disabled={busy || !role.trim() || !description.trim()}
               onClick={() => void submit()}
-              className="flex-1 border border-[var(--ink)] bg-[var(--ink)] py-2.5 font-mono text-label uppercase tracking-widest text-[var(--bone)] disabled:opacity-40"
+              className="flex-1 panel-glass-ink py-2.5 font-mono text-label uppercase tracking-widest text-[var(--bone)] disabled:opacity-40"
             >
               {busy ? t("common.saving") : t("members.publish")}
             </button>
@@ -650,15 +650,15 @@ export default function Members() {
 
           <FadeIn delay={0.04}>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex border border-[var(--ink)]/15">
+              <div className="flex panel-glass overflow-hidden">
                 <button
                   type="button"
                   onClick={() => setTab("uyeler")}
                   className={cn(
                     "px-5 py-2 font-mono text-label uppercase tracking-widest transition-colors",
                     tab === "uyeler"
-                      ? "bg-[var(--ink)] text-[var(--bone)]"
-                      : "text-[var(--ink-body)] hover:text-[var(--ink)]",
+                      ? "bg-[var(--ink)] text-[var(--bone)] dark:bg-white/[0.12] dark:text-[#F4F1EC]"
+                      : "text-[var(--ink-body)] hover:text-[var(--ink)] dark:text-white/50 dark:hover:text-white",
                   )}
                 >
                   {t("members.tabMembers")}
@@ -669,8 +669,8 @@ export default function Members() {
                   className={cn(
                     "flex items-center gap-1.5 px-5 py-2 font-mono text-label uppercase tracking-widest transition-colors",
                     tab === "talent"
-                      ? "bg-[var(--ink)] text-[var(--bone)]"
-                      : "text-[var(--ink-body)] hover:text-[var(--ink)]",
+                      ? "bg-[var(--ink)] text-[var(--bone)] dark:bg-white/[0.12] dark:text-[#F4F1EC]"
+                      : "text-[var(--ink-body)] hover:text-[var(--ink)] dark:text-white/50 dark:hover:text-white",
                   )}
                 >
                   {t("members.talentBoard")}
@@ -678,13 +678,13 @@ export default function Members() {
               </div>
 
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-[var(--ink-muted)]" />
+                <Search className="absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-[var(--ink-muted)] dark:text-white/40" />
                 <input
                   type="text"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder={tab === "uyeler" ? t("members.searchPlaceholder") : t("members.searchTalent")}
-                  className="border border-[var(--ink)]/15 bg-transparent py-2 pl-9 pr-4 font-mono text-caption text-[var(--ink)] placeholder:text-[var(--ink-muted)] focus:border-[var(--ink)]/40 focus:outline-none transition-colors"
+                  className="panel-glass py-2 pl-9 pr-4 font-mono text-caption text-[var(--ink)] placeholder:text-[var(--ink-muted)] focus:border-white/25 focus:outline-none transition-colors dark:text-[#F4F1EC] dark:placeholder:text-white/35"
                 />
               </div>
             </div>
@@ -724,7 +724,7 @@ export default function Members() {
                   <button
                     type="button"
                     onClick={() => setComposeOpen(true)}
-                    className="flex items-center gap-1.5 border border-[var(--ink)] bg-[var(--ink)] px-4 py-2 font-mono text-label uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-80"
+                    className="flex items-center gap-1.5 panel-glass-ink px-4 py-2 font-mono text-label uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-80"
                   >
                     <Tag className="size-3" /> {t("members.postCta")}
                   </button>

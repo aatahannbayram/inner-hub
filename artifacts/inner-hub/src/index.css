@@ -99,6 +99,7 @@
      yüzeyler için — tema değişse de sabit kalır. Panel dark mode'da
      --ink kendisi tersine döner (aşağıya bkz), bu token dönmez. */
   --ink-fixed: #0A0A0A;
+  --bone-fixed: #F4F1EC;
 
   --background: 39 31% 94%;
   --foreground: 0 0% 4%;
@@ -148,6 +149,11 @@
   --success-ink: #0B6B3A; /*  5.86:1 — inner-green'in metin/ikon karşılığı (bone üstünde) */
   --error-ink:   #9C3F26; /*  5.91:1 — error'ın metin karşılığı (bone üstünde) */
 
+  /* Light glass (hafif) */
+  --panel-glass: color-mix(in srgb, var(--bone) 82%, transparent);
+  --panel-glass-border: color-mix(in srgb, var(--ink) 10%, transparent);
+  --panel-glass-highlight: rgba(255, 255, 255, 0.35);
+
   /* 4px tabanlı dikey ritim */
   --space-stack-xs: 4px;
   --space-stack-sm: 8px;
@@ -158,53 +164,54 @@
 }
 
 .dark {
+  /* Footer / invite dili: ink-fixed (#0A0A0A) zemin, bone metin */
   --background: 0 0% 4%;
   --foreground: 39 31% 94%;
   
-  --card: 0 0% 4%;
+  --card: 0 0% 6%;
   --card-foreground: 39 31% 94%;
-  --card-border: 0 0% 20%;
+  --card-border: 0 0% 18%;
   
-  --popover: 0 0% 4%;
+  --popover: 0 0% 6%;
   --popover-foreground: 39 31% 94%;
-  --popover-border: 0 0% 20%;
+  --popover-border: 0 0% 18%;
   
   --primary: 39 31% 94%;
   --primary-foreground: 0 0% 4%;
   
-  --secondary: 0 0% 15%;
+  --secondary: 0 0% 10%;
   --secondary-foreground: 39 31% 94%;
   
-  --muted: 0 0% 15%;
-  --muted-foreground: 39 20% 70%;
+  --muted: 0 0% 10%;
+  --muted-foreground: 39 12% 68%;
   
-  --accent: 0 0% 15%;
+  --accent: 0 0% 10%;
   --accent-foreground: 39 31% 94%;
   
   --destructive: 0 62.8% 30.6%;
   --destructive-foreground: 0 0% 98%;
 
-  --border: 0 0% 20%;
-  --input: 0 0% 20%;
+  --border: 0 0% 18%;
+  --input: 0 0% 18%;
   --ring: 39 31% 94%;
 
-  /* Panel'in gerçek renk sistemi (--ink/--bone semantic ladder) burada
-     ters çevrilir. --ink-fixed dışındaki her şey dark'ta rol değiştirir:
-     --bone artık koyu zemin, --ink-strong vd. artık açık metin.
-     Kontrast oranları light moddaki aynı metodoloji ile hesaplandı
-     (#0A0A0A zemine karşı), aynı erişilebilirlik seviyesini korur. */
+  /* Semantic flip: zemin = footer ink-fixed, metin = bone-fixed */
   --ink: #F4F1EC;
   --bone: #0A0A0A;
 
-  --ink-strong:  #F4F1EC; /* 17.9:1 */
-  --ink-body:    #B8B5AF; /* 10.2:1 */
-  --ink-muted:   #8C8A85; /*  6.4:1 */
-  --ink-subtle:  #7C7A75; /*  4.7:1 */
-  --ink-faint:   #716F6A; /*  4.0:1 ✗ AA altı — light modda olduğu gibi */
-  --ink-nontext: #5D5B57; /*  3.0:1 — sadece kenarlık/ikon-dekor */
+  --ink-strong:  #F4F1EC;
+  --ink-body:    #B8B5AF;
+  --ink-muted:   #8C8A85;
+  --ink-subtle:  #7C7A75;
+  --ink-faint:   #716F6A;
+  --ink-nontext: #5D5B57;
 
-  --success-ink: #18FF85; /* 14.8:1 — inner-green doğrudan, koyu zeminde daha canlı okunur */
-  --error-ink:   #E2795A; /*  6.7:1 */
+  --success-ink: #18FF85;
+  --error-ink:   #E2795A;
+
+  --panel-glass: rgba(255, 255, 255, 0.045);
+  --panel-glass-border: rgba(255, 255, 255, 0.1);
+  --panel-glass-highlight: rgba(255, 255, 255, 0.08);
 }
 
 @layer base {
@@ -218,6 +225,17 @@
     scroll-behavior: smooth;
     font-optical-sizing: auto;
     scrollbar-gutter: stable;
+  }
+  html.dark body {
+    /* Footer ink-fixed + referans atmospheric texture */
+    background-color: var(--ink-fixed);
+    background-image:
+      radial-gradient(ellipse 45% 40% at 0% 12%, rgba(24, 255, 133, 0.05), transparent 70%),
+      url("/panel/dark-atmosphere.png");
+    background-size: auto, min(100vw, 720px) auto;
+    background-position: 0 0, center center;
+    background-repeat: no-repeat, no-repeat;
+    background-attachment: fixed, fixed;
   }
   ::selection {
     background-color: var(--inner-green);
@@ -240,6 +258,202 @@
 
 .dark ::selection {
   color: #0A0A0A;
+}
+
+/**
+ * Invite success kartı dilinde cam yüzey.
+ * GPU-dostu: backdrop-blur + opacity; layout thrash yok.
+ */
+.panel-glass {
+  background: var(--panel-glass);
+  border: 1px solid var(--panel-glass-border);
+  -webkit-backdrop-filter: blur(14px) saturate(1.15);
+  backdrop-filter: blur(14px) saturate(1.15);
+  box-shadow: inset 0 1px 0 var(--panel-glass-highlight);
+  transition: border-color 0.25s var(--ease-expo), background 0.25s var(--ease-expo);
+}
+
+.dark .panel-glass {
+  /* Invite / footer üstü cam: black/50 + white/10 */
+  background: rgba(10, 10, 10, 0.5);
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 12px 40px rgba(0, 0, 0, 0.35);
+}
+
+.panel-glass-strong {
+  background: color-mix(in srgb, var(--bone) 88%, transparent);
+  border: 1px solid var(--panel-glass-border);
+  -webkit-backdrop-filter: blur(18px) saturate(1.2);
+  backdrop-filter: blur(18px) saturate(1.2);
+  box-shadow: inset 0 1px 0 var(--panel-glass-highlight);
+}
+
+.dark .panel-glass-strong {
+  background: rgba(10, 10, 10, 0.72);
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+/**
+ * Her zaman koyu cam — ID kartı, invite success, hero banner.
+ * Tema tersine dönse de cream metin + ink glass korunur.
+ */
+.panel-glass-ink {
+  background: rgba(10, 10, 10, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--bone-fixed, #F4F1EC);
+  -webkit-backdrop-filter: blur(14px) saturate(1.15);
+  backdrop-filter: blur(14px) saturate(1.15);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 12px 40px rgba(0, 0, 0, 0.25);
+}
+
+.dark .panel-glass-ink {
+  /* Dark’ta da invite dilini koru — beyaza yıkama */
+  background: rgba(10, 10, 10, 0.55);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #F4F1EC;
+}
+
+/** Kart/bant: dark’ta invite cam */
+.dark .panel-card {
+  background: rgba(10, 10, 10, 0.5);
+  border-color: rgba(255, 255, 255, 0.1);
+  -webkit-backdrop-filter: blur(14px) saturate(1.15);
+  backdrop-filter: blur(14px) saturate(1.15);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 12px 40px rgba(0, 0, 0, 0.35);
+  transition: border-color 0.25s var(--ease-expo, cubic-bezier(0.16, 1, 0.3, 1)),
+    background 0.25s var(--ease-expo, cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+.dark .panel-card:hover {
+  border-color: rgba(255, 255, 255, 0.18);
+  background: rgba(10, 10, 10, 0.62);
+}
+
+/**
+ * Dark panel premium chrome — tüm sayfalara yayılan tipografi / input / ayırıcı.
+ * Sayfa başına özel class gerekmez; #panel-main altında otomatik.
+ */
+.dark #panel-main {
+  color-scheme: dark;
+}
+
+.dark #panel-main input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
+.dark #panel-main textarea,
+.dark #panel-main select {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(10, 10, 10, 0.5);
+  color: #F4F1EC;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+.dark #panel-main input::placeholder,
+.dark #panel-main textarea::placeholder {
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.dark #panel-main input:focus,
+.dark #panel-main textarea:focus,
+.dark #panel-main select:focus {
+  border-color: rgba(255, 255, 255, 0.28);
+  outline: none;
+  box-shadow: 0 0 0 1px rgba(24, 255, 133, 0.25);
+}
+
+.dark #panel-main hr {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Section mono labels — invite tracking */
+.dark #panel-main .font-mono.text-label.uppercase {
+  letter-spacing: 0.14em;
+}
+
+/* Soft premium hover lift for glass cards */
+.dark #panel-main .panel-glass {
+  transition:
+    border-color 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+    background 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dark #panel-main a.panel-glass:hover,
+.dark #panel-main button.panel-glass:hover,
+.dark #panel-main .panel-glass.group:hover,
+.dark #panel-main article.panel-glass:hover,
+.dark #panel-main [class*="cursor-pointer"].panel-glass:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(10, 10, 10, 0.65);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 16px 48px rgba(0, 0, 0, 0.4);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dark #panel-main .panel-glass {
+    transition: border-color 0.2s ease, background 0.2s ease;
+  }
+}
+
+/* Skeleton shimmer — dark glass frame */
+.dark .panel-skeleton {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel-glass,
+  .dark .panel-card {
+    transition: none;
+  }
+  .panel-ambient__blob--a,
+  .panel-ambient__blob--b,
+  .panel-ambient__blob--c {
+    animation: none;
+  }
+}
+
+/** Panel kabuğu ambient — footer ink + referans texture */
+.panel-ambient {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+  background-color: var(--ink-fixed);
+  background-image:
+    radial-gradient(ellipse 45% 40% at 0% 12%, rgba(24, 255, 133, 0.05), transparent 70%),
+    url("/panel/dark-atmosphere.png");
+  background-size: auto, min(920px, 110%) auto;
+  background-position: 0 0, center 42%;
+  background-repeat: no-repeat, no-repeat;
+}
+
+.panel-ambient__blob {
+  display: none;
+}
+
+.panel-ambient__grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.03;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/** Light panel: ambient kapalı — sadece dark’ta görünür */
+:root:not(.dark) .panel-ambient {
+  display: none;
 }
 
 .font-display {

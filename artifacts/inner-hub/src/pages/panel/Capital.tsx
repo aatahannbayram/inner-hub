@@ -132,7 +132,7 @@ function StatCard({
   icon: React.ComponentType<{ className?: string }>;
 }) {
   return (
-    <div className="border border-[var(--ink)]/[0.1] bg-[var(--bone)] p-4 sm:p-5">
+    <div className="panel-glass p-4 sm:p-5">
       <div className="mb-3 flex items-center justify-between gap-2">
         <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--ink-muted)]">{label}</p>
         <Icon className="size-3.5 shrink-0 text-[var(--ink-subtle)]" />
@@ -168,7 +168,7 @@ function DealCard({
     <button
       type="button"
       onClick={onClick}
-      className="group relative w-full overflow-hidden border border-[var(--ink)]/[0.1] bg-[var(--bone)] p-4 text-left transition-colors hover:border-[var(--ink)]/30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ink)]"
+      className="group relative w-full overflow-hidden panel-glass p-4 text-left transition-colors hover:border-[var(--ink)]/30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ink)]"
     >
       <span aria-hidden className={`absolute inset-y-0 left-0 w-[3px] ${cfg.accent}`} />
 
@@ -203,16 +203,16 @@ function DealCard({
         )}
       </div>
 
-      <div className="mb-3 grid grid-cols-2 gap-px border border-[var(--ink)]/[0.08] bg-[var(--ink)]/[0.08] pl-1 sm:grid-cols-3">
-        <div className="bg-[var(--bone)] px-2.5 py-2">
+      <div className="mb-3 grid grid-cols-2 gap-px panel-glass bg-[var(--ink)]/[0.08] pl-1 sm:grid-cols-3">
+        <div className="bg-white/[0.04] px-2.5 py-2 dark:bg-white/[0.04]">
           <p className="font-mono text-[8px] uppercase tracking-[0.14em] text-[var(--ink-muted)]">{t("capital.target")}</p>
           <p className="mt-0.5 truncate font-mono text-xs font-medium text-[var(--ink)]">{deal.raise || "·"}</p>
         </div>
-        <div className="bg-[var(--bone)] px-2.5 py-2">
+        <div className="bg-white/[0.04] px-2.5 py-2 dark:bg-white/[0.04]">
           <p className="font-mono text-[8px] uppercase tracking-[0.14em] text-[var(--ink-muted)]">{t("capital.valuation")}</p>
           <p className="mt-0.5 truncate font-mono text-xs font-medium text-[var(--ink)]">{deal.valuation || "·"}</p>
         </div>
-        <div className="col-span-2 bg-[var(--bone)] px-2.5 py-2 sm:col-span-1">
+        <div className="col-span-2 bg-white/[0.04] px-2.5 py-2 dark:bg-white/[0.04] sm:col-span-1">
           <p className="font-mono text-[8px] uppercase tracking-[0.14em] text-[var(--ink-muted)]">{t("capital.score")}</p>
           <div className="mt-1.5 flex items-center gap-2">
             <div className="h-1 flex-1 bg-[var(--ink)]/[0.08]">
@@ -228,7 +228,7 @@ function DealCard({
           {visibleTags.map((tag) => (
             <span
               key={tag}
-              className="border border-[var(--ink)]/10 px-1.5 py-0.5 font-mono text-[9px] text-[var(--ink-muted)]"
+              className="panel-glass px-1.5 py-0.5 font-mono text-[9px] text-[var(--ink-muted)]"
             >
               {tag}
             </span>
@@ -311,13 +311,13 @@ function DealDetail({
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-end" onClick={onClose}>
       <div
-        className="relative h-full w-full max-w-md overflow-y-auto border-l border-[var(--ink)]/15 bg-[var(--bone)] p-5 shadow-2xl sm:p-7"
+        className="relative h-full w-full max-w-md overflow-y-auto border-l border-[var(--ink)]/15 panel-glass-strong p-5 shadow-2xl sm:p-7"
         onClick={(e) => e.stopPropagation()}
       >
         <button
           type="button"
           onClick={onClose}
-          className="mb-6 min-h-10 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)] hover:text-[var(--ink)] transition-colors"
+              className="mb-6 flex min-h-10 items-center font-mono text-label uppercase tracking-widest text-[var(--ink-muted)] transition-colors hover:text-[var(--ink)]"
         >
           {t("capital.close")}
         </button>
@@ -341,7 +341,7 @@ function DealDetail({
             { key: "capital.valuation", v: deal.valuation },
             { key: "capital.round", v: deal.round },
           ].map((m) => (
-            <div key={m.key} className="border border-[var(--ink)]/[0.08] p-3">
+            <div key={m.key} className="panel-glass p-3">
               <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">{t(m.key)}</p>
               <p className="mt-0.5 font-mono text-sm text-[var(--ink)]">{m.v}</p>
             </div>
@@ -394,7 +394,7 @@ function DealDetail({
         {/* Sector */}
         <div className="mb-5">
           <p className="mb-2 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">{t("capital.sector")}</p>
-          <span className="border border-[var(--ink)]/10 px-2.5 py-1 font-mono text-label text-[var(--ink-muted)]">
+          <span className="panel-glass px-2.5 py-1 font-mono text-label text-[var(--ink-muted)]">
             {deal.sector}
           </span>
         </div>
@@ -404,7 +404,7 @@ function DealDetail({
           <p className="mb-2 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">{t("capital.tags")}</p>
           <div className="flex flex-wrap gap-1.5">
             {deal.tags.map((tag) => (
-              <span key={tag} className="border border-[var(--ink)]/10 px-2 py-0.5 font-mono text-label text-[var(--ink-body)]">
+              <span key={tag} className="panel-glass px-2 py-0.5 font-mono text-label text-[var(--ink-body)]">
                 {tag}
               </span>
             ))}
@@ -420,14 +420,14 @@ function DealDetail({
         <div className="space-y-2">
           <button
             type="button"
-            className="flex w-full items-center justify-between border border-[var(--ink)]/15 bg-[var(--ink)] px-5 py-3 font-mono text-label uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-80 min-h-11"
+            className="flex w-full items-center justify-between border border-[var(--ink)] bg-[var(--ink)] px-5 py-3 font-mono text-label uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-80 min-h-11"
           >
             <span>{t("capital.interested")}</span>
             <ArrowUpRight className="size-3.5" />
           </button>
           <button
             type="button"
-            className="flex w-full min-h-11 items-center justify-between border border-[var(--ink)]/15 px-5 py-3 font-mono text-label uppercase tracking-widest text-[var(--ink-body)] transition-all hover:border-[var(--ink)]/40 hover:text-[var(--ink)]"
+            className="flex w-full min-h-11 items-center justify-between panel-glass px-5 py-3 font-mono text-label uppercase tracking-widest text-[var(--ink-body)] transition-all hover:border-[var(--ink)]/40 hover:text-[var(--ink)]"
           >
             <span>{t("capital.introduceFounder")}</span>
             <ChevronRight className="size-3.5" />
@@ -480,7 +480,7 @@ function DealDetail({
 function SpvCard({ spv }: { spv: SPV }) {
   const t = useT();
   return (
-    <div className="border border-[var(--ink)]/[0.1] bg-[var(--bone)] p-5">
+    <div className="panel-glass p-5">
       <div className="mb-4 flex items-start justify-between gap-3">
         <div className="min-w-0">
           <h3
@@ -655,7 +655,7 @@ function DealCompose({
 
   return (
     <Drawer open={open} onOpenChange={(v) => !v && onClose()} shouldScaleBackground={false}>
-      <DrawerContent className="rounded-none border-[var(--ink)]/15 bg-[var(--bone)]">
+      <DrawerContent className="rounded-none panel-glass-strong border-white/10">
         <DrawerHeader className="px-6 pt-2 text-left">
           <p className="mb-1 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
             <span lang="en">inner·capital</span>
@@ -675,13 +675,13 @@ function DealCompose({
             value={company}
             onChange={(e) => setCompany(e.target.value)}
             placeholder={t("capital.phCompany")}
-            className="w-full border border-[var(--ink)]/[0.08] bg-transparent px-3 py-2.5 text-sm outline-none focus:border-[var(--ink)]/30"
+            className="w-full panel-glass bg-transparent px-3 py-2.5 text-sm outline-none focus:border-[var(--ink)]/30"
           />
           <input
             value={tagline}
             onChange={(e) => setTagline(e.target.value)}
             placeholder={t("capital.phTagline")}
-            className="w-full border border-[var(--ink)]/[0.08] bg-transparent px-3 py-2.5 text-sm outline-none focus:border-[var(--ink)]/30"
+            className="w-full panel-glass bg-transparent px-3 py-2.5 text-sm outline-none focus:border-[var(--ink)]/30"
           />
           <div className="flex flex-wrap gap-1.5">
             {STAGES.map((s) => (
@@ -722,33 +722,33 @@ function DealCompose({
               value={raise}
               onChange={(e) => setRaise(e.target.value)}
               placeholder={t("capital.phRaise")}
-              className="border border-[var(--ink)]/[0.08] bg-transparent px-3 py-2.5 text-sm outline-none focus:border-[var(--ink)]/30"
+              className="panel-glass bg-transparent px-3 py-2.5 text-sm outline-none focus:border-[var(--ink)]/30"
             />
             <input
               value={valuation}
               onChange={(e) => setValuation(e.target.value)}
               placeholder={t("capital.phValuation")}
-              className="border border-[var(--ink)]/[0.08] bg-transparent px-3 py-2.5 text-sm outline-none focus:border-[var(--ink)]/30"
+              className="panel-glass bg-transparent px-3 py-2.5 text-sm outline-none focus:border-[var(--ink)]/30"
             />
           </div>
           <input
             value={round}
             onChange={(e) => setRound(e.target.value)}
             placeholder={t("capital.phRound")}
-            className="w-full border border-[var(--ink)]/[0.08] bg-transparent px-3 py-2.5 text-sm outline-none focus:border-[var(--ink)]/30"
+            className="w-full panel-glass bg-transparent px-3 py-2.5 text-sm outline-none focus:border-[var(--ink)]/30"
           />
           <input
             value={founders}
             onChange={(e) => setFounders(e.target.value)}
             placeholder={t("capital.phFounders")}
-            className="w-full border border-[var(--ink)]/[0.08] bg-transparent px-3 py-2.5 text-sm outline-none focus:border-[var(--ink)]/30"
+            className="w-full panel-glass bg-transparent px-3 py-2.5 text-sm outline-none focus:border-[var(--ink)]/30"
           />
           <input
             value={score}
             onChange={(e) => setScore(e.target.value)}
             placeholder={t("capital.phScore")}
             inputMode="numeric"
-            className="w-full border border-[var(--ink)]/[0.08] bg-transparent px-3 py-2.5 text-sm outline-none focus:border-[var(--ink)]/30"
+            className="w-full panel-glass bg-transparent px-3 py-2.5 text-sm outline-none focus:border-[var(--ink)]/30"
           />
           {error && (
             <p className="font-mono text-label text-[var(--error-ink)]" role="alert">
@@ -759,7 +759,7 @@ function DealCompose({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 border border-[var(--ink)]/15 py-2.5 font-mono text-label uppercase tracking-widest text-[var(--ink-body)]"
+              className="flex-1 panel-glass py-2.5 font-mono text-label uppercase tracking-widest text-[var(--ink-body)]"
             >
               {t("common.cancel")}
             </button>
@@ -767,7 +767,7 @@ function DealCompose({
               type="button"
               disabled={busy || !company.trim()}
               onClick={() => void submit()}
-              className="flex-1 min-h-11 border border-[var(--ink)]/15 bg-[var(--ink)] py-2.5 font-mono text-label uppercase tracking-widest text-[var(--bone)] disabled:opacity-40"
+              className="flex-1 min-h-11 border border-[var(--ink)] bg-[var(--ink)] py-2.5 font-mono text-label uppercase tracking-widest text-[var(--bone)] disabled:opacity-40"
             >
               {busy ? t("common.saving") : t("common.save")}
             </button>
@@ -847,7 +847,7 @@ export default function Capital() {
           ) : (
             <p className="text-sm text-[var(--ink-muted)]">{t("capital.membersOnly")}</p>
           )}
-          <div className="flex border border-[var(--ink)]/15">
+          <div className="flex panel-glass">
             {(["pipeline", "liste"] as const).map((v) => (
               <button
                 key={v}
@@ -963,7 +963,7 @@ export default function Capital() {
                   key={deal.id}
                   type="button"
                   onClick={() => setSelectedDeal(deal)}
-                  className="grid w-full grid-cols-1 gap-2 border border-[var(--ink)]/[0.08] bg-[var(--bone)] p-4 text-left transition-colors hover:border-[var(--ink)]/25 md:grid-cols-[1.4fr_0.8fr_0.6fr_0.6fr_auto] md:items-center md:gap-4 md:border-0 md:border-b md:border-[var(--ink)]/[0.06] md:bg-transparent md:px-0 md:py-3"
+                  className="grid w-full grid-cols-1 gap-2 panel-glass p-4 text-left transition-colors hover:border-[var(--ink)]/25 md:grid-cols-[1.4fr_0.8fr_0.6fr_0.6fr_auto] md:items-center md:gap-4 md:border-0 md:border-b md:border-[var(--ink)]/[0.06] md:bg-transparent md:px-0 md:py-3"
                 >
                   <div className="min-w-0">
                     <p className="font-display font-serif text-base text-[var(--ink)] md:text-sm">{deal.company}</p>

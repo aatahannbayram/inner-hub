@@ -131,7 +131,7 @@ function CourseCard({
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <div className="group relative overflow-hidden border border-[var(--ink)]/[0.08] transition-all duration-200 hover:border-[var(--ink)]/15">
+    <div className="group relative overflow-hidden panel-glass transition-all duration-200 hover:border-[var(--ink)]/15">
       <span
         aria-hidden="true"
         className="absolute inset-x-0 top-0 z-10 h-[2px] origin-left scale-x-0 bg-[var(--inner-green)] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-x-100"
@@ -141,7 +141,7 @@ function CourseCard({
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
           <div className="min-w-0 flex-1">
             <div className="mb-2 flex flex-wrap items-center gap-2">
-              <span className="border border-[var(--ink)]/10 px-1.5 py-0.5 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
+              <span className="panel-glass px-1.5 py-0.5 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
                 {course.tag}
               </span>
               {!course.isEnrolled && (
@@ -213,7 +213,7 @@ function CourseCard({
           {course.isEnrolled ? (
             <button
               onClick={() => setExpanded((v) => !v)}
-              className="flex items-center gap-2 border border-[var(--ink)] bg-[var(--ink)] px-4 py-2 font-mono text-label uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-80"
+              className="flex items-center gap-2 panel-glass-ink px-4 py-2 font-mono text-label uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-80"
             >
               {course.progressPct > 0 ? t("courses.continue") : t("courses.start")}
               <ChevronRight className="size-3" />
@@ -223,7 +223,7 @@ function CourseCard({
               type="button"
               disabled={busy}
               onClick={() => onEnroll?.(course.id)}
-              className="flex items-center gap-2 border border-[var(--ink)] bg-[var(--ink)] px-4 py-2 font-mono text-label uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-80 disabled:opacity-40"
+              className="flex items-center gap-2 panel-glass-ink px-4 py-2 font-mono text-label uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-80 disabled:opacity-40"
             >
               {t("courses.enroll")}
               <ChevronRight className="size-3" />
@@ -333,7 +333,7 @@ function CoursesHero({
                   onClick={() => scrollToId("courses-available")}
                   className={
                     hasEnrolled
-                      ? "liquid-glass group inline-flex min-h-11 items-center gap-2 border border-[var(--bone)]/25 px-6 py-3 font-mono text-sm uppercase tracking-widest text-[var(--bone)] transition-colors hover:bg-[var(--bone)] hover:text-[var(--ink)] sm:px-8"
+                      ? "liquid-glass group inline-flex min-h-11 items-center gap-2 border border-[var(--bone-fixed)]/25 px-6 py-3 font-mono text-sm uppercase tracking-widest text-[var(--bone-fixed)] transition-colors hover:bg-[var(--bone-fixed)] hover:text-[var(--ink-fixed)] sm:px-8"
                       : "group inline-flex min-h-11 items-center gap-2 bg-[var(--bone)] px-6 py-3 font-mono text-sm uppercase tracking-widest text-[var(--ink)] transition-opacity hover:opacity-90 sm:px-8"
                   }
                 >
@@ -369,7 +369,7 @@ function CoursesStat({
   icon: React.ComponentType<{ className?: string }>;
 }) {
   return (
-    <div className="border border-[var(--ink)]/[0.08] p-4">
+    <div className="panel-glass p-4">
       <div className="mb-2 flex items-center justify-between">
         <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">{label}</p>
         <Icon className="size-3.5 text-[var(--ink-subtle)]" />

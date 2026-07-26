@@ -40,10 +40,10 @@ interface ApiMessage {
 function AiDigestEmpty({ channelLabel }: { channelLabel: string }) {
   const t = useT();
   return (
-    <div className="relative mx-4 mb-4 overflow-hidden border border-[var(--ink)]/[0.12] bg-[var(--ink)]/[0.03] p-4">
+    <div className="relative mx-4 mb-4 overflow-hidden panel-glass p-4">
       <AmbientCardBackground />
       <div className="relative z-10 flex items-start gap-3">
-        <div className="relative flex size-7 shrink-0 items-center justify-center border border-[var(--ink)]/15 bg-[var(--bone)]">
+        <div className="relative flex size-7 shrink-0 items-center justify-center panel-glass">
           <Sparkles className="size-3.5 text-[var(--ink-body)]" />
         </div>
         <div className="min-w-0 flex-1">
@@ -201,7 +201,7 @@ export default function ChatPage() {
   return (
     <div className="-mx-4 -my-6 flex h-[calc(100svh-60px)] min-h-0 min-w-0 flex-col overflow-x-hidden sm:-mx-6 lg:-mx-8 lg:-my-8">
       <div className="flex min-h-0 flex-1">
-        <aside className="hidden w-[220px] shrink-0 flex-col border-r border-[var(--ink)]/[0.08] bg-[var(--bone)] md:flex">
+        <aside className="panel-glass-strong hidden w-[220px] shrink-0 flex-col border-r border-[var(--ink)]/[0.08] md:flex">
           <div className="border-b border-[var(--ink)]/[0.08] px-4 py-3">
             <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">{t("chat.channels")}</p>
           </div>
@@ -322,14 +322,14 @@ export default function ChatPage() {
                     key={s}
                     type="button"
                     onClick={() => setDraft(s)}
-                    className="border border-[var(--ink)]/12 px-2.5 py-1 font-mono text-label text-[var(--ink-muted)] transition-colors hover:border-[var(--inner-green)]/40 hover:text-[var(--ink)]"
+                    className="panel-glass px-2.5 py-1 font-mono text-label text-[var(--ink-muted)] transition-colors hover:border-[var(--inner-green)]/40 hover:text-[var(--ink)]"
                   >
                     {s}
                   </button>
                 ))}
               </div>
             )}
-            <div className="flex items-end gap-3 border border-[var(--ink)]/15 bg-[var(--bone)] p-3 transition-colors focus-within:border-[var(--ink)]/40">
+            <div className="panel-glass flex items-end gap-3 p-3 transition-colors focus-within:border-[var(--ink)]/40">
               <textarea
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}

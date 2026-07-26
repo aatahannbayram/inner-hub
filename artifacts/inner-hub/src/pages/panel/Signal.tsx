@@ -200,7 +200,7 @@ function SignalStat({
   icon: React.ComponentType<{ className?: string }>;
 }) {
   return (
-    <div className="relative overflow-hidden border border-[var(--ink)]/[0.1] bg-[var(--bone)] p-4">
+    <div className="relative overflow-hidden panel-glass p-4">
       <span aria-hidden className="absolute inset-y-0 left-0 w-[3px] bg-[var(--ink)]/12" />
       <div className="mb-2 flex items-center justify-between gap-2 pl-1">
         <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--ink-muted)]">{label}</p>
@@ -226,7 +226,7 @@ function ThemeCard({ theme, index }: { theme: Theme; index: number }) {
   return (
     <article
       className={[
-        "group relative overflow-hidden border bg-[var(--bone)] p-4 transition-colors sm:p-5",
+        "group relative overflow-hidden panel-glass p-4 transition-colors sm:p-5",
         rising
           ? "border-[var(--ink)]/[0.12] hover:border-[var(--ink)]/30"
           : "border-[var(--ink)]/[0.1] hover:border-[var(--ink)]/25",
@@ -267,7 +267,7 @@ function ThemeCard({ theme, index }: { theme: Theme; index: number }) {
 
         <Link
           href="/panel/chat"
-          className="inline-flex min-h-10 shrink-0 items-center justify-center gap-1.5 border border-[var(--ink)]/15 px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)] transition-colors hover:border-[var(--ink)] hover:bg-[var(--ink)] hover:text-[var(--bone)] sm:self-center"
+          className="inline-flex min-h-10 shrink-0 items-center justify-center gap-1.5 panel-glass px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)] transition-colors hover:border-[var(--ink)] hover:bg-[var(--ink)] hover:text-[var(--bone)] sm:self-center"
         >
           <MessageSquare className="size-3" />
           {t("signal.followInChat")}
@@ -281,7 +281,7 @@ function ThemeCard({ theme, index }: { theme: Theme; index: number }) {
 function ConnectionCard({ conn }: { conn: Connection }) {
   const t = useT();
   return (
-    <article className="group relative flex h-full flex-col overflow-hidden border border-[var(--ink)]/[0.1] bg-[var(--bone)] p-4 transition-colors hover:border-[var(--ink)]/28 sm:p-5">
+    <article className="group relative flex h-full flex-col overflow-hidden panel-glass p-4 transition-colors hover:border-[var(--ink)]/28 sm:p-5">
       <span
         aria-hidden
         className="absolute inset-y-0 left-0 w-[3px] bg-[var(--inner-green)]/50 transition-colors group-hover:bg-[var(--inner-green)]"
@@ -535,15 +535,15 @@ export default function Signal() {
     : "";
 
   return (
-    <div className="mx-auto max-w-4xl space-y-8">
+    <div className="mx-auto max-w-5xl space-y-8">
       <FadeIn>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div>
+          <div className="min-w-0">
             <p className="mb-2 font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
               {t("signal.eyebrow")}
             </p>
             <h1
-              className="font-display font-serif text-4xl text-[var(--ink)] md:text-5xl"
+              className="font-display font-serif text-3xl text-[var(--ink)] sm:text-4xl md:text-5xl"
               style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 300 }}
             >
               <Lockup suffix="signal" className="text-[var(--ink)]" />
@@ -561,7 +561,7 @@ export default function Signal() {
             type="button"
             onClick={fetchSignal}
             disabled={loading}
-            className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 border border-[var(--ink)]/15 bg-[var(--ink)] px-4 py-2.5 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-85 disabled:opacity-35 sm:w-auto"
+            className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 border border-[var(--ink)] bg-[var(--ink)] px-4 py-2.5 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-85 disabled:opacity-35 sm:w-auto"
           >
             <RefreshCw className={`size-3 ${loading ? "animate-spin" : ""}`} />
             {loading ? t("signal.analyzing") : t("signal.refresh")}
@@ -629,7 +629,7 @@ export default function Signal() {
           {/* Insight hero */}
           <FadeIn delay={0.04}>
             <section id="signal-insight" className="scroll-mt-4">
-              <div className="relative overflow-hidden border border-[var(--ink)]/15 bg-[var(--ink)] p-5 text-[var(--bone)] sm:p-6 md:p-8">
+              <div className="relative overflow-hidden border border-white/10 bg-black/55 p-5 text-[var(--bone)] backdrop-blur-md sm:p-6 md:p-8 dark:bg-black/50">
                 <AmbientCardBackground />
                 <span
                   aria-hidden
@@ -657,14 +657,14 @@ export default function Signal() {
                     <button
                       type="button"
                       onClick={copyInsight}
-                      className="inline-flex min-h-10 items-center gap-2 border border-[var(--bone)]/25 px-3 py-2 font-mono text-label uppercase tracking-widest text-[var(--bone)]/80 transition-colors hover:border-[var(--bone)]/50 hover:text-[var(--bone)]"
+                      className="inline-flex min-h-10 items-center gap-2 border border-[var(--bone-fixed)]/25 px-3 py-2 font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)]/80 transition-colors hover:border-[var(--bone)]/50 hover:text-[var(--bone)]"
                     >
                       {copied ? <Check className="size-3" /> : <Copy className="size-3" />}
                       {copied ? t("common.copied") : t("signal.copyInsight")}
                     </button>
                     <Link
                       href="/panel/chat"
-                      className="inline-flex min-h-10 items-center gap-2 border border-[var(--bone)]/25 px-3 py-2 font-mono text-label uppercase tracking-widest text-[var(--bone)]/80 transition-colors hover:border-[var(--bone)]/50 hover:text-[var(--bone)]"
+                      className="inline-flex min-h-10 items-center gap-2 border border-[var(--bone-fixed)]/25 px-3 py-2 font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)]/80 transition-colors hover:border-[var(--bone)]/50 hover:text-[var(--bone)]"
                     >
                       <MessageSquare className="size-3" /> {t("signal.openInChat")}
                     </Link>
@@ -716,7 +716,7 @@ export default function Signal() {
                       type="button"
                       layoutId={reduce ? undefined : "signal-visual-frame"}
                       onClick={() => setLightboxOpen(true)}
-                      className="group relative mt-3 block w-full overflow-hidden border border-[var(--ink)]/[0.1] text-left"
+                      className="group relative mt-3 block w-full overflow-hidden panel-glass text-left"
                       initial={reduce ? false : { opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ duration: reduce ? 0 : 0.45 }}
@@ -830,7 +830,7 @@ export default function Signal() {
           <FadeIn delay={0.1}>
             <section
               id="signal-activity"
-              className="scroll-mt-4 overflow-x-auto border border-[var(--ink)]/15 p-4 sm:p-5"
+              className="scroll-mt-4 overflow-x-auto panel-glass p-4 sm:p-5"
             >
               <ActivityHeatmap />
             </section>
