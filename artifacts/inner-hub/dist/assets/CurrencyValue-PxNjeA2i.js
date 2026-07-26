@@ -1,0 +1,1 @@
+import{j as n}from"./index-DXNnuWQu.js";function e({value:s}){const r=s.match(/^([₺$€£])(.+)$/);return r?n.jsxs(n.Fragment,{children:[n.jsx("span",{className:"font-sans",children:r[1]}),r[2]]}):n.jsx(n.Fragment,{children:s})}export{e as C};

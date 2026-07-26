@@ -43,8 +43,10 @@ const VAULT_CARD_PORTRAIT: PortraitConfig = {
 
 const EDITORIAL_PORTRAIT = "/editorial/circle-portrait.jpg";
 
+// Background/border brighten-on-hover comes from the shared .dark .panel-glass:hover rule (index.css) —
+// kept here only to the states that rule doesn't cover (focus-visible signal, active press feedback).
 const STAT_CARD_INTERACTIVE =
-  "outline-none transition-all duration-150 ease-out hover:bg-[var(--ink)]/[0.04] hover:border-[var(--ink)]/25 active:scale-[0.99] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--inner-green)] motion-reduce:transition-none motion-reduce:active:scale-100";
+  "outline-none transition-all duration-150 ease-out active:scale-[0.99] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--inner-green)] motion-reduce:transition-none motion-reduce:active:scale-100";
 
 const STAT_CARD_ACCENT =
   "absolute inset-y-0 left-0 w-[2px] bg-[var(--ink)]/12 transition-colors duration-150 ease-out group-hover:bg-[var(--inner-green)] motion-reduce:transition-none";
