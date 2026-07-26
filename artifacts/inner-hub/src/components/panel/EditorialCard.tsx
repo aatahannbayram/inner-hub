@@ -96,7 +96,7 @@ export function EditorialCard({
             className={cn(
               "pointer-events-none absolute inset-0",
               dark
-                ? "bg-gradient-to-t from-[var(--ink)]/80 via-transparent to-transparent"
+                ? "bg-gradient-to-t from-[var(--ink-fixed)]/80 via-transparent to-transparent"
                 : "bg-gradient-to-t from-[var(--bone)]/40 via-transparent to-transparent",
             )}
           />

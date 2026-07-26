@@ -95,6 +95,11 @@
   --inner-green: #18FF85;
   --error: #B4553B;
 
+  /* Video/foto scrim'leri, footer gibi her zaman koyu kalması gereken
+     yüzeyler için — tema değişse de sabit kalır. Panel dark mode'da
+     --ink kendisi tersine döner (aşağıya bkz), bu token dönmez. */
+  --ink-fixed: #0A0A0A;
+
   --background: 39 31% 94%;
   --foreground: 0 0% 4%;
   
@@ -182,6 +187,24 @@
   --border: 0 0% 20%;
   --input: 0 0% 20%;
   --ring: 39 31% 94%;
+
+  /* Panel'in gerçek renk sistemi (--ink/--bone semantic ladder) burada
+     ters çevrilir. --ink-fixed dışındaki her şey dark'ta rol değiştirir:
+     --bone artık koyu zemin, --ink-strong vd. artık açık metin.
+     Kontrast oranları light moddaki aynı metodoloji ile hesaplandı
+     (#0A0A0A zemine karşı), aynı erişilebilirlik seviyesini korur. */
+  --ink: #F4F1EC;
+  --bone: #0A0A0A;
+
+  --ink-strong:  #F4F1EC; /* 17.9:1 */
+  --ink-body:    #B8B5AF; /* 10.2:1 */
+  --ink-muted:   #8C8A85; /*  6.4:1 */
+  --ink-subtle:  #7C7A75; /*  4.7:1 */
+  --ink-faint:   #716F6A; /*  4.0:1 ✗ AA altı — light modda olduğu gibi */
+  --ink-nontext: #5D5B57; /*  3.0:1 — sadece kenarlık/ikon-dekor */
+
+  --success-ink: #18FF85; /* 14.8:1 — inner-green doğrudan, koyu zeminde daha canlı okunur */
+  --error-ink:   #E2795A; /*  6.7:1 */
 }
 
 @layer base {
