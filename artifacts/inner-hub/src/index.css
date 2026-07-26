@@ -227,14 +227,11 @@
     scrollbar-gutter: stable;
   }
   html.dark body {
-    /* Footer ink-fixed + referans atmospheric texture */
+    /* Footer ink-fixed + full-bleed ambient light wash (pure gradients, no seams) */
     background-color: var(--ink-fixed);
     background-image:
-      radial-gradient(ellipse 45% 40% at 0% 12%, rgba(24, 255, 133, 0.05), transparent 70%),
-      url("/panel/dark-atmosphere.png");
-    background-size: auto, min(100vw, 720px) auto;
-    background-position: 0 0, center center;
-    background-repeat: no-repeat, no-repeat;
+      radial-gradient(ellipse 90% 75% at 12% -10%, rgba(24, 255, 133, 0.10), transparent 62%),
+      radial-gradient(ellipse 80% 70% at 100% 110%, rgba(24, 255, 133, 0.06), transparent 60%);
     background-attachment: fixed, fixed;
   }
   ::selection {
@@ -418,7 +415,7 @@
   }
 }
 
-/** Panel kabuğu ambient — footer ink + referans texture */
+/** Panel kabuğu ambient — footer ink + full-bleed ambient light wash (pure gradients, no seams) */
 .panel-ambient {
   position: absolute;
   inset: 0;
@@ -426,19 +423,9 @@
   pointer-events: none;
   z-index: 0;
   background-color: var(--ink-fixed);
-  background-image: radial-gradient(ellipse 45% 40% at 0% 12%, rgba(24, 255, 133, 0.05), transparent 70%);
-}
-
-.panel-ambient::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image: url("/panel/dark-atmosphere.png");
-  background-size: min(920px, 110%) auto;
-  background-position: center 42%;
-  background-repeat: no-repeat;
-  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%);
-  mask-image: linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%);
+  background-image:
+    radial-gradient(ellipse 90% 75% at 12% -10%, rgba(24, 255, 133, 0.10), transparent 62%),
+    radial-gradient(ellipse 80% 70% at 100% 110%, rgba(24, 255, 133, 0.06), transparent 60%);
 }
 
 .panel-ambient__blob {
