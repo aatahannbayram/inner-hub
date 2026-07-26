@@ -56,19 +56,19 @@ const MOMENTUM_CONFIG = {
   yüksek: {
     icon: TrendingUp,
     labelKey: "signal.momentumRising",
-    tone: "border-[var(--ink)]/15 bg-[var(--ink)] text-[var(--bone)]",
+    tone: "border-transparent bg-[var(--inner-green)] text-[var(--ink-fixed)]",
     accent: "var(--inner-green)",
   },
   orta: {
     icon: Minus,
     labelKey: "signal.momentumStable",
-    tone: "border-[var(--ink)]/15 text-[var(--ink-body)]",
+    tone: "border-[var(--ink)]/20 bg-[var(--ink)]/10 text-[var(--ink-strong)]",
     accent: "color-mix(in srgb, var(--ink) 22%, transparent)",
   },
   düşük: {
     icon: TrendingDown,
     labelKey: "signal.momentumFalling",
-    tone: "border-[var(--error)]/30 text-[var(--error-ink)]",
+    tone: "border-[var(--error)]/40 bg-[var(--error)]/12 text-[var(--error-ink)]",
     accent: "var(--error)",
   },
 } as const;
@@ -111,8 +111,8 @@ function ActivityHeatmap() {
         </div>
         <div className="flex items-center gap-2">
           <span className="font-mono text-label text-[var(--ink-subtle)]">{t("signal.low")}</span>
-          {[0.15, 0.3, 0.5, 0.7, 1].map((o, i) => (
-            <span key={i} className="size-2.5 bg-[var(--ink)]" style={{ opacity: o }} />
+          {[0.18, 0.4, 0.6, 0.8, 1].map((o, i) => (
+            <span key={i} className="size-2.5 bg-[var(--inner-green)]" style={{ opacity: o }} />
           ))}
           <span className="font-mono text-label text-[var(--ink-subtle)]">{t("signal.high")}</span>
         </div>
@@ -139,8 +139,8 @@ function ActivityHeatmap() {
                 {week.map((val, di) => (
                   <div
                     key={di}
-                    className="h-5 bg-[var(--ink)] transition-opacity"
-                    style={{ opacity: val === 0 ? 0.04 : (val / maxVal) * 0.85 + 0.15 }}
+                    className="h-5 bg-[var(--inner-green)] transition-opacity"
+                    style={{ opacity: val === 0 ? 0.06 : (val / maxVal) * 0.8 + 0.2 }}
                     title={t("signal.interactions", { n: val })}
                   />
                 ))}
@@ -267,7 +267,7 @@ function ThemeCard({ theme, index }: { theme: Theme; index: number }) {
 
         <Link
           href="/panel/chat"
-          className="inline-flex min-h-10 shrink-0 items-center justify-center gap-1.5 panel-glass px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)] transition-colors hover:border-[var(--ink)] hover:bg-[var(--ink)] hover:text-[var(--bone)] sm:self-center"
+          className="inline-flex min-h-10 shrink-0 items-center justify-center gap-1.5 panel-glass px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-[var(--ink-strong)] transition-colors hover:border-[var(--ink)] hover:bg-[var(--ink)] hover:text-[var(--bone)] sm:self-center"
         >
           <MessageSquare className="size-3" />
           {t("signal.followInChat")}

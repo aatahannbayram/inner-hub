@@ -344,16 +344,16 @@ export default function InnerApi() {
                 <span
                   className={`border px-1.5 py-0.5 font-mono text-label font-semibold uppercase tracking-widest ${
                     ep.status === "stable"
-                      ? "text-[var(--ink-body)] border-[var(--ink)]/15"
-                      : "text-[var(--ink-muted)] border-[var(--ink)]/20 bg-[var(--ink)]/[0.04]"
+                      ? "text-[var(--ink-strong)] border-[var(--ink)]/20 bg-[var(--ink)]/[0.08]"
+                      : "text-[var(--ink-body)] border-[var(--ink)]/20 bg-[var(--ink)]/[0.04]"
                   }`}
                 >
                   {ep.status}
                 </span>
-                <span className="ml-auto font-mono text-label font-medium text-[var(--ink-muted)] shrink-0">{ep.rate}</span>
+                <span className="ml-auto font-mono text-label font-medium text-[var(--ink-body)] shrink-0">{ep.rate}</span>
               </div>
               <p className="font-mono text-label font-medium text-[var(--ink-strong)] break-all sm:truncate">{ep.path}</p>
-              <p className="text-sm text-[var(--ink-muted)] truncate">{ep.desc}</p>
+              <p className="text-sm text-[var(--ink-body)] truncate">{ep.desc}</p>
             </div>
           ))}
         </div>
@@ -417,7 +417,7 @@ export default function InnerApi() {
                   ))}
                 </ul>
                 <a
-                  href="mailto:destek@inner.digital?subject=inner·api%20plan%20talebi"
+                  href="mailto:support@inner.digital?subject=inner·api%20plan%20talebi"
                   className={[
                     "flex w-full items-center justify-between border px-3 py-2 font-mono text-label font-semibold uppercase tracking-widest transition-all",
                     plan.recommended
