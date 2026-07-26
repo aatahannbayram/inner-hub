@@ -357,7 +357,7 @@ function PlatformBindRow({
               type="button"
               disabled={busy || !draft.trim()}
               onClick={() => void save()}
-              className="flex items-center gap-1.5 panel-glass-ink px-3 py-1.5 font-mono text-label uppercase tracking-widest text-[var(--bone)] disabled:opacity-40"
+              className="flex items-center gap-1.5 panel-glass-ink px-3 py-1.5 font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)] disabled:opacity-40"
             >
               <Check className="size-3" /> {busy ? t("common.saving") : t("common.save")}
             </button>

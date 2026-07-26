@@ -409,7 +409,7 @@ function TalentCard({
           {post.postedByHandle ? (
             <a
               href={`/u/${post.postedByHandle}`}
-              className="flex items-center gap-1.5 panel-glass-ink px-3 py-1.5 font-mono text-label uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-80"
+              className="flex items-center gap-1.5 panel-glass-ink px-3 py-1.5 font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)] transition-opacity hover:opacity-80"
             >
               {t("members.profile")} <ArrowRight className="size-2.5" />
             </a>
@@ -542,7 +542,7 @@ function TalentCompose({
               type="button"
               disabled={busy || !role.trim() || !description.trim()}
               onClick={() => void submit()}
-              className="flex-1 panel-glass-ink py-2.5 font-mono text-label uppercase tracking-widest text-[var(--bone)] disabled:opacity-40"
+              className="flex-1 panel-glass-ink py-2.5 font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)] disabled:opacity-40"
             >
               {busy ? t("common.saving") : t("members.publish")}
             </button>
@@ -724,7 +724,7 @@ export default function Members() {
                   <button
                     type="button"
                     onClick={() => setComposeOpen(true)}
-                    className="flex items-center gap-1.5 panel-glass-ink px-4 py-2 font-mono text-label uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-80"
+                    className="flex items-center gap-1.5 panel-glass-ink px-4 py-2 font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)] transition-opacity hover:opacity-80"
                   >
                     <Tag className="size-3" /> {t("members.postCta")}
                   </button>

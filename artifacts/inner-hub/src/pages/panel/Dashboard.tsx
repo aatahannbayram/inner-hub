@@ -339,16 +339,16 @@ export default function Dashboard({ userName = "Ata" }: { userName?: string }) {
       </FadeIn>
 
       <FadeIn delay={0.08}>
-        <div className="relative overflow-hidden panel-glass-ink p-5 text-[var(--bone)] sm:p-6">
+        <div className="relative overflow-hidden panel-glass-ink p-5 text-[var(--bone-fixed)] sm:p-6">
           <AsciiField tone="dark" />
           <AmbientCardBackground />
           <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0">
-              <p className="mb-1 font-mono text-label uppercase tracking-widest text-[var(--bone)]/57">
+              <p className="mb-1 font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)]/57">
                 {t("dashboard.newTerm")}
               </p>
-              <p className="text-lg font-light text-[var(--bone)]">{t("dashboard.enrollCourse2")}</p>
-              <p className="text-sm text-[var(--bone)]/50">
+              <p className="text-lg font-light text-[var(--bone-fixed)]">{t("dashboard.enrollCourse2")}</p>
+              <p className="text-sm text-[var(--bone-fixed)]/50">
                 <span lang="en">inner·hub</span> · {t("dashboard.termApplicationsOpen")}
               </p>
             </div>

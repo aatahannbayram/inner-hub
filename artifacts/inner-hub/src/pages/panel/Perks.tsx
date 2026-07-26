@@ -244,12 +244,12 @@ function PerkDetail({
           </div>
 
           {perk.code && (
-            <div className="panel-glass-ink p-4 text-[var(--bone)]">
-              <p className="mb-2 font-mono text-label uppercase tracking-widest text-[var(--bone)]/62">
+            <div className="panel-glass-ink p-4 text-[var(--bone-fixed)]">
+              <p className="mb-2 font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)]/62">
                 {t("perks.activationCode")}
               </p>
               <div className="flex items-center justify-between gap-3">
-                <code className="font-mono text-sm tracking-wider text-[var(--bone)]">{perk.code}</code>
+                <code className="font-mono text-sm tracking-wider text-[var(--bone-fixed)]">{perk.code}</code>
                 <button
                   type="button"
                   onClick={copyCode}
@@ -268,7 +268,7 @@ function PerkDetail({
             href={perk.partnerUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex w-full items-center justify-center gap-2 panel-glass-ink px-4 py-3 font-mono text-caption uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-85"
+            className="flex w-full items-center justify-center gap-2 panel-glass-ink px-4 py-3 font-mono text-caption uppercase tracking-widest text-[var(--bone-fixed)] transition-opacity hover:opacity-85"
           >
             {t("perks.goPartner")} <ExternalLink className="size-3.5" />
           </a>
@@ -502,11 +502,11 @@ export default function Perks() {
                   key={perk.id}
                   type="button"
                   onClick={() => setSelected(perk)}
-                  className="group relative flex min-h-[160px] flex-col justify-between overflow-hidden panel-glass-ink p-5 text-left text-[var(--bone)] transition-opacity hover:opacity-95 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--ink)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bone)]"
+                  className="group relative flex min-h-[160px] flex-col justify-between overflow-hidden panel-glass-ink p-5 text-left text-[var(--bone-fixed)] transition-opacity hover:opacity-95 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--ink)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bone)]"
                 >
                   <AmbientCardBackground />
                   <div className="relative z-10">
-                    <p className="mb-2 font-mono text-label uppercase tracking-widest text-[var(--bone)]/57">
+                    <p className="mb-2 font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)]/57">
                       <span lang="en">{perk.brand}</span> · {perk.badge}
                     </p>
                     <h2
@@ -516,7 +516,7 @@ export default function Perks() {
                       {perk.title}
                     </h2>
                   </div>
-                  <span className="relative z-10 mt-4 inline-flex items-center gap-1.5 font-mono text-label uppercase tracking-widest text-[var(--bone)]/70 transition-colors group-hover:text-[var(--bone)]">
+                  <span className="relative z-10 mt-4 inline-flex items-center gap-1.5 font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)]/70 transition-colors group-hover:text-[var(--bone-fixed)]">
                     {t("perks.openDetail")} <ArrowRight className="size-3" />
                   </span>
                   <span className="pointer-events-none absolute bottom-3 right-3 z-10 size-8 bg-[var(--inner-green)]" />

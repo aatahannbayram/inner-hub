@@ -136,7 +136,7 @@ const DEFAULT_PREFS: SettingsPrefs = {
   showOnline: true,
   allowMatch: true,
   analyticsConsent: true,
-  theme: "light",
+  theme: "dark",
   lang: "tr",
   compactMode: false,
   onboardingCompleted: false,

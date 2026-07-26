@@ -7,7 +7,7 @@ import { ThemeProvider, applyTheme, THEME_STORAGE_KEY, type ThemeMode } from "@/
 try {
   const stored = window.localStorage.getItem(THEME_STORAGE_KEY);
   const mode: ThemeMode =
-    stored === "light" || stored === "dark" || stored === "system" ? stored : "light";
+    stored === "light" || stored === "dark" || stored === "system" ? stored : "dark";
   applyTheme(mode);
 } catch {
   /* localStorage yoksa light kalır */

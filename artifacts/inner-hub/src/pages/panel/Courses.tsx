@@ -213,7 +213,7 @@ function CourseCard({
           {course.isEnrolled ? (
             <button
               onClick={() => setExpanded((v) => !v)}
-              className="flex items-center gap-2 panel-glass-ink px-4 py-2 font-mono text-label uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-80"
+              className="flex items-center gap-2 panel-glass-ink px-4 py-2 font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)] transition-opacity hover:opacity-80"
             >
               {course.progressPct > 0 ? t("courses.continue") : t("courses.start")}
               <ChevronRight className="size-3" />
@@ -223,7 +223,7 @@ function CourseCard({
               type="button"
               disabled={busy}
               onClick={() => onEnroll?.(course.id)}
-              className="flex items-center gap-2 panel-glass-ink px-4 py-2 font-mono text-label uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-80 disabled:opacity-40"
+              className="flex items-center gap-2 panel-glass-ink px-4 py-2 font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)] transition-opacity hover:opacity-80 disabled:opacity-40"
             >
               {t("courses.enroll")}
               <ChevronRight className="size-3" />

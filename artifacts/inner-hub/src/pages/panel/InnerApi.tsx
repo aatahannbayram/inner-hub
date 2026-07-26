@@ -237,21 +237,21 @@ export default function InnerApi() {
     <div className="min-w-0 space-y-8 max-w-4xl overflow-x-hidden">
       {/* Hero banner */}
       <FadeIn>
-        <div className="relative overflow-hidden panel-glass-ink p-6 text-[var(--bone)] sm:p-8">
+        <div className="relative overflow-hidden panel-glass-ink p-6 text-[var(--bone-fixed)] sm:p-8">
           <AsciiField tone="dark" />
           <AmbientCardBackground />
           <div className="relative z-10 flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <p className="font-mono text-label font-semibold uppercase tracking-widest text-[var(--bone)]/60 mb-2">
+              <p className="font-mono text-label font-semibold uppercase tracking-widest text-[var(--bone-fixed)]/60 mb-2">
                 {t("api.eyebrow")}
               </p>
               <h1
-                className="font-serif font-display text-3xl text-[var(--bone)] sm:text-4xl md:text-5xl"
+                className="font-serif font-display text-3xl text-[var(--bone-fixed)] sm:text-4xl md:text-5xl"
                 style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
               >
-                <Lockup suffix="api" className="text-[var(--bone)]" />
+                <Lockup suffix="api" className="text-[var(--bone-fixed)]" />
               </h1>
-              <p className="mt-2 max-w-md text-sm text-[var(--bone)]/65 font-light">
+              <p className="mt-2 max-w-md text-sm text-[var(--bone-fixed)]/65 font-light">
                 {t("api.subtitle")}
               </p>
             </div>
@@ -306,7 +306,7 @@ export default function InnerApi() {
               <button
                 disabled={creating || !newKeyName.trim()}
                 onClick={() => void createKey()}
-                className="flex shrink-0 items-center gap-1.5 panel-glass-ink px-3 py-1.5 font-mono text-label font-semibold uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-80 disabled:opacity-40"
+                className="flex shrink-0 items-center gap-1.5 panel-glass-ink px-3 py-1.5 font-mono text-label font-semibold uppercase tracking-widest text-[var(--bone-fixed)] transition-opacity hover:opacity-80 disabled:opacity-40"
               >
                 <Plus className="size-3" /> {creating ? t("api.creating") : t("api.createKey")}
               </button>
