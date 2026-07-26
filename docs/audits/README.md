@@ -14,6 +14,7 @@ Yeniden kullanılabilir analiz playbook’ları ve Inner-Hub instance’ları.
 | [inner-hub-live-panel-handoff-2026-07-25.md](./inner-hub-live-panel-handoff-2026-07-25.md) | Handoff | Canlı panel wave (API haritası, kalan mock, Cursor↔Claude paralel çalışma) |
 | [inner-hub-parallel-tracks-2026-07-25.md](./inner-hub-parallel-tracks-2026-07-25.md) | Plan | Cursor×Claude çakışmasız track’ler + Claude yapıştırma prompt’u |
 | [inner-hub-status-2026-07-25.md](./inner-hub-status-2026-07-25.md) | Durum | "Nerede kaldık" özeti — deploy durumu, Cursor'ın aktif dosyaları, bekleyen kararlar (dark theme, gsap lazy-load) |
+| [inner-hub-dark-mode-hero-text-fix-2026-07-26.md](./inner-hub-dark-mode-hero-text-fix-2026-07-26.md) | Fix | Dark modda hero başlık/paragraf görünmezliği (Kurslar/Ayrıcalıklar/Katılımcılar/Signal) — kök sebep + düzeltme + Node sürüm notu |
 
 **Sıra:** önce Brand & Panel → sonra Deep UX.  
 **Paralel agent’lar:** handoff + `inner-hub-parallel-tracks-2026-07-25.md`.
