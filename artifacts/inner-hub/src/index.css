@@ -227,12 +227,8 @@
     scrollbar-gutter: stable;
   }
   html.dark body {
-    /* Footer ink-fixed + full-bleed ambient light wash (pure gradients, no seams) */
+    /* Plain black base — ambient glow only shows once .panel-ambient mounts inside the panel shell */
     background-color: var(--ink-fixed);
-    background-image:
-      radial-gradient(ellipse 90% 75% at 12% -10%, rgba(24, 255, 133, 0.10), transparent 62%),
-      radial-gradient(ellipse 80% 70% at 100% 110%, rgba(24, 255, 133, 0.06), transparent 60%);
-    background-attachment: fixed, fixed;
   }
   ::selection {
     background-color: var(--inner-green);
