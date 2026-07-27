@@ -56,7 +56,7 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
       onClick={cycle}
       title={`${t("settings.theme")}: ${label}`}
       aria-label={`${t("settings.theme")}: ${label}`}
-      className={`hit-40 relative inline-flex items-center justify-center text-[var(--ink-muted)] transition-colors hover:text-[var(--ink)] ${className}`}
+      className={`relative z-10 inline-flex size-11 shrink-0 items-center justify-center text-[var(--ink-muted)] transition-colors hover:text-[var(--ink)] dark:text-white/55 dark:hover:text-white ${className}`}
     >
       {isDark ? <Moon className="size-4" strokeWidth={1.6} /> : <Sun className="size-4" strokeWidth={1.6} />}
     </button>

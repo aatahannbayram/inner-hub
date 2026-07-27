@@ -3,14 +3,14 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "wouter";
 import { useQueryClient } from "@tanstack/react-query";
-import { LogOut, Menu, X, Bell, ChevronLeft, ChevronRight, Sparkles, CalendarDays, TrendingUp, UserPlus, Zap } from "lucide-react";
+import { LogOut, Menu, X, Bell, ChevronLeft, ChevronRight, Sparkles, CalendarDays, TrendingUp, UserPlus, Zap, Search } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { PanelNav } from "./PanelNav";
 import { PanelPageTransition } from "./PanelPageTransition";
 import { PanelOnboarding } from "./PanelOnboarding";
 import { LegalAcceptModal } from "./LegalAcceptModal";
-import { PanelSearch, SearchTrigger } from "./PanelSearch";
+import { PanelSearch, HeaderIconButton, SearchTriggerBar } from "./PanelSearch";
 import { useApiQuery } from "@/hooks/useApiQuery";
 import { apiUrl } from "@/lib/api";
 import { Lockup } from "@/components/Lockup";
@@ -396,7 +396,7 @@ function MobileDrawer({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[80] bg-[var(--ink-fixed)]/30 backdrop-blur-sm lg:hidden"
+            className="fixed inset-0 z-[70] bg-[var(--ink-fixed)]/30 backdrop-blur-sm lg:hidden"
             onClick={onClose}
           />
           <motion.aside
@@ -404,7 +404,7 @@ function MobileDrawer({
             animate={{ x: 0 }}
             exit={{ x: "-100%" }}
             transition={{ type: "spring", stiffness: 380, damping: 36 }}
-            className="panel-glass-strong fixed inset-y-0 left-0 z-[90] flex w-[min(280px,85vw)] flex-col border-r border-[var(--ink)]/[0.08] lg:hidden"
+            className="panel-glass-strong fixed inset-y-0 left-0 z-[75] flex w-[min(280px,85vw)] flex-col border-r border-[var(--ink)]/[0.08] lg:hidden"
           >
             <div className="flex h-[60px] items-center justify-between border-b border-[var(--ink)]/[0.08] px-4">
               <BrandMark collapsed={false} />
@@ -440,7 +440,13 @@ function ShellInner({ user, children, onLogout }: PanelShellProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [searchFocusSignal, setSearchFocusSignal] = useState(0);
   const [location] = useLocation();
+
+  const openSearch = () => {
+    setSearchOpen(true);
+    setSearchFocusSignal((n) => n + 1);
+  };
   const mainRef = useRef<HTMLElement>(null);
   const prevLocation = useRef(location);
   const queryClient = useQueryClient();
@@ -487,80 +493,74 @@ function ShellInner({ user, children, onLogout }: PanelShellProps) {
       />
 
       <div className="relative z-[1] flex min-h-0 min-w-0 flex-1 flex-col">
-        {/* Top bar */}
-        <header className="z-40 flex h-14 shrink-0 items-center justify-between gap-2 border-b border-[var(--ink)]/[0.08] panel-glass-strong px-3 sm:h-[60px] sm:px-5 lg:px-6 dark:border-white/10">
-          <button
-            type="button"
-            data-onboarding="nav"
+        {/* Top bar — mobilde sabit 44px hedefler, hit-40 yok (çakışma yapıyordu) */}
+        <header className="relative z-40 flex h-14 shrink-0 items-center gap-1 border-b border-[var(--ink)]/[0.08] panel-glass-strong px-2 sm:h-[60px] sm:gap-2 sm:px-5 lg:px-6 dark:border-white/10">
+          <HeaderIconButton
+            label={t("shell.openMenu")}
             onClick={() => setMobileOpen(true)}
-            className="hit-40 relative text-[var(--ink-body)] hover:text-[var(--ink)] lg:hidden"
-            aria-label={t("shell.openMenu")}
+            className="lg:hidden text-[var(--ink-body)] hover:text-[var(--ink)]"
+            data-onboarding="nav"
           >
             <Menu className="size-5" />
-          </button>
-          <div className="lg:hidden">
+          </HeaderIconButton>
+
+          <div className="min-w-0 shrink lg:hidden">
             <BrandMark collapsed={false} />
           </div>
 
-          <div className="hidden min-w-0 flex-1 justify-center px-4 lg:flex">
-            <SearchTrigger variant="bar" onClick={() => setSearchOpen(true)} />
+          <div className="mx-auto hidden min-w-0 flex-1 justify-center px-4 lg:flex">
+            <SearchTriggerBar onClick={openSearch} />
           </div>
 
-          <div className="ml-auto flex items-center gap-2 sm:gap-3">
-            <span className="lg:hidden">
-              <SearchTrigger variant="icon" onClick={() => setSearchOpen(true)} />
-            </span>
+          <div className="ml-auto flex shrink-0 items-center gap-0.5 sm:gap-1">
+            <HeaderIconButton label={t("search.open")} onClick={openSearch} className="lg:hidden">
+              <Search className="size-4" />
+            </HeaderIconButton>
             <ThemeToggle />
-            {/* Online indicator */}
-            <div className="hidden items-center gap-1.5 sm:flex">
-              <span className="size-1.5 rounded-full bg-[var(--inner-green)] animate-beacon" />
-              <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)] dark:text-white/45">
-                {t("common.online")}
-              </span>
-            </div>
-
-            {/* Notifications */}
-            <button
-              type="button"
-              data-onboarding="notifications"
-              onClick={() => setNotifOpen((o) => !o)}
-              className="hit-40 relative text-[var(--ink-muted)] transition-colors hover:text-[var(--ink)] dark:text-white/45 dark:hover:text-white"
-              aria-label={t("shell.notifications")}
-            >
-              <Bell className="size-4" />
-              {notifCount > 0 && (
-                <span className="absolute -right-1 -top-1 flex size-3.5 items-center justify-center bg-[var(--inner-green)] font-mono text-label text-black">
-                  {notifCount}
+            <div className="relative">
+              <HeaderIconButton
+                label={t("shell.notifications")}
+                onClick={() => setNotifOpen((o) => !o)}
+                data-onboarding="notifications"
+              >
+                <span className="relative inline-flex">
+                  <Bell className="size-4" />
+                  {notifCount > 0 && (
+                    <span className="absolute -right-1.5 -top-1.5 flex size-3.5 items-center justify-center bg-[var(--inner-green)] font-mono text-[9px] text-black">
+                      {notifCount > 9 ? "9+" : notifCount}
+                    </span>
+                  )}
                 </span>
+              </HeaderIconButton>
+              {notifOpen && (
+                <NotifPanel
+                  onClose={() => setNotifOpen(false)}
+                  count={notifCount}
+                  onClear={() => {
+                    queryClient.setQueryData(["notifications"], (prev: typeof notifData) =>
+                      prev
+                        ? {
+                            ...prev,
+                            unreadCount: 0,
+                            notifications: prev.notifications.map((n) => ({ ...n, isRead: true })),
+                          }
+                        : prev,
+                    );
+                  }}
+                />
               )}
-            </button>
-            {notifOpen && (
-              <NotifPanel
-                onClose={() => setNotifOpen(false)}
-                count={notifCount}
-                onClear={() => {
-                  queryClient.setQueryData(["notifications"], (prev: typeof notifData) =>
-                    prev
-                      ? {
-                          ...prev,
-                          unreadCount: 0,
-                          notifications: prev.notifications.map((n) => ({ ...n, isRead: true })),
-                        }
-                      : prev,
-                  );
-                }}
-              />
-            )}
-
-            {/* Avatar */}
+            </div>
             {user.avatarUrl ? (
               <img
                 src={user.avatarUrl}
-                alt={user.name}
-                className="size-7 object-cover"
+                alt=""
+                className="ml-0.5 size-9 object-cover sm:size-8"
               />
             ) : (
-              <div className="flex size-7 items-center justify-center border border-white/10 bg-[var(--ink)] font-mono text-label uppercase text-[var(--bone)] dark:bg-white/10 dark:text-[#F4F1EC]">
+              <div
+                className="ml-0.5 flex size-9 items-center justify-center border border-[var(--ink)]/15 bg-[var(--ink)] font-mono text-label uppercase text-[var(--bone)] sm:size-8 dark:border-white/10 dark:bg-white/10 dark:text-[#F4F1EC]"
+                aria-hidden
+              >
                 {user.name.slice(0, 2)}
               </div>
             )}
@@ -581,7 +581,11 @@ function ShellInner({ user, children, onLogout }: PanelShellProps) {
 
       <LegalAcceptModal />
       <PanelOnboarding userName={user.name} />
-      <PanelSearch open={searchOpen} onOpenChange={setSearchOpen} />
+      <PanelSearch
+        open={searchOpen}
+        onOpenChange={setSearchOpen}
+        focusSignal={searchFocusSignal}
+      />
     </div>
   );
 }
