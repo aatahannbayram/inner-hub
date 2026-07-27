@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { ChevronDown, ChevronRight, BookOpen, CheckCircle2, Lock, Play, GraduationCap, TrendingUp } from "lucide-react";
+import { ChevronDown, ChevronRight, BookOpen, CheckCircle2, Lock, Play, GraduationCap, TrendingUp, ExternalLink } from "lucide-react";
+import { Link } from "wouter";
 import { FadeIn } from "@/components/FadeIn";
 import { AnimatedHeading } from "@/components/AnimatedHeading";
 import { HeroVideo } from "@/components/HeroVideo";
@@ -11,6 +12,9 @@ import { HeroQuickStat } from "@/components/panel/HeroQuickStat";
 import { LessonPlayerModal } from "@/components/panel/LessonPlayerModal";
 import { cleanDisplayText } from "@/lib/displayText";
 import { useT } from "@/i18n";
+
+type CourseFormat = "vod" | "live" | "hybrid";
+type RoomFilter = "mine" | "all";
 
 interface Lesson {
   id: number;
@@ -39,6 +43,9 @@ interface Course {
   totalDuration: string;
   isEnrolled: boolean;
   tag: string;
+  format: CourseFormat;
+  meetUrl: string | null;
+  passCost: number;
   modules: Module[];
 }
 
@@ -64,6 +71,9 @@ interface RawCourse {
   term?: number;
   progressPct?: number;
   isEnrolled?: boolean;
+  format?: CourseFormat;
+  meetUrl?: string | null;
+  passCost?: number;
   modules?: RawModule[];
 }
 
@@ -104,6 +114,9 @@ function mapApiCourse(row: RawCourse, t: ReturnType<typeof useT>): Course {
     totalDuration: totalSeconds > 0 ? formatLessonDuration(totalSeconds) : "",
     isEnrolled: row.isEnrolled ?? false,
     tag: t("courses.tag"),
+    format: row.format ?? "vod",
+    meetUrl: row.meetUrl ?? null,
+    passCost: row.passCost ?? 0,
     modules,
   };
 }
@@ -199,9 +212,17 @@ function CourseCard({
               <span className="panel-glass px-1.5 py-0.5 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
                 {course.tag}
               </span>
+              <span className="panel-glass px-1.5 py-0.5 font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
+                {course.format}
+              </span>
               {!course.isEnrolled && (
                 <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
                   {t("courses.enrollRequired")}
+                </span>
+              )}
+              {!course.isEnrolled && course.format !== "vod" && course.passCost > 0 && (
+                <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
+                  {t("courses.passCostHint", { n: course.passCost })}
                 </span>
               )}
             </div>
@@ -265,6 +286,17 @@ function CourseCard({
 
         {/* Actions */}
         <div className="mt-4 flex flex-wrap items-center gap-2 sm:gap-3">
+          {course.isEnrolled && course.meetUrl ? (
+            <a
+              href={course.meetUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center gap-2 panel-glass-ink px-4 py-2 font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)] transition-opacity hover:opacity-80"
+            >
+              {t("courses.joinMeet")}
+              <ExternalLink className="size-3" />
+            </a>
+          ) : null}
           {course.isEnrolled ? (
             <button
               onClick={() => setExpanded((v) => !v)}
@@ -446,10 +478,22 @@ export default function CoursesPage() {
   const queryClient = useQueryClient();
   const [busyId, setBusyId] = useState<number | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [passRequired, setPassRequired] = useState(false);
   const [activeLesson, setActiveLesson] = useState<Lesson | null>(null);
+  const [room, setRoom] = useState<RoomFilter>(() => {
+    const p = new URLSearchParams(window.location.search).get("room");
+    return p === "all" ? "all" : "mine";
+  });
+
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    url.searchParams.set("room", room);
+    window.history.replaceState({}, "", `${url.pathname}${url.search}`);
+  }, [room]);
+
   const { data, isLoading, isError, error, refetch } = useApiQuery<{ courses: RawCourse[] }>(
-    ["courses"],
-    "/api/courses",
+    ["courses", room],
+    `/api/courses?room=${room}`,
   );
   const courses = (data?.courses ?? []).map((row) => mapApiCourse(row, t));
   const loading = isLoading;
@@ -464,12 +508,18 @@ export default function CoursesPage() {
   const enroll = async (id: number) => {
     setBusyId(id);
     setActionError(null);
+    setPassRequired(false);
     try {
       const res = await fetch(apiUrl(`/api/courses/${id}/enroll`), {
         method: "POST",
         credentials: "include",
       });
       const json = await res.json().catch(() => ({}));
+      if (res.status === 402) {
+        setPassRequired(true);
+        setActionError(t("courses.passRequired"));
+        return;
+      }
       if (!res.ok) throw new Error(json.error ?? t("courses.enrollFailed"));
       await queryClient.invalidateQueries({ queryKey: ["courses"] });
     } catch (e: any) {
@@ -487,6 +537,26 @@ export default function CoursesPage() {
         enrolledCount={enrolled.length}
         totalCount={courses.length}
       />
+
+      <FadeIn delay={0.01}>
+        <div className="flex w-full max-w-xs panel-glass sm:w-auto">
+          {(["mine", "all"] as RoomFilter[]).map((r) => (
+            <button
+              key={r}
+              type="button"
+              onClick={() => setRoom(r)}
+              className={[
+                "min-h-10 flex-1 px-4 py-2 font-mono text-label uppercase tracking-widest transition-colors sm:flex-none",
+                room === r
+                  ? "bg-[var(--ink)] text-[var(--bone)]"
+                  : "text-[var(--ink-body)] hover:text-[var(--ink)]",
+              ].join(" ")}
+            >
+              {r === "mine" ? t("courses.roomMine") : t("courses.roomAll")}
+            </button>
+          ))}
+        </div>
+      </FadeIn>
 
       {!loading && !isError && courses.length > 0 && (
         <FadeIn delay={0.02}>
@@ -519,9 +589,17 @@ export default function CoursesPage() {
         />
       )}
       {actionError && (
-        <p className="font-mono text-label text-[var(--error-ink)]" role="alert">
-          {actionError}
-        </p>
+        <div className="panel-glass space-y-2 p-4" role="alert">
+          <p className="font-mono text-label text-[var(--error-ink)]">{actionError}</p>
+          {passRequired && (
+            <Link
+              href="/panel/membership"
+              className="inline-block font-mono text-label uppercase tracking-widest text-[var(--ink)] underline-offset-4 hover:underline"
+            >
+              {t("courses.getPass")}
+            </Link>
+          )}
+        </div>
       )}
       {!loading && !isError && courses.length === 0 && (
         <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">

@@ -1,9 +1,11 @@
 import { useMemo, useState } from "react";
 import { Lockup } from "@/components/Lockup";
-import { Check, ArrowRight, Zap, Star, Crown } from "lucide-react";
+import { Check, ArrowRight, Star, Crown, Ticket } from "lucide-react";
 import { FadeIn } from "@/components/FadeIn";
 import { CurrencyValue } from "@/components/panel/CurrencyValue";
 import { AmbientCardBackground } from "@/components/panel/AmbientCardBackground";
+import { useApiQuery } from "@/hooks/useApiQuery";
+import { apiUrl } from "@/lib/api";
 import { useT } from "@/i18n";
 
 interface Plan {
@@ -18,25 +20,28 @@ interface Plan {
   highlighted?: boolean;
 }
 
+type PassMe = { balance: number; monthlyGrant: number; passPriceTry: number };
+type AuthMe = { user: { id: number } };
+
 async function createCheckoutSession(
-  type: "membership" | "event",
-  planId?: "annual" | "founder",
-  eventId?: number,
+  type: "membership" | "pass",
+  opts?: { planId?: "annual" | "founder"; userId?: number },
 ) {
-  const res = await fetch("/api/payments/checkout-session", {
+  const res = await fetch(apiUrl("/api/payments/checkout-session"), {
     method: "POST",
+    credentials: "include",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       type,
-      planId,
-      eventId,
-      successUrl: `${window.location.origin}/panel/payment/success`,
+      planId: opts?.planId,
+      userId: opts?.userId,
+      successUrl: `${window.location.origin}/panel/payment/success?type=${type}`,
       cancelUrl: `${window.location.origin}/panel/membership`,
     }),
   });
 
   if (!res.ok) {
-    const err = await res.json();
+    const err = await res.json().catch(() => ({}));
     throw new Error(err.error ?? "checkout");
   }
 
@@ -54,7 +59,7 @@ function PlanCard({ plan }: { plan: Plan }) {
     setLoading(true);
     setError("");
     try {
-      await createCheckoutSession("membership", plan.id);
+      await createCheckoutSession("membership", { planId: plan.id });
     } catch (e: any) {
       setError(e.message === "checkout" ? t("membership.checkoutFailed") : e.message);
     } finally {
@@ -86,112 +91,173 @@ function PlanCard({ plan }: { plan: Plan }) {
       )}
 
       <div className="relative z-10 flex flex-1 flex-col">
-      {/* Header */}
-      <div className="mb-5">
-        <div
-          className={[
-            "mb-3 flex size-9 items-center justify-center border",
-            plan.highlighted
-              ? "border-[var(--bone)]/20"
-              : "border-[var(--ink)]/10",
-          ].join(" ")}
-        >
-          <Icon
+        <div className="mb-5">
+          <div
             className={[
-              "size-4",
-              plan.highlighted ? "text-[var(--bone)]/70" : "text-[var(--ink-body)]",
-            ].join(" ")}
-          />
-        </div>
-        <p
-          className={[
-            "font-mono text-label uppercase tracking-widest",
-            plan.highlighted ? "text-[var(--bone)]/50" : "text-[var(--ink-body)]",
-          ].join(" ")}
-        >
-          {plan.name}
-        </p>
-        <div className="mt-1 flex items-baseline gap-1">
-          <span
-            className={[
-              "font-serif text-4xl",
-              plan.highlighted ? "text-[var(--bone)]" : "text-[var(--ink)]",
-            ].join(" ")}
-            style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
-          >
-            <CurrencyValue value={plan.price} />
-          </span>
-          <span
-            className={[
-              "font-mono text-caption",
-              plan.highlighted ? "text-[var(--bone)]/57" : "text-[var(--ink-muted)]",
+              "mb-3 flex size-9 items-center justify-center border",
+              plan.highlighted ? "border-[var(--bone)]/20" : "border-[var(--ink)]/10",
             ].join(" ")}
           >
-            {plan.period}
-          </span>
-        </div>
-        <p
-          className={[
-            "mt-2 text-sm leading-relaxed",
-            plan.highlighted ? "text-[var(--bone)]/60" : "text-[var(--ink-muted)]",
-          ].join(" ")}
-        >
-          {plan.description}
-        </p>
-      </div>
-
-      {/* Features */}
-      <ul className="mb-6 flex-1 space-y-2">
-        {plan.features.map((f) => (
-          <li key={f} className="flex items-start gap-2">
-            <Check
+            <Icon
               className={[
-                "mt-0.5 size-3.5 shrink-0",
-                plan.highlighted ? "text-[var(--success-ink)]" : "text-[var(--ink-body)]",
-              ].join(" ")}
-            />
-            <span
-              className={[
-                "text-sm",
+                "size-4",
                 plan.highlighted ? "text-[var(--bone)]/70" : "text-[var(--ink-body)]",
               ].join(" ")}
+            />
+          </div>
+          <p
+            className={[
+              "font-mono text-label uppercase tracking-widest",
+              plan.highlighted ? "text-[var(--bone)]/50" : "text-[var(--ink-body)]",
+            ].join(" ")}
+          >
+            {plan.name}
+          </p>
+          <div className="mt-1 flex items-baseline gap-1">
+            <span
+              className={[
+                "font-serif text-4xl",
+                plan.highlighted ? "text-[var(--bone)]" : "text-[var(--ink)]",
+              ].join(" ")}
+              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
             >
-              {f}
+              <CurrencyValue value={plan.price} />
             </span>
-          </li>
-        ))}
-      </ul>
+            <span
+              className={[
+                "font-mono text-caption",
+                plan.highlighted ? "text-[var(--bone)]/57" : "text-[var(--ink-muted)]",
+              ].join(" ")}
+            >
+              {plan.period}
+            </span>
+          </div>
+          <p
+            className={[
+              "mt-2 text-sm leading-relaxed",
+              plan.highlighted ? "text-[var(--bone)]/60" : "text-[var(--ink-muted)]",
+            ].join(" ")}
+          >
+            {plan.description}
+          </p>
+        </div>
 
-      {/* Error */}
+        <ul className="mb-6 flex-1 space-y-2">
+          {plan.features.map((f) => (
+            <li key={f} className="flex items-start gap-2">
+              <Check
+                className={[
+                  "mt-0.5 size-3.5 shrink-0",
+                  plan.highlighted ? "text-[var(--success-ink)]" : "text-[var(--ink-body)]",
+                ].join(" ")}
+              />
+              <span
+                className={[
+                  "text-sm",
+                  plan.highlighted ? "text-[var(--bone)]/70" : "text-[var(--ink-body)]",
+                ].join(" ")}
+              >
+                {f}
+              </span>
+            </li>
+          ))}
+        </ul>
+
+        {error && (
+          <p className="mb-3 font-mono text-label uppercase tracking-widest text-[var(--error-ink)]">
+            {error}
+          </p>
+        )}
+
+        <button
+          onClick={handleBuy}
+          disabled={loading}
+          className={[
+            "flex w-full items-center justify-between border px-5 py-3 font-mono text-caption uppercase tracking-widest transition-opacity disabled:opacity-40 hover:opacity-80",
+            plan.highlighted
+              ? "border-[var(--bone-fixed)]/20 bg-[var(--bone-fixed)] text-[var(--ink-fixed)]"
+              : "border-[var(--ink)] bg-[var(--ink)] text-[var(--bone)]",
+          ].join(" ")}
+        >
+          <span>{loading ? t("membership.redirecting") : t("membership.buy")}</span>
+          <ArrowRight className="size-3.5" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function CirclePassCard() {
+  const t = useT();
+  const { data: passData } = useApiQuery<PassMe>(["passes-me"], "/api/passes/me");
+  const { data: meData } = useApiQuery<AuthMe>(["auth-me"], "/api/auth/me");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const balance = passData?.balance ?? 0;
+  const monthlyGrant = passData?.monthlyGrant ?? 3;
+  const price = passData?.passPriceTry ?? 299;
+
+  const buyPass = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const userId = meData?.user?.id;
+      await createCheckoutSession("pass", { userId });
+    } catch (e: any) {
+      setError(e.message === "checkout" ? t("membership.checkoutFailed") : e.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="border-t border-[var(--ink)]/[0.08] pt-8">
+      <div className="flex flex-col gap-4 panel-glass p-5 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-start gap-4">
+          <div className="flex size-9 items-center justify-center panel-glass">
+            <Ticket className="size-4 text-[var(--ink-body)]" />
+          </div>
+          <div>
+            <p className="mb-0.5 font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
+              {t("membership.circlePass")}
+            </p>
+            <p className="text-sm font-medium text-[var(--ink)]">
+              {t("membership.passBalance", { n: balance })}
+            </p>
+            <p className="mt-0.5 text-sm text-[var(--ink-muted)]">
+              {t("membership.passMonthly", { balance, grant: monthlyGrant })}
+            </p>
+            <p className="mt-1 font-mono text-label text-[var(--ink-subtle)]">
+              {t("membership.passHint")}
+            </p>
+          </div>
+        </div>
+        <div className="flex shrink-0 items-center gap-4">
+          <button
+            type="button"
+            onClick={() => void buyPass()}
+            disabled={loading || !meData?.user?.id}
+            className="flex items-center gap-2 panel-glass-ink px-4 py-2 font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)] transition-opacity hover:opacity-80 disabled:opacity-40"
+          >
+            {loading
+              ? t("membership.redirecting")
+              : t("membership.buyPass", { price })}
+            <ArrowRight className="size-3" />
+          </button>
+        </div>
+      </div>
       {error && (
-        <p className="mb-3 font-mono text-label uppercase tracking-widest text-[var(--error-ink)]">
+        <p className="mt-2 font-mono text-label uppercase tracking-widest text-[var(--error-ink)]">
           {error}
         </p>
       )}
-
-      {/* CTA */}
-      <button
-        onClick={handleBuy}
-        disabled={loading}
-        className={[
-          "flex w-full items-center justify-between border px-5 py-3 font-mono text-caption uppercase tracking-widest transition-opacity disabled:opacity-40 hover:opacity-80",
-          plan.highlighted
-            ? "border-[var(--bone-fixed)]/20 bg-[var(--bone-fixed)] text-[var(--ink-fixed)]"
-            : "border-[var(--ink)] bg-[var(--ink)] text-[var(--bone)]",
-        ].join(" ")}
-      >
-        <span>{loading ? t("membership.redirecting") : t("membership.buy")}</span>
-        <ArrowRight className="size-3.5" />
-      </button>
-      </div>
     </div>
   );
 }
 
 export default function Membership() {
   const t = useT();
-  const [ticketLoading, setTicketLoading] = useState(false);
-  const [ticketError, setTicketError] = useState("");
 
   const PLANS: Plan[] = useMemo(
     () => [
@@ -210,6 +276,7 @@ export default function Membership() {
           t("membership.feat5"),
           t("membership.feat6"),
           t("membership.feat7"),
+          t("membership.featPasses"),
         ],
         highlighted: true,
         badge: t("membership.popular"),
@@ -229,43 +296,30 @@ export default function Membership() {
           t("membership.featF5"),
           t("membership.featF6"),
           t("membership.featF7"),
+          t("membership.featPasses"),
         ],
       },
     ],
     [t],
   );
 
-  const handleEventTicket = async () => {
-    setTicketLoading(true);
-    setTicketError("");
-    try {
-      await createCheckoutSession("event", undefined, 1);
-    } catch (e: any) {
-      setTicketError(e.message === "checkout" ? t("membership.checkoutFailed") : e.message);
-    } finally {
-      setTicketLoading(false);
-    }
-  };
-
   return (
-    <div className="min-w-0 space-y-10 max-w-4xl overflow-x-hidden">
-      {/* Header */}
+    <div className="min-w-0 max-w-4xl space-y-10 overflow-x-hidden">
       <FadeIn>
         <div>
-          <div className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)] mb-2"><Lockup suffix="hub" className="text-[var(--ink)]" fontSize="1.15rem" /></div>
+          <div className="mb-2 font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
+            <Lockup suffix="hub" className="text-[var(--ink)]" fontSize="1.15rem" />
+          </div>
           <h1
-            className="font-serif font-display text-4xl md:text-5xl text-[var(--ink)]"
+            className="font-serif font-display text-4xl text-[var(--ink)] md:text-5xl"
             style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
           >
             {t("membership.title")}
           </h1>
-          <p className="mt-2 text-sm text-[var(--ink-muted)] font-light">
-            {t("membership.subtitle")}
-          </p>
+          <p className="mt-2 text-sm font-light text-[var(--ink-muted)]">{t("membership.subtitle")}</p>
         </div>
       </FadeIn>
 
-      {/* Plans */}
       <div>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {PLANS.map((plan) => (
@@ -274,50 +328,10 @@ export default function Membership() {
         </div>
       </div>
 
-      {/* Event ticket section */}
-      <div>
-        <div className="border-t border-[var(--ink)]/[0.08] pt-8">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between panel-glass p-5">
-            <div className="flex items-start gap-4">
-              <div className="flex size-9 items-center justify-center panel-glass">
-                <Zap className="size-4 text-[var(--ink-body)]" />
-              </div>
-              <div>
-                <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)] mb-0.5">
-                  {t("membership.oneTime")}
-                </p>
-                <p className="text-sm font-medium text-[var(--ink)]">{t("membership.eventTicket")}</p>
-                <p className="mt-0.5 text-sm text-[var(--ink-muted)]">{t("membership.eventTicketDesc")}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-4 shrink-0">
-              <span
-                className="font-serif text-2xl text-[var(--ink)]"
-                style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
-              >
-                <CurrencyValue value="₺199" />
-              </span>
-              <button
-                onClick={handleEventTicket}
-                disabled={ticketLoading}
-                className="flex items-center gap-2 panel-glass px-4 py-2 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)] transition-all hover:border-[var(--ink)] hover:text-[var(--ink)] disabled:opacity-40"
-              >
-                {ticketLoading ? t("membership.redirecting") : t("membership.buyTicket")}
-                <ArrowRight className="size-3" />
-              </button>
-            </div>
-          </div>
-          {ticketError && (
-            <p className="mt-2 font-mono text-label uppercase tracking-widest text-[var(--error-ink)]">
-              {ticketError}
-            </p>
-          )}
-        </div>
-      </div>
+      <CirclePassCard />
 
-      {/* Trust note */}
       <div className="border-t border-[var(--ink)]/[0.08] pt-4">
-        <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)] text-center">
+        <p className="text-center font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)]">
           {t("membership.trust")}
         </p>
       </div>

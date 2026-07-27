@@ -8,6 +8,9 @@ import { apiUrl } from "@/lib/api";
 import { LoadingBlock, ErrorState, CourseCardSkeleton } from "@/components/panel/Skeletons";
 import { useT } from "@/i18n";
 
+type CourseFormat = "vod" | "live" | "hybrid";
+type Audience = "all" | "founder" | "investor" | "builder" | "company";
+
 type AdminLesson = {
   id: number;
   title: string;
@@ -22,8 +25,32 @@ type AdminCourse = {
   term: number;
   order: number;
   isPublished: boolean;
+  format: CourseFormat;
+  startsAt: string | null;
+  endsAt: string | null;
+  meetUrl: string | null;
+  audience: Audience;
+  passCost: number;
   modules: AdminModule[];
 };
+
+function toDatetimeLocal(iso: string | null | undefined): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function fromDatetimeLocal(v: string): string | null {
+  if (!v.trim()) return null;
+  const d = new Date(v);
+  if (Number.isNaN(d.getTime())) return null;
+  return d.toISOString();
+}
+
+const FORMAT_OPTIONS: CourseFormat[] = ["vod", "live", "hybrid"];
+const AUDIENCE_OPTIONS: Audience[] = ["all", "founder", "investor", "builder", "company"];
 
 function formatDuration(sec: number | null): string {
   if (!sec) return "";
@@ -268,6 +295,13 @@ function ModuleAdminRow({ courseModule, onChanged }: { courseModule: AdminModule
 function CourseAdminCard({ course, onChanged }: { course: AdminCourse; onChanged: () => void }) {
   const t = useT();
   const totalLessons = course.modules.reduce((n, m) => n + m.lessons.length, 0);
+  const [meetUrl, setMeetUrl] = useState(course.meetUrl ?? "");
+  const [startsAt, setStartsAt] = useState(toDatetimeLocal(course.startsAt));
+  const [savingLive, setSavingLive] = useState(false);
+  const [notifying, setNotifying] = useState(false);
+  const format = course.format ?? "vod";
+  const audience = course.audience ?? "all";
+  const isLiveLike = format === "live" || format === "hybrid";
 
   const togglePublish = async () => {
     await fetch(apiUrl(`/api/courses/${course.id}`), {
@@ -279,27 +313,107 @@ function CourseAdminCard({ course, onChanged }: { course: AdminCourse; onChanged
     onChanged();
   };
 
+  const saveLiveFields = async () => {
+    setSavingLive(true);
+    try {
+      await fetch(apiUrl(`/api/courses/${course.id}`), {
+        method: "PATCH",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          meetUrl: meetUrl.trim() || null,
+          startsAt: fromDatetimeLocal(startsAt),
+        }),
+      });
+      onChanged();
+    } finally {
+      setSavingLive(false);
+    }
+  };
+
+  const notifyLive = async () => {
+    setNotifying(true);
+    try {
+      await fetch(apiUrl("/api/admin/live/notify"), {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refType: "course", refId: course.id, channel: "both" }),
+      });
+    } finally {
+      setNotifying(false);
+    }
+  };
+
   return (
     <div className="panel-glass">
       <div className="flex flex-wrap items-center justify-between gap-3 p-4">
         <div className="min-w-0">
           <p className="font-serif text-lg text-[var(--ink)]">{course.title}</p>
           <p className="mt-0.5 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
-            {t("courses.term", { n: course.term })} · {totalLessons} {t("courses.lessonsCount")}
+            {t("courses.term", { n: course.term })} · {totalLessons} {t("courses.lessonsCount")} ·{" "}
+            {format} · {audience}
+            {isLiveLike && course.passCost > 0 ? ` · ${course.passCost} pass` : ""}
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => void togglePublish()}
-          className={`px-2 py-0.5 font-mono text-label uppercase tracking-widest ${
-            course.isPublished
-              ? "border border-[var(--inner-green)]/30 bg-[var(--inner-green)]/8 text-[var(--success-ink)]"
-              : "border border-[var(--ink)]/20 bg-[var(--ink)]/[0.04] text-[var(--ink-body)]"
-          }`}
-        >
-          {course.isPublished ? t("courses.published") : t("courses.draft")}
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          {isLiveLike && (
+            <button
+              type="button"
+              disabled={notifying}
+              onClick={() => void notifyLive()}
+              className="px-2 py-0.5 font-mono text-label uppercase tracking-widest border border-[var(--ink)]/20 bg-[var(--ink)]/[0.04] text-[var(--ink-body)] transition-colors hover:border-[var(--ink)]/40 disabled:opacity-40"
+            >
+              {notifying ? "…" : t("courses.notify")}
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => void togglePublish()}
+            className={`px-2 py-0.5 font-mono text-label uppercase tracking-widest ${
+              course.isPublished
+                ? "border border-[var(--inner-green)]/30 bg-[var(--inner-green)]/8 text-[var(--success-ink)]"
+                : "border border-[var(--ink)]/20 bg-[var(--ink)]/[0.04] text-[var(--ink-body)]"
+            }`}
+          >
+            {course.isPublished ? t("courses.published") : t("courses.draft")}
+          </button>
+        </div>
       </div>
+      {isLiveLike && (
+        <div className="space-y-2 border-t border-[var(--ink)]/[0.06] px-4 py-3">
+          <label className="block space-y-1">
+            <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
+              {t("courses.startsAt")}
+            </span>
+            <input
+              type="datetime-local"
+              value={startsAt}
+              onChange={(e) => setStartsAt(e.target.value)}
+              className="w-full border border-[var(--ink)]/15 bg-transparent px-3 py-2 text-sm text-[var(--ink)] outline-none focus:border-[var(--ink)]/40"
+            />
+          </label>
+          <label className="block space-y-1">
+            <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
+              {t("courses.meetUrl")}
+            </span>
+            <input
+              value={meetUrl}
+              onChange={(e) => setMeetUrl(e.target.value)}
+              placeholder="https://meet…"
+              className="w-full border border-[var(--ink)]/15 bg-transparent px-3 py-2 text-sm text-[var(--ink)] outline-none focus:border-[var(--ink)]/40"
+            />
+          </label>
+          <button
+            type="button"
+            disabled={savingLive}
+            onClick={() => void saveLiveFields()}
+            className="panel-glass px-3 py-1.5 font-mono text-label uppercase tracking-widest text-[var(--ink-body)] transition-colors hover:border-[var(--ink)]/30 disabled:opacity-40"
+          >
+            {savingLive ? "…" : t("courses.saveLive")}
+          </button>
+        </div>
+      )}
       {course.modules.map((m) => (
         <ModuleAdminRow key={m.id} courseModule={m} onChanged={onChanged} />
       ))}
@@ -313,21 +427,45 @@ function AddCourseForm({ onAdded }: { onAdded: () => void }) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [term, setTerm] = useState(1);
+  const [format, setFormat] = useState<CourseFormat>("vod");
+  const [audience, setAudience] = useState<Audience>("all");
+  const [startsAt, setStartsAt] = useState("");
+  const [meetUrl, setMeetUrl] = useState("");
+  const [passCost, setPassCost] = useState(1);
   const [busy, setBusy] = useState(false);
+  const isLiveLike = format === "live" || format === "hybrid";
 
   const submit = async () => {
     if (!title.trim()) return;
     setBusy(true);
     try {
+      const body: Record<string, unknown> = {
+        title,
+        description,
+        term,
+        isPublished: false,
+        format,
+        audience,
+        passCost: format === "vod" ? 0 : passCost,
+      };
+      if (isLiveLike) {
+        body.startsAt = fromDatetimeLocal(startsAt);
+        body.meetUrl = meetUrl.trim() || null;
+      }
       const res = await fetch(apiUrl("/api/courses"), {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, description, term, isPublished: false }),
+        body: JSON.stringify(body),
       });
       if (res.ok) {
         setTitle("");
         setDescription("");
+        setFormat("vod");
+        setAudience("all");
+        setStartsAt("");
+        setMeetUrl("");
+        setPassCost(1);
         onAdded();
       }
     } finally {
@@ -353,7 +491,7 @@ function AddCourseForm({ onAdded }: { onAdded: () => void }) {
         rows={2}
         className="w-full border border-[var(--ink)]/15 bg-transparent px-3 py-2 text-sm text-[var(--ink)] outline-none focus:border-[var(--ink)]/40"
       />
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3">
         <label className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
           {t("courses.term", { n: term })}
         </label>
@@ -365,6 +503,78 @@ function AddCourseForm({ onAdded }: { onAdded: () => void }) {
           className="w-16 border border-[var(--ink)]/15 bg-transparent px-2 py-1 text-sm text-[var(--ink)] outline-none focus:border-[var(--ink)]/40"
         />
       </div>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <label className="block space-y-1">
+          <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
+            {t("courses.format")}
+          </span>
+          <select
+            value={format}
+            onChange={(e) => setFormat(e.target.value as CourseFormat)}
+            className="w-full border border-[var(--ink)]/15 bg-transparent px-3 py-2 text-sm text-[var(--ink)] outline-none focus:border-[var(--ink)]/40"
+          >
+            {FORMAT_OPTIONS.map((f) => (
+              <option key={f} value={f}>
+                {f}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="block space-y-1">
+          <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
+            {t("courses.audience")}
+          </span>
+          <select
+            value={audience}
+            onChange={(e) => setAudience(e.target.value as Audience)}
+            className="w-full border border-[var(--ink)]/15 bg-transparent px-3 py-2 text-sm text-[var(--ink)] outline-none focus:border-[var(--ink)]/40"
+          >
+            {AUDIENCE_OPTIONS.map((a) => (
+              <option key={a} value={a}>
+                {a}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+      {isLiveLike && (
+        <>
+          <label className="block space-y-1">
+            <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
+              {t("courses.startsAt")}
+            </span>
+            <input
+              type="datetime-local"
+              value={startsAt}
+              onChange={(e) => setStartsAt(e.target.value)}
+              className="w-full border border-[var(--ink)]/15 bg-transparent px-3 py-2 text-sm text-[var(--ink)] outline-none focus:border-[var(--ink)]/40"
+            />
+          </label>
+          <label className="block space-y-1">
+            <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
+              {t("courses.meetUrl")}
+            </span>
+            <input
+              value={meetUrl}
+              onChange={(e) => setMeetUrl(e.target.value)}
+              placeholder="https://meet…"
+              className="w-full border border-[var(--ink)]/15 bg-transparent px-3 py-2 text-sm text-[var(--ink)] outline-none focus:border-[var(--ink)]/40"
+            />
+          </label>
+          <label className="flex items-center gap-3">
+            <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
+              {t("courses.passCost")}
+            </span>
+            <input
+              type="number"
+              min={0}
+              value={passCost}
+              onChange={(e) => setPassCost(Number(e.target.value) || 0)}
+              className="w-16 border border-[var(--ink)]/15 bg-transparent px-2 py-1 text-sm text-[var(--ink)] outline-none focus:border-[var(--ink)]/40"
+            />
+          </label>
+        </>
+      )}
       <button
         type="button"
         disabled={busy || !title.trim()}
@@ -422,7 +632,11 @@ export default function CoursesAdmin() {
         <FadeIn delay={0.05}>
           <div className="space-y-3">
             {courses.map((c) => (
-              <CourseAdminCard key={c.id} course={c} onChanged={refresh} />
+              <CourseAdminCard
+                key={`${c.id}-${c.startsAt ?? ""}-${c.meetUrl ?? ""}`}
+                course={c}
+                onChanged={refresh}
+              />
             ))}
             <AddCourseForm onAdded={refresh} />
           </div>

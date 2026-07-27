@@ -12,10 +12,11 @@ import {
   publicUser,
   requireAuth,
 } from "../lib/auth";
-import { ensureUserProfileColumns } from "../lib/ensureSchema";
+import { ensureUserProfileColumns, ensureUserMembershipColumns } from "../lib/ensureSchema";
 import {
   consumeInviteCode,
   normalizeEmail,
+  personaFromInviteRequest,
   validateInviteCodeForEmail,
 } from "../lib/inviteCodes";
 
@@ -109,10 +110,18 @@ router.post("/register", async (req, res) => {
       return;
     }
 
+    await ensureUserMembershipColumns();
+    const persona = await personaFromInviteRequest(invite.invitationRequestId);
+
     const passwordHash = await bcrypt.hash(password, 12);
     const [user] = await db
       .insert(usersTable)
-      .values({ email: normalizedEmail, name: name.trim(), passwordHash })
+      .values({
+        email: normalizedEmail,
+        name: name.trim(),
+        passwordHash,
+        persona: persona ?? undefined,
+      })
       .returning();
 
     await consumeInviteCode(invite.id, user.id);
@@ -202,6 +211,8 @@ router.post("/google", async (req, res) => {
         res.status(403).json({ error: invite.error });
         return;
       }
+      await ensureUserMembershipColumns();
+      const persona = await personaFromInviteRequest(invite.invitationRequestId);
       [user] = await db
         .insert(usersTable)
         .values({
@@ -209,6 +220,7 @@ router.post("/google", async (req, res) => {
           name: payload.name ?? normalizedEmail,
           avatarUrl: payload.picture,
           googleId: payload.sub,
+          persona: persona ?? undefined,
         })
         .returning();
       await consumeInviteCode(invite.id, user.id);
@@ -244,6 +256,7 @@ router.get("/me", async (req, res) => {
   }
   try {
     await ensureUserProfileColumns();
+    await ensureUserMembershipColumns();
     const [fresh] = await db
       .select()
       .from(usersTable)

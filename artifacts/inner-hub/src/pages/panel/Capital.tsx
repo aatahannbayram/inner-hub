@@ -792,8 +792,11 @@ export default function Capital() {
     ["capital"],
     "/api/capital",
   );
-  const { data: meData } = useApiQuery<{ user: { role: "member" | "admin" } }>(["auth-me"], "/api/auth/me");
+  const { data: meData } = useApiQuery<{
+    user: { role: "member" | "admin"; persona?: string | null };
+  }>(["auth-me"], "/api/auth/me");
   const isAdmin = meData?.user?.role === "admin";
+  const isInvestor = meData?.user?.persona === "investor";
 
   const deals = data?.deals ?? [];
   const spvs = data?.spvs ?? [];
@@ -816,6 +819,16 @@ export default function Capital() {
     <div className="mx-auto max-w-7xl space-y-8">
       {/* Hero */}
       <CapitalHero dealCount={activeDeals} />
+
+      {isInvestor && (
+        <FadeIn>
+          <div className="panel-glass px-4 py-3">
+            <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
+              {t("capital.investorBanner")}
+            </p>
+          </div>
+        </FadeIn>
+      )}
 
       {isLoading && deals.length === 0 && (
         <LoadingBlock label={t("capital.loading")}>

@@ -22,6 +22,7 @@ import {
   Webhook,
   UserCircle,
   Newspaper,
+  Mic2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useT } from "@/i18n";
@@ -45,6 +46,7 @@ const PREFETCH: Record<string, () => Promise<unknown>> = {
   "/panel/chat": () => import("@/pages/panel/Chat"),
   "/panel/courses": () => import("@/pages/panel/Courses"),
   "/panel/events": () => import("@/pages/panel/Events"),
+  "/panel/stage": () => import("@/pages/panel/Stage"),
   "/panel/members": () => import("@/pages/panel/Members"),
   "/panel/perks": () => import("@/pages/panel/Perks"),
   "/panel/signal": () => import("@/pages/panel/Signal"),
@@ -59,6 +61,7 @@ const PREFETCH: Record<string, () => Promise<unknown>> = {
   "/panel/membership": () => import("@/pages/panel/Membership"),
   "/panel/applications": () => import("@/pages/panel/Applications"),
   "/panel/courses/admin": () => import("@/pages/panel/CoursesAdmin"),
+  "/panel/events/admin": () => import("@/pages/panel/EventsAdmin"),
   "/panel/haberler": () => import("@/pages/panel/HaberlerAdmin"),
   "/panel/analytics": () => import("@/pages/panel/Analytics"),
   "/panel/settings": () => import("@/pages/panel/Settings"),
@@ -73,6 +76,7 @@ const SECTION_DEFS: NavSection[] = [
       { href: "/panel/chat", labelKey: "nav.community", icon: MessageSquare },
       { href: "/panel/courses", labelKey: "nav.courses", icon: BookOpen },
       { href: "/panel/events", labelKey: "nav.events", icon: CalendarDays },
+      { href: "/panel/stage", labelKey: "nav.dashboard", mark: "stage", icon: Mic2 },
       { href: "/panel/members", labelKey: "nav.members", icon: Users },
       { href: "/panel/perks", labelKey: "nav.perks", icon: Gift },
     ],
@@ -107,6 +111,7 @@ const ADMIN_SECTION: NavSection = {
   items: [
     { href: "/panel/applications", labelKey: "nav.applications", icon: ClipboardList },
     { href: "/panel/courses/admin", labelKey: "nav.coursesAdmin", icon: BookOpen },
+    { href: "/panel/events/admin", labelKey: "nav.eventsAdmin", icon: CalendarDays },
     { href: "/panel/haberler", labelKey: "nav.haberlerAdmin", icon: Newspaper },
     { href: "/panel/analytics", labelKey: "nav.analytics", icon: BarChart3 },
     { href: "/panel/settings", labelKey: "nav.settings", icon: Settings },

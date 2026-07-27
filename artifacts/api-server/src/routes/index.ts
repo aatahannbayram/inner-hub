@@ -18,6 +18,9 @@ import analyticsRouter from "./analytics";
 import talentRouter from "./talent";
 import apiKeysRouter from "./apiKeys";
 import settingsRouter from "./settings";
+import passesRouter from "./passes";
+import stageRouter from "./stage";
+import liveJobsRouter from "./liveJobs";
 
 const router: IRouter = Router();
 
@@ -40,5 +43,8 @@ router.use(analyticsRouter);
 router.use(talentRouter);
 router.use(apiKeysRouter);
 router.use(settingsRouter);
+router.use(passesRouter);
+router.use(stageRouter);
+router.use(liveJobsRouter);
 
 export default router;

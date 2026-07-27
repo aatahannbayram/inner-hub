@@ -100,7 +100,10 @@ export async function revokeUnusedInviteCodes(invitationRequestId: number) {
 export async function validateInviteCodeForEmail(
   inviteCode: unknown,
   registeringEmail: string,
-): Promise<{ ok: true; id: number; code: string } | { ok: false; error: string }> {
+): Promise<
+  | { ok: true; id: number; code: string; invitationRequestId: number | null }
+  | { ok: false; error: string }
+> {
   await ensureInviteCodesSchema();
 
   if (typeof inviteCode !== "string" || !inviteCode.trim()) {
@@ -113,7 +116,7 @@ export async function validateInviteCodeForEmail(
   // Opsiyonel master kod (yalnızca ops / acil) — email bağısız
   const master = process.env.INVITE_PASSCODE?.trim();
   if (master && inviteCode.trim() === master) {
-    return { ok: true, id: -1, code: master };
+    return { ok: true, id: -1, code: master, invitationRequestId: null };
   }
 
   const [row] = await db
@@ -138,7 +141,32 @@ export async function validateInviteCodeForEmail(
     };
   }
 
-  return { ok: true, id: row.id, code: row.code };
+  return {
+    ok: true,
+    id: row.id,
+    code: row.code,
+    invitationRequestId: row.invitationRequestId ?? null,
+  };
+}
+
+const PERSONAS = new Set(["founder", "investor", "builder", "company"]);
+
+/** Davet başvurusundaki role → users.persona */
+export async function personaFromInviteRequest(
+  invitationRequestId: number | null | undefined,
+): Promise<string | null> {
+  if (invitationRequestId == null || invitationRequestId < 0) return null;
+  const { invitationRequestsTable } = await import("@workspace/db/schema");
+  const [inv] = await db
+    .select({ role: invitationRequestsTable.role })
+    .from(invitationRequestsTable)
+    .where(eq(invitationRequestsTable.id, invitationRequestId))
+    .limit(1);
+  const raw = (inv?.role ?? "").trim().toLowerCase();
+  if (!raw) return null;
+  if (raw === "operator") return "builder";
+  if (PERSONAS.has(raw)) return raw;
+  return null;
 }
 
 export async function consumeInviteCode(inviteCodeId: number, userId: number) {

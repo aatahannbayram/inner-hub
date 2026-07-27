@@ -41,7 +41,9 @@ const ProfilePage       = lazy(() => import("@/pages/panel/Profile"));
 const Analytics         = lazy(() => import("@/pages/panel/Analytics"));
 const ApplicationsPage  = lazy(() => import("@/pages/panel/Applications"));
 const CoursesAdmin      = lazy(() => import("@/pages/panel/CoursesAdmin"));
+const EventsAdmin       = lazy(() => import("@/pages/panel/EventsAdmin"));
 const HaberlerAdmin     = lazy(() => import("@/pages/panel/HaberlerAdmin"));
+const Stage             = lazy(() => import("@/pages/panel/Stage"));
 const FAQ               = lazy(() => import("@/pages/panel/FAQ"));
 const Settings          = lazy(() => import("@/pages/panel/Settings"));
 
@@ -75,8 +77,11 @@ function PanelRoutes({ user, onLogout }: { user: PanelUser; onLogout: () => void
             )}
           />
           <Route path="/panel/chat"         component={() => <ChatPage />} />
+          <Route path="/panel/courses/admin" component={() => <CoursesAdmin />} />
           <Route path="/panel/courses"      component={() => <CoursesPage />} />
+          <Route path="/panel/events/admin" component={() => <EventsAdmin />} />
           <Route path="/panel/events"       component={() => <Events />} />
+          <Route path="/panel/stage"        component={() => <Stage />} />
           <Route path="/panel/members"      component={() => <Members />} />
           <Route path="/panel/perks"        component={() => <Perks />} />
           <Route path="/panel/signal"       component={() => <Signal />} />
@@ -91,7 +96,6 @@ function PanelRoutes({ user, onLogout }: { user: PanelUser; onLogout: () => void
           <Route path="/panel/membership"   component={() => <Membership />} />
           <Route path="/panel/payment/success" component={() => <PaymentSuccess />} />
           <Route path="/panel/applications" component={() => <ApplicationsPage />} />
-          <Route path="/panel/courses/admin" component={() => <CoursesAdmin />} />
           <Route path="/panel/haberler"     component={() => <HaberlerAdmin />} />
           <Route path="/panel/analytics"    component={() => <Analytics />} />
           <Route path="/panel/settings"     component={() => <Settings />} />

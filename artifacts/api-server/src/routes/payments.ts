@@ -1,5 +1,10 @@
 import express, { Router } from "express";
 import Stripe from "stripe";
+import { and, eq } from "drizzle-orm";
+import { db } from "@workspace/db";
+import { passLedgerTable, usersTable } from "@workspace/db/schema";
+import { creditPasses } from "../lib/passes";
+import { ensureUserMembershipColumns } from "../lib/ensureSchema";
 
 const router = Router();
 
@@ -9,39 +14,70 @@ function getStripe(): Stripe {
   return new Stripe(key, { apiVersion: "2026-06-24.dahlia" });
 }
 
-// ─── Fiyat tablosu ────────────────────────────────────────────────────────────
-// Stripe Price ID'leri production'da Dashboard'dan alınır.
-// TEST modunda her seferinde fiyat oluşturuluyor (STRIPE_PRICE_* env var yoksa).
 const PLANS = {
   annual: {
     name: "inner·hub Yıllık Üyelik",
-    amount: 49900, // 499 TRY (kuruş cinsinden)
+    amount: 49900,
     currency: "try",
     interval: "year" as const,
     priceId: process.env.STRIPE_PRICE_ANNUAL,
   },
   founder: {
     name: "inner·hub Kurucu Üyelik",
-    amount: 99900, // 999 TRY
+    amount: 99900,
     currency: "try",
     interval: "year" as const,
     priceId: process.env.STRIPE_PRICE_FOUNDER,
   },
 };
 
+const PASS_AMOUNT_TRY = 29900;
+const MEMBERSHIP_PASS_GRANT = 3;
+
+async function alreadyCredited(userId: number, refId: string): Promise<boolean> {
+  const [row] = await db
+    .select({ id: passLedgerTable.id })
+    .from(passLedgerTable)
+    .where(and(eq(passLedgerTable.userId, userId), eq(passLedgerTable.refId, refId)))
+    .limit(1);
+  return Boolean(row);
+}
+
+async function grantMembershipPasses(userId: number, refId: string, reason: string) {
+  if (await alreadyCredited(userId, refId)) return;
+  await creditPasses({
+    userId,
+    amount: MEMBERSHIP_PASS_GRANT,
+    reason,
+    refType: "stripe",
+    refId,
+  });
+}
+
+function periodEndFromSubscription(sub: Stripe.Subscription): Date | null {
+  const end = (sub as { current_period_end?: number }).current_period_end;
+  if (typeof end === "number" && Number.isFinite(end)) {
+    return new Date(end * 1000);
+  }
+  return null;
+}
+
 // ─── POST /api/payments/checkout-session ─────────────────────────────────────
-// Body: { type: "membership" | "event", planId?: string, eventId?: number, userId?: string }
+// Body: { type: "membership" | "pass", planId?: string, userId?: string }
 router.post("/checkout-session", async (req, res) => {
   try {
     const stripe = getStripe();
-    const { type, planId, eventId, userId, successUrl, cancelUrl } = req.body as {
-      type: "membership" | "event";
+    const { type, planId, successUrl, cancelUrl } = req.body as {
+      type: "membership" | "pass";
       planId?: keyof typeof PLANS;
-      eventId?: number;
-      userId?: string;
+      userId?: string | number;
       successUrl?: string;
       cancelUrl?: string;
     };
+
+    const userId =
+      (req.body.userId != null && String(req.body.userId)) ||
+      (req.user?.id != null ? String(req.user.id) : "");
 
     const origin =
       req.headers.origin ??
@@ -56,7 +92,6 @@ router.post("/checkout-session", async (req, res) => {
       const plan = PLANS[planId];
       if (!plan) return res.status(400).json({ error: "Geçersiz plan" });
 
-      // Eğer Stripe Price ID varsa onu kullan, yoksa inline fiyat yarat
       const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = plan.priceId
         ? [{ price: plan.priceId, quantity: 1 }]
         : [
@@ -76,27 +111,30 @@ router.post("/checkout-session", async (req, res) => {
         line_items: lineItems,
         success_url: `${success}?session_id={CHECKOUT_SESSION_ID}&type=membership&plan=${planId}`,
         cancel_url: cancel,
-        metadata: { userId: userId ?? "", planId, type: "membership" },
+        metadata: { userId, planId, type: "membership" },
         subscription_data: {
-          metadata: { userId: userId ?? "", planId },
+          metadata: { userId, planId },
         },
       };
-    } else if (type === "event" && eventId) {
+    } else if (type === "pass") {
+      if (!userId) {
+        return res.status(400).json({ error: "Pass satın almak için userId gerekli" });
+      }
       sessionParams = {
         mode: "payment",
         line_items: [
           {
             price_data: {
               currency: "try",
-              product_data: { name: `inner·hub Etkinlik Bileti #${eventId}` },
-              unit_amount: 19900, // 199 TRY
+              product_data: { name: "inner·hub Circle Pass" },
+              unit_amount: PASS_AMOUNT_TRY,
             },
             quantity: 1,
           },
         ],
-        success_url: `${success}?session_id={CHECKOUT_SESSION_ID}&type=event&eventId=${eventId}`,
+        success_url: `${success}?session_id={CHECKOUT_SESSION_ID}&type=pass`,
         cancel_url: cancel,
-        metadata: { userId: userId ?? "", eventId: String(eventId), type: "event" },
+        metadata: { type: "pass", userId },
       };
     } else {
       return res.status(400).json({ error: "Geçersiz istek parametreleri" });
@@ -111,7 +149,6 @@ router.post("/checkout-session", async (req, res) => {
 });
 
 // ─── POST /api/payments/webhook ───────────────────────────────────────────────
-// Express'in JSON middleware'ini bu route için atla — ham body gerekiyor.
 router.post(
   "/webhook",
   express.raw({ type: "application/json" }),
@@ -131,27 +168,109 @@ router.post(
       return res.status(400).json({ error: `Webhook imzası doğrulanamadı: ${err.message}` });
     }
 
-    // Olayları işle
-    switch (event.type) {
-      case "checkout.session.completed": {
-        const session = event.data.object as Stripe.Checkout.Session;
-        const { userId, planId, type } = session.metadata ?? {};
-        // TODO: users tablosunda role/subscription_status güncelle
-        console.log(`Ödeme tamamlandı — user: ${userId}, type: ${type}, plan: ${planId}`);
-        break;
+    try {
+      await ensureUserMembershipColumns();
+
+      switch (event.type) {
+        case "checkout.session.completed": {
+          const session = event.data.object as Stripe.Checkout.Session;
+          const { userId, planId, type } = session.metadata ?? {};
+          const uid = Number(userId);
+
+          if (type === "pass" && Number.isFinite(uid) && uid > 0) {
+            if (!(await alreadyCredited(uid, session.id))) {
+              await creditPasses({
+                userId: uid,
+                amount: 1,
+                reason: "purchase",
+                refType: "stripe",
+                refId: session.id,
+              });
+            }
+          } else if (type === "membership" && Number.isFinite(uid) && uid > 0) {
+            let periodEnd: Date | null = null;
+            if (session.subscription) {
+              const stripe = getStripe();
+              const subId =
+                typeof session.subscription === "string"
+                  ? session.subscription
+                  : session.subscription.id;
+              const sub = await stripe.subscriptions.retrieve(subId);
+              periodEnd = periodEndFromSubscription(sub);
+            }
+
+            await db
+              .update(usersTable)
+              .set({
+                membershipPlan: planId ?? "annual",
+                membershipStatus: "active",
+                ...(periodEnd ? { membershipPeriodEnd: periodEnd } : {}),
+              })
+              .where(eq(usersTable.id, uid));
+
+            await grantMembershipPasses(uid, session.id, "membership_grant");
+          }
+          break;
+        }
+
+        case "invoice.paid": {
+          const invoice = event.data.object as Stripe.Invoice;
+          const stripe = getStripe();
+          const invAny = invoice as unknown as {
+            subscription?: string | { id: string } | null;
+            metadata?: Record<string, string>;
+            billing_reason?: string;
+          };
+          // İlk abonelik grant'ı checkout.session.completed'da; burada yalnızca yenileme
+          if (invAny.billing_reason === "subscription_create") break;
+
+          let userId = invAny.metadata?.userId;
+
+          const subRaw = invAny.subscription;
+          const subId = typeof subRaw === "string" ? subRaw : subRaw?.id;
+
+          if (subId) {
+            const sub = await stripe.subscriptions.retrieve(subId);
+            userId = userId || sub.metadata?.userId;
+            const uid = Number(userId);
+            if (Number.isFinite(uid) && uid > 0) {
+              const periodEnd = periodEndFromSubscription(sub);
+              await db
+                .update(usersTable)
+                .set({
+                  membershipStatus: "active",
+                  ...(periodEnd ? { membershipPeriodEnd: periodEnd } : {}),
+                })
+                .where(eq(usersTable.id, uid));
+            }
+          }
+
+          const uid = Number(userId);
+          if (Number.isFinite(uid) && uid > 0) {
+            await grantMembershipPasses(uid, invoice.id, "membership_grant");
+          }
+          break;
+        }
+
+        case "customer.subscription.deleted": {
+          const sub = event.data.object as Stripe.Subscription;
+          const uid = Number(sub.metadata?.userId);
+          if (Number.isFinite(uid) && uid > 0) {
+            await db
+              .update(usersTable)
+              .set({ membershipStatus: "cancelled" })
+              .where(eq(usersTable.id, uid));
+          }
+          break;
+        }
+
+        case "invoice.payment_failed": {
+          break;
+        }
       }
-      case "customer.subscription.deleted": {
-        const sub = event.data.object as Stripe.Subscription;
-        const userId = sub.metadata?.userId;
-        // TODO: kullanıcının üyeliğini pasife al
-        console.log(`Abonelik iptal — user: ${userId}`);
-        break;
-      }
-      case "invoice.payment_failed": {
-        const invoice = event.data.object as Stripe.Invoice;
-        console.log(`Ödeme başarısız — customer: ${invoice.customer}`);
-        break;
-      }
+    } catch (err: any) {
+      console.error("Stripe webhook handler error:", err?.message ?? err);
+      return res.status(500).json({ error: "Webhook işlenemedi" });
     }
 
     return res.json({ received: true });
@@ -168,7 +287,7 @@ router.get("/session/:id", async (req, res) => {
       customerEmail: session.customer_details?.email,
       metadata: session.metadata,
     });
-  } catch (err: any) {
+  } catch {
     return res.status(404).json({ error: "Oturum bulunamadı" });
   }
 });

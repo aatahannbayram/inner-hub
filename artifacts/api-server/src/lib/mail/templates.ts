@@ -187,3 +187,61 @@ export function adminNewRequestMail(payload: {
 
   return { subject, text, html, kind: "admin.new_request" as const };
 }
+
+export function liveSessionReminderMail(ctx: {
+  name: string;
+  sessionTitle: string;
+  startsAt?: Date | null;
+  meetUrl?: string | null;
+  refType: "course" | "event";
+  lead?: string;
+}) {
+  const appUrl = appBaseUrl();
+  const name = firstName(ctx.name);
+  const when = ctx.startsAt
+    ? ctx.startsAt.toLocaleString("tr-TR", { timeZone: "Europe/Istanbul" })
+    : null;
+  const panelPath = ctx.refType === "course" ? "/panel/courses" : "/panel/events";
+  const panelUrl = `${appUrl}${panelPath}`;
+  const subject = `inner hub · canlı hatırlatma: ${ctx.sessionTitle}`;
+  const lead =
+    ctx.lead?.trim() ||
+    `${ctx.sessionTitle} canlı oturumu yaklaşıyor.`;
+
+  const text = [
+    `Merhaba ${name},`,
+    "",
+    lead,
+    when ? `Başlangıç: ${when}` : null,
+    ctx.meetUrl ? `Katılım: ${ctx.meetUrl}` : `Panel: ${panelUrl}`,
+    "",
+    "inner hub",
+    appUrl,
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  const html = renderInnerEmailLayout({
+    appUrl,
+    preheader: lead,
+    eyebrow: "Canlı oturum · hatırlatma",
+    title: ctx.sessionTitle,
+    bodyHtml: `
+      <p style="margin:0 0 12px;">Merhaba ${escapeHtml(name)},</p>
+      <p style="margin:0 0 12px;">${escapeHtml(lead)}</p>
+      ${when ? `<p style="margin:0 0 12px;">Başlangıç: <strong style="color:#F4F1EC;font-weight:500;">${escapeHtml(when)}</strong></p>` : ""}
+      ${
+        ctx.meetUrl
+          ? `<p style="margin:0;">Meet linki e-postanın CTA’sında.</p>`
+          : `<p style="margin:0;">Detaylar panelde.</p>`
+      }
+    `,
+    cta: {
+      label: ctx.meetUrl ? "Canlıya katıl" : "Panele git",
+      href: ctx.meetUrl || panelUrl,
+    },
+    footerNote: "Bu ileti, kayıtlı olduğun canlı oturum için otomatik gönderildi.",
+  });
+
+  return { subject, text, html, kind: "live.session_reminder" as const };
+}

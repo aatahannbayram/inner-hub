@@ -10,12 +10,70 @@ import {
   lessonsTable,
   modulesTable,
   progressTable,
+  usersTable,
 } from "@workspace/db/schema";
 import { requireAuth, requireAdmin } from "../lib/auth";
-import { ensureCourseVideoColumns } from "../lib/ensureSchema";
+import {
+  ensureCourseVideoColumns,
+  ensureLiveSessionColumns,
+  ensureUserMembershipColumns,
+} from "../lib/ensureSchema";
+import { spendPasses } from "../lib/passes";
+import { sendTransactionalMail } from "../lib/mail/transport";
+import { getUserSettingsPrefs } from "./settings";
 import { createNotification } from "./notifications";
 
 const router = Router();
+
+function audienceOk(audience: string | null | undefined, persona: string | null | undefined) {
+  const a = audience || "all";
+  if (a === "all") return true;
+  return persona === a;
+}
+
+function courseNeedsPass(course: { format: string; passCost: number }) {
+  if (course.format === "vod") return 0;
+  return Math.max(0, course.passCost ?? 1);
+}
+
+function parseRoom(raw: unknown): "mine" | "all" {
+  return raw === "mine" ? "mine" : "all";
+}
+
+function resolveCourseFormat(raw: unknown, fallback = "vod"): string {
+  if (raw === "vod" || raw === "live" || raw === "hybrid") return raw;
+  return fallback;
+}
+
+function resolveCoursePassCost(format: string, passCost: unknown, provided: boolean): number {
+  if (format === "vod") return 0;
+  if (provided && Number.isFinite(Number(passCost))) return Math.max(0, Number(passCost));
+  return 1;
+}
+
+function resolveEventFormat(raw: unknown, fallback = "in_person"): string {
+  if (raw === "online" || raw === "in_person" || raw === "hybrid") return raw;
+  return fallback;
+}
+
+function resolveEventPassCost(passCost: unknown, provided: boolean): number {
+  if (provided && Number.isFinite(Number(passCost))) return Math.max(0, Number(passCost));
+  return 1;
+}
+
+function isPassError(err: unknown): boolean {
+  return err instanceof Error && err.message === "Yetersiz Circle Pass";
+}
+
+async function loadUserPersona(userId: number): Promise<string | null> {
+  await ensureUserMembershipColumns();
+  const [user] = await db
+    .select({ persona: usersTable.persona })
+    .from(usersTable)
+    .where(eq(usersTable.id, userId))
+    .limit(1);
+  return user?.persona ?? null;
+}
 
 let muxClient: Mux | null = null;
 function getMux(): Mux {
@@ -32,6 +90,7 @@ function getMux(): Mux {
 
 async function ensureDemoContent() {
   if (process.env.NODE_ENV === "production") return;
+  await ensureLiveSessionColumns();
 
   const [eventRow] = await db.select({ id: eventsTable.id }).from(eventsTable).limit(1);
   if (!eventRow) {
@@ -44,6 +103,9 @@ async function ensureDemoContent() {
         startAt: new Date("2026-09-15T10:00:00"),
         endAt: new Date("2026-09-15T18:00:00"),
         isPublished: true,
+        format: "in_person",
+        audience: "all",
+        passCost: 1,
       },
       {
         title: "Networking Kahvaltısı",
@@ -52,6 +114,10 @@ async function ensureDemoContent() {
         startAt: new Date("2026-08-05T09:00:00"),
         endAt: new Date("2026-08-05T11:00:00"),
         isPublished: true,
+        format: "online",
+        meetUrl: "https://meet.inner.digital/networking",
+        audience: "all",
+        passCost: 1,
       },
       {
         title: "Fundraising Workshop",
@@ -60,6 +126,9 @@ async function ensureDemoContent() {
         startAt: new Date("2026-08-20T14:00:00"),
         endAt: new Date("2026-08-20T17:00:00"),
         isPublished: true,
+        format: "hybrid",
+        audience: "founder",
+        passCost: 1,
       },
     ]);
   } else {
@@ -68,6 +137,10 @@ async function ensureDemoContent() {
       .update(eventsTable)
       .set({ title: "Networking Kahvaltısı" })
       .where(eq(eventsTable.title, "Networking Kahvaltısı — Ağustos"));
+    await db
+      .update(eventsTable)
+      .set({ title: "AI & Girişimcilik Zirvesi" })
+      .where(eq(eventsTable.title, "AI & Girişimcilik Zirvesi — Eylül"));
   }
 
   const [courseRow] = await db.select({ id: coursesTable.id }).from(coursesTable).limit(1);
@@ -80,6 +153,9 @@ async function ensureDemoContent() {
         term: 1,
         order: 1,
         isPublished: true,
+        format: "vod",
+        audience: "all",
+        passCost: 0,
       },
       {
         title: "Yapay Zeka ile İK Yönetimi",
@@ -88,6 +164,9 @@ async function ensureDemoContent() {
         term: 1,
         order: 2,
         isPublished: true,
+        format: "vod",
+        audience: "all",
+        passCost: 0,
       },
     ]);
   }
@@ -192,14 +271,27 @@ function progressPctFromModules(modules: { lessons: LessonWithState[] }[]): numb
 // ─── GET /api/events ─────────────────────────────────────────────────────────
 router.get("/events", requireAuth, async (req, res) => {
   try {
+    await ensureLiveSessionColumns();
     await ensureDemoContent();
     const userId = req.user!.id;
+    const persona = await loadUserPersona(userId);
+    const room = parseRoom(req.query.room);
 
     const rows = await db
       .select()
       .from(eventsTable)
       .where(eq(eventsTable.isPublished, true))
       .orderBy(asc(eventsTable.startAt));
+
+    const visible = rows.filter((e) => {
+      if (!audienceOk(e.audience, persona)) return false;
+      // room=mine: yalnızca persona'ya özel veya all (audienceOk zaten bunu yapar)
+      // room=all: aynı audience filtresi (üyeye açık tüm odalar)
+      if (room === "mine") {
+        return e.audience === "all" || e.audience === persona;
+      }
+      return true;
+    });
 
     const regs = await db
       .select()
@@ -218,19 +310,26 @@ router.get("/events", requireAuth, async (req, res) => {
 
     const now = Date.now();
     res.json({
-      events: rows.map((e) => ({
-        id: e.id,
-        title: e.title,
-        description: e.description ?? "",
-        location: e.location ?? "",
-        startAt: e.startAt.toISOString(),
-        endAt: e.endAt?.toISOString() ?? e.startAt.toISOString(),
-        isPast: e.startAt.getTime() < now,
-        isPublished: e.isPublished,
-        capacity: 0,
-        registered: countMap.get(e.id) ?? 0,
-        isRegistered: mySet.has(e.id),
-      })),
+      events: visible.map((e) => {
+        const isRegistered = mySet.has(e.id);
+        return {
+          id: e.id,
+          title: e.title,
+          description: e.description ?? "",
+          location: e.location ?? "",
+          startAt: e.startAt.toISOString(),
+          endAt: e.endAt?.toISOString() ?? e.startAt.toISOString(),
+          isPast: e.startAt.getTime() < now,
+          isPublished: e.isPublished,
+          format: e.format ?? "in_person",
+          audience: e.audience ?? "all",
+          meetUrl: isRegistered ? (e.meetUrl ?? null) : null,
+          passCost: e.passCost ?? 1,
+          capacity: 0,
+          registered: countMap.get(e.id) ?? 0,
+          isRegistered,
+        };
+      }),
     });
   } catch (err: any) {
     res.status(500).json({ error: err.message ?? "Etkinlikler yüklenemedi" });
@@ -240,6 +339,7 @@ router.get("/events", requireAuth, async (req, res) => {
 // ─── POST /api/events/:id/register ───────────────────────────────────────────
 router.post("/events/:id/register", requireAuth, async (req, res) => {
   try {
+    await ensureLiveSessionColumns();
     const eventId = Number(req.params.id);
     const userId = req.user!.id;
     if (!Number.isFinite(eventId)) {
@@ -261,6 +361,12 @@ router.post("/events/:id/register", requireAuth, async (req, res) => {
       return;
     }
 
+    const persona = await loadUserPersona(userId);
+    if (!audienceOk(event.audience, persona)) {
+      res.status(403).json({ error: "Bu etkinlik senin odan için değil" });
+      return;
+    }
+
     const [existing] = await db
       .select()
       .from(eventRegistrationsTable)
@@ -273,6 +379,16 @@ router.post("/events/:id/register", requireAuth, async (req, res) => {
       .limit(1);
 
     if (!existing) {
+      const passCost = Math.max(0, event.passCost ?? 1);
+      if (passCost > 0) {
+        await spendPasses({
+          userId,
+          amount: passCost,
+          reason: "spend_event",
+          refType: "event",
+          refId: String(eventId),
+        });
+      }
       await db.insert(eventRegistrationsTable).values({ userId, eventId });
       await createNotification({
         userId,
@@ -282,8 +398,17 @@ router.post("/events/:id/register", requireAuth, async (req, res) => {
       });
     }
 
-    res.json({ eventId, isRegistered: true });
+    res.json({
+      eventId,
+      isRegistered: true,
+      meetUrl: event.meetUrl ?? null,
+      passCost: event.passCost ?? 1,
+    });
   } catch (err: any) {
+    if (isPassError(err)) {
+      res.status(402).json({ error: err.message });
+      return;
+    }
     res.status(500).json({ error: err.message ?? "Kayıt başarısız" });
   }
 });
@@ -313,18 +438,267 @@ router.delete("/events/:id/register", requireAuth, async (req, res) => {
   }
 });
 
+// ─── GET /api/admin/events ───────────────────────────────────────────────────
+router.get("/admin/events", requireAuth, requireAdmin, async (_req, res) => {
+  try {
+    await ensureLiveSessionColumns();
+    await ensureDemoContent();
+
+    const rows = await db.select().from(eventsTable).orderBy(asc(eventsTable.startAt));
+
+    const counts = await db
+      .select({
+        eventId: eventRegistrationsTable.eventId,
+        n: count(),
+      })
+      .from(eventRegistrationsTable)
+      .groupBy(eventRegistrationsTable.eventId);
+    const countMap = new Map(counts.map((c) => [c.eventId, Number(c.n)]));
+
+    const now = Date.now();
+    res.json({
+      events: rows.map((e) => ({
+        id: e.id,
+        title: e.title,
+        description: e.description ?? "",
+        location: e.location ?? "",
+        startAt: e.startAt.toISOString(),
+        endAt: e.endAt?.toISOString() ?? e.startAt.toISOString(),
+        isPast: e.startAt.getTime() < now,
+        isPublished: e.isPublished,
+        format: e.format ?? "in_person",
+        audience: e.audience ?? "all",
+        meetUrl: e.meetUrl ?? null,
+        passCost: e.passCost ?? 1,
+        registered: countMap.get(e.id) ?? 0,
+      })),
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message ?? "Etkinlikler yüklenemedi" });
+  }
+});
+
+// ─── POST /api/events (admin) ────────────────────────────────────────────────
+router.post("/events", requireAuth, requireAdmin, async (req, res) => {
+  try {
+    await ensureLiveSessionColumns();
+    const {
+      title,
+      description,
+      location,
+      startAt,
+      endAt,
+      format,
+      meetUrl,
+      audience,
+      passCost,
+      isPublished,
+    } = req.body ?? {};
+
+    if (!title || typeof title !== "string") {
+      res.status(400).json({ error: "Başlık gerekli" });
+      return;
+    }
+    const start = startAt ? new Date(startAt) : null;
+    if (!start || Number.isNaN(start.getTime())) {
+      res.status(400).json({ error: "Geçerli startAt gerekli" });
+      return;
+    }
+    const end = endAt ? new Date(endAt) : null;
+    if (endAt && (!end || Number.isNaN(end.getTime()))) {
+      res.status(400).json({ error: "Geçersiz endAt" });
+      return;
+    }
+
+    const resolvedFormat = resolveEventFormat(format);
+    const [event] = await db
+      .insert(eventsTable)
+      .values({
+        title,
+        description: typeof description === "string" ? description : null,
+        location: typeof location === "string" ? location : null,
+        startAt: start,
+        endAt: end,
+        format: resolvedFormat,
+        meetUrl: typeof meetUrl === "string" ? meetUrl : null,
+        audience: typeof audience === "string" && audience ? audience : "all",
+        passCost: resolveEventPassCost(passCost, passCost !== undefined && passCost !== null),
+        isPublished: isPublished === true,
+      })
+      .returning();
+
+    res.json({ event });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message ?? "Etkinlik oluşturulamadı" });
+  }
+});
+
+// ─── PATCH /api/events/:id (admin) ───────────────────────────────────────────
+router.patch("/events/:id", requireAuth, requireAdmin, async (req, res) => {
+  try {
+    await ensureLiveSessionColumns();
+    const eventId = Number(req.params.id);
+    if (!Number.isFinite(eventId)) {
+      res.status(400).json({ error: "Geçersiz etkinlik" });
+      return;
+    }
+
+    const {
+      title,
+      description,
+      location,
+      startAt,
+      endAt,
+      format,
+      meetUrl,
+      audience,
+      passCost,
+      isPublished,
+    } = req.body ?? {};
+
+    const patch: Partial<typeof eventsTable.$inferInsert> = {};
+    if (typeof title === "string") patch.title = title;
+    if (typeof description === "string") patch.description = description;
+    if (typeof location === "string") patch.location = location;
+    if (startAt !== undefined) {
+      const start = new Date(startAt);
+      if (Number.isNaN(start.getTime())) {
+        res.status(400).json({ error: "Geçersiz startAt" });
+        return;
+      }
+      patch.startAt = start;
+    }
+    if (endAt !== undefined) {
+      if (endAt === null) {
+        patch.endAt = null;
+      } else {
+        const end = new Date(endAt);
+        if (Number.isNaN(end.getTime())) {
+          res.status(400).json({ error: "Geçersiz endAt" });
+          return;
+        }
+        patch.endAt = end;
+      }
+    }
+    if (format !== undefined) patch.format = resolveEventFormat(format);
+    if (meetUrl !== undefined) patch.meetUrl = typeof meetUrl === "string" ? meetUrl : null;
+    if (typeof audience === "string") patch.audience = audience || "all";
+    if (passCost !== undefined) {
+      patch.passCost = resolveEventPassCost(passCost, true);
+    }
+    if (typeof isPublished === "boolean") patch.isPublished = isPublished;
+
+    if (Object.keys(patch).length === 0) {
+      res.status(400).json({ error: "Güncellenecek alan yok" });
+      return;
+    }
+
+    const [event] = await db
+      .update(eventsTable)
+      .set(patch)
+      .where(eq(eventsTable.id, eventId))
+      .returning();
+    if (!event) {
+      res.status(404).json({ error: "Etkinlik bulunamadı" });
+      return;
+    }
+    res.json({ event });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message ?? "Etkinlik güncellenemedi" });
+  }
+});
+
+// ─── POST /api/admin/events/:id/notify ───────────────────────────────────────
+router.post("/admin/events/:id/notify", requireAuth, requireAdmin, async (req, res) => {
+  try {
+    await ensureLiveSessionColumns();
+    const eventId = Number(req.params.id);
+    if (!Number.isFinite(eventId)) {
+      res.status(400).json({ error: "Geçersiz etkinlik" });
+      return;
+    }
+
+    const [event] = await db
+      .select()
+      .from(eventsTable)
+      .where(eq(eventsTable.id, eventId))
+      .limit(1);
+    if (!event) {
+      res.status(404).json({ error: "Etkinlik bulunamadı" });
+      return;
+    }
+
+    const sendEmail = req.body?.email === true || req.body?.sendEmail === true;
+    const customBody =
+      typeof req.body?.body === "string" && req.body.body.trim()
+        ? req.body.body.trim()
+        : `${event.title} yakında başlıyor.${event.meetUrl ? ` Bağlantı: ${event.meetUrl}` : ""}`;
+
+    const regs = await db
+      .select({
+        userId: eventRegistrationsTable.userId,
+        email: usersTable.email,
+        name: usersTable.name,
+      })
+      .from(eventRegistrationsTable)
+      .innerJoin(usersTable, eq(usersTable.id, eventRegistrationsTable.userId))
+      .where(eq(eventRegistrationsTable.eventId, eventId));
+
+    let notified = 0;
+    let emailed = 0;
+    for (const r of regs) {
+      await createNotification({
+        userId: r.userId,
+        title: "Canlı etkinlik hatırlatması",
+        body: customBody,
+        kind: "event_live",
+      });
+      notified += 1;
+
+      if (sendEmail) {
+        const prefs = await getUserSettingsPrefs(r.userId);
+        if (prefs.notifEmail && prefs.notifEvents) {
+          const ok = await sendTransactionalMail({
+            to: r.email,
+            subject: `inner·hub: ${event.title}`,
+            text: customBody,
+            html: `<p>${customBody.replace(/</g, "&lt;")}</p>`,
+            kind: "event_live",
+          });
+          if (ok) emailed += 1;
+        }
+      }
+    }
+
+    res.json({ eventId, notified, emailed, totalRegistered: regs.length });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message ?? "Bildirim gönderilemedi" });
+  }
+});
+
 // ─── GET /api/courses ────────────────────────────────────────────────────────
 router.get("/courses", requireAuth, async (req, res) => {
   try {
     await ensureDemoContent();
     await ensureCourseVideoColumns();
+    await ensureLiveSessionColumns();
     const userId = req.user!.id;
+    const persona = await loadUserPersona(userId);
+    const room = parseRoom(req.query.room);
 
     const rows = await db
       .select()
       .from(coursesTable)
       .where(eq(coursesTable.isPublished, true))
       .orderBy(asc(coursesTable.order), desc(coursesTable.createdAt));
+
+    const visible = rows.filter((c) => {
+      if (!audienceOk(c.audience, persona)) return false;
+      if (room === "mine") {
+        return c.audience === "all" || c.audience === persona;
+      }
+      return true;
+    });
 
     const enrollments = await db
       .select()
@@ -333,15 +707,22 @@ router.get("/courses", requireAuth, async (req, res) => {
     const enrolledIds = new Set(enrollments.map((e) => e.courseId));
 
     const courses = await Promise.all(
-      rows.map(async (c) => {
+      visible.map(async (c) => {
         const isEnrolled = enrolledIds.has(c.id);
         const modules = await courseModulesForUser(userId, c.id, isEnrolled);
+        const format = c.format ?? "vod";
         return {
           id: c.id,
           title: c.title,
           description: c.description ?? "",
           term: c.term,
           order: c.order,
+          format,
+          startsAt: c.startsAt?.toISOString() ?? null,
+          endsAt: c.endsAt?.toISOString() ?? null,
+          meetUrl: isEnrolled ? (c.meetUrl ?? null) : null,
+          audience: c.audience ?? "all",
+          passCost: courseNeedsPass({ format, passCost: c.passCost ?? 0 }),
           isEnrolled,
           progressPct: isEnrolled ? progressPctFromModules(modules) : 0,
           modules,
@@ -358,6 +739,7 @@ router.get("/courses", requireAuth, async (req, res) => {
 // ─── POST /api/courses/:id/enroll ────────────────────────────────────────────
 router.post("/courses/:id/enroll", requireAuth, async (req, res) => {
   try {
+    await ensureLiveSessionColumns();
     const courseId = Number(req.params.id);
     const userId = req.user!.id;
     if (!Number.isFinite(courseId)) {
@@ -375,6 +757,12 @@ router.post("/courses/:id/enroll", requireAuth, async (req, res) => {
       return;
     }
 
+    const persona = await loadUserPersona(userId);
+    if (!audienceOk(course.audience, persona)) {
+      res.status(403).json({ error: "Bu kurs senin odan için değil" });
+      return;
+    }
+
     const [existing] = await db
       .select()
       .from(enrollmentsTable)
@@ -382,6 +770,19 @@ router.post("/courses/:id/enroll", requireAuth, async (req, res) => {
       .limit(1);
 
     if (!existing) {
+      const need = courseNeedsPass({
+        format: course.format ?? "vod",
+        passCost: course.passCost ?? 0,
+      });
+      if (need > 0) {
+        await spendPasses({
+          userId,
+          amount: need,
+          reason: "spend_course",
+          refType: "course",
+          refId: String(courseId),
+        });
+      }
       await db.insert(enrollmentsTable).values({ userId, courseId });
       await createNotification({
         userId,
@@ -394,9 +795,14 @@ router.post("/courses/:id/enroll", requireAuth, async (req, res) => {
     res.json({
       courseId,
       isEnrolled: true,
+      meetUrl: course.meetUrl ?? null,
       progressPct: await progressPctForUser(userId, courseId),
     });
   } catch (err: any) {
+    if (isPassError(err)) {
+      res.status(402).json({ error: err.message });
+      return;
+    }
     res.status(500).json({ error: err.message ?? "Kayıt başarısız" });
   }
 });
@@ -407,6 +813,7 @@ router.get("/admin/courses", requireAuth, requireAdmin, async (req, res) => {
   try {
     await ensureDemoContent();
     await ensureCourseVideoColumns();
+    await ensureLiveSessionColumns();
     const userId = req.user!.id;
 
     const rows = await db
@@ -415,15 +822,24 @@ router.get("/admin/courses", requireAuth, requireAdmin, async (req, res) => {
       .orderBy(asc(coursesTable.order), desc(coursesTable.createdAt));
 
     const courses = await Promise.all(
-      rows.map(async (c) => ({
-        id: c.id,
-        title: c.title,
-        description: c.description ?? "",
-        term: c.term,
-        order: c.order,
-        isPublished: c.isPublished,
-        modules: await courseModulesForUser(userId, c.id, true),
-      })),
+      rows.map(async (c) => {
+        const format = c.format ?? "vod";
+        return {
+          id: c.id,
+          title: c.title,
+          description: c.description ?? "",
+          term: c.term,
+          order: c.order,
+          isPublished: c.isPublished,
+          format,
+          startsAt: c.startsAt?.toISOString() ?? null,
+          endsAt: c.endsAt?.toISOString() ?? null,
+          meetUrl: c.meetUrl ?? null,
+          audience: c.audience ?? "all",
+          passCost: c.passCost ?? 0,
+          modules: await courseModulesForUser(userId, c.id, true),
+        };
+      }),
     );
 
     res.json({ courses });
@@ -435,11 +851,43 @@ router.get("/admin/courses", requireAuth, requireAdmin, async (req, res) => {
 // ─── POST /api/courses (admin) ───────────────────────────────────────────────
 router.post("/courses", requireAuth, requireAdmin, async (req, res) => {
   try {
-    const { title, description, term, order, isPublished } = req.body ?? {};
+    await ensureLiveSessionColumns();
+    const {
+      title,
+      description,
+      term,
+      order,
+      isPublished,
+      format,
+      startsAt,
+      endsAt,
+      meetUrl,
+      audience,
+      passCost,
+    } = req.body ?? {};
     if (!title || typeof title !== "string") {
       res.status(400).json({ error: "Başlık gerekli" });
       return;
     }
+
+    const resolvedFormat = resolveCourseFormat(format);
+    let starts: Date | null = null;
+    let ends: Date | null = null;
+    if (startsAt) {
+      starts = new Date(startsAt);
+      if (Number.isNaN(starts.getTime())) {
+        res.status(400).json({ error: "Geçersiz startsAt" });
+        return;
+      }
+    }
+    if (endsAt) {
+      ends = new Date(endsAt);
+      if (Number.isNaN(ends.getTime())) {
+        res.status(400).json({ error: "Geçersiz endsAt" });
+        return;
+      }
+    }
+
     const [course] = await db
       .insert(coursesTable)
       .values({
@@ -448,6 +896,16 @@ router.post("/courses", requireAuth, requireAdmin, async (req, res) => {
         term: Number.isFinite(term) ? term : 1,
         order: Number.isFinite(order) ? order : 0,
         isPublished: isPublished === true,
+        format: resolvedFormat,
+        startsAt: starts,
+        endsAt: ends,
+        meetUrl: typeof meetUrl === "string" ? meetUrl : null,
+        audience: typeof audience === "string" && audience ? audience : "all",
+        passCost: resolveCoursePassCost(
+          resolvedFormat,
+          passCost,
+          passCost !== undefined && passCost !== null,
+        ),
       })
       .returning();
     res.json({ course });
@@ -459,18 +917,78 @@ router.post("/courses", requireAuth, requireAdmin, async (req, res) => {
 // ─── PATCH /api/courses/:id (admin) ──────────────────────────────────────────
 router.patch("/courses/:id", requireAuth, requireAdmin, async (req, res) => {
   try {
+    await ensureLiveSessionColumns();
     const courseId = Number(req.params.id);
     if (!Number.isFinite(courseId)) {
       res.status(400).json({ error: "Geçersiz kurs" });
       return;
     }
-    const { title, description, term, order, isPublished } = req.body ?? {};
+    const {
+      title,
+      description,
+      term,
+      order,
+      isPublished,
+      format,
+      startsAt,
+      endsAt,
+      meetUrl,
+      audience,
+      passCost,
+    } = req.body ?? {};
+
+    const [existing] = await db
+      .select()
+      .from(coursesTable)
+      .where(eq(coursesTable.id, courseId))
+      .limit(1);
+    if (!existing) {
+      res.status(404).json({ error: "Kurs bulunamadı" });
+      return;
+    }
+
     const patch: Partial<typeof coursesTable.$inferInsert> = {};
     if (typeof title === "string") patch.title = title;
     if (typeof description === "string") patch.description = description;
     if (Number.isFinite(term)) patch.term = term;
     if (Number.isFinite(order)) patch.order = order;
     if (typeof isPublished === "boolean") patch.isPublished = isPublished;
+    if (format !== undefined) patch.format = resolveCourseFormat(format, existing.format);
+    if (startsAt !== undefined) {
+      if (startsAt === null) {
+        patch.startsAt = null;
+      } else {
+        const d = new Date(startsAt);
+        if (Number.isNaN(d.getTime())) {
+          res.status(400).json({ error: "Geçersiz startsAt" });
+          return;
+        }
+        patch.startsAt = d;
+      }
+    }
+    if (endsAt !== undefined) {
+      if (endsAt === null) {
+        patch.endsAt = null;
+      } else {
+        const d = new Date(endsAt);
+        if (Number.isNaN(d.getTime())) {
+          res.status(400).json({ error: "Geçersiz endsAt" });
+          return;
+        }
+        patch.endsAt = d;
+      }
+    }
+    if (meetUrl !== undefined) patch.meetUrl = typeof meetUrl === "string" ? meetUrl : null;
+    if (typeof audience === "string") patch.audience = audience || "all";
+
+    const nextFormat = (patch.format as string | undefined) ?? existing.format ?? "vod";
+    if (format !== undefined || passCost !== undefined) {
+      patch.passCost = resolveCoursePassCost(
+        nextFormat,
+        passCost !== undefined ? passCost : existing.passCost,
+        passCost !== undefined && passCost !== null,
+      );
+    }
 
     const [course] = await db
       .update(coursesTable)

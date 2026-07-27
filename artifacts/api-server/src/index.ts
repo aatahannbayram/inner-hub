@@ -1,6 +1,15 @@
 import app from "./app";
 import { logger } from "./lib/logger";
-import { ensureUserProfileColumns, ensureMatchAndFaqSchema, ensureVaultCapitalSchema, ensureAnalyticsEventsSchema } from "./lib/ensureSchema";
+import {
+  ensureUserProfileColumns,
+  ensureMatchAndFaqSchema,
+  ensureVaultCapitalSchema,
+  ensureAnalyticsEventsSchema,
+  ensureLiveSessionColumns,
+  ensureUserMembershipColumns,
+  ensurePassSchema,
+  ensureStageSchema,
+} from "./lib/ensureSchema";
 
 const rawPort = process.env["PORT"];
 
@@ -21,6 +30,10 @@ Promise.all([
   ensureMatchAndFaqSchema(),
   ensureVaultCapitalSchema(),
   ensureAnalyticsEventsSchema(),
+  ensureLiveSessionColumns(),
+  ensureUserMembershipColumns(),
+  ensurePassSchema(),
+  ensureStageSchema(),
 ])
   .catch((err) => {
     logger.warn({ err }, "Schema ensure failed (will retry on demand)");

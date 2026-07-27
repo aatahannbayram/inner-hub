@@ -17,6 +17,98 @@ export async function ensureCourseVideoColumns() {
   await db.execute(sql`ALTER TABLE lessons ADD COLUMN IF NOT EXISTS duration_seconds integer`);
 }
 
+/** Kurs + etkinlik canlı alanları. */
+export async function ensureLiveSessionColumns() {
+  await db.execute(sql`ALTER TABLE courses ADD COLUMN IF NOT EXISTS format text DEFAULT 'vod'`);
+  await db.execute(sql`ALTER TABLE courses ADD COLUMN IF NOT EXISTS starts_at timestamp`);
+  await db.execute(sql`ALTER TABLE courses ADD COLUMN IF NOT EXISTS ends_at timestamp`);
+  await db.execute(sql`ALTER TABLE courses ADD COLUMN IF NOT EXISTS meet_url text`);
+  await db.execute(sql`ALTER TABLE courses ADD COLUMN IF NOT EXISTS audience text DEFAULT 'all'`);
+  await db.execute(sql`ALTER TABLE courses ADD COLUMN IF NOT EXISTS pass_cost integer DEFAULT 0`);
+  await db.execute(sql`UPDATE courses SET format = 'vod' WHERE format IS NULL`);
+  await db.execute(sql`UPDATE courses SET audience = 'all' WHERE audience IS NULL`);
+  await db.execute(sql`UPDATE courses SET pass_cost = 0 WHERE pass_cost IS NULL`);
+
+  await db.execute(sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS format text DEFAULT 'in_person'`);
+  await db.execute(sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS meet_url text`);
+  await db.execute(sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS audience text DEFAULT 'all'`);
+  await db.execute(sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS pass_cost integer DEFAULT 1`);
+  await db.execute(sql`UPDATE events SET format = 'in_person' WHERE format IS NULL`);
+  await db.execute(sql`UPDATE events SET audience = 'all' WHERE audience IS NULL`);
+  await db.execute(sql`UPDATE events SET pass_cost = 1 WHERE pass_cost IS NULL`);
+}
+
+/** Üye persona + membership alanları. */
+export async function ensureUserMembershipColumns() {
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS persona text`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS membership_plan text`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS membership_status text`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS membership_period_end timestamp`);
+}
+
+/** Circle Pass cüzdan + ledger. */
+export async function ensurePassSchema() {
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS pass_wallets (
+      id serial PRIMARY KEY,
+      user_id integer NOT NULL UNIQUE REFERENCES users(id),
+      balance integer NOT NULL DEFAULT 0,
+      updated_at timestamp NOT NULL DEFAULT now()
+    )
+  `);
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS pass_ledger (
+      id serial PRIMARY KEY,
+      user_id integer NOT NULL REFERENCES users(id),
+      delta integer NOT NULL,
+      reason text NOT NULL,
+      ref_type text,
+      ref_id text,
+      created_at timestamp NOT NULL DEFAULT now()
+    )
+  `);
+  await db.execute(sql`
+    CREATE INDEX IF NOT EXISTS pass_ledger_user_idx ON pass_ledger (user_id)
+  `);
+}
+
+/** Stage ürün + oy. */
+export async function ensureStageSchema() {
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS stage_products (
+      id serial PRIMARY KEY,
+      user_id integer NOT NULL REFERENCES users(id),
+      title text NOT NULL,
+      url text NOT NULL,
+      pitch text NOT NULL,
+      status text NOT NULL DEFAULT 'published',
+      created_at timestamp NOT NULL DEFAULT now()
+    )
+  `);
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS stage_votes (
+      id serial PRIMARY KEY,
+      product_id integer NOT NULL REFERENCES stage_products(id),
+      user_id integer NOT NULL REFERENCES users(id),
+      created_at timestamp NOT NULL DEFAULT now(),
+      UNIQUE (product_id, user_id)
+    )
+  `);
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS live_notify_log (
+      id serial PRIMARY KEY,
+      ref_type text NOT NULL,
+      ref_id integer NOT NULL,
+      kind text NOT NULL,
+      created_at timestamp NOT NULL DEFAULT now()
+    )
+  `);
+  await db.execute(sql`
+    CREATE UNIQUE INDEX IF NOT EXISTS live_notify_log_uidx
+      ON live_notify_log (ref_type, ref_id, kind)
+  `);
+}
+
 /** Tanışma talepleri + FAQ kategori kolonu. */
 export async function ensureMatchAndFaqSchema() {
   await db.execute(sql`

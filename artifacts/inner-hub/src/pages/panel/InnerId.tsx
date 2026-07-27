@@ -28,6 +28,8 @@ type ApiUser = {
   name: string;
   email: string;
   role: "member" | "admin";
+  persona?: string | null;
+  membershipPlan?: string | null;
   title?: string | null;
   company?: string | null;
   bio?: string | null;
@@ -96,9 +98,11 @@ function IdCard({
 }) {
   const t = useT();
   const { locale } = useLocale();
-  const tier = user.role === "admin" ? t("id.tierFounder") : t("id.tierMember");
+  const isFounder =
+    user.membershipPlan === "founder" || user.persona === "founder";
+  const tier = isFounder ? t("id.tierFounder") : t("id.tierMember");
   const badges = [
-    user.role === "admin" ? t("id.badgeFounder") : t("id.badgeMember"),
+    isFounder ? t("id.badgeFounder") : t("id.badgeMember"),
     ...(user.title ? [user.title] : []),
     ...skills.slice(0, 2),
   ].filter(Boolean);

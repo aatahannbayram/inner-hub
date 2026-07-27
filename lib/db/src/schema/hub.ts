@@ -30,6 +30,15 @@ export const coursesTable = pgTable("courses", {
   term: integer("term").default(1).notNull(),
   order: integer("order").default(0).notNull(),
   isPublished: boolean("is_published").default(false).notNull(),
+  /** vod | live | hybrid */
+  format: text("format").default("vod").notNull(),
+  startsAt: timestamp("starts_at"),
+  endsAt: timestamp("ends_at"),
+  meetUrl: text("meet_url"),
+  /** all | founder | investor | company | builder */
+  audience: text("audience").default("all").notNull(),
+  /** Canlı oturum Pass maliyeti (genelde 0 veya 1) */
+  passCost: integer("pass_cost").default(0).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -78,6 +87,11 @@ export const eventsTable = pgTable("events", {
   startAt: timestamp("start_at").notNull(),
   endAt: timestamp("end_at"),
   isPublished: boolean("is_published").default(false).notNull(),
+  /** online | in_person | hybrid */
+  format: text("format").default("in_person").notNull(),
+  meetUrl: text("meet_url"),
+  audience: text("audience").default("all").notNull(),
+  passCost: integer("pass_cost").default(1).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -264,3 +278,55 @@ export const apiKeysTable = pgTable("api_keys", {
 });
 
 export type ApiKey = typeof apiKeysTable.$inferSelect;
+
+// ─── CIRCLE PASS ──────────────────────────────────────────────────────────────
+export const passWalletsTable = pgTable("pass_wallets", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => usersTable.id).notNull().unique(),
+  balance: integer("balance").default(0).notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const passLedgerTable = pgTable("pass_ledger", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => usersTable.id).notNull(),
+  delta: integer("delta").notNull(),
+  reason: text("reason").notNull(),
+  refType: text("ref_type"),
+  refId: text("ref_id"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export type PassWallet = typeof passWalletsTable.$inferSelect;
+export type PassLedger = typeof passLedgerTable.$inferSelect;
+
+// ─── INNER·STAGE ──────────────────────────────────────────────────────────────
+export const stageProductsTable = pgTable("stage_products", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => usersTable.id).notNull(),
+  title: text("title").notNull(),
+  url: text("url").notNull(),
+  pitch: text("pitch").notNull(),
+  status: text("status").default("published").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const stageVotesTable = pgTable("stage_votes", {
+  id: serial("id").primaryKey(),
+  productId: integer("product_id").references(() => stageProductsTable.id).notNull(),
+  userId: integer("user_id").references(() => usersTable.id).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export type StageProduct = typeof stageProductsTable.$inferSelect;
+export type StageVote = typeof stageVotesTable.$inferSelect;
+
+/** Canlı hatırlatma dedupe */
+export const liveNotifyLogTable = pgTable("live_notify_log", {
+  id: serial("id").primaryKey(),
+  refType: text("ref_type").notNull(),
+  refId: integer("ref_id").notNull(),
+  kind: text("kind").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+

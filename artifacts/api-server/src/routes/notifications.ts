@@ -7,7 +7,14 @@ import { getUserSettingsPrefs } from "./settings";
 
 const router = Router();
 
-export type NotifKind = "match" | "event" | "capital" | "request" | "signal";
+export type NotifKind =
+  | "match"
+  | "event"
+  | "event_live"
+  | "course"
+  | "capital"
+  | "request"
+  | "signal";
 
 /** Eski DB'lerde title/kind yoksa ekle (idempotent). */
 async function ensureNotificationColumns() {
@@ -50,11 +57,20 @@ function mapRow(n: {
   kind?: string | null;
 }) {
   const kind = (n.kind as NotifKind | null) ?? "signal";
+  const allowed = [
+    "match",
+    "event",
+    "event_live",
+    "course",
+    "capital",
+    "request",
+    "signal",
+  ];
   return {
     id: n.id,
     title: (n.title && n.title.trim()) || "Bildirim",
     body: n.body,
-    kind: ["match", "event", "capital", "request", "signal"].includes(kind) ? kind : "signal",
+    kind: allowed.includes(kind) ? kind : "signal",
     isRead: n.isRead,
     createdAt: n.createdAt.toISOString(),
   };
@@ -62,7 +78,7 @@ function mapRow(n: {
 
 function kindAllowed(prefs: Awaited<ReturnType<typeof getUserSettingsPrefs>>, kind: NotifKind): boolean {
   if (kind === "match") return prefs.notifMatch;
-  if (kind === "event") return prefs.notifEvents;
+  if (kind === "event" || kind === "event_live" || kind === "course") return prefs.notifEvents;
   if (kind === "capital") return prefs.notifCapital;
   return true; // request | signal
 }

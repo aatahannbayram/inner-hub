@@ -4,6 +4,7 @@ import {
   invitationApprovedMail,
   invitationReceivedMail,
   invitationRejectedMail,
+  liveSessionReminderMail,
   type ApplicantMailContext,
 } from "./templates";
 
@@ -60,6 +61,20 @@ export async function notifyApplicantInvitationApproved(ctx: ApplicantMailContex
 /** Başvuran: red. */
 export async function notifyApplicantInvitationRejected(ctx: ApplicantMailContext) {
   const mail = invitationRejectedMail(ctx);
+  return sendTransactionalMail({ ...mail, to: ctx.email });
+}
+
+/** Canlı kurs/etkinlik hatırlatması. */
+export async function notifyLiveSession(ctx: {
+  name: string;
+  email: string;
+  sessionTitle: string;
+  startsAt?: Date | null;
+  meetUrl?: string | null;
+  refType: "course" | "event";
+  lead?: string;
+}) {
+  const mail = liveSessionReminderMail(ctx);
   return sendTransactionalMail({ ...mail, to: ctx.email });
 }
 

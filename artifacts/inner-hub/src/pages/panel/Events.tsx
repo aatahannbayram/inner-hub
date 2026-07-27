@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { MapPin, Clock, Users, ChevronRight, CheckCircle2, CalendarDays, Sparkles } from "lucide-react";
+import { MapPin, Clock, Users, ChevronRight, CheckCircle2, CalendarDays, Sparkles, ExternalLink } from "lucide-react";
+import { Link } from "wouter";
 import { FadeIn } from "@/components/FadeIn";
 import { AnimatedHeading } from "@/components/AnimatedHeading";
 import { useApiQuery } from "@/hooks/useApiQuery";
@@ -11,6 +12,8 @@ import { HeroQuickStat } from "@/components/panel/HeroQuickStat";
 import { useT, useLocale } from "@/i18n";
 
 type ViewMode = "liste" | "takvim";
+type RoomFilter = "mine" | "all";
+type EventFormat = "online" | "in_person" | "hybrid";
 
 interface Event {
   id: number;
@@ -20,13 +23,18 @@ interface Event {
   endAt: string;
   location: string;
   type: "gathering" | "workshop" | "online";
+  format: EventFormat | null;
+  meetUrl: string | null;
+  passCost: number;
   capacity: number;
   registered: number;
   isRegistered: boolean;
   isPast: boolean;
 }
 
-function inferType(title: string, location: string): Event["type"] {
+function inferType(title: string, location: string, format?: string | null): Event["type"] {
+  if (format === "online") return "online";
+  if (format === "hybrid" || format === "in_person") return "gathering";
   const hay = `${title} ${location}`.toLowerCase();
   if (hay.includes("online") || hay.includes("zoom")) return "online";
   if (hay.includes("workshop")) return "workshop";
@@ -44,6 +52,9 @@ interface RawEvent {
   capacity?: number;
   registered?: number;
   isRegistered?: boolean;
+  format?: EventFormat;
+  meetUrl?: string | null;
+  passCost?: number;
 }
 
 function mapApiEvent(row: RawEvent): Event {
@@ -55,7 +66,10 @@ function mapApiEvent(row: RawEvent): Event {
     startAt: row.startAt,
     endAt: row.endAt,
     location,
-    type: inferType(row.title, location),
+    type: inferType(row.title, location, row.format),
+    format: row.format ?? null,
+    meetUrl: row.meetUrl ?? null,
+    passCost: row.passCost ?? 1,
     capacity: row.capacity ?? 0,
     registered: row.registered ?? 0,
     isRegistered: row.isRegistered ?? false,
@@ -91,9 +105,12 @@ function displayTitle(title: string) {
     .trim();
 }
 
-function typeLabel(type: Event["type"], t: (key: string) => string) {
-  if (type === "workshop") return t("events.typeWorkshop");
-  if (type === "online") return t("events.typeOnline");
+function typeLabel(event: Event, t: (key: string) => string) {
+  if (event.format === "online") return t("events.typeOnline");
+  if (event.format === "hybrid") return t("events.typeHybrid");
+  if (event.format === "in_person") return t("events.typeInPerson");
+  if (event.type === "workshop") return t("events.typeWorkshop");
+  if (event.type === "online") return t("events.typeOnline");
   return t("events.typeGathering");
 }
 
@@ -114,7 +131,8 @@ function EventCard({
   const isFull = event.capacity > 0 && spots <= 0;
   const title = displayTitle(event.title);
   const monthShort = new Date(event.startAt).toLocaleDateString(localeTag(locale), { month: "short" });
-  const label = typeLabel(event.type, t);
+  const label = typeLabel(event, t);
+  const isOnlineLike = event.format === "online" || event.type === "online";
 
   return (
     <article
@@ -150,7 +168,7 @@ function EventCard({
         </div>
         <div className="min-w-0 sm:hidden">
           <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-[var(--ink-muted)]">
-            {event.type === "online" ? (
+            {isOnlineLike ? (
               <span lang="en">{label}</span>
             ) : (
               label
@@ -165,7 +183,7 @@ function EventCard({
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <p className="mb-1 hidden font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--ink-muted)] sm:block">
-              {event.type === "online" ? (
+              {isOnlineLike ? (
                 <span lang="en">{label}</span>
               ) : (
                 label
@@ -213,7 +231,18 @@ function EventCard({
           </ul>
 
           {!event.isPast && (
-            <div className="shrink-0">
+            <div className="flex shrink-0 flex-wrap items-center gap-2">
+              {event.isRegistered && event.meetUrl ? (
+                <a
+                  href={event.meetUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex min-h-11 w-full items-center justify-center gap-1.5 bg-[var(--ink)] px-5 py-2.5 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-85 sm:w-auto"
+                >
+                  {t("events.joinMeet")}
+                  <ExternalLink className="size-3" />
+                </a>
+              ) : null}
               {event.capacity > 0 && isFull ? (
                 <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-muted)]">
                   {t("events.full")}
@@ -461,10 +490,22 @@ export default function Events() {
   const [view, setView] = useState<ViewMode>("liste");
   const [busyId, setBusyId] = useState<number | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [passRequired, setPassRequired] = useState(false);
+  const [room, setRoom] = useState<RoomFilter>(() => {
+    const p = new URLSearchParams(window.location.search).get("room");
+    return p === "all" ? "all" : "mine";
+  });
   const queryClient = useQueryClient();
+
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    url.searchParams.set("room", room);
+    window.history.replaceState({}, "", `${url.pathname}${url.search}`);
+  }, [room]);
+
   const { data, isLoading: loading, isError, error, refetch } = useApiQuery<{ events: RawEvent[] }>(
-    ["events"],
-    "/api/events",
+    ["events", room],
+    `/api/events?room=${room}`,
   );
   const events: Event[] = (data?.events ?? []).map(mapApiEvent);
 
@@ -480,12 +521,18 @@ export default function Events() {
   const register = async (id: number) => {
     setBusyId(id);
     setActionError(null);
+    setPassRequired(false);
     try {
       const res = await fetch(apiUrl(`/api/events/${id}/register`), {
         method: "POST",
         credentials: "include",
       });
       const json = await res.json().catch(() => ({}));
+      if (res.status === 402) {
+        setPassRequired(true);
+        setActionError(t("events.passRequired"));
+        return;
+      }
       if (!res.ok) throw new Error(json.error ?? t("events.registerFailed"));
       await queryClient.invalidateQueries({ queryKey: ["events"] });
     } catch (e: any) {
@@ -517,6 +564,26 @@ export default function Events() {
     <div className="space-y-8 max-w-5xl">
       {/* Hero */}
       <EventsHero upcomingCount={upcoming.length} />
+
+      <FadeIn delay={0.01}>
+        <div className="flex w-full max-w-xs panel-glass sm:w-auto">
+          {(["mine", "all"] as RoomFilter[]).map((r) => (
+            <button
+              key={r}
+              type="button"
+              onClick={() => setRoom(r)}
+              className={[
+                "min-h-10 flex-1 px-4 py-2 font-mono text-label uppercase tracking-widest transition-colors sm:flex-none",
+                room === r
+                  ? "bg-[var(--ink)] text-[var(--bone)]"
+                  : "text-[var(--ink-body)] hover:text-[var(--ink)]",
+              ].join(" ")}
+            >
+              {r === "mine" ? t("events.roomMine") : t("events.roomAll")}
+            </button>
+          ))}
+        </div>
+      </FadeIn>
 
       {!loading && !isError && events.length > 0 && (
         <FadeIn delay={0.02}>
@@ -576,9 +643,17 @@ export default function Events() {
       )}
 
       {actionError && (
-        <p className="font-mono text-label text-[var(--error-ink)]" role="alert">
-          {actionError}
-        </p>
+        <div className="panel-glass space-y-2 p-4" role="alert">
+          <p className="font-mono text-label text-[var(--error-ink)]">{actionError}</p>
+          {passRequired && (
+            <Link
+              href="/panel/membership"
+              className="inline-block font-mono text-label uppercase tracking-widest text-[var(--ink)] underline-offset-4 hover:underline"
+            >
+              {t("events.getPass")}
+            </Link>
+          )}
+        </div>
       )}
 
       {!loading && !isError && events.length > 0 && view === "liste" ? (

@@ -11,6 +11,11 @@ export const usersTable = pgTable("users", {
   name: text("name").notNull(),
   avatarUrl: text("avatar_url"),
   role: roleEnum("role").default("member").notNull(),
+  /** Davet personası: founder | investor | builder | company */
+  persona: text("persona"),
+  membershipPlan: text("membership_plan"),
+  membershipStatus: text("membership_status"),
+  membershipPeriodEnd: timestamp("membership_period_end"),
   bio: text("bio"),
   title: text("title"),
   company: text("company"),
