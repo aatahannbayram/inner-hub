@@ -1094,6 +1094,85 @@ router.post("/modules/:id/lessons", requireAuth, requireAdmin, async (req, res) 
   }
 });
 
+// ─── DELETE /api/lessons/:id (admin) ─────────────────────────────────────────
+router.delete("/lessons/:id", requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const lessonId = Number(req.params.id);
+    if (!Number.isFinite(lessonId)) {
+      res.status(400).json({ error: "Geçersiz ders" });
+      return;
+    }
+    await db.delete(progressTable).where(eq(progressTable.lessonId, lessonId));
+    const [deleted] = await db.delete(lessonsTable).where(eq(lessonsTable.id, lessonId)).returning({ id: lessonsTable.id });
+    if (!deleted) {
+      res.status(404).json({ error: "Ders bulunamadı" });
+      return;
+    }
+    res.json({ ok: true });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message ?? "Ders silinemedi" });
+  }
+});
+
+// ─── DELETE /api/modules/:id (admin) ─────────────────────────────────────────
+router.delete("/modules/:id", requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const moduleId = Number(req.params.id);
+    if (!Number.isFinite(moduleId)) {
+      res.status(400).json({ error: "Geçersiz modül" });
+      return;
+    }
+    const lessonIds = (
+      await db.select({ id: lessonsTable.id }).from(lessonsTable).where(eq(lessonsTable.moduleId, moduleId))
+    ).map((l) => l.id);
+    if (lessonIds.length > 0) {
+      await db.delete(progressTable).where(inArray(progressTable.lessonId, lessonIds));
+      await db.delete(lessonsTable).where(inArray(lessonsTable.id, lessonIds));
+    }
+    const [deleted] = await db.delete(modulesTable).where(eq(modulesTable.id, moduleId)).returning({ id: modulesTable.id });
+    if (!deleted) {
+      res.status(404).json({ error: "Modül bulunamadı" });
+      return;
+    }
+    res.json({ ok: true });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message ?? "Modül silinemedi" });
+  }
+});
+
+// ─── DELETE /api/courses/:id (admin) ─────────────────────────────────────────
+router.delete("/courses/:id", requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const courseId = Number(req.params.id);
+    if (!Number.isFinite(courseId)) {
+      res.status(400).json({ error: "Geçersiz kurs" });
+      return;
+    }
+    const moduleIds = (
+      await db.select({ id: modulesTable.id }).from(modulesTable).where(eq(modulesTable.courseId, courseId))
+    ).map((m) => m.id);
+    if (moduleIds.length > 0) {
+      const lessonIds = (
+        await db.select({ id: lessonsTable.id }).from(lessonsTable).where(inArray(lessonsTable.moduleId, moduleIds))
+      ).map((l) => l.id);
+      if (lessonIds.length > 0) {
+        await db.delete(progressTable).where(inArray(progressTable.lessonId, lessonIds));
+        await db.delete(lessonsTable).where(inArray(lessonsTable.id, lessonIds));
+      }
+      await db.delete(modulesTable).where(inArray(modulesTable.id, moduleIds));
+    }
+    await db.delete(enrollmentsTable).where(eq(enrollmentsTable.courseId, courseId));
+    const [deleted] = await db.delete(coursesTable).where(eq(coursesTable.id, courseId)).returning({ id: coursesTable.id });
+    if (!deleted) {
+      res.status(404).json({ error: "Kurs bulunamadı" });
+      return;
+    }
+    res.json({ ok: true });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message ?? "Kurs silinemedi" });
+  }
+});
+
 // ─── POST /api/lessons/:id/complete ──────────────────────────────────────────
 router.post("/lessons/:id/complete", requireAuth, async (req, res) => {
   try {

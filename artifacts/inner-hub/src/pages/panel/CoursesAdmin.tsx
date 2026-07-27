@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Plus, Upload, Loader2, ChevronDown, ChevronRight, Check } from "lucide-react";
+import { Plus, Upload, Loader2, ChevronDown, ChevronRight, Check, Trash2 } from "lucide-react";
 import { FadeIn } from "@/components/FadeIn";
 import { Lockup } from "@/components/Lockup";
 import { useApiQuery } from "@/hooks/useApiQuery";
@@ -263,22 +263,47 @@ function AddModuleForm({ courseId, onAdded }: { courseId: number; onAdded: () =>
 }
 
 function ModuleAdminRow({ courseModule, onChanged }: { courseModule: AdminModule; onChanged: () => void }) {
+  const t = useT();
   const [open, setOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  const deleteModule = async () => {
+    if (!window.confirm(t("courses.confirmDeleteModule"))) return;
+    setDeleting(true);
+    try {
+      await fetch(apiUrl(`/api/modules/${courseModule.id}`), { method: "DELETE", credentials: "include" });
+      onChanged();
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   return (
     <div className="border-t border-[var(--ink)]/[0.06]">
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center gap-2 px-3 py-2.5 text-left transition-colors hover:bg-[var(--ink)]/[0.02]"
-      >
-        {open ? (
-          <ChevronDown className="size-3.5 shrink-0 text-[var(--ink-body)]" />
-        ) : (
-          <ChevronRight className="size-3.5 shrink-0 text-[var(--ink-body)]" />
-        )}
-        <span className="flex-1 text-xs font-medium text-[var(--ink)]">{courseModule.title}</span>
-        <span className="font-mono text-label text-[var(--ink-muted)]">{courseModule.lessons.length}</span>
-      </button>
+      <div className="flex w-full items-center gap-2 px-3 py-2.5 hover:bg-[var(--ink)]/[0.02]">
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          className="flex flex-1 items-center gap-2 text-left"
+        >
+          {open ? (
+            <ChevronDown className="size-3.5 shrink-0 text-[var(--ink-body)]" />
+          ) : (
+            <ChevronRight className="size-3.5 shrink-0 text-[var(--ink-body)]" />
+          )}
+          <span className="flex-1 text-xs font-medium text-[var(--ink)]">{courseModule.title}</span>
+          <span className="font-mono text-label text-[var(--ink-muted)]">{courseModule.lessons.length}</span>
+        </button>
+        <button
+          type="button"
+          disabled={deleting}
+          onClick={() => void deleteModule()}
+          aria-label={t("courses.deleteModule")}
+          className="hit-40 flex items-center justify-center text-[var(--ink-muted)] transition-colors hover:text-[var(--error-ink)] disabled:opacity-40"
+        >
+          <Trash2 className="size-3.5" />
+        </button>
+      </div>
       {open && (
         <div className="bg-[var(--ink)]/[0.015]">
           {courseModule.lessons.map((l) => (
@@ -309,6 +334,7 @@ function CourseAdminCard({ course, onChanged }: { course: AdminCourse; onChanged
   const [startsAt, setStartsAt] = useState(toDatetimeLocal(course.startsAt));
   const [savingLive, setSavingLive] = useState(false);
   const [notifying, setNotifying] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const format = course.format ?? "vod";
   const audience = course.audience ?? "all";
   const isLiveLike = format === "live" || format === "hybrid";
@@ -355,6 +381,17 @@ function CourseAdminCard({ course, onChanged }: { course: AdminCourse; onChanged
     }
   };
 
+  const deleteCourse = async () => {
+    if (!window.confirm(t("courses.confirmDeleteCourse", { title: course.title }))) return;
+    setDeleting(true);
+    try {
+      await fetch(apiUrl(`/api/courses/${course.id}`), { method: "DELETE", credentials: "include" });
+      onChanged();
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   return (
     <div className="panel-glass">
       <div className="flex flex-wrap items-center justify-between gap-3 p-4">
@@ -388,6 +425,15 @@ function CourseAdminCard({ course, onChanged }: { course: AdminCourse; onChanged
             }`}
           >
             {course.isPublished ? t("courses.published") : t("courses.draft")}
+          </button>
+          <button
+            type="button"
+            disabled={deleting}
+            onClick={() => void deleteCourse()}
+            aria-label={t("courses.deleteCourse")}
+            className="hit-40 flex items-center justify-center text-[var(--ink-muted)] transition-colors hover:text-[var(--error-ink)] disabled:opacity-40"
+          >
+            <Trash2 className="size-3.5" />
           </button>
         </div>
       </div>
