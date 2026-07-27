@@ -162,6 +162,8 @@ export const notificationsTable = pgTable("notifications", {
   title: text("title"),
   body: text("body").notNull(),
   kind: text("kind"),
+  /** Panel içi hedef yol, örn. /panel/events */
+  href: text("href"),
   isRead: boolean("is_read").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });

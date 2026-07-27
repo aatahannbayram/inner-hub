@@ -16,10 +16,26 @@ export type NotifKind =
   | "request"
   | "signal";
 
-/** Eski DB'lerde title/kind yoksa ekle (idempotent). */
+const KIND_DEFAULT_HREF: Record<NotifKind, string> = {
+  match: "/panel/match",
+  event: "/panel/events",
+  event_live: "/panel/events",
+  course: "/panel/courses",
+  capital: "/panel/capital",
+  request: "/panel/applications",
+  signal: "/panel/signal",
+};
+
+/** Eski DB'lerde title/kind/href yoksa ekle (idempotent). */
 async function ensureNotificationColumns() {
   await db.execute(sql`ALTER TABLE notifications ADD COLUMN IF NOT EXISTS title text`);
   await db.execute(sql`ALTER TABLE notifications ADD COLUMN IF NOT EXISTS kind text`);
+  await db.execute(sql`ALTER TABLE notifications ADD COLUMN IF NOT EXISTS href text`);
+}
+
+export function hrefForKind(kind: NotifKind, href?: string | null): string {
+  if (href && href.startsWith("/panel")) return href;
+  return KIND_DEFAULT_HREF[kind] ?? "/panel";
 }
 
 async function ensureWelcomeNotifications(userId: number) {
@@ -36,6 +52,7 @@ async function ensureWelcomeNotifications(userId: number) {
       title: "inner·hub'a hoş geldin",
       body: "Topluluk chat, etkinlikler ve kurslar canlı. Profilini tamamlamayı unutma.",
       kind: "signal",
+      href: "/panel/profile",
       isRead: false,
     },
     {
@@ -43,6 +60,7 @@ async function ensureWelcomeNotifications(userId: number) {
       title: "Etkinlikler seni bekliyor",
       body: "Yaklaşan networking ve workshop’lara Etkinlikler’den kayıt olabilirsin.",
       kind: "event",
+      href: "/panel/events",
       isRead: false,
     },
   ]);
@@ -55,9 +73,10 @@ function mapRow(n: {
   createdAt: Date;
   title?: string | null;
   kind?: string | null;
+  href?: string | null;
 }) {
   const kind = (n.kind as NotifKind | null) ?? "signal";
-  const allowed = [
+  const allowed: NotifKind[] = [
     "match",
     "event",
     "event_live",
@@ -66,11 +85,13 @@ function mapRow(n: {
     "request",
     "signal",
   ];
+  const safeKind = allowed.includes(kind) ? kind : "signal";
   return {
     id: n.id,
     title: (n.title && n.title.trim()) || "Bildirim",
     body: n.body,
-    kind: allowed.includes(kind) ? kind : "signal",
+    kind: safeKind,
+    href: hrefForKind(safeKind, n.href),
     isRead: n.isRead,
     createdAt: n.createdAt.toISOString(),
   };
@@ -80,7 +101,7 @@ function kindAllowed(prefs: Awaited<ReturnType<typeof getUserSettingsPrefs>>, ki
   if (kind === "match") return prefs.notifMatch;
   if (kind === "event" || kind === "event_live" || kind === "course") return prefs.notifEvents;
   if (kind === "capital") return prefs.notifCapital;
-  return true; // request | signal
+  return true;
 }
 
 /** Diğer route'lardan bildirim oluşturmak için. */
@@ -89,6 +110,7 @@ export async function createNotification(input: {
   title: string;
   body: string;
   kind?: NotifKind;
+  href?: string | null;
 }) {
   try {
     await ensureNotificationColumns();
@@ -101,6 +123,7 @@ export async function createNotification(input: {
       title: input.title,
       body: input.body,
       kind,
+      href: hrefForKind(kind, input.href),
       isRead: false,
     });
   } catch {

@@ -130,6 +130,7 @@ async function notifyUsers(opts: {
         title: opts.title,
         body: opts.emailLead,
         kind: opts.notifKind,
+        href: opts.refType === "course" ? "/panel/courses" : "/panel/events",
       });
     }
     if (opts.channel === "whatsapp" || opts.channel === "all") {

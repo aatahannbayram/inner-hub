@@ -205,6 +205,7 @@ router.post("/match/introduce", requireAuth, async (req, res) => {
       title: "Tanışma talebin alındı",
       body: `${targetName} için talebin inner ekibine iletildi. Kısa sürede dönüş yapılır.`,
       kind: "match",
+      href: "/panel/match",
     });
 
     const admins = await db
@@ -219,6 +220,7 @@ router.post("/match/introduce", requireAuth, async (req, res) => {
           title: "Yeni tanışma talebi",
           body: `${fromName}, ${targetName}${matchType ? ` (${matchType})` : ""} ile tanışmak istiyor.`,
           kind: "request",
+          href: "/panel/applications",
         }),
       ),
     );

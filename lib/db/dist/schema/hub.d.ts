@@ -2601,6 +2601,23 @@ export declare const notificationsTable: import("drizzle-orm/pg-core").PgTableWi
             identity: undefined;
             generated: undefined;
         }, {}, {}>;
+        href: import("drizzle-orm/pg-core").PgColumn<{
+            name: "href";
+            tableName: "notifications";
+            dataType: "string";
+            columnType: "PgText";
+            data: string;
+            driverParam: string;
+            notNull: false;
+            hasDefault: false;
+            isPrimaryKey: false;
+            isAutoincrement: false;
+            hasRuntimeDefault: false;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+            identity: undefined;
+            generated: undefined;
+        }, {}, {}>;
         isRead: import("drizzle-orm/pg-core").PgColumn<{
             name: "is_read";
             tableName: "notifications";

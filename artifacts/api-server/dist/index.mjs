@@ -54048,6 +54048,8 @@ var init_hub = __esm({
       title: text("title"),
       body: text("body").notNull(),
       kind: text("kind"),
+      /** Panel içi hedef yol, örn. /panel/events */
+      href: text("href"),
       isRead: boolean("is_read").default(false).notNull(),
       createdAt: timestamp("created_at").defaultNow().notNull()
     });
@@ -122026,9 +122028,23 @@ var import_express7 = __toESM(require_express2(), 1);
 init_drizzle_orm();
 init_schema2();
 var router7 = (0, import_express7.Router)();
+var KIND_DEFAULT_HREF = {
+  match: "/panel/match",
+  event: "/panel/events",
+  event_live: "/panel/events",
+  course: "/panel/courses",
+  capital: "/panel/capital",
+  request: "/panel/applications",
+  signal: "/panel/signal"
+};
 async function ensureNotificationColumns() {
   await db.execute(sql`ALTER TABLE notifications ADD COLUMN IF NOT EXISTS title text`);
   await db.execute(sql`ALTER TABLE notifications ADD COLUMN IF NOT EXISTS kind text`);
+  await db.execute(sql`ALTER TABLE notifications ADD COLUMN IF NOT EXISTS href text`);
+}
+function hrefForKind(kind, href) {
+  if (href && href.startsWith("/panel")) return href;
+  return KIND_DEFAULT_HREF[kind] ?? "/panel";
 }
 async function ensureWelcomeNotifications(userId) {
   const [row] = await db.select({ id: notificationsTable.id }).from(notificationsTable).where(eq(notificationsTable.userId, userId)).limit(1);
@@ -122039,6 +122055,7 @@ async function ensureWelcomeNotifications(userId) {
       title: "inner\xB7hub'a ho\u015F geldin",
       body: "Topluluk chat, etkinlikler ve kurslar canl\u0131. Profilini tamamlamay\u0131 unutma.",
       kind: "signal",
+      href: "/panel/profile",
       isRead: false
     },
     {
@@ -122046,6 +122063,7 @@ async function ensureWelcomeNotifications(userId) {
       title: "Etkinlikler seni bekliyor",
       body: "Yakla\u015Fan networking ve workshop\u2019lara Etkinlikler\u2019den kay\u0131t olabilirsin.",
       kind: "event",
+      href: "/panel/events",
       isRead: false
     }
   ]);
@@ -122061,11 +122079,13 @@ function mapRow(n) {
     "request",
     "signal"
   ];
+  const safeKind = allowed.includes(kind) ? kind : "signal";
   return {
     id: n.id,
     title: n.title && n.title.trim() || "Bildirim",
     body: n.body,
-    kind: allowed.includes(kind) ? kind : "signal",
+    kind: safeKind,
+    href: hrefForKind(safeKind, n.href),
     isRead: n.isRead,
     createdAt: n.createdAt.toISOString()
   };
@@ -122087,6 +122107,7 @@ async function createNotification(input) {
       title: input.title,
       body: input.body,
       kind,
+      href: hrefForKind(kind, input.href),
       isRead: false
     });
   } catch {
@@ -122400,7 +122421,8 @@ router8.post("/events/:id/register", requireAuth, async (req, res) => {
         userId,
         title: "Etkinlik kayd\u0131 onayland\u0131",
         body: `${event.title} i\xE7in kayd\u0131n al\u0131nd\u0131.`,
-        kind: "event"
+        kind: "event",
+        href: "/panel/events"
       });
     }
     res.json({
@@ -122607,7 +122629,8 @@ router8.post("/admin/events/:id/notify", requireAuth, requireAdmin, async (req, 
         userId: r.userId,
         title: "Canl\u0131 etkinlik hat\u0131rlatmas\u0131",
         body: customBody,
-        kind: "event_live"
+        kind: "event_live",
+        href: "/panel/events"
       });
       notified += 1;
       if (sendEmail) {
@@ -122715,7 +122738,8 @@ router8.post("/courses/:id/enroll", requireAuth, async (req, res) => {
         userId,
         title: "Kursa kay\u0131t oldun",
         body: `${course.title} kursuna kayd\u0131n tamamland\u0131.`,
-        kind: "signal"
+        kind: "course",
+        href: "/panel/courses"
       });
     }
     res.json({
@@ -123671,7 +123695,8 @@ router12.post("/match/introduce", requireAuth, async (req, res) => {
       userId,
       title: "Tan\u0131\u015Fma talebin al\u0131nd\u0131",
       body: `${targetName} i\xE7in talebin inner ekibine iletildi. K\u0131sa s\xFCrede d\xF6n\xFC\u015F yap\u0131l\u0131r.`,
-      kind: "match"
+      kind: "match",
+      href: "/panel/match"
     });
     const admins = await db.select({ id: usersTable.id }).from(usersTable).where(eq(usersTable.role, "admin"));
     const fromName = req.user.name || req.user.email;
@@ -123681,7 +123706,8 @@ router12.post("/match/introduce", requireAuth, async (req, res) => {
           userId: a.id,
           title: "Yeni tan\u0131\u015Fma talebi",
           body: `${fromName}, ${targetName}${matchType ? ` (${matchType})` : ""} ile tan\u0131\u015Fmak istiyor.`,
-          kind: "request"
+          kind: "request",
+          href: "/panel/applications"
         })
       )
     );
@@ -125439,7 +125465,8 @@ async function notifyUsers(opts) {
         userId: u.id,
         title: opts.title,
         body: opts.emailLead,
-        kind: opts.notifKind
+        kind: opts.notifKind,
+        href: opts.refType === "course" ? "/panel/courses" : "/panel/events"
       });
     }
     if (opts.channel === "whatsapp" || opts.channel === "all") {

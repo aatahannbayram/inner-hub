@@ -395,6 +395,7 @@ router.post("/events/:id/register", requireAuth, async (req, res) => {
         title: "Etkinlik kaydı onaylandı",
         body: `${event.title} için kaydın alındı.`,
         kind: "event",
+        href: "/panel/events",
       });
     }
 
@@ -652,6 +653,7 @@ router.post("/admin/events/:id/notify", requireAuth, requireAdmin, async (req, r
         title: "Canlı etkinlik hatırlatması",
         body: customBody,
         kind: "event_live",
+        href: "/panel/events",
       });
       notified += 1;
 
@@ -789,7 +791,8 @@ router.post("/courses/:id/enroll", requireAuth, async (req, res) => {
         userId,
         title: "Kursa kayıt oldun",
         body: `${course.title} kursuna kaydın tamamlandı.`,
-        kind: "signal",
+        kind: "course",
+        href: "/panel/courses",
       });
     }
 

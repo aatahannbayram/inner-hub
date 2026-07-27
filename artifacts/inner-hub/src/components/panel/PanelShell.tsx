@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "wouter";
 import { useQueryClient } from "@tanstack/react-query";
-import { LogOut, Menu, X, Bell, ChevronLeft, ChevronRight, Sparkles, CalendarDays, TrendingUp, UserPlus, Zap, Search } from "lucide-react";
+import { LogOut, Menu, X, Bell, ChevronLeft, ChevronRight, Sparkles, CalendarDays, TrendingUp, UserPlus, Zap, Search, BookOpen, ArrowUpRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { PanelNav } from "./PanelNav";
@@ -18,16 +18,18 @@ import { LocaleSyncFromSettings, useLocale, useT } from "@/i18n";
 import { ThemeSyncFromSettings } from "@/components/ThemeSyncFromSettings";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { PanelAmbient } from "@/components/panel/PanelAmbient";
+import { createPortal } from "react-dom";
 
 // ─── Notifications ────────────────────────────────────────────────────────────
 
-type NotifKind = "match" | "event" | "capital" | "request" | "signal";
+type NotifKind = "match" | "event" | "event_live" | "course" | "capital" | "request" | "signal";
 
 type ApiNotif = {
   id: number;
   title: string;
   body: string;
   kind: NotifKind;
+  href: string;
   isRead: boolean;
   createdAt: string;
 };
@@ -35,10 +37,26 @@ type ApiNotif = {
 const NOTIF_ICONS: Record<NotifKind, React.ComponentType<{ className?: string }>> = {
   match: Sparkles,
   event: CalendarDays,
+  event_live: CalendarDays,
+  course: BookOpen,
   capital: TrendingUp,
   request: UserPlus,
   signal: Zap,
 };
+
+function notifHref(n: ApiNotif): string {
+  if (n.href?.startsWith("/panel")) return n.href;
+  const map: Record<NotifKind, string> = {
+    match: "/panel/match",
+    event: "/panel/events",
+    event_live: "/panel/events",
+    course: "/panel/courses",
+    capital: "/panel/capital",
+    request: "/panel/applications",
+    signal: "/panel/signal",
+  };
+  return map[n.kind] ?? "/panel";
+}
 
 function relativeTime(
   iso: string,
@@ -70,6 +88,7 @@ function NotifPanel({
 }) {
   const t = useT();
   const { locale } = useLocale();
+  const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
   const { data, isLoading, isError, refetch } = useApiQuery<{
     notifications: ApiNotif[];
@@ -95,67 +114,94 @@ function NotifPanel({
     }
   };
 
-  const markOne = async (id: number) => {
-    try {
-      const res = await fetch(apiUrl(`/api/notifications/${id}/read`), {
-        method: "PATCH",
-        credentials: "include",
-      });
-      const json = await res.json().catch(() => ({}));
-      if (!res.ok) return;
-      if (typeof json.unreadCount === "number" && json.unreadCount === 0) onClear();
-      await queryClient.invalidateQueries({ queryKey: ["notifications"] });
-    } catch {
-      /* ignore */
+  const openNotif = async (n: ApiNotif) => {
+    if (!n.isRead) {
+      try {
+        const res = await fetch(apiUrl(`/api/notifications/${n.id}/read`), {
+          method: "PATCH",
+          credentials: "include",
+        });
+        const json = await res.json().catch(() => ({}));
+        if (res.ok && typeof json.unreadCount === "number" && json.unreadCount === 0) onClear();
+        await queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      } catch {
+        /* ignore */
+      }
     }
+    onClose();
+    setLocation(notifHref(n));
   };
 
-  return (
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, []);
+
+  const panel = (
     <>
-      <div className="fixed inset-0 z-40" onClick={onClose} />
-      <div className="panel-glass-strong fixed right-4 top-[68px] z-50 w-80 shadow-lg">
-        <div className="flex items-center justify-between border-b border-[var(--ink)]/[0.08] px-4 py-3">
-          <div className="flex items-center gap-2">
+      <button
+        type="button"
+        className="fixed inset-0 z-[100] bg-[var(--ink)]/45 dark:bg-black/55"
+        aria-label={t("shell.closeMenu")}
+        onClick={onClose}
+      />
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={t("shell.notifications")}
+        className="panel-glass-strong fixed inset-x-0 bottom-0 z-[110] flex max-h-[min(88dvh,640px)] flex-col overflow-hidden border border-[var(--ink)]/10 shadow-2xl dark:border-white/10 sm:inset-x-auto sm:bottom-auto sm:right-3 sm:top-[64px] sm:w-[min(100vw-1.5rem,24rem)] sm:max-h-[min(70vh,520px)]"
+      >
+        <div className="flex shrink-0 items-center justify-between gap-3 border-b border-[var(--ink)]/[0.08] px-4 py-3 dark:border-white/10">
+          <div className="min-w-0">
             <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
               {t("shell.notifications")}
             </p>
-            {count > 0 && (
-              <span className="flex size-4 items-center justify-center bg-[var(--ink)] font-mono text-label text-[var(--bone)]">
-                {count}
-              </span>
-            )}
+            {count > 0 ? (
+              <p className="mt-0.5 text-xs text-[var(--ink-muted)]">
+                {t("shell.unreadCount", { n: count })}
+              </p>
+            ) : null}
           </div>
-          {count > 0 && (
+          <div className="flex shrink-0 items-center gap-1">
+            {count > 0 && (
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => void markAll()}
+                className="min-h-10 px-2 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)] transition-colors hover:text-[var(--ink)] disabled:opacity-40"
+              >
+                {t("shell.markAllRead")}
+              </button>
+            )}
             <button
               type="button"
-              disabled={busy}
-              onClick={() => void markAll()}
-              className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)] transition-colors hover:text-[var(--ink)] disabled:opacity-40"
+              onClick={onClose}
+              className="inline-flex size-11 items-center justify-center text-[var(--ink-muted)] hover:text-[var(--ink)] sm:size-9"
+              aria-label={t("shell.closeMenu")}
             >
-              {t("shell.markAllRead")}
+              <X className="size-5" />
             </button>
-          )}
+          </div>
         </div>
 
-        <div className="max-h-[400px] overflow-y-auto">
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain pb-[env(safe-area-inset-bottom)]">
           {isLoading && notifs.length === 0 && (
-            <p className="px-4 py-6 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
-              Yükleniyor…
-            </p>
+            <p className="px-4 py-8 text-center text-sm text-[var(--ink-muted)]">{t("shell.notifLoading")}</p>
           )}
           {isError && (
             <button
               type="button"
               onClick={() => refetch()}
-              className="w-full px-4 py-6 text-left font-mono text-label uppercase tracking-widest text-[var(--error-ink)]"
+              className="w-full px-4 py-8 text-center text-sm text-[var(--error-ink)]"
             >
-              Yüklenemedi · tekrar dene
+              {t("shell.notifError")}
             </button>
           )}
           {!isLoading && !isError && notifs.length === 0 && (
-            <p className="px-4 py-6 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
-              {t("shell.noNotifications")}
-            </p>
+            <p className="px-4 py-8 text-center text-sm text-[var(--ink-muted)]">{t("shell.noNotifications")}</p>
           )}
           {notifs.map((n) => {
             const Icon = NOTIF_ICONS[n.kind] ?? Zap;
@@ -163,40 +209,47 @@ function NotifPanel({
               <button
                 key={n.id}
                 type="button"
-                onClick={() => {
-                  if (!n.isRead) void markOne(n.id);
-                }}
+                onClick={() => void openNotif(n)}
                 className={cn(
-                  "flex w-full gap-3 border-b border-[var(--ink)]/[0.05] px-4 py-3 text-left transition-colors last:border-0",
-                  !n.isRead && "bg-[var(--ink)]/[0.025]",
+                  "flex w-full gap-3 border-b border-[var(--ink)]/[0.06] px-4 py-4 text-left transition-colors last:border-0 active:bg-[var(--ink)]/[0.04]",
+                  !n.isRead && "bg-[var(--ink)]/[0.03]",
                 )}
               >
-                <div className="mt-0.5 flex size-7 shrink-0 items-center justify-center bg-[var(--ink)]/[0.06]">
-                  <Icon className="size-3.5 text-[var(--ink-body)]" />
+                <div className="mt-0.5 flex size-9 shrink-0 items-center justify-center bg-[var(--ink)]/[0.06]">
+                  <Icon className="size-4 text-[var(--ink-body)]" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-start justify-between gap-2">
-                    <p className="text-xs font-light leading-snug text-[var(--ink)]">{n.title}</p>
+                    <p className="text-sm font-medium leading-snug text-[var(--ink)] break-words">
+                      {n.title}
+                    </p>
                     {!n.isRead && (
-                      <span className="mt-1 size-1.5 shrink-0 rounded-full bg-[var(--inner-green)]" />
+                      <span className="mt-1.5 size-2 shrink-0 rounded-full bg-[var(--inner-green)]" />
                     )}
                   </div>
-                  <p className="mt-0.5 font-mono text-label leading-snug text-[var(--ink-muted)]">{n.body}</p>
-                  <p className="mt-1 font-mono text-label text-[var(--ink-subtle)]">
-                    {relativeTime(n.createdAt, t, locale)}
+                  <p className="mt-1.5 text-sm leading-relaxed text-[var(--ink-body)] break-words whitespace-pre-wrap">
+                    {n.body}
                   </p>
+                  <div className="mt-2 flex items-center justify-between gap-2">
+                    <p className="font-mono text-label text-[var(--ink-subtle)]">
+                      {relativeTime(n.createdAt, t, locale)}
+                    </p>
+                    <span className="inline-flex items-center gap-1 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
+                      {t("shell.openNotif")}
+                      <ArrowUpRight className="size-3" />
+                    </span>
+                  </div>
                 </div>
               </button>
             );
           })}
         </div>
-
-        <div className="border-t border-[var(--ink)]/[0.08] px-4 py-2.5">
-          <p className="text-center font-mono text-label text-[var(--ink-subtle)]">inner·hub · bildirimler</p>
-        </div>
       </div>
     </>
   );
+
+  if (typeof document === "undefined") return null;
+  return createPortal(panel, document.body);
 }
 
 // ─── Sidebar context ──────────────────────────────────────────────────────────

@@ -72,6 +72,10 @@ export const tr = {
     minutesAgo: "{n} dk önce",
     hoursAgo: "{n} saat önce",
     daysAgo: "{n} gün önce",
+    unreadCount: "{n} okunmamış",
+    openNotif: "Aç",
+    notifLoading: "Bildirimler yükleniyor…",
+    notifError: "Yüklenemedi · tekrar dene",
   },
   search: {
     title: "Ara",
@@ -1537,6 +1541,10 @@ export const en: Messages = {
     minutesAgo: "{n}m ago",
     hoursAgo: "{n}h ago",
     daysAgo: "{n}d ago",
+    unreadCount: "{n} unread",
+    openNotif: "Open",
+    notifLoading: "Loading notifications…",
+    notifError: "Could not load · try again",
   },
   search: {
     title: "Search",
