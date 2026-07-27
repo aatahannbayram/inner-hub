@@ -36,7 +36,7 @@ async function sendDecisionMail(params: {
   invitationRequestId: number;
   applicationId?: number | null;
   next: "approved" | "rejected";
-}): Promise<boolean> {
+}): Promise<{ ok: boolean; error?: string }> {
   const applicant = {
     name: params.invite.name,
     email: params.invite.email,
@@ -252,13 +252,13 @@ router.post("/applications/:id/resend", requireAdmin, async (req, res) => {
       return;
     }
 
-    const sent = await sendDecisionMail({
+    const result = await sendDecisionMail({
       invite,
       invitationRequestId,
       applicationId: existing.id,
       next: existing.status,
     });
-    res.json({ sent });
+    res.json({ sent: result.ok, error: result.error });
   } catch (err: any) {
     res.status(500).json({ error: err.message ?? "Mail gönderilemedi" });
   }

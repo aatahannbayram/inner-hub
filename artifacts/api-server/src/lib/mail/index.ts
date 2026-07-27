@@ -39,7 +39,7 @@ export async function notifyNewInvitationRequest(req: {
     role: roleLabelOf(req.role) ?? req.role,
   });
   const to = process.env.NOTIFY_EMAIL || process.env.SMTP_USER;
-  if (!to) return false;
+  if (!to) return { ok: false, error: "NOTIFY_EMAIL/SMTP_USER yok" };
   return sendTransactionalMail({ ...mail, to });
 }
 

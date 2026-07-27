@@ -69,11 +69,13 @@ export type OutboundMail = {
  * - List-Unsubscribe (mailto)
  * - Auto-Submitted for transactional
  */
-export async function sendTransactionalMail(mail: OutboundMail): Promise<boolean> {
+export type MailResult = { ok: boolean; error?: string };
+
+export async function sendTransactionalMail(mail: OutboundMail): Promise<MailResult> {
   const transport = getMailTransporter();
   if (!transport) {
     logger.info({ kind: mail.kind, to: mail.to }, "SMTP not configured — mail skipped");
-    return false;
+    return { ok: false, error: "SMTP yapılandırılmamış (SMTP_HOST/SMTP_USER/SMTP_PASS eksik)" };
   }
 
   const domain = mailDomain();
@@ -98,9 +100,9 @@ export async function sendTransactionalMail(mail: OutboundMail): Promise<boolean
       },
     });
     logger.info({ kind: mail.kind, to: mail.to, messageId }, "Transactional mail sent");
-    return true;
+    return { ok: true };
   } catch (err) {
     logger.error({ err, kind: mail.kind, to: mail.to }, "Transactional mail failed");
-    return false;
+    return { ok: false, error: err instanceof Error ? err.message : String(err) };
   }
 }

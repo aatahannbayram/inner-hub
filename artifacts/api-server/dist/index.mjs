@@ -97701,7 +97701,7 @@ async function sendTransactionalMail(mail) {
   const transport = getMailTransporter();
   if (!transport) {
     logger.info({ kind: mail.kind, to: mail.to }, "SMTP not configured \u2014 mail skipped");
-    return false;
+    return { ok: false, error: "SMTP yap\u0131land\u0131r\u0131lmam\u0131\u015F (SMTP_HOST/SMTP_USER/SMTP_PASS eksik)" };
   }
   const domain2 = mailDomain();
   const messageId = `<${Date.now()}.${randomBytes(8).toString("hex")}@${domain2}>`;
@@ -97724,10 +97724,10 @@ async function sendTransactionalMail(mail) {
       }
     });
     logger.info({ kind: mail.kind, to: mail.to, messageId }, "Transactional mail sent");
-    return true;
+    return { ok: true };
   } catch (err) {
     logger.error({ err, kind: mail.kind, to: mail.to }, "Transactional mail failed");
-    return false;
+    return { ok: false, error: err instanceof Error ? err.message : String(err) };
   }
 }
 
@@ -98101,7 +98101,7 @@ async function notifyNewInvitationRequest(req) {
     role: roleLabelOf(req.role) ?? req.role
   });
   const to = process.env.NOTIFY_EMAIL || process.env.SMTP_USER;
-  if (!to) return false;
+  if (!to) return { ok: false, error: "NOTIFY_EMAIL/SMTP_USER yok" };
   return sendTransactionalMail({ ...mail, to });
 }
 async function notifyApplicantInvitationReceived(ctx) {
@@ -123258,13 +123258,13 @@ router9.post("/applications/:id/resend", requireAdmin, async (req, res) => {
       res.status(400).json({ error: "Yaln\u0131zca onaylanm\u0131\u015F veya reddedilmi\u015F ba\u015Fvurular i\xE7in mail tekrar g\xF6nderilebilir" });
       return;
     }
-    const sent = await sendDecisionMail({
+    const result = await sendDecisionMail({
       invite,
       invitationRequestId,
       applicationId: existing.id,
       next: existing.status
     });
-    res.json({ sent });
+    res.json({ sent: result.ok, error: result.error });
   } catch (err) {
     res.status(500).json({ error: err.message ?? "Mail g\xF6nderilemedi" });
   }
