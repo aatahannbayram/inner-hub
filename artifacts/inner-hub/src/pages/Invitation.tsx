@@ -244,8 +244,14 @@ export default function Invitation() {
         <a href="/" className="inline-flex focus-visible:outline-none">
           <Lockup className="text-[var(--bone-fixed)]" fontSize="clamp(22px, 2.4vw, 30px)" pulse />
         </a>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 sm:gap-4">
           <LocaleToggle tone="dark" />
+          <a
+            href="/panel"
+            className="font-mono text-[10px] uppercase tracking-widest text-white/40 transition-colors hover:text-white/80 sm:text-xs"
+          >
+            {t("invite.memberLogin")}
+          </a>
           <a
             href="/"
             className="font-mono text-[10px] uppercase tracking-widest text-white/55 transition-colors hover:text-white sm:text-xs"
@@ -302,13 +308,22 @@ export default function Invitation() {
               <p className="max-w-[42ch] text-sm leading-relaxed text-white/60 md:text-base">
                 {t("invite.successBody")}
               </p>
-              <a
-                href="/"
-                className="mt-8 inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-[var(--bone-fixed)]/70 transition-colors hover:text-[var(--bone-fixed)]"
-              >
-                {t("invite.backHome")}
-                <ArrowUpRight className="size-3.5" />
-              </a>
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-6">
+                <a
+                  href="/"
+                  className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-[var(--bone-fixed)]/70 transition-colors hover:text-[var(--bone-fixed)]"
+                >
+                  {t("invite.backHome")}
+                  <ArrowUpRight className="size-3.5" />
+                </a>
+                <a
+                  href="/panel"
+                  className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-white/40 transition-colors hover:text-white/75"
+                >
+                  {t("invite.successPanelHint")}
+                  <ArrowUpRight className="size-3.5" />
+                </a>
+              </div>
             </motion.div>
           ) : (
             <motion.div

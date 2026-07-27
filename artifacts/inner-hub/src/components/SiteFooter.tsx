@@ -37,7 +37,6 @@ export function SiteFooter() {
               { label: t("publicNav.platform"), href: "/#section-03" },
               { label: t("publicNav.gathering"), href: "/#section-06" },
               { label: t("publicNav.artifacts"), href: "/haberler" },
-              { label: t("home.panel"), href: "/panel" },
               { label: t("publicNav.invitation"), href: "/invitation" },
             ].map((l) => (
               <li key={l.href}>

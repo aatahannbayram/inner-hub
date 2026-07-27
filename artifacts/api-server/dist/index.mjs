@@ -95843,7 +95843,10 @@ function invitationReceivedMail(ctx) {
   const text2 = [
     `Merhaba ${name},`,
     "",
-    "Davet talebin bize ula\u015Ft\u0131. Ekibimiz ba\u015Fvurunu inceliyor; k\u0131sa s\xFCre i\xE7inde d\xF6n\xFC\u015F yapaca\u011F\u0131z.",
+    "Davet talebin bize ula\u015Ft\u0131. Ekibimiz ba\u015Fvurunu inceliyor; k\u0131sa s\xFCre i\xE7inde bu e-postaya d\xF6n\xFC\u015F yapaca\u011F\u0131z.",
+    "",
+    "Onaylan\u0131rsa: ki\u015Fisel davet kodun + panel kay\u0131t linki bu adrese gelir.",
+    `Panel adresi (\u015Fimdilik bekleyebilirsin): ${appUrl2}/panel`,
     "",
     "Bu s\xFCre\xE7te ek bir \u015Fey yapman gerekmiyor. Sorun olursa: support@inner.digital",
     "",
@@ -95852,12 +95855,13 @@ function invitationReceivedMail(ctx) {
   ].join("\n");
   const html = renderInnerEmailLayout({
     appUrl: appUrl2,
-    preheader: "Davet talebin al\u0131nd\u0131. Ekibimiz k\u0131sa s\xFCre i\xE7inde d\xF6n\xFC\u015F yapacak.",
+    preheader: "Davet talebin al\u0131nd\u0131. Onayda kod ve panel linki bu adrese gelir.",
     eyebrow: "Davetiye \xB7 al\u0131nd\u0131",
     title: `${name}, talebin bizde.`,
     bodyHtml: `
-      <p style="margin:0 0 12px;">Davet talebin ba\u015Far\u0131yla kayda ge\xE7ti. inner\xB7hub davetiye ile ilerler; her ba\u015Fvuruyu tek tek okuyoruz.</p>
-      <p style="margin:0;">\u0130nceleme tamamlan\u0131nca bu adrese yaz\u0131l\u0131 olarak haber verece\u011Fiz. Bu arada ek bir ad\u0131m gerekmiyor.</p>
+      <p style="margin:0 0 12px;">Davet talebin kayda ge\xE7ti. inner\xB7hub davetiye ile ilerler; her ba\u015Fvuruyu tek tek okuyoruz.</p>
+      <p style="margin:0 0 12px;">\u0130nceleme bitince <strong style="color:#F4F1EC;font-weight:500;">bu e-postaya</strong> yazaca\u011F\u0131z. Onaylan\u0131rsa ki\u015Fisel davet kodun ve panele kay\u0131t ad\u0131m\u0131 ayn\u0131 iletiyle gelir.</p>
+      <p style="margin:0;font-size:13px;color:rgba(244,241,236,0.45);">\u015Eimdilik beklemen yeterli. Panel: <a href="${escapeHtml(appUrl2)}/panel" style="color:#F4F1EC;">${escapeHtml(appUrl2)}/panel</a> (kod olmadan kay\u0131t olamazs\u0131n).</p>
       ${roleLine(ctx.roleLabel)}
     `,
     cta: { label: "inner.digital", href: appUrl2 },
@@ -95870,32 +95874,38 @@ function invitationApprovedMail(ctx) {
   const panelUrl = `${appUrl2}/panel`;
   const name = firstName(ctx.name);
   const inviteCode = ctx.inviteCode?.trim() || "";
-  const subject = "inner hub \xB7 davetin onayland\u0131";
+  const subject = "inner hub \xB7 davetin onayland\u0131 \xB7 panele gir";
   const text2 = [
     `Merhaba ${name},`,
     "",
     "Davet talebin onayland\u0131. \xC7embere ho\u015F geldin.",
     "",
-    inviteCode ? `Davet kodun: ${inviteCode}` : "Davet kodun i\xE7in support@inner.digital yaz.",
-    `Panele git, kay\u0131t ol (ayn\u0131 e-posta + davet kodu): ${panelUrl}`,
+    "Panele nas\u0131l girersin:",
+    `1) A\xE7: ${panelUrl}`,
+    "2) Kay\u0131t ol: bu e-posta + \u015Fifre + davet kodu",
+    inviteCode ? `3) Davet kodun: ${inviteCode}` : "3) Davet kodun i\xE7in support@inner.digital yaz",
     "",
-    "Kay\u0131t olduktan sonra sonraki giri\u015Flerde kod gerekmez.",
+    "Kay\u0131t olduktan sonra sonraki giri\u015Flerde sadece e-posta ve \u015Fifre yeter. Kod gerekmez.",
     "",
     "inner hub",
     appUrl2
   ].join("\n");
   const codeHtml = inviteCode ? `
-      <p style="margin:0 0 12px;">Panele gidip <strong style="color:#F4F1EC;font-weight:500;">bu ba\u015Fvurudaki e-posta</strong> ile kay\u0131t ol. Davet kodun:</p>
+      <ol style="margin:0 0 16px;padding-left:18px;color:rgba(244,241,236,0.72);line-height:1.55;">
+        <li style="margin:0 0 8px;"><a href="${escapeHtml(panelUrl)}" style="color:#F4F1EC;">${escapeHtml(panelUrl)}</a> adresini a\xE7</li>
+        <li style="margin:0 0 8px;"><strong style="color:#F4F1EC;font-weight:500;">Bu e-posta</strong> (${escapeHtml(ctx.email)}) ile kay\u0131t ol</li>
+        <li style="margin:0;">Davet kodunu gir:</li>
+      </ol>
       <p style="margin:0 0 16px;padding:14px 16px;border:1px solid rgba(255,255,255,0.14);background:rgba(255,255,255,0.04);font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:18px;letter-spacing:0.12em;color:#F4F1EC;">
         ${escapeHtml(inviteCode)}
       </p>
       <p style="margin:0 0 12px;font-size:13px;color:rgba(244,241,236,0.45);">Kod sana \xF6zel ve tek kullan\u0131ml\u0131k. Kay\u0131ttan sonra giri\u015Flerde gerekmez. Sorun olursa <a href="mailto:support@inner.digital" style="color:#F4F1EC;">support@inner.digital</a>.</p>
     ` : `
-      <p style="margin:0 0 12px;">Panele gidip hesab\u0131n\u0131 olu\u015Fturabilirsin. Davet kodu i\xE7in <a href="mailto:support@inner.digital" style="color:#F4F1EC;">support@inner.digital</a> yaz.</p>
+      <p style="margin:0 0 12px;">Panele gidip hesab\u0131n\u0131 olu\u015Ftur. Davet kodu i\xE7in <a href="mailto:support@inner.digital" style="color:#F4F1EC;">support@inner.digital</a> yaz.</p>
     `;
   const html = renderInnerEmailLayout({
     appUrl: appUrl2,
-    preheader: inviteCode ? `Davetin onayland\u0131. Kodun: ${inviteCode}` : "Davetin onayland\u0131. Panele ge\xE7ebilirsin.",
+    preheader: inviteCode ? `Davetin onayland\u0131. Kod: ${inviteCode}. Panele kay\u0131t ol.` : "Davetin onayland\u0131. Panele ge\xE7ebilirsin.",
     eyebrow: "Davetiye \xB7 onay",
     title: "\xC7embere ho\u015F geldin.",
     bodyHtml: `
@@ -95903,7 +95913,7 @@ function invitationApprovedMail(ctx) {
       ${codeHtml}
       ${roleLine(ctx.roleLabel)}
     `,
-    cta: { label: "Panele git", href: panelUrl },
+    cta: { label: "Panele git ve kay\u0131t ol", href: panelUrl },
     footerNote: "Bu ileti, davet talebinin onaylanmas\u0131 \xFCzerine otomatik g\xF6nderildi."
   });
   return { subject, text: text2, html, kind: "invite.approved" };
@@ -119660,6 +119670,28 @@ router8.post("/courses/:id/enroll", requireAuth, async (req, res) => {
     });
   } catch (err) {
     res.status(500).json({ error: err.message ?? "Kay\u0131t ba\u015Far\u0131s\u0131z" });
+  }
+});
+router8.get("/admin/courses", requireAuth, requireAdmin, async (req, res) => {
+  try {
+    await ensureDemoContent();
+    await ensureCourseVideoColumns();
+    const userId = req.user.id;
+    const rows = await db.select().from(coursesTable).orderBy(asc(coursesTable.order), desc(coursesTable.createdAt));
+    const courses = await Promise.all(
+      rows.map(async (c) => ({
+        id: c.id,
+        title: c.title,
+        description: c.description ?? "",
+        term: c.term,
+        order: c.order,
+        isPublished: c.isPublished,
+        modules: await courseModulesForUser(userId, c.id, true)
+      }))
+    );
+    res.json({ courses });
+  } catch (err) {
+    res.status(500).json({ error: err.message ?? "Kurslar y\xFCklenemedi" });
   }
 });
 router8.post("/courses", requireAuth, requireAdmin, async (req, res) => {

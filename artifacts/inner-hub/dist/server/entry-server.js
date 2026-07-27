@@ -314,10 +314,12 @@ const tr = {
     preparing: "Davetiye hazırlanıyor",
     access: "inner · erişim",
     homeLink: "Ana sayfa",
+    memberLogin: "Üye girişi",
     requestTitle: "Davetiye talep et",
     received: "Alındı",
     successTitle: "Uygunsa, sizinle iletişime geçeriz",
-    successBody: "Her talebi dikkatle inceliyoruz. Otomatik yanıt yok. Önemli olduğunda gerçek bir cevap.",
+    successBody: "Her talebi dikkatle inceliyoruz. Onaylanırsa bu e-postaya davet kodu gelir; panele o kodla kayıt olursun.",
+    successPanelHint: "Zaten kodun varsa üye girişinden panele geç.",
     backHome: "Ana sayfaya dön",
     howEnter: "Nasıl giriyorsun?",
     roleFounder: "Girişimci",
@@ -1534,10 +1536,12 @@ const en = {
     preparing: "Preparing invitation",
     access: "inner · access",
     homeLink: "Home",
+    memberLogin: "Member login",
     requestTitle: "Request an invitation",
     received: "Received",
     successTitle: "If it fits, we will be in touch",
-    successBody: "We review every request carefully. No automated replies. Only a real answer when it matters.",
+    successBody: "We review every request carefully. If approved, your invite code arrives by email; register on the panel with that code.",
+    successPanelHint: "Already have a code? Enter the panel via member login.",
     backHome: "Back to home",
     howEnter: "How do you enter?",
     roleFounder: "Founder",
@@ -2806,7 +2810,6 @@ function SiteFooter() {
               { label: t("publicNav.platform"), href: "/#section-03" },
               { label: t("publicNav.gathering"), href: "/#section-06" },
               { label: t("publicNav.artifacts"), href: "/haberler" },
-              { label: t("home.panel"), href: "/panel" },
               { label: t("publicNav.invitation"), href: "/invitation" }
             ].map((l) => /* @__PURE__ */ jsx("li", { children: /* @__PURE__ */ jsx(
               "a",
@@ -8554,8 +8557,16 @@ function Invitation() {
     ),
     /* @__PURE__ */ jsxs("header", { className: "relative z-20 flex h-[60px] shrink-0 items-center justify-between px-5 md:h-[72px] md:px-10 lg:px-[8%]", children: [
       /* @__PURE__ */ jsx("a", { href: "/", className: "inline-flex focus-visible:outline-none", children: /* @__PURE__ */ jsx(Lockup, { className: "text-[var(--bone-fixed)]", fontSize: "clamp(22px, 2.4vw, 30px)", pulse: true }) }),
-      /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3", children: [
+      /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3 sm:gap-4", children: [
         /* @__PURE__ */ jsx(LocaleToggle, { tone: "dark" }),
+        /* @__PURE__ */ jsx(
+          "a",
+          {
+            href: "/panel",
+            className: "font-mono text-[10px] uppercase tracking-widest text-white/40 transition-colors hover:text-white/80 sm:text-xs",
+            children: t("invite.memberLogin")
+          }
+        ),
         /* @__PURE__ */ jsx(
           "a",
           {
@@ -8607,17 +8618,30 @@ function Invitation() {
           ] }),
           /* @__PURE__ */ jsx("h1", { className: "mb-4 font-display font-serif italic text-4xl leading-[1.1] text-balance text-[var(--bone-fixed)] md:text-5xl", children: t("invite.successTitle") }),
           /* @__PURE__ */ jsx("p", { className: "max-w-[42ch] text-sm leading-relaxed text-white/60 md:text-base", children: t("invite.successBody") }),
-          /* @__PURE__ */ jsxs(
-            "a",
-            {
-              href: "/",
-              className: "mt-8 inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-[var(--bone-fixed)]/70 transition-colors hover:text-[var(--bone-fixed)]",
-              children: [
-                t("invite.backHome"),
-                /* @__PURE__ */ jsx(ArrowUpRight, { className: "size-3.5" })
-              ]
-            }
-          )
+          /* @__PURE__ */ jsxs("div", { className: "mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-6", children: [
+            /* @__PURE__ */ jsxs(
+              "a",
+              {
+                href: "/",
+                className: "inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-[var(--bone-fixed)]/70 transition-colors hover:text-[var(--bone-fixed)]",
+                children: [
+                  t("invite.backHome"),
+                  /* @__PURE__ */ jsx(ArrowUpRight, { className: "size-3.5" })
+                ]
+              }
+            ),
+            /* @__PURE__ */ jsxs(
+              "a",
+              {
+                href: "/panel",
+                className: "inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-white/40 transition-colors hover:text-white/75",
+                children: [
+                  t("invite.successPanelHint"),
+                  /* @__PURE__ */ jsx(ArrowUpRight, { className: "size-3.5" })
+                ]
+              }
+            )
+          ] })
         ]
       },
       "success"
