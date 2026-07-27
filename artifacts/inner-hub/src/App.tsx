@@ -46,6 +46,7 @@ const HaberlerAdmin     = lazy(() => import("@/pages/panel/HaberlerAdmin"));
 const Stage             = lazy(() => import("@/pages/panel/Stage"));
 const FAQ               = lazy(() => import("@/pages/panel/FAQ"));
 const Settings          = lazy(() => import("@/pages/panel/Settings"));
+const OrgPage           = lazy(() => import("@/pages/panel/Org"));
 
 const queryClient = new QueryClient();
 
@@ -83,6 +84,7 @@ function PanelRoutes({ user, onLogout }: { user: PanelUser; onLogout: () => void
           <Route path="/panel/events"       component={() => <Events />} />
           <Route path="/panel/stage"        component={() => <Stage />} />
           <Route path="/panel/members"      component={() => <Members />} />
+          <Route path="/panel/org"          component={() => <OrgPage />} />
           <Route path="/panel/perks"        component={() => <Perks />} />
           <Route path="/panel/signal"       component={() => <Signal />} />
           <Route path="/panel/match"        component={() => <Match />} />

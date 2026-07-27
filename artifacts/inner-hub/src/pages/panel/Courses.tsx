@@ -15,6 +15,16 @@ import { useT } from "@/i18n";
 
 type CourseFormat = "vod" | "live" | "hybrid";
 type RoomFilter = "mine" | "all";
+type CourseCategory = "business" | "product" | "art" | "craft" | "capital" | "ops";
+const COURSE_CATEGORIES: Array<CourseCategory | "all"> = [
+  "all",
+  "business",
+  "product",
+  "art",
+  "craft",
+  "capital",
+  "ops",
+];
 
 interface Lesson {
   id: number;
@@ -46,6 +56,7 @@ interface Course {
   format: CourseFormat;
   meetUrl: string | null;
   passCost: number;
+  category?: CourseCategory | string | null;
   modules: Module[];
 }
 
@@ -74,6 +85,7 @@ interface RawCourse {
   format?: CourseFormat;
   meetUrl?: string | null;
   passCost?: number;
+  category?: string | null;
   modules?: RawModule[];
 }
 
@@ -117,6 +129,7 @@ function mapApiCourse(row: RawCourse, t: ReturnType<typeof useT>): Course {
     format: row.format ?? "vod",
     meetUrl: row.meetUrl ?? null,
     passCost: row.passCost ?? 0,
+    category: row.category ?? null,
     modules,
   };
 }
@@ -484,6 +497,7 @@ export default function CoursesPage() {
     const p = new URLSearchParams(window.location.search).get("room");
     return p === "all" ? "all" : "mine";
   });
+  const [category, setCategory] = useState<CourseCategory | "all">("all");
 
   useEffect(() => {
     const url = new URL(window.location.href);
@@ -495,7 +509,12 @@ export default function CoursesPage() {
     ["courses", room],
     `/api/courses?room=${room}`,
   );
-  const courses = (data?.courses ?? []).map((row) => mapApiCourse(row, t));
+  const coursesAll = (data?.courses ?? []).map((row) => mapApiCourse(row, t));
+  const hasCategoryField = coursesAll.some((c) => Boolean(c.category));
+  const courses =
+    category === "all" || !hasCategoryField
+      ? coursesAll
+      : coursesAll.filter((c) => c.category === category);
   const loading = isLoading;
 
   const enrolled = courses.filter((c) => c.isEnrolled);
@@ -539,22 +558,43 @@ export default function CoursesPage() {
       />
 
       <FadeIn delay={0.01}>
-        <div className="flex w-full max-w-xs panel-glass sm:w-auto">
-          {(["mine", "all"] as RoomFilter[]).map((r) => (
-            <button
-              key={r}
-              type="button"
-              onClick={() => setRoom(r)}
-              className={[
-                "min-h-10 flex-1 px-4 py-2 font-mono text-label uppercase tracking-widest transition-colors sm:flex-none",
-                room === r
-                  ? "bg-[var(--ink)] text-[var(--bone)]"
-                  : "text-[var(--ink-body)] hover:text-[var(--ink)]",
-              ].join(" ")}
-            >
-              {r === "mine" ? t("courses.roomMine") : t("courses.roomAll")}
-            </button>
-          ))}
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+          <div className="flex w-full max-w-xs panel-glass sm:w-auto">
+            {(["mine", "all"] as RoomFilter[]).map((r) => (
+              <button
+                key={r}
+                type="button"
+                onClick={() => setRoom(r)}
+                className={[
+                  "min-h-10 flex-1 px-4 py-2 font-mono text-label uppercase tracking-widest transition-colors sm:flex-none",
+                  room === r
+                    ? "bg-[var(--ink)] text-[var(--bone)]"
+                    : "text-[var(--ink-body)] hover:text-[var(--ink)]",
+                ].join(" ")}
+              >
+                {r === "mine" ? t("courses.roomMine") : t("courses.roomAll")}
+              </button>
+            ))}
+          </div>
+          {hasCategoryField ? (
+            <div className="flex flex-wrap gap-1.5">
+              {COURSE_CATEGORIES.map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => setCategory(c)}
+                  className={[
+                    "border px-2.5 py-1.5 font-mono text-label uppercase tracking-widest transition-colors",
+                    category === c
+                      ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--bone)]"
+                      : "border-[var(--ink)]/15 text-[var(--ink-muted)] hover:text-[var(--ink)]",
+                  ].join(" ")}
+                >
+                  {c === "all" ? t("common.all") : t(`courses.category.${c}`)}
+                </button>
+              ))}
+            </div>
+          ) : null}
         </div>
       </FadeIn>
 

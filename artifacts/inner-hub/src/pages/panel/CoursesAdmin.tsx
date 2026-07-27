@@ -10,6 +10,7 @@ import { useT } from "@/i18n";
 
 type CourseFormat = "vod" | "live" | "hybrid";
 type Audience = "all" | "founder" | "investor" | "builder" | "company";
+type CourseCategory = "business" | "product" | "art" | "craft" | "capital" | "ops";
 
 type AdminLesson = {
   id: number;
@@ -31,6 +32,7 @@ type AdminCourse = {
   meetUrl: string | null;
   audience: Audience;
   passCost: number;
+  category?: CourseCategory | string | null;
   modules: AdminModule[];
 };
 
@@ -51,6 +53,14 @@ function fromDatetimeLocal(v: string): string | null {
 
 const FORMAT_OPTIONS: CourseFormat[] = ["vod", "live", "hybrid"];
 const AUDIENCE_OPTIONS: Audience[] = ["all", "founder", "investor", "builder", "company"];
+const CATEGORY_OPTIONS: CourseCategory[] = [
+  "business",
+  "product",
+  "art",
+  "craft",
+  "capital",
+  "ops",
+];
 
 function formatDuration(sec: number | null): string {
   if (!sec) return "";
@@ -353,6 +363,7 @@ function CourseAdminCard({ course, onChanged }: { course: AdminCourse; onChanged
           <p className="mt-0.5 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
             {t("courses.term", { n: course.term })} · {totalLessons} {t("courses.lessonsCount")} ·{" "}
             {format} · {audience}
+            {course.category ? ` · ${course.category}` : ""}
             {isLiveLike && course.passCost > 0 ? ` · ${course.passCost} pass` : ""}
           </p>
         </div>
@@ -429,6 +440,7 @@ function AddCourseForm({ onAdded }: { onAdded: () => void }) {
   const [term, setTerm] = useState(1);
   const [format, setFormat] = useState<CourseFormat>("vod");
   const [audience, setAudience] = useState<Audience>("all");
+  const [category, setCategory] = useState<CourseCategory>("business");
   const [startsAt, setStartsAt] = useState("");
   const [meetUrl, setMeetUrl] = useState("");
   const [passCost, setPassCost] = useState(1);
@@ -446,6 +458,7 @@ function AddCourseForm({ onAdded }: { onAdded: () => void }) {
         isPublished: false,
         format,
         audience,
+        category,
         passCost: format === "vod" ? 0 : passCost,
       };
       if (isLiveLike) {
@@ -463,6 +476,7 @@ function AddCourseForm({ onAdded }: { onAdded: () => void }) {
         setDescription("");
         setFormat("vod");
         setAudience("all");
+        setCategory("business");
         setStartsAt("");
         setMeetUrl("");
         setPassCost(1);
@@ -532,6 +546,22 @@ function AddCourseForm({ onAdded }: { onAdded: () => void }) {
             {AUDIENCE_OPTIONS.map((a) => (
               <option key={a} value={a}>
                 {a}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="block space-y-1 sm:col-span-2">
+          <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
+            {t("courses.categoryLabel")}
+          </span>
+          <select
+            value={category}
+            onChange={(e) => setCategory(e.target.value as CourseCategory)}
+            className="w-full border border-[var(--ink)]/15 bg-transparent px-3 py-2 text-sm text-[var(--ink)] outline-none focus:border-[var(--ink)]/40"
+          >
+            {CATEGORY_OPTIONS.map((c) => (
+              <option key={c} value={c}>
+                {t(`courses.category.${c}`)}
               </option>
             ))}
           </select>

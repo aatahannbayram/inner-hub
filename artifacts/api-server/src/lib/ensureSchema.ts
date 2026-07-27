@@ -44,6 +44,93 @@ export async function ensureUserMembershipColumns() {
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS membership_plan text`);
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS membership_status text`);
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS membership_period_end timestamp`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_style text DEFAULT 'lorelei'`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS primary_org_id integer`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS university text`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS behance text`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS instagram text`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS whatsapp_opt_in text`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS deleted_at timestamp`);
+}
+
+/** Org + hukuki + kampanya + kurs kategori. */
+export async function ensureOrgLegalCampaignSchema() {
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS organizations (
+      id serial PRIMARY KEY,
+      name text NOT NULL,
+      slug text NOT NULL UNIQUE,
+      domain text,
+      logo_url text,
+      type text NOT NULL DEFAULT 'startup',
+      created_by_user_id integer REFERENCES users(id),
+      verified boolean NOT NULL DEFAULT false,
+      created_at timestamp NOT NULL DEFAULT now()
+    )
+  `);
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS org_memberships (
+      id serial PRIMARY KEY,
+      org_id integer NOT NULL REFERENCES organizations(id),
+      user_id integer NOT NULL REFERENCES users(id),
+      role text NOT NULL DEFAULT 'member',
+      title text,
+      created_at timestamp NOT NULL DEFAULT now(),
+      UNIQUE (org_id, user_id)
+    )
+  `);
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS legal_documents (
+      id serial PRIMARY KEY,
+      slug text NOT NULL,
+      version text NOT NULL,
+      locale text NOT NULL DEFAULT 'tr',
+      title text NOT NULL,
+      body_markdown text NOT NULL,
+      published_at timestamp NOT NULL DEFAULT now()
+    )
+  `);
+  await db.execute(sql`
+    CREATE UNIQUE INDEX IF NOT EXISTS legal_documents_slug_ver_locale
+      ON legal_documents (slug, version, locale)
+  `);
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS legal_acceptances (
+      id serial PRIMARY KEY,
+      user_id integer NOT NULL REFERENCES users(id),
+      document_id integer NOT NULL REFERENCES legal_documents(id),
+      version text NOT NULL,
+      accepted_at timestamp NOT NULL DEFAULT now(),
+      ip text,
+      user_agent text
+    )
+  `);
+  await db.execute(sql`
+    CREATE UNIQUE INDEX IF NOT EXISTS legal_acceptances_user_doc
+      ON legal_acceptances (user_id, document_id, version)
+  `);
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS campaigns (
+      id serial PRIMARY KEY,
+      org_id integer NOT NULL REFERENCES organizations(id),
+      created_by_user_id integer NOT NULL REFERENCES users(id),
+      title text NOT NULL,
+      pitch text NOT NULL,
+      cta_url text NOT NULL,
+      code text,
+      category text DEFAULT 'Eğitim',
+      status text NOT NULL DEFAULT 'draft',
+      perk_id integer,
+      starts_at timestamp,
+      ends_at timestamp,
+      created_at timestamp NOT NULL DEFAULT now()
+    )
+  `);
+  await db.execute(sql`ALTER TABLE perks ADD COLUMN IF NOT EXISTS source text DEFAULT 'partner'`);
+  await db.execute(sql`ALTER TABLE perks ADD COLUMN IF NOT EXISTS org_id integer`);
+  await db.execute(sql`ALTER TABLE perks ADD COLUMN IF NOT EXISTS campaign_id integer`);
+  await db.execute(sql`ALTER TABLE courses ADD COLUMN IF NOT EXISTS category text DEFAULT 'business'`);
+  await db.execute(sql`UPDATE courses SET category = 'business' WHERE category IS NULL`);
 }
 
 /** Circle Pass cüzdan + ledger. */

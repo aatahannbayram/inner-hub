@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowUpRight,
   Bell,
+  Briefcase,
   LayoutDashboard,
   Menu,
   Sparkles,
@@ -18,6 +19,11 @@ const LS_KEY = "inner_onboarding_v1";
 const EASE = [0.16, 1, 0.3, 1] as const;
 
 type PrefsBlob = Record<string, unknown> & { onboardingCompleted?: boolean };
+type Persona = "founder" | "investor" | "builder" | "company";
+
+function isPersona(v: unknown): v is Persona {
+  return v === "founder" || v === "investor" || v === "builder" || v === "company";
+}
 
 type WizardStep = {
   id: string;
@@ -59,10 +65,11 @@ export function PanelOnboarding({ userName }: { userName: string }) {
   const [step, setStep] = useState(0);
   const [coachIdx, setCoachIdx] = useState(0);
   const [spot, setSpot] = useState<DOMRect | null>(null);
+  const [persona, setPersona] = useState<Persona | null>(null);
   const firstName = userName.trim().split(/\s+/)[0] || "orada";
 
-  const wizard = useMemo<WizardStep[]>(
-    () => [
+  const wizard = useMemo<WizardStep[]>(() => {
+    const steps: WizardStep[] = [
       {
         id: "welcome",
         eyebrow: t("onboarding.welcomeEyebrow"),
@@ -98,12 +105,21 @@ export function PanelOnboarding({ userName }: { userName: string }) {
         body: t("onboarding.profileBody"),
         icon: UserCircle,
       },
-    ],
-    [t],
-  );
+    ];
+    if (persona) {
+      steps.push({
+        id: `persona-${persona}`,
+        eyebrow: t("onboarding.persona.eyebrow"),
+        title: t(`onboarding.persona.${persona}.title`),
+        body: t(`onboarding.persona.${persona}.body`),
+        icon: Briefcase,
+      });
+    }
+    return steps;
+  }, [t, persona]);
 
-  const coach = useMemo<CoachTip[]>(
-    () => [
+  const coach = useMemo<CoachTip[]>(() => {
+    const tips: CoachTip[] = [
       {
         id: "nav",
         target: "nav",
@@ -125,9 +141,18 @@ export function PanelOnboarding({ userName }: { userName: string }) {
         body: t("onboarding.coachMainBody"),
         prefer: "top",
       },
-    ],
-    [t],
-  );
+    ];
+    if (persona) {
+      tips.splice(1, 0, {
+        id: "persona",
+        target: "nav",
+        title: t(`onboarding.persona.${persona}.coachTitle`),
+        body: t(`onboarding.persona.${persona}.coachBody`),
+        prefer: "bottom",
+      });
+    }
+    return tips;
+  }, [t, persona]);
 
   useEffect(() => {
     if (readLocalDone()) {
@@ -137,9 +162,18 @@ export function PanelOnboarding({ userName }: { userName: string }) {
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch(apiUrl("/api/settings"), { credentials: "include" });
-        if (!res.ok) throw new Error("settings");
-        const json = (await res.json()) as { prefs?: PrefsBlob };
+        const [settingsRes, meRes] = await Promise.all([
+          fetch(apiUrl("/api/settings"), { credentials: "include" }),
+          fetch(apiUrl("/api/auth/me"), { credentials: "include" }),
+        ]);
+        if (meRes.ok) {
+          const meJson = (await meRes.json()) as { user?: { persona?: unknown } };
+          if (!cancelled && isPersona(meJson.user?.persona)) {
+            setPersona(meJson.user.persona);
+          }
+        }
+        if (!settingsRes.ok) throw new Error("settings");
+        const json = (await settingsRes.json()) as { prefs?: PrefsBlob };
         if (cancelled) return;
         if (json.prefs?.onboardingCompleted) {
           writeLocalDone();
@@ -409,21 +443,25 @@ function CoachOverlay({
     height: spot.height + pad * 2,
   };
 
-  // Tooltip position - responsive: prefer below on mobile, respect prefer on desktop
+  // Mobile: prefer bottom sheet-style placement; desktop respects tip.prefer
   const isMobile = typeof window !== "undefined" && window.innerWidth < 640;
   let cardTop = hole.top + hole.height + 12;
   let cardLeft = Math.min(hole.left, window.innerWidth - 300);
-  if (!isMobile) {
-    if (tip.prefer === "right") {
-      cardTop = hole.top;
-      cardLeft = hole.left + hole.width + 12;
-    } else if (tip.prefer === "left") {
-      cardTop = hole.top;
-      cardLeft = Math.max(12, hole.left - 292);
-    } else if (tip.prefer === "top") {
-      cardTop = Math.max(12, hole.top - 140);
-      cardLeft = hole.left;
-    }
+  if (isMobile) {
+    cardTop = Math.min(hole.top + hole.height + 12, window.innerHeight - 200);
+    cardLeft = 12;
+  } else if (tip.prefer === "right") {
+    cardTop = hole.top;
+    cardLeft = hole.left + hole.width + 12;
+  } else if (tip.prefer === "left") {
+    cardTop = hole.top;
+    cardLeft = Math.max(12, hole.left - 292);
+  } else if (tip.prefer === "top") {
+    cardTop = Math.max(12, hole.top - 140);
+    cardLeft = hole.left;
+  } else if (tip.prefer === "bottom") {
+    cardTop = hole.top + hole.height + 12;
+    cardLeft = hole.left;
   }
   // Clamp into viewport
   cardLeft = Math.max(12, Math.min(cardLeft, window.innerWidth - 292));

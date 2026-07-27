@@ -43,6 +43,7 @@ interface Member {
   bio: string;
   tags: string[];
   linkedin: string | null;
+  avatarUrl?: string | null;
   isAvailable?: boolean;
 }
 
@@ -67,11 +68,19 @@ function MemberCard({ member, onSelect }: { member: Member; onSelect: (m: Member
       onClick={() => onSelect(member)}
     >
       <div className="relative aspect-square w-full overflow-hidden bg-[var(--ink)]/[0.04]">
-        <PersonAvatar
-          name={member.name}
-          initials={member.initials}
-          className="size-full text-3xl transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.03]"
-        />
+        {member.avatarUrl ? (
+          <img
+            src={member.avatarUrl}
+            alt={member.name}
+            className="size-full object-cover transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.03]"
+          />
+        ) : (
+          <PersonAvatar
+            name={member.name}
+            initials={member.initials}
+            className="size-full text-3xl transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.03]"
+          />
+        )}
         {member.isAvailable && (
           <span className="absolute bottom-2.5 right-2.5 size-3 rounded-full border-2 border-[var(--bone)] bg-[var(--inner-green)]" />
         )}

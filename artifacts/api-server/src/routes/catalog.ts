@@ -723,6 +723,7 @@ router.get("/courses", requireAuth, async (req, res) => {
           meetUrl: isEnrolled ? (c.meetUrl ?? null) : null,
           audience: c.audience ?? "all",
           passCost: courseNeedsPass({ format, passCost: c.passCost ?? 0 }),
+          category: (c as { category?: string }).category ?? "business",
           isEnrolled,
           progressPct: isEnrolled ? progressPctFromModules(modules) : 0,
           modules,
@@ -837,6 +838,7 @@ router.get("/admin/courses", requireAuth, requireAdmin, async (req, res) => {
           meetUrl: c.meetUrl ?? null,
           audience: c.audience ?? "all",
           passCost: c.passCost ?? 0,
+          category: (c as { category?: string }).category ?? "business",
           modules: await courseModulesForUser(userId, c.id, true),
         };
       }),
@@ -864,6 +866,7 @@ router.post("/courses", requireAuth, requireAdmin, async (req, res) => {
       meetUrl,
       audience,
       passCost,
+      category,
     } = req.body ?? {};
     if (!title || typeof title !== "string") {
       res.status(400).json({ error: "Başlık gerekli" });
@@ -871,6 +874,11 @@ router.post("/courses", requireAuth, requireAdmin, async (req, res) => {
     }
 
     const resolvedFormat = resolveCourseFormat(format);
+    const COURSE_CATS = ["business", "product", "art", "craft", "capital", "ops"] as const;
+    const resolvedCategory =
+      typeof category === "string" && (COURSE_CATS as readonly string[]).includes(category)
+        ? category
+        : "business";
     let starts: Date | null = null;
     let ends: Date | null = null;
     if (startsAt) {
@@ -901,6 +909,7 @@ router.post("/courses", requireAuth, requireAdmin, async (req, res) => {
         endsAt: ends,
         meetUrl: typeof meetUrl === "string" ? meetUrl : null,
         audience: typeof audience === "string" && audience ? audience : "all",
+        category: resolvedCategory,
         passCost: resolveCoursePassCost(
           resolvedFormat,
           passCost,
@@ -935,6 +944,7 @@ router.patch("/courses/:id", requireAuth, requireAdmin, async (req, res) => {
       meetUrl,
       audience,
       passCost,
+      category,
     } = req.body ?? {};
 
     const [existing] = await db
@@ -980,6 +990,10 @@ router.patch("/courses/:id", requireAuth, requireAdmin, async (req, res) => {
     }
     if (meetUrl !== undefined) patch.meetUrl = typeof meetUrl === "string" ? meetUrl : null;
     if (typeof audience === "string") patch.audience = audience || "all";
+    const COURSE_CATS = ["business", "product", "art", "craft", "capital", "ops"] as const;
+    if (typeof category === "string" && (COURSE_CATS as readonly string[]).includes(category)) {
+      patch.category = category;
+    }
 
     const nextFormat = (patch.format as string | undefined) ?? existing.format ?? "vod";
     if (format !== undefined || passCost !== undefined) {

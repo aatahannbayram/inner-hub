@@ -4,11 +4,9 @@ import { FadeIn } from "@/components/FadeIn";
 import { useApiQuery } from "@/hooks/useApiQuery";
 import { apiUrl } from "@/lib/api";
 import { ErrorState, LoadingBlock } from "@/components/panel/Skeletons";
-import { Check, Bell, Shield, Palette, Globe, LogOut, AlertTriangle } from "lucide-react";
+import { Check, Bell, Shield, Palette, Globe, LogOut, AlertTriangle, MessageCircle } from "lucide-react";
 import { useLocale, useT } from "@/i18n";
 import { useTheme, type ThemeMode } from "@/hooks/useTheme";
-
-// ─── Toggle ───────────────────────────────────────────────────────────────────
 
 function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
   return (
@@ -29,8 +27,6 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean
     </button>
   );
 }
-
-// ─── Section ──────────────────────────────────────────────────────────────────
 
 function Section({
   icon: Icon,
@@ -126,6 +122,26 @@ type SettingsPrefs = {
   onboardingCompleted: boolean;
 };
 
+type MeUser = {
+  name?: string;
+  handle?: string | null;
+  title?: string | null;
+  company?: string | null;
+  bio?: string | null;
+  skills?: string[];
+  linkedin?: string | null;
+  github?: string | null;
+  website?: string | null;
+  twitter?: string | null;
+  university?: string | null;
+  behance?: string | null;
+  instagram?: string | null;
+  phone?: string | null;
+  visibility?: string | null;
+  avatarStyle?: string | null;
+  whatsappOptIn?: string | boolean | null;
+};
+
 const DEFAULT_PREFS: SettingsPrefs = {
   notifMatch: true,
   notifEvents: true,
@@ -142,6 +158,13 @@ const DEFAULT_PREFS: SettingsPrefs = {
   onboardingCompleted: false,
 };
 
+function splitName(name: string | undefined) {
+  const parts = (name ?? "").trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return { firstName: "", lastName: "" };
+  if (parts.length === 1) return { firstName: parts[0], lastName: "" };
+  return { firstName: parts[0], lastName: parts.slice(1).join(" ") };
+}
+
 export default function Settings() {
   const t = useT();
   const { setLocale } = useLocale();
@@ -150,12 +173,19 @@ export default function Settings() {
     ["settings"],
     "/api/settings",
   );
+  const meQ = useApiQuery<{ user: MeUser }>(["auth-me"], "/api/auth/me");
 
   const [prefs, setPrefs] = useState<SettingsPrefs>(DEFAULT_PREFS);
   const [hydrated, setHydrated] = useState(false);
   const [busy, setBusy] = useState(false);
   const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [whatsappOptIn, setWhatsappOptIn] = useState(false);
+  const [phone, setPhone] = useState("");
+  const [waBusy, setWaBusy] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState("");
+  const [deleteBusy, setDeleteBusy] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   useEffect(() => {
     if (data?.prefs) {
@@ -163,6 +193,13 @@ export default function Settings() {
       setHydrated(true);
     }
   }, [data]);
+
+  useEffect(() => {
+    const u = meQ.data?.user;
+    if (!u) return;
+    setPhone(u.phone ?? "");
+    setWhatsappOptIn(u.whatsappOptIn === true || u.whatsappOptIn === "true");
+  }, [meQ.data]);
 
   const patch = <K extends keyof SettingsPrefs>(key: K, value: SettingsPrefs[K]) => {
     setPrefs((p) => ({ ...p, [key]: value }));
@@ -172,6 +209,50 @@ export default function Settings() {
   const patchTheme = (v: ThemeMode) => {
     patch("theme", v);
     setThemeMode(v);
+  };
+
+  const patchMeWhatsapp = async (nextOptIn: boolean, nextPhone: string) => {
+    const u = meQ.data?.user;
+    if (!u) return;
+    const { firstName, lastName } = splitName(u.name);
+    setWaBusy(true);
+    try {
+      const res = await fetch(apiUrl("/api/auth/me"), {
+        method: "PATCH",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          firstName,
+          lastName,
+          handle: u.handle ?? "",
+          title: u.title ?? "",
+          company: u.company ?? "",
+          bio: u.bio ?? "",
+          skills: Array.isArray(u.skills) ? u.skills : [],
+          linkedin: u.linkedin ?? "",
+          github: u.github ?? "",
+          website: u.website ?? "",
+          twitter: u.twitter ?? "",
+          university: u.university ?? "",
+          behance: u.behance ?? "",
+          instagram: u.instagram ?? "",
+          phone: nextPhone,
+          whatsappOptIn: nextOptIn,
+          visibility: u.visibility ?? "members",
+          avatarStyle: u.avatarStyle ?? "lorelei",
+        }),
+      });
+      if (!res.ok) {
+        const json = await res.json().catch(() => ({}));
+        throw new Error(json.error ?? t("settings.whatsappError"));
+      }
+      await meQ.refetch();
+    } catch {
+      setWhatsappOptIn(u.whatsappOptIn === true || u.whatsappOptIn === "true");
+      setPhone(u.phone ?? "");
+    } finally {
+      setWaBusy(false);
+    }
   };
 
   const save = async () => {
@@ -204,6 +285,27 @@ export default function Settings() {
       /* ignore */
     }
     window.location.href = "/panel";
+  };
+
+  const deleteAccount = async () => {
+    if (deleteConfirm !== "DELETE" || deleteBusy) return;
+    setDeleteBusy(true);
+    setDeleteError(null);
+    try {
+      const res = await fetch(apiUrl("/api/account"), {
+        method: "DELETE",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ confirm: "DELETE" }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json.error ?? t("settings.deleteAccountError"));
+      window.location.href = "/panel";
+    } catch (e: unknown) {
+      setDeleteError(e instanceof Error ? e.message : t("settings.deleteAccountError"));
+    } finally {
+      setDeleteBusy(false);
+    }
   };
 
   if (isLoading && !hydrated) {
@@ -255,6 +357,37 @@ export default function Settings() {
           <SettingRow label={t("settings.notifEmail")} sub={t("settings.notifEmailSub")}>
             <Toggle checked={prefs.notifEmail} onChange={(v) => patch("notifEmail", v)} />
           </SettingRow>
+        </div>
+      </Section>
+
+      <Section icon={MessageCircle} title={t("settings.whatsapp")} sub={t("settings.whatsappSub")}>
+        <div className="panel-glass space-y-3 px-4 py-3">
+          <SettingRow label={t("settings.whatsappOptIn")} sub={t("settings.whatsappOptInSub")}>
+            <Toggle
+              checked={whatsappOptIn}
+              onChange={(v) => {
+                setWhatsappOptIn(v);
+                void patchMeWhatsapp(v, phone);
+              }}
+            />
+          </SettingRow>
+          <div className="pb-2">
+            <label className="mb-1.5 block font-mono text-label uppercase tracking-widest text-[var(--ink-strong)]">
+              {t("settings.whatsappPhone")}
+            </label>
+            <input
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              onBlur={() => {
+                if (!waBusy) void patchMeWhatsapp(whatsappOptIn, phone);
+              }}
+              placeholder="+90…"
+              className="min-h-11 w-full border border-[var(--ink)]/15 bg-transparent px-3 py-2 text-sm text-[var(--ink)] outline-none focus:border-[var(--ink)]/40"
+            />
+            <p className="mt-1 font-mono text-label text-[var(--ink-muted)]">
+              {t("settings.whatsappPhoneHint")}
+            </p>
+          </div>
         </div>
       </Section>
 
@@ -348,7 +481,7 @@ export default function Settings() {
             {t("settings.danger")}
           </p>
         </div>
-        <div className="space-y-3">
+        <div className="space-y-4">
           <div className="flex items-center justify-between gap-4">
             <div>
               <p className="text-sm font-light text-[var(--ink)]">{t("settings.suspend")}</p>
@@ -373,6 +506,34 @@ export default function Settings() {
               className="hit-40 relative flex items-center gap-1.5 panel-glass px-4 py-2 font-mono text-label uppercase tracking-widest text-[var(--ink-body)] transition-colors hover:text-[var(--ink)]"
             >
               <LogOut className="size-3" /> {t("common.logout")}
+            </button>
+          </div>
+          <div className="border-t border-[var(--error)]/15 pt-4">
+            <p className="text-sm font-light text-[var(--ink)]">{t("settings.deleteAccount")}</p>
+            <p className="mt-0.5 font-mono text-label text-[var(--ink-muted)]">
+              {t("settings.deleteAccountSub")}
+            </p>
+            <p className="mt-2 font-mono text-label text-[var(--ink-muted)]">
+              {t("settings.deleteAccountConfirmHint")}
+            </p>
+            <input
+              value={deleteConfirm}
+              onChange={(e) => setDeleteConfirm(e.target.value)}
+              placeholder="DELETE"
+              className="mt-2 min-h-11 w-full border border-[var(--error)]/25 bg-transparent px-3 py-2 font-mono text-sm text-[var(--ink)] outline-none focus:border-[var(--error)]/50"
+            />
+            {deleteError && (
+              <p className="mt-2 font-mono text-label text-[var(--error-ink)]" role="alert">
+                {deleteError}
+              </p>
+            )}
+            <button
+              type="button"
+              disabled={deleteConfirm !== "DELETE" || deleteBusy}
+              onClick={() => void deleteAccount()}
+              className="mt-3 min-h-11 border border-[var(--error)]/40 px-4 py-2 font-mono text-label uppercase tracking-widest text-[var(--error-ink)] transition-opacity hover:bg-[var(--error)]/10 disabled:opacity-30"
+            >
+              {deleteBusy ? t("common.loading") : t("settings.deleteAccountAction")}
             </button>
           </div>
         </div>

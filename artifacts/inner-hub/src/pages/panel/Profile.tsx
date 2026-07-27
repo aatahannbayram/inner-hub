@@ -1,12 +1,17 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Lockup } from "@/components/Lockup";
 import { FadeIn } from "@/components/FadeIn";
-import { Check, Plus, X, AlertCircle } from "lucide-react";
-import { toUpperTR } from "@/lib/tr";
+import { Check, Plus, X, AlertCircle, Upload, Building2, Search } from "lucide-react";
 import { useApiQuery } from "@/hooks/useApiQuery";
 import { apiUrl } from "@/lib/api";
 import { ErrorState, LoadingBlock } from "@/components/panel/Skeletons";
+import { MemberAvatar } from "@/components/panel/MemberAvatar";
 import { useT } from "@/i18n";
+import { useQueryClient } from "@tanstack/react-query";
+
+const AVATAR_STYLES = ["lorelei", "shapes", "notionists", "avataaars", "bottts"] as const;
+type AvatarStyle = (typeof AVATAR_STYLES)[number];
+const ORG_TYPES = ["startup", "company", "fund", "studio"] as const;
 
 type Profile = {
   firstName: string;
@@ -20,11 +25,25 @@ type Profile = {
   github: string;
   website: string;
   twitter: string;
+  university: string;
+  behance: string;
+  instagram: string;
+  phone: string;
+  avatarStyle: AvatarStyle;
   visibility: "public" | "members" | "private";
+};
+
+type ApiOrg = {
+  id: number;
+  name: string;
+  slug: string;
+  logoUrl: string | null;
+  type: string;
 };
 
 type ApiUser = {
   name?: string;
+  email?: string;
   title?: string | null;
   company?: string | null;
   bio?: string | null;
@@ -33,10 +52,20 @@ type ApiUser = {
   github?: string | null;
   website?: string | null;
   twitter?: string | null;
+  university?: string | null;
+  behance?: string | null;
+  instagram?: string | null;
+  phone?: string | null;
   skills?: string[];
   visibility?: string | null;
   profileCompletionPct?: number;
+  avatarUrl?: string | null;
+  resolvedAvatarUrl?: string | null;
+  avatarStyle?: string | null;
+  org?: ApiOrg | null;
 };
+
+type OrgMine = ApiOrg & { membershipRole?: string };
 
 const EMPTY: Profile = {
   firstName: "",
@@ -50,6 +79,11 @@ const EMPTY: Profile = {
   github: "",
   website: "",
   twitter: "",
+  university: "",
+  behance: "",
+  instagram: "",
+  phone: "",
+  avatarStyle: "lorelei",
   visibility: "members",
 };
 
@@ -72,6 +106,9 @@ function stripPrefix(value: string, prefixes: string[]): string {
 
 function mapUserToProfile(user: ApiUser): Profile {
   const { firstName, lastName } = splitName(user.name);
+  const style = AVATAR_STYLES.includes(user.avatarStyle as AvatarStyle)
+    ? (user.avatarStyle as AvatarStyle)
+    : "lorelei";
   return {
     firstName,
     lastName,
@@ -84,6 +121,11 @@ function mapUserToProfile(user: ApiUser): Profile {
     github: stripPrefix(user.github ?? "", ["https://", "http://", "www.", "github.com/"]),
     website: stripPrefix(user.website ?? "", ["https://", "http://"]),
     twitter: stripPrefix(user.twitter ?? "", ["https://", "http://", "www.", "x.com/", "twitter.com/"]),
+    university: user.university ?? "",
+    behance: stripPrefix(user.behance ?? "", ["https://", "http://", "www.", "behance.net/"]),
+    instagram: stripPrefix(user.instagram ?? "", ["https://", "http://", "www.", "instagram.com/", "@"]),
+    phone: user.phone ?? "",
+    avatarStyle: style,
     visibility:
       user.visibility === "public" || user.visibility === "private" || user.visibility === "members"
         ? user.visibility
@@ -91,7 +133,7 @@ function mapUserToProfile(user: ApiUser): Profile {
   };
 }
 
-function calcCompletion(p: Profile): number {
+function calcCompletion(p: Profile, hasAvatar: boolean): number {
   const checks = [
     p.firstName.trim().length > 0,
     p.lastName.trim().length > 0,
@@ -101,9 +143,44 @@ function calcCompletion(p: Profile): number {
     p.bio.trim().length > 20,
     p.skills.length >= 2,
     p.linkedin.trim().length > 0,
-    p.github.trim().length > 0 || p.website.trim().length > 0,
+    p.github.trim().length > 0 || p.website.trim().length > 0 || p.behance.trim().length > 0,
+    p.university.trim().length > 0,
+    hasAvatar || p.handle.trim().length > 0,
   ];
   return Math.round((checks.filter(Boolean).length / checks.length) * 100);
+}
+
+/** Compress image to JPEG data URL under ~160KB string length. */
+async function compressImageToDataUrl(file: File, maxChars = 160_000): Promise<string> {
+  const bitmap = await createImageBitmap(file);
+  let w = bitmap.width;
+  let h = bitmap.height;
+  const maxDim = 640;
+  if (Math.max(w, h) > maxDim) {
+    const scale = maxDim / Math.max(w, h);
+    w = Math.round(w * scale);
+    h = Math.round(h * scale);
+  }
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("canvas");
+  let quality = 0.82;
+  let dataUrl = "";
+  for (let attempt = 0; attempt < 12; attempt++) {
+    canvas.width = w;
+    canvas.height = h;
+    ctx.drawImage(bitmap, 0, 0, w, h);
+    dataUrl = canvas.toDataURL("image/jpeg", quality);
+    if (dataUrl.length <= maxChars) break;
+    if (quality > 0.45) quality -= 0.1;
+    else {
+      w = Math.max(96, Math.round(w * 0.75));
+      h = Math.max(96, Math.round(h * 0.75));
+    }
+  }
+  bitmap.close();
+  if (dataUrl.length > maxChars) throw new Error("too_large");
+  return dataUrl;
 }
 
 function Section({ title, sub, children }: { title: string; sub?: string; children: React.ReactNode }) {
@@ -127,6 +204,8 @@ function Field({
   prefix,
   textarea,
   maxLength,
+  type = "text",
+  hint,
 }: {
   label: string;
   value: string;
@@ -136,9 +215,11 @@ function Field({
   prefix?: string;
   textarea?: boolean;
   maxLength?: number;
+  type?: string;
+  hint?: string;
 }) {
   const cls = [
-    "w-full panel-glass bg-transparent px-3 py-2.5 text-sm text-[var(--ink)] placeholder:text-[var(--ink-subtle)] outline-none transition-colors focus:border-[var(--ink)]/30",
+    "w-full min-h-11 panel-glass bg-transparent px-3 py-2.5 text-sm text-[var(--ink)] placeholder:text-[var(--ink-subtle)] outline-none transition-colors focus:border-[var(--ink)]/30",
     mono ? "font-mono text-caption" : "font-light",
   ].join(" ");
 
@@ -148,16 +229,17 @@ function Field({
         {label}
       </label>
       {prefix ? (
-        <div className="flex items-stretch panel-glass transition-colors focus-within:border-[var(--ink)]/30">
+        <div className="flex min-h-11 items-stretch panel-glass transition-colors focus-within:border-[var(--ink)]/30">
           <span className="flex items-center border-r border-[var(--ink)]/[0.08] bg-[var(--ink)]/[0.03] px-3 font-mono text-label font-medium text-[var(--ink-body)]">
             {prefix}
           </span>
           <input
-            className="flex-1 bg-transparent px-3 py-2.5 text-sm font-light text-[var(--ink)] placeholder:text-[var(--ink-subtle)] outline-none"
+            className="min-w-0 flex-1 bg-transparent px-3 py-2.5 text-sm font-light text-[var(--ink)] placeholder:text-[var(--ink-subtle)] outline-none"
             value={value}
             onChange={(e) => onChange(e.target.value)}
             placeholder={placeholder}
             maxLength={maxLength}
+            type={type}
           />
         </div>
       ) : textarea ? (
@@ -176,6 +258,7 @@ function Field({
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           maxLength={maxLength}
+          type={type}
         />
       )}
       {maxLength && (
@@ -183,6 +266,7 @@ function Field({
           {value.length}/{maxLength}
         </p>
       )}
+      {hint && <p className="mt-1 font-mono text-label text-[var(--ink-muted)]">{hint}</p>}
     </div>
   );
 }
@@ -266,7 +350,7 @@ function VisibilitySelector({
           type="button"
           onClick={() => onChange(opt.value)}
           className={[
-            "flex items-center gap-3 border px-4 py-3 text-left transition-colors",
+            "flex min-h-11 items-center gap-3 border px-4 py-3 text-left transition-colors",
             value === opt.value
               ? "border-[var(--ink)]/30 bg-[var(--ink)]/[0.04]"
               : "border-[var(--ink)]/[0.08] hover:border-[var(--ink)]/15",
@@ -286,29 +370,6 @@ function VisibilitySelector({
           </div>
         </button>
       ))}
-    </div>
-  );
-}
-
-function Avatar({ name }: { name: string }) {
-  const t = useT();
-  const initials = toUpperTR(
-    name
-      .split(" ")
-      .slice(0, 2)
-      .map((w) => w[0])
-      .join(""),
-  );
-
-  return (
-    <div className="flex items-center gap-4">
-      <div className="flex size-16 items-center justify-center bg-[var(--ink)] font-mono text-lg text-[var(--bone)]">
-        {initials || "?"}
-      </div>
-      <div>
-        <p className="mb-1 text-sm text-[var(--ink)]">{t("profile.photo")}</p>
-        <p className="font-mono text-label font-medium text-[var(--ink-muted)]">{t("profile.photoSoon")}</p>
-      </div>
     </div>
   );
 }
@@ -337,22 +398,210 @@ function CompletionBar({ pct }: { pct: number }) {
   );
 }
 
+function OrgSection() {
+  const t = useT();
+  const qc = useQueryClient();
+  const { data, refetch } = useApiQuery<{ primaryOrgId: number | null; orgs: OrgMine[] }>(
+    ["orgs-mine"],
+    "/api/orgs/mine",
+  );
+  const orgs = data?.orgs ?? [];
+  const [name, setName] = useState("");
+  const [logoUrl, setLogoUrl] = useState("");
+  const [type, setType] = useState<(typeof ORG_TYPES)[number]>("startup");
+  const [q, setQ] = useState("");
+  const [results, setResults] = useState<ApiOrg[]>([]);
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState<string | null>(null);
+
+  const create = async () => {
+    if (!name.trim() || busy) return;
+    setBusy(true);
+    setMsg(null);
+    try {
+      const res = await fetch(apiUrl("/api/orgs"), {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: name.trim(),
+          logoUrl: logoUrl.trim() || undefined,
+          type,
+        }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json.error ?? t("profile.orgCreateError"));
+      setName("");
+      setLogoUrl("");
+      setMsg(t("profile.orgCreated"));
+      await refetch();
+      await qc.invalidateQueries({ queryKey: ["auth-me"] });
+    } catch (e: unknown) {
+      setMsg(e instanceof Error ? e.message : t("profile.orgCreateError"));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const search = async (query: string) => {
+    setQ(query);
+    if (query.trim().length < 2) {
+      setResults([]);
+      return;
+    }
+    try {
+      const res = await fetch(apiUrl(`/api/orgs/search?q=${encodeURIComponent(query.trim())}`), {
+        credentials: "include",
+      });
+      const json = await res.json().catch(() => ({}));
+      setResults(json.orgs ?? []);
+    } catch {
+      setResults([]);
+    }
+  };
+
+  const join = async (id: number) => {
+    setBusy(true);
+    setMsg(null);
+    try {
+      const res = await fetch(apiUrl(`/api/orgs/${id}/join`), {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json.error ?? t("profile.orgJoinError"));
+      setMsg(t("profile.orgJoined"));
+      setQ("");
+      setResults([]);
+      await refetch();
+      await qc.invalidateQueries({ queryKey: ["auth-me"] });
+    } catch (e: unknown) {
+      setMsg(e instanceof Error ? e.message : t("profile.orgJoinError"));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <Section title={t("profile.org")} sub={t("profile.orgSub")}>
+      {orgs.length > 0 ? (
+        <ul className="mb-4 space-y-2">
+          {orgs.map((o) => (
+            <li key={o.id} className="flex items-center gap-3 panel-glass px-3 py-2.5">
+              {o.logoUrl ? (
+                <img src={o.logoUrl} alt="" className="size-8 shrink-0 rounded-sm object-cover" />
+              ) : (
+                <Building2 className="size-4 shrink-0 text-[var(--ink-muted)]" />
+              )}
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm text-[var(--ink)]">{o.name}</p>
+                <p className="font-mono text-label text-[var(--ink-muted)]">
+                  {o.type}
+                  {o.membershipRole ? ` · ${o.membershipRole}` : ""}
+                </p>
+              </div>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="mb-4 text-sm text-[var(--ink-muted)]">{t("profile.orgEmpty")}</p>
+      )}
+
+      <p className="mb-2 font-mono text-label uppercase tracking-widest text-[var(--ink-strong)]">
+        {t("profile.createOrg")}
+      </p>
+      <div className="space-y-3">
+        <Field label={t("profile.orgName")} value={name} onChange={setName} placeholder={t("profile.orgNamePlaceholder")} maxLength={80} />
+        <Field label={t("profile.orgLogo")} value={logoUrl} onChange={setLogoUrl} placeholder="https://…" mono />
+        <div>
+          <label className="mb-1.5 block font-mono text-label font-semibold uppercase tracking-widest text-[var(--ink-strong)]">
+            {t("profile.orgType")}
+          </label>
+          <select
+            value={type}
+            onChange={(e) => setType(e.target.value as (typeof ORG_TYPES)[number])}
+            className="min-h-11 w-full panel-glass bg-transparent px-3 py-2.5 text-sm text-[var(--ink)] outline-none"
+          >
+            {ORG_TYPES.map((ot) => (
+              <option key={ot} value={ot}>
+                {t(`profile.orgType_${ot}`)}
+              </option>
+            ))}
+          </select>
+        </div>
+        <button
+          type="button"
+          disabled={busy || name.trim().length < 2}
+          onClick={() => void create()}
+          className="min-h-11 w-full border border-[var(--ink)] bg-[var(--ink)] px-4 py-2.5 font-mono text-label uppercase tracking-widest text-[var(--bone)] disabled:opacity-30 sm:w-auto"
+        >
+          {t("profile.createOrg")}
+        </button>
+      </div>
+
+      <div className="mt-6 space-y-2">
+        <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-strong)]">
+          {t("profile.joinOrg")}
+        </p>
+        <div className="relative">
+          <Search className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-[var(--ink-muted)]" />
+          <input
+            value={q}
+            onChange={(e) => void search(e.target.value)}
+            placeholder={t("profile.joinOrgPlaceholder")}
+            className="min-h-11 w-full panel-glass bg-transparent py-2.5 pl-9 pr-3 text-sm text-[var(--ink)] outline-none"
+          />
+        </div>
+        {results.length > 0 && (
+          <ul className="divide-y divide-[var(--ink)]/[0.06] border border-[var(--ink)]/[0.08]">
+            {results.map((r) => (
+              <li key={r.id} className="flex items-center justify-between gap-3 px-3 py-2.5">
+                <span className="truncate text-sm text-[var(--ink)]">{r.name}</span>
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => void join(r.id)}
+                  className="shrink-0 font-mono text-label uppercase tracking-widest text-[var(--ink)] underline-offset-2 hover:underline disabled:opacity-40"
+                >
+                  {t("profile.join")}
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+      {msg && <p className="mt-3 font-mono text-label text-[var(--ink-muted)]">{msg}</p>}
+    </Section>
+  );
+}
+
 export default function ProfilePage() {
   const t = useT();
+  const fileRef = useRef<HTMLInputElement>(null);
   const { data, isLoading, isError, error, refetch } = useApiQuery<{ user: ApiUser }>(
     ["auth-me"],
     "/api/auth/me",
   );
   const [profile, setProfile] = useState<Profile>(EMPTY);
+  /** Uploaded photo only (not DiceBear resolved URL). */
+  const [customAvatar, setCustomAvatar] = useState<string | null>(null);
+  const [org, setOrg] = useState<ApiOrg | null>(null);
+  const [seed, setSeed] = useState("inner");
   const [hydrated, setHydrated] = useState(false);
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [avatarBusy, setAvatarBusy] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [handleError, setHandleError] = useState("");
 
   useEffect(() => {
     if (!data?.user) return;
     setProfile(mapUserToProfile(data.user));
+    setCustomAvatar(data.user.avatarUrl ?? null);
+    setOrg(data.user.org ?? null);
+    setSeed(data.user.handle || data.user.email || data.user.name || "inner");
     setHydrated(true);
   }, [data]);
 
@@ -367,6 +616,68 @@ export default function ProfilePage() {
     if (v !== clean) setHandleError(t("profile.handleError"));
     else setHandleError("");
     set("handle", clean);
+  };
+
+  const applyUser = (user: ApiUser) => {
+    setProfile(mapUserToProfile(user));
+    setCustomAvatar(user.avatarUrl ?? null);
+    if (user.org !== undefined) setOrg(user.org);
+    setSeed(user.handle || user.email || user.name || "inner");
+    window.dispatchEvent(new CustomEvent("inner-profile-updated", { detail: user }));
+  };
+
+  const uploadAvatar = async (file: File) => {
+    setAvatarBusy(true);
+    setSaveError(null);
+    try {
+      const dataUrl = await compressImageToDataUrl(file);
+      const res = await fetch(apiUrl("/api/auth/me/avatar"), {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ dataUrl }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json.error ?? t("profile.avatarError"));
+      if (json.user) applyUser(json.user);
+    } catch (e: unknown) {
+      const msg =
+        e instanceof Error && e.message === "too_large"
+          ? t("profile.avatarTooLarge")
+          : e instanceof Error
+            ? e.message
+            : t("profile.avatarError");
+      setSaveError(msg);
+    } finally {
+      setAvatarBusy(false);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  };
+
+  const useGenerated = async (style?: AvatarStyle) => {
+    setAvatarBusy(true);
+    setSaveError(null);
+    try {
+      const st = style ?? profile.avatarStyle;
+      const res = await fetch(apiUrl("/api/auth/me/avatar"), {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ useGenerated: true, avatarStyle: st }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json.error ?? t("profile.avatarError"));
+      if (json.user) applyUser(json.user);
+      set("avatarStyle", st);
+    } catch (e: unknown) {
+      setSaveError(e instanceof Error ? e.message : t("profile.avatarError"));
+    } finally {
+      setAvatarBusy(false);
+    }
+  };
+
+  const pickStyle = (st: AvatarStyle) => {
+    set("avatarStyle", st);
   };
 
   const save = async () => {
@@ -390,23 +701,28 @@ export default function ProfilePage() {
           github: profile.github,
           website: profile.website,
           twitter: profile.twitter,
+          university: profile.university,
+          behance: profile.behance,
+          instagram: profile.instagram,
+          phone: profile.phone,
+          avatarStyle: profile.avatarStyle,
           visibility: profile.visibility,
         }),
       });
       const json = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(json.error ?? t("profile.saveError"));
-      if (json.user) setProfile(mapUserToProfile(json.user));
+      if (json.user) applyUser(json.user);
       setSaved(true);
-      window.dispatchEvent(new CustomEvent("inner-profile-updated", { detail: json.user }));
       setTimeout(() => setSaved(false), 3000);
-    } catch (e: any) {
-      setSaveError(e.message ?? t("profile.saveError"));
+    } catch (e: unknown) {
+      setSaveError(e instanceof Error ? e.message : t("profile.saveError"));
     } finally {
       setSaving(false);
     }
   };
 
-  const completion = calcCompletion(profile);
+  const hasCustomAvatar = Boolean(customAvatar);
+  const completion = calcCompletion(profile, hasCustomAvatar || Boolean(profile.handle));
   const fullName = `${profile.firstName} ${profile.lastName}`.trim();
 
   if (isLoading && !hydrated) {
@@ -438,14 +754,77 @@ export default function ProfilePage() {
             style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
           >
             {t("profile.title")}
-
           </h1>
           <p className="mt-2 text-sm font-light text-[var(--ink-muted)]">{t("profile.subtitle")}</p>
         </div>
       </FadeIn>
 
       <CompletionBar pct={completion} />
-      <Avatar name={fullName || t("common.member")} />
+
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+        <MemberAvatar
+          seed={seed}
+          avatarUrl={customAvatar}
+          avatarStyle={profile.avatarStyle}
+          orgLogoUrl={org?.logoUrl}
+          orgName={org?.name}
+          size="lg"
+          alt={fullName}
+        />
+        <div className="min-w-0 flex-1 space-y-3">
+          <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
+            {t("profile.avatar")}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              disabled={avatarBusy}
+              onClick={() => fileRef.current?.click()}
+              className="inline-flex min-h-11 items-center gap-1.5 panel-glass px-4 py-2 font-mono text-label uppercase tracking-widest text-[var(--ink-body)] disabled:opacity-40"
+            >
+              <Upload className="size-3" />
+              {avatarBusy ? t("common.loading") : t("profile.uploadAvatar")}
+            </button>
+            <button
+              type="button"
+              disabled={avatarBusy}
+              onClick={() => void useGenerated(profile.avatarStyle)}
+              className="inline-flex min-h-11 items-center panel-glass px-4 py-2 font-mono text-label uppercase tracking-widest text-[var(--ink-body)] disabled:opacity-40"
+            >
+              {t("profile.useGenerated")}
+            </button>
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*"
+              className="sr-only"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) void uploadAvatar(f);
+              }}
+            />
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {AVATAR_STYLES.map((st) => (
+              <button
+                key={st}
+                type="button"
+                disabled={avatarBusy}
+                onClick={() => pickStyle(st)}
+                className={[
+                  "border px-2.5 py-1.5 font-mono text-label uppercase tracking-widest transition-colors",
+                  profile.avatarStyle === st
+                    ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--bone)]"
+                    : "border-[var(--ink)]/15 text-[var(--ink-muted)] hover:text-[var(--ink)]",
+                ].join(" ")}
+              >
+                {st}
+              </button>
+            ))}
+          </div>
+          <p className="font-mono text-label text-[var(--ink-muted)]">{t("profile.avatarHint")}</p>
+        </div>
+      </div>
 
       <Section title={t("profile.sectionBasics")}>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -473,6 +852,20 @@ export default function ProfilePage() {
           <Field label={t("profile.company")} value={profile.company} onChange={(v) => set("company", v)} placeholder={t("profile.placeholderCompany")} maxLength={50} />
         </div>
         <div className="mt-3">
+          <Field label={t("profile.university")} value={profile.university} onChange={(v) => set("university", v)} placeholder={t("profile.placeholderUniversity")} maxLength={120} />
+        </div>
+        <div className="mt-3">
+          <Field
+            label={t("profile.phone")}
+            value={profile.phone}
+            onChange={(v) => set("phone", v)}
+            placeholder={t("profile.placeholderPhone")}
+            type="tel"
+            hint={t("profile.phoneHint")}
+            maxLength={40}
+          />
+        </div>
+        <div className="mt-3">
           <Field
             label={t("profile.bio")}
             value={profile.bio}
@@ -492,10 +885,14 @@ export default function ProfilePage() {
         <div className="space-y-3">
           <Field label="LinkedIn" value={profile.linkedin} onChange={(v) => set("linkedin", v)} prefix="linkedin.com/in/" placeholder={t("profile.placeholderLinkedin")} mono />
           <Field label="GitHub" value={profile.github} onChange={(v) => set("github", v)} prefix="github.com/" placeholder={t("profile.placeholderGithub")} mono />
+          <Field label={t("profile.behance")} value={profile.behance} onChange={(v) => set("behance", v)} prefix="behance.net/" placeholder={t("profile.placeholderBehance")} mono />
+          <Field label={t("profile.instagram")} value={profile.instagram} onChange={(v) => set("instagram", v)} prefix="instagram.com/" placeholder={t("profile.placeholderInstagram")} mono />
           <Field label={t("profile.personalSite")} value={profile.website} onChange={(v) => set("website", v)} prefix="https://" placeholder={t("profile.placeholderWebsite")} mono />
           <Field label={t("profile.twitter")} value={profile.twitter} onChange={(v) => set("twitter", v)} prefix="x.com/" placeholder={t("profile.placeholderTwitter")} mono />
         </div>
       </Section>
+
+      <OrgSection />
 
       <Section title={t("profile.visibility")} sub={t("profile.visibilityHint")}>
         <VisibilitySelector value={profile.visibility} onChange={(v) => set("visibility", v)} />
@@ -507,7 +904,7 @@ export default function ProfilePage() {
           onClick={() => void save()}
           disabled={!!handleError || saving}
           className={[
-            "flex items-center gap-2 border px-6 py-2.5 font-mono text-label uppercase tracking-widest transition-all",
+            "flex min-h-11 items-center gap-2 border px-6 py-2.5 font-mono text-label uppercase tracking-widest transition-all",
             saved
               ? "border-[var(--inner-green)]/40 bg-[var(--inner-green)]/10 text-[var(--success-ink)]"
               : "border-[var(--ink)] bg-[var(--ink)] text-[var(--bone)] hover:bg-[var(--ink)]/85 disabled:opacity-30",

@@ -17,7 +17,7 @@ import { createNotification } from "./notifications";
 const router = Router();
 
 type RefType = "course" | "event";
-type Channel = "email" | "inapp" | "both";
+type Channel = "email" | "inapp" | "both" | "whatsapp" | "all";
 type ReminderKind = "t24h" | "t15m";
 
 async function alreadyLogged(refType: RefType, refId: number, kind: string): Promise<boolean> {
@@ -50,6 +50,8 @@ async function recipientsFor(refType: RefType, refId: number) {
         id: usersTable.id,
         email: usersTable.email,
         name: usersTable.name,
+        phone: usersTable.phone,
+        whatsappOptIn: usersTable.whatsappOptIn,
       })
       .from(enrollmentsTable)
       .innerJoin(usersTable, eq(usersTable.id, enrollmentsTable.userId))
@@ -61,6 +63,8 @@ async function recipientsFor(refType: RefType, refId: number) {
       id: usersTable.id,
       email: usersTable.email,
       name: usersTable.name,
+      phone: usersTable.phone,
+      whatsappOptIn: usersTable.whatsappOptIn,
     })
     .from(eventRegistrationsTable)
     .innerJoin(usersTable, eq(usersTable.id, eventRegistrationsTable.userId))
@@ -106,9 +110,10 @@ async function notifyUsers(opts: {
 
   const users = await recipientsFor(opts.refType, opts.refId);
   let sent = 0;
+  const { sendWhatsAppTemplate } = await import("../lib/whatsapp");
 
   for (const u of users) {
-    if (opts.channel === "email" || opts.channel === "both") {
+    if (opts.channel === "email" || opts.channel === "both" || opts.channel === "all") {
       await notifyLiveSession({
         name: u.name,
         email: u.email,
@@ -119,13 +124,28 @@ async function notifyUsers(opts: {
         lead: opts.emailLead,
       });
     }
-    if (opts.channel === "inapp" || opts.channel === "both") {
+    if (opts.channel === "inapp" || opts.channel === "both" || opts.channel === "all") {
       await createNotification({
         userId: u.id,
         title: opts.title,
         body: opts.emailLead,
         kind: opts.notifKind,
       });
+    }
+    if (opts.channel === "whatsapp" || opts.channel === "all") {
+      const phone = (u as { phone?: string | null }).phone;
+      const optIn = (u as { whatsappOptIn?: string | null }).whatsappOptIn;
+      if (phone && optIn === "true") {
+        const when = opts.startsAt
+          ? opts.startsAt.toLocaleString("tr-TR", { dateStyle: "short", timeStyle: "short" })
+          : "";
+        await sendWhatsAppTemplate({
+          toE164: phone,
+          templateId: opts.logKind.includes("15") ? "live_session_t15m" : "live_session_t24h",
+          vars: [u.name.split(" ")[0] || u.name, opts.title, when || opts.meetUrl || "inner.digital", opts.meetUrl || ""],
+          locale: "tr",
+        });
+      }
     }
     sent += 1;
   }
@@ -164,7 +184,13 @@ router.post("/admin/live/notify", requireAuth, requireAdmin, async (req, res) =>
       return;
     }
     const ch: Channel =
-      channel === "email" || channel === "inapp" || channel === "both" ? channel : "both";
+      channel === "email" ||
+      channel === "inapp" ||
+      channel === "both" ||
+      channel === "whatsapp" ||
+      channel === "all"
+        ? channel
+        : "both";
 
     const session = await loadSession(refType, id);
     if (!session) {

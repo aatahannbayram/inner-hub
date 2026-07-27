@@ -1,8 +1,10 @@
 import { Router } from "express";
-import { asc, eq, sql } from "drizzle-orm";
+import { asc, eq, isNull, sql } from "drizzle-orm";
 import { db } from "@workspace/db";
 import { perksTable, usersTable } from "@workspace/db/schema";
 import { requireAuth } from "../lib/auth";
+import { resolveAvatarUrl } from "../lib/identity";
+import { ensureUserMembershipColumns } from "../lib/ensureSchema";
 
 const router = Router();
 
@@ -14,6 +16,9 @@ async function ensurePerkColumns() {
   await db.execute(sql`ALTER TABLE perks ADD COLUMN IF NOT EXISTS how_to text`);
   await db.execute(sql`ALTER TABLE perks ADD COLUMN IF NOT EXISTS featured boolean NOT NULL DEFAULT false`);
   await db.execute(sql`ALTER TABLE perks ADD COLUMN IF NOT EXISTS expires_at timestamp`);
+  await db.execute(sql`ALTER TABLE perks ADD COLUMN IF NOT EXISTS source text DEFAULT 'partner'`);
+  await db.execute(sql`ALTER TABLE perks ADD COLUMN IF NOT EXISTS org_id integer`);
+  await db.execute(sql`ALTER TABLE perks ADD COLUMN IF NOT EXISTS campaign_id integer`);
 }
 
 /** Boş katalogda üyelik değeri görünsün diye seed (prod dahil, yalnızca count=0). */
@@ -163,6 +168,7 @@ router.get("/perks", requireAuth, async (_req, res) => {
         partnerUrl: p.ctaUrl,
         featured: p.featured,
         expiresAt: p.expiresAt ? p.expiresAt.toISOString().slice(0, 10) : undefined,
+        source: (p as { source?: string }).source === "campaign" ? "campaign" : "partner",
       })),
     });
   } catch (err: any) {
@@ -173,6 +179,7 @@ router.get("/perks", requireAuth, async (_req, res) => {
 // ─── GET /api/members ─────────────────────────────────────────────────────────
 router.get("/members", requireAuth, async (_req, res) => {
   try {
+    await ensureUserMembershipColumns();
     const rows = await db
       .select({
         id: usersTable.id,
@@ -182,9 +189,14 @@ router.get("/members", requireAuth, async (_req, res) => {
         bio: usersTable.bio,
         linkedin: usersTable.linkedin,
         avatarUrl: usersTable.avatarUrl,
+        avatarStyle: usersTable.avatarStyle,
+        handle: usersTable.handle,
+        email: usersTable.email,
+        persona: usersTable.persona,
         role: usersTable.role,
       })
       .from(usersTable)
+      .where(isNull(usersTable.deletedAt))
       .orderBy(asc(usersTable.name));
 
     res.json({
@@ -195,9 +207,10 @@ router.get("/members", requireAuth, async (_req, res) => {
         title: u.title ?? (u.role === "admin" ? "Admin" : "Üye"),
         company: u.company ?? "—",
         bio: u.bio ?? "",
-        tags: [u.title, u.company].filter((t): t is string => Boolean(t && t.trim())),
+        tags: [u.title, u.company, u.persona].filter((t): t is string => Boolean(t && t.trim())),
         linkedin: u.linkedin,
-        avatarUrl: u.avatarUrl,
+        avatarUrl: resolveAvatarUrl(u),
+        persona: u.persona,
         isAvailable: false,
       })),
     });

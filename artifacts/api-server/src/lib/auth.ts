@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
 import type { Request, Response, NextFunction } from "express";
-import { eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import { db } from "@workspace/db";
 import { sessionsTable, usersTable, type User } from "@workspace/db/schema";
 
@@ -36,7 +36,7 @@ export async function getUserBySession(sessionId: string | undefined): Promise<U
     .select({ user: usersTable, expiresAt: sessionsTable.expiresAt })
     .from(sessionsTable)
     .innerJoin(usersTable, eq(sessionsTable.userId, usersTable.id))
-    .where(eq(sessionsTable.id, sessionId))
+    .where(and(eq(sessionsTable.id, sessionId), isNull(usersTable.deletedAt)))
     .limit(1);
 
   if (!row) return null;

@@ -23,6 +23,7 @@ import {
   UserCircle,
   Newspaper,
   Mic2,
+  Building2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useT } from "@/i18n";
@@ -48,6 +49,7 @@ const PREFETCH: Record<string, () => Promise<unknown>> = {
   "/panel/events": () => import("@/pages/panel/Events"),
   "/panel/stage": () => import("@/pages/panel/Stage"),
   "/panel/members": () => import("@/pages/panel/Members"),
+  "/panel/org": () => import("@/pages/panel/Org"),
   "/panel/perks": () => import("@/pages/panel/Perks"),
   "/panel/signal": () => import("@/pages/panel/Signal"),
   "/panel/match": () => import("@/pages/panel/Match"),
@@ -78,6 +80,7 @@ const SECTION_DEFS: NavSection[] = [
       { href: "/panel/events", labelKey: "nav.events", icon: CalendarDays },
       { href: "/panel/stage", labelKey: "nav.dashboard", mark: "stage", icon: Mic2 },
       { href: "/panel/members", labelKey: "nav.members", icon: Users },
+      { href: "/panel/org", labelKey: "nav.org", icon: Building2 },
       { href: "/panel/perks", labelKey: "nav.perks", icon: Gift },
     ],
   },

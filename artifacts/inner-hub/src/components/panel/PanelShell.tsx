@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { PanelNav } from "./PanelNav";
 import { PanelPageTransition } from "./PanelPageTransition";
 import { PanelOnboarding } from "./PanelOnboarding";
+import { LegalAcceptModal } from "./LegalAcceptModal";
 import { useApiQuery } from "@/hooks/useApiQuery";
 import { apiUrl } from "@/lib/api";
 import { Lockup } from "@/components/Lockup";
@@ -569,6 +570,7 @@ function ShellInner({ user, children, onLogout }: PanelShellProps) {
         </main>
       </div>
 
+      <LegalAcceptModal />
       <PanelOnboarding userName={user.name} />
     </div>
   );

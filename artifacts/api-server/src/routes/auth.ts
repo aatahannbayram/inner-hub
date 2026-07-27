@@ -12,13 +12,17 @@ import {
   publicUser,
   requireAuth,
 } from "../lib/auth";
-import { ensureUserProfileColumns, ensureUserMembershipColumns } from "../lib/ensureSchema";
+import {
+  ensureUserProfileColumns,
+  ensureUserMembershipColumns,
+} from "../lib/ensureSchema";
 import {
   consumeInviteCode,
   normalizeEmail,
   personaFromInviteRequest,
   validateInviteCodeForEmail,
 } from "../lib/inviteCodes";
+import { getPrimaryOrgForUser, isAvatarStyle, resolveAvatarUrl } from "../lib/identity";
 
 const router = Router();
 
@@ -35,6 +39,9 @@ function calcCompletion(input: {
   linkedin: string;
   github: string;
   website: string;
+  university: string;
+  behance: string;
+  hasAvatar: boolean;
 }): number {
   const parts = input.name.trim().split(/\s+/).filter(Boolean);
   const checks = [
@@ -46,7 +53,9 @@ function calcCompletion(input: {
     input.bio.trim().length > 20,
     input.skills.length >= 2,
     input.linkedin.trim().length > 0,
-    input.github.trim().length > 0 || input.website.trim().length > 0,
+    input.github.trim().length > 0 || input.website.trim().length > 0 || input.behance.trim().length > 0,
+    input.university.trim().length > 0,
+    input.hasAvatar,
   ];
   return Math.round((checks.filter(Boolean).length / checks.length) * 100);
 }
@@ -263,10 +272,21 @@ router.get("/me", async (req, res) => {
       .where(eq(usersTable.id, req.user.id))
       .limit(1);
     const user = fresh ?? req.user;
+    const org = await getPrimaryOrgForUser(user.id);
     res.json({
       user: {
         ...publicUser(user),
         skills: parseSkills(user.skills),
+        resolvedAvatarUrl: resolveAvatarUrl(user),
+        org: org
+          ? {
+              id: org.id,
+              name: org.name,
+              slug: org.slug,
+              logoUrl: org.logoUrl,
+              type: org.type,
+            }
+          : null,
       },
     });
   } catch (err: any) {
@@ -278,6 +298,7 @@ router.get("/me", async (req, res) => {
 router.patch("/me", requireAuth, async (req, res) => {
   try {
     await ensureUserProfileColumns();
+    await ensureUserMembershipColumns();
     const userId = req.user!.id;
     const body = req.body ?? {};
 
@@ -293,6 +314,17 @@ router.patch("/me", requireAuth, async (req, res) => {
     const github = typeof body.github === "string" ? body.github.trim().slice(0, 120) : "";
     const website = typeof body.website === "string" ? body.website.trim().slice(0, 120) : "";
     const twitter = typeof body.twitter === "string" ? body.twitter.trim().slice(0, 120) : "";
+    const university = typeof body.university === "string" ? body.university.trim().slice(0, 120) : "";
+    const behance = typeof body.behance === "string" ? body.behance.trim().slice(0, 120) : "";
+    const instagram = typeof body.instagram === "string" ? body.instagram.trim().slice(0, 120) : "";
+    const phone = typeof body.phone === "string" ? body.phone.trim().slice(0, 40) : "";
+    const whatsappOptIn =
+      body.whatsappOptIn === true || body.whatsappOptIn === "true"
+        ? "true"
+        : body.whatsappOptIn === false || body.whatsappOptIn === "false"
+          ? "false"
+          : undefined;
+    const avatarStyle = isAvatarStyle(body.avatarStyle) ? body.avatarStyle : undefined;
     const visibility =
       body.visibility === "public" || body.visibility === "private" || body.visibility === "members"
         ? body.visibility
@@ -313,6 +345,8 @@ router.patch("/me", requireAuth, async (req, res) => {
       }
     }
 
+    const current = req.user!;
+    const nextAvatarStyle = avatarStyle ?? current.avatarStyle ?? "lorelei";
     const profileCompletionPct = calcCompletion({
       name,
       handle,
@@ -323,6 +357,9 @@ router.patch("/me", requireAuth, async (req, res) => {
       linkedin,
       github,
       website,
+      university,
+      behance,
+      hasAvatar: Boolean(current.avatarUrl) || Boolean(handle || current.email),
     });
 
     const [updated] = await db
@@ -337,6 +374,12 @@ router.patch("/me", requireAuth, async (req, res) => {
         github: github || null,
         website: website || null,
         twitter: twitter || null,
+        university: university || null,
+        behance: behance || null,
+        instagram: instagram || null,
+        phone: phone || null,
+        ...(whatsappOptIn !== undefined ? { whatsappOptIn } : {}),
+        ...(avatarStyle ? { avatarStyle: nextAvatarStyle } : {}),
         skills: JSON.stringify(skills),
         visibility,
         profileCompletionPct,
@@ -344,14 +387,70 @@ router.patch("/me", requireAuth, async (req, res) => {
       .where(eq(usersTable.id, userId))
       .returning();
 
+    const org = await getPrimaryOrgForUser(userId);
     res.json({
       user: {
         ...publicUser(updated),
         skills: parseSkills(updated.skills),
+        resolvedAvatarUrl: resolveAvatarUrl(updated),
+        org: org
+          ? { id: org.id, name: org.name, slug: org.slug, logoUrl: org.logoUrl, type: org.type }
+          : null,
       },
     });
   } catch (err: any) {
     res.status(500).json({ error: err.message ?? "Profil kaydedilemedi" });
+  }
+});
+
+/** POST /api/auth/me/avatar — { dataUrl } veya { clear: true } veya { useGenerated: true } */
+router.post("/me/avatar", requireAuth, async (req, res) => {
+  try {
+    await ensureUserMembershipColumns();
+    const userId = req.user!.id;
+    const { dataUrl, clear, useGenerated, avatarStyle } = req.body ?? {};
+
+    if (clear === true || useGenerated === true) {
+      const style = isAvatarStyle(avatarStyle) ? avatarStyle : req.user!.avatarStyle ?? "lorelei";
+      const [updated] = await db
+        .update(usersTable)
+        .set({ avatarUrl: null, avatarStyle: style })
+        .where(eq(usersTable.id, userId))
+        .returning();
+      res.json({
+        user: {
+          ...publicUser(updated!),
+          skills: parseSkills(updated!.skills),
+          resolvedAvatarUrl: resolveAvatarUrl(updated!),
+        },
+      });
+      return;
+    }
+
+    if (typeof dataUrl !== "string" || !dataUrl.startsWith("data:image/")) {
+      res.status(400).json({ error: "Geçerli bir görsel dataUrl gerekli" });
+      return;
+    }
+    if (dataUrl.length > 220_000) {
+      res.status(400).json({ error: "Görsel çok büyük (max ~160KB)" });
+      return;
+    }
+
+    const [updated] = await db
+      .update(usersTable)
+      .set({ avatarUrl: dataUrl })
+      .where(eq(usersTable.id, userId))
+      .returning();
+
+    res.json({
+      user: {
+        ...publicUser(updated!),
+        skills: parseSkills(updated!.skills),
+        resolvedAvatarUrl: resolveAvatarUrl(updated!),
+      },
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message ?? "Avatar güncellenemedi" });
   }
 });
 

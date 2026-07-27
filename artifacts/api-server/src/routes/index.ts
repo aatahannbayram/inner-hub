@@ -21,6 +21,9 @@ import settingsRouter from "./settings";
 import passesRouter from "./passes";
 import stageRouter from "./stage";
 import liveJobsRouter from "./liveJobs";
+import orgsRouter from "./orgs";
+import legalRouter from "./legal";
+import campaignsRouter from "./campaigns";
 
 const router: IRouter = Router();
 
@@ -46,5 +49,8 @@ router.use(settingsRouter);
 router.use(passesRouter);
 router.use(stageRouter);
 router.use(liveJobsRouter);
+router.use(orgsRouter);
+router.use(legalRouter);
+router.use(campaignsRouter);
 
 export default router;

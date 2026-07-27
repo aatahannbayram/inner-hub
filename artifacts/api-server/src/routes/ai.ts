@@ -262,4 +262,97 @@ router.get("/image/:requestId", async (req, res) => {
   }
 });
 
+/** POST /api/ai/coach — profil + persona bazlı aksiyon önerileri */
+router.post("/coach", async (req, res) => {
+  try {
+    const profile = (req.body?.profile ?? {}) as {
+      name?: string;
+      persona?: string | null;
+      title?: string | null;
+      company?: string | null;
+      university?: string | null;
+      skills?: string[];
+      profileCompletionPct?: number;
+      missing?: string[];
+    };
+
+    const missing = Array.isArray(profile.missing) ? profile.missing : [];
+    const persona = profile.persona || "builder";
+    const pct = profile.profileCompletionPct ?? 0;
+
+    const fallback = {
+      actions: [
+        missing.includes("university")
+          ? {
+              id: "university",
+              title: "Üniversite ekle",
+              reason: "Eğitim ağı eşleşmelerini güçlendirir.",
+              href: "/panel/profile",
+            }
+          : {
+              id: "skills",
+              title: "2+ beceri ekle",
+              reason: "Match ve Signal önerileri becerilerine göre çalışır.",
+              href: "/panel/profile",
+            },
+        {
+          id: "org",
+          title: "Şirketini bağla",
+          reason: "Slack tarzı org rozeti ve kampanya hakkı açılır.",
+          href: "/panel/org",
+        },
+        persona === "investor"
+          ? {
+              id: "capital",
+              title: "Capital akışına bak",
+              reason: "Yatırımcı odasında deal görünürlüğü artar.",
+              href: "/panel/capital",
+            }
+          : persona === "company"
+            ? {
+                id: "campaign",
+                title: "Ekosistem kampanyası yayınla",
+                reason: "Perks’te inner·only ayrıcalık oluştur (1 Pass).",
+                href: "/panel/perks",
+              }
+            : {
+                id: "stage",
+                title: "Stage’e ürün koy",
+                reason: "Haftalık vitrinde görünürlük kazan.",
+                href: "/panel/stage",
+              },
+      ].slice(0, 3),
+      insight:
+        pct < 80
+          ? `Profilin %${pct}. Tamamlama eşleşmeyi ve canlı oturum keşfini hızlandırır.`
+          : `Profilin güçlü (${pct}%). Bir sonraki adım: odana göre bir aksiyon seç.`,
+      persona,
+    };
+
+    if (!process.env.ANTHROPIC_API_KEY) {
+      return res.json(fallback);
+    }
+
+    const client = getClient();
+    const message = await client.messages.create({
+      model: "claude-haiku-4-5-20251001",
+      max_tokens: 500,
+      messages: [
+        {
+          role: "user",
+          content: `inner·hub üye coach'usun. JSON üret (başka metin yok):
+{"actions":[{"id":"string","title":"string","reason":"string","href":"/panel/..."}],"insight":"string","persona":"${persona}"}
+En fazla 3 aksiyon. Türkçe. Profil: ${JSON.stringify(profile)}`,
+        },
+      ],
+    });
+    const raw = (message.content[0] as { text: string }).text.trim();
+    const jsonMatch = raw.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) return res.json(fallback);
+    return res.json(JSON.parse(jsonMatch[0]));
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message ?? "Coach başarısız" });
+  }
+});
+
 export default router;

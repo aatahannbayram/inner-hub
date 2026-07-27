@@ -20655,27 +20655,27 @@ var require_router = __commonJS({
     var slice = Array.prototype.slice;
     var flatten = Array.prototype.flat;
     var methods = METHODS.map((method) => method.toLowerCase());
-    module.exports = Router24;
+    module.exports = Router27;
     module.exports.Route = Route;
-    function Router24(options) {
-      if (!(this instanceof Router24)) {
-        return new Router24(options);
+    function Router27(options) {
+      if (!(this instanceof Router27)) {
+        return new Router27(options);
       }
       const opts = options || {};
-      function router24(req, res, next) {
-        router24.handle(req, res, next);
+      function router27(req, res, next) {
+        router27.handle(req, res, next);
       }
-      Object.setPrototypeOf(router24, this);
-      router24.caseSensitive = opts.caseSensitive;
-      router24.mergeParams = opts.mergeParams;
-      router24.params = {};
-      router24.strict = opts.strict;
-      router24.stack = [];
-      return router24;
+      Object.setPrototypeOf(router27, this);
+      router27.caseSensitive = opts.caseSensitive;
+      router27.mergeParams = opts.mergeParams;
+      router27.params = {};
+      router27.strict = opts.strict;
+      router27.stack = [];
+      return router27;
     }
-    Router24.prototype = function() {
+    Router27.prototype = function() {
     };
-    Router24.prototype.param = function param(name, fn) {
+    Router27.prototype.param = function param(name, fn) {
       if (!name) {
         throw new TypeError("argument name is required");
       }
@@ -20695,7 +20695,7 @@ var require_router = __commonJS({
       params.push(fn);
       return this;
     };
-    Router24.prototype.handle = function handle(req, res, callback) {
+    Router27.prototype.handle = function handle(req, res, callback) {
       if (!callback) {
         throw new TypeError("argument callback is required");
       }
@@ -20822,7 +20822,7 @@ var require_router = __commonJS({
         }
       }
     };
-    Router24.prototype.use = function use(handler) {
+    Router27.prototype.use = function use(handler) {
       let offset = 0;
       let path10 = "/";
       if (typeof handler !== "function") {
@@ -20855,7 +20855,7 @@ var require_router = __commonJS({
       }
       return this;
     };
-    Router24.prototype.route = function route(path10) {
+    Router27.prototype.route = function route(path10) {
       const route2 = new Route(path10);
       const layer = new Layer(path10, {
         sensitive: this.caseSensitive,
@@ -20870,7 +20870,7 @@ var require_router = __commonJS({
       return route2;
     };
     methods.concat("all").forEach(function(method) {
-      Router24.prototype[method] = function(path10) {
+      Router27.prototype[method] = function(path10) {
         const route = this.route(path10);
         route[method].apply(route, slice.call(arguments, 1));
         return this;
@@ -21053,13 +21053,13 @@ var require_application = __commonJS({
     var compileTrust = require_utils3().compileTrust;
     var resolve4 = __require("node:path").resolve;
     var once = require_once();
-    var Router24 = require_router();
+    var Router27 = require_router();
     var slice = Array.prototype.slice;
     var flatten = Array.prototype.flat;
     var app2 = exports = module.exports = {};
     var trustProxyDefaultSymbol = "@@symbol:trust_proxy_default";
     app2.init = function init() {
-      var router24 = null;
+      var router27 = null;
       this.cache = /* @__PURE__ */ Object.create(null);
       this.engines = /* @__PURE__ */ Object.create(null);
       this.settings = /* @__PURE__ */ Object.create(null);
@@ -21068,13 +21068,13 @@ var require_application = __commonJS({
         configurable: true,
         enumerable: true,
         get: function getrouter() {
-          if (router24 === null) {
-            router24 = new Router24({
+          if (router27 === null) {
+            router27 = new Router27({
               caseSensitive: this.enabled("case sensitive routing"),
               strict: this.enabled("strict routing")
             });
           }
-          return router24;
+          return router27;
         }
       });
     };
@@ -21145,15 +21145,15 @@ var require_application = __commonJS({
       if (fns.length === 0) {
         throw new TypeError("app.use() requires a middleware function");
       }
-      var router24 = this.router;
+      var router27 = this.router;
       fns.forEach(function(fn2) {
         if (!fn2 || !fn2.handle || !fn2.set) {
-          return router24.use(path10, fn2);
+          return router27.use(path10, fn2);
         }
         debug(".use app under %s", path10);
         fn2.mountpath = path10;
         fn2.parent = this;
-        router24.use(path10, function mounted_app(req, res, next) {
+        router27.use(path10, function mounted_app(req, res, next) {
           var orig = req.app;
           fn2.handle(req, res, function(err) {
             Object.setPrototypeOf(req, orig.request);
@@ -23726,7 +23726,7 @@ var require_express = __commonJS({
     var EventEmitter2 = __require("node:events").EventEmitter;
     var mixin = require_merge_descriptors();
     var proto = require_application();
-    var Router24 = require_router();
+    var Router27 = require_router();
     var req = require_request();
     var res = require_response();
     exports = module.exports = createApplication;
@@ -23748,8 +23748,8 @@ var require_express = __commonJS({
     exports.application = proto;
     exports.request = req;
     exports.response = res;
-    exports.Route = Router24.Route;
-    exports.Router = Router24;
+    exports.Route = Router27.Route;
+    exports.Router = Router27;
     exports.json = bodyParser.json;
     exports.raw = bodyParser.raw;
     exports.static = require_serve_static();
@@ -53874,6 +53874,8 @@ var init_users = __esm({
       email: text("email").notNull().unique(),
       name: text("name").notNull(),
       avatarUrl: text("avatar_url"),
+      /** DiceBear stil anahtarı (lorelei | shapes | notionists | …) */
+      avatarStyle: text("avatar_style").default("lorelei"),
       role: roleEnum("role").default("member").notNull(),
       /** Davet personası: founder | investor | builder | company */
       persona: text("persona"),
@@ -53883,8 +53885,14 @@ var init_users = __esm({
       bio: text("bio"),
       title: text("title"),
       company: text("company"),
+      /** Birincil organizasyon */
+      primaryOrgId: integer("primary_org_id"),
+      university: text("university"),
+      behance: text("behance"),
+      instagram: text("instagram"),
       linkedin: text("linkedin"),
       phone: text("phone"),
+      whatsappOptIn: text("whatsapp_opt_in"),
       handle: text("handle"),
       github: text("github"),
       website: text("website"),
@@ -53895,6 +53903,7 @@ var init_users = __esm({
       profileCompletionPct: integer("profile_completion_pct").default(0).notNull(),
       passwordHash: text("password_hash"),
       googleId: text("google_id").unique(),
+      deletedAt: timestamp("deleted_at"),
       createdAt: timestamp("created_at").defaultNow().notNull()
     });
     insertUserSchema = createInsertSchema(usersTable).omit({ id: true, createdAt: true });
@@ -53903,7 +53912,7 @@ var init_users = __esm({
 });
 
 // ../../lib/db/src/schema/hub.ts
-var applicationsTable, insertApplicationSchema, selectApplicationSchema, coursesTable, modulesTable, lessonsTable, enrollmentsTable, progressTable, insertCourseSchema, selectCourseSchema, eventsTable, eventRegistrationsTable, insertEventSchema, selectEventSchema, channelsTable, messagesTable, insertMessageSchema, perksTable, insertPerkSchema, selectPerkSchema, notificationsTable, faqTable, introductionRequestsTable, vaultDocumentsTable, capitalDealsTable, capitalSpvsTable, talentPostsTable, sessionsTable, apiKeysTable, passWalletsTable, passLedgerTable, stageProductsTable, stageVotesTable, liveNotifyLogTable;
+var applicationsTable, insertApplicationSchema, selectApplicationSchema, coursesTable, modulesTable, lessonsTable, enrollmentsTable, progressTable, insertCourseSchema, selectCourseSchema, eventsTable, eventRegistrationsTable, insertEventSchema, selectEventSchema, channelsTable, messagesTable, insertMessageSchema, perksTable, insertPerkSchema, selectPerkSchema, notificationsTable, faqTable, introductionRequestsTable, vaultDocumentsTable, capitalDealsTable, capitalSpvsTable, talentPostsTable, sessionsTable, apiKeysTable, passWalletsTable, passLedgerTable, stageProductsTable, stageVotesTable, liveNotifyLogTable, organizationsTable, orgMembershipsTable, legalDocumentsTable, legalAcceptancesTable, campaignsTable;
 var init_hub = __esm({
   "../../lib/db/src/schema/hub.ts"() {
     "use strict";
@@ -53938,6 +53947,8 @@ var init_hub = __esm({
       audience: text("audience").default("all").notNull(),
       /** Canlı oturum Pass maliyeti (genelde 0 veya 1) */
       passCost: integer("pass_cost").default(0).notNull(),
+      /** business | product | art | craft | capital | ops */
+      category: text("category").default("business").notNull(),
       createdAt: timestamp("created_at").defaultNow().notNull()
     });
     modulesTable = pgTable("modules", {
@@ -54023,6 +54034,10 @@ var init_hub = __esm({
       howTo: text("how_to"),
       featured: boolean("featured").default(false).notNull(),
       expiresAt: timestamp("expires_at"),
+      /** partner | campaign */
+      source: text("source").default("partner").notNull(),
+      orgId: integer("org_id"),
+      campaignId: integer("campaign_id"),
       createdAt: timestamp("created_at").defaultNow().notNull()
     });
     insertPerkSchema = createInsertSchema(perksTable).omit({ id: true, createdAt: true });
@@ -54161,6 +54176,60 @@ var init_hub = __esm({
       kind: text("kind").notNull(),
       createdAt: timestamp("created_at").defaultNow().notNull()
     });
+    organizationsTable = pgTable("organizations", {
+      id: serial("id").primaryKey(),
+      name: text("name").notNull(),
+      slug: text("slug").notNull().unique(),
+      domain: text("domain"),
+      logoUrl: text("logo_url"),
+      /** startup | company | fund | studio */
+      type: text("type").default("startup").notNull(),
+      createdByUserId: integer("created_by_user_id").references(() => usersTable.id),
+      verified: boolean("verified").default(false).notNull(),
+      createdAt: timestamp("created_at").defaultNow().notNull()
+    });
+    orgMembershipsTable = pgTable("org_memberships", {
+      id: serial("id").primaryKey(),
+      orgId: integer("org_id").references(() => organizationsTable.id).notNull(),
+      userId: integer("user_id").references(() => usersTable.id).notNull(),
+      /** owner | admin | member */
+      role: text("role").default("member").notNull(),
+      title: text("title"),
+      createdAt: timestamp("created_at").defaultNow().notNull()
+    });
+    legalDocumentsTable = pgTable("legal_documents", {
+      id: serial("id").primaryKey(),
+      slug: text("slug").notNull(),
+      version: text("version").notNull(),
+      locale: text("locale").default("tr").notNull(),
+      title: text("title").notNull(),
+      bodyMarkdown: text("body_markdown").notNull(),
+      publishedAt: timestamp("published_at").defaultNow().notNull()
+    });
+    legalAcceptancesTable = pgTable("legal_acceptances", {
+      id: serial("id").primaryKey(),
+      userId: integer("user_id").references(() => usersTable.id).notNull(),
+      documentId: integer("document_id").references(() => legalDocumentsTable.id).notNull(),
+      version: text("version").notNull(),
+      acceptedAt: timestamp("accepted_at").defaultNow().notNull(),
+      ip: text("ip"),
+      userAgent: text("user_agent")
+    });
+    campaignsTable = pgTable("campaigns", {
+      id: serial("id").primaryKey(),
+      orgId: integer("org_id").references(() => organizationsTable.id).notNull(),
+      createdByUserId: integer("created_by_user_id").references(() => usersTable.id).notNull(),
+      title: text("title").notNull(),
+      pitch: text("pitch").notNull(),
+      ctaUrl: text("cta_url").notNull(),
+      code: text("code"),
+      category: text("category").default("E\u011Fitim"),
+      status: text("status").default("draft").notNull(),
+      perkId: integer("perk_id"),
+      startsAt: timestamp("starts_at"),
+      endsAt: timestamp("ends_at"),
+      createdAt: timestamp("created_at").defaultNow().notNull()
+    });
   }
 });
 
@@ -54237,6 +54306,7 @@ __export(schema_exports, {
   apiKeysTable: () => apiKeysTable,
   applicationStatusEnum: () => applicationStatusEnum,
   applicationsTable: () => applicationsTable,
+  campaignsTable: () => campaignsTable,
   capitalDealsTable: () => capitalDealsTable,
   capitalSpvsTable: () => capitalSpvsTable,
   channelsTable: () => channelsTable,
@@ -54257,11 +54327,15 @@ __export(schema_exports, {
   introductionRequestsTable: () => introductionRequestsTable,
   invitationRequestsTable: () => invitationRequestsTable,
   inviteCodesTable: () => inviteCodesTable,
+  legalAcceptancesTable: () => legalAcceptancesTable,
+  legalDocumentsTable: () => legalDocumentsTable,
   lessonsTable: () => lessonsTable,
   liveNotifyLogTable: () => liveNotifyLogTable,
   messagesTable: () => messagesTable,
   modulesTable: () => modulesTable,
   notificationsTable: () => notificationsTable,
+  orgMembershipsTable: () => orgMembershipsTable,
+  organizationsTable: () => organizationsTable,
   passLedgerTable: () => passLedgerTable,
   passWalletsTable: () => passWalletsTable,
   perksTable: () => perksTable,
@@ -93181,15 +93255,107 @@ var require_src6 = __commonJS({
   }
 });
 
+// src/lib/whatsapp.ts
+var whatsapp_exports = {};
+__export(whatsapp_exports, {
+  WHATSAPP_TEMPLATES: () => TEMPLATES,
+  fillTemplate: () => fillTemplate,
+  getWhatsAppTemplate: () => getWhatsAppTemplate,
+  sendWhatsAppTemplate: () => sendWhatsAppTemplate
+});
+function getWhatsAppTemplate(id, locale = "tr") {
+  const t = TEMPLATES[id];
+  return {
+    templateName: t.name,
+    body: locale === "en" ? t.bodyEn : t.bodyTr
+  };
+}
+function fillTemplate(body, vars) {
+  let out = body;
+  vars.forEach((v, i) => {
+    out = out.replaceAll(`{{${i + 1}}}`, v);
+  });
+  return out;
+}
+async function sendWhatsAppTemplate(input) {
+  const token = process.env.WHATSAPP_TOKEN?.trim();
+  const phoneId = process.env.WHATSAPP_PHONE_NUMBER_ID?.trim();
+  if (!token || !phoneId) {
+    console.info(
+      "[whatsapp] skip (no WHATSAPP_TOKEN / WHATSAPP_PHONE_NUMBER_ID)",
+      input.templateId,
+      fillTemplate(getWhatsAppTemplate(input.templateId, input.locale).body, input.vars)
+    );
+    return false;
+  }
+  const tpl = getWhatsAppTemplate(input.templateId, input.locale ?? "tr");
+  const res = await fetch(`https://graph.facebook.com/v19.0/${phoneId}/messages`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      messaging_product: "whatsapp",
+      to: input.toE164.replace(/\D/g, ""),
+      type: "template",
+      template: {
+        name: tpl.templateName,
+        language: { code: input.locale === "en" ? "en" : "tr" },
+        components: [
+          {
+            type: "body",
+            parameters: input.vars.map((text2) => ({ type: "text", text: text2 }))
+          }
+        ]
+      }
+    })
+  });
+  if (!res.ok) {
+    const err = await res.text().catch(() => "");
+    console.error("[whatsapp] send failed", res.status, err);
+    return false;
+  }
+  return true;
+}
+var TEMPLATES;
+var init_whatsapp = __esm({
+  "src/lib/whatsapp.ts"() {
+    "use strict";
+    TEMPLATES = {
+      live_session_t24h: {
+        name: "live_session_t24h",
+        bodyTr: "Merhaba {{1}}, {{2}} yar\u0131n {{3}} ba\u015Fl\u0131yor. Meet: {{4}} \xB7 inner\xB7hub",
+        bodyEn: "Hi {{1}}, {{2}} starts tomorrow at {{3}}. Meet: {{4}} \xB7 inner\xB7hub"
+      },
+      live_session_t15m: {
+        name: "live_session_t15m",
+        bodyTr: "{{1}}, {{2}} 15 dk i\xE7inde ba\u015Fl\u0131yor. Kat\u0131l: {{3}}",
+        bodyEn: "{{1}}, {{2}} starts in 15 min. Join: {{3}}"
+      },
+      pass_low_balance: {
+        name: "pass_low_balance",
+        bodyTr: "Circle Pass bakiyen {{1}}. Canl\u0131 oturum i\xE7in +1 Pass ekleyebilirsin: {{2}}",
+        bodyEn: "Your Circle Pass balance is {{1}}. Add +1 Pass for live sessions: {{2}}"
+      },
+      profile_nudge: {
+        name: "profile_nudge",
+        bodyTr: "{{1}}, profilin %{{2}} tamam. \xDCniversite / Behance ekleyerek e\u015Fle\u015Fmeyi g\xFC\xE7lendir: {{3}}",
+        bodyEn: "{{1}}, your profile is {{2}}% complete. Add university / Behance: {{3}}"
+      }
+    };
+  }
+});
+
 // src/app.ts
-var import_express24 = __toESM(require_express2(), 1);
+var import_express27 = __toESM(require_express2(), 1);
 var import_cors = __toESM(require_lib3(), 1);
 var import_cookie_parser = __toESM(require_cookie_parser(), 1);
 var import_pino_http = __toESM(require_logger(), 1);
 import path9 from "node:path";
 
 // src/routes/index.ts
-var import_express23 = __toESM(require_express2(), 1);
+var import_express26 = __toESM(require_express2(), 1);
 
 // src/routes/health.ts
 var import_express = __toESM(require_express2(), 1);
@@ -115696,6 +115862,91 @@ async function ensureUserMembershipColumns() {
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS membership_plan text`);
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS membership_status text`);
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS membership_period_end timestamp`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_style text DEFAULT 'lorelei'`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS primary_org_id integer`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS university text`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS behance text`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS instagram text`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS whatsapp_opt_in text`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS deleted_at timestamp`);
+}
+async function ensureOrgLegalCampaignSchema() {
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS organizations (
+      id serial PRIMARY KEY,
+      name text NOT NULL,
+      slug text NOT NULL UNIQUE,
+      domain text,
+      logo_url text,
+      type text NOT NULL DEFAULT 'startup',
+      created_by_user_id integer REFERENCES users(id),
+      verified boolean NOT NULL DEFAULT false,
+      created_at timestamp NOT NULL DEFAULT now()
+    )
+  `);
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS org_memberships (
+      id serial PRIMARY KEY,
+      org_id integer NOT NULL REFERENCES organizations(id),
+      user_id integer NOT NULL REFERENCES users(id),
+      role text NOT NULL DEFAULT 'member',
+      title text,
+      created_at timestamp NOT NULL DEFAULT now(),
+      UNIQUE (org_id, user_id)
+    )
+  `);
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS legal_documents (
+      id serial PRIMARY KEY,
+      slug text NOT NULL,
+      version text NOT NULL,
+      locale text NOT NULL DEFAULT 'tr',
+      title text NOT NULL,
+      body_markdown text NOT NULL,
+      published_at timestamp NOT NULL DEFAULT now()
+    )
+  `);
+  await db.execute(sql`
+    CREATE UNIQUE INDEX IF NOT EXISTS legal_documents_slug_ver_locale
+      ON legal_documents (slug, version, locale)
+  `);
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS legal_acceptances (
+      id serial PRIMARY KEY,
+      user_id integer NOT NULL REFERENCES users(id),
+      document_id integer NOT NULL REFERENCES legal_documents(id),
+      version text NOT NULL,
+      accepted_at timestamp NOT NULL DEFAULT now(),
+      ip text,
+      user_agent text
+    )
+  `);
+  await db.execute(sql`
+    CREATE UNIQUE INDEX IF NOT EXISTS legal_acceptances_user_doc
+      ON legal_acceptances (user_id, document_id, version)
+  `);
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS campaigns (
+      id serial PRIMARY KEY,
+      org_id integer NOT NULL REFERENCES organizations(id),
+      created_by_user_id integer NOT NULL REFERENCES users(id),
+      title text NOT NULL,
+      pitch text NOT NULL,
+      cta_url text NOT NULL,
+      code text,
+      category text DEFAULT 'Eğitim',
+      status text NOT NULL DEFAULT 'draft',
+      perk_id integer,
+      starts_at timestamp,
+      ends_at timestamp,
+      created_at timestamp NOT NULL DEFAULT now()
+    )
+  `);
+  await db.execute(sql`ALTER TABLE perks ADD COLUMN IF NOT EXISTS source text DEFAULT 'partner'`);
+  await db.execute(sql`ALTER TABLE perks ADD COLUMN IF NOT EXISTS org_id integer`);
+  await db.execute(sql`ALTER TABLE perks ADD COLUMN IF NOT EXISTS campaign_id integer`);
+  await db.execute(sql`ALTER TABLE courses ADD COLUMN IF NOT EXISTS category text DEFAULT 'business'`);
+  await db.execute(sql`UPDATE courses SET category = 'business' WHERE category IS NULL`);
 }
 async function ensurePassSchema() {
   await db.execute(sql`
@@ -116481,6 +116732,75 @@ router4.get("/image/:requestId", async (req, res) => {
     return res.status(500).json({ error: err.message });
   }
 });
+router4.post("/coach", async (req, res) => {
+  try {
+    const profile = req.body?.profile ?? {};
+    const missing = Array.isArray(profile.missing) ? profile.missing : [];
+    const persona = profile.persona || "builder";
+    const pct = profile.profileCompletionPct ?? 0;
+    const fallback = {
+      actions: [
+        missing.includes("university") ? {
+          id: "university",
+          title: "\xDCniversite ekle",
+          reason: "E\u011Fitim a\u011F\u0131 e\u015Fle\u015Fmelerini g\xFC\xE7lendirir.",
+          href: "/panel/profile"
+        } : {
+          id: "skills",
+          title: "2+ beceri ekle",
+          reason: "Match ve Signal \xF6nerileri becerilerine g\xF6re \xE7al\u0131\u015F\u0131r.",
+          href: "/panel/profile"
+        },
+        {
+          id: "org",
+          title: "\u015Eirketini ba\u011Fla",
+          reason: "Slack tarz\u0131 org rozeti ve kampanya hakk\u0131 a\xE7\u0131l\u0131r.",
+          href: "/panel/org"
+        },
+        persona === "investor" ? {
+          id: "capital",
+          title: "Capital ak\u0131\u015F\u0131na bak",
+          reason: "Yat\u0131r\u0131mc\u0131 odas\u0131nda deal g\xF6r\xFCn\xFCrl\xFC\u011F\xFC artar.",
+          href: "/panel/capital"
+        } : persona === "company" ? {
+          id: "campaign",
+          title: "Ekosistem kampanyas\u0131 yay\u0131nla",
+          reason: "Perks\u2019te inner\xB7only ayr\u0131cal\u0131k olu\u015Ftur (1 Pass).",
+          href: "/panel/perks"
+        } : {
+          id: "stage",
+          title: "Stage\u2019e \xFCr\xFCn koy",
+          reason: "Haftal\u0131k vitrinde g\xF6r\xFCn\xFCrl\xFCk kazan.",
+          href: "/panel/stage"
+        }
+      ].slice(0, 3),
+      insight: pct < 80 ? `Profilin %${pct}. Tamamlama e\u015Fle\u015Fmeyi ve canl\u0131 oturum ke\u015Ffini h\u0131zland\u0131r\u0131r.` : `Profilin g\xFC\xE7l\xFC (${pct}%). Bir sonraki ad\u0131m: odana g\xF6re bir aksiyon se\xE7.`,
+      persona
+    };
+    if (!process.env.ANTHROPIC_API_KEY) {
+      return res.json(fallback);
+    }
+    const client = getClient();
+    const message = await client.messages.create({
+      model: "claude-haiku-4-5-20251001",
+      max_tokens: 500,
+      messages: [
+        {
+          role: "user",
+          content: `inner\xB7hub \xFCye coach'usun. JSON \xFCret (ba\u015Fka metin yok):
+{"actions":[{"id":"string","title":"string","reason":"string","href":"/panel/..."}],"insight":"string","persona":"${persona}"}
+En fazla 3 aksiyon. T\xFCrk\xE7e. Profil: ${JSON.stringify(profile)}`
+        }
+      ]
+    });
+    const raw = message.content[0].text.trim();
+    const jsonMatch = raw.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) return res.json(fallback);
+    return res.json(JSON.parse(jsonMatch[0]));
+  } catch (err) {
+    return res.status(500).json({ error: err.message ?? "Coach ba\u015Far\u0131s\u0131z" });
+  }
+});
 var ai_default = router4;
 
 // src/routes/auth.ts
@@ -116514,7 +116834,7 @@ async function destroySession(sessionId) {
 }
 async function getUserBySession(sessionId) {
   if (!sessionId) return null;
-  const [row] = await db.select({ user: usersTable, expiresAt: sessionsTable.expiresAt }).from(sessionsTable).innerJoin(usersTable, eq(sessionsTable.userId, usersTable.id)).where(eq(sessionsTable.id, sessionId)).limit(1);
+  const [row] = await db.select({ user: usersTable, expiresAt: sessionsTable.expiresAt }).from(sessionsTable).innerJoin(usersTable, eq(sessionsTable.userId, usersTable.id)).where(and(eq(sessionsTable.id, sessionId), isNull(usersTable.deletedAt))).limit(1);
   if (!row) return null;
   if (row.expiresAt.getTime() < Date.now()) {
     await destroySession(sessionId);
@@ -116663,6 +116983,145 @@ async function consumeInviteCode(inviteCodeId, userId) {
   await db.update(inviteCodesTable).set({ usedAt: /* @__PURE__ */ new Date(), usedByUserId: userId }).where(and(eq(inviteCodesTable.id, inviteCodeId), isNull(inviteCodesTable.usedAt)));
 }
 
+// src/lib/identity.ts
+init_drizzle_orm();
+init_schema2();
+var AVATAR_STYLES = ["lorelei", "shapes", "notionists", "avataaars", "bottts"];
+function isAvatarStyle(v) {
+  return typeof v === "string" && AVATAR_STYLES.includes(v);
+}
+function dicebearAvatarUrl(seed, style = "lorelei") {
+  const safe = (seed || "inner").trim() || "inner";
+  const st = isAvatarStyle(style) ? style : "lorelei";
+  return `https://api.dicebear.com/9.x/${st}/svg?seed=${encodeURIComponent(safe)}&backgroundType=gradientLinear`;
+}
+function resolveAvatarUrl(user) {
+  if (user.avatarUrl && user.avatarUrl.trim()) return user.avatarUrl.trim();
+  const seed = user.handle || user.email || user.name || `u${user.id ?? 0}`;
+  return dicebearAvatarUrl(seed, user.avatarStyle ?? "lorelei");
+}
+function slugifyOrg(name) {
+  return name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 48) || "org";
+}
+async function getPrimaryOrgForUser(userId) {
+  await ensureOrgLegalCampaignSchema();
+  await ensureUserMembershipColumns();
+  const [user] = await db.select({ primaryOrgId: usersTable.primaryOrgId }).from(usersTable).where(and(eq(usersTable.id, userId), isNull(usersTable.deletedAt))).limit(1);
+  if (!user?.primaryOrgId) {
+    const [mem] = await db.select({ orgId: orgMembershipsTable.orgId }).from(orgMembershipsTable).where(eq(orgMembershipsTable.userId, userId)).limit(1);
+    if (!mem) return null;
+    const [org2] = await db.select().from(organizationsTable).where(eq(organizationsTable.id, mem.orgId)).limit(1);
+    return org2 ?? null;
+  }
+  const [org] = await db.select().from(organizationsTable).where(eq(organizationsTable.id, user.primaryOrgId)).limit(1);
+  return org ?? null;
+}
+var LEGAL_SEED = [
+  {
+    slug: "terms",
+    version: "2026-07-1",
+    locale: "tr",
+    title: "Kullan\u0131m Ko\u015Fullar\u0131",
+    bodyMarkdown: `# Kullan\u0131m Ko\u015Fullar\u0131
+
+inner\xB7hub davetli bir \xFCyelik platformudur. Hesab\u0131n\u0131z\u0131 yaln\u0131zca size verilen davet ile kullanabilirsiniz.
+
+## Hesap
+- Bilgilerinizin do\u011Frulu\u011Fundan siz sorumlusunuz.
+- Hesab\u0131n\u0131z\u0131 ba\u015Fkalar\u0131yla payla\u015Famazs\u0131n\u0131z.
+
+## \u0130\xE7erik
+- \xDCye i\xE7erikleri topluluk kurallar\u0131na uygun olmal\u0131d\u0131r.
+- Telif ihlali yasakt\u0131r.
+
+## \xD6demeler
+- \xDCyelik ve Circle Pass sat\u0131n al\u0131mlar\u0131 Stripe \xFCzerinden i\u015Flenir.
+- \u0130ade politikas\u0131 support@inner.digital \xFCzerinden y\xF6netilir.
+
+Bu metin bilgilendirme ama\xE7l\u0131 bir \u015Fablondur; g\xFCncel hukuki metin y\xF6netim taraf\u0131ndan yay\u0131nlan\u0131r.
+`
+  },
+  {
+    slug: "privacy",
+    version: "2026-07-1",
+    locale: "tr",
+    title: "Gizlilik Politikas\u0131",
+    bodyMarkdown: `# Gizlilik Politikas\u0131
+
+inner\xB7hub, \xFCyelik, e\u015Fle\u015Fme ve bildirim hizmetleri i\xE7in gerekli ki\u015Fisel verileri i\u015Fler.
+
+- \u0130leti\u015Fim: e-posta, iste\u011Fe ba\u011Fl\u0131 telefon / WhatsApp
+- Profil: ad, unvan, \u015Firket, sosyal ba\u011Flant\u0131lar
+- \xD6deme: Stripe \xFCzerinden; kart verisi saklanmaz
+
+Haklar\u0131n\u0131z i\xE7in support@inner.digital yazabilirsiniz.
+`
+  },
+  {
+    slug: "kvkk",
+    version: "2026-07-1",
+    locale: "tr",
+    title: "KVKK Ayd\u0131nlatma Metni",
+    bodyMarkdown: `# KVKK Ayd\u0131nlatma Metni
+
+6698 say\u0131l\u0131 Ki\u015Fisel Verilerin Korunmas\u0131 Kanunu kapsam\u0131nda veri sorumlusu inner\xB7hub'd\u0131r.
+
+\u0130\u015Flenen veriler: kimlik, ileti\u015Fim, i\u015Flem g\xFCvenli\u011Fi, \xFCyelik ve i\u015Flem bilgileri.
+Ama\xE7: \xFCyelik y\xF6netimi, canl\u0131 oturumlar, e\u015Fle\u015Fme, bildirimler, faturalama.
+
+Ba\u015Fvuru: support@inner.digital
+`
+  },
+  {
+    slug: "community",
+    version: "2026-07-1",
+    locale: "tr",
+    title: "Topluluk Kurallar\u0131",
+    bodyMarkdown: `# Topluluk Kurallar\u0131
+
+- Sayg\u0131 ve g\xFCven esast\u0131r.
+- Spam, nefret s\xF6ylemi ve izinsiz sat\u0131\u015F yasakt\u0131r.
+- Gizli deal / pitch bilgilerini d\u0131\u015Far\u0131 s\u0131zd\u0131rmay\u0131n.
+- \u0130hlalde hesap ask\u0131ya al\u0131nabilir.
+`
+  }
+];
+async function ensureLegalDocumentsSeeded() {
+  await ensureOrgLegalCampaignSchema();
+  for (const doc of LEGAL_SEED) {
+    const [existing] = await db.select({ id: legalDocumentsTable.id }).from(legalDocumentsTable).where(
+      and(
+        eq(legalDocumentsTable.slug, doc.slug),
+        eq(legalDocumentsTable.version, doc.version),
+        eq(legalDocumentsTable.locale, doc.locale)
+      )
+    ).limit(1);
+    if (!existing) {
+      await db.insert(legalDocumentsTable).values(doc);
+    }
+  }
+}
+async function userHasAcceptedLatestLegal(userId, locale = "tr") {
+  await ensureLegalDocumentsSeeded();
+  const docs = await db.select().from(legalDocumentsTable).where(eq(legalDocumentsTable.locale, locale));
+  const bySlug = /* @__PURE__ */ new Map();
+  for (const d of docs) {
+    const prev = bySlug.get(d.slug);
+    if (!prev || d.publishedAt > prev.publishedAt) bySlug.set(d.slug, d);
+  }
+  for (const doc of bySlug.values()) {
+    const [acc] = await db.select({ id: legalAcceptancesTable.id }).from(legalAcceptancesTable).where(
+      and(
+        eq(legalAcceptancesTable.userId, userId),
+        eq(legalAcceptancesTable.documentId, doc.id),
+        eq(legalAcceptancesTable.version, doc.version)
+      )
+    ).limit(1);
+    if (!acc) return { ok: false, missing: doc };
+  }
+  return { ok: true };
+}
+
 // src/routes/auth.ts
 var router5 = (0, import_express5.Router)();
 var googleClientId = process.env.GOOGLE_CLIENT_ID;
@@ -116678,7 +117137,9 @@ function calcCompletion(input) {
     input.bio.trim().length > 20,
     input.skills.length >= 2,
     input.linkedin.trim().length > 0,
-    input.github.trim().length > 0 || input.website.trim().length > 0
+    input.github.trim().length > 0 || input.website.trim().length > 0 || input.behance.trim().length > 0,
+    input.university.trim().length > 0,
+    input.hasAvatar
   ];
   return Math.round(checks.filter(Boolean).length / checks.length * 100);
 }
@@ -116825,10 +117286,19 @@ router5.get("/me", async (req, res) => {
     await ensureUserMembershipColumns();
     const [fresh] = await db.select().from(usersTable).where(eq(usersTable.id, req.user.id)).limit(1);
     const user = fresh ?? req.user;
+    const org = await getPrimaryOrgForUser(user.id);
     res.json({
       user: {
         ...publicUser(user),
-        skills: parseSkills(user.skills)
+        skills: parseSkills(user.skills),
+        resolvedAvatarUrl: resolveAvatarUrl(user),
+        org: org ? {
+          id: org.id,
+          name: org.name,
+          slug: org.slug,
+          logoUrl: org.logoUrl,
+          type: org.type
+        } : null
       }
     });
   } catch (err) {
@@ -116838,6 +117308,7 @@ router5.get("/me", async (req, res) => {
 router5.patch("/me", requireAuth, async (req, res) => {
   try {
     await ensureUserProfileColumns();
+    await ensureUserMembershipColumns();
     const userId = req.user.id;
     const body = req.body ?? {};
     const firstName2 = typeof body.firstName === "string" ? body.firstName.trim() : "";
@@ -116852,6 +117323,12 @@ router5.patch("/me", requireAuth, async (req, res) => {
     const github = typeof body.github === "string" ? body.github.trim().slice(0, 120) : "";
     const website = typeof body.website === "string" ? body.website.trim().slice(0, 120) : "";
     const twitter = typeof body.twitter === "string" ? body.twitter.trim().slice(0, 120) : "";
+    const university = typeof body.university === "string" ? body.university.trim().slice(0, 120) : "";
+    const behance = typeof body.behance === "string" ? body.behance.trim().slice(0, 120) : "";
+    const instagram = typeof body.instagram === "string" ? body.instagram.trim().slice(0, 120) : "";
+    const phone = typeof body.phone === "string" ? body.phone.trim().slice(0, 40) : "";
+    const whatsappOptIn = body.whatsappOptIn === true || body.whatsappOptIn === "true" ? "true" : body.whatsappOptIn === false || body.whatsappOptIn === "false" ? "false" : void 0;
+    const avatarStyle = isAvatarStyle(body.avatarStyle) ? body.avatarStyle : void 0;
     const visibility = body.visibility === "public" || body.visibility === "private" || body.visibility === "members" ? body.visibility : "members";
     const skills = Array.isArray(body.skills) ? body.skills.filter((s) => typeof s === "string").map((s) => s.trim()).filter(Boolean).slice(0, 10) : [];
     if (handle) {
@@ -116861,6 +117338,8 @@ router5.patch("/me", requireAuth, async (req, res) => {
         return;
       }
     }
+    const current = req.user;
+    const nextAvatarStyle = avatarStyle ?? current.avatarStyle ?? "lorelei";
     const profileCompletionPct = calcCompletion({
       name,
       handle,
@@ -116870,7 +117349,10 @@ router5.patch("/me", requireAuth, async (req, res) => {
       skills,
       linkedin,
       github,
-      website
+      website,
+      university,
+      behance,
+      hasAvatar: Boolean(current.avatarUrl) || Boolean(handle || current.email)
     });
     const [updated] = await db.update(usersTable).set({
       name,
@@ -116882,18 +117364,64 @@ router5.patch("/me", requireAuth, async (req, res) => {
       github: github || null,
       website: website || null,
       twitter: twitter || null,
+      university: university || null,
+      behance: behance || null,
+      instagram: instagram || null,
+      phone: phone || null,
+      ...whatsappOptIn !== void 0 ? { whatsappOptIn } : {},
+      ...avatarStyle ? { avatarStyle: nextAvatarStyle } : {},
       skills: JSON.stringify(skills),
       visibility,
       profileCompletionPct
     }).where(eq(usersTable.id, userId)).returning();
+    const org = await getPrimaryOrgForUser(userId);
     res.json({
       user: {
         ...publicUser(updated),
-        skills: parseSkills(updated.skills)
+        skills: parseSkills(updated.skills),
+        resolvedAvatarUrl: resolveAvatarUrl(updated),
+        org: org ? { id: org.id, name: org.name, slug: org.slug, logoUrl: org.logoUrl, type: org.type } : null
       }
     });
   } catch (err) {
     res.status(500).json({ error: err.message ?? "Profil kaydedilemedi" });
+  }
+});
+router5.post("/me/avatar", requireAuth, async (req, res) => {
+  try {
+    await ensureUserMembershipColumns();
+    const userId = req.user.id;
+    const { dataUrl, clear, useGenerated, avatarStyle } = req.body ?? {};
+    if (clear === true || useGenerated === true) {
+      const style = isAvatarStyle(avatarStyle) ? avatarStyle : req.user.avatarStyle ?? "lorelei";
+      const [updated2] = await db.update(usersTable).set({ avatarUrl: null, avatarStyle: style }).where(eq(usersTable.id, userId)).returning();
+      res.json({
+        user: {
+          ...publicUser(updated2),
+          skills: parseSkills(updated2.skills),
+          resolvedAvatarUrl: resolveAvatarUrl(updated2)
+        }
+      });
+      return;
+    }
+    if (typeof dataUrl !== "string" || !dataUrl.startsWith("data:image/")) {
+      res.status(400).json({ error: "Ge\xE7erli bir g\xF6rsel dataUrl gerekli" });
+      return;
+    }
+    if (dataUrl.length > 22e4) {
+      res.status(400).json({ error: "G\xF6rsel \xE7ok b\xFCy\xFCk (max ~160KB)" });
+      return;
+    }
+    const [updated] = await db.update(usersTable).set({ avatarUrl: dataUrl }).where(eq(usersTable.id, userId)).returning();
+    res.json({
+      user: {
+        ...publicUser(updated),
+        skills: parseSkills(updated.skills),
+        resolvedAvatarUrl: resolveAvatarUrl(updated)
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message ?? "Avatar g\xFCncellenemedi" });
   }
 });
 var auth_default = router5;
@@ -122136,6 +122664,7 @@ router8.get("/courses", requireAuth, async (req, res) => {
           meetUrl: isEnrolled ? c.meetUrl ?? null : null,
           audience: c.audience ?? "all",
           passCost: courseNeedsPass({ format, passCost: c.passCost ?? 0 }),
+          category: c.category ?? "business",
           isEnrolled,
           progressPct: isEnrolled ? progressPctFromModules(modules) : 0,
           modules
@@ -122226,6 +122755,7 @@ router8.get("/admin/courses", requireAuth, requireAdmin, async (req, res) => {
           meetUrl: c.meetUrl ?? null,
           audience: c.audience ?? "all",
           passCost: c.passCost ?? 0,
+          category: c.category ?? "business",
           modules: await courseModulesForUser(userId, c.id, true)
         };
       })
@@ -122249,13 +122779,16 @@ router8.post("/courses", requireAuth, requireAdmin, async (req, res) => {
       endsAt,
       meetUrl,
       audience,
-      passCost
+      passCost,
+      category
     } = req.body ?? {};
     if (!title || typeof title !== "string") {
       res.status(400).json({ error: "Ba\u015Fl\u0131k gerekli" });
       return;
     }
     const resolvedFormat = resolveCourseFormat(format);
+    const COURSE_CATS = ["business", "product", "art", "craft", "capital", "ops"];
+    const resolvedCategory = typeof category === "string" && COURSE_CATS.includes(category) ? category : "business";
     let starts = null;
     let ends = null;
     if (startsAt) {
@@ -122283,6 +122816,7 @@ router8.post("/courses", requireAuth, requireAdmin, async (req, res) => {
       endsAt: ends,
       meetUrl: typeof meetUrl === "string" ? meetUrl : null,
       audience: typeof audience === "string" && audience ? audience : "all",
+      category: resolvedCategory,
       passCost: resolveCoursePassCost(
         resolvedFormat,
         passCost,
@@ -122313,7 +122847,8 @@ router8.patch("/courses/:id", requireAuth, requireAdmin, async (req, res) => {
       endsAt,
       meetUrl,
       audience,
-      passCost
+      passCost,
+      category
     } = req.body ?? {};
     const [existing] = await db.select().from(coursesTable).where(eq(coursesTable.id, courseId)).limit(1);
     if (!existing) {
@@ -122353,6 +122888,10 @@ router8.patch("/courses/:id", requireAuth, requireAdmin, async (req, res) => {
     }
     if (meetUrl !== void 0) patch.meetUrl = typeof meetUrl === "string" ? meetUrl : null;
     if (typeof audience === "string") patch.audience = audience || "all";
+    const COURSE_CATS = ["business", "product", "art", "craft", "capital", "ops"];
+    if (typeof category === "string" && COURSE_CATS.includes(category)) {
+      patch.category = category;
+    }
     const nextFormat = patch.format ?? existing.format ?? "vod";
     if (format !== void 0 || passCost !== void 0) {
       patch.passCost = resolveCoursePassCost(
@@ -122671,6 +123210,9 @@ async function ensurePerkColumns() {
   await db.execute(sql`ALTER TABLE perks ADD COLUMN IF NOT EXISTS how_to text`);
   await db.execute(sql`ALTER TABLE perks ADD COLUMN IF NOT EXISTS featured boolean NOT NULL DEFAULT false`);
   await db.execute(sql`ALTER TABLE perks ADD COLUMN IF NOT EXISTS expires_at timestamp`);
+  await db.execute(sql`ALTER TABLE perks ADD COLUMN IF NOT EXISTS source text DEFAULT 'partner'`);
+  await db.execute(sql`ALTER TABLE perks ADD COLUMN IF NOT EXISTS org_id integer`);
+  await db.execute(sql`ALTER TABLE perks ADD COLUMN IF NOT EXISTS campaign_id integer`);
 }
 async function ensurePerksSeed() {
   const [row] = await db.select({ id: perksTable.id }).from(perksTable).limit(1);
@@ -122798,7 +123340,8 @@ router10.get("/perks", requireAuth, async (_req, res) => {
         code: p.code,
         partnerUrl: p.ctaUrl,
         featured: p.featured,
-        expiresAt: p.expiresAt ? p.expiresAt.toISOString().slice(0, 10) : void 0
+        expiresAt: p.expiresAt ? p.expiresAt.toISOString().slice(0, 10) : void 0,
+        source: p.source === "campaign" ? "campaign" : "partner"
       }))
     });
   } catch (err) {
@@ -122807,6 +123350,7 @@ router10.get("/perks", requireAuth, async (_req, res) => {
 });
 router10.get("/members", requireAuth, async (_req, res) => {
   try {
+    await ensureUserMembershipColumns();
     const rows = await db.select({
       id: usersTable.id,
       name: usersTable.name,
@@ -122815,8 +123359,12 @@ router10.get("/members", requireAuth, async (_req, res) => {
       bio: usersTable.bio,
       linkedin: usersTable.linkedin,
       avatarUrl: usersTable.avatarUrl,
+      avatarStyle: usersTable.avatarStyle,
+      handle: usersTable.handle,
+      email: usersTable.email,
+      persona: usersTable.persona,
       role: usersTable.role
-    }).from(usersTable).orderBy(asc(usersTable.name));
+    }).from(usersTable).where(isNull(usersTable.deletedAt)).orderBy(asc(usersTable.name));
     res.json({
       members: rows.map((u) => ({
         id: u.id,
@@ -122825,9 +123373,10 @@ router10.get("/members", requireAuth, async (_req, res) => {
         title: u.title ?? (u.role === "admin" ? "Admin" : "\xDCye"),
         company: u.company ?? "\u2014",
         bio: u.bio ?? "",
-        tags: [u.title, u.company].filter((t) => Boolean(t && t.trim())),
+        tags: [u.title, u.company, u.persona].filter((t) => Boolean(t && t.trim())),
         linkedin: u.linkedin,
-        avatarUrl: u.avatarUrl,
+        avatarUrl: resolveAvatarUrl(u),
+        persona: u.persona,
         isAvailable: false
       }))
     });
@@ -124831,14 +125380,18 @@ async function recipientsFor(refType, refId) {
     const rows2 = await db.select({
       id: usersTable.id,
       email: usersTable.email,
-      name: usersTable.name
+      name: usersTable.name,
+      phone: usersTable.phone,
+      whatsappOptIn: usersTable.whatsappOptIn
     }).from(enrollmentsTable).innerJoin(usersTable, eq(usersTable.id, enrollmentsTable.userId)).where(eq(enrollmentsTable.courseId, refId));
     return rows2;
   }
   const rows = await db.select({
     id: usersTable.id,
     email: usersTable.email,
-    name: usersTable.name
+    name: usersTable.name,
+    phone: usersTable.phone,
+    whatsappOptIn: usersTable.whatsappOptIn
   }).from(eventRegistrationsTable).innerJoin(usersTable, eq(usersTable.id, eventRegistrationsTable.userId)).where(eq(eventRegistrationsTable.eventId, refId));
   return rows;
 }
@@ -124868,8 +125421,9 @@ async function notifyUsers(opts) {
   }
   const users = await recipientsFor(opts.refType, opts.refId);
   let sent = 0;
+  const { sendWhatsAppTemplate: sendWhatsAppTemplate2 } = await Promise.resolve().then(() => (init_whatsapp(), whatsapp_exports));
   for (const u of users) {
-    if (opts.channel === "email" || opts.channel === "both") {
+    if (opts.channel === "email" || opts.channel === "both" || opts.channel === "all") {
       await notifyLiveSession({
         name: u.name,
         email: u.email,
@@ -124880,13 +125434,26 @@ async function notifyUsers(opts) {
         lead: opts.emailLead
       });
     }
-    if (opts.channel === "inapp" || opts.channel === "both") {
+    if (opts.channel === "inapp" || opts.channel === "both" || opts.channel === "all") {
       await createNotification({
         userId: u.id,
         title: opts.title,
         body: opts.emailLead,
         kind: opts.notifKind
       });
+    }
+    if (opts.channel === "whatsapp" || opts.channel === "all") {
+      const phone = u.phone;
+      const optIn = u.whatsappOptIn;
+      if (phone && optIn === "true") {
+        const when = opts.startsAt ? opts.startsAt.toLocaleString("tr-TR", { dateStyle: "short", timeStyle: "short" }) : "";
+        await sendWhatsAppTemplate2({
+          toE164: phone,
+          templateId: opts.logKind.includes("15") ? "live_session_t15m" : "live_session_t24h",
+          vars: [u.name.split(" ")[0] || u.name, opts.title, when || opts.meetUrl || "inner.digital", opts.meetUrl || ""],
+          locale: "tr"
+        });
+      }
     }
     sent += 1;
   }
@@ -124914,7 +125481,7 @@ router22.post("/admin/live/notify", requireAuth, requireAdmin, async (req, res) 
       res.status(400).json({ error: "Ge\xE7ersiz refId" });
       return;
     }
-    const ch = channel === "email" || channel === "inapp" || channel === "both" ? channel : "both";
+    const ch = channel === "email" || channel === "inapp" || channel === "both" || channel === "whatsapp" || channel === "all" ? channel : "both";
     const session = await loadSession(refType, id);
     if (!session) {
       res.status(404).json({ error: "Oturum bulunamad\u0131" });
@@ -125040,34 +125607,521 @@ router22.post("/jobs/live-reminders", async (req, res) => {
 });
 var liveJobs_default = router22;
 
-// src/routes/index.ts
+// src/routes/orgs.ts
+var import_express23 = __toESM(require_express2(), 1);
+init_drizzle_orm();
+init_schema2();
 var router23 = (0, import_express23.Router)();
-router23.use(health_default);
-router23.use(invitations_default);
-router23.use("/payments", payments_default);
-router23.use("/ai", ai_default);
-router23.use("/auth", auth_default);
-router23.use(catalog_default);
-router23.use(applications_default);
-router23.use(community_default);
-router23.use(chat_default);
-router23.use(notifications_default);
-router23.use(match_default);
-router23.use(vault_default);
-router23.use(capital_default);
-router23.use(pulse_default);
-router23.use(publicId_default);
-router23.use(analytics_default);
-router23.use(talent_default);
-router23.use(apiKeys_default);
-router23.use(settings_default);
-router23.use(passes_default);
-router23.use(stage_default);
-router23.use(liveJobs_default);
-var routes_default = router23;
+function mapOrg(o) {
+  return {
+    id: o.id,
+    name: o.name,
+    slug: o.slug,
+    domain: o.domain,
+    logoUrl: o.logoUrl,
+    type: o.type,
+    verified: o.verified,
+    createdAt: o.createdAt.toISOString()
+  };
+}
+router23.get("/orgs/mine", requireAuth, async (req, res) => {
+  try {
+    await ensureOrgLegalCampaignSchema();
+    await ensureUserMembershipColumns();
+    const userId = req.user.id;
+    const rows = await db.select({
+      membership: orgMembershipsTable,
+      org: organizationsTable
+    }).from(orgMembershipsTable).innerJoin(organizationsTable, eq(organizationsTable.id, orgMembershipsTable.orgId)).where(eq(orgMembershipsTable.userId, userId));
+    const [me] = await db.select({ primaryOrgId: usersTable.primaryOrgId }).from(usersTable).where(eq(usersTable.id, userId)).limit(1);
+    res.json({
+      primaryOrgId: me?.primaryOrgId ?? null,
+      orgs: rows.map((r) => ({
+        ...mapOrg(r.org),
+        membershipRole: r.membership.role,
+        membershipTitle: r.membership.title
+      }))
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message ?? "Organizasyonlar y\xFCklenemedi" });
+  }
+});
+router23.post("/orgs", requireAuth, async (req, res) => {
+  try {
+    await ensureOrgLegalCampaignSchema();
+    await ensureUserMembershipColumns();
+    const userId = req.user.id;
+    const { name, domain: domain2, logoUrl, type: type2 } = req.body ?? {};
+    if (!name || typeof name !== "string" || name.trim().length < 2) {
+      res.status(400).json({ error: "\u015Eirket ad\u0131 gerekli" });
+      return;
+    }
+    let slug = slugifyOrg(name.trim());
+    const [taken] = await db.select({ id: organizationsTable.id }).from(organizationsTable).where(eq(organizationsTable.slug, slug)).limit(1);
+    if (taken) slug = `${slug}-${userId}`;
+    const orgType = type2 === "company" || type2 === "fund" || type2 === "studio" || type2 === "startup" ? type2 : "startup";
+    const [org] = await db.insert(organizationsTable).values({
+      name: name.trim().slice(0, 80),
+      slug,
+      domain: typeof domain2 === "string" ? domain2.trim().slice(0, 120) || null : null,
+      logoUrl: typeof logoUrl === "string" ? logoUrl.trim().slice(0, 500) || null : null,
+      type: orgType,
+      createdByUserId: userId
+    }).returning();
+    await db.insert(orgMembershipsTable).values({
+      orgId: org.id,
+      userId,
+      role: "owner"
+    });
+    await db.update(usersTable).set({ primaryOrgId: org.id, company: org.name }).where(eq(usersTable.id, userId));
+    res.status(201).json({ org: mapOrg(org) });
+  } catch (err) {
+    res.status(500).json({ error: err.message ?? "Organizasyon olu\u015Fturulamad\u0131" });
+  }
+});
+router23.patch("/orgs/:id", requireAuth, async (req, res) => {
+  try {
+    await ensureOrgLegalCampaignSchema();
+    const orgId = Number(req.params.id);
+    const userId = req.user.id;
+    if (!Number.isFinite(orgId)) {
+      res.status(400).json({ error: "Ge\xE7ersiz org" });
+      return;
+    }
+    const [mem] = await db.select().from(orgMembershipsTable).where(
+      and(
+        eq(orgMembershipsTable.orgId, orgId),
+        eq(orgMembershipsTable.userId, userId)
+      )
+    ).limit(1);
+    if (!mem || mem.role !== "owner" && mem.role !== "admin") {
+      res.status(403).json({ error: "Yetki yok" });
+      return;
+    }
+    const { name, domain: domain2, logoUrl, type: type2 } = req.body ?? {};
+    const patch = {};
+    if (typeof name === "string" && name.trim()) patch.name = name.trim().slice(0, 80);
+    if (domain2 !== void 0) patch.domain = typeof domain2 === "string" ? domain2.trim() || null : null;
+    if (logoUrl !== void 0)
+      patch.logoUrl = typeof logoUrl === "string" ? logoUrl.trim() || null : null;
+    if (type2 === "company" || type2 === "fund" || type2 === "studio" || type2 === "startup") {
+      patch.type = type2;
+    }
+    const [org] = await db.update(organizationsTable).set(patch).where(eq(organizationsTable.id, orgId)).returning();
+    res.json({ org: org ? mapOrg(org) : null });
+  } catch (err) {
+    res.status(500).json({ error: err.message ?? "G\xFCncellenemedi" });
+  }
+});
+router23.post("/orgs/:id/join", requireAuth, async (req, res) => {
+  try {
+    await ensureOrgLegalCampaignSchema();
+    await ensureUserMembershipColumns();
+    const userId = req.user.id;
+    const raw = String(req.params.id);
+    const asId = Number(raw);
+    const [org] = Number.isFinite(asId) ? await db.select().from(organizationsTable).where(eq(organizationsTable.id, asId)).limit(1) : await db.select().from(organizationsTable).where(eq(organizationsTable.slug, raw)).limit(1);
+    if (!org) {
+      res.status(404).json({ error: "Organizasyon bulunamad\u0131" });
+      return;
+    }
+    const [existing] = await db.select().from(orgMembershipsTable).where(and(eq(orgMembershipsTable.orgId, org.id), eq(orgMembershipsTable.userId, userId))).limit(1);
+    if (!existing) {
+      await db.insert(orgMembershipsTable).values({
+        orgId: org.id,
+        userId,
+        role: "member",
+        title: typeof req.body?.title === "string" ? req.body.title.slice(0, 80) : null
+      });
+    }
+    await db.update(usersTable).set({ primaryOrgId: org.id, company: org.name }).where(eq(usersTable.id, userId));
+    res.json({ org: mapOrg(org), joined: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message ?? "Kat\u0131l\u0131m ba\u015Far\u0131s\u0131z" });
+  }
+});
+router23.get("/orgs/:id/members", requireAuth, async (req, res) => {
+  try {
+    await ensureOrgLegalCampaignSchema();
+    const orgId = Number(req.params.id);
+    if (!Number.isFinite(orgId)) {
+      res.status(400).json({ error: "Ge\xE7ersiz org" });
+      return;
+    }
+    const rows = await db.select({
+      userId: usersTable.id,
+      name: usersTable.name,
+      handle: usersTable.handle,
+      title: usersTable.title,
+      avatarUrl: usersTable.avatarUrl,
+      avatarStyle: usersTable.avatarStyle,
+      email: usersTable.email,
+      membershipRole: orgMembershipsTable.role,
+      membershipTitle: orgMembershipsTable.title
+    }).from(orgMembershipsTable).innerJoin(usersTable, eq(usersTable.id, orgMembershipsTable.userId)).where(eq(orgMembershipsTable.orgId, orgId));
+    const [org] = await db.select().from(organizationsTable).where(eq(organizationsTable.id, orgId)).limit(1);
+    res.json({
+      org: org ? mapOrg(org) : null,
+      members: rows.map((r) => ({
+        id: r.userId,
+        name: r.name,
+        handle: r.handle,
+        title: r.membershipTitle || r.title,
+        membershipRole: r.membershipRole,
+        avatarUrl: r.avatarUrl,
+        avatarStyle: r.avatarStyle,
+        seed: r.handle || r.email
+      })),
+      count: rows.length
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message ?? "\xDCyeler y\xFCklenemedi" });
+  }
+});
+router23.get("/orgs/search", requireAuth, async (req, res) => {
+  try {
+    await ensureOrgLegalCampaignSchema();
+    const q = String(req.query.q ?? "").trim().toLowerCase();
+    if (q.length < 2) {
+      res.json({ orgs: [] });
+      return;
+    }
+    const rows = await db.select().from(organizationsTable).where(sql`lower(${organizationsTable.name}) like ${`%${q}%`}`).limit(20);
+    res.json({ orgs: rows.map(mapOrg) });
+  } catch (err) {
+    res.status(500).json({ error: err.message ?? "Arama ba\u015Far\u0131s\u0131z" });
+  }
+});
+var orgs_default = router23;
+
+// src/routes/legal.ts
+var import_express24 = __toESM(require_express2(), 1);
+init_drizzle_orm();
+init_schema2();
+var router24 = (0, import_express24.Router)();
+router24.get("/legal/pending", requireAuth, async (req, res) => {
+  try {
+    const locale = req.query.locale === "en" ? "en" : "tr";
+    await ensureLegalDocumentsSeeded();
+    const status = await userHasAcceptedLatestLegal(req.user.id, locale);
+    if (status.ok) {
+      res.json({ pending: [] });
+      return;
+    }
+    const docs = await db.select().from(legalDocumentsTable).where(eq(legalDocumentsTable.locale, locale)).orderBy(desc(legalDocumentsTable.publishedAt));
+    const bySlug = /* @__PURE__ */ new Map();
+    for (const d of docs) {
+      if (!bySlug.has(d.slug)) bySlug.set(d.slug, d);
+    }
+    const pending = [];
+    for (const doc of bySlug.values()) {
+      const [acc] = await db.select({ id: legalAcceptancesTable.id }).from(legalAcceptancesTable).where(
+        and(
+          eq(legalAcceptancesTable.userId, req.user.id),
+          eq(legalAcceptancesTable.documentId, doc.id),
+          eq(legalAcceptancesTable.version, doc.version)
+        )
+      ).limit(1);
+      if (!acc) {
+        pending.push({
+          id: doc.id,
+          slug: doc.slug,
+          version: doc.version,
+          title: doc.title,
+          bodyMarkdown: doc.bodyMarkdown
+        });
+      }
+    }
+    res.json({ pending });
+  } catch (err) {
+    res.status(500).json({ error: err.message ?? "Hukuki belgeler y\xFCklenemedi" });
+  }
+});
+router24.post("/legal/accept", requireAuth, async (req, res) => {
+  try {
+    await ensureLegalDocumentsSeeded();
+    const userId = req.user.id;
+    const ip = req.headers["x-forwarded-for"]?.split(",")[0]?.trim() || req.ip || null;
+    const ua = req.headers["user-agent"]?.slice(0, 300) ?? null;
+    const locale = req.body?.locale === "en" ? "en" : "tr";
+    let docs = await db.select().from(legalDocumentsTable).where(eq(legalDocumentsTable.locale, locale));
+    if (Array.isArray(req.body?.documentIds) && req.body.documentIds.length) {
+      const ids = req.body.documentIds.map(Number).filter(Number.isFinite);
+      docs = docs.filter((d) => ids.includes(d.id));
+    }
+    const bySlug = /* @__PURE__ */ new Map();
+    for (const d of docs) {
+      const prev = bySlug.get(d.slug);
+      if (!prev || d.publishedAt > prev.publishedAt) bySlug.set(d.slug, d);
+    }
+    let accepted = 0;
+    for (const doc of bySlug.values()) {
+      const [existing] = await db.select({ id: legalAcceptancesTable.id }).from(legalAcceptancesTable).where(
+        and(
+          eq(legalAcceptancesTable.userId, userId),
+          eq(legalAcceptancesTable.documentId, doc.id),
+          eq(legalAcceptancesTable.version, doc.version)
+        )
+      ).limit(1);
+      if (existing) continue;
+      await db.insert(legalAcceptancesTable).values({
+        userId,
+        documentId: doc.id,
+        version: doc.version,
+        ip,
+        userAgent: ua
+      });
+      accepted += 1;
+    }
+    res.json({ ok: true, accepted });
+  } catch (err) {
+    res.status(500).json({ error: err.message ?? "Onay kaydedilemedi" });
+  }
+});
+router24.delete("/account", requireAuth, async (req, res) => {
+  try {
+    await ensureUserMembershipColumns();
+    await ensureOrgLegalCampaignSchema();
+    const userId = req.user.id;
+    const confirm = String(req.body?.confirm ?? "");
+    if (confirm !== "DELETE" && confirm !== "S\u0130L") {
+      res.status(400).json({ error: "Onay i\xE7in confirm: DELETE gerekli" });
+      return;
+    }
+    await db.update(usersTable).set({
+      deletedAt: /* @__PURE__ */ new Date(),
+      email: `deleted+${userId}@inner.invalid`,
+      name: "Silinmi\u015F \xFCye",
+      avatarUrl: null,
+      handle: null,
+      passwordHash: null,
+      googleId: null,
+      phone: null,
+      bio: null,
+      linkedin: null,
+      github: null,
+      website: null,
+      twitter: null,
+      behance: null,
+      instagram: null,
+      university: null,
+      skills: "[]"
+    }).where(eq(usersTable.id, userId));
+    const sessionId = req.cookies?.[SESSION_COOKIE];
+    if (sessionId) await destroySession(sessionId);
+    res.clearCookie(SESSION_COOKIE, { path: "/" });
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message ?? "Hesap silinemedi" });
+  }
+});
+var legal_default = router24;
+
+// src/routes/campaigns.ts
+var import_express25 = __toESM(require_express2(), 1);
+init_drizzle_orm();
+init_schema2();
+var router25 = (0, import_express25.Router)();
+async function requireOrgAdmin(userId, orgId) {
+  const [mem] = await db.select().from(orgMembershipsTable).where(and(eq(orgMembershipsTable.orgId, orgId), eq(orgMembershipsTable.userId, userId))).limit(1);
+  if (!mem || mem.role !== "owner" && mem.role !== "admin") return null;
+  return mem;
+}
+router25.get("/campaigns/mine", requireAuth, async (req, res) => {
+  try {
+    await ensureOrgLegalCampaignSchema();
+    const userId = req.user.id;
+    const mems = await db.select({ orgId: orgMembershipsTable.orgId }).from(orgMembershipsTable).where(eq(orgMembershipsTable.userId, userId));
+    const orgIds = mems.map((m) => m.orgId);
+    if (!orgIds.length) {
+      res.json({ campaigns: [] });
+      return;
+    }
+    const rows = await db.select({
+      campaign: campaignsTable,
+      orgName: organizationsTable.name
+    }).from(campaignsTable).innerJoin(organizationsTable, eq(organizationsTable.id, campaignsTable.orgId)).where(eq(campaignsTable.createdByUserId, userId)).orderBy(desc(campaignsTable.createdAt));
+    res.json({
+      campaigns: rows.map((r) => ({
+        id: r.campaign.id,
+        orgId: r.campaign.orgId,
+        orgName: r.orgName,
+        title: r.campaign.title,
+        pitch: r.campaign.pitch,
+        ctaUrl: r.campaign.ctaUrl,
+        code: r.campaign.code,
+        category: r.campaign.category,
+        status: r.campaign.status,
+        perkId: r.campaign.perkId,
+        startsAt: r.campaign.startsAt?.toISOString() ?? null,
+        endsAt: r.campaign.endsAt?.toISOString() ?? null,
+        createdAt: r.campaign.createdAt.toISOString()
+      }))
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message ?? "Kampanyalar y\xFCklenemedi" });
+  }
+});
+router25.post("/campaigns", requireAuth, async (req, res) => {
+  try {
+    await ensureOrgLegalCampaignSchema();
+    const userId = req.user.id;
+    const { orgId, title, pitch, ctaUrl, code, category, publish } = req.body ?? {};
+    const oid = Number(orgId);
+    if (!Number.isFinite(oid)) {
+      res.status(400).json({ error: "orgId gerekli" });
+      return;
+    }
+    const mem = await requireOrgAdmin(userId, oid);
+    if (!mem) {
+      res.status(403).json({ error: "Organizasyon yetkisi yok" });
+      return;
+    }
+    if (!title || !pitch || !ctaUrl) {
+      res.status(400).json({ error: "title, pitch, ctaUrl gerekli" });
+      return;
+    }
+    const [org] = await db.select().from(organizationsTable).where(eq(organizationsTable.id, oid)).limit(1);
+    if (!org) {
+      res.status(404).json({ error: "Org yok" });
+      return;
+    }
+    const shouldPublish = publish === true;
+    if (shouldPublish) {
+      try {
+        await spendPasses({
+          userId,
+          amount: 1,
+          reason: "spend_campaign",
+          refType: "campaign_draft",
+          refId: `pending-${userId}-${Date.now()}`
+        });
+      } catch (e) {
+        if (String(e.message).includes("Yetersiz")) {
+          res.status(402).json({ error: "Yetersiz Circle Pass" });
+          return;
+        }
+        throw e;
+      }
+    }
+    const [campaign] = await db.insert(campaignsTable).values({
+      orgId: oid,
+      createdByUserId: userId,
+      title: String(title).trim().slice(0, 120),
+      pitch: String(pitch).trim().slice(0, 500),
+      ctaUrl: String(ctaUrl).trim().slice(0, 400),
+      code: typeof code === "string" ? code.trim().slice(0, 40) || null : null,
+      category: typeof category === "string" ? category : "E\u011Fitim",
+      status: shouldPublish ? "live" : "draft"
+    }).returning();
+    let perkId = null;
+    if (shouldPublish && campaign) {
+      const [perk] = await db.insert(perksTable).values({
+        brand: org.name,
+        title: campaign.title,
+        description: campaign.pitch,
+        logoUrl: org.logoUrl,
+        ctaUrl: campaign.ctaUrl,
+        category: campaign.category ?? "E\u011Fitim",
+        badge: "inner\xB7only",
+        code: campaign.code,
+        howTo: "Ekosistem kampanyas\u0131 \xB7 yaln\u0131zca inner\xB7hub \xFCyelerine \xF6zel.",
+        featured: true,
+        source: "campaign",
+        orgId: org.id,
+        campaignId: campaign.id,
+        isActive: true,
+        order: 0
+      }).returning();
+      perkId = perk?.id ?? null;
+      if (perkId) {
+        await db.update(campaignsTable).set({ perkId }).where(eq(campaignsTable.id, campaign.id));
+      }
+    }
+    res.status(201).json({
+      campaign: {
+        id: campaign.id,
+        status: campaign.status,
+        perkId
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message ?? "Kampanya olu\u015Fturulamad\u0131" });
+  }
+});
+router25.post("/admin/campaigns/:id/approve", requireAuth, requireAdmin, async (req, res) => {
+  try {
+    await ensureOrgLegalCampaignSchema();
+    const id = Number(req.params.id);
+    const [campaign] = await db.select().from(campaignsTable).where(eq(campaignsTable.id, id)).limit(1);
+    if (!campaign) {
+      res.status(404).json({ error: "Yok" });
+      return;
+    }
+    const [org] = await db.select().from(organizationsTable).where(eq(organizationsTable.id, campaign.orgId)).limit(1);
+    if (!org) {
+      res.status(404).json({ error: "Org yok" });
+      return;
+    }
+    let perkId = campaign.perkId;
+    if (!perkId) {
+      const [perk] = await db.insert(perksTable).values({
+        brand: org.name,
+        title: campaign.title,
+        description: campaign.pitch,
+        logoUrl: org.logoUrl,
+        ctaUrl: campaign.ctaUrl,
+        category: campaign.category ?? "E\u011Fitim",
+        badge: "inner\xB7only",
+        code: campaign.code,
+        howTo: "Ekosistem kampanyas\u0131 \xB7 yaln\u0131zca inner\xB7hub \xFCyelerine \xF6zel.",
+        featured: true,
+        source: "campaign",
+        orgId: org.id,
+        campaignId: campaign.id,
+        isActive: true
+      }).returning();
+      perkId = perk?.id ?? null;
+    }
+    await db.update(campaignsTable).set({ status: "live", perkId }).where(eq(campaignsTable.id, id));
+    res.json({ ok: true, perkId });
+  } catch (err) {
+    res.status(500).json({ error: err.message ?? "Onay ba\u015Far\u0131s\u0131z" });
+  }
+});
+var campaigns_default = router25;
+
+// src/routes/index.ts
+var router26 = (0, import_express26.Router)();
+router26.use(health_default);
+router26.use(invitations_default);
+router26.use("/payments", payments_default);
+router26.use("/ai", ai_default);
+router26.use("/auth", auth_default);
+router26.use(catalog_default);
+router26.use(applications_default);
+router26.use(community_default);
+router26.use(chat_default);
+router26.use(notifications_default);
+router26.use(match_default);
+router26.use(vault_default);
+router26.use(capital_default);
+router26.use(pulse_default);
+router26.use(publicId_default);
+router26.use(analytics_default);
+router26.use(talent_default);
+router26.use(apiKeys_default);
+router26.use(settings_default);
+router26.use(passes_default);
+router26.use(stage_default);
+router26.use(liveJobs_default);
+router26.use(orgs_default);
+router26.use(legal_default);
+router26.use(campaigns_default);
+var routes_default = router26;
 
 // src/app.ts
-var app = (0, import_express24.default)();
+var app = (0, import_express27.default)();
 app.use(
   (0, import_pino_http.default)({
     logger,
@@ -125116,18 +126170,18 @@ app.use(
 );
 app.use((req, res, next) => {
   if (req.method === "PUT" && /^\/api\/vault\/\d+\/file$/.test(req.path)) {
-    return import_express24.default.raw({ type: () => true, limit: "12mb" })(req, res, next);
+    return import_express27.default.raw({ type: () => true, limit: "12mb" })(req, res, next);
   }
   next();
 });
-app.use(import_express24.default.json());
-app.use(import_express24.default.text({ type: "text/plain", limit: "16kb" }));
-app.use(import_express24.default.urlencoded({ extended: true }));
+app.use(import_express27.default.json());
+app.use(import_express27.default.text({ type: "text/plain", limit: "16kb" }));
+app.use(import_express27.default.urlencoded({ extended: true }));
 app.use((0, import_cookie_parser.default)());
 app.use(attachUser);
 app.use("/api", routes_default);
 var frontendDist = path9.join(__dirname, "..", "..", "inner-hub", "dist");
-app.use(import_express24.default.static(frontendDist));
+app.use(import_express27.default.static(frontendDist));
 app.get(/^(?!\/api).*/, (_req, res) => {
   res.sendFile(path9.join(frontendDist, "index.html"));
 });
@@ -125152,7 +126206,8 @@ Promise.all([
   ensureLiveSessionColumns(),
   ensureUserMembershipColumns(),
   ensurePassSchema(),
-  ensureStageSchema()
+  ensureStageSchema(),
+  ensureOrgLegalCampaignSchema()
 ]).catch((err) => {
   logger.warn({ err }, "Schema ensure failed (will retry on demand)");
 }).finally(() => {

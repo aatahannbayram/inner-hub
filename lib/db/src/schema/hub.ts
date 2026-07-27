@@ -39,6 +39,8 @@ export const coursesTable = pgTable("courses", {
   audience: text("audience").default("all").notNull(),
   /** Canlı oturum Pass maliyeti (genelde 0 veya 1) */
   passCost: integer("pass_cost").default(0).notNull(),
+  /** business | product | art | craft | capital | ops */
+  category: text("category").default("business").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -142,6 +144,10 @@ export const perksTable = pgTable("perks", {
   howTo: text("how_to"),
   featured: boolean("featured").default(false).notNull(),
   expiresAt: timestamp("expires_at"),
+  /** partner | campaign */
+  source: text("source").default("partner").notNull(),
+  orgId: integer("org_id"),
+  campaignId: integer("campaign_id"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -329,4 +335,74 @@ export const liveNotifyLogTable = pgTable("live_notify_log", {
   kind: text("kind").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
+// ─── ORGANİZASYONLAR ──────────────────────────────────────────────────────────
+export const organizationsTable = pgTable("organizations", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  slug: text("slug").notNull().unique(),
+  domain: text("domain"),
+  logoUrl: text("logo_url"),
+  /** startup | company | fund | studio */
+  type: text("type").default("startup").notNull(),
+  createdByUserId: integer("created_by_user_id").references(() => usersTable.id),
+  verified: boolean("verified").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const orgMembershipsTable = pgTable("org_memberships", {
+  id: serial("id").primaryKey(),
+  orgId: integer("org_id").references(() => organizationsTable.id).notNull(),
+  userId: integer("user_id").references(() => usersTable.id).notNull(),
+  /** owner | admin | member */
+  role: text("role").default("member").notNull(),
+  title: text("title"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export type Organization = typeof organizationsTable.$inferSelect;
+export type OrgMembership = typeof orgMembershipsTable.$inferSelect;
+
+// ─── HUKUKİ BELGELER ──────────────────────────────────────────────────────────
+export const legalDocumentsTable = pgTable("legal_documents", {
+  id: serial("id").primaryKey(),
+  slug: text("slug").notNull(),
+  version: text("version").notNull(),
+  locale: text("locale").default("tr").notNull(),
+  title: text("title").notNull(),
+  bodyMarkdown: text("body_markdown").notNull(),
+  publishedAt: timestamp("published_at").defaultNow().notNull(),
+});
+
+export const legalAcceptancesTable = pgTable("legal_acceptances", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => usersTable.id).notNull(),
+  documentId: integer("document_id").references(() => legalDocumentsTable.id).notNull(),
+  version: text("version").notNull(),
+  acceptedAt: timestamp("accepted_at").defaultNow().notNull(),
+  ip: text("ip"),
+  userAgent: text("user_agent"),
+});
+
+export type LegalDocument = typeof legalDocumentsTable.$inferSelect;
+export type LegalAcceptance = typeof legalAcceptancesTable.$inferSelect;
+
+// ─── FİRMA KAMPANYALARI ───────────────────────────────────────────────────────
+export const campaignsTable = pgTable("campaigns", {
+  id: serial("id").primaryKey(),
+  orgId: integer("org_id").references(() => organizationsTable.id).notNull(),
+  createdByUserId: integer("created_by_user_id").references(() => usersTable.id).notNull(),
+  title: text("title").notNull(),
+  pitch: text("pitch").notNull(),
+  ctaUrl: text("cta_url").notNull(),
+  code: text("code"),
+  category: text("category").default("Eğitim"),
+  status: text("status").default("draft").notNull(),
+  perkId: integer("perk_id"),
+  startsAt: timestamp("starts_at"),
+  endsAt: timestamp("ends_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export type Campaign = typeof campaignsTable.$inferSelect;
 

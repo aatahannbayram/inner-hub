@@ -10,6 +10,8 @@ export const usersTable = pgTable("users", {
   email: text("email").notNull().unique(),
   name: text("name").notNull(),
   avatarUrl: text("avatar_url"),
+  /** DiceBear stil anahtarı (lorelei | shapes | notionists | …) */
+  avatarStyle: text("avatar_style").default("lorelei"),
   role: roleEnum("role").default("member").notNull(),
   /** Davet personası: founder | investor | builder | company */
   persona: text("persona"),
@@ -19,8 +21,14 @@ export const usersTable = pgTable("users", {
   bio: text("bio"),
   title: text("title"),
   company: text("company"),
+  /** Birincil organizasyon */
+  primaryOrgId: integer("primary_org_id"),
+  university: text("university"),
+  behance: text("behance"),
+  instagram: text("instagram"),
   linkedin: text("linkedin"),
   phone: text("phone"),
+  whatsappOptIn: text("whatsapp_opt_in"),
   handle: text("handle"),
   github: text("github"),
   website: text("website"),
@@ -31,6 +39,7 @@ export const usersTable = pgTable("users", {
   profileCompletionPct: integer("profile_completion_pct").default(0).notNull(),
   passwordHash: text("password_hash"),
   googleId: text("google_id").unique(),
+  deletedAt: timestamp("deleted_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

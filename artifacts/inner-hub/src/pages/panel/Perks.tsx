@@ -21,8 +21,11 @@ import { useApiQuery } from "@/hooks/useApiQuery";
 import { LoadingBlock, ErrorState, CourseCardSkeleton } from "@/components/panel/Skeletons";
 import { HeroQuickStat } from "@/components/panel/HeroQuickStat";
 import { useT, useLocale } from "@/i18n";
+import { apiUrl } from "@/lib/api";
+import { useQueryClient } from "@tanstack/react-query";
 
 type Category = "Tümü" | "Yazılım" | "Finans" | "Yaşam" | "Eğitim";
+type SourceFilter = "all" | "partner" | "campaign";
 
 interface Perk {
   id: number;
@@ -37,6 +40,7 @@ interface Perk {
   partnerUrl: string;
   featured?: boolean;
   expiresAt?: string;
+  source?: "campaign" | "partner" | string;
 }
 
 const CATEGORIES: Category[] = ["Tümü", "Yazılım", "Finans", "Yaşam", "Eğitim"];
@@ -107,9 +111,16 @@ function PerkCard({
     >
       <div className="mb-4 flex items-start justify-between gap-3">
         <BrandMark brand={perk.brand} logoUrl={perk.logoUrl} />
-        <span className="font-mono text-label uppercase tracking-widest text-[var(--ink)] panel-glass bg-[var(--ink)]/[0.03] px-2 py-0.5">
-          {perk.badge}
-        </span>
+        <div className="flex flex-col items-end gap-1">
+          {perk.source === "campaign" ? (
+            <span className="font-mono text-label uppercase tracking-widest text-[var(--inner-green)]">
+              {t("perks.campaignBadge")}
+            </span>
+          ) : null}
+          <span className="font-mono text-label uppercase tracking-widest text-[var(--ink)] panel-glass bg-[var(--ink)]/[0.03] px-2 py-0.5">
+            {perk.badge}
+          </span>
+        </div>
       </div>
 
       <p className="mb-1 text-xs text-[var(--ink-muted)]">
@@ -396,9 +407,101 @@ function PerksStat({
   );
 }
 
+function CampaignCreateForm({ orgId }: { orgId: number }) {
+  const t = useT();
+  const qc = useQueryClient();
+  const [title, setTitle] = useState("");
+  const [pitch, setPitch] = useState("");
+  const [ctaUrl, setCtaUrl] = useState("");
+  const [code, setCode] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState<string | null>(null);
+
+  const submit = async () => {
+    if (!title.trim() || !pitch.trim() || !ctaUrl.trim() || busy) return;
+    setBusy(true);
+    setMsg(null);
+    try {
+      const res = await fetch(apiUrl("/api/campaigns"), {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          orgId,
+          title: title.trim(),
+          pitch: pitch.trim(),
+          ctaUrl: ctaUrl.trim(),
+          code: code.trim() || undefined,
+          publish: true,
+        }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json.error ?? t("campaigns.createError"));
+      setTitle("");
+      setPitch("");
+      setCtaUrl("");
+      setCode("");
+      setMsg(t("campaigns.created"));
+      await qc.invalidateQueries({ queryKey: ["perks"] });
+    } catch (e: unknown) {
+      setMsg(e instanceof Error ? e.message : t("campaigns.createError"));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="panel-glass space-y-3 p-4">
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <p className="font-mono text-label uppercase tracking-widest text-[var(--ink)]">
+          {t("campaigns.create")}
+        </p>
+        <p className="font-mono text-label text-[var(--ink-muted)]">{t("campaigns.costHint")}</p>
+      </div>
+      <input
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        placeholder={t("campaigns.titlePlaceholder")}
+        className="min-h-11 w-full border border-[var(--ink)]/15 bg-transparent px-3 py-2 text-sm text-[var(--ink)] outline-none focus:border-[var(--ink)]/40"
+      />
+      <textarea
+        value={pitch}
+        onChange={(e) => setPitch(e.target.value)}
+        placeholder={t("campaigns.pitchPlaceholder")}
+        rows={2}
+        className="w-full border border-[var(--ink)]/15 bg-transparent px-3 py-2 text-sm text-[var(--ink)] outline-none focus:border-[var(--ink)]/40"
+      />
+      <div className="grid gap-2 sm:grid-cols-2">
+        <input
+          value={ctaUrl}
+          onChange={(e) => setCtaUrl(e.target.value)}
+          placeholder={t("campaigns.ctaPlaceholder")}
+          className="min-h-11 w-full border border-[var(--ink)]/15 bg-transparent px-3 py-2 text-sm text-[var(--ink)] outline-none focus:border-[var(--ink)]/40"
+        />
+        <input
+          value={code}
+          onChange={(e) => setCode(e.target.value)}
+          placeholder={t("campaigns.codePlaceholder")}
+          className="min-h-11 w-full border border-[var(--ink)]/15 bg-transparent px-3 py-2 text-sm text-[var(--ink)] outline-none focus:border-[var(--ink)]/40"
+        />
+      </div>
+      <button
+        type="button"
+        disabled={busy || !title.trim() || !pitch.trim() || !ctaUrl.trim()}
+        onClick={() => void submit()}
+        className="min-h-11 border border-[var(--ink)] bg-[var(--ink)] px-4 py-2 font-mono text-label uppercase tracking-widest text-[var(--bone)] disabled:opacity-40"
+      >
+        {busy ? t("common.saving") : t("campaigns.publish")}
+      </button>
+      {msg ? <p className="font-mono text-label text-[var(--ink-muted)]">{msg}</p> : null}
+    </div>
+  );
+}
+
 export default function Perks() {
   const t = useT();
   const [active, setActive] = useState<Category>("Tümü");
+  const [sourceFilter, setSourceFilter] = useState<SourceFilter>("all");
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<Perk | null>(null);
   const [savedIds, setSavedIds] = useState<number[]>(() => loadSaved());
@@ -408,7 +511,9 @@ export default function Perks() {
     ["perks"],
     "/api/perks",
   );
+  const orgsQ = useApiQuery<{ orgs: { id: number }[] }>(["orgs-mine"], "/api/orgs/mine");
   const perks = data?.perks ?? [];
+  const primaryOrgId = orgsQ.data?.orgs?.[0]?.id;
 
   const counts = useMemo(() => {
     const map: Record<Category, number> = {
@@ -430,6 +535,8 @@ export default function Perks() {
     const q = toLowerTR(query.trim());
     return perks.filter((p) => {
       if (active !== "Tümü" && p.category !== active) return false;
+      if (sourceFilter === "partner" && p.source === "campaign") return false;
+      if (sourceFilter === "campaign" && p.source !== "campaign") return false;
       if (showSavedOnly && !savedIds.includes(p.id)) return false;
       if (!q) return true;
       return (
@@ -439,7 +546,7 @@ export default function Perks() {
         toLowerTR(p.badge).includes(q)
       );
     });
-  }, [perks, active, query, showSavedOnly, savedIds]);
+  }, [perks, active, sourceFilter, query, showSavedOnly, savedIds]);
 
   const toggleSave = (id: number) => {
     setSavedIds((prev) => {
@@ -468,6 +575,12 @@ export default function Perks() {
         />
       ) : (
         <>
+      {primaryOrgId ? (
+        <FadeIn delay={0.005}>
+          <CampaignCreateForm orgId={primaryOrgId} />
+        </FadeIn>
+      ) : null}
+
       <FadeIn delay={0.01}>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           <PerksStat label={t("perks.statTotal")} value={String(perks.length)} sub={t("perks.statTotalSub")} icon={Gift} />
@@ -548,6 +661,30 @@ export default function Perks() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
+            {(
+              [
+                { id: "all" as const, label: t("common.all") },
+                { id: "partner" as const, label: t("perks.partners") },
+                { id: "campaign" as const, label: t("perks.ecosystem") },
+              ] as const
+            ).map((s) => (
+              <button
+                key={s.id}
+                type="button"
+                onClick={() => setSourceFilter(s.id)}
+                className={[
+                  "border px-3 py-1.5 font-mono text-label uppercase tracking-widest transition-colors",
+                  sourceFilter === s.id
+                    ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--bone)]"
+                    : "border-[var(--ink)]/15 text-[var(--ink-muted)] hover:border-[var(--ink)]/40 hover:text-[var(--ink)]",
+                ].join(" ")}
+              >
+                {s.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
             {CATEGORIES.map((cat) => (
               <button
                 key={cat}
@@ -598,6 +735,7 @@ export default function Perks() {
               type="button"
               onClick={() => {
                 setActive("Tümü");
+                setSourceFilter("all");
                 setQuery("");
                 setShowSavedOnly(false);
               }}
