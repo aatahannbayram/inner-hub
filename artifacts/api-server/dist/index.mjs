@@ -20655,27 +20655,27 @@ var require_router = __commonJS({
     var slice = Array.prototype.slice;
     var flatten = Array.prototype.flat;
     var methods = METHODS.map((method) => method.toLowerCase());
-    module.exports = Router27;
+    module.exports = Router28;
     module.exports.Route = Route;
-    function Router27(options) {
-      if (!(this instanceof Router27)) {
-        return new Router27(options);
+    function Router28(options) {
+      if (!(this instanceof Router28)) {
+        return new Router28(options);
       }
       const opts = options || {};
-      function router27(req, res, next) {
-        router27.handle(req, res, next);
+      function router28(req, res, next) {
+        router28.handle(req, res, next);
       }
-      Object.setPrototypeOf(router27, this);
-      router27.caseSensitive = opts.caseSensitive;
-      router27.mergeParams = opts.mergeParams;
-      router27.params = {};
-      router27.strict = opts.strict;
-      router27.stack = [];
-      return router27;
+      Object.setPrototypeOf(router28, this);
+      router28.caseSensitive = opts.caseSensitive;
+      router28.mergeParams = opts.mergeParams;
+      router28.params = {};
+      router28.strict = opts.strict;
+      router28.stack = [];
+      return router28;
     }
-    Router27.prototype = function() {
+    Router28.prototype = function() {
     };
-    Router27.prototype.param = function param(name, fn) {
+    Router28.prototype.param = function param(name, fn) {
       if (!name) {
         throw new TypeError("argument name is required");
       }
@@ -20695,7 +20695,7 @@ var require_router = __commonJS({
       params.push(fn);
       return this;
     };
-    Router27.prototype.handle = function handle(req, res, callback) {
+    Router28.prototype.handle = function handle(req, res, callback) {
       if (!callback) {
         throw new TypeError("argument callback is required");
       }
@@ -20822,7 +20822,7 @@ var require_router = __commonJS({
         }
       }
     };
-    Router27.prototype.use = function use(handler) {
+    Router28.prototype.use = function use(handler) {
       let offset = 0;
       let path10 = "/";
       if (typeof handler !== "function") {
@@ -20855,7 +20855,7 @@ var require_router = __commonJS({
       }
       return this;
     };
-    Router27.prototype.route = function route(path10) {
+    Router28.prototype.route = function route(path10) {
       const route2 = new Route(path10);
       const layer = new Layer(path10, {
         sensitive: this.caseSensitive,
@@ -20870,7 +20870,7 @@ var require_router = __commonJS({
       return route2;
     };
     methods.concat("all").forEach(function(method) {
-      Router27.prototype[method] = function(path10) {
+      Router28.prototype[method] = function(path10) {
         const route = this.route(path10);
         route[method].apply(route, slice.call(arguments, 1));
         return this;
@@ -21053,13 +21053,13 @@ var require_application = __commonJS({
     var compileTrust = require_utils3().compileTrust;
     var resolve4 = __require("node:path").resolve;
     var once = require_once();
-    var Router27 = require_router();
+    var Router28 = require_router();
     var slice = Array.prototype.slice;
     var flatten = Array.prototype.flat;
     var app2 = exports = module.exports = {};
     var trustProxyDefaultSymbol = "@@symbol:trust_proxy_default";
     app2.init = function init() {
-      var router27 = null;
+      var router28 = null;
       this.cache = /* @__PURE__ */ Object.create(null);
       this.engines = /* @__PURE__ */ Object.create(null);
       this.settings = /* @__PURE__ */ Object.create(null);
@@ -21068,13 +21068,13 @@ var require_application = __commonJS({
         configurable: true,
         enumerable: true,
         get: function getrouter() {
-          if (router27 === null) {
-            router27 = new Router27({
+          if (router28 === null) {
+            router28 = new Router28({
               caseSensitive: this.enabled("case sensitive routing"),
               strict: this.enabled("strict routing")
             });
           }
-          return router27;
+          return router28;
         }
       });
     };
@@ -21145,15 +21145,15 @@ var require_application = __commonJS({
       if (fns.length === 0) {
         throw new TypeError("app.use() requires a middleware function");
       }
-      var router27 = this.router;
+      var router28 = this.router;
       fns.forEach(function(fn2) {
         if (!fn2 || !fn2.handle || !fn2.set) {
-          return router27.use(path10, fn2);
+          return router28.use(path10, fn2);
         }
         debug(".use app under %s", path10);
         fn2.mountpath = path10;
         fn2.parent = this;
-        router27.use(path10, function mounted_app(req, res, next) {
+        router28.use(path10, function mounted_app(req, res, next) {
           var orig = req.app;
           fn2.handle(req, res, function(err) {
             Object.setPrototypeOf(req, orig.request);
@@ -23726,7 +23726,7 @@ var require_express = __commonJS({
     var EventEmitter2 = __require("node:events").EventEmitter;
     var mixin = require_merge_descriptors();
     var proto = require_application();
-    var Router27 = require_router();
+    var Router28 = require_router();
     var req = require_request();
     var res = require_response();
     exports = module.exports = createApplication;
@@ -23748,8 +23748,8 @@ var require_express = __commonJS({
     exports.application = proto;
     exports.request = req;
     exports.response = res;
-    exports.Route = Router27.Route;
-    exports.Router = Router27;
+    exports.Route = Router28.Route;
+    exports.Router = Router28;
     exports.json = bodyParser.json;
     exports.raw = bodyParser.raw;
     exports.static = require_serve_static();
@@ -50943,13 +50943,13 @@ function _promise(Class2, innerType) {
   });
 }
 function _custom(Class2, fn, _params) {
-  const norm = normalizeParams(_params);
-  norm.abort ?? (norm.abort = true);
+  const norm2 = normalizeParams(_params);
+  norm2.abort ?? (norm2.abort = true);
   const schema = new Class2({
     type: "custom",
     check: "custom",
     fn,
-    ...norm
+    ...norm2
   });
   return schema;
 }
@@ -93348,14 +93348,14 @@ var init_whatsapp = __esm({
 });
 
 // src/app.ts
-var import_express27 = __toESM(require_express2(), 1);
+var import_express28 = __toESM(require_express2(), 1);
 var import_cors = __toESM(require_lib3(), 1);
 var import_cookie_parser = __toESM(require_cookie_parser(), 1);
 var import_pino_http = __toESM(require_logger(), 1);
 import path9 from "node:path";
 
 // src/routes/index.ts
-var import_express26 = __toESM(require_express2(), 1);
+var import_express27 = __toESM(require_express2(), 1);
 
 // src/routes/health.ts
 var import_express = __toESM(require_express2(), 1);
@@ -126091,37 +126091,338 @@ router25.post("/admin/campaigns/:id/approve", requireAuth, requireAdmin, async (
 });
 var campaigns_default = router25;
 
-// src/routes/index.ts
+// src/routes/search.ts
+var import_express26 = __toESM(require_express2(), 1);
+init_drizzle_orm();
+init_sdk();
+init_schema2();
 var router26 = (0, import_express26.Router)();
-router26.use(health_default);
-router26.use(invitations_default);
-router26.use("/payments", payments_default);
-router26.use("/ai", ai_default);
-router26.use("/auth", auth_default);
-router26.use(catalog_default);
-router26.use(applications_default);
-router26.use(community_default);
-router26.use(chat_default);
-router26.use(notifications_default);
-router26.use(match_default);
-router26.use(vault_default);
-router26.use(capital_default);
-router26.use(pulse_default);
-router26.use(publicId_default);
-router26.use(analytics_default);
-router26.use(talent_default);
-router26.use(apiKeys_default);
-router26.use(settings_default);
-router26.use(passes_default);
-router26.use(stage_default);
-router26.use(liveJobs_default);
-router26.use(orgs_default);
-router26.use(legal_default);
-router26.use(campaigns_default);
-var routes_default = router26;
+var NAV_SHORTCUTS = [
+  { id: "nav-dash", kind: "page", title: "Dashboard", subtitle: "Ana panel", href: "/panel", score: 0 },
+  { id: "nav-chat", kind: "page", title: "Topluluk / Chat", subtitle: "Sohbet", href: "/panel/chat", score: 0 },
+  { id: "nav-courses", kind: "page", title: "Kurslar", subtitle: "VOD ve canl\u0131", href: "/panel/courses", score: 0 },
+  { id: "nav-events", kind: "page", title: "Etkinlikler", subtitle: "Gathering & online", href: "/panel/events", score: 0 },
+  { id: "nav-members", kind: "page", title: "\xDCyeler", subtitle: "\xC7ember", href: "/panel/members", score: 0 },
+  { id: "nav-perks", kind: "page", title: "Ayr\u0131cal\u0131klar", subtitle: "Perks & kampanyalar", href: "/panel/perks", score: 0 },
+  { id: "nav-stage", kind: "page", title: "Stage", subtitle: "\xDCr\xFCn oylama", href: "/panel/stage", score: 0 },
+  { id: "nav-org", kind: "page", title: "Organizasyon", subtitle: "\u015Eirket odas\u0131", href: "/panel/org", score: 0 },
+  { id: "nav-match", kind: "page", title: "Match", subtitle: "E\u015Fle\u015Fme", href: "/panel/match", score: 0 },
+  { id: "nav-capital", kind: "page", title: "Capital", subtitle: "Deal flow", href: "/panel/capital", score: 0 },
+  { id: "nav-signal", kind: "page", title: "Signal", subtitle: "Haftal\u0131k sinyal", href: "/panel/signal", score: 0 },
+  { id: "nav-vault", kind: "page", title: "Vault", subtitle: "Belgeler", href: "/panel/vault", score: 0 },
+  { id: "nav-membership", kind: "page", title: "\xDCyelik / Circle Pass", subtitle: "\xD6deme", href: "/panel/membership", score: 0 },
+  { id: "nav-profile", kind: "page", title: "Profil", subtitle: "Hesab\u0131n", href: "/panel/profile", score: 0 },
+  { id: "nav-settings", kind: "page", title: "Ayarlar", subtitle: "Tercihler", href: "/panel/settings", score: 0 },
+  { id: "nav-id", kind: "page", title: "inner\xB7id", subtitle: "Kimlik kart\u0131", href: "/panel/id", score: 0 },
+  { id: "nav-faq", kind: "page", title: "SSS", subtitle: "Yard\u0131m", href: "/panel/faq", score: 0 }
+];
+function norm(q) {
+  return q.trim().toLowerCase();
+}
+function scoreText(q, ...fields) {
+  const nq = norm(q);
+  if (!nq) return 0;
+  let best = 0;
+  for (const f of fields) {
+    if (!f) continue;
+    const t = f.toLowerCase();
+    if (t === nq) best = Math.max(best, 100);
+    else if (t.startsWith(nq)) best = Math.max(best, 80);
+    else if (t.includes(nq)) best = Math.max(best, 55);
+    else {
+      const parts = nq.split(/\s+/).filter(Boolean);
+      const hit = parts.filter((p) => t.includes(p)).length;
+      if (hit) best = Math.max(best, 30 + hit * 10);
+    }
+  }
+  return best;
+}
+function like2(q) {
+  return `%${q.replace(/[%_]/g, "")}%`;
+}
+async function gatherHits(q, locale) {
+  await Promise.all([
+    ensureUserMembershipColumns(),
+    ensureLiveSessionColumns(),
+    ensureStageSchema(),
+    ensureOrgLegalCampaignSchema()
+  ]);
+  const pattern = like2(q);
+  const hits = [];
+  for (const nav of NAV_SHORTCUTS) {
+    const s = scoreText(
+      q,
+      nav.title,
+      nav.subtitle,
+      nav.href,
+      locale === "en" ? nav.title : void 0
+    );
+    if (s > 0) hits.push({ ...nav, score: s + 5 });
+  }
+  const members = await db.select({
+    id: usersTable.id,
+    name: usersTable.name,
+    title: usersTable.title,
+    company: usersTable.company,
+    handle: usersTable.handle,
+    skills: usersTable.skills,
+    persona: usersTable.persona,
+    avatarUrl: usersTable.avatarUrl,
+    avatarStyle: usersTable.avatarStyle,
+    email: usersTable.email
+  }).from(usersTable).where(
+    and(
+      isNull(usersTable.deletedAt),
+      or(
+        ilike(usersTable.name, pattern),
+        ilike(usersTable.company, pattern),
+        ilike(usersTable.title, pattern),
+        ilike(usersTable.handle, pattern),
+        ilike(usersTable.skills, pattern),
+        ilike(usersTable.persona, pattern)
+      )
+    )
+  ).limit(12);
+  for (const m of members) {
+    const s = scoreText(q, m.name, m.company, m.title, m.handle, m.persona, m.skills);
+    hits.push({
+      id: `member-${m.id}`,
+      kind: "member",
+      title: m.name,
+      subtitle: [m.title, m.company].filter(Boolean).join(" \xB7 ") || void 0,
+      href: `/panel/members`,
+      score: s
+    });
+  }
+  const courses = await db.select().from(coursesTable).where(
+    and(
+      eq(coursesTable.isPublished, true),
+      or(ilike(coursesTable.title, pattern), ilike(coursesTable.description, pattern), ilike(coursesTable.category, pattern))
+    )
+  ).orderBy(asc(coursesTable.order)).limit(10);
+  for (const c of courses) {
+    hits.push({
+      id: `course-${c.id}`,
+      kind: "course",
+      title: c.title,
+      subtitle: [c.format, c.category].filter(Boolean).join(" \xB7 "),
+      href: `/panel/courses`,
+      score: scoreText(q, c.title, c.description, c.category, c.format)
+    });
+  }
+  const events = await db.select().from(eventsTable).where(
+    and(
+      eq(eventsTable.isPublished, true),
+      or(ilike(eventsTable.title, pattern), ilike(eventsTable.description, pattern), ilike(eventsTable.location, pattern))
+    )
+  ).orderBy(desc(eventsTable.startAt)).limit(10);
+  for (const e of events) {
+    hits.push({
+      id: `event-${e.id}`,
+      kind: "event",
+      title: e.title,
+      subtitle: e.location || e.format || void 0,
+      href: `/panel/events`,
+      score: scoreText(q, e.title, e.description, e.location, e.format)
+    });
+  }
+  const perks = await db.select().from(perksTable).where(
+    and(
+      eq(perksTable.isActive, true),
+      or(
+        ilike(perksTable.brand, pattern),
+        ilike(perksTable.title, pattern),
+        ilike(perksTable.description, pattern),
+        ilike(perksTable.category, pattern)
+      )
+    )
+  ).limit(10);
+  for (const p of perks) {
+    hits.push({
+      id: `perk-${p.id}`,
+      kind: "perk",
+      title: `${p.brand} \xB7 ${p.title}`,
+      subtitle: p.category || p.badge || void 0,
+      href: `/panel/perks`,
+      score: scoreText(q, p.brand, p.title, p.description, p.category)
+    });
+  }
+  try {
+    const products = await db.select().from(stageProductsTable).where(
+      and(
+        eq(stageProductsTable.status, "published"),
+        or(ilike(stageProductsTable.title, pattern), ilike(stageProductsTable.pitch, pattern))
+      )
+    ).limit(8);
+    for (const p of products) {
+      hits.push({
+        id: `stage-${p.id}`,
+        kind: "stage",
+        title: p.title,
+        subtitle: p.pitch.slice(0, 80),
+        href: `/panel/stage`,
+        score: scoreText(q, p.title, p.pitch)
+      });
+    }
+  } catch {
+  }
+  try {
+    const orgs = await db.select().from(organizationsTable).where(or(ilike(organizationsTable.name, pattern), ilike(organizationsTable.slug, pattern), ilike(organizationsTable.domain, pattern))).limit(8);
+    for (const o of orgs) {
+      hits.push({
+        id: `org-${o.id}`,
+        kind: "org",
+        title: o.name,
+        subtitle: o.type,
+        href: `/panel/org`,
+        score: scoreText(q, o.name, o.slug, o.domain, o.type)
+      });
+    }
+  } catch {
+  }
+  try {
+    const faqs = await db.select().from(faqTable).where(or(ilike(faqTable.question, pattern), ilike(faqTable.answer, pattern), ilike(faqTable.category, pattern))).limit(8);
+    for (const f of faqs) {
+      hits.push({
+        id: `faq-${f.id}`,
+        kind: "faq",
+        title: f.question,
+        subtitle: f.category,
+        href: `/panel/faq`,
+        score: scoreText(q, f.question, f.answer, f.category)
+      });
+    }
+  } catch {
+  }
+  hits.sort((a, b) => b.score - a.score);
+  return hits.filter((h) => h.score > 0).slice(0, 40);
+}
+router26.get("/search", requireAuth, async (req, res) => {
+  try {
+    const q = String(req.query.q ?? "").trim();
+    const locale = req.query.locale === "en" ? "en" : "tr";
+    if (q.length < 1) {
+      res.json({
+        query: q,
+        results: NAV_SHORTCUTS.slice(0, 8).map((n) => ({ ...n, score: 1 })),
+        ai: null
+      });
+      return;
+    }
+    if (q.length > 120) {
+      res.status(400).json({ error: "Sorgu \xE7ok uzun" });
+      return;
+    }
+    const results = await gatherHits(q, locale);
+    res.json({ query: q, results, ai: null });
+  } catch (err) {
+    res.status(500).json({ error: err.message ?? "Arama ba\u015Far\u0131s\u0131z" });
+  }
+});
+router26.post("/search/ai", requireAuth, async (req, res) => {
+  try {
+    const q = String(req.body?.q ?? "").trim();
+    const locale = req.body?.locale === "en" ? "en" : "tr";
+    if (q.length < 2) {
+      res.status(400).json({ error: "Sorgu gerekli" });
+      return;
+    }
+    const results = await gatherHits(q, locale);
+    const fallbackAi = {
+      intent: locale === "en" ? "general search" : "genel arama",
+      summary: locale === "en" ? `Found ${results.length} matches across the circle.` : `\xC7emberde ${results.length} sonu\xE7 bulundu.`,
+      suggestions: results.slice(0, 5).map((r) => ({
+        title: r.title,
+        href: r.href,
+        reason: r.subtitle || r.kind
+      }))
+    };
+    if (!process.env.ANTHROPIC_API_KEY) {
+      res.json({ query: q, results, ai: fallbackAi });
+      return;
+    }
+    const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+    const compact = results.slice(0, 20).map((r) => ({
+      kind: r.kind,
+      title: r.title,
+      subtitle: r.subtitle,
+      href: r.href
+    }));
+    const message = await client.messages.create({
+      model: "claude-haiku-4-5-20251001",
+      max_tokens: 500,
+      messages: [
+        {
+          role: "user",
+          content: `inner\xB7hub panel arama asistan\u0131s\u0131n. Kullan\u0131c\u0131 sorgusu: "${q}"
+Dil: ${locale}
+Aday sonu\xE7lar: ${JSON.stringify(compact)}
+
+Yaln\u0131zca JSON:
+{
+  "intent": "k\u0131sa niyet",
+  "summary": "1-2 c\xFCmle y\xF6nlendirme",
+  "suggestions": [{"title":"...","href":"/panel/...","reason":"..."}]
+}
+En fazla 5 suggestion; href'ler adaylardan gelsin. ${locale === "en" ? "English" : "T\xFCrk\xE7e"} yaz.`
+        }
+      ]
+    });
+    const raw = message.content[0].text.trim();
+    const jsonMatch = raw.match(/\{[\s\S]*\}/);
+    let ai = fallbackAi;
+    if (jsonMatch) {
+      try {
+        ai = { ...fallbackAi, ...JSON.parse(jsonMatch[0]) };
+      } catch {
+      }
+    }
+    const preferred = new Set((ai.suggestions ?? []).map((s) => s.href));
+    results.sort((a, b) => {
+      const ap = preferred.has(a.href) ? 1 : 0;
+      const bp = preferred.has(b.href) ? 1 : 0;
+      if (ap !== bp) return bp - ap;
+      return b.score - a.score;
+    });
+    res.json({ query: q, results, ai });
+  } catch (err) {
+    res.status(500).json({ error: err.message ?? "AI arama ba\u015Far\u0131s\u0131z" });
+  }
+});
+var search_default = router26;
+
+// src/routes/index.ts
+var router27 = (0, import_express27.Router)();
+router27.use(health_default);
+router27.use(invitations_default);
+router27.use("/payments", payments_default);
+router27.use("/ai", ai_default);
+router27.use("/auth", auth_default);
+router27.use(catalog_default);
+router27.use(applications_default);
+router27.use(community_default);
+router27.use(chat_default);
+router27.use(notifications_default);
+router27.use(match_default);
+router27.use(vault_default);
+router27.use(capital_default);
+router27.use(pulse_default);
+router27.use(publicId_default);
+router27.use(analytics_default);
+router27.use(talent_default);
+router27.use(apiKeys_default);
+router27.use(settings_default);
+router27.use(passes_default);
+router27.use(stage_default);
+router27.use(liveJobs_default);
+router27.use(orgs_default);
+router27.use(legal_default);
+router27.use(campaigns_default);
+router27.use(search_default);
+var routes_default = router27;
 
 // src/app.ts
-var app = (0, import_express27.default)();
+var app = (0, import_express28.default)();
 app.use(
   (0, import_pino_http.default)({
     logger,
@@ -126170,18 +126471,18 @@ app.use(
 );
 app.use((req, res, next) => {
   if (req.method === "PUT" && /^\/api\/vault\/\d+\/file$/.test(req.path)) {
-    return import_express27.default.raw({ type: () => true, limit: "12mb" })(req, res, next);
+    return import_express28.default.raw({ type: () => true, limit: "12mb" })(req, res, next);
   }
   next();
 });
-app.use(import_express27.default.json());
-app.use(import_express27.default.text({ type: "text/plain", limit: "16kb" }));
-app.use(import_express27.default.urlencoded({ extended: true }));
+app.use(import_express28.default.json());
+app.use(import_express28.default.text({ type: "text/plain", limit: "16kb" }));
+app.use(import_express28.default.urlencoded({ extended: true }));
 app.use((0, import_cookie_parser.default)());
 app.use(attachUser);
 app.use("/api", routes_default);
 var frontendDist = path9.join(__dirname, "..", "..", "inner-hub", "dist");
-app.use(import_express27.default.static(frontendDist));
+app.use(import_express28.default.static(frontendDist));
 app.get(/^(?!\/api).*/, (_req, res) => {
   res.sendFile(path9.join(frontendDist, "index.html"));
 });

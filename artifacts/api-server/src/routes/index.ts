@@ -24,6 +24,7 @@ import liveJobsRouter from "./liveJobs";
 import orgsRouter from "./orgs";
 import legalRouter from "./legal";
 import campaignsRouter from "./campaigns";
+import searchRouter from "./search";
 
 const router: IRouter = Router();
 
@@ -52,5 +53,6 @@ router.use(liveJobsRouter);
 router.use(orgsRouter);
 router.use(legalRouter);
 router.use(campaignsRouter);
+router.use(searchRouter);
 
 export default router;

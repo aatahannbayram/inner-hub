@@ -10,6 +10,7 @@ import { PanelNav } from "./PanelNav";
 import { PanelPageTransition } from "./PanelPageTransition";
 import { PanelOnboarding } from "./PanelOnboarding";
 import { LegalAcceptModal } from "./LegalAcceptModal";
+import { PanelSearch, SearchTrigger } from "./PanelSearch";
 import { useApiQuery } from "@/hooks/useApiQuery";
 import { apiUrl } from "@/lib/api";
 import { Lockup } from "@/components/Lockup";
@@ -438,6 +439,7 @@ function ShellInner({ user, children, onLogout }: PanelShellProps) {
   const t = useT();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const [location] = useLocation();
   const mainRef = useRef<HTMLElement>(null);
   const prevLocation = useRef(location);
@@ -486,7 +488,7 @@ function ShellInner({ user, children, onLogout }: PanelShellProps) {
 
       <div className="relative z-[1] flex min-h-0 min-w-0 flex-1 flex-col">
         {/* Top bar */}
-        <header className="z-40 flex h-14 shrink-0 items-center justify-between border-b border-[var(--ink)]/[0.08] panel-glass-strong px-3 sm:h-[60px] sm:px-5 lg:px-6 dark:border-white/10">
+        <header className="z-40 flex h-14 shrink-0 items-center justify-between gap-2 border-b border-[var(--ink)]/[0.08] panel-glass-strong px-3 sm:h-[60px] sm:px-5 lg:px-6 dark:border-white/10">
           <button
             type="button"
             data-onboarding="nav"
@@ -500,7 +502,14 @@ function ShellInner({ user, children, onLogout }: PanelShellProps) {
             <BrandMark collapsed={false} />
           </div>
 
+          <div className="hidden min-w-0 flex-1 justify-center px-4 lg:flex">
+            <SearchTrigger variant="bar" onClick={() => setSearchOpen(true)} />
+          </div>
+
           <div className="ml-auto flex items-center gap-2 sm:gap-3">
+            <span className="lg:hidden">
+              <SearchTrigger variant="icon" onClick={() => setSearchOpen(true)} />
+            </span>
             <ThemeToggle />
             {/* Online indicator */}
             <div className="hidden items-center gap-1.5 sm:flex">
@@ -572,6 +581,7 @@ function ShellInner({ user, children, onLogout }: PanelShellProps) {
 
       <LegalAcceptModal />
       <PanelOnboarding userName={user.name} />
+      <PanelSearch open={searchOpen} onOpenChange={setSearchOpen} />
     </div>
   );
 }
