@@ -212,7 +212,7 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
         style={{ objectPosition: "70% center" }}
         src={LOGIN_VIDEO_SRC}
       />
-      {/* Alt bölgede hafif blur — üstte karakter net kalsın (mouse scrub görünsün) */}
+      {/* Alt bölgede hafif blur - üstte karakter net kalsın (mouse scrub görünsün) */}
       <div
         aria-hidden="true"
         className="bottom-blur-mask pointer-events-none absolute inset-0 z-[1] bg-black/25 backdrop-blur-md"
@@ -243,7 +243,7 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
       </header>
 
       <main className="relative z-10 flex min-h-0 flex-1 flex-col justify-between gap-8 overflow-y-auto px-6 pb-10 pt-2 md:px-12 md:pb-16 lg:px-[10%]">
-        {/* Üst: ambient typewriter — absolute değil, form ile çakışmaz */}
+        {/* Üst: ambient typewriter - absolute değil, form ile çakışmaz */}
         <div className="max-w-md shrink-0">
           <p
             aria-hidden="true"
@@ -288,7 +288,7 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
           </p>
         </div>
 
-        {/* Alt: login formu — davet sayfası glass kartı */}
+        {/* Alt: login formu - davet sayfası glass kartı */}
         <div
           className="animate-blur-fade-up w-full max-w-md shrink-0 panel-glass-ink"
           style={{ animationDelay: "200ms" }}

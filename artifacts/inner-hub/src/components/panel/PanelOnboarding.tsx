@@ -409,7 +409,7 @@ function CoachOverlay({
     height: spot.height + pad * 2,
   };
 
-  // Tooltip position — responsive: prefer below on mobile, respect prefer on desktop
+  // Tooltip position - responsive: prefer below on mobile, respect prefer on desktop
   const isMobile = typeof window !== "undefined" && window.innerWidth < 640;
   let cardTop = hole.top + hole.height + 12;
   let cardLeft = Math.min(hole.left, window.innerWidth - 300);

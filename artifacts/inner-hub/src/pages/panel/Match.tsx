@@ -232,7 +232,7 @@ function MatchHero({ matchCount }: { matchCount: number }) {
         className="absolute inset-0 h-full w-full object-cover"
       />
 
-      {/* Video is bright/white — scrim needed for text legibility */}
+      {/* Video is bright/white - scrim needed for text legibility */}
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-[1] bg-[var(--ink-fixed)]/40" />
       <div
         aria-hidden="true"

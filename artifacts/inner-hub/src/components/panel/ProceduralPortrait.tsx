@@ -5,7 +5,7 @@ import { useEffect, useRef } from "react";
  * the 21st.dev ASCII-art pipeline that a given preset actually exercises
  * (grid sampling → per-cell shape → color grade → tint → post-fx → animate).
  * Only the render modes / pfx keys used by the presets we ship ("characters"
- * for Phosphor, "contour" for D60-hero) are wired up — the rest of the
+ * for Phosphor, "contour" for D60-hero) are wired up - the rest of the
  * original spec's ~20 render modes and pfx keys are left out rather than
  * stubbed.
  */
@@ -113,7 +113,7 @@ export function ProceduralPortrait({
       sampleCanvas.height = rows;
       const sctx = sampleCanvas.getContext("2d");
       if (!sctx) return;
-      // Draw the image scaled down to one pixel per grid cell — the browser's
+      // Draw the image scaled down to one pixel per grid cell - the browser's
       // own downscale filtering gives us a fast per-cell average.
       const imgRatio = img.naturalWidth / img.naturalHeight;
       const canvasRatio = cssW / cssH;
@@ -224,7 +224,7 @@ export function ProceduralPortrait({
       ctx.lineCap = "round";
 
       // Classic topographic-scan look: one flowing line per grid row, its
-      // vertical offset driven by the underlying luminance at each x — reads
+      // vertical offset driven by the underlying luminance at each x - reads
       // as contour lines tracing the portrait, and can never fragment into
       // disconnected dashes the way per-cell threshold banding does.
       const amplitude = cellSize * 0.9;

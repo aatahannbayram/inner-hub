@@ -3,7 +3,7 @@ import { FadeIn } from "@/components/FadeIn";
 /** Panel hero'larının sağ tarafındaki tek satır etiket yerine kullanılan,
  *  gerçek bir sayı + kısa açıklama taşıyan blok. Amaç: sağ boşluğu
  *  dolgu metinle değil, sayfanın anlık durumunu gösteren bir bilgiyle
- *  doldurmak — tüm hero'larda aynı bileşen kullanılarak bütünlük sağlanır. */
+ *  doldurmak - tüm hero'larda aynı bileşen kullanılarak bütünlük sağlanır. */
 export function HeroQuickStat({
   value,
   label,

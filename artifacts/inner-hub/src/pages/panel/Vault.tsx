@@ -508,7 +508,7 @@ export default function Vault() {
         />
       )}
 
-      {/* D60-hero portrait — topographic contour rendering of the archive's depth */}
+      {/* D60-hero portrait - topographic contour rendering of the archive's depth */}
       <FadeIn delay={0.03}>
         <div className="relative overflow-hidden panel-glass">
           <ProceduralPortrait
@@ -548,7 +548,7 @@ export default function Vault() {
         ))}
       </div>
 
-      {/* Featured strip — Embla */}
+      {/* Featured strip - Embla */}
       {docs.length > 0 && (
       <FadeIn delay={0.06}>
         <div className="space-y-3">

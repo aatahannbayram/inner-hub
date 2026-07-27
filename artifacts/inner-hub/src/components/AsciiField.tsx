@@ -12,7 +12,7 @@ interface AsciiFieldProps {
 /**
  * Animated ASCII-noise texture, canvas-based (retro-terminal feel referenced
  * from 21st.dev/community/ascii). Sits behind banner content as a pointer-events-none
- * absolute layer — pair with a relative z-10 wrapper for foreground content.
+ * absolute layer - pair with a relative z-10 wrapper for foreground content.
  */
 export function AsciiField({ tone = "dark", cell = 15, className = "" }: AsciiFieldProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);

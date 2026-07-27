@@ -401,9 +401,9 @@ router.post("/courses/:id/enroll", requireAuth, async (req, res) => {
   }
 });
 
-// ─── GET /api/courses/admin ───────────────────────────────────────────────────
+// ─── GET /api/admin/courses ───────────────────────────────────────────────────
 // Admin yönetim görünümü: yayında olmayan (taslak) kurslar da dahil.
-router.get("/courses/admin", requireAuth, requireAdmin, async (req, res) => {
+router.get("/admin/courses", requireAuth, requireAdmin, async (req, res) => {
   try {
     await ensureDemoContent();
     await ensureCourseVideoColumns();

@@ -123,7 +123,7 @@ export function PlatformFeatures({
       className="relative px-4 py-20 text-[var(--bone-fixed)] sm:px-6 md:px-12 md:py-40 lg:px-[10%] lg:py-48"
       style={{ backgroundColor: "var(--ink-fixed)" }}
     >
-      {/* Soft green orbs — clipped locally so they don't break sticky */}
+      {/* Soft green orbs - clipped locally so they don't break sticky */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
         <div className="absolute -left-20 top-24 size-72 bg-[var(--inner-green)]/[0.05] blur-3xl" />
         <div className="absolute -right-16 bottom-20 size-80 bg-[var(--inner-green)]/[0.035] blur-3xl" />

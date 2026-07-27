@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 
 /**
- * Mouse X konumunu video playhead'ine bağlar — karakterin bakışını takip ettirmek için.
+ * Mouse X konumunu video playhead'ine bağlar - karakterin bakışını takip ettirmek için.
  * Seek'ler `onSeeked` kuyruğuyla yapılır; hızlı harekette üst üste seek birikmez.
  */
 export function useScrubVideo() {

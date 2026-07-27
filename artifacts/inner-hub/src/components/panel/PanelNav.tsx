@@ -21,6 +21,7 @@ import {
   Fingerprint,
   Webhook,
   UserCircle,
+  Newspaper,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useT } from "@/i18n";
@@ -58,6 +59,7 @@ const PREFETCH: Record<string, () => Promise<unknown>> = {
   "/panel/membership": () => import("@/pages/panel/Membership"),
   "/panel/applications": () => import("@/pages/panel/Applications"),
   "/panel/courses/admin": () => import("@/pages/panel/CoursesAdmin"),
+  "/panel/haberler": () => import("@/pages/panel/HaberlerAdmin"),
   "/panel/analytics": () => import("@/pages/panel/Analytics"),
   "/panel/settings": () => import("@/pages/panel/Settings"),
 };
@@ -105,6 +107,7 @@ const ADMIN_SECTION: NavSection = {
   items: [
     { href: "/panel/applications", labelKey: "nav.applications", icon: ClipboardList },
     { href: "/panel/courses/admin", labelKey: "nav.coursesAdmin", icon: BookOpen },
+    { href: "/panel/haberler", labelKey: "nav.haberlerAdmin", icon: Newspaper },
     { href: "/panel/analytics", labelKey: "nav.analytics", icon: BarChart3 },
     { href: "/panel/settings", labelKey: "nav.settings", icon: Settings },
   ],

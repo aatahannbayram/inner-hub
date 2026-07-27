@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import Lenis from "lenis";
 
-/** Landing için yumuşak scroll — panelde kullanılmaz */
+/** Landing için yumuşak scroll - panelde kullanılmaz */
 export function useLenis(enabled = true) {
   useEffect(() => {
     if (!enabled || typeof window === "undefined") return;

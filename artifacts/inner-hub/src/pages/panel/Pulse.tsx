@@ -260,7 +260,7 @@ export default function Pulse() {
         />
       )}
 
-      {/* Phosphor portrait — the community's pulse, rendered as a live signal */}
+      {/* Phosphor portrait - the community's pulse, rendered as a live signal */}
       <FadeIn delay={0.03}>
         <div className="relative overflow-hidden panel-glass">
           <ProceduralPortrait

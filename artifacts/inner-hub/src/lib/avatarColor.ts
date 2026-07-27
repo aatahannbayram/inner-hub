@@ -1,5 +1,5 @@
 // Deterministic, editorial-toned color assignment for initials avatars and
-// brand marks — replaces flat ink-black placeholders with a small palette
+// brand marks - replaces flat ink-black placeholders with a small palette
 // that stays legible with light (--bone) text and on-brand with the rest of
 // the ink/bone/inner-green system.
 const PALETTE = [

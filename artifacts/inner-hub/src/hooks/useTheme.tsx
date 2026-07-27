@@ -20,7 +20,7 @@ function resolveIsDark(mode: ThemeMode): boolean {
   return mode === "dark";
 }
 
-/** Dark tema yalnızca panelde — ana site / invitation marka light+cinematic kalır */
+/** Dark tema yalnızca panelde - ana site / invitation marka light+cinematic kalır */
 export function isPanelPath(pathname?: string): boolean {
   if (typeof window === "undefined" && !pathname) return false;
   const path = pathname ?? window.location.pathname;
@@ -53,7 +53,7 @@ type ThemeContextValue = {
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 /**
- * Panel light/dark/system. Ana siteye `.dark` basılmaz —
+ * Panel light/dark/system. Ana siteye `.dark` basılmaz -
  * public sayfalar ink/bone marka dilinde kalır.
  */
 export function ThemeProvider({ children }: { children: ReactNode }) {
@@ -96,10 +96,10 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 }
 
 /**
- * Wouter Router içinde mount edilmeli — panel ↔ public geçişinde `.dark` kapsamı.
+ * Wouter Router içinde mount edilmeli - panel ↔ public geçişinde `.dark` kapsamı.
  */
 export function ThemeRouteSync() {
-  // lazy import pattern avoided — caller passes location via hook in App
+  // lazy import pattern avoided - caller passes location via hook in App
   return null;
 }
 

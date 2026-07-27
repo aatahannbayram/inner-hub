@@ -31,7 +31,7 @@ interface ApiKeyRow {
   lastUsedAt: string | null;
 }
 
-// ─── Dokümantasyon — sabit yapı; metinler bileşen içinde i18n ile ─────────────
+// ─── Dokümantasyon - sabit yapı; metinler bileşen içinde i18n ile ─────────────
 
 function formatDate(iso: string, locale: string): string {
   return new Date(iso).toLocaleDateString(locale === "tr" ? "tr-TR" : "en-US", {
@@ -41,7 +41,7 @@ function formatDate(iso: string, locale: string): string {
   });
 }
 
-// ─── Anahtar oluşturma — plaintext yalnızca bu anda görünür ───────────────────
+// ─── Anahtar oluşturma - plaintext yalnızca bu anda görünür ───────────────────
 
 function NewKeyReveal({ plaintext, onDone }: { plaintext: string; onDone: () => void }) {
   const t = useT();

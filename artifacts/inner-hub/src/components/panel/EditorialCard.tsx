@@ -16,22 +16,22 @@ type EditorialCardProps = {
   cta?: string;
   imageSrc?: string;
   imageAlt?: string;
-  /** Autoplaying muted loop video — takes priority over imageSrc/portrait */
+  /** Autoplaying muted loop video - takes priority over imageSrc/portrait */
   videoSrc?: string;
   /** Optional poster; defaults via posterForVideo(videoSrc) */
   videoPoster?: string;
-  /** Live Canvas2D procedural portrait (Phosphor/D60-hero) — takes priority over imageSrc */
+  /** Live Canvas2D procedural portrait (Phosphor/D60-hero) - takes priority over imageSrc */
   portrait?: { src: string; config: PortraitConfig };
   tone?: "light" | "dark";
   className?: string;
   /** Visual-only frame without CTA */
   mediaOnly?: boolean;
-  /** 1-based position in a set — renders as a small editorial index mark */
+  /** 1-based position in a set - renders as a small editorial index mark */
   index?: number;
 };
 
 /**
- * Kurumsal editorial kart — zero radius, ink/bone, görsel + tipografi.
+ * Kurumsal editorial kart - zero radius, ink/bone, görsel + tipografi.
  * Dekoratif “AI card” değil; etkileşim veya içerik taşıyıcı.
  */
 export function EditorialCard({
@@ -68,7 +68,7 @@ export function EditorialCard({
         className,
       )}
     >
-      {/* Top accent — draws in on hover, the one recurring "signature" mark across the panel */}
+      {/* Top accent - draws in on hover, the one recurring "signature" mark across the panel */}
       <span
         aria-hidden="true"
         className="absolute inset-x-0 top-0 z-10 h-[2px] origin-left scale-x-0 bg-[var(--inner-green)] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-x-100"

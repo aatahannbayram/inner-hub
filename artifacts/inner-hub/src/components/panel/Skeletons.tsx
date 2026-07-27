@@ -1,6 +1,6 @@
 import { motion, useReducedMotion } from "framer-motion";
 
-/** Shimmer sadece transform/opacity — layout tetiklemez, GPU'da çalışır. */
+/** Shimmer sadece transform/opacity - layout tetiklemez, GPU'da çalışır. */
 function Shimmer({ className }: { className?: string }) {
   const reduce = useReducedMotion();
   if (reduce) {
@@ -29,7 +29,7 @@ export function CourseCardSkeleton() {
 }
 
 /** Route-level Suspense fallback (kod bölme). Panel kabuğu zaten mount
- *  olmuş durumda görünür — sadece içerik alanı için genel bir iskelet. */
+ *  olmuş durumda görünür - sadece içerik alanı için genel bir iskelet. */
 export function PanelPageSkeleton() {
   return (
     <div className="space-y-8 max-w-4xl" role="status" aria-busy="true">

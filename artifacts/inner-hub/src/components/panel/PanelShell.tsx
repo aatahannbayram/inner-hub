@@ -557,7 +557,7 @@ function ShellInner({ user, children, onLogout }: PanelShellProps) {
           </div>
         </header>
 
-        {/* Main content — tek scroll container */}
+        {/* Main content - tek scroll container */}
         <main
           id="panel-main"
           ref={mainRef}

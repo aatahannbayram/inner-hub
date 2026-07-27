@@ -14,7 +14,7 @@ export function compareTR(a: string, b: string): number {
   return a.localeCompare(b, "tr");
 }
 
-// Mevcut "%0" biçimi Türkçe için DOĞRU — bu yardımcı yalnızca elle string
+// Mevcut "%0" biçimi Türkçe için DOĞRU - bu yardımcı yalnızca elle string
 // birleştirme yapılan (`%${x}`) yerlerde tutarlılık için opsiyoneldir.
 export function formatPercentTR(value: number): string {
   return new Intl.NumberFormat("tr-TR", { style: "percent", maximumFractionDigits: 1 }).format(value / 100);

@@ -383,7 +383,7 @@ export default function CoursesAdmin() {
   const queryClient = useQueryClient();
   const { data, isLoading, isError, refetch } = useApiQuery<{ courses: AdminCourse[] }>(
     ["courses-admin"],
-    "/api/courses/admin",
+    "/api/admin/courses",
   );
   const courses = data?.courses ?? [];
 

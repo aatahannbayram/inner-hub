@@ -342,7 +342,7 @@ function CoursesHero({
         poster="/posters/courses-hero.jpg"
         className="absolute inset-0 h-full w-full object-cover"
       />
-      {/* backdrop-blur-xl yerine deterministik gradient scrim — altta duran
+      {/* backdrop-blur-xl yerine deterministik gradient scrim - altta duran
           metin için yeterli kontrast, blur'un sürekli GPU maliyeti olmadan. */}
       <div
         aria-hidden="true"
@@ -401,7 +401,7 @@ function CoursesHero({
 
           <div className="mt-8 flex items-end justify-start lg:mt-0 lg:justify-end">
             <HeroQuickStat
-              value={totalCount > 0 ? `${enrolledCount}/${totalCount}` : "—"}
+              value={totalCount > 0 ? `${enrolledCount}/${totalCount}` : "-"}
               label={t("courses.heroStat")}
               tagline={t("courses.heroTagline")}
             />

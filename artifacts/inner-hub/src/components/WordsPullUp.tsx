@@ -68,7 +68,7 @@ function Asterisk() {
 
 export type PullUpSegment = { text: string; className?: string };
 
-/** Multi-segment pull-up — each segment can carry its own type style (serif italic vs sans). */
+/** Multi-segment pull-up - each segment can carry its own type style (serif italic vs sans). */
 export function WordsPullUpMultiStyle({
   segments,
   className,

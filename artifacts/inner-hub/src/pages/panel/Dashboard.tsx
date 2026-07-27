@@ -43,7 +43,7 @@ const VAULT_CARD_PORTRAIT: PortraitConfig = {
 
 const EDITORIAL_PORTRAIT = "/editorial/circle-portrait.jpg";
 
-// Background/border brighten-on-hover comes from the shared .dark .panel-glass:hover rule (index.css) —
+// Background/border brighten-on-hover comes from the shared .dark .panel-glass:hover rule (index.css) -
 // kept here only to the states that rule doesn't cover (focus-visible signal, active press feedback).
 const STAT_CARD_INTERACTIVE =
   "outline-none transition-all duration-150 ease-out active:scale-[0.99] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--inner-green)] motion-reduce:transition-none motion-reduce:active:scale-100";
@@ -160,7 +160,7 @@ function PerkCard({
   return (
     <Link
       href="/panel/perks"
-      aria-label={`${perk.brand} — ${title}`}
+      aria-label={`${perk.brand} - ${title}`}
       className={`group relative flex h-full min-h-11 flex-col overflow-hidden panel-glass p-4 sm:p-5 ${STAT_CARD_INTERACTIVE}`}
     >
       <span aria-hidden className={STAT_CARD_ACCENT} />
@@ -212,7 +212,7 @@ function DashboardHero({ userName }: { userName: string }) {
   const { displayed: typedGreeting, done: typedDone } = useTypewriter(greeting);
 
   // brand: uppercase class Türkçe (tr) bağlamında İ/ı çevirimi uygular; marka adı
-  // İngilizce kalmalı ("İNNER" değil "INNER") — bu yüzden ayrı, lang="en" ile render edilir.
+  // İngilizce kalmalı ("İNNER" değil "INNER") - bu yüzden ayrı, lang="en" ile render edilir.
   const quickNav: { brand?: string; label: string; href: string }[] = [
     { brand: "inner·signal", label: t("dashboard.goToSignal"), href: "/panel/signal" },
     { brand: "inner·match", label: t("dashboard.goToMatch"), href: "/panel/match" },
@@ -302,7 +302,7 @@ export default function Dashboard({
   profileCompletionPct?: number;
 }) {
   const t = useT();
-  // Dashboard stats fail soft — 0 sonuç göster, hata banner'ı yok (bilinçli tasarım kararı).
+  // Dashboard stats fail soft - 0 sonuç göster, hata banner'ı yok (bilinçli tasarım kararı).
   const { data: coursesData } = useApiQuery<{ courses: { id: number; title: string; progressPct?: number }[] }>(
     ["courses"],
     "/api/courses",

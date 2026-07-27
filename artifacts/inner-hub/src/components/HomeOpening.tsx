@@ -17,7 +17,7 @@ const HERO_VIDEO =
 const FEATURE_VIDEO =
   "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260406_133058_0504132a-0cf3-4450-a370-8ea3b05c95d4.mp4";
 
-/** Home §01 background — not used elsewhere on the public landing. */
+/** Home §01 background - not used elsewhere on the public landing. */
 const IDEA_VIDEO =
   "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260530_042513_df96a13b-6155-4f6e-8b93-c9dee66fba08.mp4";
 

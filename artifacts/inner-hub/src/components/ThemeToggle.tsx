@@ -6,7 +6,7 @@ import { useT } from "@/i18n";
 
 /**
  * /api/settings PUT tam prefs objesi bekliyor (partial gönderilirse diğer
- * alanlar sunucu tarafında default'a döner) — bu yüzden cache'teki mevcut
+ * alanlar sunucu tarafında default'a döner) - bu yüzden cache'teki mevcut
  * prefs'i temel alıp yalnızca theme'i güncelliyoruz.
  */
 async function persistThemeToServer(theme: ThemeMode, queryClient: ReturnType<typeof useQueryClient>) {
@@ -23,7 +23,7 @@ async function persistThemeToServer(theme: ThemeMode, queryClient: ReturnType<ty
     const json = await res.json().catch(() => null);
     if (json?.prefs) queryClient.setQueryData(["settings"], { prefs: json.prefs });
   } catch {
-    /* best-effort — tema yine de localStorage üzerinden bu sekmede uygulanmış olur */
+    /* best-effort - tema yine de localStorage üzerinden bu sekmede uygulanmış olur */
   }
 }
 

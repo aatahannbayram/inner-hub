@@ -1,13 +1,13 @@
 import { jsx, jsxs, Fragment as Fragment$1 } from "react/jsx-runtime";
 import { renderToString } from "react-dom/server";
-import { Router } from "wouter";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Link, useParams, Router, Switch, Route } from "wouter";
+import { useMutation, QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import * as React from "react";
 import { createContext, useState, useCallback, useEffect, useMemo, useContext, useRef, Fragment } from "react";
 import * as TooltipPrimitive from "@radix-ui/react-tooltip";
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { ArrowRight, ArrowUpRight, Check, Mail, Linkedin, Instagram, Zap, Users, TrendingUp, BookOpen, Radio, Fingerprint, Code2, Target } from "lucide-react";
+import { Mail, Linkedin, Instagram, ArrowRight, ArrowUpRight, Check, Zap, Users, TrendingUp, BookOpen, Radio, Fingerprint, Code2, Target, Rocket, Wrench, Building2, ArrowLeft, Play, Pause, VolumeX, Volume2, AlertCircle } from "lucide-react";
 import { useReducedMotion, motion, useInView, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import Lenis from "lenis";
 function cn(...inputs) {
@@ -113,6 +113,7 @@ const tr = {
     faq: "SSS",
     applications: "Başvurular",
     coursesAdmin: "Kurs Yönetimi",
+    haberlerAdmin: "Haberler",
     analytics: "Analitik",
     settings: "Ayarlar"
   },
@@ -185,11 +186,45 @@ const tr = {
     platform: "Platform",
     gathering: "Buluşma",
     next: "Sıradaki",
+    artifacts: "Haberler",
     invitation: "Davetiye",
     requestInvitation: "Davetiye talep et",
     primaryNav: "Ana menü",
     openMenu: "Menüyü aç",
     closeMenu: "Menüyü kapat"
+  },
+  artifacts: {
+    nav: "Haberler",
+    eyebrow: "08 · Haberler",
+    title: "Sinyal, not, video.",
+    subtitle: "Blog, post ve caption - çemberden erken sinyal. Flexlore ile üretilir; SEO ve cevap motorları için net özetlerle yayınlanır.",
+    metaTitle: "Haberler · inner.hub",
+    metaDescription: "inner.hub haberler: davetiye, gathering ve çember üzerine yazılar ile video haberler.",
+    article: "Yazı",
+    video: "Video",
+    back: "Tüm haberler",
+    ctaHint: "Erişim davetiye ile. Her zaman.",
+    empty: "Yakında - Flexlore Content Creator Flow ile yazılar buraya akacak.",
+    faqTitle: "Sık sorulanlar"
+  },
+  haberlerAdmin: {
+    title: "Haberler",
+    subtitle: "Blog / yazı / video yapısı. Flexlore bağlanana kadar draft kaydet veya JSON export et; yayına content dosyasına eklenir.",
+    viewPublic: "Herkese açık sayfa",
+    published: "Yayında",
+    open: "Aç",
+    create: "Yeni içerik",
+    createHint: "AEO için önce net cevap (answer), sonra uzun gövde. Export JSON → src/content/artifacts.",
+    fieldTitleTr: "Başlık (TR)",
+    fieldTitleEn: "Başlık (EN)",
+    fieldAnswer: "AEO cevabı",
+    fieldDescription: "Meta description",
+    fieldBody: "Gövde (satır = paragraf)",
+    saveDraft: "Draft kaydet",
+    exportJson: "JSON kopyala",
+    copied: "Kopyalandı",
+    drafts: "Draft’lar",
+    delete: "Sil"
   },
   home: {
     heroTag: "İstanbul → Global · Est. 2026",
@@ -644,7 +679,7 @@ const tr = {
     phValuation: "Değerleme",
     phRound: "Tur (Pre-seed / Seed)",
     phFounders: "Kurucular (virgülle)",
-    phScore: "Skor 0–100",
+    phScore: "Skor 0-100",
     saveFailed: "Deal kaydedilemedi"
   },
   vault: {
@@ -728,7 +763,7 @@ const tr = {
     fromCache: "Görsel önbellekten · ekstra kredi yok",
     visualReady: "Görsel hazır. Yeniden üretmek kredi harcar.",
     confirmGenerate: "Tek görsel üretilir (720p, kredi-tasarruflu). Devam?",
-    confirmRegenerate: "Yeniden üretim ~0.25–1 kredi harcar. Devam?",
+    confirmRegenerate: "Yeniden üretim ~0.25-1 kredi harcar. Devam?",
     expandEditorial: "Büyüt · editorial",
     visualAlt: "Haftalık sinyal görseli",
     weeklyThemes: "Haftalık temalar",
@@ -1178,7 +1213,7 @@ const tr = {
     topReferrersSub: "Trafik kaynakları",
     devices: "Cihazlar",
     devicesSub: "Oturumlara göre",
-    webEmpty: "Henüz site trafiği yok — ziyaretler burada birikecek.",
+    webEmpty: "Henüz site trafiği yok - ziyaretler burada birikecek.",
     syncedGoogle: "Google Analytics ile senkron",
     sendingGoogle: "gtag ile Google’a gönderiliyor",
     gaApiHint: "Canlı Google raporları için Hostinger env: GA4_PROPERTY_ID, GA4_CLIENT_EMAIL, GA4_PRIVATE_KEY",
@@ -1298,6 +1333,7 @@ const en = {
     faq: "FAQ",
     applications: "Applications",
     coursesAdmin: "Course Management",
+    haberlerAdmin: "News",
     analytics: "Analytics",
     settings: "Settings"
   },
@@ -1370,11 +1406,45 @@ const en = {
     platform: "Platform",
     gathering: "Gathering",
     next: "Next",
+    artifacts: "News",
     invitation: "Invitation",
     requestInvitation: "Request an invitation",
     primaryNav: "Primary",
     openMenu: "Open menu",
     closeMenu: "Close menu"
+  },
+  artifacts: {
+    nav: "News",
+    eyebrow: "08 · News",
+    title: "Signal, notes, video.",
+    subtitle: "Blog, posts, and captions - early signal from the circle. Produced via Flexlore; published with clear answers for search and AEO.",
+    metaTitle: "News · inner.hub",
+    metaDescription: "inner.hub news: writing and video briefs on invitations, gatherings, and the circle.",
+    article: "Article",
+    video: "Video",
+    back: "All news",
+    ctaHint: "Access is by invitation. Always.",
+    empty: "Coming soon - posts will flow here via Flexlore Content Creator Flow.",
+    faqTitle: "FAQ"
+  },
+  haberlerAdmin: {
+    title: "News",
+    subtitle: "Blog / article / video structure. Until Flexlore connects: save drafts or export JSON into the content file.",
+    viewPublic: "Public page",
+    published: "Published",
+    open: "Open",
+    create: "New post",
+    createHint: "For AEO: clear answer first, then long body. Export JSON → src/content/artifacts.",
+    fieldTitleTr: "Title (TR)",
+    fieldTitleEn: "Title (EN)",
+    fieldAnswer: "AEO answer",
+    fieldDescription: "Meta description",
+    fieldBody: "Body (line = paragraph)",
+    saveDraft: "Save draft",
+    exportJson: "Copy JSON",
+    copied: "Copied",
+    drafts: "Drafts",
+    delete: "Delete"
   },
   home: {
     heroTag: "Istanbul → Global · Est. 2026",
@@ -1498,12 +1568,12 @@ const en = {
     stepStory: "What are you building?",
     stepIntro: "How did you find us?",
     copyRole: "Investor, founder, builder, or company. Each entry is a different door.",
-    copyIdentity: "Details so we can reach you directly. No spam — only a real reply.",
+    copyIdentity: "Details so we can reach you directly. No spam - only a real reply.",
     copyOrgInvestor: "Your fund or firm + domain. We'll fetch the logo automatically.",
     copyOrgCompany: "Your company name and domain. The logo is saved to the system.",
     copyOrgDefault: "Add your org if you have one. Domain pulls the logo automatically.",
     copyStory: "Keep it short. Keep it clear. The circle will read this.",
-    copyIntro: "Most people arrive by invite. If you found us yourself, that's fine — just say so.",
+    copyIntro: "Most people arrive by invite. If you found us yourself, that's fine - just say so.",
     phName: "Your full name",
     phEmail: "you@company.com",
     orgLabel: "Org / Fund / Company",
@@ -1575,7 +1645,7 @@ const en = {
     haveAccount: "Already a member?",
     noAccount: "Don't have an account?",
     support: "Contact us",
-    typewriter: "A closed circle for founders, investors, and builders. So — what's next?",
+    typewriter: "A closed circle for founders, investors, and builders. So - what's next?",
     ambientWelcome: "A personal invitation,\nwelcome to the inner·hub circle.",
     mouseHint: "Move your mouse · the gaze follows you",
     googleFailed: "Google sign-in failed."
@@ -1630,9 +1700,9 @@ const en = {
     subtitle: "Your day inside the circle.",
     quickActions: "Quick actions",
     openMatch: "inner·match",
-    goToSignal: " — view",
-    goToMatch: " — go",
-    goToCapital: " — explore",
+    goToSignal: " - view",
+    goToMatch: " - go",
+    goToCapital: " - explore",
     openEvents: "See events",
     openChat: "Chat",
     openSignal: "inner·signal",
@@ -1829,7 +1899,7 @@ const en = {
     phValuation: "Valuation",
     phRound: "Round (Pre-seed / Seed)",
     phFounders: "Founders (comma-separated)",
-    phScore: "Score 0–100",
+    phScore: "Score 0-100",
     saveFailed: "Could not save deal"
   },
   vault: {
@@ -1913,7 +1983,7 @@ const en = {
     fromCache: "Visual from cache · no extra credit",
     visualReady: "Visual ready. Regenerating uses credits.",
     confirmGenerate: "One visual will be generated (720p, credit-efficient). Continue?",
-    confirmRegenerate: "Regeneration uses ~0.25–1 credits. Continue?",
+    confirmRegenerate: "Regeneration uses ~0.25-1 credits. Continue?",
     expandEditorial: "Expand · editorial",
     visualAlt: "Weekly signal visual",
     weeklyThemes: "Weekly themes",
@@ -2363,7 +2433,7 @@ const en = {
     topReferrersSub: "Traffic sources",
     devices: "Devices",
     devicesSub: "By session",
-    webEmpty: "No site traffic yet — visits will appear here.",
+    webEmpty: "No site traffic yet - visits will appear here.",
     syncedGoogle: "Synced with Google Analytics",
     sendingGoogle: "Sending to Google via gtag",
     gaApiHint: "For live Google reports set env: GA4_PROPERTY_ID, GA4_CLIENT_EMAIL, GA4_PRIVATE_KEY",
@@ -2530,7 +2600,7 @@ function FadeIn({
     }
   );
 }
-const EASE$2 = [0.16, 1, 0.3, 1];
+const EASE$3 = [0.16, 1, 0.3, 1];
 function WordsPullUp({
   text,
   className,
@@ -2561,7 +2631,7 @@ function WordsPullUp({
             className: "inline-block",
             initial: { y: 20, opacity: 0 },
             animate: inView ? { y: 0, opacity: 1 } : { y: 20, opacity: 0 },
-            transition: { duration: 0.6, ease: EASE$2, delay: delay + i * 0.08 },
+            transition: { duration: 0.6, ease: EASE$3, delay: delay + i * 0.08 },
             children: [
               word,
               showAsterisk && isLast ? /* @__PURE__ */ jsx(Asterisk, {}) : null
@@ -2609,7 +2679,7 @@ function WordsPullUpMultiStyle({
       className: `inline-block ${item.className ?? ""}`,
       initial: { y: 20, opacity: 0 },
       animate: inView ? { y: 0, opacity: 1 } : { y: 20, opacity: 0 },
-      transition: { duration: 0.55, ease: EASE$2, delay: delay + i * 0.08 },
+      transition: { duration: 0.55, ease: EASE$3, delay: delay + i * 0.08 },
       children: item.word
     }
   ) }, item.key)) });
@@ -2704,6 +2774,86 @@ function Lockup({
     /* @__PURE__ */ jsx(BeaconSquare, { className: "mx-[0.12em]", size: "0.42em", pulse }),
     /* @__PURE__ */ jsx("span", { style: textStyle, children: suffix })
   ] });
+}
+function SiteFooter() {
+  const t = useT();
+  return /* @__PURE__ */ jsxs(
+    "footer",
+    {
+      id: "site-footer",
+      className: "relative overflow-hidden border-t border-white/10 bg-[var(--ink-fixed)] px-4 pb-8 pt-12 text-[var(--bone-fixed)] sm:px-6 sm:pt-16 md:px-12 md:pt-20 lg:px-[10%]",
+      children: [
+        /* @__PURE__ */ jsx("div", { className: "pointer-events-none absolute -left-20 top-10 size-72 bg-[var(--inner-green)]/[0.05] blur-3xl" }),
+        /* @__PURE__ */ jsxs("div", { className: "relative z-10 grid gap-12 lg:grid-cols-[1.2fr_1fr_1fr]", children: [
+          /* @__PURE__ */ jsxs("div", { className: "space-y-5", children: [
+            /* @__PURE__ */ jsx(Lockup, { className: "text-[var(--bone-fixed)]", fontSize: "clamp(28px, 4vw, 36px)" }),
+            /* @__PURE__ */ jsx("p", { className: "max-w-[36ch] text-sm font-light leading-relaxed text-[var(--bone-fixed)]/70", children: t("home.footerTagline") }),
+            /* @__PURE__ */ jsxs(
+              "a",
+              {
+                href: "mailto:support@inner.digital",
+                className: "inline-flex items-center gap-2 font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)]/55 transition-colors hover:text-[var(--bone-fixed)]",
+                children: [
+                  /* @__PURE__ */ jsx(Mail, { className: "size-3.5" }),
+                  "support@inner.digital"
+                ]
+              }
+            )
+          ] }),
+          /* @__PURE__ */ jsxs("div", { children: [
+            /* @__PURE__ */ jsx("p", { className: "mb-4 font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)]/40", children: t("home.footerNavigate") }),
+            /* @__PURE__ */ jsx("ul", { className: "space-y-2.5", children: [
+              { label: t("publicNav.platform"), href: "/#section-03" },
+              { label: t("publicNav.gathering"), href: "/#section-06" },
+              { label: t("publicNav.artifacts"), href: "/haberler" },
+              { label: t("home.panel"), href: "/panel" },
+              { label: t("publicNav.invitation"), href: "/invitation" }
+            ].map((l) => /* @__PURE__ */ jsx("li", { children: /* @__PURE__ */ jsx(
+              "a",
+              {
+                href: l.href,
+                className: "font-mono text-caption uppercase tracking-widest text-[var(--bone-fixed)]/65 transition-colors hover:text-[var(--bone-fixed)]",
+                children: l.label
+              }
+            ) }, l.href)) })
+          ] }),
+          /* @__PURE__ */ jsxs("div", { children: [
+            /* @__PURE__ */ jsx("p", { className: "mb-4 font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)]/40", children: t("home.footerConnect") }),
+            /* @__PURE__ */ jsxs("div", { className: "mb-6 flex items-center gap-4", children: [
+              /* @__PURE__ */ jsx(
+                "a",
+                {
+                  href: "https://www.linkedin.com",
+                  target: "_blank",
+                  rel: "noopener noreferrer",
+                  "aria-label": "inner on LinkedIn",
+                  className: "border border-white/15 p-2.5 text-[var(--bone-fixed)]/60 transition-colors hover:border-white/35 hover:text-[var(--bone-fixed)]",
+                  children: /* @__PURE__ */ jsx(Linkedin, { size: 18, strokeWidth: 1.5 })
+                }
+              ),
+              /* @__PURE__ */ jsx(
+                "a",
+                {
+                  href: "https://www.instagram.com",
+                  target: "_blank",
+                  rel: "noopener noreferrer",
+                  "aria-label": "inner on Instagram",
+                  className: "border border-white/15 p-2.5 text-[var(--bone-fixed)]/60 transition-colors hover:border-white/35 hover:text-[var(--bone-fixed)]",
+                  children: /* @__PURE__ */ jsx(Instagram, { size: 18, strokeWidth: 1.5 })
+                }
+              )
+            ] }),
+            /* @__PURE__ */ jsx("p", { className: "font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)]/35", children: "İstanbul → Global" })
+          ] })
+        ] }),
+        /* @__PURE__ */ jsxs("div", { className: "relative z-10 mt-14 flex flex-col gap-6 border-t border-white/10 pt-6 md:flex-row md:items-end md:justify-between", children: [
+          /* @__PURE__ */ jsx("p", { className: "font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)]/35", children: t("home.footerRights") }),
+          /* @__PURE__ */ jsx("div", { className: "leading-none text-[var(--bone-fixed)]", "aria-hidden": "true", children: /* @__PURE__ */ jsx(Lockup, { fontSize: "clamp(2.75rem, 10vw, 7.5rem)" }) })
+        ] }),
+        /* @__PURE__ */ jsx("span", { className: "sr-only", children: "inner hub" })
+      ]
+    }
+  );
 }
 function Grain() {
   return /* @__PURE__ */ jsx("div", { className: "grain-overlay", "aria-hidden": "true" });
@@ -7200,15 +7350,16 @@ function WhatsNextCinematic() {
   );
 }
 const LINK_KEYS = [
-  { key: "idea", href: "#section-01" },
-  { key: "circle", href: "#section-02" },
-  { key: "platform", href: "#section-03" },
-  { key: "gathering", href: "#section-06" },
-  { key: "next", href: "#section-07" }
+  { key: "idea", href: "/#section-01" },
+  { key: "circle", href: "/#section-02" },
+  { key: "platform", href: "/#section-03" },
+  { key: "gathering", href: "/#section-06" },
+  { key: "artifacts", href: "/haberler" }
+  // eski "Sıradaki" → Haberler
 ];
-const EASE$1 = [0.16, 1, 0.3, 1];
+const EASE$2 = [0.16, 1, 0.3, 1];
 const HERO_CHROME = "#0A0A0A";
-function FloatingNavbar() {
+function FloatingNavbar({ placement = "overlay" }) {
   const t = useT();
   const [open, setOpen] = useState(false);
   const links = LINK_KEYS.map((link) => ({
@@ -7220,8 +7371,8 @@ function FloatingNavbar() {
     {
       initial: { opacity: 0, y: -10 },
       animate: { opacity: 1, y: 0 },
-      transition: { duration: 0.7, ease: EASE$1, delay: 0.15 },
-      className: "absolute inset-x-0 top-0 z-50",
+      transition: { duration: 0.7, ease: EASE$2, delay: 0.15 },
+      className: placement === "static" ? "sticky top-0 z-50 border-b border-white/10" : "absolute inset-x-0 top-0 z-50",
       style: { backgroundColor: HERO_CHROME },
       children: [
         /* @__PURE__ */ jsxs("div", { className: "flex h-[56px] items-center justify-between gap-3 px-3 py-2.5 sm:h-auto sm:gap-4 sm:px-5 sm:py-3.5 md:px-6", children: [
@@ -7304,7 +7455,7 @@ function FloatingNavbar() {
             initial: { opacity: 0, y: -6 },
             animate: { opacity: 1, y: 0 },
             exit: { opacity: 0, y: -6 },
-            transition: { duration: 0.25, ease: EASE$1 },
+            transition: { duration: 0.25, ease: EASE$2 },
             className: "border-t border-white/10 md:hidden",
             style: { backgroundColor: HERO_CHROME },
             children: [
@@ -7344,7 +7495,7 @@ function FloatingNavbar() {
     }
   );
 }
-const EASE = [0.16, 1, 0.3, 1];
+const EASE$1 = [0.16, 1, 0.3, 1];
 const CARD_EASE = [0.22, 1, 0.36, 1];
 const HERO_VIDEO = "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260405_170732_8a9ccda6-5cff-4628-b164-059c500a2b41.mp4";
 const FEATURE_VIDEO = "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260406_133058_0504132a-0cf3-4450-a370-8ea3b05c95d4.mp4";
@@ -7404,7 +7555,7 @@ function HeroInset() {
                 {
                   initial: { opacity: 0 },
                   animate: { opacity: 1 },
-                  transition: { duration: 0.8, delay: 0.35, ease: EASE },
+                  transition: { duration: 0.8, delay: 0.35, ease: EASE$1 },
                   className: "mb-3 flex items-center gap-2.5 font-mono text-[9px] uppercase tracking-[0.16em] text-[var(--bone-fixed)]/55 sm:mb-6 sm:gap-3 sm:text-[11px]",
                   children: [
                     /* @__PURE__ */ jsx("span", { className: "size-2 shrink-0 bg-[var(--inner-green)] animate-beacon sm:size-1.5" }),
@@ -7431,7 +7582,7 @@ function HeroInset() {
                     {
                       initial: { opacity: 0, y: 20 },
                       animate: { opacity: 1, y: 0 },
-                      transition: { duration: 0.8, delay: 0.5, ease: EASE },
+                      transition: { duration: 0.8, delay: 0.5, ease: EASE$1 },
                       className: "max-w-[36ch] text-[13px] leading-[1.45] text-[var(--bone-fixed)]/70 sm:text-sm md:text-[15px] md:leading-[1.35]",
                       children: t("home.heroBody")
                     }
@@ -7442,7 +7593,7 @@ function HeroInset() {
                       href: "/invitation",
                       initial: { opacity: 0, y: 20 },
                       animate: { opacity: 1, y: 0 },
-                      transition: { duration: 0.8, delay: 0.7, ease: EASE },
+                      transition: { duration: 0.8, delay: 0.7, ease: EASE$1 },
                       className: "group inline-flex w-full min-h-11 items-center justify-between gap-2.5 bg-[var(--bone-fixed)] py-1.5 pl-4 pr-1.5 text-sm font-medium text-[var(--ink-fixed)] transition-[gap] duration-300 hover:gap-3.5 sm:w-fit sm:min-h-0 sm:pl-5 sm:text-base",
                       children: [
                         t("home.requestInvitation"),
@@ -7957,89 +8108,1704 @@ function Home() {
       ),
       /* @__PURE__ */ jsx(WhatsNextCinematic, {})
     ] }),
-    /* @__PURE__ */ jsxs(
-      "footer",
-      {
-        id: "site-footer",
-        className: "relative overflow-hidden border-t border-white/10 bg-[var(--ink-fixed)] px-4 pb-8 pt-12 text-[var(--bone-fixed)] sm:px-6 sm:pt-16 md:px-12 md:pt-20 lg:px-[10%]",
-        children: [
-          /* @__PURE__ */ jsx("div", { className: "pointer-events-none absolute -left-20 top-10 size-72 bg-[var(--inner-green)]/[0.05] blur-3xl" }),
-          /* @__PURE__ */ jsxs("div", { className: "relative z-10 grid gap-12 lg:grid-cols-[1.2fr_1fr_1fr]", children: [
-            /* @__PURE__ */ jsxs("div", { className: "space-y-5", children: [
-              /* @__PURE__ */ jsx(Lockup, { className: "text-[var(--bone-fixed)]", fontSize: "clamp(28px, 4vw, 36px)" }),
-              /* @__PURE__ */ jsx("p", { className: "max-w-[36ch] text-sm font-light leading-relaxed text-[var(--bone-fixed)]/70", children: t("home.footerTagline") }),
-              /* @__PURE__ */ jsxs(
-                "a",
-                {
-                  href: "mailto:support@inner.digital",
-                  className: "inline-flex items-center gap-2 font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)]/55 transition-colors hover:text-[var(--bone-fixed)]",
-                  children: [
-                    /* @__PURE__ */ jsx(Mail, { className: "size-3.5" }),
-                    "support@inner.digital"
-                  ]
-                }
-              )
-            ] }),
-            /* @__PURE__ */ jsxs("div", { children: [
-              /* @__PURE__ */ jsx("p", { className: "mb-4 font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)]/40", children: t("home.footerNavigate") }),
-              /* @__PURE__ */ jsx("ul", { className: "space-y-2.5", children: [
-                { label: t("publicNav.platform"), href: "#section-03" },
-                { label: t("publicNav.gathering"), href: "#section-06" },
-                { label: t("publicNav.next"), href: "#section-07" },
-                { label: t("home.panel"), href: "/panel" },
-                { label: t("publicNav.invitation"), href: "/invitation" }
-              ].map((l) => /* @__PURE__ */ jsx("li", { children: /* @__PURE__ */ jsx(
-                "a",
-                {
-                  href: l.href,
-                  className: "font-mono text-caption uppercase tracking-widest text-[var(--bone-fixed)]/65 transition-colors hover:text-[var(--bone-fixed)]",
-                  children: l.label
-                }
-              ) }, l.href)) })
-            ] }),
-            /* @__PURE__ */ jsxs("div", { children: [
-              /* @__PURE__ */ jsx("p", { className: "mb-4 font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)]/40", children: t("home.footerConnect") }),
-              /* @__PURE__ */ jsxs("div", { className: "mb-6 flex items-center gap-4", children: [
-                /* @__PURE__ */ jsx(
-                  "a",
-                  {
-                    href: "https://www.linkedin.com",
-                    target: "_blank",
-                    rel: "noopener noreferrer",
-                    "aria-label": "inner on LinkedIn",
-                    className: "border border-white/15 p-2.5 text-[var(--bone-fixed)]/60 transition-colors hover:border-white/35 hover:text-[var(--bone-fixed)]",
-                    children: /* @__PURE__ */ jsx(Linkedin, { size: 18, strokeWidth: 1.5 })
-                  }
-                ),
-                /* @__PURE__ */ jsx(
-                  "a",
-                  {
-                    href: "https://www.instagram.com",
-                    target: "_blank",
-                    rel: "noopener noreferrer",
-                    "aria-label": "inner on Instagram",
-                    className: "border border-white/15 p-2.5 text-[var(--bone-fixed)]/60 transition-colors hover:border-white/35 hover:text-[var(--bone-fixed)]",
-                    children: /* @__PURE__ */ jsx(Instagram, { size: 18, strokeWidth: 1.5 })
-                  }
-                )
-              ] }),
-              /* @__PURE__ */ jsx("p", { className: "font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)]/35", children: "İstanbul → Global" })
-            ] })
-          ] }),
-          /* @__PURE__ */ jsxs("div", { className: "relative z-10 mt-14 flex flex-col gap-6 border-t border-white/10 pt-6 md:flex-row md:items-end md:justify-between", children: [
-            /* @__PURE__ */ jsx("p", { className: "font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)]/35", children: t("home.footerRights") }),
-            /* @__PURE__ */ jsx("div", { className: "leading-none text-[var(--bone-fixed)]", "aria-hidden": "true", children: /* @__PURE__ */ jsx(Lockup, { fontSize: "clamp(2.75rem, 10vw, 7.5rem)" }) })
-          ] }),
-          /* @__PURE__ */ jsx("span", { className: "sr-only", children: "inner hub" })
-        ]
-      }
-    )
+    /* @__PURE__ */ jsx(SiteFooter, {})
   ] });
 }
-function render3() {
+const NO_BODY_STATUS = /* @__PURE__ */ new Set([204, 205, 304]);
+const DEFAULT_JSON_ACCEPT = "application/json, application/problem+json";
+function isRequest(input) {
+  return typeof Request !== "undefined" && input instanceof Request;
+}
+function resolveMethod(input, explicitMethod) {
+  if (explicitMethod) return explicitMethod.toUpperCase();
+  if (isRequest(input)) return input.method.toUpperCase();
+  return "GET";
+}
+function isUrl(input) {
+  return typeof URL !== "undefined" && input instanceof URL;
+}
+function applyBaseUrl(input) {
+  return input;
+}
+function resolveUrl(input) {
+  if (typeof input === "string") return input;
+  if (isUrl(input)) return input.toString();
+  return input.url;
+}
+function mergeHeaders(...sources) {
+  const headers = new Headers();
+  for (const source of sources) {
+    if (!source) continue;
+    new Headers(source).forEach((value, key) => {
+      headers.set(key, value);
+    });
+  }
+  return headers;
+}
+function getMediaType(headers) {
+  const value = headers.get("content-type");
+  return value ? value.split(";", 1)[0].trim().toLowerCase() : null;
+}
+function isJsonMediaType(mediaType) {
+  return mediaType === "application/json" || Boolean(mediaType?.endsWith("+json"));
+}
+function isTextMediaType(mediaType) {
+  return Boolean(
+    mediaType && (mediaType.startsWith("text/") || mediaType === "application/xml" || mediaType === "text/xml" || mediaType.endsWith("+xml") || mediaType === "application/x-www-form-urlencoded")
+  );
+}
+function hasNoBody(response, method) {
+  if (method === "HEAD") return true;
+  if (NO_BODY_STATUS.has(response.status)) return true;
+  if (response.headers.get("content-length") === "0") return true;
+  if (response.body === null) return true;
+  return false;
+}
+function stripBom(text) {
+  return text.charCodeAt(0) === 65279 ? text.slice(1) : text;
+}
+function looksLikeJson(text) {
+  const trimmed = text.trimStart();
+  return trimmed.startsWith("{") || trimmed.startsWith("[");
+}
+function getStringField(value, key) {
+  if (!value || typeof value !== "object") return void 0;
+  const candidate = value[key];
+  if (typeof candidate !== "string") return void 0;
+  const trimmed = candidate.trim();
+  return trimmed === "" ? void 0 : trimmed;
+}
+function truncate(text, maxLength = 300) {
+  return text.length > maxLength ? `${text.slice(0, maxLength - 1)}…` : text;
+}
+function buildErrorMessage(response, data) {
+  const prefix = `HTTP ${response.status} ${response.statusText}`;
+  if (typeof data === "string") {
+    const text = data.trim();
+    return text ? `${prefix}: ${truncate(text)}` : prefix;
+  }
+  const title = getStringField(data, "title");
+  const detail = getStringField(data, "detail");
+  const message = getStringField(data, "message") ?? getStringField(data, "error_description") ?? getStringField(data, "error");
+  if (title && detail) return `${prefix}: ${title} — ${detail}`;
+  if (detail) return `${prefix}: ${detail}`;
+  if (message) return `${prefix}: ${message}`;
+  if (title) return `${prefix}: ${title}`;
+  return prefix;
+}
+class ApiError extends Error {
+  name = "ApiError";
+  status;
+  statusText;
+  data;
+  headers;
+  response;
+  method;
+  url;
+  constructor(response, data, requestInfo) {
+    super(buildErrorMessage(response, data));
+    Object.setPrototypeOf(this, new.target.prototype);
+    this.status = response.status;
+    this.statusText = response.statusText;
+    this.data = data;
+    this.headers = response.headers;
+    this.response = response;
+    this.method = requestInfo.method;
+    this.url = response.url || requestInfo.url;
+  }
+}
+class ResponseParseError extends Error {
+  name = "ResponseParseError";
+  status;
+  statusText;
+  headers;
+  response;
+  method;
+  url;
+  rawBody;
+  cause;
+  constructor(response, rawBody, cause, requestInfo) {
+    super(
+      `Failed to parse response from ${requestInfo.method} ${response.url || requestInfo.url} (${response.status} ${response.statusText}) as JSON`
+    );
+    Object.setPrototypeOf(this, new.target.prototype);
+    this.status = response.status;
+    this.statusText = response.statusText;
+    this.headers = response.headers;
+    this.response = response;
+    this.method = requestInfo.method;
+    this.url = response.url || requestInfo.url;
+    this.rawBody = rawBody;
+    this.cause = cause;
+  }
+}
+async function parseJsonBody(response, requestInfo) {
+  const raw = await response.text();
+  const normalized = stripBom(raw);
+  if (normalized.trim() === "") {
+    return null;
+  }
+  try {
+    return JSON.parse(normalized);
+  } catch (cause) {
+    throw new ResponseParseError(response, raw, cause, requestInfo);
+  }
+}
+async function parseErrorBody(response, method) {
+  if (hasNoBody(response, method)) {
+    return null;
+  }
+  const mediaType = getMediaType(response.headers);
+  if (mediaType && !isJsonMediaType(mediaType) && !isTextMediaType(mediaType)) {
+    return typeof response.blob === "function" ? response.blob() : response.text();
+  }
+  const raw = await response.text();
+  const normalized = stripBom(raw);
+  const trimmed = normalized.trim();
+  if (trimmed === "") {
+    return null;
+  }
+  if (isJsonMediaType(mediaType) || looksLikeJson(normalized)) {
+    try {
+      return JSON.parse(normalized);
+    } catch {
+      return raw;
+    }
+  }
+  return raw;
+}
+function inferResponseType(response) {
+  const mediaType = getMediaType(response.headers);
+  if (isJsonMediaType(mediaType)) return "json";
+  if (isTextMediaType(mediaType) || mediaType == null) return "text";
+  return "blob";
+}
+async function parseSuccessBody(response, responseType, requestInfo) {
+  if (hasNoBody(response, requestInfo.method)) {
+    return null;
+  }
+  const effectiveType = responseType === "auto" ? inferResponseType(response) : responseType;
+  switch (effectiveType) {
+    case "json":
+      return parseJsonBody(response, requestInfo);
+    case "text": {
+      const text = await response.text();
+      return text === "" ? null : text;
+    }
+    case "blob":
+      if (typeof response.blob !== "function") {
+        throw new TypeError(
+          'Blob responses are not supported in this runtime. Use responseType "json" or "text" instead.'
+        );
+      }
+      return response.blob();
+  }
+}
+async function customFetch(input, options = {}) {
+  input = applyBaseUrl(input);
+  const { responseType = "auto", headers: headersInit, ...init4 } = options;
+  const method = resolveMethod(input, init4.method);
+  if (init4.body != null && (method === "GET" || method === "HEAD")) {
+    throw new TypeError(`customFetch: ${method} requests cannot have a body.`);
+  }
+  const headers = mergeHeaders(isRequest(input) ? input.headers : void 0, headersInit);
+  if (typeof init4.body === "string" && !headers.has("content-type") && looksLikeJson(init4.body)) {
+    headers.set("content-type", "application/json");
+  }
+  if (responseType === "json" && !headers.has("accept")) {
+    headers.set("accept", DEFAULT_JSON_ACCEPT);
+  }
+  const requestInfo = { method, url: resolveUrl(input) };
+  const response = await fetch(input, { ...init4, method, headers });
+  if (!response.ok) {
+    const errorData = await parseErrorBody(response, method);
+    throw new ApiError(response, errorData, requestInfo);
+  }
+  return await parseSuccessBody(response, responseType, requestInfo);
+}
+const getSubmitRequestUrl = () => {
+  return `/api/request`;
+};
+const submitRequest = async (invitationInput, options) => {
+  return customFetch(
+    getSubmitRequestUrl(),
+    {
+      ...options,
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...options?.headers },
+      body: JSON.stringify(invitationInput)
+    }
+  );
+};
+const getSubmitRequestMutationOptions = (options) => {
+  const mutationKey = ["submitRequest"];
+  const { mutation: mutationOptions, request: requestOptions } = { mutation: { mutationKey }, request: void 0 };
+  const mutationFn = (props) => {
+    const { data } = props ?? {};
+    return submitRequest(data, requestOptions);
+  };
+  return { mutationFn, ...mutationOptions };
+};
+const useSubmitRequest = (options) => {
+  return useMutation(getSubmitRequestMutationOptions());
+};
+const GA_ID = "G-FGLJ0ECVDD";
+function isGaEnabled() {
+  return Boolean(GA_ID) && typeof window !== "undefined";
+}
+function trackEvent(name, params) {
+  if (!isGaEnabled() || !window.gtag) return;
+  window.gtag("event", name, params);
+}
+const INVITE_VIDEO = "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260510_060007_60275ce7-030c-4668-a160-8f364ec537d3.mp4";
+const EASE = [0.16, 1, 0.3, 1];
+const ROLE_DEFS = [
+  { value: "founder", icon: Rocket },
+  { value: "investor", icon: TrendingUp },
+  { value: "builder", icon: Wrench },
+  { value: "company", icon: Building2 }
+];
+const STEP_IDS = ["role", "identity", "org", "story", "intro"];
+const fieldClass = "w-full border-0 border-b border-white/20 bg-transparent px-0 py-3.5 text-[15px] text-[var(--bone-fixed)] shadow-none placeholder:text-white/35 focus-visible:border-[var(--inner-green)] focus-visible:outline-none focus-visible:ring-0 transition-colors";
+function Invitation() {
+  const t = useT();
+  const { locale } = useLocale();
+  const { mutate: submitRequest2, isSuccess, isError, isPending } = useSubmitRequest();
+  const roles = useMemo(
+    () => ROLE_DEFS.map((r) => ({
+      ...r,
+      label: r.value === "founder" ? t("invite.roleFounder") : r.value === "investor" ? t("invite.roleInvestor") : r.value === "builder" ? t("invite.roleBuilder") : t("invite.roleCompany"),
+      hint: r.value === "founder" ? t("invite.roleFounderHint") : r.value === "investor" ? t("invite.roleInvestorHint") : r.value === "builder" ? t("invite.roleBuilderHint") : t("invite.roleCompanyHint")
+    })),
+    [t]
+  );
+  const steps = useMemo(
+    () => [
+      { id: STEP_IDS[0], title: t("invite.stepRole") },
+      { id: STEP_IDS[1], title: t("invite.stepIdentity") },
+      { id: STEP_IDS[2], title: t("invite.stepOrg") },
+      { id: STEP_IDS[3], title: t("invite.stepStory") },
+      { id: STEP_IDS[4], title: t("invite.stepIntro") }
+    ],
+    [t]
+  );
+  const stepCopy = (s, r) => {
+    if (s === 0) return t("invite.copyRole");
+    if (s === 1) return t("invite.copyIdentity");
+    if (s === 2) {
+      if (r === "investor") return t("invite.copyOrgInvestor");
+      if (r === "company") return t("invite.copyOrgCompany");
+      return t("invite.copyOrgDefault");
+    }
+    if (s === 3) return t("invite.copyStory");
+    return t("invite.copyIntro");
+  };
+  const [booting, setBooting] = useState(true);
+  const [bootProgress, setBootProgress] = useState(0);
+  const [step, setStep] = useState(0);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [role, setRole] = useState(null);
+  const [linkedin, setLinkedin] = useState("");
+  const [link, setLink] = useState("");
+  const [organization, setOrganization] = useState("");
+  const [organizationDomain, setOrganizationDomain] = useState("");
+  const [organizationLogo, setOrganizationLogo] = useState(null);
+  const [logoLoading, setLogoLoading] = useState(false);
+  const [whoYouAre, setWhoYouAre] = useState("");
+  const [whoIntroduced, setWhoIntroduced] = useState("");
+  const [fax, setFax] = useState("");
+  useEffect(() => {
+    if (!isSuccess) return;
+    trackEvent("invite_request_submitted", { role: role ?? "unknown" });
+  }, [isSuccess, role]);
+  useEffect(() => {
+    let raf = 0;
+    const start = performance.now();
+    const duration = 1100;
+    const tick = (now) => {
+      const t2 = Math.min(1, (now - start) / duration);
+      const p = 1 - Math.pow(1 - t2, 3);
+      setBootProgress(Math.round(p * 100));
+      if (t2 < 1) {
+        raf = requestAnimationFrame(tick);
+      } else {
+        setTimeout(() => setBooting(false), 180);
+      }
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, []);
+  useEffect(() => {
+    if (organizationDomain.trim()) return;
+    const at = email.lastIndexOf("@");
+    if (at < 0) return;
+    const d = email.slice(at + 1).toLowerCase();
+    const consumer = [
+      "gmail.com",
+      "googlemail.com",
+      "yahoo.com",
+      "hotmail.com",
+      "outlook.com",
+      "icloud.com",
+      "proton.me",
+      "protonmail.com"
+    ];
+    if (d && d.includes(".") && !consumer.includes(d)) {
+      setOrganizationDomain(d);
+    }
+  }, [email, organizationDomain]);
+  useEffect(() => {
+    const domain = organizationDomain.trim().toLowerCase().replace(/^https?:\/\//, "").replace(/^www\./, "").split("/")[0];
+    if (!domain || !domain.includes(".")) {
+      setOrganizationLogo(null);
+      return;
+    }
+    let cancelled = false;
+    const t2 = window.setTimeout(async () => {
+      setLogoLoading(true);
+      try {
+        const res = await fetch(`/api/org-logo?domain=${encodeURIComponent(domain)}`);
+        if (!res.ok) {
+          if (!cancelled) setOrganizationLogo(null);
+          return;
+        }
+        const data = await res.json();
+        if (!cancelled) setOrganizationLogo(data.logoUrl ?? null);
+      } catch {
+        if (!cancelled) setOrganizationLogo(null);
+      } finally {
+        if (!cancelled) setLogoLoading(false);
+      }
+    }, 450);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(t2);
+    };
+  }, [organizationDomain]);
+  const progress = useMemo(() => (step + 1) / steps.length * 100, [step, steps.length]);
+  const orgRequired = role === "investor" || role === "company";
+  const canNext = (() => {
+    if (step === 0) return role != null;
+    if (step === 1) return name.trim().length > 1 && email.includes("@");
+    if (step === 2) {
+      if (orgRequired) return organization.trim().length > 1;
+      return true;
+    }
+    if (step === 3) return whoYouAre.trim().length >= 12;
+    if (step === 4) return true;
+    return false;
+  })();
+  const goNext = () => {
+    if (!canNext) return;
+    if (step < steps.length - 1) setStep((s) => s + 1);
+  };
+  const goBack = () => {
+    if (step > 0) setStep((s) => s - 1);
+  };
+  const handleSubmit = () => {
+    if (!role || !canNext) return;
+    submitRequest2({
+      data: {
+        name: name.trim(),
+        email: email.trim(),
+        role,
+        linkedin: linkedin || null,
+        whoYouAre: whoYouAre.trim(),
+        link: link || null,
+        whoIntroduced: whoIntroduced || null,
+        organization: organization.trim() || null,
+        organizationDomain: organizationDomain.trim() || null,
+        organizationLogo: organizationLogo || null,
+        fax: fax || null,
+        company: null
+      }
+    });
+  };
+  const onKeyDown = (e) => {
+    if (e.key !== "Enter" || e.shiftKey) return;
+    if (e.target.tagName === "TEXTAREA") return;
+    e.preventDefault();
+    if (step < steps.length - 1) goNext();
+    else handleSubmit();
+  };
+  return /* @__PURE__ */ jsxs("div", { lang: locale, className: "cinematic-surface relative flex min-h-svh flex-col overflow-hidden bg-[var(--ink-fixed)] text-[var(--bone-fixed)]", children: [
+    /* @__PURE__ */ jsx(
+      HeroVideo,
+      {
+        src: INVITE_VIDEO,
+        className: "fixed inset-0 z-0 h-full w-full scale-[1.03] object-cover"
+      }
+    ),
+    /* @__PURE__ */ jsx("div", { "aria-hidden": true, className: "pointer-events-none fixed inset-0 z-[1] bg-black/55" }),
+    /* @__PURE__ */ jsx(
+      "div",
+      {
+        "aria-hidden": true,
+        className: "pointer-events-none fixed inset-0 z-[1] bg-gradient-to-b from-black/70 via-black/45 to-black/75"
+      }
+    ),
+    /* @__PURE__ */ jsx(
+      "div",
+      {
+        "aria-hidden": true,
+        className: "noise-overlay pointer-events-none fixed inset-0 z-[1] opacity-[0.25] mix-blend-overlay"
+      }
+    ),
+    /* @__PURE__ */ jsxs("header", { className: "relative z-20 flex h-[60px] shrink-0 items-center justify-between px-5 md:h-[72px] md:px-10 lg:px-[8%]", children: [
+      /* @__PURE__ */ jsx("a", { href: "/", className: "inline-flex focus-visible:outline-none", children: /* @__PURE__ */ jsx(Lockup, { className: "text-[var(--bone-fixed)]", fontSize: "clamp(22px, 2.4vw, 30px)", pulse: true }) }),
+      /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3", children: [
+        /* @__PURE__ */ jsx(LocaleToggle, { tone: "dark" }),
+        /* @__PURE__ */ jsx(
+          "a",
+          {
+            href: "/",
+            className: "font-mono text-[10px] uppercase tracking-widest text-white/55 transition-colors hover:text-white sm:text-xs",
+            children: t("invite.homeLink")
+          }
+        )
+      ] })
+    ] }),
+    /* @__PURE__ */ jsx("main", { className: "relative z-10 flex flex-1 items-center justify-center px-4 py-10 sm:px-6 md:px-10 md:py-14", children: /* @__PURE__ */ jsx(AnimatePresence, { mode: "wait", children: booting ? /* @__PURE__ */ jsxs(
+      motion.div,
+      {
+        initial: { opacity: 0 },
+        animate: { opacity: 1 },
+        exit: { opacity: 0, y: -8 },
+        transition: { duration: 0.35 },
+        className: "w-full max-w-md",
+        children: [
+          /* @__PURE__ */ jsx("p", { className: "mb-4 font-mono text-[10px] uppercase tracking-[0.18em] text-white/50", children: t("invite.preparing") }),
+          /* @__PURE__ */ jsx("div", { className: "mb-3 h-[2px] w-full overflow-hidden bg-white/15", children: /* @__PURE__ */ jsx(
+            motion.div,
+            {
+              className: "h-full bg-[var(--inner-green)]",
+              style: { width: `${bootProgress}%` }
+            }
+          ) }),
+          /* @__PURE__ */ jsxs("div", { className: "flex items-baseline justify-between font-mono text-[11px] uppercase tracking-widest text-white/45", children: [
+            /* @__PURE__ */ jsx("span", { children: t("invite.access") }),
+            /* @__PURE__ */ jsxs("span", { children: [
+              bootProgress,
+              "%"
+            ] })
+          ] })
+        ]
+      },
+      "boot"
+    ) : isSuccess ? /* @__PURE__ */ jsxs(
+      motion.div,
+      {
+        initial: { opacity: 0, y: 18 },
+        animate: { opacity: 1, y: 0 },
+        transition: { duration: 0.55, ease: EASE },
+        className: "w-full max-w-lg panel-glass-ink px-6 py-10 sm:px-8 sm:py-12",
+        children: [
+          /* @__PURE__ */ jsxs("div", { className: "mb-6 flex items-center gap-3", children: [
+            /* @__PURE__ */ jsx("span", { className: "flex size-7 items-center justify-center bg-[var(--inner-green)]", children: /* @__PURE__ */ jsx(Check, { className: "size-3.5 text-black", strokeWidth: 2.5 }) }),
+            /* @__PURE__ */ jsx("span", { className: "font-mono text-xs uppercase tracking-widest text-white/60", children: t("invite.received") })
+          ] }),
+          /* @__PURE__ */ jsx("h1", { className: "mb-4 font-display font-serif italic text-4xl leading-[1.1] text-balance text-[var(--bone-fixed)] md:text-5xl", children: t("invite.successTitle") }),
+          /* @__PURE__ */ jsx("p", { className: "max-w-[42ch] text-sm leading-relaxed text-white/60 md:text-base", children: t("invite.successBody") }),
+          /* @__PURE__ */ jsxs(
+            "a",
+            {
+              href: "/",
+              className: "mt-8 inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-[var(--bone-fixed)]/70 transition-colors hover:text-[var(--bone-fixed)]",
+              children: [
+                t("invite.backHome"),
+                /* @__PURE__ */ jsx(ArrowUpRight, { className: "size-3.5" })
+              ]
+            }
+          )
+        ]
+      },
+      "success"
+    ) : /* @__PURE__ */ jsxs(
+      motion.div,
+      {
+        initial: { opacity: 0, y: 16 },
+        animate: { opacity: 1, y: 0 },
+        transition: { duration: 0.5, ease: EASE },
+        className: "w-full max-w-xl panel-glass-ink",
+        onKeyDown,
+        children: [
+          /* @__PURE__ */ jsxs("div", { className: "border-b border-white/10 px-5 pt-5 sm:px-7", children: [
+            /* @__PURE__ */ jsxs("div", { className: "mb-3 flex items-center justify-between gap-4", children: [
+              /* @__PURE__ */ jsx("p", { className: "font-mono text-[10px] uppercase tracking-[0.16em] text-white/50", children: t("invite.requestTitle") }),
+              /* @__PURE__ */ jsxs("p", { className: "font-mono text-[10px] uppercase tracking-widest text-white/40", children: [
+                String(step + 1).padStart(2, "0"),
+                " / ",
+                String(steps.length).padStart(2, "0")
+              ] })
+            ] }),
+            /* @__PURE__ */ jsx("div", { className: "h-[2px] w-full overflow-hidden bg-white/10", children: /* @__PURE__ */ jsx(
+              motion.div,
+              {
+                className: "h-full bg-[var(--inner-green)]",
+                animate: { width: `${progress}%` },
+                transition: { duration: 0.45, ease: EASE }
+              }
+            ) }),
+            /* @__PURE__ */ jsx("div", { className: "mt-4 flex gap-1.5 overflow-x-auto pb-4", children: steps.map((s, i) => /* @__PURE__ */ jsx(
+              "button",
+              {
+                type: "button",
+                onClick: () => {
+                  if (i < step) setStep(i);
+                },
+                className: `shrink-0 border-b px-2 py-1 font-mono text-[9px] uppercase tracking-widest transition-colors sm:text-[10px] ${i === step ? "border-[var(--inner-green)] text-[var(--bone-fixed)]" : i < step ? "border-transparent text-[var(--inner-green)]/80 hover:text-[var(--inner-green)]" : "border-transparent text-white/25"}`,
+                children: s.id
+              },
+              s.id
+            )) })
+          ] }),
+          /* @__PURE__ */ jsx("div", { className: "px-5 py-7 sm:px-7 sm:py-8", children: /* @__PURE__ */ jsx(AnimatePresence, { mode: "wait", children: /* @__PURE__ */ jsxs(
+            motion.div,
+            {
+              initial: { opacity: 0, x: 18 },
+              animate: { opacity: 1, x: 0 },
+              exit: { opacity: 0, x: -14 },
+              transition: { duration: 0.35, ease: EASE },
+              children: [
+                /* @__PURE__ */ jsx("h1", { className: "mb-2 font-display font-serif italic text-3xl leading-[1.1] text-balance text-[var(--bone-fixed)] sm:text-4xl", children: steps[step].title }),
+                /* @__PURE__ */ jsx("p", { className: "mb-8 max-w-[46ch] text-sm leading-relaxed text-white/55", children: stepCopy(step, role) }),
+                step === 0 && /* @__PURE__ */ jsx("div", { className: "grid grid-cols-1 gap-2 sm:grid-cols-2", children: roles.map((r) => {
+                  const Icon = r.icon;
+                  const active = role === r.value;
+                  return /* @__PURE__ */ jsxs(
+                    "button",
+                    {
+                      type: "button",
+                      onClick: () => setRole(r.value),
+                      className: `group flex flex-col items-start gap-3 border px-4 py-4 text-left transition-all duration-300 ${active ? "border-[var(--inner-green)]/70 bg-[var(--inner-green)]/[0.12] shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]" : "border-white/12 bg-white/[0.03] backdrop-blur-sm hover:border-white/30 hover:bg-white/[0.06]"}`,
+                      children: [
+                        /* @__PURE__ */ jsxs("div", { className: "flex w-full items-center justify-between", children: [
+                          /* @__PURE__ */ jsx(
+                            Icon,
+                            {
+                              className: `size-4 ${active ? "text-[var(--inner-green)]" : "text-white/50"}`,
+                              strokeWidth: 1.6
+                            }
+                          ),
+                          active ? /* @__PURE__ */ jsx(Check, { className: "size-3.5 text-[var(--inner-green)]", strokeWidth: 2.5 }) : null
+                        ] }),
+                        /* @__PURE__ */ jsxs("div", { children: [
+                          /* @__PURE__ */ jsx("p", { className: "font-mono text-[11px] uppercase tracking-widest text-[var(--bone-fixed)]", children: r.label }),
+                          /* @__PURE__ */ jsx("p", { className: "mt-1 text-xs leading-snug text-white/45", children: r.hint })
+                        ] })
+                      ]
+                    },
+                    r.value
+                  );
+                }) }),
+                step === 1 && /* @__PURE__ */ jsxs("div", { className: "space-y-6", children: [
+                  /* @__PURE__ */ jsx(Field, { label: t("invite.fullName"), required: true, children: /* @__PURE__ */ jsx(
+                    "input",
+                    {
+                      type: "text",
+                      value: name,
+                      onChange: (e) => setName(e.target.value),
+                      placeholder: t("invite.phName"),
+                      className: fieldClass,
+                      autoComplete: "name",
+                      autoFocus: true
+                    }
+                  ) }),
+                  /* @__PURE__ */ jsx(Field, { label: t("invite.email"), required: true, children: /* @__PURE__ */ jsx(
+                    "input",
+                    {
+                      type: "email",
+                      value: email,
+                      onChange: (e) => setEmail(e.target.value),
+                      placeholder: t("invite.phEmail"),
+                      className: fieldClass,
+                      autoComplete: "email"
+                    }
+                  ) })
+                ] }),
+                step === 2 && /* @__PURE__ */ jsxs("div", { className: "space-y-6", children: [
+                  /* @__PURE__ */ jsxs("div", { className: "flex items-start gap-4 border border-white/10 bg-white/[0.03] p-4", children: [
+                    /* @__PURE__ */ jsx("div", { className: "flex size-14 shrink-0 items-center justify-center border border-white/15 bg-black/40", children: logoLoading ? /* @__PURE__ */ jsx("span", { className: "font-mono text-[9px] uppercase tracking-widest text-white/40", children: "…" }) : organizationLogo ? /* @__PURE__ */ jsx(
+                      "img",
+                      {
+                        src: organizationLogo,
+                        alt: "",
+                        className: "size-10 object-contain"
+                      }
+                    ) : /* @__PURE__ */ jsx(Building2, { className: "size-5 text-white/35", strokeWidth: 1.5 }) }),
+                    /* @__PURE__ */ jsxs("div", { className: "min-w-0 flex-1", children: [
+                      /* @__PURE__ */ jsx("p", { className: "font-mono text-[10px] uppercase tracking-widest text-white/45", children: organizationLogo ? t("invite.logoFound") : t("invite.logoAuto") }),
+                      /* @__PURE__ */ jsx("p", { className: "mt-1 text-xs leading-snug text-white/50", children: t("invite.logoHint") })
+                    ] })
+                  ] }),
+                  /* @__PURE__ */ jsx(
+                    Field,
+                    {
+                      label: t("invite.orgLabel"),
+                      hint: orgRequired ? t("invite.required") : t("invite.optional"),
+                      required: orgRequired,
+                      children: /* @__PURE__ */ jsx(
+                        "input",
+                        {
+                          type: "text",
+                          value: organization,
+                          onChange: (e) => setOrganization(e.target.value),
+                          placeholder: t("invite.phOrg"),
+                          className: fieldClass,
+                          autoComplete: "organization",
+                          autoFocus: true
+                        }
+                      )
+                    }
+                  ),
+                  /* @__PURE__ */ jsx(Field, { label: t("invite.orgDomain"), hint: t("invite.forLogo"), children: /* @__PURE__ */ jsx(
+                    "input",
+                    {
+                      type: "text",
+                      value: organizationDomain,
+                      onChange: (e) => setOrganizationDomain(e.target.value),
+                      placeholder: t("invite.phDomain"),
+                      className: fieldClass,
+                      autoComplete: "off"
+                    }
+                  ) }),
+                  /* @__PURE__ */ jsx(Field, { label: t("invite.linkedin"), hint: t("invite.optional"), children: /* @__PURE__ */ jsx(
+                    "input",
+                    {
+                      type: "url",
+                      value: linkedin,
+                      onChange: (e) => setLinkedin(e.target.value),
+                      placeholder: "https://linkedin.com/in/...",
+                      className: fieldClass,
+                      autoComplete: "off"
+                    }
+                  ) }),
+                  /* @__PURE__ */ jsx(Field, { label: t("invite.org"), hint: t("invite.optional"), children: /* @__PURE__ */ jsx(
+                    "input",
+                    {
+                      type: "url",
+                      value: link,
+                      onChange: (e) => setLink(e.target.value),
+                      placeholder: "https://",
+                      className: fieldClass,
+                      autoComplete: "off"
+                    }
+                  ) })
+                ] }),
+                step === 3 && /* @__PURE__ */ jsx(Field, { label: t("invite.storyLabel"), required: true, children: /* @__PURE__ */ jsx(
+                  "textarea",
+                  {
+                    value: whoYouAre,
+                    onChange: (e) => setWhoYouAre(e.target.value),
+                    placeholder: t("invite.phStory"),
+                    className: `${fieldClass} min-h-[140px] resize-none py-3 leading-relaxed`,
+                    autoFocus: true
+                  }
+                ) }),
+                step === 4 && /* @__PURE__ */ jsxs("div", { className: "space-y-6", children: [
+                  /* @__PURE__ */ jsx(Field, { label: t("invite.introLabel"), hint: t("invite.optional"), children: /* @__PURE__ */ jsx(
+                    "input",
+                    {
+                      type: "text",
+                      value: whoIntroduced,
+                      onChange: (e) => setWhoIntroduced(e.target.value),
+                      placeholder: t("invite.phIntro"),
+                      className: fieldClass,
+                      autoComplete: "off",
+                      autoFocus: true
+                    }
+                  ) }),
+                  /* @__PURE__ */ jsxs("div", { className: "border border-white/12 bg-white/[0.04] px-4 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-md", children: [
+                    /* @__PURE__ */ jsx("p", { className: "mb-3 font-mono text-[10px] uppercase tracking-widest text-white/40", children: t("invite.intro") }),
+                    /* @__PURE__ */ jsxs("div", { className: "mb-3 flex items-center gap-3", children: [
+                      organizationLogo ? /* @__PURE__ */ jsx(
+                        "img",
+                        {
+                          src: organizationLogo,
+                          alt: "",
+                          className: "size-9 border border-white/10 bg-white object-contain p-1"
+                        }
+                      ) : null,
+                      /* @__PURE__ */ jsxs("div", { className: "min-w-0", children: [
+                        /* @__PURE__ */ jsx("p", { className: "truncate text-sm text-[var(--bone-fixed)]", children: organization || "Kurum belirtilmedi" }),
+                        organizationDomain ? /* @__PURE__ */ jsx("p", { className: "font-mono text-[10px] text-white/40", children: organizationDomain }) : null
+                      ] })
+                    ] }),
+                    /* @__PURE__ */ jsxs("dl", { className: "space-y-2 text-sm", children: [
+                      /* @__PURE__ */ jsx(SummaryRow, { label: t("invite.howEnter"), value: roles.find((r) => r.value === role)?.label ?? "·" }),
+                      /* @__PURE__ */ jsx(SummaryRow, { label: "İsim", value: name || "·" }),
+                      /* @__PURE__ */ jsx(SummaryRow, { label: "Email", value: email || "·" }),
+                      linkedin ? /* @__PURE__ */ jsx(SummaryRow, { label: "LinkedIn", value: linkedin }) : null
+                    ] })
+                  ] }),
+                  /* @__PURE__ */ jsx("div", { className: "sr-only", "aria-hidden": true, children: /* @__PURE__ */ jsx(
+                    "input",
+                    {
+                      type: "text",
+                      tabIndex: -1,
+                      autoComplete: "off",
+                      value: fax,
+                      onChange: (e) => setFax(e.target.value)
+                    }
+                  ) }),
+                  isError ? /* @__PURE__ */ jsx("p", { className: "font-mono text-[11px] uppercase tracking-widest text-[var(--error)]", children: "Bir şeyler ters gitti. Tekrar dene." }) : null
+                ] })
+              ]
+            },
+            step
+          ) }) }),
+          /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between gap-3 border-t border-white/10 px-5 py-4 sm:px-7", children: [
+            /* @__PURE__ */ jsxs(
+              "button",
+              {
+                type: "button",
+                onClick: goBack,
+                disabled: step === 0,
+                className: "inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-white/50 transition-colors hover:text-white disabled:invisible",
+                children: [
+                  /* @__PURE__ */ jsx(ArrowLeft, { className: "size-3.5" }),
+                  t("common.back")
+                ]
+              }
+            ),
+            step < steps.length - 1 ? /* @__PURE__ */ jsxs(
+              "button",
+              {
+                type: "button",
+                onClick: goNext,
+                disabled: !canNext,
+                className: "inline-flex items-center gap-2 bg-[var(--bone-fixed)] px-5 py-2.5 font-mono text-[11px] uppercase tracking-widest text-[var(--ink-fixed)] transition-opacity hover:opacity-90 disabled:opacity-35",
+                children: [
+                  t("invite.continue"),
+                  /* @__PURE__ */ jsx(ArrowUpRight, { className: "size-3.5" })
+                ]
+              }
+            ) : /* @__PURE__ */ jsxs(
+              "button",
+              {
+                type: "button",
+                onClick: handleSubmit,
+                disabled: isPending || !role,
+                className: "inline-flex items-center gap-2 bg-[var(--bone-fixed)] px-5 py-2.5 font-mono text-[11px] uppercase tracking-widest text-[var(--ink-fixed)] transition-opacity hover:opacity-90 disabled:opacity-35",
+                children: [
+                  isPending ? t("invite.submitting") : t("invite.submit"),
+                  !isPending ? /* @__PURE__ */ jsx(ArrowUpRight, { className: "size-3.5" }) : null
+                ]
+              }
+            )
+          ] })
+        ]
+      },
+      "wizard"
+    ) }) })
+  ] });
+}
+function Field({
+  label,
+  hint,
+  required,
+  children
+}) {
+  return /* @__PURE__ */ jsxs("div", { className: "space-y-2", children: [
+    /* @__PURE__ */ jsxs("div", { className: "flex items-baseline justify-between gap-3", children: [
+      /* @__PURE__ */ jsxs("label", { className: "font-mono text-[10px] uppercase tracking-widest text-white/65 sm:text-[11px]", children: [
+        label,
+        required ? /* @__PURE__ */ jsx("span", { className: "text-[var(--inner-green)]", children: " *" }) : null
+      ] }),
+      hint ? /* @__PURE__ */ jsx("span", { className: "font-mono text-[9px] uppercase tracking-widest text-white/30", children: hint }) : null
+    ] }),
+    children
+  ] });
+}
+function SummaryRow({ label, value }) {
+  return /* @__PURE__ */ jsxs("div", { className: "flex items-start justify-between gap-4 border-b border-white/5 pb-2 last:border-0 last:pb-0", children: [
+    /* @__PURE__ */ jsx("dt", { className: "font-mono text-[10px] uppercase tracking-widest text-white/40", children: label }),
+    /* @__PURE__ */ jsx("dd", { className: "truncate text-right text-[var(--bone-fixed)]/85", children: value })
+  ] });
+}
+function SitePublicShell({ children }) {
+  return /* @__PURE__ */ jsxs("div", { className: "site-atmosphere flex min-h-screen flex-col bg-[var(--ink-fixed)] text-[var(--bone-fixed)]", children: [
+    /* @__PURE__ */ jsx(FloatingNavbar, { placement: "static" }),
+    /* @__PURE__ */ jsx("div", { className: "flex-1", children }),
+    /* @__PURE__ */ jsx(SiteFooter, {})
+  ] });
+}
+const SITE = "https://inner.digital";
+function upsertMeta(attr, key, content) {
+  let el = document.head.querySelector(`meta[${attr}="${key}"]`);
+  if (!el) {
+    el = document.createElement("meta");
+    el.setAttribute(attr, key);
+    document.head.appendChild(el);
+  }
+  el.content = content;
+}
+function upsertLink(rel, href) {
+  let el = document.head.querySelector(`link[rel="${rel}"]`);
+  if (!el) {
+    el = document.createElement("link");
+    el.rel = rel;
+    document.head.appendChild(el);
+  }
+  el.href = href;
+}
+function upsertJsonLd(id, data) {
+  let el = document.getElementById(id);
+  if (!el) {
+    el = document.createElement("script");
+    el.id = id;
+    el.type = "application/ld+json";
+    document.head.appendChild(el);
+  }
+  el.textContent = JSON.stringify(data);
+}
+function useSeo({
+  title,
+  description,
+  canonicalPath,
+  ogImage = "https://inner.digital/inner-og.png",
+  type = "website",
+  jsonLd,
+  noIndex = false
+}) {
+  const json = jsonLd ? JSON.stringify(jsonLd) : "";
+  useEffect(() => {
+    const fullTitle = title.includes("inner") ? title : `${title} · inner.hub`;
+    const canonical = canonicalPath.startsWith("http") ? canonicalPath : `${SITE}${canonicalPath.startsWith("/") ? canonicalPath : `/${canonicalPath}`}`;
+    document.title = fullTitle;
+    upsertMeta("name", "description", description);
+    upsertMeta("name", "robots", noIndex ? "noindex, nofollow" : "index, follow");
+    upsertLink("canonical", canonical);
+    upsertMeta("property", "og:title", fullTitle);
+    upsertMeta("property", "og:description", description);
+    upsertMeta(
+      "property",
+      "og:type",
+      type === "article" ? "article" : type === "video.other" ? "video.other" : "website"
+    );
+    upsertMeta("property", "og:url", canonical);
+    upsertMeta("property", "og:image", ogImage);
+    upsertMeta("name", "twitter:card", "summary_large_image");
+    upsertMeta("name", "twitter:title", fullTitle);
+    upsertMeta("name", "twitter:description", description);
+    upsertMeta("name", "twitter:image", ogImage);
+    if (json) upsertJsonLd("ih-jsonld", JSON.parse(json));
+  }, [title, description, canonicalPath, ogImage, type, json, noIndex]);
+}
+function breadcrumbJsonLd(items) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: items.map((item, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: item.name,
+      item: item.path.startsWith("http") ? item.path : `${SITE}${item.path}`
+    }))
+  };
+}
+const SEO_POSTS = [
+  {
+    slug: "kapali-cember-deal-flow",
+    kind: "article",
+    publishedAt: "2026-07-18",
+    author: { name: "inner hub", url: "https://inner.digital" },
+    coverImage: "/posters/capital-events.jpg",
+    coverAlt: "Deal flow and capital in a closed circle",
+    tr: {
+      title: "Kapalı çember deal flow’u nasıl hızlandırır?",
+      description: "Davetiye ile girilen kurucu-yatırımcı ağlarında deal flow neden daha hızlı ve kaliteli ilerler? inner.hub modeli, güven, uyum ve erken sinyal üzerine.",
+      answer: "Kapalı çemberde deal flow hızlanır çünkü her bağlantı önceden filtrelenmiş güvene dayanır. Açık ağlarda gürültü artar; davetiye ile kurulan çemberde sinyal, sermaye ve kurucu aynı standartta buluşur.",
+      body: [
+        "Deal flow, bir yatırımcı veya kurucu için yalnızca “kaç fırsat gördüm” meselesi değildir. Asıl soru şudur: görülen fırsatların kaçı güvenilir bağlamda geldi, kaçı zaman kaybı oldu?",
+        "Açık platformlar ölçek için tasarlanır. Herkes bağlanabilir; herkes mesaj atabilir. Bu, hacmi artırır ama sinyal-gürültü oranını düşürür. Kapalı çember tersini seçer: üyelik kısıtlıdır, giriş davetiye iledir, her isim içeriden gelir.",
+        "inner.hub’da bir kurucu ile yatırımcı aynı masaya oturduğunda, aralarındaki bağın arkasında bir üyenin itibarı vardır. Bu, soğuk outbound’dan farklı bir psikoloji üretir. İlk konuşma “kimsin?” değil, “ne inşa ediyorsun?” olur.",
+        "Erken aşama AI girişimlerinde zaman en pahalı kaynaktır. Yanlış intro, yanlış pitch, yanlış term sheet - hepsi haftalar alır. Kapalı çember, bu maliyeti düşürmek için tasarlanır: uyum önce, hacim sonra.",
+        "Pratikte deal flow üç katmanda hızlanır. Bir: kalite filtresi (davetiye). İki: bağlamsal intro (üye önerisi). Üç: ortak dil (çemberin standartları). inner.hub bu üç katmanı aynı ürün yüzünde tutar.",
+        "Bu model “elitizm” değildir. Standarttır. Herkese açık olmayan bir oda, herkesin aynı kalitede konuşmasını mümkün kılar. Gathering’ler, signal board’lar ve eşleşme bu standardın üzerine kurulur.",
+        "Özetle: kapalı çember deal flow’u hızlandırır çünkü güven önceden birikmiştir. inner.hub, bu birikimi İstanbul’dan global bir ağa taşımak için kurulmuştur."
+      ],
+      tags: ["deal flow", "davetiye", "yatırımcı", "kurucu", "SEO"],
+      faq: [
+        {
+          q: "Kapalı çember açık ağdan daha mı iyidir?",
+          a: "Amaç hacimse açık ağ; amaç uyum ve güvenli deal flow ise kapalı çember daha etkilidir. inner.hub ikincisini seçer."
+        },
+        {
+          q: "Deal flow nasıl ölçülür?",
+          a: "Ham lead sayısı değil; nitelikli intro, takip eden görüşme ve kapanan ilişki oranı daha doğru ölçüttür."
+        }
+      ]
+    },
+    en: {
+      title: "How a closed circle accelerates deal flow",
+      description: "Why invitation-only founder-investor networks move deal flow faster and with higher signal - the inner.hub model of trust, fit, and early access.",
+      answer: "Deal flow accelerates in a closed circle because every connection sits on pre-filtered trust. Open networks add noise; invitation circles put founders, capital, and signal on the same standard.",
+      body: [
+        "Deal flow is not just volume. The real question is how many opportunities arrive with trusted context - and how many waste time.",
+        "Open platforms optimize for scale. Anyone can connect; anyone can message. Volume rises; signal-to-noise falls. A closed circle chooses the opposite: limited membership, invitation entry, names from inside.",
+        "When a founder and an investor meet inside inner.hub, someone’s reputation sits behind the intro. That changes the first conversation from “who are you?” to “what are you building?”",
+        "In early AI, time is the scarcest resource. Bad intros and bad process cost weeks. The closed circle is designed to cut that cost: fit first, volume later.",
+        "In practice, deal flow speeds up in three layers: quality filter (invitation), contextual intro (member referral), shared language (circle standards). inner.hub keeps all three in one product surface.",
+        "This is not elitism. It is a standard. A room that is not open to everyone allows everyone inside to speak at the same bar. Gatherings, signal, and matching sit on that bar.",
+        "Bottom line: closed circles accelerate deal flow because trust is prepaid. inner.hub exists to compound that trust from İstanbul outward."
+      ],
+      tags: ["deal flow", "invitation", "investor", "founder", "SEO"],
+      faq: [
+        {
+          q: "Is a closed circle better than an open network?",
+          a: "If the goal is volume, open wins. If the goal is trusted deal flow, closed circles win. inner.hub chooses the latter."
+        },
+        {
+          q: "How should deal flow be measured?",
+          a: "Not raw lead count - qualified intros, follow-on conversations, and closed relationships are better metrics."
+        }
+      ]
+    }
+  },
+  {
+    slug: "istanbul-ai-kurucu-agi",
+    kind: "article",
+    publishedAt: "2026-07-16",
+    author: { name: "inner hub", url: "https://inner.digital" },
+    coverImage: "/posters/match-hero.jpg",
+    coverAlt: "İstanbul AI founder network",
+    tr: {
+      title: "İstanbul’dan global AI kurucu ağı nasıl kurulur?",
+      description: "İstanbul neden AI kurucuları için erken buluşma noktası olabilir? inner.hub’ın yerel derinlik + global erişim stratejisi ve davetiye ile büyüme modeli.",
+      answer: "İstanbul’dan global bir AI kurucu ağı, yerel derinlik ve seçici davetiye ile kurulur. Önce otuz dört kişilik kurucu çember; sonra aynı standartla genişleyen global katman. inner.hub bu yolu seçer.",
+      body: [
+        "Birçok ağ ters sırayla büyür: önce global marka, sonra yerel içerik. Bu yaklaşım hızlı görünür ama kök tutmaz. inner.hub tersini yapar - İstanbul’da gerçek bir çember, ardından global yayılım.",
+        "İstanbul’un avantajı coğrafya değil; yoğunluktur. Kurucular, yatırımcılar ve builder’lar aynı şehirde erken buluşabilir. Bu fiziksel yakınlık, dijital araçlarla birleşince sinyal hızlanır.",
+        "Kurucu çember (ilk 34) bilinçli olarak küçüktür. Amaç, “herkes” olmak değil; standardı taşıyan bir çekirdek oluşturmaktır. Her yeni üye bu çekirdeğin itibarını miras alır.",
+        "Global katman, yerel kaliteyi sulandırmadan eklenir. Aynı davetiye mantığı, aynı uyum kriteri, aynı gathering disiplini. Farklı şehirler, aynı bar.",
+        "AI özelinde hız kritiktir. Model, ürün ve sermaye döngüleri kısadır. Erken doğru insanlarla aynı odada olmak, altı ay sonra “keşke” dememek demektir.",
+        "inner.hub platform katmanları - signal, match, capital, vault - bu ağın üzerine oturur. Ağ sosyal bir sohbet değil; iş üreten bir altyapıdır.",
+        "Sonuç: İstanbul başlangıçtır, sınır değildir. Global AI kurucu ağı, yerel güvenin üzerine inşa edildiğinde dayanıklı olur."
+      ],
+      tags: ["İstanbul", "AI", "kurucu ağı", "global", "davetiye"],
+      faq: [
+        {
+          q: "Neden İstanbul?",
+          a: "Yoğun kurucu-yatırımcı kesişimi ve erken fiziksel buluşma imkanı; global genişleme için sağlam bir çekirdek sağlar."
+        },
+        {
+          q: "Global üyelik ne zaman açılır?",
+          a: "Kurucu çember standardı oturdukça, aynı davetiye modeli ile şehir şehir genişler - açık başvuru ile değil."
+        }
+      ]
+    },
+    en: {
+      title: "How to build a global AI founder network from İstanbul",
+      description: "Why İstanbul can be an early meeting point for AI founders - inner.hub’s local depth + global reach strategy and invitation-led growth.",
+      answer: "A global AI founder network from İstanbul is built with local depth and selective invitations. First a founding circle of thirty-four; then a global layer on the same standard. That is the inner.hub path.",
+      body: [
+        "Many networks grow backwards: global brand first, local substance later. It looks fast and rarely roots. inner.hub does the opposite - a real circle in İstanbul, then global expansion.",
+        "İstanbul’s edge is density, not geography. Founders, investors, and builders can meet early in one city. Physical proximity plus digital tools speeds signal.",
+        "The founding circle (first 34) is intentionally small. The goal is not “everyone” - it is a core that carries the standard. Every new member inherits that reputation.",
+        "The global layer is added without diluting local quality. Same invitation logic, same fit bar, same gathering discipline. Different cities, same standard.",
+        "In AI, speed matters. Model, product, and capital cycles are short. Being in the right room early beats saying “if only” six months later.",
+        "inner.hub’s platform layers - signal, match, capital, vault - sit on top of this network. It is infrastructure for work, not a chat club.",
+        "Bottom line: İstanbul is the start, not the limit. A global AI founder network holds when it is built on local trust."
+      ],
+      tags: ["Istanbul", "AI", "founder network", "global", "invitation"],
+      faq: [
+        {
+          q: "Why İstanbul?",
+          a: "Dense founder-investor intersection and early in-person meetings create a durable core for global expansion."
+        },
+        {
+          q: "When does global membership open?",
+          a: "As the founding standard settles, the same invitation model expands city by city - not via open apply."
+        }
+      ]
+    }
+  },
+  {
+    slug: "gathering-vs-konferans",
+    kind: "article",
+    publishedAt: "2026-07-14",
+    author: { name: "inner hub", url: "https://inner.digital" },
+    coverImage: "/posters/gathering.jpg",
+    coverAlt: "Private gathering room",
+    tr: {
+      title: "Gathering ile konferans arasındaki fark nedir?",
+      description: "inner.hub gathering’i bir konferans değildir. Kapalı oda, seçili katılımcı, iş üreten format - konferans ekonomisinden neden farklılaşır?",
+      answer: "Gathering, konferans değildir: biletli sahne yerine davetiye ile girilen kapalı bir çalışma odasıdır. Amaç içerik tüketmek değil; sinyal, sermaye ve kurucuları aynı standartta buluşturmaktır.",
+      body: [
+        "Konferanslar ölçek için tasarlanır: sahne, sponsor, bilet, networking cocktail. Bu formatın değeri vardır - ama erken aşama güven ve deal flow için çoğu zaman fazla gürültülüdür.",
+        "Gathering tersine çevrilmiş bir odadır. Katılımcı sayısı düşüktür. Herkes davetiye ile gelir. Program, “konuşmacı dinle” değil “birlikte çalış” mantığındadır.",
+        "inner.hub gathering’inde otuz dört kişi bir araya gelir. Bu sayı tesadüf değildir: yeterince çeşitli, yeterince yoğun, yeterince yönetilebilir. Kalabalık değil; çember.",
+        "Gündem, ürün demoları, sermaye konuşmaları ve eşleşme üzerine kurulur. Sahne show’u değil, iş masası. Kayıtlar ve erişim davetiye sürecinin içinde kalır.",
+        "Konferansta kartvizit değişir. Gathering’de itibar değişir. Bir üyenin önerdiği isim, çemberin ortak belleğine girer.",
+        "Bu yüzden gathering SEO ve AEO açısından da net bir cevap üretir: “inner.hub gathering nedir?” sorusunun yanıtı “özel bir çalışma buluşması”dır - genel etkinlik değil.",
+        "İstanbul Eylül 2026 gathering’i bu modelin ilk kamusal ifadesidir. Sonraki buluşmalar aynı disiplini taşır: kapalı, seçili, iş odaklı."
+      ],
+      tags: ["gathering", "konferans", "etkinlik", "İstanbul", "çember"],
+      faq: [
+        {
+          q: "Gathering’e nasıl katılınır?",
+          a: "Genel bilet satışı yoktur. Erişim davetiye ve üyelik süreci üzerinden ilerler."
+        },
+        {
+          q: "Konferansa benzer mi?",
+          a: "Hayır. Sahne ve sponsor odaklı değil; kapalı oda ve iş üretme odaklıdır."
+        }
+      ]
+    },
+    en: {
+      title: "Gathering vs conference: what’s the difference?",
+      description: "An inner.hub gathering is not a conference. Closed room, invited guests, work-first format - why it diverges from conference economics.",
+      answer: "A gathering is not a conference: it is an invitation-only working room, not a ticketed stage. The goal is not content consumption - it is putting signal, capital, and founders on one standard.",
+      body: [
+        "Conferences are built for scale: stage, sponsors, tickets, networking cocktails. Valuable - and often too noisy for early trust and deal flow.",
+        "A gathering inverts the room. Attendance is small. Everyone is invited. The program is “work together,” not “watch speakers.”",
+        "At an inner.hub gathering, thirty-four people meet. That number is intentional: diverse enough, dense enough, manageable enough. Not a crowd - a circle.",
+        "The agenda centers product, capital conversations, and matching. Work table, not stage show. Access stays inside the invitation flow.",
+        "At conferences, business cards move. At gatherings, reputation moves. A name referred by a member enters the circle’s shared memory.",
+        "That is why gathering also answers SEO/AEO cleanly: “What is an inner.hub gathering?” - a private working meetup, not a generic event.",
+        "The İstanbul September 2026 gathering is the first public expression of this model. Later gatherings carry the same discipline: closed, selective, work-first."
+      ],
+      tags: ["gathering", "conference", "event", "Istanbul", "circle"],
+      faq: [
+        {
+          q: "How do I attend a gathering?",
+          a: "There is no public ticket sale. Access moves through invitation and membership."
+        },
+        {
+          q: "Is it like a conference?",
+          a: "No. It is not stage-and-sponsor led - it is a closed room built to produce work."
+        }
+      ]
+    }
+  },
+  {
+    slug: "aeo-icin-net-cevaplar",
+    kind: "article",
+    publishedAt: "2026-07-12",
+    author: { name: "inner hub", url: "https://inner.digital" },
+    coverImage: "/posters/perks-ambient.jpg",
+    coverAlt: "Clear answers for search and answer engines",
+    tr: {
+      title: "AEO nedir? Cevap motorları için nasıl yazılır?",
+      description: "AEO (Answer Engine Optimization) nedir, SEO’dan farkı nedir? inner.hub haberlerinde net cevap, FAQ şeması ve uzun form içerikle nasıl uygulanır?",
+      answer: "AEO, içeriği arama motorlarından ziyade cevap motorları (ChatGPT, Perplexity, Google AI Overviews) için optimize etmektir. Net bir ilk cevap, yapılandırılmış FAQ ve kanıtlayan uzun gövde ile yapılır.",
+      body: [
+        "Klasik SEO anahtar kelime ve backlink odaklıydı. AEO ise “bu sorunun en temiz cevabı nedir?” sorusuna odaklanır. Modeller, sayfanın ilk net paragrafını ve FAQ bloklarını sıkça öne çıkarır.",
+        "inner.hub Haberler’de her yazı bir answer (doğrudan cevap) ile açılır. Bu paragraf 40-60 kelime civarındadır; soruyu yineler ve tek cümlede çözüm verir.",
+        "Ardından uzun gövde gelir: bağlam, mekanizma, örnek, sınır. Cevap motorları kısa özeti sever; insanlar ve klasik SEO derinliği ister. İkisini birlikte tutmak gerekir.",
+        "FAQ şeması (FAQPage JSON-LD) AEO için güçlendiricidir. “Gathering nedir?”, “Davetiye nasıl alınır?” gibi sorular ayrı soru-cevap çiftleri olarak işaretlenir.",
+        "Video haberlerde VideoObject şeması + kısa yazılı özet birlikte çalışır. Motor hem medyayı hem metni okur.",
+        "Marka tutarlılığı AEO’da kritiktir. “inner.hub”, “davetiye”, “çember”, “gathering” aynı anlamda tekrar ederse modeller markayı doğru bağlar.",
+        "Pratik checklist: (1) H1 soruya yakın olsun. (2) İlk blokta net cevap. (3) 4+ paragraf kanıt. (4) FAQ. (5) Canonical + sitemap. (6) İç link (davetiye, gathering).",
+        "Flexlore Content Creator Flow bağlandığında blog, post ve caption aynı AEO şablonundan üretilecek: answer → body → faq → tags. Bu sayfa yapısı o akışa hazırdır."
+      ],
+      tags: ["AEO", "SEO", "cevap motoru", "FAQ", "içerik"],
+      faq: [
+        {
+          q: "AEO ile SEO aynı şey mi?",
+          a: "Hayır. SEO sıralama ve tıklama; AEO ise modellerin doğrudan alıntılayacağı net cevaplar üretmektir. Birbirini tamamlar."
+        },
+        {
+          q: "İyi bir AEO cevabı ne kadar olmalı?",
+          a: "Genelde 40-60 kelimelik tek paragraf yeterlidir; ardından uzun gövde ve FAQ ile desteklenir."
+        }
+      ]
+    },
+    en: {
+      title: "What is AEO? How to write for answer engines",
+      description: "What Answer Engine Optimization is, how it differs from SEO, and how inner.hub news uses clear answers, FAQ schema, and long-form proof.",
+      answer: "AEO optimizes content for answer engines (ChatGPT, Perplexity, Google AI Overviews), not only classic search rankings. It starts with a clear first answer, structured FAQ, and a long body that proves the claim.",
+      body: [
+        "Classic SEO centered keywords and backlinks. AEO asks: what is the cleanest answer to this question? Models often surface the first clear paragraph and FAQ blocks.",
+        "In inner.hub Haberler, every piece opens with an answer block - roughly 40-60 words that restate the question and resolve it in one breath.",
+        "Then comes the long body: context, mechanism, examples, limits. Answer engines like brevity; humans and classic SEO want depth. You need both.",
+        "FAQ schema (FAQPage JSON-LD) strengthens AEO. Questions like “What is a gathering?” become explicit Q&A pairs.",
+        "For video news, VideoObject schema plus a short written summary work together. Engines read both media and text.",
+        "Brand consistency matters. Repeating “inner.hub”, “invitation”, “circle”, and “gathering” with stable meaning helps models bind the brand correctly.",
+        "Practical checklist: (1) H1 near the query. (2) Clear answer first. (3) 4+ proof paragraphs. (4) FAQ. (5) Canonical + sitemap. (6) Internal links (invitation, gathering).",
+        "When Flexlore Content Creator Flow connects, blog, posts, and captions will ship from the same AEO template: answer → body → faq → tags. This page structure is ready for that flow."
+      ],
+      tags: ["AEO", "SEO", "answer engine", "FAQ", "content"],
+      faq: [
+        {
+          q: "Are AEO and SEO the same?",
+          a: "No. SEO is rankings and clicks; AEO is producing clear answers models can quote. They complement each other."
+        },
+        {
+          q: "How long should an AEO answer be?",
+          a: "Usually a 40-60 word paragraph is enough, then support it with a long body and FAQ."
+        }
+      ]
+    }
+  }
+];
+const ARTIFACTS = [
+  {
+    slug: "inner-hub-neden-davetiye",
+    kind: "article",
+    publishedAt: "2026-07-20",
+    author: { name: "inner hub", url: "https://inner.digital" },
+    coverImage: "/posters/gathering.jpg",
+    coverAlt: "inner hub gathering atmosphere",
+    tr: {
+      title: "Neden davetiye ile giriş?",
+      description: "inner.hub neden açık başvuru değil de davetiye kullanır? Kapalı çember, erken sinyal ve güven temelli üyelik.",
+      answer: "inner.hub davetiye ile girilir çünkü çember kalabalık değil uyum ister. Üyeler içeriden önerilir, özenle değerlendirilir ve kişisel olarak davet edilir.",
+      body: [
+        "Açık platformlar ölçeklenir; kapalı çemberler güven biriktirir. inner.hub ikincisini seçer.",
+        "Bir isim içeriden gelir. Uyum, şöhretten önce gelir. Uygunsa davetiye kişisel olarak ulaşır.",
+        "Bu model deal flow, eşleşme ve bilgi paylaşımını mümkün kılar: herkes aynı masada değil, aynı standartta."
+      ],
+      tags: ["davetiye", "üyelik", "çember"],
+      faq: [
+        {
+          q: "Davetiye olmadan üye olunur mu?",
+          a: "Hayır. Erişim davetiye ile başlar; açık başvuru formu üyelik garantisi vermez."
+        }
+      ]
+    },
+    en: {
+      title: "Why invitation-only entry?",
+      description: "Why inner.hub uses invitations instead of open apply - closed circle, early signal, trust-based membership.",
+      answer: "inner.hub is invitation-only because the circle optimizes for fit, not crowd. Members are put forward from inside, considered carefully, and invited personally.",
+      body: [
+        "Open platforms scale. Closed circles compound trust. inner.hub chooses the latter.",
+        "A name comes from inside. Fit beats fame. If it is right, the invitation arrives personally.",
+        "That standard makes deal flow, matching, and knowledge sharing possible - same bar, not same crowd."
+      ],
+      tags: ["invitation", "membership", "circle"],
+      faq: [
+        {
+          q: "Can I join without an invitation?",
+          a: "No. Access starts with an invitation; an open form does not guarantee membership."
+        }
+      ]
+    }
+  },
+  {
+    slug: "istanbul-gathering-2026",
+    kind: "video",
+    publishedAt: "2026-07-22",
+    author: { name: "inner hub", url: "https://inner.digital" },
+    coverImage: "/posters/courses-hero.jpg",
+    coverAlt: "İstanbul gathering visual",
+    video: {
+      src: "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260406_133058_0504132a-0cf3-4450-a370-8ea3b05c95d4.mp4",
+      durationSeconds: 18,
+      thumbnail: "/posters/gathering.jpg"
+    },
+    tr: {
+      title: "İstanbul gathering · Eylül 2026",
+      description: "İlk inner.hub buluşması: otuz dört kişi, iki gün, bir çember. İstanbul, Eylül 2026 kısa video özeti.",
+      answer: "İlk inner.hub gathering İstanbul’da, Eylül 2026’da. Otuz dört kişi, iki gün, bir çember - birçoklarının ilki.",
+      body: [
+        "Buluşma bir konferans değil; kapalı bir çalışma alanı. Sinyal, sermaye ve inşa aynı masada.",
+        "Kayıt ve detaylar davetiye sürecinin içinde ilerler. Genel bilet satışı yok."
+      ],
+      tags: ["gathering", "İstanbul", "video"]
+    },
+    en: {
+      title: "İstanbul gathering · September 2026",
+      description: "The first inner.hub gathering: thirty-four people, two days, one circle. Short video brief for September 2026 in İstanbul.",
+      answer: "The first inner.hub gathering is in İstanbul, September 2026. Thirty-four people, two days, one circle - the first of many.",
+      body: [
+        "It is not a conference. It is a closed working room where signal, capital, and builders meet.",
+        "Access stays inside the invitation flow. There is no public ticket sale."
+      ],
+      tags: ["gathering", "Istanbul", "video"]
+    }
+  },
+  ...SEO_POSTS
+];
+function getArtifact(slug) {
+  return ARTIFACTS.find((a) => a.slug === slug);
+}
+function listArtifacts() {
+  return [...ARTIFACTS].sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
+}
+function artifactPath(slug) {
+  return `/haberler/${slug}`;
+}
+function artifactsIndexPath() {
+  return "/haberler";
+}
+function artifactAbsoluteUrl(slug) {
+  return `https://inner.digital${artifactPath(slug)}`;
+}
+function copyFor(a, locale) {
+  return locale === "en" ? a.en : a.tr;
+}
+function ArtifactsPage() {
+  const t = useT();
+  const { locale } = useLocale();
+  const items = listArtifacts();
+  const indexPath = artifactsIndexPath();
+  const jsonLd = useMemo(
+    () => [
+      breadcrumbJsonLd([
+        { name: "inner.hub", path: "/" },
+        { name: t("artifacts.nav"), path: indexPath }
+      ]),
+      {
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        name: t("artifacts.metaTitle"),
+        description: t("artifacts.metaDescription"),
+        url: `https://inner.digital${indexPath}`,
+        isPartOf: { "@type": "WebSite", name: "inner.hub", url: "https://inner.digital" }
+      }
+    ],
+    [t, indexPath]
+  );
+  useSeo({
+    title: t("artifacts.metaTitle"),
+    description: t("artifacts.metaDescription"),
+    canonicalPath: indexPath,
+    jsonLd
+  });
+  return /* @__PURE__ */ jsx(SitePublicShell, { children: /* @__PURE__ */ jsxs("main", { className: "mx-auto max-w-5xl px-4 py-14 sm:px-6 md:px-10 md:py-20 lg:px-[8%]", children: [
+    /* @__PURE__ */ jsx("p", { className: "mb-4 font-mono text-[10px] uppercase tracking-widest text-white/45", children: t("artifacts.eyebrow") }),
+    /* @__PURE__ */ jsx(
+      "h1",
+      {
+        className: "max-w-2xl font-display font-serif italic text-4xl leading-[1.1] sm:text-5xl md:text-6xl",
+        style: { fontVariationSettings: "'opsz' 144, 'WONK' 1" },
+        children: t("artifacts.title")
+      }
+    ),
+    /* @__PURE__ */ jsx("p", { className: "mt-5 max-w-xl text-sm leading-relaxed text-white/55 sm:text-base", children: t("artifacts.subtitle") }),
+    /* @__PURE__ */ jsx("ul", { className: "mt-14 space-y-0 border-t border-white/10", children: items.length === 0 ? /* @__PURE__ */ jsx("li", { className: "py-16 text-sm text-white/45", children: t("artifacts.empty") }) : items.map((item) => {
+      const copy = copyFor(item, locale);
+      return /* @__PURE__ */ jsx("li", { className: "border-b border-white/10", children: /* @__PURE__ */ jsxs(
+        Link,
+        {
+          href: artifactPath(item.slug),
+          className: "group grid grid-cols-1 gap-5 py-8 transition-colors md:grid-cols-[180px_1fr_auto] md:items-center md:gap-8",
+          children: [
+            /* @__PURE__ */ jsxs("div", { className: "relative aspect-[16/10] overflow-hidden bg-white/5 md:aspect-[4/3]", children: [
+              /* @__PURE__ */ jsx(
+                "img",
+                {
+                  src: item.coverImage,
+                  alt: item.coverAlt,
+                  className: "size-full object-cover opacity-90 transition-transform duration-500 group-hover:scale-[1.03]",
+                  loading: "lazy"
+                }
+              ),
+              item.kind === "video" && /* @__PURE__ */ jsxs("span", { className: "absolute bottom-2 left-2 inline-flex items-center gap-1.5 bg-black/70 px-2 py-1 font-mono text-[9px] uppercase tracking-widest text-[var(--bone-fixed)]", children: [
+                /* @__PURE__ */ jsx(Play, { className: "size-2.5 fill-current" }),
+                t("artifacts.video")
+              ] })
+            ] }),
+            /* @__PURE__ */ jsxs("div", { className: "min-w-0", children: [
+              /* @__PURE__ */ jsxs("p", { className: "mb-2 font-mono text-[10px] uppercase tracking-widest text-white/40", children: [
+                item.kind === "video" ? t("artifacts.video") : t("artifacts.article"),
+                /* @__PURE__ */ jsx("span", { className: "mx-2 text-white/20", children: "·" }),
+                /* @__PURE__ */ jsx("time", { dateTime: item.publishedAt, children: new Date(item.publishedAt).toLocaleDateString(locale === "tr" ? "tr-TR" : "en-US", {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric"
+                }) })
+              ] }),
+              /* @__PURE__ */ jsx("h2", { className: "text-xl text-[var(--bone-fixed)] transition-colors group-hover:text-white sm:text-2xl", children: copy.title }),
+              /* @__PURE__ */ jsx("p", { className: "mt-2 line-clamp-2 text-sm leading-relaxed text-white/50", children: copy.answer })
+            ] }),
+            /* @__PURE__ */ jsx(ArrowUpRight, { className: "hidden size-5 text-white/30 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-[var(--inner-green)] md:block" })
+          ]
+        }
+      ) }, item.slug);
+    }) })
+  ] }) });
+}
+function AutoplayVideo({ src, poster, label, className }) {
+  const videoRef = useRef(null);
+  const [hover, setHover] = useState(false);
+  const [playing, setPlaying] = useState(true);
+  const [muted, setMuted] = useState(true);
+  const [progress, setProgress] = useState(0);
+  const [duration, setDuration] = useState(0);
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    v.muted = true;
+    const tryPlay = () => {
+      void v.play().then(() => setPlaying(true)).catch(() => setPlaying(false));
+    };
+    tryPlay();
+    const onVis = () => {
+      if (document.visibilityState === "visible") tryPlay();
+    };
+    document.addEventListener("visibilitychange", onVis);
+    return () => document.removeEventListener("visibilitychange", onVis);
+  }, [src]);
+  const togglePlay = () => {
+    const v = videoRef.current;
+    if (!v) return;
+    if (v.paused) {
+      void v.play();
+      setPlaying(true);
+    } else {
+      v.pause();
+      setPlaying(false);
+    }
+  };
+  const toggleMute = () => {
+    const v = videoRef.current;
+    if (!v) return;
+    v.muted = !v.muted;
+    setMuted(v.muted);
+  };
+  const seek = (ratio) => {
+    const v = videoRef.current;
+    if (!v || !duration) return;
+    v.currentTime = Math.max(0, Math.min(1, ratio)) * duration;
+    setProgress(ratio);
+  };
+  const fmt = (s) => {
+    if (!Number.isFinite(s) || s < 0) return "0:00";
+    const m = Math.floor(s / 60);
+    const sec = Math.floor(s % 60);
+    return `${m}:${String(sec).padStart(2, "0")}`;
+  };
+  return /* @__PURE__ */ jsxs(
+    "div",
+    {
+      className: `relative aspect-video overflow-hidden bg-black ${className ?? ""}`,
+      onMouseEnter: () => setHover(true),
+      onMouseLeave: () => setHover(false),
+      onFocusCapture: () => setHover(true),
+      onBlurCapture: (e) => {
+        if (!e.currentTarget.contains(e.relatedTarget)) setHover(false);
+      },
+      children: [
+        /* @__PURE__ */ jsx(
+          "video",
+          {
+            ref: videoRef,
+            className: "absolute inset-0 size-full object-cover",
+            playsInline: true,
+            muted,
+            loop: true,
+            autoPlay: true,
+            poster,
+            preload: "auto",
+            onClick: togglePlay,
+            onTimeUpdate: () => {
+              const v = videoRef.current;
+              if (!v || !v.duration) return;
+              setProgress(v.currentTime / v.duration);
+            },
+            onLoadedMetadata: () => {
+              const v = videoRef.current;
+              if (v) setDuration(v.duration);
+            },
+            onPlay: () => setPlaying(true),
+            onPause: () => setPlaying(false),
+            children: /* @__PURE__ */ jsx("source", { src, type: "video/mp4" })
+          }
+        ),
+        label ? /* @__PURE__ */ jsxs("span", { className: "pointer-events-none absolute left-3 top-3 z-10 inline-flex items-center gap-1.5 bg-black/60 px-2 py-1 font-mono text-[9px] uppercase tracking-widest text-[var(--bone-fixed)]", children: [
+          /* @__PURE__ */ jsx(Play, { className: "size-2.5 fill-current" }),
+          label
+        ] }) : null,
+        /* @__PURE__ */ jsxs(
+          "div",
+          {
+            className: `absolute inset-x-0 bottom-0 z-20 flex items-center gap-3 border-t border-white/10 bg-gradient-to-t from-black/90 via-black/70 to-black/40 px-3 py-2.5 backdrop-blur-sm transition-opacity duration-200 ${hover ? "opacity-100" : "pointer-events-none opacity-0"}`,
+            children: [
+              /* @__PURE__ */ jsx(
+                "button",
+                {
+                  type: "button",
+                  onClick: togglePlay,
+                  className: "flex size-8 shrink-0 items-center justify-center text-[var(--bone-fixed)]",
+                  "aria-label": playing ? "Pause" : "Play",
+                  children: playing ? /* @__PURE__ */ jsx(Pause, { className: "size-4 fill-current" }) : /* @__PURE__ */ jsx(Play, { className: "size-4 fill-current" })
+                }
+              ),
+              /* @__PURE__ */ jsx(
+                "button",
+                {
+                  type: "button",
+                  className: "relative h-1 flex-1 overflow-hidden bg-white/20",
+                  "aria-label": "Seek",
+                  onClick: (e) => {
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    seek((e.clientX - rect.left) / Math.max(rect.width, 1));
+                  },
+                  children: /* @__PURE__ */ jsx(
+                    "span",
+                    {
+                      className: "absolute inset-y-0 left-0 bg-[var(--inner-green)]",
+                      style: { width: `${progress * 100}%` }
+                    }
+                  )
+                }
+              ),
+              /* @__PURE__ */ jsxs("span", { className: "shrink-0 font-mono text-[10px] tabular-nums text-white/55", children: [
+                fmt(progress * duration),
+                " / ",
+                fmt(duration)
+              ] }),
+              /* @__PURE__ */ jsx(
+                "button",
+                {
+                  type: "button",
+                  onClick: toggleMute,
+                  className: "flex size-8 shrink-0 items-center justify-center text-[var(--bone-fixed)]",
+                  "aria-label": muted ? "Unmute" : "Mute",
+                  children: muted ? /* @__PURE__ */ jsx(VolumeX, { className: "size-4" }) : /* @__PURE__ */ jsx(Volume2, { className: "size-4" })
+                }
+              )
+            ]
+          }
+        )
+      ]
+    }
+  );
+}
+const Card = React.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx(
+  "div",
+  {
+    ref,
+    className: cn(
+      "rounded-xl border bg-card text-card-foreground shadow",
+      className
+    ),
+    ...props
+  }
+));
+Card.displayName = "Card";
+const CardHeader = React.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx(
+  "div",
+  {
+    ref,
+    className: cn("flex flex-col space-y-1.5 p-6", className),
+    ...props
+  }
+));
+CardHeader.displayName = "CardHeader";
+const CardTitle = React.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx(
+  "div",
+  {
+    ref,
+    className: cn("font-semibold leading-none tracking-tight", className),
+    ...props
+  }
+));
+CardTitle.displayName = "CardTitle";
+const CardDescription = React.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx(
+  "div",
+  {
+    ref,
+    className: cn("text-sm text-muted-foreground", className),
+    ...props
+  }
+));
+CardDescription.displayName = "CardDescription";
+const CardContent = React.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx("div", { ref, className: cn("p-6 pt-0", className), ...props }));
+CardContent.displayName = "CardContent";
+const CardFooter = React.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx(
+  "div",
+  {
+    ref,
+    className: cn("flex items-center p-6 pt-0", className),
+    ...props
+  }
+));
+CardFooter.displayName = "CardFooter";
+function NotFound() {
+  const t = useT();
+  return /* @__PURE__ */ jsx("div", { className: "min-h-screen w-full flex items-center justify-center bg-gray-50", children: /* @__PURE__ */ jsx(Card, { className: "w-full max-w-md mx-4", children: /* @__PURE__ */ jsxs(CardContent, { className: "pt-6", children: [
+    /* @__PURE__ */ jsxs("div", { className: "flex mb-4 gap-2", children: [
+      /* @__PURE__ */ jsx(AlertCircle, { className: "h-8 w-8 text-red-500" }),
+      /* @__PURE__ */ jsx("h1", { className: "text-2xl font-bold text-gray-900", children: t("notFound.title") })
+    ] }),
+    /* @__PURE__ */ jsx("p", { className: "mt-4 text-sm text-gray-600", children: t("notFound.body") }),
+    /* @__PURE__ */ jsx(
+      "a",
+      {
+        href: "/",
+        className: "mt-6 inline-block text-sm font-medium text-gray-900 underline underline-offset-2 hover:opacity-70",
+        children: t("notFound.backHome")
+      }
+    )
+  ] }) }) });
+}
+function ArtifactDetailPage() {
+  const t = useT();
+  const { locale } = useLocale();
+  const params = useParams();
+  const artifact = params.slug ? getArtifact(params.slug) : void 0;
+  const copy = artifact ? locale === "en" ? artifact.en : artifact.tr : null;
+  const isVideo = Boolean(artifact?.kind === "video" && artifact.video);
+  const indexPath = artifactsIndexPath();
+  const jsonLd = useMemo(() => {
+    if (!artifact || !copy) return void 0;
+    const url = artifactAbsoluteUrl(artifact.slug);
+    const articleLd = {
+      "@context": "https://schema.org",
+      "@type": isVideo ? "VideoObject" : "Article",
+      headline: copy.title,
+      name: copy.title,
+      description: copy.description,
+      datePublished: artifact.publishedAt,
+      dateModified: artifact.updatedAt ?? artifact.publishedAt,
+      author: {
+        "@type": "Organization",
+        name: artifact.author.name,
+        url: artifact.author.url ?? "https://inner.digital"
+      },
+      publisher: {
+        "@type": "Organization",
+        name: "inner.hub",
+        url: "https://inner.digital",
+        logo: {
+          "@type": "ImageObject",
+          url: "https://inner.digital/inner-logo.png"
+        }
+      },
+      mainEntityOfPage: url,
+      image: [`https://inner.digital${artifact.coverImage}`],
+      ...isVideo && artifact.video ? {
+        contentUrl: artifact.video.src,
+        embedUrl: url,
+        thumbnailUrl: `https://inner.digital${artifact.video.thumbnail}`,
+        uploadDate: artifact.publishedAt,
+        duration: `PT${artifact.video.durationSeconds}S`
+      } : {
+        articleBody: [copy.answer, ...copy.body].join("\n\n"),
+        wordCount: [copy.answer, ...copy.body].join(" ").split(/\s+/).length
+      }
+    };
+    const faqLd = {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: [
+        {
+          "@type": "Question",
+          name: copy.title,
+          acceptedAnswer: { "@type": "Answer", text: copy.answer }
+        },
+        ...(copy.faq ?? []).map((f) => ({
+          "@type": "Question",
+          name: f.q,
+          acceptedAnswer: { "@type": "Answer", text: f.a }
+        }))
+      ]
+    };
+    return [
+      breadcrumbJsonLd([
+        { name: "inner.hub", path: "/" },
+        { name: t("artifacts.nav"), path: indexPath },
+        { name: copy.title, path: artifactPath(artifact.slug) }
+      ]),
+      articleLd,
+      faqLd
+    ];
+  }, [artifact, copy, isVideo, t, indexPath]);
+  useSeo({
+    title: copy?.title ?? t("artifacts.metaTitle"),
+    description: copy?.description ?? t("artifacts.metaDescription"),
+    canonicalPath: artifact ? artifactPath(artifact.slug) : indexPath,
+    ogImage: artifact ? `https://inner.digital${artifact.coverImage}` : void 0,
+    type: isVideo ? "video.other" : "article",
+    jsonLd,
+    noIndex: !artifact
+  });
+  if (!artifact || !copy) return /* @__PURE__ */ jsx(NotFound, {});
+  return /* @__PURE__ */ jsx(SitePublicShell, { children: /* @__PURE__ */ jsxs("article", { className: "mx-auto max-w-3xl px-4 py-12 sm:px-6 md:py-16 lg:px-0", children: [
+    /* @__PURE__ */ jsxs(
+      Link,
+      {
+        href: indexPath,
+        className: "mb-10 inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-white/45 transition-colors hover:text-[var(--bone-fixed)]",
+        children: [
+          /* @__PURE__ */ jsx(ArrowLeft, { className: "size-3" }),
+          t("artifacts.back")
+        ]
+      }
+    ),
+    /* @__PURE__ */ jsxs("p", { className: "mb-4 font-mono text-[10px] uppercase tracking-widest text-white/40", children: [
+      isVideo ? t("artifacts.video") : t("artifacts.article"),
+      /* @__PURE__ */ jsx("span", { className: "mx-2 text-white/20", children: "·" }),
+      /* @__PURE__ */ jsx("time", { dateTime: artifact.publishedAt, children: new Date(artifact.publishedAt).toLocaleDateString(locale === "tr" ? "tr-TR" : "en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric"
+      }) })
+    ] }),
+    /* @__PURE__ */ jsx(
+      "h1",
+      {
+        className: "font-display font-serif italic text-3xl leading-[1.15] sm:text-4xl md:text-5xl",
+        style: { fontVariationSettings: "'opsz' 144, 'WONK' 1" },
+        children: copy.title
+      }
+    ),
+    /* @__PURE__ */ jsx("p", { className: "mt-6 border-l-2 border-[var(--inner-green)] pl-4 text-base leading-relaxed text-white/75 sm:text-lg", children: copy.answer }),
+    /* @__PURE__ */ jsx("div", { className: "mt-10 overflow-hidden border border-white/10 bg-black/40", children: isVideo && artifact.video ? /* @__PURE__ */ jsx(
+      AutoplayVideo,
+      {
+        src: artifact.video.src,
+        poster: artifact.video.thumbnail,
+        label: t("artifacts.video")
+      }
+    ) : /* @__PURE__ */ jsx(
+      "img",
+      {
+        src: artifact.coverImage,
+        alt: artifact.coverAlt,
+        className: "aspect-[16/9] w-full object-cover"
+      }
+    ) }),
+    /* @__PURE__ */ jsx("div", { className: "mt-10 space-y-5 text-[15px] leading-[1.7] text-white/65 sm:text-base", children: copy.body.map((para, i) => /* @__PURE__ */ jsx("p", { children: para }, `${artifact.slug}-p-${i}`)) }),
+    copy.faq && copy.faq.length > 0 && /* @__PURE__ */ jsxs("section", { className: "mt-12 border-t border-white/10 pt-10", children: [
+      /* @__PURE__ */ jsx("h2", { className: "mb-6 font-display font-serif italic text-2xl", children: t("artifacts.faqTitle") }),
+      /* @__PURE__ */ jsx("dl", { className: "space-y-6", children: copy.faq.map((f) => /* @__PURE__ */ jsxs("div", { children: [
+        /* @__PURE__ */ jsx("dt", { className: "font-mono text-[11px] uppercase tracking-widest text-white/50", children: f.q }),
+        /* @__PURE__ */ jsx("dd", { className: "mt-2 text-[15px] leading-relaxed text-white/65", children: f.a })
+      ] }, f.q)) })
+    ] }),
+    copy.tags.length > 0 && /* @__PURE__ */ jsx("ul", { className: "mt-12 flex flex-wrap gap-2 border-t border-white/10 pt-8", children: copy.tags.map((tag) => /* @__PURE__ */ jsx(
+      "li",
+      {
+        className: "border border-white/15 px-2.5 py-1 font-mono text-[10px] uppercase tracking-widest text-white/45",
+        children: tag
+      },
+      tag
+    )) }),
+    /* @__PURE__ */ jsxs("div", { className: "mt-14 flex flex-col gap-3 border border-white/10 p-5 sm:flex-row sm:items-center sm:justify-between", children: [
+      /* @__PURE__ */ jsx("p", { className: "text-sm text-white/55", children: t("artifacts.ctaHint") }),
+      /* @__PURE__ */ jsxs(
+        "a",
+        {
+          href: "/invitation",
+          className: "inline-flex items-center justify-center gap-2 bg-[var(--bone-fixed)] px-4 py-2.5 font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--ink-fixed)]",
+          children: [
+            t("publicNav.requestInvitation"),
+            /* @__PURE__ */ jsx("span", { className: "size-1.5 bg-[var(--inner-green)]", "aria-hidden": true })
+          ]
+        }
+      )
+    ] })
+  ] }) });
+}
+function PublicRoutes() {
+  return /* @__PURE__ */ jsxs(Switch, { children: [
+    /* @__PURE__ */ jsx(Route, { path: "/", component: Home }),
+    /* @__PURE__ */ jsx(Route, { path: "/invitation", component: Invitation }),
+    /* @__PURE__ */ jsx(Route, { path: "/haberler", component: ArtifactsPage }),
+    /* @__PURE__ */ jsx(Route, { path: "/haberler/:slug", component: ArtifactDetailPage }),
+    /* @__PURE__ */ jsx(Route, { component: NotFound })
+  ] });
+}
+function render3(url = "/") {
   const queryClient = new QueryClient();
   return renderToString(
-    /* @__PURE__ */ jsx(QueryClientProvider, { client: queryClient, children: /* @__PURE__ */ jsx(I18nProvider, { children: /* @__PURE__ */ jsx(TooltipProvider, { children: /* @__PURE__ */ jsx(Router, { ssrPath: "/", children: /* @__PURE__ */ jsx(Home, {}) }) }) }) })
+    /* @__PURE__ */ jsx(QueryClientProvider, { client: queryClient, children: /* @__PURE__ */ jsx(I18nProvider, { children: /* @__PURE__ */ jsx(TooltipProvider, { children: /* @__PURE__ */ jsx(Router, { ssrPath: url, children: /* @__PURE__ */ jsx(PublicRoutes, {}) }) }) }) })
   );
 }
 export {

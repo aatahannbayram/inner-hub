@@ -4,22 +4,23 @@ import { Lockup } from "@/components/Lockup";
 import { LocaleToggle, useT } from "@/i18n";
 
 const LINK_KEYS = [
-  { key: "idea", href: "#section-01" },
-  { key: "circle", href: "#section-02" },
-  { key: "platform", href: "#section-03" },
-  { key: "gathering", href: "#section-06" },
-  { key: "next", href: "#section-07" },
+  { key: "idea", href: "/#section-01" },
+  { key: "circle", href: "/#section-02" },
+  { key: "platform", href: "/#section-03" },
+  { key: "gathering", href: "/#section-06" },
+  { key: "artifacts", href: "/haberler" }, // eski "Sıradaki" → Haberler
 ] as const;
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
-/** Shared chrome — footer ink (hafif yeşil atmospheric), pure #000 değil */
+/** Shared chrome - footer ink (hafif yeşil atmospheric), pure #000 değil */
 export const HERO_CHROME = "#0A0A0A";
 
 /**
- * Hero nav — full-width black bar matching the outer frame for visual unity.
+ * Hero nav - full-width black bar matching the outer frame for visual unity.
+ * placement: overlay = hero üzerinde absolute; static = sayfa üstünde sticky.
  */
-export function FloatingNavbar() {
+export function FloatingNavbar({ placement = "overlay" }: { placement?: "overlay" | "static" }) {
   const t = useT();
   const [open, setOpen] = useState(false);
   const links = LINK_KEYS.map((link) => ({
@@ -32,7 +33,11 @@ export function FloatingNavbar() {
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.7, ease: EASE, delay: 0.15 }}
-      className="absolute inset-x-0 top-0 z-50"
+      className={
+        placement === "static"
+          ? "sticky top-0 z-50 border-b border-white/10"
+          : "absolute inset-x-0 top-0 z-50"
+      }
       style={{ backgroundColor: HERO_CHROME }}
     >
       <div className="flex h-[56px] items-center justify-between gap-3 px-3 py-2.5 sm:h-auto sm:gap-4 sm:px-5 sm:py-3.5 md:px-6">

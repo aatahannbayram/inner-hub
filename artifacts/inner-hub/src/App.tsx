@@ -1,5 +1,5 @@
 import { useState, useEffect, lazy, Suspense } from "react";
-import { Switch, Route, Router as WouterRouter } from "wouter";
+import { Switch, Route, Router as WouterRouter, Redirect, useParams } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -8,6 +8,8 @@ import Home from "@/pages/Home";
 import Invitation from "@/pages/Invitation";
 import Requests from "@/pages/Requests";
 import PublicProfile from "@/pages/PublicProfile";
+import ArtifactsPage from "@/pages/Artifacts";
+import ArtifactDetailPage from "@/pages/ArtifactDetail";
 import { PanelShell, type PanelUser } from "@/components/panel/PanelShell";
 import { PanelPageSkeleton } from "@/components/panel/Skeletons";
 import { apiUrl } from "@/lib/api";
@@ -18,7 +20,7 @@ import { useThemeRouteSync } from "@/hooks/useTheme";
 import { useLocation } from "wouter";
 import { GoogleAnalytics } from "@/components/GoogleAnalytics";
 
-// Panel sayfaları auth arkasında (SEO'ya tabi değil) — code-split edilir.
+// Panel sayfaları auth arkasında (SEO'ya tabi değil) - code-split edilir.
 // Home/Invitation/Requests eager kalır (prerender/SEO).
 const Dashboard        = lazy(() => import("@/pages/panel/Dashboard"));
 const Perks            = lazy(() => import("@/pages/panel/Perks"));
@@ -39,6 +41,7 @@ const ProfilePage       = lazy(() => import("@/pages/panel/Profile"));
 const Analytics         = lazy(() => import("@/pages/panel/Analytics"));
 const ApplicationsPage  = lazy(() => import("@/pages/panel/Applications"));
 const CoursesAdmin      = lazy(() => import("@/pages/panel/CoursesAdmin"));
+const HaberlerAdmin     = lazy(() => import("@/pages/panel/HaberlerAdmin"));
 const FAQ               = lazy(() => import("@/pages/panel/FAQ"));
 const Settings          = lazy(() => import("@/pages/panel/Settings"));
 
@@ -89,6 +92,7 @@ function PanelRoutes({ user, onLogout }: { user: PanelUser; onLogout: () => void
           <Route path="/panel/payment/success" component={() => <PaymentSuccess />} />
           <Route path="/panel/applications" component={() => <ApplicationsPage />} />
           <Route path="/panel/courses/admin" component={() => <CoursesAdmin />} />
+          <Route path="/panel/haberler"     component={() => <HaberlerAdmin />} />
           <Route path="/panel/analytics"    component={() => <Analytics />} />
           <Route path="/panel/settings"     component={() => <Settings />} />
           <Route component={NotFound} />
@@ -170,12 +174,25 @@ function ThemeRouteGate({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+function RedirectArtifactsIndex() {
+  return <Redirect to="/haberler" />;
+}
+
+function RedirectArtifactsSlug() {
+  const params = useParams<{ slug?: string }>();
+  return <Redirect to={params.slug ? `/haberler/${params.slug}` : "/haberler"} />;
+}
+
 function Router() {
   return (
     <ThemeRouteGate>
       <Switch>
         <Route path="/"           component={Home} />
         <Route path="/invitation" component={Invitation} />
+        <Route path="/haberler"  component={ArtifactsPage} />
+        <Route path="/haberler/:slug" component={ArtifactDetailPage} />
+        <Route path="/artifacts/:slug" component={RedirectArtifactsSlug} />
+        <Route path="/artifacts" component={RedirectArtifactsIndex} />
         <Route path="/requests"   component={Requests} />
         <Route path="/u/:handle"  component={PublicProfile} />
         <Route path="/panel" component={PanelApp} />

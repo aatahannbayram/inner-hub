@@ -4,7 +4,7 @@ import { motion, useReducedMotion } from "framer-motion";
 const WORD_DELAY = 0.045;
 const INITIAL_DELAY = 0.2;
 const CHAR_DURATION = 0.5;
-const MAX_STAGGER = 0.35; // toplam gecikme tavanı — birincil CTA'nın etkileşilebilir olması gecikmesin
+const MAX_STAGGER = 0.35; // toplam gecikme tavanı - birincil CTA'nın etkileşilebilir olması gecikmesin
 const EASE = [0.16, 1, 0.3, 1] as const;
 
 export function AnimatedHeading({
@@ -31,7 +31,7 @@ export function AnimatedHeading({
     );
   }
 
-  // Kelime bazlı split — harf bazlıya göre daha kısa toplam stagger süresi
+  // Kelime bazlı split - harf bazlıya göre daha kısa toplam stagger süresi
   // ve tam metin ekran okuyucular için aria-label'da (span'ler aria-hidden).
   let globalWordIndex = 0;
 

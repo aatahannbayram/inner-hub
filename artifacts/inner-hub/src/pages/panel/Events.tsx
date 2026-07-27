@@ -83,11 +83,11 @@ function spotsLeft(event: Event) {
   return event.capacity - event.registered;
 }
 
-/** Başlıktaki em dash / ay tekrarını temizle — tarih sütunu zaten ayı gösterir. */
+/** Başlıktaki em dash / ay tekrarını temizle - tarih sütunu zaten ayı gösterir. */
 function displayTitle(title: string) {
   return title
-    .replace(/\s*[—–―]\s*[A-Za-zÇĞİÖŞÜçğıöşü]+\.?\s*$/u, "")
-    .replace(/\s*[—–―]\s*/g, " · ")
+    .replace(/\s*[--―]\s*[A-Za-zÇĞİÖŞÜçğıöşü]+\.?\s*$/u, "")
+    .replace(/\s*[--―]\s*/g, " · ")
     .trim();
 }
 

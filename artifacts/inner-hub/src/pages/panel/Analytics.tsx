@@ -334,7 +334,7 @@ export default function Analytics() {
                     Google Analytics
                   </p>
                   <p className="mt-1 truncate text-sm text-[var(--ink)]">
-                    {web.data.measurementId ?? "—"}
+                    {web.data.measurementId ?? "-"}
                     {web.data.google.connected
                       ? ` · ${t("analytics.syncedGoogle")}`
                       : ` · ${t("analytics.sendingGoogle")}`}

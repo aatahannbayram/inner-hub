@@ -1,4 +1,4 @@
-/** Dark panel ambient — footer ink + atmospheric texture */
+/** Dark panel ambient - footer ink + atmospheric texture */
 export function PanelAmbient() {
   return (
     <div className="panel-ambient" aria-hidden>

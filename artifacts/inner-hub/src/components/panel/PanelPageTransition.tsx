@@ -5,7 +5,7 @@ import { useLocation } from "wouter";
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
-/** Opacity-only — y offset kaldırıldı (layout jump / kayma önlemi) */
+/** Opacity-only - y offset kaldırıldı (layout jump / kayma önlemi) */
 export function PanelPageTransition({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
   const reduce = useReducedMotion();

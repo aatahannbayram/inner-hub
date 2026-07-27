@@ -7,7 +7,7 @@ declare global {
   }
 }
 
-/** Build env veya index.html’deki sabit ID — G-FGLJ0ECVDD */
+/** Build env veya index.html’deki sabit ID - G-FGLJ0ECVDD */
 const GA_ID =
   (import.meta.env.VITE_GA_MEASUREMENT_ID as string | undefined)?.trim() ||
   "G-FGLJ0ECVDD";
@@ -119,7 +119,7 @@ export function trackPageView(path: string, title?: string): void {
     });
   }
 
-  // First-party: her public page_view (ilk dahil) — admin paneli için
+  // First-party: her public page_view (ilk dahil) - admin paneli için
   sendFirstPartyBeacon(path, title);
 }
 

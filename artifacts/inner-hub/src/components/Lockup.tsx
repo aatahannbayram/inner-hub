@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 
-/** Yeşil yanıp sönen kare — `·` yerine marka ayırıcısı. `pulse` birincil
+/** Yeşil yanıp sönen kare - `·` yerine marka ayırıcısı. `pulse` birincil
  *  logo yerleşimlerinde (nav, hero, davet) yumuşak bir glow ekler. */
 export function BeaconSquare({
   className = "",
@@ -22,7 +22,7 @@ export function BeaconSquare({
 
 /**
  * Marka kilidi: `inner` ■ `suffix`
- * Örn. inner■hub, inner■signal — orta nokta (·) yerine yeşil kare.
+ * Örn. inner■hub, inner■signal - orta nokta (·) yerine yeşil kare.
  */
 export function Lockup({
   suffix = "hub",

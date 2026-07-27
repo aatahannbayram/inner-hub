@@ -5,7 +5,7 @@ import { useThemeOptional } from "@/hooks/useTheme";
 
 type ToasterProps = React.ComponentProps<typeof Sonner>;
 
-/** next-themes ile çakışmasın — kendi ThemeProvider'ımızı kullanır */
+/** next-themes ile çakışmasın - kendi ThemeProvider'ımızı kullanır */
 const Toaster = ({ ...props }: ToasterProps) => {
   const theme = useThemeOptional();
   const sonnerTheme: ToasterProps["theme"] = theme
