@@ -7,7 +7,7 @@ import { createContext, useState, useCallback, useEffect, useMemo, useContext, u
 import * as TooltipPrimitive from "@radix-ui/react-tooltip";
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { ArrowRight, ArrowUpRight, Check, Zap, Users, TrendingUp, BookOpen, Radio, Fingerprint, Code2, Target, Mail, Linkedin, Instagram } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Check, Mail, Linkedin, Instagram, Zap, Users, TrendingUp, BookOpen, Radio, Fingerprint, Code2, Target } from "lucide-react";
 import { useReducedMotion, motion, useInView, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import Lenis from "lenis";
 function cn(...inputs) {
@@ -58,15 +58,6 @@ function writeStoredLocale(locale) {
   } catch {
   }
 }
-function detectBrowserLocale() {
-  try {
-    const lang = navigator.language?.toLowerCase() ?? "";
-    if (lang.startsWith("tr")) return "tr";
-    if (lang.startsWith("en")) return "en";
-  } catch {
-  }
-  return DEFAULT_LOCALE;
-}
 function getByPath(obj, path) {
   const parts = path.split(".");
   let cur = obj;
@@ -112,6 +103,8 @@ const tr = {
     comingSoon: "Bu sayfa yakında hazır olacak.",
     home: "Ana sayfa",
     skipToContent: "İçeriğe atla",
+    sectionIndex: "Bölüm dizini",
+    privateCircle: "inner.hub özel çember",
     yes: "Evet",
     no: "Hayır",
     searchPlaceholder: "Ara…"
@@ -216,8 +209,14 @@ const tr = {
     ideaEyebrow: "01 · Fikir",
     ideaTitle: "Özel bir çember.",
     ideaBody: "inner·hub, davetle girilen bir ağdır. Kurucular, builder’lar ve yatırımcılar buraya erken sinyal, derin bağlantı ve birlikte inşa etmek için gelir.",
-    seatsEyebrow: "02 · Kurucu koltuklar",
+    ideaLine1: "AI merkezdir.",
+    ideaLine2: "Etrafında: kurucular, builder’lar, yatırımcılar.",
+    ideaLine3: "inner.hub onları erken bir araya getirir.",
+    ideaReveal: "İstanbul’da başlar. Tek tek seçilen otuz dört kişi kurucu çemberi oluşturur: bir platformun üyeleri değil, sıradakini mümkün kılan insanlar.",
+    seatsEyebrow: "02 · İlk otuz dört",
     seatsTitle: "Kimler için.",
+    seatsLine1: "Erken buluşanlar için kurucu koltuklar.",
+    seatsLine2: "Bilet değil. Katman değil. Çember.",
     seatFounders: "Kurucular.",
     seatFounders1: "AI ve ötesinde girişim kuranlar",
     seatFounders2: "Gürültü gelmeden shipping edenler",
@@ -234,9 +233,48 @@ const tr = {
     circleStartsHere: "Çemberin burada başlar.",
     learnMore: "Daha fazla",
     seatsFooter: "Bu otuz dört kişi sadece üye değil. inner·hub’ın kurucu üyeleri.",
+    platformEyebrow: "03 · Platform",
+    platformTitle: "Kapalı bir çemberin temposuna göre inşa edildi.",
+    platformAccess: "Erişim davetiye ile. Her zaman.",
+    moreTools: "+{n} araç daha",
+    modSignalTag: "AI katmanı",
+    modSignalDesc: "Yapay zeka destekli fırsat ve anlaşma akışı. Herkesten önce doğru sinyaller.",
+    modMatchTag: "Eşleştirme",
+    modMatchDesc: "Kapalı çemberde kurucu, mentor ve yatırımcı eşleşmesi. Güvene dayalı bağlantılar.",
+    modCapitalTag: "Yatırımlar",
+    modCapitalDesc: "Özel deal flow ve yatırım hattı. SPV’ler, demo day’ler ve ortak yatırım fırsatları.",
+    modVaultTag: "Bilgi",
+    modVaultDesc: "Ortak bilgi tabanı. Pitch deck’ler, pazar araştırması ve belgeler. Yetkilendirilmiş ve aranabilir.",
+    modPulseTag: "Zeka",
+    modPulseDesc: "Canlı ekosistem sinyal panosu. Ne hareket ediyor, ne trend, ne önemli. Yalnızca içeride.",
+    modIdTag: "Kimlik",
+    modIdDesc: "Taşınabilir, doğrulanmış üyelik kimliği. inner.hub üyeliğin platformun ötesinde ağırlık taşır.",
+    modApiTag: "Platform",
+    modApiDesc: "Entegrasyonlar ve ortaklar için platform API’si. inner.hub altyapısının üstüne inşa et.",
+    modBountyTag: "Pazar yeri",
+    modBountyDesc: "Topluluk görev sistemi. Şirketler challenge açar, üyeler çözer, platform kolaylaştırır.",
     whatThisIs: "Bu nedir",
+    whatThisIsEyebrow: "04 · Bu nedir",
+    thePoint: "Öz",
+    bigThings: "Büyük işler burada başlar.",
+    whatThisIsBody: "Yeni fikirler burada konuşulur, burada test edilir ve onları gerçekten kurup fonlayabilecek insanlar tarafından burada desteklenir.",
     byInvitation: "Davetiye ile",
+    entryEyebrow: "05 · Giriş",
+    entryTitle: "Giriş davetiye iledir. Her zaman.",
+    entryBody: "Bilet yok, katman yok, açık liste yok. Üyeler çemberin içinden önerilir, özenle değerlendirilir ve kişisel olarak davet edilir.",
+    entryStepName: "Adın",
+    entryStepNameLine: "Çemberin içinden biri adını öne sürer.",
+    entryStepConsider: "Değerlendirme",
+    entryStepConsiderLine: "Acele etmeyiz. Uyum, şöhretten önce gelir.",
+    entryStepInvite: "Davetiye",
+    entryStepInviteLine: "Uygunsa, doğrudan bizden duyarsın.",
     theGathering: "Buluşma",
+    gatheringEyebrow: "06 · Buluşma",
+    gatheringDate: "Eyl 2026 · İstanbul",
+    gatheringTitle: "İlk inner.hub buluşması. İstanbul, Eylül 2026.",
+    gatheringLine: "Otuz dört kişi. İki gün. Bir çember. Birçoklarının ilki.",
+    oneCircle: "34 · Bir çember",
+    oneCircleSr: "Otuz dört kare, bir çember.",
     whatsNext: "Sırada ne var",
     people: "Kişi",
     days: "Gün",
@@ -244,7 +282,7 @@ const tr = {
     footerTagline: "Davetli üyelik. Erken sinyal. Birlikte inşa.",
     footerNavigate: "Gezin",
     footerConnect: "Bağlan",
-    footerRights: "© 2026 inner·hub",
+    footerRights: "© 2026 inner hub · Tüm hakları saklıdır",
     langSwitch: "Dil",
     panel: "Panel"
   },
@@ -1108,8 +1146,33 @@ const tr = {
   },
   analytics: {
     title: "analitik",
-    subtitle: "Topluluk büyümesi ve katılım · canlı veritabanından, gerçek zamanlı.",
+    subtitle: "Site trafiği (Google ile senkron) ve çember katılımı · Framer tarzı paneli.",
     admin: "Admin",
+    tabSite: "Site",
+    tabCircle: "Çember",
+    visitors: "Ziyaretçi",
+    pageViews: "Sayfa görüntüleme",
+    uniqueSessions: "benzersiz oturum",
+    inRange: "seçili aralık",
+    source: "Kaynak",
+    sourceGoogleSub: "GA4 Data API",
+    sourceSiteSub: "first-party + gtag",
+    visitorsOverTime: "Ziyaretçiler",
+    visitorsOverTimeSub: "Günlük benzersiz oturumlar",
+    topPages: "Popüler sayfalar",
+    topPagesSub: "En çok görüntülenen path’ler",
+    topReferrers: "Referrer’lar",
+    topReferrersSub: "Trafik kaynakları",
+    devices: "Cihazlar",
+    devicesSub: "Oturumlara göre",
+    webEmpty: "Henüz site trafiği yok — ziyaretler burada birikecek.",
+    syncedGoogle: "Google Analytics ile senkron",
+    sendingGoogle: "gtag ile Google’a gönderiliyor",
+    gaApiHint: "Canlı Google raporları için Hostinger env: GA4_PROPERTY_ID, GA4_CLIENT_EMAIL, GA4_PRIVATE_KEY",
+    openGoogle: "Google Analytics",
+    range7: "7 gün",
+    range28: "28 gün",
+    range90: "90 gün",
     totalMembers: "Toplam Üye",
     activeMembers: "Aktif Üye",
     newThisWeek: "Bu hafta yeni",
@@ -1200,6 +1263,8 @@ const en = {
     comingSoon: "This page will be ready soon.",
     home: "Home",
     skipToContent: "Skip to content",
+    sectionIndex: "Section index",
+    privateCircle: "inner.hub private circle",
     yes: "Yes",
     no: "No",
     searchPlaceholder: "Search…"
@@ -1304,8 +1369,14 @@ const en = {
     ideaEyebrow: "01 · The idea",
     ideaTitle: "A private circle.",
     ideaBody: "inner·hub is an invite-only network. Founders, builders, and investors come here for early signal, deep connection, and building together.",
-    seatsEyebrow: "02 · Founding seats",
+    ideaLine1: "AI is the center.",
+    ideaLine2: "Around it: founders, builders, investors.",
+    ideaLine3: "inner.hub brings them together early.",
+    ideaReveal: "It starts in İstanbul. Thirty-four people, chosen one by one, form the founding circle: not members of a platform, but the people who make what comes next possible.",
+    seatsEyebrow: "02 · The first thirty-four",
     seatsTitle: "Who it's for.",
+    seatsLine1: "Founding seats for people who meet early.",
+    seatsLine2: "Not tickets. Not tiers. The circle.",
     seatFounders: "Founders.",
     seatFounders1: "Building startups in AI and beyond",
     seatFounders2: "Shipping before the noise arrives",
@@ -1322,9 +1393,48 @@ const en = {
     circleStartsHere: "Your circle starts here.",
     learnMore: "Learn more",
     seatsFooter: "These thirty-four are not just members. They are the founding members of inner.hub.",
+    platformEyebrow: "03 · The platform",
+    platformTitle: "Built for the pace of a closed circle.",
+    platformAccess: "Access is by invitation. Always.",
+    moreTools: "+{n} more tools",
+    modSignalTag: "AI Layer",
+    modSignalDesc: "AI-powered deal and opportunity feed. The right signals, before anyone else sees them.",
+    modMatchTag: "Matching",
+    modMatchDesc: "Co-founder, mentor, and investor matching inside a closed circle. Trust-based connections.",
+    modCapitalTag: "Investments",
+    modCapitalDesc: "Private deal flow and investment pipeline. SPVs, demo days, and co-investment opportunities.",
+    modVaultTag: "Knowledge",
+    modVaultDesc: "Shared knowledge base. Pitch decks, market research, and documents. Permissioned and searchable.",
+    modPulseTag: "Intelligence",
+    modPulseDesc: "Live ecosystem signal dashboard. What's moving, what's trending, what matters. Inside only.",
+    modIdTag: "Identity",
+    modIdDesc: "Portable verified membership identity. Your inner.hub membership carries weight beyond the platform.",
+    modApiTag: "Platform",
+    modApiDesc: "Platform API for integrations and partners. Build on top of the inner.hub infrastructure.",
+    modBountyTag: "Marketplace",
+    modBountyDesc: "Community task system. Companies post challenges, members solve them, platform facilitates.",
     whatThisIs: "What this is",
+    whatThisIsEyebrow: "04 · What this is",
+    thePoint: "The point",
+    bigThings: "Big things start here.",
+    whatThisIsBody: "New ideas are discussed here, tested here, and supported here by people who can actually build them and fund them.",
     byInvitation: "By invitation",
+    entryEyebrow: "05 · Entry",
+    entryTitle: "Entry is by invitation. Always.",
+    entryBody: "There are no tickets, no tiers, and no public list. Members are put forward from inside the circle, considered with care, and invited personally.",
+    entryStepName: "Your name",
+    entryStepNameLine: "Someone inside the circle puts your name forward.",
+    entryStepConsider: "Consideration",
+    entryStepConsiderLine: "We take our time. Fit beats fame.",
+    entryStepInvite: "Invitation",
+    entryStepInviteLine: "If it is right, you hear from us directly.",
     theGathering: "The gathering",
+    gatheringEyebrow: "06 · The gathering",
+    gatheringDate: "Sep 2026 · İstanbul",
+    gatheringTitle: "The first inner.hub gathering. İstanbul, September 2026.",
+    gatheringLine: "Thirty-four people. Two days. One circle. The first of many.",
+    oneCircle: "34 · One circle",
+    oneCircleSr: "Thirty-four squares forming one circle.",
     whatsNext: "What's next",
     people: "People",
     days: "Days",
@@ -1332,7 +1442,7 @@ const en = {
     footerTagline: "Invite-only. Early signal. Build together.",
     footerNavigate: "Navigate",
     footerConnect: "Connect",
-    footerRights: "© 2026 inner·hub",
+    footerRights: "© 2026 inner hub · All rights reserved",
     langSwitch: "Language",
     panel: "Panel"
   },
@@ -2196,8 +2306,33 @@ const en = {
   },
   analytics: {
     title: "analytics",
-    subtitle: "Community growth and engagement · live from the database.",
+    subtitle: "Site traffic (synced with Google) and circle engagement · Framer-style panel.",
     admin: "Admin",
+    tabSite: "Site",
+    tabCircle: "Circle",
+    visitors: "Visitors",
+    pageViews: "Page views",
+    uniqueSessions: "unique sessions",
+    inRange: "selected range",
+    source: "Source",
+    sourceGoogleSub: "GA4 Data API",
+    sourceSiteSub: "first-party + gtag",
+    visitorsOverTime: "Visitors",
+    visitorsOverTimeSub: "Daily unique sessions",
+    topPages: "Top pages",
+    topPagesSub: "Most viewed paths",
+    topReferrers: "Referrers",
+    topReferrersSub: "Traffic sources",
+    devices: "Devices",
+    devicesSub: "By session",
+    webEmpty: "No site traffic yet — visits will appear here.",
+    syncedGoogle: "Synced with Google Analytics",
+    sendingGoogle: "Sending to Google via gtag",
+    gaApiHint: "For live Google reports set env: GA4_PROPERTY_ID, GA4_CLIENT_EMAIL, GA4_PRIVATE_KEY",
+    openGoogle: "Google Analytics",
+    range7: "7 days",
+    range28: "28 days",
+    range90: "90 days",
     totalMembers: "Total members",
     activeMembers: "Active members",
     newThisWeek: "New this week",
@@ -2263,7 +2398,7 @@ const dictionaries = { tr, en };
 const I18nContext = createContext(null);
 function resolveInitialLocale() {
   if (typeof window === "undefined") return DEFAULT_LOCALE;
-  return readStoredLocale() ?? detectBrowserLocale();
+  return readStoredLocale() ?? DEFAULT_LOCALE;
 }
 function I18nProvider({ children }) {
   const [locale, setLocaleState] = useState(resolveInitialLocale);
@@ -2706,6 +2841,7 @@ const SECTIONS = [
   { id: "section-07", label: "07" }
 ];
 function IndexRail() {
+  const t = useT();
   const [active, setActive] = useState("section-01");
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -2727,7 +2863,7 @@ function IndexRail() {
   return /* @__PURE__ */ jsxDEV(
     "nav",
     {
-      "aria-label": "Section index",
+      "aria-label": t("common.sectionIndex"),
       className: "hidden lg:flex fixed right-8 top-1/2 -translate-y-1/2 z-40 flex-col items-end gap-4",
       children: SECTIONS.map(({ id, label }) => {
         const isActive = active === id;
@@ -2748,14 +2884,14 @@ function IndexRail() {
                 false,
                 {
                   fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/IndexRail.tsx",
-                  lineNumber: 51,
+                  lineNumber: 53,
                   columnNumber: 15
                 },
                 this
               ),
               /* @__PURE__ */ jsxDEV("span", { className: isActive ? "text-[var(--bone-fixed)]" : "text-[var(--bone-fixed)]/45", children: label }, void 0, false, {
                 fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/IndexRail.tsx",
-                lineNumber: 56,
+                lineNumber: 58,
                 columnNumber: 13
               }, this)
             ]
@@ -2764,7 +2900,7 @@ function IndexRail() {
           true,
           {
             fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/IndexRail.tsx",
-            lineNumber: 44,
+            lineNumber: 46,
             columnNumber: 11
           },
           this
@@ -2775,7 +2911,7 @@ function IndexRail() {
     false,
     {
       fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/IndexRail.tsx",
-      lineNumber: 37,
+      lineNumber: 39,
       columnNumber: 5
     },
     this
@@ -2787,6 +2923,7 @@ const SIZE = 7;
 const VIEWBOX = 320;
 const CENTER = VIEWBOX / 2;
 function DiagramCircle() {
+  const t = useT();
   const squares = Array.from({ length: TOTAL }, (_, i) => {
     const angle = i / TOTAL * Math.PI * 2 - Math.PI / 2;
     const x = CENTER + RADIUS * Math.cos(angle);
@@ -2815,7 +2952,7 @@ function DiagramCircle() {
           false,
           {
             fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/DiagramCircle.tsx",
-            lineNumber: 24,
+            lineNumber: 27,
             columnNumber: 11
           },
           this
@@ -2825,24 +2962,24 @@ function DiagramCircle() {
       false,
       {
         fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/DiagramCircle.tsx",
-        lineNumber: 17,
+        lineNumber: 20,
         columnNumber: 7
       },
       this
     ),
-    /* @__PURE__ */ jsxDEV("span", { className: "font-mono text-label uppercase tracking-widest opacity-50", children: "34 · One circle" }, void 0, false, {
+    /* @__PURE__ */ jsxDEV("span", { className: "font-mono text-label uppercase tracking-widest opacity-50", children: t("home.oneCircle") }, void 0, false, {
       fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/DiagramCircle.tsx",
-      lineNumber: 35,
+      lineNumber: 38,
       columnNumber: 7
     }, this),
-    /* @__PURE__ */ jsxDEV("span", { className: "sr-only", children: "Thirty-four squares forming one circle." }, void 0, false, {
+    /* @__PURE__ */ jsxDEV("span", { className: "sr-only", children: t("home.oneCircleSr") }, void 0, false, {
       fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/DiagramCircle.tsx",
-      lineNumber: 36,
+      lineNumber: 41,
       columnNumber: 7
     }, this)
   ] }, void 0, true, {
     fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/DiagramCircle.tsx",
-    lineNumber: 16,
+    lineNumber: 19,
     columnNumber: 5
   }, this);
 }
@@ -2995,12 +3132,12 @@ function FeatureCard$1({
       children: [
         /* @__PURE__ */ jsxDEV("p", { className: "mb-4 font-mono text-label uppercase tracking-widest text-white/45", children: feature.tag }, void 0, false, {
           fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/PlatformFeatures.tsx",
-          lineNumber: 42,
+          lineNumber: 43,
           columnNumber: 7
         }, this),
         /* @__PURE__ */ jsxDEV("h3", { className: "mb-6 font-serif text-xl italic text-[var(--bone-fixed)] md:text-2xl", children: feature.name }, void 0, false, {
           fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/PlatformFeatures.tsx",
-          lineNumber: 45,
+          lineNumber: 46,
           columnNumber: 7
         }, this),
         /* @__PURE__ */ jsxDEV("div", { className: "mb-6 aspect-video overflow-hidden bg-black/40", children: feature.media.type === "video" ? /* @__PURE__ */ jsxDEV(
@@ -3014,7 +3151,7 @@ function FeatureCard$1({
           false,
           {
             fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/PlatformFeatures.tsx",
-            lineNumber: 50,
+            lineNumber: 51,
             columnNumber: 11
           },
           this
@@ -3030,18 +3167,18 @@ function FeatureCard$1({
           false,
           {
             fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/PlatformFeatures.tsx",
-            lineNumber: 56,
+            lineNumber: 57,
             columnNumber: 11
           },
           this
         ) }, void 0, false, {
           fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/PlatformFeatures.tsx",
-          lineNumber: 48,
+          lineNumber: 49,
           columnNumber: 7
         }, this),
         /* @__PURE__ */ jsxDEV("p", { className: "text-sm leading-relaxed text-white/55 md:text-base", children: feature.desc }, void 0, false, {
           fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/PlatformFeatures.tsx",
-          lineNumber: 64,
+          lineNumber: 65,
           columnNumber: 7
         }, this)
       ]
@@ -3050,7 +3187,7 @@ function FeatureCard$1({
     true,
     {
       fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/PlatformFeatures.tsx",
-      lineNumber: 31,
+      lineNumber: 32,
       columnNumber: 5
     },
     this
@@ -3060,78 +3197,82 @@ function PlatformFeatures({
   features,
   restModules
 }) {
+  const t = useT();
   const [activeIndex, setActiveIndex] = useState(0);
   const cardRefs = useRef(/* @__PURE__ */ new Map());
+  const ratiosRef = useRef(/* @__PURE__ */ new Map());
   useEffect(() => {
+    const ratios = ratiosRef.current;
+    ratios.clear();
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const idx = Number(entry.target.dataset.featureIndex);
-            setActiveIndex(idx);
+          const idx = Number(entry.target.dataset.featureIndex);
+          if (Number.isNaN(idx)) return;
+          ratios.set(idx, entry.isIntersecting ? entry.intersectionRatio : 0);
+        });
+        let bestIdx = 0;
+        let bestRatio = -1;
+        ratios.forEach((ratio, idx) => {
+          if (ratio > bestRatio) {
+            bestRatio = ratio;
+            bestIdx = idx;
           }
         });
+        if (bestRatio > 0) setActiveIndex(bestIdx);
       },
-      { threshold: 0.6 }
+      {
+        // Mid-viewport band so the left nav tracks the card you're actually reading
+        root: null,
+        threshold: [0, 0.25, 0.5, 0.75, 1],
+        rootMargin: "-28% 0px -42% 0px"
+      }
     );
     cardRefs.current.forEach((el) => observer.observe(el));
     return () => observer.disconnect();
   }, [features.length]);
   const scrollToCard = (index) => {
+    setActiveIndex(index);
     cardRefs.current.get(index)?.scrollIntoView({ behavior: "smooth", block: "center" });
   };
   return /* @__PURE__ */ jsxDEV(
     "div",
     {
-      className: "relative overflow-hidden px-4 py-20 text-[var(--bone-fixed)] sm:px-6 md:px-12 md:py-40 lg:px-[10%] lg:py-48",
+      className: "relative px-4 py-20 text-[var(--bone-fixed)] sm:px-6 md:px-12 md:py-40 lg:px-[10%] lg:py-48",
       style: { backgroundColor: "var(--ink-fixed)" },
       children: [
-        /* @__PURE__ */ jsxDEV(
-          "div",
-          {
-            "aria-hidden": true,
-            className: "pointer-events-none absolute -left-20 top-24 size-72 bg-[var(--inner-green)]/[0.05] blur-3xl"
-          },
-          void 0,
-          false,
-          {
+        /* @__PURE__ */ jsxDEV("div", { className: "pointer-events-none absolute inset-0 overflow-hidden", "aria-hidden": true, children: [
+          /* @__PURE__ */ jsxDEV("div", { className: "absolute -left-20 top-24 size-72 bg-[var(--inner-green)]/[0.05] blur-3xl" }, void 0, false, {
             fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/PlatformFeatures.tsx",
-            lineNumber: 106,
-            columnNumber: 7
-          },
-          this
-        ),
-        /* @__PURE__ */ jsxDEV(
-          "div",
-          {
-            "aria-hidden": true,
-            className: "pointer-events-none absolute -right-16 bottom-20 size-80 bg-[var(--inner-green)]/[0.035] blur-3xl"
-          },
-          void 0,
-          false,
-          {
+            lineNumber: 128,
+            columnNumber: 9
+          }, this),
+          /* @__PURE__ */ jsxDEV("div", { className: "absolute -right-16 bottom-20 size-80 bg-[var(--inner-green)]/[0.035] blur-3xl" }, void 0, false, {
             fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/PlatformFeatures.tsx",
-            lineNumber: 110,
-            columnNumber: 7
-          },
-          this
-        ),
-        /* @__PURE__ */ jsxDEV("div", { className: "relative z-10 grid grid-cols-1 gap-16 lg:grid-cols-[400px_1fr] lg:gap-24 xl:grid-cols-[460px_1fr] xl:gap-48", children: [
-          /* @__PURE__ */ jsxDEV("div", { className: "lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col lg:justify-between lg:py-32", children: [
+            lineNumber: 129,
+            columnNumber: 9
+          }, this)
+        ] }, void 0, true, {
+          fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/PlatformFeatures.tsx",
+          lineNumber: 127,
+          columnNumber: 7
+        }, this),
+        /* @__PURE__ */ jsxDEV("div", { className: "relative z-10 grid grid-cols-1 gap-16 lg:grid-cols-[400px_1fr] lg:items-start lg:gap-24 xl:grid-cols-[460px_1fr] xl:gap-48", children: [
+          /* @__PURE__ */ jsxDEV("div", { className: "lg:sticky lg:top-0 lg:flex lg:h-[100svh] lg:flex-col lg:justify-between lg:self-start lg:py-28", children: [
             /* @__PURE__ */ jsxDEV("div", { children: [
-              /* @__PURE__ */ jsxDEV("p", { className: "mb-4 font-mono text-xs uppercase tracking-widest text-white/45", children: "03 · The platform" }, void 0, false, {
+              /* @__PURE__ */ jsxDEV("p", { className: "mb-4 font-mono text-xs uppercase tracking-widest text-white/45", children: t("home.platformEyebrow") }, void 0, false, {
                 fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/PlatformFeatures.tsx",
-                lineNumber: 118,
+                lineNumber: 136,
                 columnNumber: 13
               }, this),
-              /* @__PURE__ */ jsxDEV("h2", { className: "font-display font-serif italic text-2xl leading-[1.2] text-[var(--bone-fixed)] sm:text-3xl lg:text-[46px]", children: "Built for the pace of a closed circle." }, void 0, false, {
+              /* @__PURE__ */ jsxDEV("h2", { className: "font-display font-serif italic text-2xl leading-[1.2] text-[var(--bone-fixed)] sm:text-3xl lg:text-[46px]", children: t("home.platformTitle") }, void 0, false, {
                 fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/PlatformFeatures.tsx",
-                lineNumber: 121,
+                lineNumber: 139,
                 columnNumber: 13
               }, this)
             ] }, void 0, true, {
               fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/PlatformFeatures.tsx",
-              lineNumber: 117,
+              lineNumber: 135,
               columnNumber: 11
             }, this),
             /* @__PURE__ */ jsxDEV("div", { className: "mt-12 hidden flex-col gap-2 lg:flex", children: features.map((f, i) => /* @__PURE__ */ jsxDEV(
@@ -3146,19 +3287,19 @@ function PlatformFeatures({
               false,
               {
                 fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/PlatformFeatures.tsx",
-                lineNumber: 128,
+                lineNumber: 146,
                 columnNumber: 15
               },
               this
             )) }, void 0, false, {
               fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/PlatformFeatures.tsx",
-              lineNumber: 126,
+              lineNumber: 144,
               columnNumber: 11
             }, this),
             /* @__PURE__ */ jsxDEV("div", { className: "mt-12 hidden lg:block", children: [
-              /* @__PURE__ */ jsxDEV("p", { className: "mb-4 text-sm text-white/55", children: "Access is by invitation. Always." }, void 0, false, {
+              /* @__PURE__ */ jsxDEV("p", { className: "mb-4 text-sm text-white/55", children: t("home.platformAccess") }, void 0, false, {
                 fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/PlatformFeatures.tsx",
-                lineNumber: 144,
+                lineNumber: 162,
                 columnNumber: 13
               }, this),
               /* @__PURE__ */ jsxDEV(
@@ -3167,11 +3308,12 @@ function PlatformFeatures({
                   href: "/invitation",
                   className: "inline-flex items-center gap-2 border border-white/25 px-5 py-2.5 font-mono text-xs uppercase tracking-widest text-[var(--bone-fixed)] transition-colors hover:border-white/50 hover:bg-[var(--bone-fixed)] hover:text-[var(--ink-fixed)]",
                   children: [
-                    "Request an invitation ",
+                    t("home.requestInvitation"),
+                    " ",
                     /* @__PURE__ */ jsxDEV(ArrowRight, { className: "size-3" }, void 0, false, {
                       fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/PlatformFeatures.tsx",
-                      lineNumber: 149,
-                      columnNumber: 37
+                      lineNumber: 167,
+                      columnNumber: 45
                     }, this)
                   ]
                 },
@@ -3179,19 +3321,19 @@ function PlatformFeatures({
                 true,
                 {
                   fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/PlatformFeatures.tsx",
-                  lineNumber: 145,
+                  lineNumber: 163,
                   columnNumber: 13
                 },
                 this
               )
             ] }, void 0, true, {
               fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/PlatformFeatures.tsx",
-              lineNumber: 143,
+              lineNumber: 161,
               columnNumber: 11
             }, this)
           ] }, void 0, true, {
             fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/PlatformFeatures.tsx",
-            lineNumber: 116,
+            lineNumber: 134,
             columnNumber: 9
           }, this),
           /* @__PURE__ */ jsxDEV("div", { className: "flex flex-col gap-3 sm:gap-2", children: [
@@ -3209,19 +3351,15 @@ function PlatformFeatures({
               false,
               {
                 fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/PlatformFeatures.tsx",
-                lineNumber: 156,
+                lineNumber: 174,
                 columnNumber: 13
               },
               this
             )),
             restModules.length > 0 && /* @__PURE__ */ jsxDEV("div", { className: "mt-6 border-t border-white/10 pt-10", children: [
-              /* @__PURE__ */ jsxDEV("p", { className: "mb-6 font-mono text-label uppercase tracking-widest text-white/45", children: [
-                "+",
-                restModules.length,
-                " more tools"
-              ] }, void 0, true, {
+              /* @__PURE__ */ jsxDEV("p", { className: "mb-6 font-mono text-label uppercase tracking-widest text-white/45", children: t("home.moreTools", { n: restModules.length }) }, void 0, false, {
                 fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/PlatformFeatures.tsx",
-                lineNumber: 169,
+                lineNumber: 187,
                 columnNumber: 15
               }, this),
               /* @__PURE__ */ jsxDEV("div", { className: "grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-1", children: restModules.map((mod) => {
@@ -3235,27 +3373,27 @@ function PlatformFeatures({
                       /* @__PURE__ */ jsxDEV("div", { className: "flex items-center justify-between", children: [
                         /* @__PURE__ */ jsxDEV(Icon, { className: "size-4 text-white/45", strokeWidth: 1.5 }, void 0, false, {
                           fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/PlatformFeatures.tsx",
-                          lineNumber: 182,
+                          lineNumber: 200,
                           columnNumber: 25
                         }, this),
                         /* @__PURE__ */ jsxDEV("span", { className: "font-mono text-label uppercase tracking-widest text-white/40", children: mod.tag }, void 0, false, {
                           fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/PlatformFeatures.tsx",
-                          lineNumber: 183,
+                          lineNumber: 201,
                           columnNumber: 25
                         }, this)
                       ] }, void 0, true, {
                         fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/PlatformFeatures.tsx",
-                        lineNumber: 181,
+                        lineNumber: 199,
                         columnNumber: 23
                       }, this),
                       /* @__PURE__ */ jsxDEV("h4", { className: "font-serif italic text-lg text-[var(--bone-fixed)]", children: mod.name }, void 0, false, {
                         fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/PlatformFeatures.tsx",
-                        lineNumber: 187,
+                        lineNumber: 205,
                         columnNumber: 23
                       }, this),
                       /* @__PURE__ */ jsxDEV("p", { className: "text-sm leading-relaxed text-white/50", children: mod.desc }, void 0, false, {
                         fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/PlatformFeatures.tsx",
-                        lineNumber: 190,
+                        lineNumber: 208,
                         columnNumber: 23
                       }, this)
                     ]
@@ -3264,29 +3402,29 @@ function PlatformFeatures({
                   true,
                   {
                     fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/PlatformFeatures.tsx",
-                    lineNumber: 176,
+                    lineNumber: 194,
                     columnNumber: 21
                   },
                   this
                 );
               }) }, void 0, false, {
                 fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/PlatformFeatures.tsx",
-                lineNumber: 172,
+                lineNumber: 190,
                 columnNumber: 15
               }, this)
             ] }, void 0, true, {
               fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/PlatformFeatures.tsx",
-              lineNumber: 168,
+              lineNumber: 186,
               columnNumber: 13
             }, this)
           ] }, void 0, true, {
             fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/PlatformFeatures.tsx",
-            lineNumber: 154,
+            lineNumber: 172,
             columnNumber: 9
           }, this)
         ] }, void 0, true, {
           fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/PlatformFeatures.tsx",
-          lineNumber: 115,
+          lineNumber: 132,
           columnNumber: 7
         }, this)
       ]
@@ -3295,7 +3433,7 @@ function PlatformFeatures({
     true,
     {
       fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/PlatformFeatures.tsx",
-      lineNumber: 101,
+      lineNumber: 122,
       columnNumber: 5
     },
     this
@@ -7815,56 +7953,26 @@ const CARD_EASE = [0.22, 1, 0.36, 1];
 const HERO_VIDEO = "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260405_170732_8a9ccda6-5cff-4628-b164-059c500a2b41.mp4";
 const FEATURE_VIDEO = "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260406_133058_0504132a-0cf3-4450-a370-8ea3b05c95d4.mp4";
 const IDEA_VIDEO = "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260530_042513_df96a13b-6155-4f6e-8b93-c9dee66fba08.mp4";
-const SEAT_CARDS = [
-  {
-    id: "01",
-    title: "Founders.",
-    items: [
-      "Building startups in AI and beyond",
-      "Shipping before the noise arrives",
-      "Looking for co-builders, not crowds",
-      "Chosen one by one. Never open apply"
-    ]
-  },
-  {
-    id: "02",
-    title: "Builders.",
-    items: [
-      "Engineers and researchers in serious AI",
-      "Depth over demos. Craft that compounds",
-      "Signal shared inside the circle first"
-    ]
-  },
-  {
-    id: "03",
-    title: "Investors.",
-    items: [
-      "Angels and venture operators",
-      "Early conviction, patient capital",
-      "Access shaped by trust, not tickets"
-    ]
-  }
-];
 function HomeOpening() {
   return /* @__PURE__ */ jsxDEV(Fragment$1, { children: [
     /* @__PURE__ */ jsxDEV(HeroInset, {}, void 0, false, {
       fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/HomeOpening.tsx",
-      lineNumber: 62,
+      lineNumber: 31,
       columnNumber: 7
     }, this),
     /* @__PURE__ */ jsxDEV(AboutIdea, {}, void 0, false, {
       fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/HomeOpening.tsx",
-      lineNumber: 63,
+      lineNumber: 32,
       columnNumber: 7
     }, this),
     /* @__PURE__ */ jsxDEV(FoundingSeats, {}, void 0, false, {
       fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/HomeOpening.tsx",
-      lineNumber: 64,
+      lineNumber: 33,
       columnNumber: 7
     }, this)
   ] }, void 0, true, {
     fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/HomeOpening.tsx",
-    lineNumber: 61,
+    lineNumber: 30,
     columnNumber: 5
   }, this);
 }
@@ -7891,7 +7999,7 @@ function HeroInset() {
               false,
               {
                 fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/HomeOpening.tsx",
-                lineNumber: 80,
+                lineNumber: 49,
                 columnNumber: 9
               },
               this
@@ -7906,7 +8014,7 @@ function HeroInset() {
               false,
               {
                 fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/HomeOpening.tsx",
-                lineNumber: 84,
+                lineNumber: 53,
                 columnNumber: 9
               },
               this
@@ -7921,7 +8029,7 @@ function HeroInset() {
               false,
               {
                 fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/HomeOpening.tsx",
-                lineNumber: 88,
+                lineNumber: 57,
                 columnNumber: 9
               },
               this
@@ -7936,14 +8044,14 @@ function HeroInset() {
               false,
               {
                 fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/HomeOpening.tsx",
-                lineNumber: 92,
+                lineNumber: 61,
                 columnNumber: 9
               },
               this
             ),
             /* @__PURE__ */ jsxDEV(FloatingNavbar, {}, void 0, false, {
               fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/HomeOpening.tsx",
-              lineNumber: 97,
+              lineNumber: 66,
               columnNumber: 9
             }, this),
             /* @__PURE__ */ jsxDEV("div", { className: "absolute inset-x-0 bottom-0 z-10 px-3 pb-[max(1rem,env(safe-area-inset-bottom))] pt-16 sm:px-5 sm:pb-6 md:px-8 md:pb-9 lg:px-10", children: [
@@ -7957,7 +8065,7 @@ function HeroInset() {
                   children: [
                     /* @__PURE__ */ jsxDEV("span", { className: "size-2 shrink-0 bg-[var(--inner-green)] animate-beacon sm:size-1.5" }, void 0, false, {
                       fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/HomeOpening.tsx",
-                      lineNumber: 106,
+                      lineNumber: 75,
                       columnNumber: 13
                     }, this),
                     t("home.heroTag")
@@ -7967,7 +8075,7 @@ function HeroInset() {
                 true,
                 {
                   fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/HomeOpening.tsx",
-                  lineNumber: 100,
+                  lineNumber: 69,
                   columnNumber: 11
                 },
                 this
@@ -7986,23 +8094,23 @@ function HeroInset() {
                     false,
                     {
                       fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/HomeOpening.tsx",
-                      lineNumber: 113,
+                      lineNumber: 82,
                       columnNumber: 17
                     },
                     this
                   ) }, void 0, false, {
                     fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/HomeOpening.tsx",
-                    lineNumber: 112,
+                    lineNumber: 81,
                     columnNumber: 15
                   }, this),
-                  /* @__PURE__ */ jsxDEV("p", { className: "sr-only", children: "inner.hub private circle" }, void 0, false, {
+                  /* @__PURE__ */ jsxDEV("p", { className: "sr-only", children: t("common.privateCircle") }, void 0, false, {
                     fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/HomeOpening.tsx",
-                    lineNumber: 120,
+                    lineNumber: 89,
                     columnNumber: 15
                   }, this)
                 ] }, void 0, true, {
                   fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/HomeOpening.tsx",
-                  lineNumber: 111,
+                  lineNumber: 80,
                   columnNumber: 13
                 }, this),
                 /* @__PURE__ */ jsxDEV("div", { className: "flex flex-col gap-3.5 sm:gap-5 md:col-span-4 md:pb-3", children: [
@@ -8019,7 +8127,7 @@ function HeroInset() {
                     false,
                     {
                       fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/HomeOpening.tsx",
-                      lineNumber: 124,
+                      lineNumber: 93,
                       columnNumber: 15
                     },
                     this
@@ -8036,11 +8144,11 @@ function HeroInset() {
                         t("home.requestInvitation"),
                         /* @__PURE__ */ jsxDEV("span", { className: "flex size-9 shrink-0 items-center justify-center bg-[var(--ink-fixed)] transition-transform duration-300 group-hover:scale-110 sm:size-10", children: /* @__PURE__ */ jsxDEV(ArrowUpRight, { className: "size-4 text-[var(--bone-fixed)]", strokeWidth: 1.75 }, void 0, false, {
                           fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/HomeOpening.tsx",
-                          lineNumber: 142,
+                          lineNumber: 111,
                           columnNumber: 19
                         }, this) }, void 0, false, {
                           fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/HomeOpening.tsx",
-                          lineNumber: 141,
+                          lineNumber: 110,
                           columnNumber: 17
                         }, this)
                       ]
@@ -8049,24 +8157,24 @@ function HeroInset() {
                     true,
                     {
                       fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/HomeOpening.tsx",
-                      lineNumber: 133,
+                      lineNumber: 102,
                       columnNumber: 15
                     },
                     this
                   )
                 ] }, void 0, true, {
                   fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/HomeOpening.tsx",
-                  lineNumber: 123,
+                  lineNumber: 92,
                   columnNumber: 13
                 }, this)
               ] }, void 0, true, {
                 fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/HomeOpening.tsx",
-                lineNumber: 110,
+                lineNumber: 79,
                 columnNumber: 11
               }, this)
             ] }, void 0, true, {
               fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/HomeOpening.tsx",
-              lineNumber: 99,
+              lineNumber: 68,
               columnNumber: 9
             }, this)
           ]
@@ -8075,7 +8183,7 @@ function HeroInset() {
         true,
         {
           fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/HomeOpening.tsx",
-          lineNumber: 76,
+          lineNumber: 45,
           columnNumber: 7
         },
         this
@@ -8085,13 +8193,14 @@ function HeroInset() {
     false,
     {
       fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/HomeOpening.tsx",
-      lineNumber: 72,
+      lineNumber: 41,
       columnNumber: 5
     },
     this
   );
 }
 function AboutIdea() {
+  const t = useT();
   return /* @__PURE__ */ jsxDEV(
     "section",
     {
@@ -8109,35 +8218,35 @@ function AboutIdea() {
             false,
             {
               fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/HomeOpening.tsx",
-              lineNumber: 162,
+              lineNumber: 132,
               columnNumber: 11
             },
             this
           ),
           /* @__PURE__ */ jsxDEV("div", { className: "absolute inset-0 bg-[var(--ink-fixed)]/55" }, void 0, false, {
             fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/HomeOpening.tsx",
-            lineNumber: 166,
+            lineNumber: 136,
             columnNumber: 11
           }, this),
           /* @__PURE__ */ jsxDEV("div", { className: "absolute inset-0 bg-gradient-to-b from-black/50 via-black/35 to-black/60" }, void 0, false, {
             fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/HomeOpening.tsx",
-            lineNumber: 167,
+            lineNumber: 137,
             columnNumber: 11
           }, this),
           /* @__PURE__ */ jsxDEV("div", { className: "noise-overlay absolute inset-0 opacity-[0.3] mix-blend-overlay" }, void 0, false, {
             fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/HomeOpening.tsx",
-            lineNumber: 168,
+            lineNumber: 138,
             columnNumber: 11
           }, this)
         ] }, void 0, true, {
           fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/HomeOpening.tsx",
-          lineNumber: 161,
+          lineNumber: 131,
           columnNumber: 9
         }, this),
         /* @__PURE__ */ jsxDEV("div", { className: "relative z-10 px-5 py-14 text-center sm:px-8 sm:py-16 md:px-12 md:py-20", children: [
-          /* @__PURE__ */ jsxDEV("p", { className: "mb-6 font-mono text-[10px] uppercase tracking-widest text-[var(--bone-fixed)]/60 sm:mb-8 sm:text-xs", children: "01 · The idea" }, void 0, false, {
+          /* @__PURE__ */ jsxDEV("p", { className: "mb-6 font-mono text-[10px] uppercase tracking-widest text-[var(--bone-fixed)]/60 sm:mb-8 sm:text-xs", children: t("home.ideaEyebrow") }, void 0, false, {
             fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/HomeOpening.tsx",
-            lineNumber: 172,
+            lineNumber: 142,
             columnNumber: 11
           }, this),
           /* @__PURE__ */ jsxDEV(
@@ -8145,13 +8254,13 @@ function AboutIdea() {
             {
               className: "mx-auto max-w-3xl justify-center text-3xl leading-[0.95] text-[var(--bone-fixed)] sm:text-4xl sm:leading-[0.9] md:text-5xl lg:text-6xl xl:text-7xl",
               segments: [
-                { text: "AI is the center.", className: "font-normal" },
+                { text: t("home.ideaLine1"), className: "font-normal" },
                 {
-                  text: "Around it: founders, builders, investors.",
+                  text: t("home.ideaLine2"),
                   className: "font-display font-serif italic"
                 },
                 {
-                  text: "inner.hub brings them together early.",
+                  text: t("home.ideaLine3"),
                   className: "font-normal"
                 }
               ]
@@ -8160,7 +8269,7 @@ function AboutIdea() {
             false,
             {
               fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/HomeOpening.tsx",
-              lineNumber: 176,
+              lineNumber: 146,
               columnNumber: 11
             },
             this
@@ -8168,26 +8277,26 @@ function AboutIdea() {
           /* @__PURE__ */ jsxDEV(
             ScrollTextReveal,
             {
-              text: "It starts in İstanbul. Thirty-four people, chosen one by one, form the founding circle: not members of a platform, but the people who make what comes next possible.",
+              text: t("home.ideaReveal"),
               className: "mx-auto mt-10 max-w-2xl text-xs leading-relaxed text-[var(--bone-fixed)]/70 sm:mt-12 sm:text-sm md:text-base"
             },
             void 0,
             false,
             {
               fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/HomeOpening.tsx",
-              lineNumber: 191,
+              lineNumber: 161,
               columnNumber: 11
             },
             this
           )
         ] }, void 0, true, {
           fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/HomeOpening.tsx",
-          lineNumber: 171,
+          lineNumber: 141,
           columnNumber: 9
         }, this)
       ] }, void 0, true, {
         fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/HomeOpening.tsx",
-        lineNumber: 159,
+        lineNumber: 129,
         columnNumber: 7
       }, this)
     },
@@ -8195,15 +8304,41 @@ function AboutIdea() {
     false,
     {
       fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/HomeOpening.tsx",
-      lineNumber: 155,
+      lineNumber: 125,
       columnNumber: 5
     },
     this
   );
 }
 function FoundingSeats() {
+  const t = useT();
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
+  const seatCards = useMemo(
+    () => [
+      {
+        id: "01",
+        title: t("home.seatFounders"),
+        items: [
+          t("home.seatFounders1"),
+          t("home.seatFounders2"),
+          t("home.seatFounders3"),
+          t("home.seatFounders4")
+        ]
+      },
+      {
+        id: "02",
+        title: t("home.seatBuilders"),
+        items: [t("home.seatBuilders1"), t("home.seatBuilders2"), t("home.seatBuilders3")]
+      },
+      {
+        id: "03",
+        title: t("home.seatInvestors"),
+        items: [t("home.seatInvestors1"), t("home.seatInvestors2"), t("home.seatInvestors3")]
+      }
+    ],
+    [t]
+  );
   return /* @__PURE__ */ jsxDEV(
     "section",
     {
@@ -8213,14 +8348,14 @@ function FoundingSeats() {
       children: [
         /* @__PURE__ */ jsxDEV("div", { "aria-hidden": true, className: "bg-noise pointer-events-none absolute inset-0 opacity-[0.15]" }, void 0, false, {
           fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/HomeOpening.tsx",
-          lineNumber: 211,
+          lineNumber: 208,
           columnNumber: 7
         }, this),
         /* @__PURE__ */ jsxDEV("div", { className: "relative z-10 mx-auto max-w-7xl", children: [
           /* @__PURE__ */ jsxDEV("div", { className: "mb-10 max-w-3xl sm:mb-12 md:mb-14", children: [
-            /* @__PURE__ */ jsxDEV("p", { className: "mb-5 font-mono text-[10px] uppercase tracking-widest text-[var(--bone-fixed)]/50 sm:text-xs", children: "02 · The first thirty-four" }, void 0, false, {
+            /* @__PURE__ */ jsxDEV("p", { className: "mb-5 font-mono text-[10px] uppercase tracking-widest text-[var(--bone-fixed)]/50 sm:text-xs", children: t("home.seatsEyebrow") }, void 0, false, {
               fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/HomeOpening.tsx",
-              lineNumber: 215,
+              lineNumber: 212,
               columnNumber: 11
             }, this),
             /* @__PURE__ */ jsxDEV(
@@ -8229,11 +8364,11 @@ function FoundingSeats() {
                 className: "justify-start text-left text-xl leading-tight sm:text-2xl md:text-3xl lg:text-4xl",
                 segments: [
                   {
-                    text: "Founding seats for people who meet early.",
+                    text: t("home.seatsLine1"),
                     className: "font-normal text-[var(--bone-fixed)]"
                   },
                   {
-                    text: "Not tickets. Not tiers. The circle.",
+                    text: t("home.seatsLine2"),
                     className: "font-normal text-white/40"
                   }
                 ]
@@ -8242,26 +8377,26 @@ function FoundingSeats() {
               false,
               {
                 fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/HomeOpening.tsx",
-                lineNumber: 218,
+                lineNumber: 215,
                 columnNumber: 11
               },
               this
             )
           ] }, void 0, true, {
             fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/HomeOpening.tsx",
-            lineNumber: 214,
+            lineNumber: 211,
             columnNumber: 9
           }, this),
           /* @__PURE__ */ jsxDEV("div", { className: "grid grid-cols-1 gap-3 sm:gap-2 md:grid-cols-2 md:gap-1 lg:grid-cols-4 lg:h-[min(480px,70vh)]", children: [
             /* @__PURE__ */ jsxDEV(FeatureCard, { index: 0, inView, className: "relative min-h-[240px] overflow-hidden lg:min-h-0", children: [
               /* @__PURE__ */ jsxDEV(HeroVideo, { src: FEATURE_VIDEO, className: "absolute inset-0 h-full w-full object-cover" }, void 0, false, {
                 fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/HomeOpening.tsx",
-                lineNumber: 236,
+                lineNumber: 233,
                 columnNumber: 13
               }, this),
               /* @__PURE__ */ jsxDEV("div", { "aria-hidden": true, className: "absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" }, void 0, false, {
                 fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/HomeOpening.tsx",
-                lineNumber: 237,
+                lineNumber: 234,
                 columnNumber: 13
               }, this),
               /* @__PURE__ */ jsxDEV(
@@ -8269,23 +8404,23 @@ function FoundingSeats() {
                 {
                   className: "absolute bottom-4 left-4 right-4 font-medium sm:bottom-5 sm:left-5",
                   style: { color: "#F4F1EC" },
-                  children: "Your circle starts here."
+                  children: t("home.circleStartsHere")
                 },
                 void 0,
                 false,
                 {
                   fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/HomeOpening.tsx",
-                  lineNumber: 238,
+                  lineNumber: 235,
                   columnNumber: 13
                 },
                 this
               )
             ] }, void 0, true, {
               fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/HomeOpening.tsx",
-              lineNumber: 235,
+              lineNumber: 232,
               columnNumber: 11
             }, this),
-            SEAT_CARDS.map((card, i) => /* @__PURE__ */ jsxDEV(
+            seatCards.map((card, i) => /* @__PURE__ */ jsxDEV(
               FeatureCard,
               {
                 index: i + 1,
@@ -8295,22 +8430,22 @@ function FoundingSeats() {
                   /* @__PURE__ */ jsxDEV("div", { className: "mb-4 flex items-start justify-between gap-3", children: [
                     /* @__PURE__ */ jsxDEV("span", { className: "font-mono text-[10px] uppercase tracking-widest text-white/40", children: card.id }, void 0, false, {
                       fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/HomeOpening.tsx",
-                      lineNumber: 254,
+                      lineNumber: 251,
                       columnNumber: 17
                     }, this),
                     /* @__PURE__ */ jsxDEV("span", { className: "size-2.5 bg-[var(--inner-green)] animate-beacon", "aria-hidden": true }, void 0, false, {
                       fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/HomeOpening.tsx",
-                      lineNumber: 257,
+                      lineNumber: 254,
                       columnNumber: 17
                     }, this)
                   ] }, void 0, true, {
                     fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/HomeOpening.tsx",
-                    lineNumber: 253,
+                    lineNumber: 250,
                     columnNumber: 15
                   }, this),
                   /* @__PURE__ */ jsxDEV("h3", { className: "mb-4 text-lg font-medium text-[var(--bone-fixed)] sm:text-xl", children: card.title }, void 0, false, {
                     fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/HomeOpening.tsx",
-                    lineNumber: 259,
+                    lineNumber: 256,
                     columnNumber: 15
                   }, this),
                   /* @__PURE__ */ jsxDEV("ul", { className: "flex flex-1 flex-col gap-2.5", children: card.items.map((item) => /* @__PURE__ */ jsxDEV("li", { className: "flex items-start gap-2.5 text-sm text-white/55", children: [
@@ -8324,23 +8459,23 @@ function FoundingSeats() {
                       false,
                       {
                         fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/HomeOpening.tsx",
-                        lineNumber: 263,
+                        lineNumber: 260,
                         columnNumber: 21
                       },
                       this
                     ),
                     /* @__PURE__ */ jsxDEV("span", { children: item }, void 0, false, {
                       fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/HomeOpening.tsx",
-                      lineNumber: 267,
+                      lineNumber: 264,
                       columnNumber: 21
                     }, this)
                   ] }, item, true, {
                     fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/HomeOpening.tsx",
-                    lineNumber: 262,
+                    lineNumber: 259,
                     columnNumber: 19
                   }, this)) }, void 0, false, {
                     fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/HomeOpening.tsx",
-                    lineNumber: 260,
+                    lineNumber: 257,
                     columnNumber: 15
                   }, this),
                   /* @__PURE__ */ jsxDEV(
@@ -8349,10 +8484,10 @@ function FoundingSeats() {
                       href: "/invitation",
                       className: "mt-5 inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-[var(--bone-fixed)]/70 transition-colors hover:text-[var(--bone-fixed)]",
                       children: [
-                        "Learn more",
+                        t("home.learnMore"),
                         /* @__PURE__ */ jsxDEV(ArrowUpRight, { className: "size-3.5 -rotate-0", strokeWidth: 1.75 }, void 0, false, {
                           fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/HomeOpening.tsx",
-                          lineNumber: 276,
+                          lineNumber: 273,
                           columnNumber: 17
                         }, this)
                       ]
@@ -8361,7 +8496,7 @@ function FoundingSeats() {
                     true,
                     {
                       fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/HomeOpening.tsx",
-                      lineNumber: 271,
+                      lineNumber: 268,
                       columnNumber: 15
                     },
                     this
@@ -8372,24 +8507,24 @@ function FoundingSeats() {
               true,
               {
                 fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/HomeOpening.tsx",
-                lineNumber: 247,
+                lineNumber: 244,
                 columnNumber: 13
               },
               this
             ))
           ] }, void 0, true, {
             fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/HomeOpening.tsx",
-            lineNumber: 233,
-            columnNumber: 7
+            lineNumber: 230,
+            columnNumber: 9
           }, this),
-          /* @__PURE__ */ jsxDEV("p", { className: "mt-8 max-w-2xl text-sm leading-relaxed text-white/50 sm:mt-10 sm:text-base", children: "These thirty-four are not just members. They are the founding members of inner.hub." }, void 0, false, {
+          /* @__PURE__ */ jsxDEV("p", { className: "mt-8 max-w-2xl text-sm leading-relaxed text-white/50 sm:mt-10 sm:text-base", children: t("home.seatsFooter") }, void 0, false, {
             fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/HomeOpening.tsx",
-            lineNumber: 282,
+            lineNumber: 279,
             columnNumber: 9
           }, this)
         ] }, void 0, true, {
           fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/HomeOpening.tsx",
-          lineNumber: 213,
+          lineNumber: 210,
           columnNumber: 7
         }, this)
       ]
@@ -8398,7 +8533,7 @@ function FoundingSeats() {
     true,
     {
       fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/HomeOpening.tsx",
-      lineNumber: 206,
+      lineNumber: 203,
       columnNumber: 5
     },
     this
@@ -8423,7 +8558,7 @@ function FeatureCard({
     false,
     {
       fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/components/HomeOpening.tsx",
-      lineNumber: 302,
+      lineNumber: 299,
       columnNumber: 5
     },
     this
@@ -8475,104 +8610,85 @@ function Counter({ to, suffix = "" }) {
     columnNumber: 10
   }, this);
 }
-const MODULES = [
-  {
-    id: "signal",
-    name: "inner·signal",
-    desc: "AI-powered deal and opportunity feed. The right signals, before anyone else sees them.",
-    icon: Zap,
-    tag: "AI Layer"
-  },
-  {
-    id: "match",
-    name: "inner·match",
-    desc: "Co-founder, mentor, and investor matching inside a closed circle. Trust-based connections.",
-    icon: Users,
-    tag: "Matching"
-  },
-  {
-    id: "capital",
-    name: "inner·capital",
-    desc: "Private deal flow and investment pipeline. SPVs, demo days, and co-investment opportunities.",
-    icon: TrendingUp,
-    tag: "Investments"
-  },
-  {
-    id: "vault",
-    name: "inner·vault",
-    desc: "Shared knowledge base. Pitch decks, market research, and documents. Permissioned and searchable.",
-    icon: BookOpen,
-    tag: "Knowledge"
-  },
-  {
-    id: "pulse",
-    name: "inner·pulse",
-    desc: "Live ecosystem signal dashboard. What's moving, what's trending, what matters. Inside only.",
-    icon: Radio,
-    tag: "Intelligence"
-  },
-  {
-    id: "id",
-    name: "inner·id",
-    desc: "Portable verified membership identity. Your inner.hub membership carries weight beyond the platform.",
-    icon: Fingerprint,
-    tag: "Identity"
-  },
-  {
-    id: "api",
-    name: "inner·api",
-    desc: "Platform API for integrations and partners. Build on top of the inner.hub infrastructure.",
-    icon: Code2,
-    tag: "Platform"
-  },
-  {
-    id: "bounty",
-    name: "inner·bounty",
-    desc: "Community task system. Companies post challenges, members solve them, platform facilitates.",
-    icon: Target,
-    tag: "Marketplace"
-  }
-];
-const PLATFORM_FEATURES = [
-  {
-    id: "signal",
-    name: "inner·signal",
-    tag: "AI Layer",
-    desc: "AI-powered deal and opportunity feed. The right signals, before anyone else sees them.",
+const FEATURE_MEDIA = {
+  signal: "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260406_094145_4a271a6c-3869-4f1c-8aa7-aeb0cb227994.mp4",
+  match: "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260508_215831_c6a8989c-d716-4d8d-8745-e972a2eec711.mp4",
+  capital: "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260403_050628_c4e32401-fab4-4a27-b7a8-6e9291cd5959.mp4"
+};
+function buildHomeModules(t) {
+  return [
+    {
+      id: "signal",
+      name: "inner·signal",
+      desc: t("home.modSignalDesc"),
+      icon: Zap,
+      tag: t("home.modSignalTag")
+    },
+    {
+      id: "match",
+      name: "inner·match",
+      desc: t("home.modMatchDesc"),
+      icon: Users,
+      tag: t("home.modMatchTag")
+    },
+    {
+      id: "capital",
+      name: "inner·capital",
+      desc: t("home.modCapitalDesc"),
+      icon: TrendingUp,
+      tag: t("home.modCapitalTag")
+    },
+    {
+      id: "vault",
+      name: "inner·vault",
+      desc: t("home.modVaultDesc"),
+      icon: BookOpen,
+      tag: t("home.modVaultTag")
+    },
+    {
+      id: "pulse",
+      name: "inner·pulse",
+      desc: t("home.modPulseDesc"),
+      icon: Radio,
+      tag: t("home.modPulseTag")
+    },
+    {
+      id: "id",
+      name: "inner·id",
+      desc: t("home.modIdDesc"),
+      icon: Fingerprint,
+      tag: t("home.modIdTag")
+    },
+    {
+      id: "api",
+      name: "inner·api",
+      desc: t("home.modApiDesc"),
+      icon: Code2,
+      tag: t("home.modApiTag")
+    },
+    {
+      id: "bounty",
+      name: "inner·bounty",
+      desc: t("home.modBountyDesc"),
+      icon: Target,
+      tag: t("home.modBountyTag")
+    }
+  ];
+}
+function buildPlatformFeatures(modules) {
+  return modules.slice(0, 3).map((m) => ({
+    id: m.id,
+    name: m.name,
+    tag: m.tag,
+    desc: m.desc,
     media: {
       type: "video",
-      src: "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260406_094145_4a271a6c-3869-4f1c-8aa7-aeb0cb227994.mp4"
+      src: FEATURE_MEDIA[m.id]
     }
-  },
-  {
-    id: "match",
-    name: "inner·match",
-    tag: "Matching",
-    desc: "Co-founder, mentor, and investor matching inside a closed circle. Trust-based connections.",
-    media: {
-      type: "video",
-      src: "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260508_215831_c6a8989c-d716-4d8d-8745-e972a2eec711.mp4"
-    }
-  },
-  {
-    id: "capital",
-    name: "inner·capital",
-    tag: "Investments",
-    desc: "Private deal flow and investment pipeline. SPVs, demo days, and co-investment opportunities.",
-    media: {
-      type: "video",
-      src: "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260403_050628_c4e32401-fab4-4a27-b7a8-6e9291cd5959.mp4"
-    }
-  }
-];
-const MARQUEE_MODULES = MODULES.map((m) => ({
-  id: m.id,
-  name: m.name,
-  icon: m.icon,
-  tag: m.tag
-}));
-function MarqueeStrip() {
-  const loop = [...MARQUEE_MODULES, ...MARQUEE_MODULES, ...MARQUEE_MODULES];
+  }));
+}
+function MarqueeStrip({ modules }) {
+  const loop = [...modules, ...modules, ...modules];
   return /* @__PURE__ */ jsxDEV("div", { className: "relative z-10 overflow-hidden bg-[var(--ink-fixed)] py-3 sm:py-4", children: [
     /* @__PURE__ */ jsxDEV(
       "div",
@@ -8584,7 +8700,7 @@ function MarqueeStrip() {
       false,
       {
         fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-        lineNumber: 160,
+        lineNumber: 152,
         columnNumber: 7
       },
       this
@@ -8599,7 +8715,7 @@ function MarqueeStrip() {
       false,
       {
         fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-        lineNumber: 164,
+        lineNumber: 156,
         columnNumber: 7
       },
       this
@@ -8628,29 +8744,29 @@ function MarqueeStrip() {
                   false,
                   {
                     fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-                    lineNumber: 184,
+                    lineNumber: 176,
                     columnNumber: 19
                   },
                   this
                 ) }, void 0, false, {
                   fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-                  lineNumber: 183,
+                  lineNumber: 175,
                   columnNumber: 17
                 }, this),
                 /* @__PURE__ */ jsxDEV("span", { className: "flex flex-col gap-0.5", children: [
                   /* @__PURE__ */ jsxDEV("span", { className: "font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--bone-fixed)] sm:text-[11px]", children: item.name }, void 0, false, {
                     fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-                    lineNumber: 190,
+                    lineNumber: 182,
                     columnNumber: 19
                   }, this),
                   /* @__PURE__ */ jsxDEV("span", { className: "hidden font-mono text-[8px] uppercase tracking-[0.14em] text-[var(--bone-fixed)]/40 sm:block", children: item.tag }, void 0, false, {
                     fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-                    lineNumber: 193,
+                    lineNumber: 185,
                     columnNumber: 19
                   }, this)
                 ] }, void 0, true, {
                   fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-                  lineNumber: 189,
+                  lineNumber: 181,
                   columnNumber: 17
                 }, this),
                 /* @__PURE__ */ jsxDEV(
@@ -8663,7 +8779,7 @@ function MarqueeStrip() {
                   false,
                   {
                     fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-                    lineNumber: 197,
+                    lineNumber: 189,
                     columnNumber: 17
                   },
                   this
@@ -8674,7 +8790,7 @@ function MarqueeStrip() {
             true,
             {
               fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-              lineNumber: 178,
+              lineNumber: 170,
               columnNumber: 15
             },
             this
@@ -8685,18 +8801,18 @@ function MarqueeStrip() {
       false,
       {
         fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-        lineNumber: 170,
+        lineNumber: 162,
         columnNumber: 9
       },
       this
     ) }, void 0, false, {
       fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-      lineNumber: 169,
+      lineNumber: 161,
       columnNumber: 7
     }, this)
   ] }, void 0, true, {
     fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-    lineNumber: 158,
+    lineNumber: 150,
     columnNumber: 5
   }, this);
 }
@@ -8712,7 +8828,7 @@ function ScrollProgress() {
     false,
     {
       fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-      lineNumber: 214,
+      lineNumber: 206,
       columnNumber: 5
     },
     this
@@ -8722,21 +8838,21 @@ function StatItem({ n, label, suffix = "" }) {
   return /* @__PURE__ */ jsxDEV("div", { className: "flex flex-col items-start", children: [
     /* @__PURE__ */ jsxDEV("span", { className: "font-display font-serif italic text-4xl leading-none mb-2 text-[var(--bone-fixed)] sm:mb-3 sm:text-5xl md:text-7xl", children: /* @__PURE__ */ jsxDEV(Counter, { to: n, suffix }, void 0, false, {
       fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-      lineNumber: 226,
+      lineNumber: 218,
       columnNumber: 9
     }, this) }, void 0, false, {
       fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-      lineNumber: 225,
+      lineNumber: 217,
       columnNumber: 7
     }, this),
     /* @__PURE__ */ jsxDEV("span", { className: "font-mono text-[9px] uppercase tracking-widest opacity-40 text-[var(--bone-fixed)] sm:text-label", children: label }, void 0, false, {
       fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-      lineNumber: 228,
+      lineNumber: 220,
       columnNumber: 7
     }, this)
   ] }, void 0, true, {
     fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-    lineNumber: 224,
+    lineNumber: 216,
     columnNumber: 5
   }, this);
 }
@@ -8744,6 +8860,8 @@ function Home() {
   useLenis(true);
   const t = useT();
   const { locale } = useLocale();
+  const modules = buildHomeModules(t);
+  const platformFeatures = buildPlatformFeatures(modules);
   useEffect(() => {
     if (window.location.hash) {
       const el = document.getElementById(window.location.hash.slice(1));
@@ -8753,47 +8871,47 @@ function Home() {
   return /* @__PURE__ */ jsxDEV("div", { lang: locale, className: "site-atmosphere flex min-h-screen flex-col", children: [
     /* @__PURE__ */ jsxDEV("a", { href: "#main-content", className: "sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[9999] focus:bg-foreground focus:text-background focus:px-4 focus:py-2 font-mono text-xs uppercase tracking-widest", children: t("common.skipToContent") }, void 0, false, {
       fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-      lineNumber: 248,
+      lineNumber: 242,
       columnNumber: 7
     }, this),
     /* @__PURE__ */ jsxDEV(ScrollProgress, {}, void 0, false, {
       fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-      lineNumber: 252,
+      lineNumber: 246,
       columnNumber: 7
     }, this),
     /* @__PURE__ */ jsxDEV(Preloader, {}, void 0, false, {
       fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-      lineNumber: 253,
+      lineNumber: 247,
       columnNumber: 7
     }, this),
     /* @__PURE__ */ jsxDEV(Grain, {}, void 0, false, {
       fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-      lineNumber: 254,
+      lineNumber: 248,
       columnNumber: 7
     }, this),
     /* @__PURE__ */ jsxDEV(IndexRail, {}, void 0, false, {
       fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-      lineNumber: 255,
+      lineNumber: 249,
       columnNumber: 7
     }, this),
     /* @__PURE__ */ jsxDEV("main", { id: "main-content", className: "flex-grow", children: [
       /* @__PURE__ */ jsxDEV(HomeOpening, {}, void 0, false, {
         fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-        lineNumber: 260,
+        lineNumber: 254,
         columnNumber: 9
       }, this),
-      /* @__PURE__ */ jsxDEV(MarqueeStrip, {}, void 0, false, {
+      /* @__PURE__ */ jsxDEV(MarqueeStrip, { modules }, void 0, false, {
         fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-        lineNumber: 263,
+        lineNumber: 257,
         columnNumber: 9
       }, this),
-      /* @__PURE__ */ jsxDEV("section", { id: "section-03", children: /* @__PURE__ */ jsxDEV(PlatformFeatures, { features: PLATFORM_FEATURES, restModules: MODULES.slice(3) }, void 0, false, {
+      /* @__PURE__ */ jsxDEV("section", { id: "section-03", children: /* @__PURE__ */ jsxDEV(PlatformFeatures, { features: platformFeatures, restModules: modules.slice(3) }, void 0, false, {
         fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-        lineNumber: 267,
+        lineNumber: 261,
         columnNumber: 11
       }, this) }, void 0, false, {
         fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-        lineNumber: 266,
+        lineNumber: 260,
         columnNumber: 9
       }, this),
       /* @__PURE__ */ jsxDEV("div", { className: "relative overflow-hidden bg-[var(--ink-fixed)] border-t border-border/15", children: [
@@ -8808,49 +8926,49 @@ function Home() {
             false,
             {
               fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-              lineNumber: 273,
+              lineNumber: 267,
               columnNumber: 13
             },
             this
           ),
           /* @__PURE__ */ jsxDEV("div", { className: "pointer-events-none absolute inset-0 bg-gradient-to-b from-black/55 via-black/60 to-[var(--ink-fixed)]" }, void 0, false, {
             fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-            lineNumber: 277,
+            lineNumber: 271,
             columnNumber: 13
           }, this)
         ] }, void 0, true, {
           fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-          lineNumber: 272,
+          lineNumber: 266,
           columnNumber: 11
         }, this),
         /* @__PURE__ */ jsxDEV("section", { id: "section-04", className: "relative z-10 px-4 pt-20 pb-16 sm:px-6 sm:pt-28 sm:pb-24 md:px-12 md:pt-36 lg:px-[10%]", children: [
           /* @__PURE__ */ jsxDEV("div", { className: "mb-10 flex items-baseline justify-between gap-3 border-b border-white/15 pb-5 font-mono text-[10px] uppercase tracking-widest text-white/50 sm:mb-16 sm:gap-6 sm:pb-6 sm:text-xs", children: [
-            /* @__PURE__ */ jsxDEV("span", { children: "04 · What this is" }, void 0, false, {
+            /* @__PURE__ */ jsxDEV("span", { children: t("home.whatThisIsEyebrow") }, void 0, false, {
               fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-              lineNumber: 283,
+              lineNumber: 277,
               columnNumber: 15
             }, this),
-            /* @__PURE__ */ jsxDEV("span", { className: "whitespace-nowrap", children: "The point" }, void 0, false, {
+            /* @__PURE__ */ jsxDEV("span", { className: "whitespace-nowrap", children: t("home.thePoint") }, void 0, false, {
               fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-              lineNumber: 284,
+              lineNumber: 278,
               columnNumber: 15
             }, this)
           ] }, void 0, true, {
             fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-            lineNumber: 282,
+            lineNumber: 276,
             columnNumber: 13
           }, this),
           /* @__PURE__ */ jsxDEV(
             WordsPullUp,
             {
-              text: "Big things start here.",
+              text: t("home.bigThings"),
               className: "font-display font-serif italic text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-[var(--bone-fixed)] max-w-3xl mb-8 sm:mb-10 text-balance"
             },
             void 0,
             false,
             {
               fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-              lineNumber: 286,
+              lineNumber: 280,
               columnNumber: 13
             },
             this
@@ -8858,7 +8976,7 @@ function Home() {
           /* @__PURE__ */ jsxDEV(
             ScrollTextReveal,
             {
-              text: "New ideas are discussed here, tested here, and supported here by people who can actually build them and fund them.",
+              text: t("home.whatThisIsBody"),
               className: "max-w-[46ch] text-[var(--bone-fixed)]",
               style: { fontSize: "clamp(17px, 2.4vw, 26px)", lineHeight: 1.55, opacity: 0.85 }
             },
@@ -8866,93 +8984,93 @@ function Home() {
             false,
             {
               fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-              lineNumber: 290,
+              lineNumber: 284,
               columnNumber: 13
             },
             this
           )
         ] }, void 0, true, {
           fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-          lineNumber: 281,
+          lineNumber: 275,
           columnNumber: 11
         }, this),
         /* @__PURE__ */ jsxDEV("section", { id: "section-05", className: "relative z-10 px-4 pt-6 pb-24 sm:px-6 sm:pt-8 sm:pb-32 md:px-12 md:pb-48 lg:px-[10%]", children: [
           /* @__PURE__ */ jsxDEV("div", { className: "mb-10 flex items-baseline justify-between gap-3 border-b border-white/15 pb-5 font-mono text-[10px] uppercase tracking-widest text-white/50 sm:mb-16 sm:gap-6 sm:pb-6 sm:text-xs", children: [
-            /* @__PURE__ */ jsxDEV("span", { children: "05 · Entry" }, void 0, false, {
+            /* @__PURE__ */ jsxDEV("span", { children: t("home.entryEyebrow") }, void 0, false, {
               fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-              lineNumber: 300,
+              lineNumber: 294,
               columnNumber: 15
             }, this),
-            /* @__PURE__ */ jsxDEV("span", { className: "whitespace-nowrap", children: "By invitation" }, void 0, false, {
+            /* @__PURE__ */ jsxDEV("span", { className: "whitespace-nowrap", children: t("home.byInvitation") }, void 0, false, {
               fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-              lineNumber: 301,
+              lineNumber: 295,
               columnNumber: 15
             }, this)
           ] }, void 0, true, {
             fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-            lineNumber: 299,
+            lineNumber: 293,
             columnNumber: 13
           }, this),
           /* @__PURE__ */ jsxDEV(
             WordsPullUp,
             {
-              text: "Entry is by invitation. Always.",
+              text: t("home.entryTitle"),
               className: "font-display font-serif italic text-3xl sm:text-4xl md:text-5xl max-w-2xl mb-6 sm:mb-8 text-balance text-[var(--bone-fixed)]"
             },
             void 0,
             false,
             {
               fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-              lineNumber: 303,
+              lineNumber: 297,
               columnNumber: 13
             },
             this
           ),
-          /* @__PURE__ */ jsxDEV(FadeIn, { delay: 0.2, children: /* @__PURE__ */ jsxDEV("p", { className: "mb-12 max-w-[65ch] text-base leading-[1.7] text-[var(--bone-fixed)]/80 sm:mb-20 sm:text-lg", children: "There are no tickets, no tiers, and no public list. Members are put forward from inside the circle, considered with care, and invited personally." }, void 0, false, {
+          /* @__PURE__ */ jsxDEV(FadeIn, { delay: 0.2, children: /* @__PURE__ */ jsxDEV("p", { className: "mb-12 max-w-[65ch] text-base leading-[1.7] text-[var(--bone-fixed)]/80 sm:mb-20 sm:text-lg", children: t("home.entryBody") }, void 0, false, {
             fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-            lineNumber: 308,
+            lineNumber: 302,
             columnNumber: 15
           }, this) }, void 0, false, {
             fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-            lineNumber: 307,
+            lineNumber: 301,
             columnNumber: 13
           }, this),
           /* @__PURE__ */ jsxDEV("div", { className: "max-w-3xl", children: [
-            { label: "Your name", line: "Someone inside the circle puts your name forward." },
-            { label: "Consideration", line: "We take our time. Fit beats fame." },
-            { label: "Invitation", line: "If it is right, you hear from us directly." }
+            { label: t("home.entryStepName"), line: t("home.entryStepNameLine") },
+            { label: t("home.entryStepConsider"), line: t("home.entryStepConsiderLine") },
+            { label: t("home.entryStepInvite"), line: t("home.entryStepInviteLine") }
           ].map((item, i) => /* @__PURE__ */ jsxDEV(FadeIn, { delay: i * 0.1, children: /* @__PURE__ */ jsxDEV("div", { className: "flex flex-col gap-2 border-t border-white/15 py-5 last:border-b md:flex-row md:items-baseline md:gap-12 md:py-6", children: [
             /* @__PURE__ */ jsxDEV("div", { className: "w-full flex-shrink-0 font-mono text-[10px] uppercase tracking-widest text-white/50 sm:text-xs md:w-48", children: item.label }, void 0, false, {
               fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-              lineNumber: 320,
+              lineNumber: 314,
               columnNumber: 21
             }, this),
             /* @__PURE__ */ jsxDEV("p", { className: "text-base text-[var(--bone-fixed)]/90 sm:text-lg", children: item.line }, void 0, false, {
               fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-              lineNumber: 321,
+              lineNumber: 315,
               columnNumber: 21
             }, this)
           ] }, void 0, true, {
             fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-            lineNumber: 319,
+            lineNumber: 313,
             columnNumber: 19
           }, this) }, item.label, false, {
             fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-            lineNumber: 318,
+            lineNumber: 312,
             columnNumber: 17
           }, this)) }, void 0, false, {
             fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-            lineNumber: 312,
+            lineNumber: 306,
             columnNumber: 13
           }, this)
         ] }, void 0, true, {
           fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-          lineNumber: 298,
+          lineNumber: 292,
           columnNumber: 11
         }, this)
       ] }, void 0, true, {
         fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-        lineNumber: 271,
+        lineNumber: 265,
         columnNumber: 9
       }, this),
       /* @__PURE__ */ jsxDEV(
@@ -8963,89 +9081,89 @@ function Home() {
           children: [
             /* @__PURE__ */ jsxDEV("div", { className: "pointer-events-none absolute -right-24 top-0 size-[520px] bg-[var(--inner-green)]/[0.04] blur-3xl" }, void 0, false, {
               fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-              lineNumber: 334,
+              lineNumber: 328,
               columnNumber: 11
             }, this),
             /* @__PURE__ */ jsxDEV("div", { className: "pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[var(--ink-fixed)]/40 to-transparent" }, void 0, false, {
               fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-              lineNumber: 335,
+              lineNumber: 329,
               columnNumber: 11
             }, this),
             /* @__PURE__ */ jsxDEV(FadeIn, { children: /* @__PURE__ */ jsxDEV("div", { className: "mb-12 flex items-baseline justify-between gap-3 border-b border-white/15 pb-5 font-mono text-[10px] uppercase tracking-widest opacity-60 sm:mb-20 sm:gap-6 sm:pb-6 sm:text-xs", children: [
-              /* @__PURE__ */ jsxDEV("span", { children: "06 · The gathering" }, void 0, false, {
+              /* @__PURE__ */ jsxDEV("span", { children: t("home.gatheringEyebrow") }, void 0, false, {
                 fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-                lineNumber: 339,
+                lineNumber: 333,
                 columnNumber: 15
               }, this),
-              /* @__PURE__ */ jsxDEV("span", { className: "whitespace-nowrap", children: "Sep 2026 · İstanbul" }, void 0, false, {
+              /* @__PURE__ */ jsxDEV("span", { className: "whitespace-nowrap", children: t("home.gatheringDate") }, void 0, false, {
                 fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-                lineNumber: 340,
+                lineNumber: 334,
                 columnNumber: 15
               }, this)
             ] }, void 0, true, {
               fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-              lineNumber: 338,
+              lineNumber: 332,
               columnNumber: 13
             }, this) }, void 0, false, {
               fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-              lineNumber: 337,
+              lineNumber: 331,
               columnNumber: 11
             }, this),
             /* @__PURE__ */ jsxDEV(
               WordsPullUp,
               {
-                text: "The first inner.hub gathering. İstanbul, September 2026.",
+                text: t("home.gatheringTitle"),
                 className: "mb-12 max-w-3xl text-balance font-display font-serif italic text-3xl sm:mb-20 sm:text-4xl md:mb-24 md:text-5xl lg:text-6xl"
               },
               void 0,
               false,
               {
                 fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-                lineNumber: 343,
+                lineNumber: 337,
                 columnNumber: 11
               },
               this
             ),
             /* @__PURE__ */ jsxDEV("div", { className: "mb-12 flex flex-col gap-12 sm:mb-20 sm:gap-16 lg:mb-24 lg:flex-row lg:items-center", children: [
               /* @__PURE__ */ jsxDEV("div", { className: "grid min-w-0 grid-cols-3 gap-3 sm:gap-6 md:gap-10 lg:flex-1", children: [
-                /* @__PURE__ */ jsxDEV(StatItem, { n: 34, label: "People" }, void 0, false, {
+                /* @__PURE__ */ jsxDEV(StatItem, { n: 34, label: t("home.people") }, void 0, false, {
                   fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-                  lineNumber: 350,
+                  lineNumber: 344,
                   columnNumber: 15
                 }, this),
-                /* @__PURE__ */ jsxDEV(StatItem, { n: 2, label: "Days" }, void 0, false, {
+                /* @__PURE__ */ jsxDEV(StatItem, { n: 2, label: t("home.days") }, void 0, false, {
                   fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-                  lineNumber: 351,
+                  lineNumber: 345,
                   columnNumber: 15
                 }, this),
-                /* @__PURE__ */ jsxDEV(StatItem, { n: 8, label: "Modules" }, void 0, false, {
+                /* @__PURE__ */ jsxDEV(StatItem, { n: 8, label: t("home.modules") }, void 0, false, {
                   fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-                  lineNumber: 352,
+                  lineNumber: 346,
                   columnNumber: 15
                 }, this)
               ] }, void 0, true, {
                 fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-                lineNumber: 349,
+                lineNumber: 343,
                 columnNumber: 13
               }, this),
               /* @__PURE__ */ jsxDEV(FadeIn, { delay: 0.2, className: "flex-shrink-0", children: /* @__PURE__ */ jsxDEV(DiagramCircle, {}, void 0, false, {
                 fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-                lineNumber: 355,
+                lineNumber: 349,
                 columnNumber: 15
               }, this) }, void 0, false, {
                 fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-                lineNumber: 354,
+                lineNumber: 348,
                 columnNumber: 13
               }, this)
             ] }, void 0, true, {
               fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-              lineNumber: 348,
+              lineNumber: 342,
               columnNumber: 11
             }, this),
             /* @__PURE__ */ jsxDEV(FadeIn, { delay: 0.15, children: /* @__PURE__ */ jsxDEV("div", { className: "flex flex-col gap-6 sm:gap-8 md:flex-row md:items-end md:justify-between", children: [
-              /* @__PURE__ */ jsxDEV("p", { className: "max-w-2xl text-balance font-serif text-xl opacity-80 sm:text-2xl md:text-3xl", children: "Thirty-four people. Two days. One circle. The first of many." }, void 0, false, {
+              /* @__PURE__ */ jsxDEV("p", { className: "max-w-2xl text-balance font-serif text-xl opacity-80 sm:text-2xl md:text-3xl", children: t("home.gatheringLine") }, void 0, false, {
                 fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-                lineNumber: 361,
+                lineNumber: 355,
                 columnNumber: 15
               }, this),
               /* @__PURE__ */ jsxDEV(
@@ -9054,10 +9172,10 @@ function Home() {
                   href: "#section-07",
                   className: "group inline-flex min-h-11 items-center justify-center gap-2 border border-white/25 px-5 py-3 font-mono text-xs uppercase tracking-widest text-[var(--bone-fixed)] transition-colors hover:border-white/60 hover:bg-white hover:text-black sm:min-h-0 sm:justify-start",
                   children: [
-                    "What's next",
+                    t("home.whatsNext"),
                     /* @__PURE__ */ jsxDEV(ArrowUpRight, { className: "size-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" }, void 0, false, {
                       fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-                      lineNumber: 369,
+                      lineNumber: 363,
                       columnNumber: 17
                     }, this)
                   ]
@@ -9066,18 +9184,18 @@ function Home() {
                 true,
                 {
                   fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-                  lineNumber: 364,
+                  lineNumber: 358,
                   columnNumber: 15
                 },
                 this
               )
             ] }, void 0, true, {
               fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-              lineNumber: 360,
+              lineNumber: 354,
               columnNumber: 13
             }, this) }, void 0, false, {
               fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-              lineNumber: 359,
+              lineNumber: 353,
               columnNumber: 11
             }, this)
           ]
@@ -9086,19 +9204,19 @@ function Home() {
         true,
         {
           fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-          lineNumber: 330,
+          lineNumber: 324,
           columnNumber: 9
         },
         this
       ),
       /* @__PURE__ */ jsxDEV(WhatsNextCinematic, {}, void 0, false, {
         fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-        lineNumber: 376,
+        lineNumber: 370,
         columnNumber: 9
       }, this)
     ] }, void 0, true, {
       fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-      lineNumber: 257,
+      lineNumber: 251,
       columnNumber: 7
     }, this),
     /* @__PURE__ */ jsxDEV(
@@ -9109,19 +9227,19 @@ function Home() {
         children: [
           /* @__PURE__ */ jsxDEV("div", { className: "pointer-events-none absolute -left-20 top-10 size-72 bg-[var(--inner-green)]/[0.05] blur-3xl" }, void 0, false, {
             fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-            lineNumber: 385,
+            lineNumber: 379,
             columnNumber: 9
           }, this),
           /* @__PURE__ */ jsxDEV("div", { className: "relative z-10 grid gap-12 lg:grid-cols-[1.2fr_1fr_1fr]", children: [
             /* @__PURE__ */ jsxDEV("div", { className: "space-y-5", children: [
               /* @__PURE__ */ jsxDEV(Lockup, { className: "text-[var(--bone-fixed)]", fontSize: "clamp(28px, 4vw, 36px)" }, void 0, false, {
                 fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-                lineNumber: 389,
+                lineNumber: 383,
                 columnNumber: 13
               }, this),
               /* @__PURE__ */ jsxDEV("p", { className: "max-w-[36ch] text-sm font-light leading-relaxed text-[var(--bone-fixed)]/70", children: t("home.footerTagline") }, void 0, false, {
                 fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-                lineNumber: 390,
+                lineNumber: 384,
                 columnNumber: 13
               }, this),
               /* @__PURE__ */ jsxDEV(
@@ -9132,7 +9250,7 @@ function Home() {
                   children: [
                     /* @__PURE__ */ jsxDEV(Mail, { className: "size-3.5" }, void 0, false, {
                       fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-                      lineNumber: 397,
+                      lineNumber: 391,
                       columnNumber: 15
                     }, this),
                     "support@inner.digital"
@@ -9142,20 +9260,20 @@ function Home() {
                 true,
                 {
                   fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-                  lineNumber: 393,
+                  lineNumber: 387,
                   columnNumber: 13
                 },
                 this
               )
             ] }, void 0, true, {
               fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-              lineNumber: 388,
+              lineNumber: 382,
               columnNumber: 11
             }, this),
             /* @__PURE__ */ jsxDEV("div", { children: [
               /* @__PURE__ */ jsxDEV("p", { className: "mb-4 font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)]/40", children: t("home.footerNavigate") }, void 0, false, {
                 fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-                lineNumber: 403,
+                lineNumber: 397,
                 columnNumber: 13
               }, this),
               /* @__PURE__ */ jsxDEV("ul", { className: "space-y-2.5", children: [
@@ -9175,28 +9293,28 @@ function Home() {
                 false,
                 {
                   fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-                  lineNumber: 415,
+                  lineNumber: 409,
                   columnNumber: 19
                 },
                 this
               ) }, l.href, false, {
                 fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-                lineNumber: 414,
+                lineNumber: 408,
                 columnNumber: 17
               }, this)) }, void 0, false, {
                 fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-                lineNumber: 406,
+                lineNumber: 400,
                 columnNumber: 13
               }, this)
             ] }, void 0, true, {
               fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-              lineNumber: 402,
+              lineNumber: 396,
               columnNumber: 11
             }, this),
             /* @__PURE__ */ jsxDEV("div", { children: [
               /* @__PURE__ */ jsxDEV("p", { className: "mb-4 font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)]/40", children: t("home.footerConnect") }, void 0, false, {
                 fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-                lineNumber: 427,
+                lineNumber: 421,
                 columnNumber: 13
               }, this),
               /* @__PURE__ */ jsxDEV("div", { className: "mb-6 flex items-center gap-4", children: [
@@ -9210,7 +9328,7 @@ function Home() {
                     className: "border border-white/15 p-2.5 text-[var(--bone-fixed)]/60 transition-colors hover:border-white/35 hover:text-[var(--bone-fixed)]",
                     children: /* @__PURE__ */ jsxDEV(Linkedin, { size: 18, strokeWidth: 1.5 }, void 0, false, {
                       fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-                      lineNumber: 438,
+                      lineNumber: 432,
                       columnNumber: 17
                     }, this)
                   },
@@ -9218,7 +9336,7 @@ function Home() {
                   false,
                   {
                     fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-                    lineNumber: 431,
+                    lineNumber: 425,
                     columnNumber: 15
                   },
                   this
@@ -9233,7 +9351,7 @@ function Home() {
                     className: "border border-white/15 p-2.5 text-[var(--bone-fixed)]/60 transition-colors hover:border-white/35 hover:text-[var(--bone-fixed)]",
                     children: /* @__PURE__ */ jsxDEV(Instagram, { size: 18, strokeWidth: 1.5 }, void 0, false, {
                       fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-                      lineNumber: 447,
+                      lineNumber: 441,
                       columnNumber: 17
                     }, this)
                   },
@@ -9241,54 +9359,54 @@ function Home() {
                   false,
                   {
                     fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-                    lineNumber: 440,
+                    lineNumber: 434,
                     columnNumber: 15
                   },
                   this
                 )
               ] }, void 0, true, {
                 fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-                lineNumber: 430,
+                lineNumber: 424,
                 columnNumber: 13
               }, this),
               /* @__PURE__ */ jsxDEV("p", { className: "font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)]/35", children: "İstanbul → Global" }, void 0, false, {
                 fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-                lineNumber: 450,
+                lineNumber: 444,
                 columnNumber: 13
               }, this)
             ] }, void 0, true, {
               fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-              lineNumber: 426,
+              lineNumber: 420,
               columnNumber: 11
             }, this)
           ] }, void 0, true, {
             fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-            lineNumber: 387,
+            lineNumber: 381,
             columnNumber: 9
           }, this),
           /* @__PURE__ */ jsxDEV("div", { className: "relative z-10 mt-14 flex flex-col gap-6 border-t border-white/10 pt-6 md:flex-row md:items-end md:justify-between", children: [
-            /* @__PURE__ */ jsxDEV("p", { className: "font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)]/35", children: "© 2026 inner hub · All rights reserved" }, void 0, false, {
+            /* @__PURE__ */ jsxDEV("p", { className: "font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)]/35", children: t("home.footerRights") }, void 0, false, {
               fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-              lineNumber: 457,
+              lineNumber: 451,
               columnNumber: 11
             }, this),
             /* @__PURE__ */ jsxDEV("div", { className: "leading-none text-[var(--bone-fixed)]", "aria-hidden": "true", children: /* @__PURE__ */ jsxDEV(Lockup, { fontSize: "clamp(2.75rem, 10vw, 7.5rem)" }, void 0, false, {
               fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-              lineNumber: 461,
+              lineNumber: 455,
               columnNumber: 13
             }, this) }, void 0, false, {
               fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-              lineNumber: 460,
+              lineNumber: 454,
               columnNumber: 11
             }, this)
           ] }, void 0, true, {
             fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-            lineNumber: 456,
+            lineNumber: 450,
             columnNumber: 9
           }, this),
           /* @__PURE__ */ jsxDEV("span", { className: "sr-only", children: "inner hub" }, void 0, false, {
             fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-            lineNumber: 464,
+            lineNumber: 458,
             columnNumber: 9
           }, this)
         ]
@@ -9297,14 +9415,14 @@ function Home() {
       true,
       {
         fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-        lineNumber: 381,
+        lineNumber: 375,
         columnNumber: 7
       },
       this
     )
   ] }, void 0, true, {
     fileName: "/Users/macbookpro/Desktop/Inner-Hub/artifacts/inner-hub/src/pages/Home.tsx",
-    lineNumber: 247,
+    lineNumber: 241,
     columnNumber: 5
   }, this);
 }

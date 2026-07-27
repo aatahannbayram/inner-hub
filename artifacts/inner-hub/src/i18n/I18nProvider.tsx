@@ -10,7 +10,6 @@ import {
 import { dictionaries, type Messages } from "./messages";
 import {
   DEFAULT_LOCALE,
-  detectBrowserLocale,
   getByPath,
   interpolate,
   isLocale,
@@ -30,8 +29,9 @@ type I18nContextValue = {
 const I18nContext = createContext<I18nContextValue | null>(null);
 
 function resolveInitialLocale(): Locale {
+  // SSR + ilk ziyaret: her zaman TR. Kullanıcı dil seçince localStorage yazar.
   if (typeof window === "undefined") return DEFAULT_LOCALE;
-  return readStoredLocale() ?? detectBrowserLocale();
+  return readStoredLocale() ?? DEFAULT_LOCALE;
 }
 
 export function I18nProvider({ children }: { children: ReactNode }) {

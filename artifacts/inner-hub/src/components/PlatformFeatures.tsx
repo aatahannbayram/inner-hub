@@ -3,6 +3,7 @@ import { useInView } from "framer-motion";
 import { ArrowRight, type LucideIcon } from "lucide-react";
 import { HeroVideo } from "@/components/HeroVideo";
 import { posterForVideo } from "@/lib/videoPosters";
+import { useT } from "@/i18n";
 
 export type PlatformFeature = {
   id: string;
@@ -73,20 +74,39 @@ export function PlatformFeatures({
   features: PlatformFeature[];
   restModules: { id: string; name: string; desc: string; icon: LucideIcon; tag: string }[];
 }) {
+  const t = useT();
   const [activeIndex, setActiveIndex] = useState(0);
   const cardRefs = useRef<Map<number, HTMLDivElement>>(new Map());
+  const ratiosRef = useRef<Map<number, number>>(new Map());
 
   useEffect(() => {
+    const ratios = ratiosRef.current;
+    ratios.clear();
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const idx = Number((entry.target as HTMLElement).dataset.featureIndex);
-            setActiveIndex(idx);
+          const idx = Number((entry.target as HTMLElement).dataset.featureIndex);
+          if (Number.isNaN(idx)) return;
+          ratios.set(idx, entry.isIntersecting ? entry.intersectionRatio : 0);
+        });
+
+        let bestIdx = 0;
+        let bestRatio = -1;
+        ratios.forEach((ratio, idx) => {
+          if (ratio > bestRatio) {
+            bestRatio = ratio;
+            bestIdx = idx;
           }
         });
+        if (bestRatio > 0) setActiveIndex(bestIdx);
       },
-      { threshold: 0.6 },
+      {
+        // Mid-viewport band so the left nav tracks the card you're actually reading
+        root: null,
+        threshold: [0, 0.25, 0.5, 0.75, 1],
+        rootMargin: "-28% 0px -42% 0px",
+      },
     );
 
     cardRefs.current.forEach((el) => observer.observe(el));
@@ -94,32 +114,30 @@ export function PlatformFeatures({
   }, [features.length]);
 
   const scrollToCard = (index: number) => {
+    setActiveIndex(index);
     cardRefs.current.get(index)?.scrollIntoView({ behavior: "smooth", block: "center" });
   };
 
   return (
     <div
-      className="relative overflow-hidden px-4 py-20 text-[var(--bone-fixed)] sm:px-6 md:px-12 md:py-40 lg:px-[10%] lg:py-48"
+      className="relative px-4 py-20 text-[var(--bone-fixed)] sm:px-6 md:px-12 md:py-40 lg:px-[10%] lg:py-48"
       style={{ backgroundColor: "var(--ink-fixed)" }}
     >
-      {/* Footer dili soft green orb */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -left-20 top-24 size-72 bg-[var(--inner-green)]/[0.05] blur-3xl"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -right-16 bottom-20 size-80 bg-[var(--inner-green)]/[0.035] blur-3xl"
-      />
+      {/* Soft green orbs — clipped locally so they don't break sticky */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
+        <div className="absolute -left-20 top-24 size-72 bg-[var(--inner-green)]/[0.05] blur-3xl" />
+        <div className="absolute -right-16 bottom-20 size-80 bg-[var(--inner-green)]/[0.035] blur-3xl" />
+      </div>
 
-      <div className="relative z-10 grid grid-cols-1 gap-16 lg:grid-cols-[400px_1fr] lg:gap-24 xl:grid-cols-[460px_1fr] xl:gap-48">
-        <div className="lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col lg:justify-between lg:py-32">
+      <div className="relative z-10 grid grid-cols-1 gap-16 lg:grid-cols-[400px_1fr] lg:items-start lg:gap-24 xl:grid-cols-[460px_1fr] xl:gap-48">
+        {/* self-start + sticky: grid stretch was pinning the column to full row height */}
+        <div className="lg:sticky lg:top-0 lg:flex lg:h-[100svh] lg:flex-col lg:justify-between lg:self-start lg:py-28">
           <div>
             <p className="mb-4 font-mono text-xs uppercase tracking-widest text-white/45">
-              03 · The platform
+              {t("home.platformEyebrow")}
             </p>
             <h2 className="font-display font-serif italic text-2xl leading-[1.2] text-[var(--bone-fixed)] sm:text-3xl lg:text-[46px]">
-              Built for the pace of a closed circle.
+              {t("home.platformTitle")}
             </h2>
           </div>
 
@@ -141,12 +159,12 @@ export function PlatformFeatures({
           </div>
 
           <div className="mt-12 hidden lg:block">
-            <p className="mb-4 text-sm text-white/55">Access is by invitation. Always.</p>
+            <p className="mb-4 text-sm text-white/55">{t("home.platformAccess")}</p>
             <a
               href="/invitation"
               className="inline-flex items-center gap-2 border border-white/25 px-5 py-2.5 font-mono text-xs uppercase tracking-widest text-[var(--bone-fixed)] transition-colors hover:border-white/50 hover:bg-[var(--bone-fixed)] hover:text-[var(--ink-fixed)]"
             >
-              Request an invitation <ArrowRight className="size-3" />
+              {t("home.requestInvitation")} <ArrowRight className="size-3" />
             </a>
           </div>
         </div>
@@ -167,7 +185,7 @@ export function PlatformFeatures({
           {restModules.length > 0 && (
             <div className="mt-6 border-t border-white/10 pt-10">
               <p className="mb-6 font-mono text-label uppercase tracking-widest text-white/45">
-                +{restModules.length} more tools
+                {t("home.moreTools", { n: restModules.length })}
               </p>
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-1">
                 {restModules.map((mod) => {

@@ -57,6 +57,7 @@ const PREFETCH: Record<string, () => Promise<unknown>> = {
   "/panel/faq": () => import("@/pages/panel/FAQ"),
   "/panel/membership": () => import("@/pages/panel/Membership"),
   "/panel/applications": () => import("@/pages/panel/Applications"),
+  "/panel/courses/admin": () => import("@/pages/panel/CoursesAdmin"),
   "/panel/analytics": () => import("@/pages/panel/Analytics"),
   "/panel/settings": () => import("@/pages/panel/Settings"),
 };
@@ -103,6 +104,7 @@ const ADMIN_SECTION: NavSection = {
   titleKey: "nav.sectionAdmin",
   items: [
     { href: "/panel/applications", labelKey: "nav.applications", icon: ClipboardList },
+    { href: "/panel/courses/admin", labelKey: "nav.coursesAdmin", icon: BookOpen },
     { href: "/panel/analytics", labelKey: "nav.analytics", icon: BarChart3 },
     { href: "/panel/settings", labelKey: "nav.settings", icon: Settings },
   ],

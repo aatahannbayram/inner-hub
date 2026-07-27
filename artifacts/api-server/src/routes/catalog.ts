@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { and, asc, count, desc, eq, inArray } from "drizzle-orm";
+import Mux from "@mux/mux-node";
 import { db } from "@workspace/db";
 import {
   coursesTable,
@@ -10,10 +11,24 @@ import {
   modulesTable,
   progressTable,
 } from "@workspace/db/schema";
-import { requireAuth } from "../lib/auth";
+import { requireAuth, requireAdmin } from "../lib/auth";
+import { ensureCourseVideoColumns } from "../lib/ensureSchema";
 import { createNotification } from "./notifications";
 
 const router = Router();
+
+let muxClient: Mux | null = null;
+function getMux(): Mux {
+  if (!muxClient) {
+    const tokenId = process.env.MUX_TOKEN_ID;
+    const tokenSecret = process.env.MUX_TOKEN_SECRET;
+    if (!tokenId || !tokenSecret) {
+      throw new Error("Mux yapılandırılmamış (MUX_TOKEN_ID/MUX_TOKEN_SECRET eksik)");
+    }
+    muxClient = new Mux({ tokenId, tokenSecret });
+  }
+  return muxClient;
+}
 
 async function ensureDemoContent() {
   if (process.env.NODE_ENV === "production") return;
@@ -105,6 +120,73 @@ async function progressPctForUser(userId: number, courseId: number): Promise<num
     );
 
   return Math.round(((done?.n ?? 0) / lessons.length) * 100);
+}
+
+type LessonWithState = {
+  id: number;
+  title: string;
+  durationSeconds: number | null;
+  videoUrl: string | null;
+  isCompleted: boolean;
+  isLocked: boolean;
+};
+
+async function courseModulesForUser(
+  userId: number,
+  courseId: number,
+  isEnrolled: boolean,
+): Promise<{ id: number; title: string; lessons: LessonWithState[] }[]> {
+  const mods = await db
+    .select()
+    .from(modulesTable)
+    .where(eq(modulesTable.courseId, courseId))
+    .orderBy(asc(modulesTable.order));
+  if (mods.length === 0) return [];
+
+  const moduleIds = mods.map((m) => m.id);
+  const lessons = await db
+    .select()
+    .from(lessonsTable)
+    .where(inArray(lessonsTable.moduleId, moduleIds))
+    .orderBy(asc(lessonsTable.order));
+
+  const lessonIds = lessons.map((l) => l.id);
+  const completedIds = new Set<number>();
+  if (lessonIds.length > 0) {
+    const done = await db
+      .select({ lessonId: progressTable.lessonId })
+      .from(progressTable)
+      .where(
+        and(
+          eq(progressTable.userId, userId),
+          eq(progressTable.completed, true),
+          inArray(progressTable.lessonId, lessonIds),
+        ),
+      );
+    done.forEach((d) => completedIds.add(d.lessonId));
+  }
+
+  return mods.map((m) => ({
+    id: m.id,
+    title: m.title,
+    lessons: lessons
+      .filter((l) => l.moduleId === m.id)
+      .map((l) => ({
+        id: l.id,
+        title: l.title,
+        durationSeconds: l.durationSeconds ?? null,
+        videoUrl: l.videoUrl,
+        isCompleted: completedIds.has(l.id),
+        isLocked: !isEnrolled,
+      })),
+  }));
+}
+
+function progressPctFromModules(modules: { lessons: LessonWithState[] }[]): number {
+  const allLessons = modules.flatMap((m) => m.lessons);
+  if (allLessons.length === 0) return 0;
+  const done = allLessons.filter((l) => l.isCompleted).length;
+  return Math.round((done / allLessons.length) * 100);
 }
 
 // ─── GET /api/events ─────────────────────────────────────────────────────────
@@ -235,6 +317,7 @@ router.delete("/events/:id/register", requireAuth, async (req, res) => {
 router.get("/courses", requireAuth, async (req, res) => {
   try {
     await ensureDemoContent();
+    await ensureCourseVideoColumns();
     const userId = req.user!.id;
 
     const rows = await db
@@ -250,15 +333,20 @@ router.get("/courses", requireAuth, async (req, res) => {
     const enrolledIds = new Set(enrollments.map((e) => e.courseId));
 
     const courses = await Promise.all(
-      rows.map(async (c) => ({
-        id: c.id,
-        title: c.title,
-        description: c.description ?? "",
-        term: c.term,
-        order: c.order,
-        isEnrolled: enrolledIds.has(c.id),
-        progressPct: enrolledIds.has(c.id) ? await progressPctForUser(userId, c.id) : 0,
-      })),
+      rows.map(async (c) => {
+        const isEnrolled = enrolledIds.has(c.id);
+        const modules = await courseModulesForUser(userId, c.id, isEnrolled);
+        return {
+          id: c.id,
+          title: c.title,
+          description: c.description ?? "",
+          term: c.term,
+          order: c.order,
+          isEnrolled,
+          progressPct: isEnrolled ? progressPctFromModules(modules) : 0,
+          modules,
+        };
+      }),
     );
 
     res.json({ courses });
@@ -310,6 +398,279 @@ router.post("/courses/:id/enroll", requireAuth, async (req, res) => {
     });
   } catch (err: any) {
     res.status(500).json({ error: err.message ?? "Kayıt başarısız" });
+  }
+});
+
+// ─── GET /api/courses/admin ───────────────────────────────────────────────────
+// Admin yönetim görünümü: yayında olmayan (taslak) kurslar da dahil.
+router.get("/courses/admin", requireAuth, requireAdmin, async (req, res) => {
+  try {
+    await ensureDemoContent();
+    await ensureCourseVideoColumns();
+    const userId = req.user!.id;
+
+    const rows = await db
+      .select()
+      .from(coursesTable)
+      .orderBy(asc(coursesTable.order), desc(coursesTable.createdAt));
+
+    const courses = await Promise.all(
+      rows.map(async (c) => ({
+        id: c.id,
+        title: c.title,
+        description: c.description ?? "",
+        term: c.term,
+        order: c.order,
+        isPublished: c.isPublished,
+        modules: await courseModulesForUser(userId, c.id, true),
+      })),
+    );
+
+    res.json({ courses });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message ?? "Kurslar yüklenemedi" });
+  }
+});
+
+// ─── POST /api/courses (admin) ───────────────────────────────────────────────
+router.post("/courses", requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const { title, description, term, order, isPublished } = req.body ?? {};
+    if (!title || typeof title !== "string") {
+      res.status(400).json({ error: "Başlık gerekli" });
+      return;
+    }
+    const [course] = await db
+      .insert(coursesTable)
+      .values({
+        title,
+        description: typeof description === "string" ? description : null,
+        term: Number.isFinite(term) ? term : 1,
+        order: Number.isFinite(order) ? order : 0,
+        isPublished: isPublished === true,
+      })
+      .returning();
+    res.json({ course });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message ?? "Kurs oluşturulamadı" });
+  }
+});
+
+// ─── PATCH /api/courses/:id (admin) ──────────────────────────────────────────
+router.patch("/courses/:id", requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const courseId = Number(req.params.id);
+    if (!Number.isFinite(courseId)) {
+      res.status(400).json({ error: "Geçersiz kurs" });
+      return;
+    }
+    const { title, description, term, order, isPublished } = req.body ?? {};
+    const patch: Partial<typeof coursesTable.$inferInsert> = {};
+    if (typeof title === "string") patch.title = title;
+    if (typeof description === "string") patch.description = description;
+    if (Number.isFinite(term)) patch.term = term;
+    if (Number.isFinite(order)) patch.order = order;
+    if (typeof isPublished === "boolean") patch.isPublished = isPublished;
+
+    const [course] = await db
+      .update(coursesTable)
+      .set(patch)
+      .where(eq(coursesTable.id, courseId))
+      .returning();
+    if (!course) {
+      res.status(404).json({ error: "Kurs bulunamadı" });
+      return;
+    }
+    res.json({ course });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message ?? "Kurs güncellenemedi" });
+  }
+});
+
+// ─── POST /api/courses/:id/modules (admin) ───────────────────────────────────
+router.post("/courses/:id/modules", requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const courseId = Number(req.params.id);
+    if (!Number.isFinite(courseId)) {
+      res.status(400).json({ error: "Geçersiz kurs" });
+      return;
+    }
+    const { title, order } = req.body ?? {};
+    if (!title || typeof title !== "string") {
+      res.status(400).json({ error: "Başlık gerekli" });
+      return;
+    }
+    const [course] = await db
+      .select({ id: coursesTable.id })
+      .from(coursesTable)
+      .where(eq(coursesTable.id, courseId))
+      .limit(1);
+    if (!course) {
+      res.status(404).json({ error: "Kurs bulunamadı" });
+      return;
+    }
+    const [courseModule] = await db
+      .insert(modulesTable)
+      .values({ courseId, title, order: Number.isFinite(order) ? order : 0 })
+      .returning();
+    res.json({ module: courseModule });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message ?? "Modül oluşturulamadı" });
+  }
+});
+
+// ─── POST /api/modules/:id/lessons (admin) ───────────────────────────────────
+router.post("/modules/:id/lessons", requireAuth, requireAdmin, async (req, res) => {
+  try {
+    await ensureCourseVideoColumns();
+    const moduleId = Number(req.params.id);
+    if (!Number.isFinite(moduleId)) {
+      res.status(400).json({ error: "Geçersiz modül" });
+      return;
+    }
+    const { title, content, videoUrl, durationSeconds, order } = req.body ?? {};
+    if (!title || typeof title !== "string") {
+      res.status(400).json({ error: "Başlık gerekli" });
+      return;
+    }
+    const [courseModule] = await db
+      .select({ id: modulesTable.id })
+      .from(modulesTable)
+      .where(eq(modulesTable.id, moduleId))
+      .limit(1);
+    if (!courseModule) {
+      res.status(404).json({ error: "Modül bulunamadı" });
+      return;
+    }
+    const [lesson] = await db
+      .insert(lessonsTable)
+      .values({
+        moduleId,
+        title,
+        content: typeof content === "string" ? content : null,
+        videoUrl: typeof videoUrl === "string" ? videoUrl : null,
+        durationSeconds: Number.isFinite(durationSeconds) ? durationSeconds : null,
+        order: Number.isFinite(order) ? order : 0,
+      })
+      .returning();
+    res.json({ lesson });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message ?? "Ders oluşturulamadı" });
+  }
+});
+
+// ─── POST /api/lessons/:id/complete ──────────────────────────────────────────
+router.post("/lessons/:id/complete", requireAuth, async (req, res) => {
+  try {
+    const lessonId = Number(req.params.id);
+    const userId = req.user!.id;
+    if (!Number.isFinite(lessonId)) {
+      res.status(400).json({ error: "Geçersiz ders" });
+      return;
+    }
+
+    const [lesson] = await db
+      .select({ id: lessonsTable.id, moduleId: lessonsTable.moduleId })
+      .from(lessonsTable)
+      .where(eq(lessonsTable.id, lessonId))
+      .limit(1);
+    if (!lesson) {
+      res.status(404).json({ error: "Ders bulunamadı" });
+      return;
+    }
+
+    const [courseModule] = await db
+      .select({ courseId: modulesTable.courseId })
+      .from(modulesTable)
+      .where(eq(modulesTable.id, lesson.moduleId))
+      .limit(1);
+    if (!courseModule) {
+      res.status(404).json({ error: "Modül bulunamadı" });
+      return;
+    }
+
+    const [enrollment] = await db
+      .select()
+      .from(enrollmentsTable)
+      .where(
+        and(eq(enrollmentsTable.userId, userId), eq(enrollmentsTable.courseId, courseModule.courseId)),
+      )
+      .limit(1);
+    if (!enrollment) {
+      res.status(403).json({ error: "Bu kursa kayıtlı değilsin" });
+      return;
+    }
+
+    const [existing] = await db
+      .select()
+      .from(progressTable)
+      .where(and(eq(progressTable.userId, userId), eq(progressTable.lessonId, lessonId)))
+      .limit(1);
+
+    if (existing) {
+      await db
+        .update(progressTable)
+        .set({ completed: true, completedAt: new Date() })
+        .where(eq(progressTable.id, existing.id));
+    } else {
+      await db.insert(progressTable).values({ userId, lessonId, completed: true, completedAt: new Date() });
+    }
+
+    res.json({
+      lessonId,
+      completed: true,
+      progressPct: await progressPctForUser(userId, courseModule.courseId),
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message ?? "İşaretlenemedi" });
+  }
+});
+
+// ─── POST /api/mux/uploads (admin) ───────────────────────────────────────────
+router.post("/mux/uploads", requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const mux = getMux();
+    const appUrl = (process.env.APP_URL ?? "https://inner.digital").replace(/\/$/, "");
+    const upload = await mux.video.uploads.create({
+      cors_origin: appUrl,
+      new_asset_settings: { playback_policies: ["public"] },
+    });
+    res.json({ uploadId: upload.id, uploadUrl: upload.url });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message ?? "Mux upload başlatılamadı" });
+  }
+});
+
+// ─── GET /api/mux/uploads/:id (admin) ────────────────────────────────────────
+router.get("/mux/uploads/:id", requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const mux = getMux();
+    const upload = await mux.video.uploads.retrieve(String(req.params.id));
+    if (upload.status === "errored" || upload.status === "cancelled" || upload.status === "timed_out") {
+      res.json({ status: "errored" });
+      return;
+    }
+    if (upload.status !== "asset_created" || !upload.asset_id) {
+      res.json({ status: "waiting" });
+      return;
+    }
+    const asset = await mux.video.assets.retrieve(upload.asset_id);
+    if (asset.status === "errored") {
+      res.json({ status: "errored" });
+      return;
+    }
+    if (asset.status !== "ready") {
+      res.json({ status: "waiting" });
+      return;
+    }
+    const playbackId = asset.playback_ids?.[0]?.id;
+    res.json({
+      status: "ready",
+      playbackId: playbackId ?? null,
+      durationSeconds: asset.duration ? Math.round(asset.duration) : null,
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message ?? "Mux durumu alınamadı" });
   }
 });
 

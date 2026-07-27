@@ -46,6 +46,7 @@ export const lessonsTable = pgTable("lessons", {
   title: text("title").notNull(),
   content: text("content"),
   videoUrl: text("video_url"),
+  durationSeconds: integer("duration_seconds"),
   order: integer("order").default(0).notNull(),
 });
 

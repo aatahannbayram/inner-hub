@@ -3,8 +3,8 @@ import { useLocation } from "wouter";
 import { initGoogleAnalytics, trackPageView } from "@/lib/analytics";
 
 /**
- * GA4: mount’ta gtag yükle, wouter location değişince page_view gönder.
- * VITE_GA_MEASUREMENT_ID yoksa hiçbir şey yapmaz.
+ * GA4 (G-FGLJ0ECVDD): mount’ta gtag yükle, route değişince
+ * Google page_view + first-party beacon (admin Framer paneli) gönder.
  */
 export function GoogleAnalytics() {
   const [location] = useLocation();

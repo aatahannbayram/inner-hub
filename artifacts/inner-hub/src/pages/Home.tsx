@@ -50,109 +50,101 @@ function Counter({ to, suffix = "" }: { to: number; suffix?: string }) {
   return <span ref={ref}>{val}{suffix}</span>;
 }
 
-// ─── Platform modules ─────────────────────────────────────────────────────────
-const MODULES = [
-  {
-    id: "signal",
-    name: "inner·signal",
-    desc: "AI-powered deal and opportunity feed. The right signals, before anyone else sees them.",
-    icon: Zap,
-    tag: "AI Layer",
-  },
-  {
-    id: "match",
-    name: "inner·match",
-    desc: "Co-founder, mentor, and investor matching inside a closed circle. Trust-based connections.",
-    icon: Users,
-    tag: "Matching",
-  },
-  {
-    id: "capital",
-    name: "inner·capital",
-    desc: "Private deal flow and investment pipeline. SPVs, demo days, and co-investment opportunities.",
-    icon: TrendingUp,
-    tag: "Investments",
-  },
-  {
-    id: "vault",
-    name: "inner·vault",
-    desc: "Shared knowledge base. Pitch decks, market research, and documents. Permissioned and searchable.",
-    icon: BookOpen,
-    tag: "Knowledge",
-  },
-  {
-    id: "pulse",
-    name: "inner·pulse",
-    desc: "Live ecosystem signal dashboard. What's moving, what's trending, what matters. Inside only.",
-    icon: Radio,
-    tag: "Intelligence",
-  },
-  {
-    id: "id",
-    name: "inner·id",
-    desc: "Portable verified membership identity. Your inner.hub membership carries weight beyond the platform.",
-    icon: Fingerprint,
-    tag: "Identity",
-  },
-  {
-    id: "api",
-    name: "inner·api",
-    desc: "Platform API for integrations and partners. Build on top of the inner.hub infrastructure.",
-    icon: Code2,
-    tag: "Platform",
-  },
-  {
-    id: "bounty",
-    name: "inner·bounty",
-    desc: "Community task system. Companies post challenges, members solve them, platform facilitates.",
-    icon: Target,
-    tag: "Marketplace",
-  },
-];
+// ─── Platform module media (copy comes from i18n) ─────────────────────────────
+const FEATURE_MEDIA = {
+  signal:
+    "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260406_094145_4a271a6c-3869-4f1c-8aa7-aeb0cb227994.mp4",
+  match:
+    "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260508_215831_c6a8989c-d716-4d8d-8745-e972a2eec711.mp4",
+  capital:
+    "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260403_050628_c4e32401-fab4-4a27-b7a8-6e9291cd5959.mp4",
+} as const;
 
-const PLATFORM_FEATURES: PlatformFeature[] = [
-  {
-    id: "signal",
-    name: "inner·signal",
-    tag: "AI Layer",
-    desc: "AI-powered deal and opportunity feed. The right signals, before anyone else sees them.",
-    media: {
-      type: "video",
-      src: "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260406_094145_4a271a6c-3869-4f1c-8aa7-aeb0cb227994.mp4",
+type HomeModule = {
+  id: string;
+  name: string;
+  desc: string;
+  icon: typeof Zap;
+  tag: string;
+};
+
+function buildHomeModules(t: (key: string) => string): HomeModule[] {
+  return [
+    {
+      id: "signal",
+      name: "inner·signal",
+      desc: t("home.modSignalDesc"),
+      icon: Zap,
+      tag: t("home.modSignalTag"),
     },
-  },
-  {
-    id: "match",
-    name: "inner·match",
-    tag: "Matching",
-    desc: "Co-founder, mentor, and investor matching inside a closed circle. Trust-based connections.",
-    media: {
-      type: "video",
-      src: "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260508_215831_c6a8989c-d716-4d8d-8745-e972a2eec711.mp4",
+    {
+      id: "match",
+      name: "inner·match",
+      desc: t("home.modMatchDesc"),
+      icon: Users,
+      tag: t("home.modMatchTag"),
     },
-  },
-  {
-    id: "capital",
-    name: "inner·capital",
-    tag: "Investments",
-    desc: "Private deal flow and investment pipeline. SPVs, demo days, and co-investment opportunities.",
-    media: {
-      type: "video",
-      src: "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260403_050628_c4e32401-fab4-4a27-b7a8-6e9291cd5959.mp4",
+    {
+      id: "capital",
+      name: "inner·capital",
+      desc: t("home.modCapitalDesc"),
+      icon: TrendingUp,
+      tag: t("home.modCapitalTag"),
     },
-  },
-];
+    {
+      id: "vault",
+      name: "inner·vault",
+      desc: t("home.modVaultDesc"),
+      icon: BookOpen,
+      tag: t("home.modVaultTag"),
+    },
+    {
+      id: "pulse",
+      name: "inner·pulse",
+      desc: t("home.modPulseDesc"),
+      icon: Radio,
+      tag: t("home.modPulseTag"),
+    },
+    {
+      id: "id",
+      name: "inner·id",
+      desc: t("home.modIdDesc"),
+      icon: Fingerprint,
+      tag: t("home.modIdTag"),
+    },
+    {
+      id: "api",
+      name: "inner·api",
+      desc: t("home.modApiDesc"),
+      icon: Code2,
+      tag: t("home.modApiTag"),
+    },
+    {
+      id: "bounty",
+      name: "inner·bounty",
+      desc: t("home.modBountyDesc"),
+      icon: Target,
+      tag: t("home.modBountyTag"),
+    },
+  ];
+}
+
+function buildPlatformFeatures(modules: HomeModule[]): PlatformFeature[] {
+  return modules.slice(0, 3).map((m) => ({
+    id: m.id,
+    name: m.name,
+    tag: m.tag,
+    desc: m.desc,
+    media: {
+      type: "video" as const,
+      src: FEATURE_MEDIA[m.id as keyof typeof FEATURE_MEDIA],
+    },
+  }));
+}
 
 // ─── Marquee strip ────────────────────────────────────────────────────────────
-const MARQUEE_MODULES = MODULES.map((m) => ({
-  id: m.id,
-  name: m.name,
-  icon: m.icon,
-  tag: m.tag,
-}));
-
-function MarqueeStrip() {
-  const loop = [...MARQUEE_MODULES, ...MARQUEE_MODULES, ...MARQUEE_MODULES];
+function MarqueeStrip({ modules }: { modules: HomeModule[] }) {
+  const loop = [...modules, ...modules, ...modules];
 
   return (
     <div className="relative z-10 overflow-hidden bg-[var(--ink-fixed)] py-3 sm:py-4">
@@ -235,6 +227,8 @@ export default function Home() {
   useLenis(true);
   const t = useT();
   const { locale } = useLocale();
+  const modules = buildHomeModules(t);
+  const platformFeatures = buildPlatformFeatures(modules);
 
   useEffect(() => {
     if (window.location.hash) {
@@ -260,11 +254,11 @@ export default function Home() {
         <HomeOpening />
 
         {/* ── Marquee ── */}
-        <MarqueeStrip />
+        <MarqueeStrip modules={modules} />
 
         {/* ── 03 · The platform ── */}
         <section id="section-03">
-          <PlatformFeatures features={PLATFORM_FEATURES} restModules={MODULES.slice(3)} />
+          <PlatformFeatures features={platformFeatures} restModules={modules.slice(3)} />
         </section>
 
         {/* ── 04–05 · What this is → Entry (one continuous dark, video-anchored span) ── */}
@@ -280,15 +274,15 @@ export default function Home() {
           {/* 04 · What this is */}
           <section id="section-04" className="relative z-10 px-4 pt-20 pb-16 sm:px-6 sm:pt-28 sm:pb-24 md:px-12 md:pt-36 lg:px-[10%]">
             <div className="mb-10 flex items-baseline justify-between gap-3 border-b border-white/15 pb-5 font-mono text-[10px] uppercase tracking-widest text-white/50 sm:mb-16 sm:gap-6 sm:pb-6 sm:text-xs">
-              <span>04 · What this is</span>
-              <span className="whitespace-nowrap">The point</span>
+              <span>{t("home.whatThisIsEyebrow")}</span>
+              <span className="whitespace-nowrap">{t("home.thePoint")}</span>
             </div>
             <WordsPullUp
-              text="Big things start here."
+              text={t("home.bigThings")}
               className="font-display font-serif italic text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-[var(--bone-fixed)] max-w-3xl mb-8 sm:mb-10 text-balance"
             />
             <ScrollTextReveal
-              text="New ideas are discussed here, tested here, and supported here by people who can actually build them and fund them."
+              text={t("home.whatThisIsBody")}
               className="max-w-[46ch] text-[var(--bone-fixed)]"
               style={{ fontSize: "clamp(17px, 2.4vw, 26px)", lineHeight: 1.55, opacity: 0.85 }}
             />
@@ -297,23 +291,23 @@ export default function Home() {
           {/* 05 · Entry */}
           <section id="section-05" className="relative z-10 px-4 pt-6 pb-24 sm:px-6 sm:pt-8 sm:pb-32 md:px-12 md:pb-48 lg:px-[10%]">
             <div className="mb-10 flex items-baseline justify-between gap-3 border-b border-white/15 pb-5 font-mono text-[10px] uppercase tracking-widest text-white/50 sm:mb-16 sm:gap-6 sm:pb-6 sm:text-xs">
-              <span>05 · Entry</span>
-              <span className="whitespace-nowrap">By invitation</span>
+              <span>{t("home.entryEyebrow")}</span>
+              <span className="whitespace-nowrap">{t("home.byInvitation")}</span>
             </div>
             <WordsPullUp
-              text="Entry is by invitation. Always."
+              text={t("home.entryTitle")}
               className="font-display font-serif italic text-3xl sm:text-4xl md:text-5xl max-w-2xl mb-6 sm:mb-8 text-balance text-[var(--bone-fixed)]"
             />
             <FadeIn delay={0.2}>
               <p className="mb-12 max-w-[65ch] text-base leading-[1.7] text-[var(--bone-fixed)]/80 sm:mb-20 sm:text-lg">
-                There are no tickets, no tiers, and no public list. Members are put forward from inside the circle, considered with care, and invited personally.
+                {t("home.entryBody")}
               </p>
             </FadeIn>
             <div className="max-w-3xl">
               {[
-                { label: "Your name", line: "Someone inside the circle puts your name forward." },
-                { label: "Consideration", line: "We take our time. Fit beats fame." },
-                { label: "Invitation", line: "If it is right, you hear from us directly." },
+                { label: t("home.entryStepName"), line: t("home.entryStepNameLine") },
+                { label: t("home.entryStepConsider"), line: t("home.entryStepConsiderLine") },
+                { label: t("home.entryStepInvite"), line: t("home.entryStepInviteLine") },
               ].map((item, i) => (
                 <FadeIn key={item.label} delay={i * 0.1}>
                   <div className="flex flex-col gap-2 border-t border-white/15 py-5 last:border-b md:flex-row md:items-baseline md:gap-12 md:py-6">
@@ -336,20 +330,20 @@ export default function Home() {
 
           <FadeIn>
             <div className="mb-12 flex items-baseline justify-between gap-3 border-b border-white/15 pb-5 font-mono text-[10px] uppercase tracking-widest opacity-60 sm:mb-20 sm:gap-6 sm:pb-6 sm:text-xs">
-              <span>06 · The gathering</span>
-              <span className="whitespace-nowrap">Sep 2026 · İstanbul</span>
+              <span>{t("home.gatheringEyebrow")}</span>
+              <span className="whitespace-nowrap">{t("home.gatheringDate")}</span>
             </div>
           </FadeIn>
           <WordsPullUp
-            text="The first inner.hub gathering. İstanbul, September 2026."
+            text={t("home.gatheringTitle")}
             className="mb-12 max-w-3xl text-balance font-display font-serif italic text-3xl sm:mb-20 sm:text-4xl md:mb-24 md:text-5xl lg:text-6xl"
           />
 
           <div className="mb-12 flex flex-col gap-12 sm:mb-20 sm:gap-16 lg:mb-24 lg:flex-row lg:items-center">
             <div className="grid min-w-0 grid-cols-3 gap-3 sm:gap-6 md:gap-10 lg:flex-1">
-              <StatItem n={34} label="People" />
-              <StatItem n={2} label="Days" />
-              <StatItem n={8} label="Modules" />
+              <StatItem n={34} label={t("home.people")} />
+              <StatItem n={2} label={t("home.days")} />
+              <StatItem n={8} label={t("home.modules")} />
             </div>
             <FadeIn delay={0.2} className="flex-shrink-0">
               <DiagramCircle />
@@ -359,13 +353,13 @@ export default function Home() {
           <FadeIn delay={0.15}>
             <div className="flex flex-col gap-6 sm:gap-8 md:flex-row md:items-end md:justify-between">
               <p className="max-w-2xl text-balance font-serif text-xl opacity-80 sm:text-2xl md:text-3xl">
-                Thirty-four people. Two days. One circle. The first of many.
+                {t("home.gatheringLine")}
               </p>
               <a
                 href="#section-07"
                 className="group inline-flex min-h-11 items-center justify-center gap-2 border border-white/25 px-5 py-3 font-mono text-xs uppercase tracking-widest text-[var(--bone-fixed)] transition-colors hover:border-white/60 hover:bg-white hover:text-black sm:min-h-0 sm:justify-start"
               >
-                What&apos;s next
+                {t("home.whatsNext")}
                 <ArrowUpRight className="size-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
               </a>
             </div>
@@ -455,7 +449,7 @@ export default function Home() {
 
         <div className="relative z-10 mt-14 flex flex-col gap-6 border-t border-white/10 pt-6 md:flex-row md:items-end md:justify-between">
           <p className="font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)]/35">
-            © 2026 inner hub · All rights reserved
+            {t("home.footerRights")}
           </p>
           <div className="leading-none text-[var(--bone-fixed)]" aria-hidden="true">
             <Lockup fontSize="clamp(2.75rem, 10vw, 7.5rem)" />

@@ -38,6 +38,7 @@ const InnerApi          = lazy(() => import("@/pages/panel/InnerApi"));
 const ProfilePage       = lazy(() => import("@/pages/panel/Profile"));
 const Analytics         = lazy(() => import("@/pages/panel/Analytics"));
 const ApplicationsPage  = lazy(() => import("@/pages/panel/Applications"));
+const CoursesAdmin      = lazy(() => import("@/pages/panel/CoursesAdmin"));
 const FAQ               = lazy(() => import("@/pages/panel/FAQ"));
 const Settings          = lazy(() => import("@/pages/panel/Settings"));
 
@@ -87,6 +88,7 @@ function PanelRoutes({ user, onLogout }: { user: PanelUser; onLogout: () => void
           <Route path="/panel/membership"   component={() => <Membership />} />
           <Route path="/panel/payment/success" component={() => <PaymentSuccess />} />
           <Route path="/panel/applications" component={() => <ApplicationsPage />} />
+          <Route path="/panel/courses/admin" component={() => <CoursesAdmin />} />
           <Route path="/panel/analytics"    component={() => <Analytics />} />
           <Route path="/panel/settings"     component={() => <Settings />} />
           <Route component={NotFound} />

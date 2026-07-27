@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useT } from "@/i18n";
 
 const SECTIONS = [
   { id: "section-01", label: "01" },
@@ -11,6 +12,7 @@ const SECTIONS = [
 ];
 
 export function IndexRail() {
+  const t = useT();
   const [active, setActive] = useState("section-01");
 
   useEffect(() => {
@@ -35,7 +37,7 @@ export function IndexRail() {
 
   return (
     <nav
-      aria-label="Section index"
+      aria-label={t("common.sectionIndex")}
       className="hidden lg:flex fixed right-8 top-1/2 -translate-y-1/2 z-40 flex-col items-end gap-4"
     >
       {SECTIONS.map(({ id, label }) => {

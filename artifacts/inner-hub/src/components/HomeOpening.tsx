@@ -1,7 +1,7 @@
-import { useRef, type ReactNode } from "react";
+import { useMemo, useRef, type ReactNode } from "react";
 import { ArrowUpRight, Check } from "lucide-react";
 import { motion, useInView } from "framer-motion";
-import { WordsPullUp, WordsPullUpMultiStyle } from "@/components/WordsPullUp";
+import { WordsPullUpMultiStyle } from "@/components/WordsPullUp";
 import { ScrollTextReveal } from "@/components/ScrollTextReveal";
 import { FloatingNavbar } from "@/components/FloatingNavbar";
 import { HeroVideo } from "@/components/HeroVideo";
@@ -20,37 +20,6 @@ const FEATURE_VIDEO =
 /** Home §01 background — not used elsewhere on the public landing. */
 const IDEA_VIDEO =
   "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260530_042513_df96a13b-6155-4f6e-8b93-c9dee66fba08.mp4";
-
-const SEAT_CARDS = [
-  {
-    id: "01",
-    title: "Founders.",
-    items: [
-      "Building startups in AI and beyond",
-      "Shipping before the noise arrives",
-      "Looking for co-builders, not crowds",
-      "Chosen one by one. Never open apply",
-    ],
-  },
-  {
-    id: "02",
-    title: "Builders.",
-    items: [
-      "Engineers and researchers in serious AI",
-      "Depth over demos. Craft that compounds",
-      "Signal shared inside the circle first",
-    ],
-  },
-  {
-    id: "03",
-    title: "Investors.",
-    items: [
-      "Angels and venture operators",
-      "Early conviction, patient capital",
-      "Access shaped by trust, not tickets",
-    ],
-  },
-] as const;
 
 /**
  * Opening span: inset cinematic hero + §01 idea card + §02 founding seats grid.
@@ -117,7 +86,7 @@ function HeroInset() {
                   pulse
                 />
               </h1>
-              <p className="sr-only">inner.hub private circle</p>
+              <p className="sr-only">{t("common.privateCircle")}</p>
             </div>
 
             <div className="flex flex-col gap-3.5 sm:gap-5 md:col-span-4 md:pb-3">
@@ -151,6 +120,7 @@ function HeroInset() {
 }
 
 function AboutIdea() {
+  const t = useT();
   return (
     <section
       id="section-01"
@@ -170,26 +140,26 @@ function AboutIdea() {
 
         <div className="relative z-10 px-5 py-14 text-center sm:px-8 sm:py-16 md:px-12 md:py-20">
           <p className="mb-6 font-mono text-[10px] uppercase tracking-widest text-[var(--bone-fixed)]/60 sm:mb-8 sm:text-xs">
-            01 · The idea
+            {t("home.ideaEyebrow")}
           </p>
 
           <WordsPullUpMultiStyle
             className="mx-auto max-w-3xl justify-center text-3xl leading-[0.95] text-[var(--bone-fixed)] sm:text-4xl sm:leading-[0.9] md:text-5xl lg:text-6xl xl:text-7xl"
             segments={[
-              { text: "AI is the center.", className: "font-normal" },
+              { text: t("home.ideaLine1"), className: "font-normal" },
               {
-                text: "Around it: founders, builders, investors.",
+                text: t("home.ideaLine2"),
                 className: "font-display font-serif italic",
               },
               {
-                text: "inner.hub brings them together early.",
+                text: t("home.ideaLine3"),
                 className: "font-normal",
               },
             ]}
           />
 
           <ScrollTextReveal
-            text="It starts in İstanbul. Thirty-four people, chosen one by one, form the founding circle: not members of a platform, but the people who make what comes next possible."
+            text={t("home.ideaReveal")}
             className="mx-auto mt-10 max-w-2xl text-xs leading-relaxed text-[var(--bone-fixed)]/70 sm:mt-12 sm:text-sm md:text-base"
           />
         </div>
@@ -199,8 +169,35 @@ function AboutIdea() {
 }
 
 function FoundingSeats() {
+  const t = useT();
   const ref = useRef<HTMLElement>(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
+
+  const seatCards = useMemo(
+    () => [
+      {
+        id: "01",
+        title: t("home.seatFounders"),
+        items: [
+          t("home.seatFounders1"),
+          t("home.seatFounders2"),
+          t("home.seatFounders3"),
+          t("home.seatFounders4"),
+        ],
+      },
+      {
+        id: "02",
+        title: t("home.seatBuilders"),
+        items: [t("home.seatBuilders1"), t("home.seatBuilders2"), t("home.seatBuilders3")],
+      },
+      {
+        id: "03",
+        title: t("home.seatInvestors"),
+        items: [t("home.seatInvestors1"), t("home.seatInvestors2"), t("home.seatInvestors3")],
+      },
+    ],
+    [t],
+  );
 
   return (
     <section
@@ -213,24 +210,24 @@ function FoundingSeats() {
       <div className="relative z-10 mx-auto max-w-7xl">
         <div className="mb-10 max-w-3xl sm:mb-12 md:mb-14">
           <p className="mb-5 font-mono text-[10px] uppercase tracking-widest text-[var(--bone-fixed)]/50 sm:text-xs">
-            02 · The first thirty-four
+            {t("home.seatsEyebrow")}
           </p>
           <WordsPullUpMultiStyle
             className="justify-start text-left text-xl leading-tight sm:text-2xl md:text-3xl lg:text-4xl"
             segments={[
               {
-                text: "Founding seats for people who meet early.",
+                text: t("home.seatsLine1"),
                 className: "font-normal text-[var(--bone-fixed)]",
               },
-            {
-              text: "Not tickets. Not tiers. The circle.",
-              className: "font-normal text-white/40",
-            },
-          ]}
-        />
-      </div>
+              {
+                text: t("home.seatsLine2"),
+                className: "font-normal text-white/40",
+              },
+            ]}
+          />
+        </div>
 
-      <div className="grid grid-cols-1 gap-3 sm:gap-2 md:grid-cols-2 md:gap-1 lg:grid-cols-4 lg:h-[min(480px,70vh)]">
+        <div className="grid grid-cols-1 gap-3 sm:gap-2 md:grid-cols-2 md:gap-1 lg:grid-cols-4 lg:h-[min(480px,70vh)]">
           {/* Video card */}
           <FeatureCard index={0} inView={inView} className="relative min-h-[240px] overflow-hidden lg:min-h-0">
             <HeroVideo src={FEATURE_VIDEO} className="absolute inset-0 h-full w-full object-cover" />
@@ -239,11 +236,11 @@ function FoundingSeats() {
               className="absolute bottom-4 left-4 right-4 font-medium sm:bottom-5 sm:left-5"
               style={{ color: "#F4F1EC" }}
             >
-              Your circle starts here.
+              {t("home.circleStartsHere")}
             </p>
           </FeatureCard>
 
-          {SEAT_CARDS.map((card, i) => (
+          {seatCards.map((card, i) => (
             <FeatureCard
               key={card.id}
               index={i + 1}
@@ -272,7 +269,7 @@ function FoundingSeats() {
                 href="/invitation"
                 className="mt-5 inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-[var(--bone-fixed)]/70 transition-colors hover:text-[var(--bone-fixed)]"
               >
-                Learn more
+                {t("home.learnMore")}
                 <ArrowUpRight className="size-3.5 -rotate-0" strokeWidth={1.75} />
               </a>
             </FeatureCard>
@@ -280,7 +277,7 @@ function FoundingSeats() {
         </div>
 
         <p className="mt-8 max-w-2xl text-sm leading-relaxed text-white/50 sm:mt-10 sm:text-base">
-          These thirty-four are not just members. They are the founding members of inner.hub.
+          {t("home.seatsFooter")}
         </p>
       </div>
     </section>

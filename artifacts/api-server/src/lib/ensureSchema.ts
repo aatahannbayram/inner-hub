@@ -12,6 +12,11 @@ export async function ensureUserProfileColumns() {
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS settings_prefs text`);
 }
 
+/** Prod/eski DB'lerde ders video süresi kolonunu idempotent ekle. */
+export async function ensureCourseVideoColumns() {
+  await db.execute(sql`ALTER TABLE lessons ADD COLUMN IF NOT EXISTS duration_seconds integer`);
+}
+
 /** Tanışma talepleri + FAQ kategori kolonu. */
 export async function ensureMatchAndFaqSchema() {
   await db.execute(sql`
@@ -113,6 +118,33 @@ export async function ensureApiKeysSchema() {
       created_at timestamp NOT NULL DEFAULT now(),
       last_used_at timestamp
     )
+  `);
+}
+
+/** Public site analytics beacons (Framer-style admin). */
+export async function ensureAnalyticsEventsSchema() {
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS analytics_events (
+      id serial PRIMARY KEY,
+      event_name text NOT NULL DEFAULT 'page_view',
+      path text NOT NULL,
+      title text,
+      referrer text,
+      session_id text NOT NULL,
+      locale text,
+      device text,
+      user_agent text,
+      created_at timestamp NOT NULL DEFAULT now()
+    )
+  `);
+  await db.execute(sql`
+    CREATE INDEX IF NOT EXISTS analytics_events_created_idx ON analytics_events (created_at)
+  `);
+  await db.execute(sql`
+    CREATE INDEX IF NOT EXISTS analytics_events_path_idx ON analytics_events (path)
+  `);
+  await db.execute(sql`
+    CREATE INDEX IF NOT EXISTS analytics_events_session_idx ON analytics_events (session_id)
   `);
 }
 

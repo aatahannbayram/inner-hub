@@ -1,3 +1,5 @@
+import { useT } from "@/i18n";
+
 const TOTAL = 34;
 const RADIUS = 130;
 const SIZE = 7;
@@ -5,6 +7,7 @@ const VIEWBOX = 320;
 const CENTER = VIEWBOX / 2;
 
 export function DiagramCircle() {
+  const t = useT();
   const squares = Array.from({ length: TOTAL }, (_, i) => {
     const angle = (i / TOTAL) * Math.PI * 2 - Math.PI / 2;
     const x = CENTER + RADIUS * Math.cos(angle);
@@ -32,8 +35,10 @@ export function DiagramCircle() {
           />
         ))}
       </svg>
-      <span className="font-mono text-label uppercase tracking-widest opacity-50">34 · One circle</span>
-      <span className="sr-only">Thirty-four squares forming one circle.</span>
+      <span className="font-mono text-label uppercase tracking-widest opacity-50">
+        {t("home.oneCircle")}
+      </span>
+      <span className="sr-only">{t("home.oneCircleSr")}</span>
     </div>
   );
 }
