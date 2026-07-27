@@ -8,6 +8,7 @@ import { useApiQuery } from "@/hooks/useApiQuery";
 import { apiUrl } from "@/lib/api";
 import { StatCardSkeleton, CourseCardSkeleton, LoadingBlock, ErrorState } from "@/components/panel/Skeletons";
 import { HeroQuickStat } from "@/components/panel/HeroQuickStat";
+import { LessonPlayerModal } from "@/components/panel/LessonPlayerModal";
 import { cleanDisplayText } from "@/lib/displayText";
 import { useT } from "@/i18n";
 
@@ -17,6 +18,7 @@ interface Lesson {
   duration: string;
   isCompleted: boolean;
   isLocked: boolean;
+  videoUrl: string | null;
 }
 
 interface Module {
@@ -40,6 +42,21 @@ interface Course {
   modules: Module[];
 }
 
+interface RawLesson {
+  id: number;
+  title: string;
+  durationSeconds: number | null;
+  videoUrl: string | null;
+  isCompleted: boolean;
+  isLocked: boolean;
+}
+
+interface RawModule {
+  id: number;
+  title: string;
+  lessons: RawLesson[];
+}
+
 interface RawCourse {
   id: number;
   title: string;
@@ -47,9 +64,34 @@ interface RawCourse {
   term?: number;
   progressPct?: number;
   isEnrolled?: boolean;
+  modules?: RawModule[];
+}
+
+function formatLessonDuration(sec: number | null): string {
+  if (!sec) return "";
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  return `${m}:${String(s).padStart(2, "0")}`;
 }
 
 function mapApiCourse(row: RawCourse, t: ReturnType<typeof useT>): Course {
+  const modules: Module[] = (row.modules ?? []).map((m) => ({
+    id: m.id,
+    title: m.title,
+    lessons: m.lessons.map((l) => ({
+      id: l.id,
+      title: l.title,
+      duration: formatLessonDuration(l.durationSeconds),
+      isCompleted: l.isCompleted,
+      isLocked: l.isLocked,
+      videoUrl: l.videoUrl,
+    })),
+  }));
+  const allLessons = modules.flatMap((m) => m.lessons);
+  const totalSeconds = (row.modules ?? [])
+    .flatMap((m) => m.lessons)
+    .reduce((sum, l) => sum + (l.durationSeconds ?? 0), 0);
+
   return {
     id: row.id,
     title: row.title,
@@ -57,20 +99,23 @@ function mapApiCourse(row: RawCourse, t: ReturnType<typeof useT>): Course {
     instructor: "inner·hub",
     instructorTitle: row.term ? t("courses.term", { n: row.term }) : t("courses.education"),
     progressPct: row.progressPct ?? 0,
-    totalLessons: 0,
-    completedLessons: 0,
-    totalDuration: "",
+    totalLessons: allLessons.length,
+    completedLessons: allLessons.filter((l) => l.isCompleted).length,
+    totalDuration: totalSeconds > 0 ? formatLessonDuration(totalSeconds) : "",
     isEnrolled: row.isEnrolled ?? false,
     tag: t("courses.tag"),
-    modules: [],
+    modules,
   };
 }
 
-function LessonRow({ lesson }: { lesson: Lesson }) {
+function LessonRow({ lesson, onOpen }: { lesson: Lesson; onOpen?: (lesson: Lesson) => void }) {
   return (
-    <div
+    <button
+      type="button"
+      disabled={lesson.isLocked}
+      onClick={() => onOpen?.(lesson)}
       className={[
-        "flex items-center gap-3 px-4 py-2.5 transition-colors",
+        "flex w-full items-center gap-3 px-4 py-2.5 text-left transition-colors",
         lesson.isLocked ? "opacity-40 cursor-not-allowed" : "hover:bg-[var(--ink)]/[0.03] cursor-pointer",
       ].join(" ")}
     >
@@ -83,11 +128,19 @@ function LessonRow({ lesson }: { lesson: Lesson }) {
       )}
       <span className="flex-1 text-xs text-[var(--ink-strong)]">{lesson.title}</span>
       <span className="font-mono text-label text-[var(--ink-muted)]">{lesson.duration}</span>
-    </div>
+    </button>
   );
 }
 
-function ModuleAccordion({ module, defaultOpen = false }: { module: Module; defaultOpen?: boolean }) {
+function ModuleAccordion({
+  module,
+  defaultOpen = false,
+  onOpenLesson,
+}: {
+  module: Module;
+  defaultOpen?: boolean;
+  onOpenLesson?: (lesson: Lesson) => void;
+}) {
   const [open, setOpen] = useState(defaultOpen);
   const completed = module.lessons.filter((l) => l.isCompleted).length;
 
@@ -110,7 +163,7 @@ function ModuleAccordion({ module, defaultOpen = false }: { module: Module; defa
       {open && (
         <div className="border-t border-[var(--ink)]/[0.06] bg-[var(--ink)]/[0.015]">
           {module.lessons.map((lesson) => (
-            <LessonRow key={lesson.id} lesson={lesson} />
+            <LessonRow key={lesson.id} lesson={lesson} onOpen={onOpenLesson} />
           ))}
         </div>
       )}
@@ -122,10 +175,12 @@ function CourseCard({
   course,
   busy,
   onEnroll,
+  onOpenLesson,
 }: {
   course: Course;
   busy?: boolean;
   onEnroll?: (id: number) => void;
+  onOpenLesson?: (lesson: Lesson) => void;
 }) {
   const t = useT();
   const [expanded, setExpanded] = useState(false);
@@ -252,7 +307,7 @@ function CourseCard({
             </p>
           ) : (
             course.modules.map((mod, i) => (
-              <ModuleAccordion key={mod.id} module={mod} defaultOpen={i === 0} />
+              <ModuleAccordion key={mod.id} module={mod} defaultOpen={i === 0} onOpenLesson={onOpenLesson} />
             ))
           )}
         </div>
@@ -391,6 +446,7 @@ export default function CoursesPage() {
   const queryClient = useQueryClient();
   const [busyId, setBusyId] = useState<number | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [activeLesson, setActiveLesson] = useState<Lesson | null>(null);
   const { data, isLoading, isError, error, refetch } = useApiQuery<{ courses: RawCourse[] }>(
     ["courses"],
     "/api/courses",
@@ -486,7 +542,7 @@ export default function CoursesPage() {
             </div>
             <div className="space-y-3">
               {enrolled.map((course) => (
-                <CourseCard key={course.id} course={course} />
+                <CourseCard key={course.id} course={course} onOpenLesson={setActiveLesson} />
               ))}
             </div>
           </section>
@@ -513,6 +569,14 @@ export default function CoursesPage() {
             </div>
           </section>
         </FadeIn>
+      )}
+
+      {activeLesson && (
+        <LessonPlayerModal
+          lesson={activeLesson}
+          onClose={() => setActiveLesson(null)}
+          onCompleted={() => void queryClient.invalidateQueries({ queryKey: ["courses"] })}
+        />
       )}
     </div>
   );
