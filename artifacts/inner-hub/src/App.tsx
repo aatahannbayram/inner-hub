@@ -178,8 +178,7 @@ function Router() {
         <Route path="/invitation" component={Invitation} />
         <Route path="/requests"   component={Requests} />
         <Route path="/u/:handle"  component={PublicProfile} />
-        <Route path="/panel"    component={PanelApp} />
-        <Route path="/panel/:rest+" component={PanelApp} />
+        <Route path="/panel*" component={PanelApp} />
         <Route component={NotFound} />
       </Switch>
     </ThemeRouteGate>
