@@ -55,13 +55,17 @@ function DetailPanel({
   onClose,
   onApprove,
   onReject,
+  onResend,
   busy,
+  resendState,
 }: {
   app: Application;
   onClose: () => void;
   onApprove: () => void;
   onReject: () => void;
+  onResend: () => void;
   busy: boolean;
+  resendState: "idle" | "sent" | "failed";
 }) {
   const t = useT();
   useEffect(() => {
@@ -175,6 +179,28 @@ function DetailPanel({
             </button>
           </div>
         )}
+
+        {(app.status === "onaylandı" || app.status === "reddedildi") && (
+          <div className="border-t border-[var(--ink)]/[0.08] p-4">
+            <button
+              disabled={busy}
+              onClick={onResend}
+              className="w-full py-3 font-mono text-label uppercase tracking-widest text-[var(--ink-body)] panel-glass transition-colors hover:text-[var(--ink)] disabled:opacity-40"
+            >
+              {t("applications.resendMail")}
+            </button>
+            {resendState === "sent" && (
+              <p className="mt-2 text-center font-mono text-label text-[var(--success-ink)]">
+                {t("applications.resendSent")}
+              </p>
+            )}
+            {resendState === "failed" && (
+              <p className="mt-2 text-center font-mono text-label text-[var(--error-ink)]">
+                {t("applications.resendFailed")}
+              </p>
+            )}
+          </div>
+        )}
       </div>
     </>
   );
@@ -203,6 +229,7 @@ export default function ApplicationsPage() {
   const [search, setSearch] = useState("");
   const [busy, setBusy] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [resendState, setResendState] = useState<"idle" | "sent" | "failed">("idle");
 
   const counts: Record<FilterId, number> = {
     all: apps.length,
@@ -239,6 +266,24 @@ export default function ApplicationsPage() {
       setSelected((prev) => (prev?.id === id ? { ...prev, status } : prev));
     } catch (e: any) {
       setActionError(e.message ?? t("applications.updateFailed"));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const resendMail = async (id: number) => {
+    setBusy(true);
+    setResendState("idle");
+    try {
+      const res = await fetch(apiUrl(`/api/applications/${id}/resend`), {
+        method: "POST",
+        credentials: "include",
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json.error ?? t("applications.resendFailed"));
+      setResendState(json.sent ? "sent" : "failed");
+    } catch {
+      setResendState("failed");
     } finally {
       setBusy(false);
     }
@@ -342,7 +387,10 @@ export default function ApplicationsPage() {
               filtered.map((app, i) => (
                 <div
                   key={app.id}
-                  onClick={() => setSelected(app)}
+                  onClick={() => {
+                    setSelected(app);
+                    setResendState("idle");
+                  }}
                   className={[
                     "flex cursor-pointer items-center gap-4 px-4 py-3.5 transition-colors hover:bg-[var(--ink)]/[0.03]",
                     i < filtered.length - 1 ? "border-b border-[var(--ink)]/[0.05]" : "",
@@ -413,9 +461,11 @@ export default function ApplicationsPage() {
         <DetailPanel
           app={selected}
           busy={busy}
+          resendState={resendState}
           onClose={() => setSelected(null)}
           onApprove={() => updateStatus(selected.id, "onaylandı")}
           onReject={() => updateStatus(selected.id, "reddedildi")}
+          onResend={() => resendMail(selected.id)}
         />
       )}
     </div>

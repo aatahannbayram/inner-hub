@@ -30,6 +30,35 @@ function toDbStatus(status: string): "pending" | "approved" | "rejected" | null 
   return null;
 }
 
+/** Onay/red mailini gönderir (approve/reject anında ve manuel "tekrar gönder" için ortak). */
+async function sendDecisionMail(params: {
+  invite: { name: string; email: string; role: string | null };
+  invitationRequestId: number;
+  applicationId?: number | null;
+  next: "approved" | "rejected";
+}): Promise<boolean> {
+  const applicant = {
+    name: params.invite.name,
+    email: params.invite.email,
+    roleLabel: roleLabelOf(params.invite.role),
+  };
+  if (params.next === "approved") {
+    try {
+      const inviteCode = await issueInviteCodeForApproval({
+        email: params.invite.email,
+        invitationRequestId: params.invitationRequestId,
+        applicationId: params.applicationId,
+      });
+      return await notifyApplicantInvitationApproved({ ...applicant, inviteCode });
+    } catch (err: any) {
+      console.error("invite code issue failed", err);
+      return await notifyApplicantInvitationApproved(applicant);
+    }
+  }
+  void revokeUnusedInviteCodes(params.invitationRequestId);
+  return await notifyApplicantInvitationRejected(applicant);
+}
+
 /** Eski DB'lerde role/linkedin/org kolonlarını ekle (idempotent). */
 async function ensureInvitationColumns() {
   await db.execute(sql`ALTER TABLE invitation_requests ADD COLUMN IF NOT EXISTS role text`);
@@ -181,33 +210,57 @@ router.patch("/applications/:id", requireAdmin, async (req, res) => {
     }
 
     // Otomasyon: yalnızca gerçek durum değişiminde başvuran maili
-    if (prevStatus !== next) {
-      const applicant = {
-        name: invite.name,
-        email: invite.email,
-        roleLabel: roleLabelOf(invite.role),
-      };
-      if (next === "approved") {
-        try {
-          const inviteCode = await issueInviteCodeForApproval({
-            email: invite.email,
-            invitationRequestId,
-            applicationId,
-          });
-          void notifyApplicantInvitationApproved({ ...applicant, inviteCode });
-        } catch (err: any) {
-          console.error("invite code issue failed", err);
-          void notifyApplicantInvitationApproved(applicant);
-        }
-      } else if (next === "rejected") {
-        void revokeUnusedInviteCodes(invitationRequestId);
-        void notifyApplicantInvitationRejected(applicant);
-      }
+    if (prevStatus !== next && (next === "approved" || next === "rejected")) {
+      void sendDecisionMail({ invite, invitationRequestId, applicationId, next });
     }
 
     res.json({ id: invitationRequestId, status: toUiStatus(next) });
   } catch (err: any) {
     res.status(500).json({ error: err.message ?? "Durum güncellenemedi" });
+  }
+});
+
+// ─── POST /api/applications/:id/resend ────────────────────────────────────────
+// Onaylanmış/reddedilmiş bir başvuru için mail'i durumu değiştirmeden tekrar gönderir
+// (spam'e düşme gibi teslimat sorunlarında admin'in elle tetiklemesi için).
+router.post("/applications/:id/resend", requireAdmin, async (req, res) => {
+  try {
+    const invitationRequestId = Number(req.params.id);
+    if (!Number.isFinite(invitationRequestId)) {
+      res.status(400).json({ error: "Geçersiz id" });
+      return;
+    }
+
+    const [invite] = await db
+      .select()
+      .from(invitationRequestsTable)
+      .where(eq(invitationRequestsTable.id, invitationRequestId))
+      .limit(1);
+    if (!invite) {
+      res.status(404).json({ error: "Başvuru bulunamadı" });
+      return;
+    }
+
+    const [existing] = await db
+      .select()
+      .from(applicationsTable)
+      .where(eq(applicationsTable.invitationRequestId, invitationRequestId))
+      .limit(1);
+
+    if (existing?.status !== "approved" && existing?.status !== "rejected") {
+      res.status(400).json({ error: "Yalnızca onaylanmış veya reddedilmiş başvurular için mail tekrar gönderilebilir" });
+      return;
+    }
+
+    const sent = await sendDecisionMail({
+      invite,
+      invitationRequestId,
+      applicationId: existing.id,
+      next: existing.status,
+    });
+    res.json({ sent });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message ?? "Mail gönderilemedi" });
   }
 });
 

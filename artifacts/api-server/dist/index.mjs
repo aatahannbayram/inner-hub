@@ -97884,29 +97884,47 @@ function roleLine(roleLabel) {
 function invitationReceivedMail(ctx) {
   const appUrl2 = appBaseUrl();
   const name = firstName(ctx.name);
-  const subject = "inner hub \xB7 davet talebin al\u0131nd\u0131";
+  const subject = "inner hub \xB7 talebin elimize ula\u015Ft\u0131";
   const text2 = [
     `Merhaba ${name},`,
     "",
-    "Davet talebin bize ula\u015Ft\u0131. Ekibimiz ba\u015Fvurunu inceliyor; k\u0131sa s\xFCre i\xE7inde bu e-postaya d\xF6n\xFC\u015F yapaca\u011F\u0131z.",
+    "Talebin az \xF6nce elimize ula\u015Ft\u0131 \u2014 te\u015Fekk\xFCrler, zaman ay\u0131rd\u0131\u011F\u0131n i\xE7in.",
     "",
-    "Onaylan\u0131rsa: ki\u015Fisel davet kodun + panel kay\u0131t linki bu adrese gelir.",
-    `Panel adresi (\u015Fimdilik bekleyebilirsin): ${appUrl2}/panel`,
+    "inner\xB7hub davetiye usul\xFCyle ilerliyor; her ba\u015Fvuruyu ekip olarak tek tek okuyoruz, otomatik onay yok. Bu da biraz zaman alabiliyor, ama her sat\u0131r\u0131 ger\xE7ekten okudu\u011Fumuz anlam\u0131na geliyor.",
     "",
-    "Bu s\xFCre\xE7te ek bir \u015Fey yapman gerekmiyor. Sorun olursa: support@inner.digital",
+    "\u015Eimdi ne olacak:",
+    "1) Ba\u015Fvurun ekibe d\xFC\u015Ft\xFC, s\u0131rada inceleme bekliyor.",
+    "2) Karar \xE7\u0131k\u0131nca \u2014 olumlu ya da olumsuz \u2014 yine bu adrese, bu e-postadan yazaca\u011F\u0131z.",
+    "3) Onaylan\u0131rsa ki\u015Fisel davet kodun ve panele kay\u0131t ad\u0131mlar\u0131 ayn\u0131 iletide olacak.",
+    "",
+    "\u015Eimdilik senden ek bir \u015Fey gerekmiyor. Akl\u0131na tak\u0131lan olursa: support@inner.digital",
     "",
     "inner hub",
     appUrl2
   ].join("\n");
   const html = renderInnerEmailLayout({
     appUrl: appUrl2,
-    preheader: "Davet talebin al\u0131nd\u0131. Onayda kod ve panel linki bu adrese gelir.",
+    preheader: "Talebin elimize ula\u015Ft\u0131. \u0130ncelemeyi bitirince yine buradan yazaca\u011F\u0131z.",
     eyebrow: "Davetiye \xB7 al\u0131nd\u0131",
-    title: `${name}, talebin bizde.`,
+    title: `${name}, talebin elimizde.`,
     bodyHtml: `
-      <p style="margin:0 0 12px;">Davet talebin kayda ge\xE7ti. inner\xB7hub davetiye ile ilerler; her ba\u015Fvuruyu tek tek okuyoruz.</p>
-      <p style="margin:0 0 12px;">\u0130nceleme bitince <strong style="color:#F4F1EC;font-weight:500;">bu e-postaya</strong> yazaca\u011F\u0131z. Onaylan\u0131rsa ki\u015Fisel davet kodun ve panele kay\u0131t ad\u0131m\u0131 ayn\u0131 iletiyle gelir.</p>
-      <p style="margin:0;font-size:13px;color:rgba(244,241,236,0.45);">\u015Eimdilik beklemen yeterli. Panel: <a href="${escapeHtml(appUrl2)}/panel" style="color:#F4F1EC;">${escapeHtml(appUrl2)}/panel</a> (kod olmadan kay\u0131t olamazs\u0131n).</p>
+      <p style="margin:0 0 12px;">Merhaba ${escapeHtml(name)}, talebin az \xF6nce elimize ula\u015Ft\u0131 \u2014 zaman ay\u0131rd\u0131\u011F\u0131n i\xE7in te\u015Fekk\xFCrler.</p>
+      <p style="margin:0 0 20px;">inner\xB7hub davetiye usul\xFCyle ilerliyor; her ba\u015Fvuruyu ekip olarak tek tek okuyoruz, otomatik onay yok. Bu biraz zaman alabilir, ama her sat\u0131r\u0131n ger\xE7ekten okundu\u011Fu anlam\u0131na geliyor.</p>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 20px;border-collapse:separate;">
+        <tr>
+          <td style="width:22px;padding:0 10px 14px 0;vertical-align:top;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:11px;color:#18FF85;">01</td>
+          <td style="padding:0 0 14px;vertical-align:top;font-size:14px;color:rgba(244,241,236,0.72);">Ba\u015Fvurun ekibe d\xFC\u015Ft\xFC, s\u0131rada inceleme bekliyor.</td>
+        </tr>
+        <tr>
+          <td style="width:22px;padding:0 10px 14px 0;vertical-align:top;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:11px;color:#18FF85;">02</td>
+          <td style="padding:0 0 14px;vertical-align:top;font-size:14px;color:rgba(244,241,236,0.72);">Karar \xE7\u0131k\u0131nca \u2014 olumlu ya da olumsuz \u2014 yine <strong style="color:#F4F1EC;font-weight:500;">bu e-postaya</strong> yazaca\u011F\u0131z.</td>
+        </tr>
+        <tr>
+          <td style="width:22px;padding:0 10px 0 0;vertical-align:top;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:11px;color:#18FF85;">03</td>
+          <td style="padding:0;vertical-align:top;font-size:14px;color:rgba(244,241,236,0.72);">Onaylan\u0131rsa ki\u015Fisel davet kodun ve panele kay\u0131t ad\u0131mlar\u0131 ayn\u0131 iletide olacak.</td>
+        </tr>
+      </table>
+      <p style="margin:0;font-size:13px;color:rgba(244,241,236,0.45);">\u015Eimdilik ek bir \u015Fey gerekmiyor. Akl\u0131na tak\u0131lan olursa <a href="mailto:support@inner.digital" style="color:#F4F1EC;">support@inner.digital</a>.</p>
       ${roleLine(ctx.roleLabel)}
     `,
     cta: { label: "inner.digital", href: appUrl2 },
@@ -97916,9 +97934,9 @@ function invitationReceivedMail(ctx) {
 }
 function invitationApprovedMail(ctx) {
   const appUrl2 = appBaseUrl();
-  const panelUrl = `${appUrl2}/panel`;
-  const name = firstName(ctx.name);
   const inviteCode = ctx.inviteCode?.trim() || "";
+  const panelUrl = inviteCode ? `${appUrl2}/panel?invite=${encodeURIComponent(inviteCode)}&email=${encodeURIComponent(ctx.email)}` : `${appUrl2}/panel`;
+  const name = firstName(ctx.name);
   const subject = "inner hub \xB7 davetin onayland\u0131 \xB7 panele gir";
   const text2 = [
     `Merhaba ${name},`,
@@ -97927,8 +97945,9 @@ function invitationApprovedMail(ctx) {
     "",
     "Panele nas\u0131l girersin:",
     `1) A\xE7: ${panelUrl}`,
-    "2) Kay\u0131t ol: bu e-posta + \u015Fifre + davet kodu",
-    inviteCode ? `3) Davet kodun: ${inviteCode}` : "3) Davet kodun i\xE7in support@inner.digital yaz",
+    "2) A\xE7\u0131lan ekranda kay\u0131t formunu g\xF6receksin \u2014 e-posta ve davet kodu zaten dolu",
+    "3) Kendine bir \u015Fifre belirle, ad\u0131n\u0131 yaz, kay\u0131t ol",
+    inviteCode ? `(Davet kodun: ${inviteCode} \u2014 link a\xE7\u0131l\u0131nca otomatik dolu gelir)` : "Davet kodun i\xE7in support@inner.digital yaz",
     "",
     "Kay\u0131t olduktan sonra sonraki giri\u015Flerde sadece e-posta ve \u015Fifre yeter. Kod gerekmez.",
     "",
@@ -97937,14 +97956,14 @@ function invitationApprovedMail(ctx) {
   ].join("\n");
   const codeHtml = inviteCode ? `
       <ol style="margin:0 0 16px;padding-left:18px;color:rgba(244,241,236,0.72);line-height:1.55;">
-        <li style="margin:0 0 8px;"><a href="${escapeHtml(panelUrl)}" style="color:#F4F1EC;">${escapeHtml(panelUrl)}</a> adresini a\xE7</li>
-        <li style="margin:0 0 8px;"><strong style="color:#F4F1EC;font-weight:500;">Bu e-posta</strong> (${escapeHtml(ctx.email)}) ile kay\u0131t ol</li>
-        <li style="margin:0;">Davet kodunu gir:</li>
+        <li style="margin:0 0 8px;"><a href="${escapeHtml(panelUrl)}" style="color:#F4F1EC;">Panele git</a> \u2014 e-posta ve davet kodun otomatik dolu gelir</li>
+        <li style="margin:0 0 8px;">Kendine bir <strong style="color:#F4F1EC;font-weight:500;">\u015Fifre belirle</strong>, ad\u0131n\u0131 yaz</li>
+        <li style="margin:0;">Kay\u0131t ol butonuna bas, i\xE7eri gir</li>
       </ol>
       <p style="margin:0 0 16px;padding:14px 16px;border:1px solid rgba(255,255,255,0.14);background:rgba(255,255,255,0.04);font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:18px;letter-spacing:0.12em;color:#F4F1EC;">
         ${escapeHtml(inviteCode)}
       </p>
-      <p style="margin:0 0 12px;font-size:13px;color:rgba(244,241,236,0.45);">Kod sana \xF6zel ve tek kullan\u0131ml\u0131k. Kay\u0131ttan sonra giri\u015Flerde gerekmez. Sorun olursa <a href="mailto:support@inner.digital" style="color:#F4F1EC;">support@inner.digital</a>.</p>
+      <p style="margin:0 0 12px;font-size:13px;color:rgba(244,241,236,0.45);">Link a\xE7\u0131lmazsa ya da kod otomatik gelmezse yukar\u0131daki kodu elle girebilirsin. Kod sana \xF6zel ve tek kullan\u0131ml\u0131k, kay\u0131ttan sonra giri\u015Flerde gerekmez. Sorun olursa <a href="mailto:support@inner.digital" style="color:#F4F1EC;">support@inner.digital</a>.</p>
     ` : `
       <p style="margin:0 0 12px;">Panele gidip hesab\u0131n\u0131 olu\u015Ftur. Davet kodu i\xE7in <a href="mailto:support@inner.digital" style="color:#F4F1EC;">support@inner.digital</a> yaz.</p>
     `;
@@ -123090,6 +123109,28 @@ function toDbStatus(status) {
   if (status === "beklemede" || status === "pending") return "pending";
   return null;
 }
+async function sendDecisionMail(params) {
+  const applicant = {
+    name: params.invite.name,
+    email: params.invite.email,
+    roleLabel: roleLabelOf(params.invite.role)
+  };
+  if (params.next === "approved") {
+    try {
+      const inviteCode = await issueInviteCodeForApproval({
+        email: params.invite.email,
+        invitationRequestId: params.invitationRequestId,
+        applicationId: params.applicationId
+      });
+      return await notifyApplicantInvitationApproved({ ...applicant, inviteCode });
+    } catch (err) {
+      console.error("invite code issue failed", err);
+      return await notifyApplicantInvitationApproved(applicant);
+    }
+  }
+  void revokeUnusedInviteCodes(params.invitationRequestId);
+  return await notifyApplicantInvitationRejected(applicant);
+}
 async function ensureInvitationColumns() {
   await db.execute(sql`ALTER TABLE invitation_requests ADD COLUMN IF NOT EXISTS role text`);
   await db.execute(sql`ALTER TABLE invitation_requests ADD COLUMN IF NOT EXISTS linkedin text`);
@@ -123192,32 +123233,40 @@ router9.patch("/applications/:id", requireAdmin, async (req, res) => {
       }).returning({ id: applicationsTable.id });
       applicationId = created?.id;
     }
-    if (prevStatus !== next) {
-      const applicant = {
-        name: invite.name,
-        email: invite.email,
-        roleLabel: roleLabelOf(invite.role)
-      };
-      if (next === "approved") {
-        try {
-          const inviteCode = await issueInviteCodeForApproval({
-            email: invite.email,
-            invitationRequestId,
-            applicationId
-          });
-          void notifyApplicantInvitationApproved({ ...applicant, inviteCode });
-        } catch (err) {
-          console.error("invite code issue failed", err);
-          void notifyApplicantInvitationApproved(applicant);
-        }
-      } else if (next === "rejected") {
-        void revokeUnusedInviteCodes(invitationRequestId);
-        void notifyApplicantInvitationRejected(applicant);
-      }
+    if (prevStatus !== next && (next === "approved" || next === "rejected")) {
+      void sendDecisionMail({ invite, invitationRequestId, applicationId, next });
     }
     res.json({ id: invitationRequestId, status: toUiStatus(next) });
   } catch (err) {
     res.status(500).json({ error: err.message ?? "Durum g\xFCncellenemedi" });
+  }
+});
+router9.post("/applications/:id/resend", requireAdmin, async (req, res) => {
+  try {
+    const invitationRequestId = Number(req.params.id);
+    if (!Number.isFinite(invitationRequestId)) {
+      res.status(400).json({ error: "Ge\xE7ersiz id" });
+      return;
+    }
+    const [invite] = await db.select().from(invitationRequestsTable).where(eq(invitationRequestsTable.id, invitationRequestId)).limit(1);
+    if (!invite) {
+      res.status(404).json({ error: "Ba\u015Fvuru bulunamad\u0131" });
+      return;
+    }
+    const [existing] = await db.select().from(applicationsTable).where(eq(applicationsTable.invitationRequestId, invitationRequestId)).limit(1);
+    if (existing?.status !== "approved" && existing?.status !== "rejected") {
+      res.status(400).json({ error: "Yaln\u0131zca onaylanm\u0131\u015F veya reddedilmi\u015F ba\u015Fvurular i\xE7in mail tekrar g\xF6nderilebilir" });
+      return;
+    }
+    const sent = await sendDecisionMail({
+      invite,
+      invitationRequestId,
+      applicationId: existing.id,
+      next: existing.status
+    });
+    res.json({ sent });
+  } catch (err) {
+    res.status(500).json({ error: err.message ?? "Mail g\xF6nderilemedi" });
   }
 });
 var applications_default = router9;

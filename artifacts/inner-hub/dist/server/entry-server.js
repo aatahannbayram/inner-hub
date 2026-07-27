@@ -523,6 +523,7 @@ const tr = {
     or: "veya",
     inviteCode: "Davet kodu",
     invitePlaceholder: "Davet kodunuz",
+    inviteCodeApplied: "Davet kodun onay mailinden alındı",
     fullName: "Ad Soyad",
     email: "E-posta",
     password: "Şifre",
@@ -1404,6 +1405,9 @@ const tr = {
     none: "Yok",
     searchPlaceholder: "Ad, e-posta, etiket…",
     updateFailed: "Durum güncellenemedi",
+    resendMail: "Maili tekrar gönder",
+    resendSent: "Mail tekrar gönderildi",
+    resendFailed: "Mail gönderilemedi (SMTP yapılandırılmamış olabilir)",
     footer: "başvurular · yalnızca admin"
   },
   analytics: {
@@ -1957,6 +1961,7 @@ const en = {
     or: "or",
     inviteCode: "Invite code",
     invitePlaceholder: "Your invite code",
+    inviteCodeApplied: "Invite code applied from your approval email",
     fullName: "Full name",
     email: "Email",
     password: "Password",
@@ -2838,6 +2843,9 @@ const en = {
     none: "None",
     searchPlaceholder: "Name, email, tag…",
     updateFailed: "Could not update status",
+    resendMail: "Resend email",
+    resendSent: "Email resent",
+    resendFailed: "Could not send email (SMTP may be unconfigured)",
     footer: "applications · admin only"
   },
   analytics: {

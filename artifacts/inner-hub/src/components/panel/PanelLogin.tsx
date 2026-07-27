@@ -87,13 +87,23 @@ async function apiRequest(path: string, body: unknown) {
   return data;
 }
 
+function inviteParamsFromUrl(): { invite: string; email: string } | null {
+  if (typeof window === "undefined") return null;
+  const params = new URLSearchParams(window.location.search);
+  const invite = params.get("invite")?.trim();
+  if (!invite) return null;
+  return { invite, email: params.get("email")?.trim() ?? "" };
+}
+
 export function PanelLogin({ onLogin }: PanelLoginProps) {
   const t = useT();
-  const [mode, setMode] = useState<"login" | "register">("login");
+  const initialInvite = useRef(inviteParamsFromUrl()).current;
+  const [mode, setMode] = useState<"login" | "register">(initialInvite ? "register" : "login");
   const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(initialInvite?.email ?? "");
   const [password, setPassword] = useState("");
-  const [inviteCode, setInviteCode] = useState("");
+  const [inviteCode, setInviteCode] = useState(initialInvite?.invite ?? "");
+  const inviteFromLink = Boolean(initialInvite?.invite);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [googleReady, setGoogleReady] = useState(false);
@@ -348,21 +358,27 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
             <form id="panel-login-form" onSubmit={handleSubmit} className="space-y-5">
               {mode === "register" && (
                 <>
-                  <div className="space-y-2">
-                    <label className="font-mono text-[10px] uppercase tracking-widest text-white/65 sm:text-[11px]">
-                      {t("login.inviteCode")}
-                      <span className="text-[var(--inner-green)]"> *</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={inviteCode}
-                      onChange={(e) => setInviteCode(e.target.value)}
-                      placeholder={t("login.invitePlaceholder")}
-                      className={fieldClass}
-                      required
-                      autoComplete="off"
-                    />
-                  </div>
+                  {inviteFromLink ? (
+                    <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--inner-green)]">
+                      {t("login.inviteCodeApplied")}
+                    </p>
+                  ) : (
+                    <div className="space-y-2">
+                      <label className="font-mono text-[10px] uppercase tracking-widest text-white/65 sm:text-[11px]">
+                        {t("login.inviteCode")}
+                        <span className="text-[var(--inner-green)]"> *</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={inviteCode}
+                        onChange={(e) => setInviteCode(e.target.value)}
+                        placeholder={t("login.invitePlaceholder")}
+                        className={fieldClass}
+                        required
+                        autoComplete="off"
+                      />
+                    </div>
+                  )}
                   <div className="space-y-2">
                     <label className="font-mono text-[10px] uppercase tracking-widest text-white/65 sm:text-[11px]">
                       {t("login.fullName")}
