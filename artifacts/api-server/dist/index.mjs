@@ -30445,7 +30445,7 @@ See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode de
 var require_connection_parameters = __commonJS({
   "../../node_modules/.pnpm/pg@8.22.0/node_modules/pg/lib/connection-parameters.js"(exports, module) {
     "use strict";
-    var dns = __require("dns");
+    var dns2 = __require("dns");
     var defaults4 = require_defaults();
     var parse5 = require_pg_connection_string().parse;
     var val = function(key, config2, envVar) {
@@ -30581,7 +30581,7 @@ var require_connection_parameters = __commonJS({
         if (this.client_encoding) {
           params.push("client_encoding=" + quoteParamValue(this.client_encoding));
         }
-        dns.lookup(this.host, function(err, address) {
+        dns2.lookup(this.host, function(err, address) {
           if (err) return cb(err, null);
           params.push("hostaddr=" + quoteParamValue(address));
           return cb(null, params.join(" "));
@@ -31791,8 +31791,8 @@ var require_stream = __commonJS({
     };
     function getNodejsStreamFuncs() {
       function getStream2(ssl) {
-        const net = __require("net");
-        return new net.Socket();
+        const net2 = __require("net");
+        return new net2.Socket();
       }
       function getSecureStream2(options) {
         const tls = __require("tls");
@@ -31929,8 +31929,8 @@ var require_connection = __commonJS({
         if (self2.sslNegotiation === "direct") {
           options.ALPNProtocols = ["postgresql"];
         }
-        const net = __require("net");
-        if (net.isIP && net.isIP(host) === 0) {
+        const net2 = __require("net");
+        if (net2.isIP && net2.isIP(host) === 0) {
           options.servername = host;
         }
         try {
@@ -54164,6 +54164,7 @@ var init_hub = __esm({
       pitch: text("pitch").notNull(),
       status: text("status").default("published").notNull(),
       featured: boolean("featured").default(false).notNull(),
+      imageUrl: text("image_url"),
       createdAt: timestamp("created_at").defaultNow().notNull()
     });
     stageVotesTable = pgTable("stage_votes", {
@@ -55014,7 +55015,7 @@ var require_fetch = __commonJS({
     var { PassThrough } = __require("stream");
     var Cookies = require_cookies();
     var packageData = require_package2();
-    var net = __require("net");
+    var net2 = __require("net");
     var errors = require_errors();
     var MAX_REDIRECTS = 5;
     module.exports = function(url2, options) {
@@ -55117,7 +55118,7 @@ var require_fetch = __commonJS({
       if (options.tls) {
         Object.assign(reqOptions, options.tls);
       }
-      if (parsed.protocol === "https:" && parsed.hostname && parsed.hostname !== reqOptions.host && !net.isIP(parsed.hostname) && !reqOptions.servername) {
+      if (parsed.protocol === "https:" && parsed.hostname && parsed.hostname !== reqOptions.host && !net2.isIP(parsed.hostname) && !reqOptions.servername) {
         reqOptions.servername = parsed.hostname;
       }
       try {
@@ -55264,8 +55265,8 @@ var require_shared = __commonJS({
     var fs7 = __require("fs");
     var nmfetch = require_fetch();
     var errors = require_errors();
-    var dns = __require("dns");
-    var net = __require("net");
+    var dns2 = __require("dns");
+    var net2 = __require("net");
     var os2 = __require("os");
     var DNS_TTL = 5 * 60 * 1e3;
     var CACHE_CLEANUP_INTERVAL = 30 * 1e3;
@@ -55293,16 +55294,16 @@ var require_shared = __commonJS({
       if (!isFamilySupported(family, options.allowInternalNetworkInterfaces)) {
         return callback(null, []);
       }
-      const dnsResolver = dns.Resolver ? new dns.Resolver(options) : dns;
+      const dnsResolver = dns2.Resolver ? new dns2.Resolver(options) : dns2;
       dnsResolver["resolve" + family](hostname3, (err, addresses) => {
         if (err) {
           switch (err.code) {
-            case dns.NODATA:
-            case dns.NOTFOUND:
-            case dns.NOTIMP:
-            case dns.SERVFAIL:
-            case dns.CONNREFUSED:
-            case dns.REFUSED:
+            case dns2.NODATA:
+            case dns2.NOTFOUND:
+            case dns2.NOTIMP:
+            case dns2.SERVFAIL:
+            case dns2.CONNREFUSED:
+            case dns2.REFUSED:
             case "EAI_AGAIN":
               return callback(null, []);
           }
@@ -55333,7 +55334,7 @@ var require_shared = __commonJS({
       if (!options.host && options.servername) {
         options.host = options.servername;
       }
-      if (!options.host || net.isIP(options.host)) {
+      if (!options.host || net2.isIP(options.host)) {
         const value = {
           addresses: [options.host],
           servername: options.servername || false
@@ -55420,7 +55421,7 @@ var require_shared = __commonJS({
             }
           }
           try {
-            dns.lookup(options.host, { all: true }, (err3, addresses3) => {
+            dns2.lookup(options.host, { all: true }, (err3, addresses3) => {
               if (err3) {
                 if (cached2) {
                   dnsCache.set(options.host, {
@@ -61047,7 +61048,7 @@ var require_dkim = __commonJS({
 var require_http_proxy_client = __commonJS({
   "../../node_modules/.pnpm/nodemailer@9.0.3/node_modules/nodemailer/lib/smtp-connection/http-proxy-client.js"(exports, module) {
     "use strict";
-    var net = __require("net");
+    var net2 = __require("net");
     var tls = __require("tls");
     var urllib = require_url();
     var errors = require_errors();
@@ -61074,7 +61075,7 @@ var require_http_proxy_client = __commonJS({
         connectOptions.rejectUnauthorized = tlsOptions.rejectUnauthorized !== false;
         connect = tls.connect.bind(tls);
       } else {
-        connect = net.connect.bind(net);
+        connect = net2.connect.bind(net2);
       }
       let socket;
       let finished = false;
@@ -61438,8 +61439,8 @@ var require_mailer = __commonJS({
     var urllib = require_url();
     var packageData = require_package2();
     var MailMessage = require_mail_message();
-    var net = __require("net");
-    var dns = __require("dns");
+    var net2 = __require("net");
+    var dns2 = __require("dns");
     var crypto11 = __require("crypto");
     var Mail = class extends EventEmitter2 {
       constructor(transporter2, options, defaults4) {
@@ -61751,10 +61752,10 @@ var require_mailer = __commonJS({
                   });
                 });
               };
-              if (net.isIP(proxy.hostname)) {
+              if (net2.isIP(proxy.hostname)) {
                 return connect(proxy.hostname);
               }
-              return dns.resolve(proxy.hostname, (err2, address) => {
+              return dns2.resolve(proxy.hostname, (err2, address) => {
                 if (err2) {
                   return callback(err2);
                 }
@@ -61907,7 +61908,7 @@ var require_smtp_connection = __commonJS({
     "use strict";
     var packageInfo = require_package2();
     var { EventEmitter: EventEmitter2 } = __require("events");
-    var net = __require("net");
+    var net2 = __require("net");
     var tls = __require("tls");
     var os2 = __require("os");
     var crypto11 = __require("crypto");
@@ -61937,7 +61938,7 @@ var require_smtp_connection = __commonJS({
         this.alreadySecured = !!this.options.secured;
         this.port = Number(this.options.port) || (this.secureConnection ? 465 : 587);
         this.host = this.options.host || "localhost";
-        this.servername = this.options.servername ? this.options.servername : !net.isIP(this.host) ? this.host : false;
+        this.servername = this.options.servername ? this.options.servername : !net2.isIP(this.host) ? this.host : false;
         this.allowInternalNetworkInterfaces = this.options.allowInternalNetworkInterfaces || false;
         if (typeof this.options.secure === "undefined" && this.port === 465) {
           this.secureConnection = true;
@@ -62108,7 +62109,7 @@ var require_smtp_connection = __commonJS({
         }
         this._connectionAttemptId++;
         const currentAttemptId = this._connectionAttemptId;
-        const connectFn = secure ? tls.connect : net.connect;
+        const connectFn = secure ? tls.connect : net2.connect;
         try {
           this._socket = connectFn(opts, () => {
             if (this._connectionAttemptId !== currentAttemptId) {
@@ -83786,7 +83787,7 @@ var require_dist5 = __commonJS({
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.Agent = void 0;
-    var net = __importStar(__require("net"));
+    var net2 = __importStar(__require("net"));
     var http2 = __importStar(__require("http"));
     var https_1 = __require("https");
     __exportStar(require_helpers(), exports);
@@ -83826,7 +83827,7 @@ var require_dist5 = __commonJS({
         if (!this.sockets[name]) {
           this.sockets[name] = [];
         }
-        const fakeSocket = new net.Socket({ writable: false });
+        const fakeSocket = new net2.Socket({ writable: false });
         this.sockets[name].push(fakeSocket);
         this.totalSocketCount++;
         return fakeSocket;
@@ -84038,7 +84039,7 @@ var require_dist6 = __commonJS({
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.HttpsProxyAgent = void 0;
-    var net = __importStar(__require("net"));
+    var net2 = __importStar(__require("net"));
     var tls = __importStar(__require("tls"));
     var assert_1 = __importDefault(__require("assert"));
     var debug_1 = __importDefault(require_src());
@@ -84047,7 +84048,7 @@ var require_dist6 = __commonJS({
     var parse_proxy_response_1 = require_parse_proxy_response();
     var debug = (0, debug_1.default)("https-proxy-agent");
     var setServernameFromNonIpHost = (options) => {
-      if (options.servername === void 0 && options.host && !net.isIP(options.host)) {
+      if (options.servername === void 0 && options.host && !net2.isIP(options.host)) {
         return {
           ...options,
           servername: options.host
@@ -84087,10 +84088,10 @@ var require_dist6 = __commonJS({
           socket = tls.connect(setServernameFromNonIpHost(this.connectOpts));
         } else {
           debug("Creating `net.Socket`: %o", this.connectOpts);
-          socket = net.connect(this.connectOpts);
+          socket = net2.connect(this.connectOpts);
         }
         const headers = typeof this.proxyHeaders === "function" ? this.proxyHeaders() : { ...this.proxyHeaders };
-        const host = net.isIPv6(opts.host) ? `[${opts.host}]` : opts.host;
+        const host = net2.isIPv6(opts.host) ? `[${opts.host}]` : opts.host;
         let payload = `CONNECT ${host}:${opts.port} HTTP/1.1\r
 `;
         if (proxy.username || proxy.password) {
@@ -84123,7 +84124,7 @@ var require_dist6 = __commonJS({
           return socket;
         }
         socket.destroy();
-        const fakeSocket = new net.Socket({ writable: false });
+        const fakeSocket = new net2.Socket({ writable: false });
         fakeSocket.readable = true;
         req.once("socket", (s) => {
           debug("Replaying proxy buffer for failed request");
@@ -98417,6 +98418,7 @@ var ensureStageSchema = once(async () => {
       ON live_notify_log (ref_type, ref_id, kind)
   `);
   await db.execute(sql`ALTER TABLE stage_products ADD COLUMN IF NOT EXISTS featured boolean NOT NULL DEFAULT false`);
+  await db.execute(sql`ALTER TABLE stage_products ADD COLUMN IF NOT EXISTS image_url text`);
 });
 var ensureMatchAndFaqSchema = once(async () => {
   await db.execute(sql`
@@ -125379,6 +125381,130 @@ var passes_default = router20;
 var import_express21 = __toESM(require_express2(), 1);
 init_drizzle_orm();
 init_schema2();
+
+// src/lib/linkPreview.ts
+import dns from "node:dns/promises";
+import net from "node:net";
+function isPrivateIp(ip) {
+  if (net.isIP(ip) === 4) {
+    const [a, b] = ip.split(".").map(Number);
+    if (a === void 0 || b === void 0) return true;
+    if (a === 10 || a === 127 || a === 0) return true;
+    if (a === 169 && b === 254) return true;
+    if (a === 172 && b >= 16 && b <= 31) return true;
+    if (a === 192 && b === 168) return true;
+    return false;
+  }
+  if (net.isIP(ip) === 6) {
+    const lower = ip.toLowerCase();
+    if (lower === "::1") return true;
+    if (lower.startsWith("fe80:")) return true;
+    if (lower.startsWith("fc") || lower.startsWith("fd")) return true;
+    if (lower.startsWith("::ffff:")) return isPrivateIp(lower.slice(7));
+    return false;
+  }
+  return true;
+}
+async function assertPublicHost(hostname3) {
+  if (net.isIP(hostname3)) {
+    if (isPrivateIp(hostname3)) throw new Error("\xD6zel adreslere eri\u015Fim engellendi");
+    return;
+  }
+  const records = await dns.lookup(hostname3, { all: true, verbatim: true });
+  if (records.length === 0) throw new Error("Host \xE7\xF6z\xFCmlenemedi");
+  for (const r of records) {
+    if (isPrivateIp(r.address)) throw new Error("\xD6zel adreslere eri\u015Fim engellendi");
+  }
+}
+function decodeEntities(s) {
+  return s.replaceAll("&amp;", "&").replaceAll("&lt;", "<").replaceAll("&gt;", ">").replaceAll("&quot;", '"').replaceAll("&#39;", "'").trim();
+}
+function extractMeta(html, prop, key) {
+  const patterns = [
+    new RegExp(`<meta[^>]+${prop}=["']${key}["'][^>]*content=["']([^"']*)["']`, "i"),
+    new RegExp(`<meta[^>]+content=["']([^"']*)["'][^>]*${prop}=["']${key}["']`, "i")
+  ];
+  for (const re of patterns) {
+    const m = html.match(re);
+    if (m?.[1]) return decodeEntities(m[1]);
+  }
+  return null;
+}
+function extractTitle(html) {
+  const m = html.match(/<title[^>]*>([^<]*)<\/title>/i);
+  return m?.[1] ? decodeEntities(m[1]) : null;
+}
+async function readCapped(res, maxBytes) {
+  const reader = res.body?.getReader();
+  if (!reader) return "";
+  const decoder = new TextDecoder();
+  let out = "";
+  let total = 0;
+  while (total < maxBytes) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    total += value.byteLength;
+    out += decoder.decode(value, { stream: true });
+  }
+  await reader.cancel().catch(() => {
+  });
+  return out;
+}
+async function fetchLinkPreview(rawUrl) {
+  let target;
+  try {
+    target = new URL(rawUrl);
+  } catch {
+    throw new Error("Ge\xE7ersiz URL");
+  }
+  let html = "";
+  for (let hop = 0; hop < 4; hop++) {
+    if (target.protocol !== "http:" && target.protocol !== "https:") {
+      throw new Error("Sadece http/https desteklenir");
+    }
+    await assertPublicHost(target.hostname);
+    const res = await fetch(target, {
+      signal: AbortSignal.timeout(9e3),
+      redirect: "manual",
+      headers: {
+        "User-Agent": "inner-hub-link-preview/1.0 (+https://inner.digital)",
+        Accept: "text/html"
+      }
+    });
+    if (res.status >= 300 && res.status < 400) {
+      const loc = res.headers.get("location");
+      if (!loc) break;
+      target = new URL(loc, target);
+      continue;
+    }
+    if (!res.ok) throw new Error(`Site yan\u0131t vermedi (${res.status})`);
+    const ct = res.headers.get("content-type") ?? "";
+    if (!ct.includes("text/html")) throw new Error("HTML i\xE7erik bulunamad\u0131");
+    html = await readCapped(res, 3e5);
+    break;
+  }
+  const title = extractMeta(html, "property", "og:title") ?? extractMeta(html, "name", "twitter:title") ?? extractTitle(html);
+  const description = extractMeta(html, "property", "og:description") ?? extractMeta(html, "name", "twitter:description") ?? extractMeta(html, "name", "description");
+  let image = extractMeta(html, "property", "og:image") ?? extractMeta(html, "name", "twitter:image");
+  if (image) {
+    try {
+      image = new URL(image, target).toString();
+    } catch {
+      image = null;
+    }
+  }
+  if (!image) {
+    const logo = await resolveAndCacheOrgLogo(target.hostname).catch(() => null);
+    image = logo?.logoPath ?? null;
+  }
+  return {
+    title: title?.slice(0, 200) ?? null,
+    description: description?.slice(0, 500) ?? null,
+    image
+  };
+}
+
+// src/routes/stage.ts
 var router21 = (0, import_express21.Router)();
 function mapProduct(product, voteCount, myVote, author) {
   return {
@@ -125388,6 +125514,7 @@ function mapProduct(product, voteCount, myVote, author) {
     pitch: product.pitch,
     status: product.status,
     featured: product.featured,
+    imageUrl: product.imageUrl,
     createdAt: product.createdAt.toISOString(),
     userId: product.userId,
     authorName: author?.name ?? null,
@@ -125396,6 +125523,19 @@ function mapProduct(product, voteCount, myVote, author) {
     myVote
   };
 }
+router21.get("/stage/link-preview", requireAuth, async (req, res) => {
+  const url2 = String(req.query.url ?? "").trim();
+  if (!url2) {
+    res.status(400).json({ error: "url zorunlu" });
+    return;
+  }
+  try {
+    const preview = await fetchLinkPreview(url2);
+    res.json(preview);
+  } catch (err) {
+    res.status(422).json({ error: err.message ?? "\xD6nizleme al\u0131namad\u0131" });
+  }
+});
 router21.get("/stage/products", requireAuth, async (req, res) => {
   try {
     await ensureStageSchema();
@@ -125429,10 +125569,12 @@ router21.post("/stage/products", requireAuth, async (req, res) => {
   try {
     await ensureStageSchema();
     const userId = req.user.id;
-    const { title, url: url2, pitch } = req.body;
+    const { title, url: url2, pitch, imageUrl } = req.body;
     const t = title?.trim() ?? "";
     const u = url2?.trim() ?? "";
     const p = pitch?.trim() ?? "";
+    const rawImage = imageUrl?.trim() ?? "";
+    const img = rawImage.length <= 500 && (rawImage.startsWith("http://") || rawImage.startsWith("https://") || rawImage.startsWith("/api/org-logos/")) ? rawImage : null;
     if (!t || !u || !p) {
       res.status(400).json({ error: "title, url ve pitch zorunlu" });
       return;
@@ -125446,6 +125588,7 @@ router21.post("/stage/products", requireAuth, async (req, res) => {
       title: t,
       url: u,
       pitch: p,
+      imageUrl: img,
       status: "published"
     }).returning();
     res.status(201).json(

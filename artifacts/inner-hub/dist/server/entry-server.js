@@ -1204,7 +1204,9 @@ const tr = {
     adminFeature: "Vitrine Sabitle",
     adminUnfeature: "Vitrinden Kaldır",
     adminRemove: "Kaldır",
-    confirmRemove: "Bu ürünü kaldırmak istediğine emin misin?"
+    confirmRemove: "Bu ürünü kaldırmak istediğine emin misin?",
+    previewLoading: "Site bilgileri getiriliyor…",
+    previewHint: "Başlık, açıklama ve logo otomatik dolduruldu — istersen düzenle."
   },
   members: {
     title: "Katılımcılar",
@@ -2658,7 +2660,9 @@ const en = {
     adminFeature: "Pin to Showcase",
     adminUnfeature: "Unpin",
     adminRemove: "Remove",
-    confirmRemove: "Remove this product?"
+    confirmRemove: "Remove this product?",
+    previewLoading: "Fetching site info…",
+    previewHint: "Title, description, and logo auto-filled — edit as you like."
   },
   members: {
     title: "Members",

@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { ExternalLink, Plus, Rocket, Star, ThumbsUp, Trash2 } from "lucide-react";
+import { ExternalLink, Globe, Loader2, Plus, Rocket, Star, ThumbsUp, Trash2 } from "lucide-react";
 import { FadeIn } from "@/components/FadeIn";
 import { Lockup } from "@/components/Lockup";
 import { useApiQuery } from "@/hooks/useApiQuery";
@@ -23,6 +23,7 @@ type StageProduct = {
   votes: number;
   myVote: boolean;
   featured: boolean;
+  imageUrl: string | null;
   authorName: string | null;
   authorHandle: string | null;
 };
@@ -87,6 +88,21 @@ function ProductCard({
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex min-w-0 flex-1 items-start gap-3">
           {rank !== undefined && <RankBadge rank={rank} />}
+          {product.imageUrl ? (
+            <img
+              src={product.imageUrl}
+              alt=""
+              className="size-10 shrink-0 border border-[var(--ink)]/10 object-cover"
+              loading="lazy"
+              onError={(e) => {
+                e.currentTarget.style.display = "none";
+              }}
+            />
+          ) : (
+            <div className="flex size-10 shrink-0 items-center justify-center border border-[var(--ink)]/10 bg-[var(--ink)]/[0.03] text-[var(--ink-subtle)]">
+              <Globe className="size-4" />
+            </div>
+          )}
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-1.5">
               <p className="font-serif text-lg text-[var(--ink)]">{product.title}</p>
@@ -176,6 +192,62 @@ function SubmitDrawer({
   const [pitch, setPitch] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [titleTouched, setTitleTouched] = useState(false);
+  const [pitchTouched, setPitchTouched] = useState(false);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [previewFailed, setPreviewFailed] = useState(false);
+
+  // URL girilince site meta verisini (başlık/açıklama/logo) otomatik çek;
+  // kullanıcı zaten kendi başlık/pitch'ini yazdıysa üzerine yazma.
+  useEffect(() => {
+    const trimmed = url.trim();
+    let valid: string | null = null;
+    try {
+      const u = new URL(trimmed);
+      if (u.protocol === "http:" || u.protocol === "https:") valid = u.toString();
+    } catch {
+      valid = null;
+    }
+    if (!valid) {
+      setPreviewImage(null);
+      setPreviewFailed(false);
+      return;
+    }
+    let cancelled = false;
+    const timer = window.setTimeout(async () => {
+      setPreviewLoading(true);
+      setPreviewFailed(false);
+      try {
+        const res = await fetch(
+          apiUrl(`/api/stage/link-preview?url=${encodeURIComponent(valid!)}`),
+          { credentials: "include" },
+        );
+        if (!res.ok) {
+          if (!cancelled) setPreviewFailed(true);
+          return;
+        }
+        const data = (await res.json()) as {
+          title: string | null;
+          description: string | null;
+          image: string | null;
+        };
+        if (cancelled) return;
+        setPreviewImage(data.image ?? null);
+        if (!titleTouched && data.title) setTitle(data.title);
+        if (!pitchTouched && data.description) setPitch(data.description.slice(0, 500));
+      } catch {
+        if (!cancelled) setPreviewFailed(true);
+      } finally {
+        if (!cancelled) setPreviewLoading(false);
+      }
+    }, 550);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [url]);
 
   const submit = async () => {
     if (!title.trim() || !url.trim() || !pitch.trim()) return;
@@ -186,13 +258,16 @@ function SubmitDrawer({
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, url, pitch }),
+        body: JSON.stringify({ title, url, pitch, imageUrl: previewImage }),
       });
       const json = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(json.error ?? t("stage.submitFailed"));
       setTitle("");
       setUrl("");
       setPitch("");
+      setPreviewImage(null);
+      setTitleTouched(false);
+      setPitchTouched(false);
       onAdded();
       onClose();
     } catch (e: any) {
@@ -220,21 +295,55 @@ function SubmitDrawer({
           </DrawerDescription>
         </DrawerHeader>
         <div className="max-h-[70vh] space-y-3 overflow-y-auto px-6 pb-8">
+          <div className="relative">
+            <input
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              placeholder={t("stage.urlPlaceholder")}
+              className="w-full panel-glass bg-transparent px-3 py-2.5 pr-9 text-sm outline-none focus:border-[var(--ink)]/30"
+            />
+            {previewLoading && (
+              <Loader2 className="absolute right-3 top-1/2 size-3.5 -translate-y-1/2 animate-spin text-[var(--ink-subtle)]" />
+            )}
+          </div>
+
+          {(previewImage || previewLoading || (url.trim() && !previewFailed)) && (
+            <div className="flex items-center gap-3 panel-glass p-3">
+              {previewImage ? (
+                <img
+                  src={previewImage}
+                  alt=""
+                  className="size-9 shrink-0 border border-[var(--ink)]/10 object-cover"
+                  onError={(e) => {
+                    e.currentTarget.style.display = "none";
+                  }}
+                />
+              ) : (
+                <div className="flex size-9 shrink-0 items-center justify-center border border-[var(--ink)]/10 bg-[var(--ink)]/[0.03] text-[var(--ink-subtle)]">
+                  <Globe className="size-4" />
+                </div>
+              )}
+              <p className="min-w-0 truncate font-mono text-[10px] uppercase tracking-widest text-[var(--ink-muted)]">
+                {previewLoading ? t("stage.previewLoading") : t("stage.previewHint")}
+              </p>
+            </div>
+          )}
+
           <input
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={(e) => {
+              setTitle(e.target.value);
+              setTitleTouched(true);
+            }}
             placeholder={t("stage.titlePlaceholder")}
-            className="w-full panel-glass bg-transparent px-3 py-2.5 text-sm outline-none focus:border-[var(--ink)]/30"
-          />
-          <input
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            placeholder={t("stage.urlPlaceholder")}
             className="w-full panel-glass bg-transparent px-3 py-2.5 text-sm outline-none focus:border-[var(--ink)]/30"
           />
           <textarea
             value={pitch}
-            onChange={(e) => setPitch(e.target.value)}
+            onChange={(e) => {
+              setPitch(e.target.value);
+              setPitchTouched(true);
+            }}
             placeholder={t("stage.pitchPlaceholder")}
             rows={3}
             className="w-full panel-glass bg-transparent px-3 py-2.5 text-sm outline-none focus:border-[var(--ink)]/30"

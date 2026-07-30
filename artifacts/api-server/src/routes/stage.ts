@@ -4,6 +4,7 @@ import { db } from "@workspace/db";
 import { stageProductsTable, stageVotesTable, usersTable } from "@workspace/db/schema";
 import { requireAuth, requireAdmin } from "../lib/auth";
 import { ensureStageSchema } from "../lib/ensureSchema";
+import { fetchLinkPreview } from "../lib/linkPreview";
 
 const router = Router();
 
@@ -20,6 +21,7 @@ function mapProduct(
     pitch: product.pitch,
     status: product.status,
     featured: product.featured,
+    imageUrl: product.imageUrl,
     createdAt: product.createdAt.toISOString(),
     userId: product.userId,
     authorName: author?.name ?? null,
@@ -28,6 +30,21 @@ function mapProduct(
     myVote,
   };
 }
+
+/** GET /api/stage/link-preview?url=... — ürün formunda URL girilince başlık/açıklama/görsel öner. */
+router.get("/stage/link-preview", requireAuth, async (req, res) => {
+  const url = String(req.query.url ?? "").trim();
+  if (!url) {
+    res.status(400).json({ error: "url zorunlu" });
+    return;
+  }
+  try {
+    const preview = await fetchLinkPreview(url);
+    res.json(preview);
+  } catch (err: any) {
+    res.status(422).json({ error: err.message ?? "Önizleme alınamadı" });
+  }
+});
 
 /** GET /api/stage/products — yayınlanmış ürünler + oy sayıları */
 router.get("/stage/products", requireAuth, async (req, res) => {
@@ -78,15 +95,24 @@ router.post("/stage/products", requireAuth, async (req, res) => {
   try {
     await ensureStageSchema();
     const userId = req.user!.id;
-    const { title, url, pitch } = req.body as {
+    const { title, url, pitch, imageUrl } = req.body as {
       title?: string;
       url?: string;
       pitch?: string;
+      imageUrl?: string;
     };
 
     const t = title?.trim() ?? "";
     const u = url?.trim() ?? "";
     const p = pitch?.trim() ?? "";
+    const rawImage = imageUrl?.trim() ?? "";
+    const img =
+      rawImage.length <= 500 &&
+      (rawImage.startsWith("http://") ||
+        rawImage.startsWith("https://") ||
+        rawImage.startsWith("/api/org-logos/"))
+        ? rawImage
+        : null;
 
     if (!t || !u || !p) {
       res.status(400).json({ error: "title, url ve pitch zorunlu" });
@@ -104,6 +130,7 @@ router.post("/stage/products", requireAuth, async (req, res) => {
         title: t,
         url: u,
         pitch: p,
+        imageUrl: img,
         status: "published",
       })
       .returning();

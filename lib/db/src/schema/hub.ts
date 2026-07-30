@@ -317,6 +317,7 @@ export const stageProductsTable = pgTable("stage_products", {
   pitch: text("pitch").notNull(),
   status: text("status").default("published").notNull(),
   featured: boolean("featured").default(false).notNull(),
+  imageUrl: text("image_url"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

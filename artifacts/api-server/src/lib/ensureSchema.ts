@@ -215,6 +215,7 @@ export const ensureStageSchema = once(async () => {
       ON live_notify_log (ref_type, ref_id, kind)
   `);
   await db.execute(sql`ALTER TABLE stage_products ADD COLUMN IF NOT EXISTS featured boolean NOT NULL DEFAULT false`);
+  await db.execute(sql`ALTER TABLE stage_products ADD COLUMN IF NOT EXISTS image_url text`);
 });
 
 /** Tanışma talepleri + FAQ kategori kolonu. */

@@ -1172,6 +1172,8 @@ export const tr = {
     adminUnfeature: "Vitrinden Kaldır",
     adminRemove: "Kaldır",
     confirmRemove: "Bu ürünü kaldırmak istediğine emin misin?",
+    previewLoading: "Site bilgileri getiriliyor…",
+    previewHint: "Başlık, açıklama ve logo otomatik dolduruldu — istersen düzenle.",
   },
   members: {
     title: "Katılımcılar",
@@ -2660,6 +2662,8 @@ export const en: Messages = {
     adminUnfeature: "Unpin",
     adminRemove: "Remove",
     confirmRemove: "Remove this product?",
+    previewLoading: "Fetching site info…",
+    previewHint: "Title, description, and logo auto-filled — edit as you like.",
   },
   members: {
     title: "Members",
