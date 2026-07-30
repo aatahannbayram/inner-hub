@@ -54163,6 +54163,7 @@ var init_hub = __esm({
       url: text("url").notNull(),
       pitch: text("pitch").notNull(),
       status: text("status").default("published").notNull(),
+      featured: boolean("featured").default(false).notNull(),
       createdAt: timestamp("created_at").defaultNow().notNull()
     });
     stageVotesTable = pgTable("stage_votes", {
@@ -98415,6 +98416,7 @@ var ensureStageSchema = once(async () => {
     CREATE UNIQUE INDEX IF NOT EXISTS live_notify_log_uidx
       ON live_notify_log (ref_type, ref_id, kind)
   `);
+  await db.execute(sql`ALTER TABLE stage_products ADD COLUMN IF NOT EXISTS featured boolean NOT NULL DEFAULT false`);
 });
 var ensureMatchAndFaqSchema = once(async () => {
   await db.execute(sql`
@@ -125385,6 +125387,7 @@ function mapProduct(product, voteCount, myVote, author) {
     url: product.url,
     pitch: product.pitch,
     status: product.status,
+    featured: product.featured,
     createdAt: product.createdAt.toISOString(),
     userId: product.userId,
     authorName: author?.name ?? null,
@@ -125402,7 +125405,10 @@ router21.get("/stage/products", requireAuth, async (req, res) => {
       authorName: usersTable.name,
       authorHandle: usersTable.handle,
       votes: sql`coalesce(count(${stageVotesTable.id}), 0)::int`
-    }).from(stageProductsTable).leftJoin(usersTable, eq(usersTable.id, stageProductsTable.userId)).leftJoin(stageVotesTable, eq(stageVotesTable.productId, stageProductsTable.id)).where(eq(stageProductsTable.status, "published")).groupBy(stageProductsTable.id, usersTable.name, usersTable.handle).orderBy(desc(stageProductsTable.createdAt));
+    }).from(stageProductsTable).leftJoin(usersTable, eq(usersTable.id, stageProductsTable.userId)).leftJoin(stageVotesTable, eq(stageVotesTable.productId, stageProductsTable.id)).where(eq(stageProductsTable.status, "published")).groupBy(stageProductsTable.id, usersTable.name, usersTable.handle).orderBy(
+      sql`coalesce(count(${stageVotesTable.id}), 0) desc`,
+      desc(stageProductsTable.createdAt)
+    );
     const myVotes = await db.select({ productId: stageVotesTable.productId }).from(stageVotesTable).where(eq(stageVotesTable.userId, userId));
     const myVoteSet = new Set(myVotes.map((v) => v.productId));
     res.json({
@@ -125494,9 +125500,13 @@ router21.get("/stage/showcase", requireAuth, async (req, res) => {
     }).from(stageProductsTable).leftJoin(usersTable, eq(usersTable.id, stageProductsTable.userId)).leftJoin(stageVotesTable, eq(stageVotesTable.productId, stageProductsTable.id)).where(
       and(
         eq(stageProductsTable.status, "published"),
-        gte(stageProductsTable.createdAt, weekAgo)
+        or(gte(stageProductsTable.createdAt, weekAgo), eq(stageProductsTable.featured, true))
       )
-    ).groupBy(stageProductsTable.id, usersTable.name, usersTable.handle).orderBy(sql`coalesce(count(${stageVotesTable.id}), 0) desc`, desc(stageProductsTable.createdAt)).limit(20);
+    ).groupBy(stageProductsTable.id, usersTable.name, usersTable.handle).orderBy(
+      desc(stageProductsTable.featured),
+      sql`coalesce(count(${stageVotesTable.id}), 0) desc`,
+      desc(stageProductsTable.createdAt)
+    ).limit(20);
     const myVotes = await db.select({ productId: stageVotesTable.productId }).from(stageVotesTable).where(eq(stageVotesTable.userId, userId));
     const myVoteSet = new Set(myVotes.map((v) => v.productId));
     res.json({
@@ -125511,6 +125521,47 @@ router21.get("/stage/showcase", requireAuth, async (req, res) => {
     });
   } catch (err) {
     res.status(500).json({ error: err.message ?? "Showcase y\xFCklenemedi" });
+  }
+});
+router21.patch("/stage/products/:id", requireAuth, requireAdmin, async (req, res) => {
+  try {
+    await ensureStageSchema();
+    const productId = Number(req.params.id);
+    if (!Number.isFinite(productId)) {
+      res.status(400).json({ error: "Ge\xE7ersiz \xFCr\xFCn" });
+      return;
+    }
+    const { featured } = req.body;
+    if (typeof featured !== "boolean") {
+      res.status(400).json({ error: "featured (boolean) zorunlu" });
+      return;
+    }
+    const [updated] = await db.update(stageProductsTable).set({ featured }).where(eq(stageProductsTable.id, productId)).returning();
+    if (!updated) {
+      res.status(404).json({ error: "\xDCr\xFCn bulunamad\u0131" });
+      return;
+    }
+    res.json({ id: updated.id, featured: updated.featured });
+  } catch (err) {
+    res.status(500).json({ error: err.message ?? "G\xFCncellenemedi" });
+  }
+});
+router21.delete("/stage/products/:id", requireAuth, requireAdmin, async (req, res) => {
+  try {
+    await ensureStageSchema();
+    const productId = Number(req.params.id);
+    if (!Number.isFinite(productId)) {
+      res.status(400).json({ error: "Ge\xE7ersiz \xFCr\xFCn" });
+      return;
+    }
+    const [updated] = await db.update(stageProductsTable).set({ status: "hidden" }).where(eq(stageProductsTable.id, productId)).returning();
+    if (!updated) {
+      res.status(404).json({ error: "\xDCr\xFCn bulunamad\u0131" });
+      return;
+    }
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message ?? "Kald\u0131r\u0131lamad\u0131" });
   }
 });
 var stage_default = router21;

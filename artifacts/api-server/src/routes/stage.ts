@@ -1,8 +1,8 @@
 import { Router } from "express";
-import { and, count, desc, eq, gte, sql } from "drizzle-orm";
+import { and, count, desc, eq, gte, or, sql } from "drizzle-orm";
 import { db } from "@workspace/db";
 import { stageProductsTable, stageVotesTable, usersTable } from "@workspace/db/schema";
-import { requireAuth } from "../lib/auth";
+import { requireAuth, requireAdmin } from "../lib/auth";
 import { ensureStageSchema } from "../lib/ensureSchema";
 
 const router = Router();
@@ -19,6 +19,7 @@ function mapProduct(
     url: product.url,
     pitch: product.pitch,
     status: product.status,
+    featured: product.featured,
     createdAt: product.createdAt.toISOString(),
     userId: product.userId,
     authorName: author?.name ?? null,
@@ -46,7 +47,10 @@ router.get("/stage/products", requireAuth, async (req, res) => {
       .leftJoin(stageVotesTable, eq(stageVotesTable.productId, stageProductsTable.id))
       .where(eq(stageProductsTable.status, "published"))
       .groupBy(stageProductsTable.id, usersTable.name, usersTable.handle)
-      .orderBy(desc(stageProductsTable.createdAt));
+      .orderBy(
+        sql`coalesce(count(${stageVotesTable.id}), 0) desc`,
+        desc(stageProductsTable.createdAt),
+      );
 
     const myVotes = await db
       .select({ productId: stageVotesTable.productId })
@@ -182,11 +186,15 @@ router.get("/stage/showcase", requireAuth, async (req, res) => {
       .where(
         and(
           eq(stageProductsTable.status, "published"),
-          gte(stageProductsTable.createdAt, weekAgo),
+          or(gte(stageProductsTable.createdAt, weekAgo), eq(stageProductsTable.featured, true)),
         ),
       )
       .groupBy(stageProductsTable.id, usersTable.name, usersTable.handle)
-      .orderBy(sql`coalesce(count(${stageVotesTable.id}), 0) desc`, desc(stageProductsTable.createdAt))
+      .orderBy(
+        desc(stageProductsTable.featured),
+        sql`coalesce(count(${stageVotesTable.id}), 0) desc`,
+        desc(stageProductsTable.createdAt),
+      )
       .limit(20);
 
     const myVotes = await db
@@ -207,6 +215,63 @@ router.get("/stage/showcase", requireAuth, async (req, res) => {
     });
   } catch (err: any) {
     res.status(500).json({ error: err.message ?? "Showcase yüklenemedi" });
+  }
+});
+
+/** PATCH /api/stage/products/:id — admin: vitrine sabitle/kaldır (featured) */
+router.patch("/stage/products/:id", requireAuth, requireAdmin, async (req, res) => {
+  try {
+    await ensureStageSchema();
+    const productId = Number(req.params.id);
+    if (!Number.isFinite(productId)) {
+      res.status(400).json({ error: "Geçersiz ürün" });
+      return;
+    }
+    const { featured } = req.body as { featured?: boolean };
+    if (typeof featured !== "boolean") {
+      res.status(400).json({ error: "featured (boolean) zorunlu" });
+      return;
+    }
+
+    const [updated] = await db
+      .update(stageProductsTable)
+      .set({ featured })
+      .where(eq(stageProductsTable.id, productId))
+      .returning();
+    if (!updated) {
+      res.status(404).json({ error: "Ürün bulunamadı" });
+      return;
+    }
+
+    res.json({ id: updated.id, featured: updated.featured });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message ?? "Güncellenemedi" });
+  }
+});
+
+/** DELETE /api/stage/products/:id — admin: ürünü kaldır (soft) */
+router.delete("/stage/products/:id", requireAuth, requireAdmin, async (req, res) => {
+  try {
+    await ensureStageSchema();
+    const productId = Number(req.params.id);
+    if (!Number.isFinite(productId)) {
+      res.status(400).json({ error: "Geçersiz ürün" });
+      return;
+    }
+
+    const [updated] = await db
+      .update(stageProductsTable)
+      .set({ status: "hidden" })
+      .where(eq(stageProductsTable.id, productId))
+      .returning();
+    if (!updated) {
+      res.status(404).json({ error: "Ürün bulunamadı" });
+      return;
+    }
+
+    res.json({ ok: true });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message ?? "Kaldırılamadı" });
   }
 });
 

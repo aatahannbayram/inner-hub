@@ -78,7 +78,6 @@ const SECTION_DEFS: NavSection[] = [
       { href: "/panel/chat", labelKey: "nav.community", icon: MessageSquare },
       { href: "/panel/courses", labelKey: "nav.courses", icon: BookOpen },
       { href: "/panel/events", labelKey: "nav.events", icon: CalendarDays },
-      { href: "/panel/stage", labelKey: "nav.dashboard", mark: "stage", icon: Mic2 },
       { href: "/panel/members", labelKey: "nav.members", icon: Users },
       { href: "/panel/org", labelKey: "nav.org", icon: Building2 },
       { href: "/panel/perks", labelKey: "nav.perks", icon: Gift },
@@ -88,6 +87,7 @@ const SECTION_DEFS: NavSection[] = [
     id: "platform",
     titleKey: "nav.sectionPlatform",
     items: [
+      { href: "/panel/stage", labelKey: "nav.dashboard", mark: "stage", icon: Mic2 },
       { href: "/panel/signal", labelKey: "nav.dashboard", mark: "signal", icon: Zap },
       { href: "/panel/match", labelKey: "nav.dashboard", mark: "match", icon: Sparkles },
       { href: "/panel/capital", labelKey: "nav.dashboard", mark: "capital", icon: TrendingUp },

@@ -214,6 +214,7 @@ export const ensureStageSchema = once(async () => {
     CREATE UNIQUE INDEX IF NOT EXISTS live_notify_log_uidx
       ON live_notify_log (ref_type, ref_id, kind)
   `);
+  await db.execute(sql`ALTER TABLE stage_products ADD COLUMN IF NOT EXISTS featured boolean NOT NULL DEFAULT false`);
 });
 
 /** Tanışma talepleri + FAQ kategori kolonu. */
