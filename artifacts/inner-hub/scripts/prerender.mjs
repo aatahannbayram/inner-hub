@@ -258,5 +258,63 @@ for (const a of ARTIFACTS) {
   );
 }
 
+// ─── Panel shell stubs ──────────────────────────────────────────────────────
+// /panel/* rotaları tamamen client-side (auth arkasında); SSR içerik gerekmez.
+// Ama bazı statik hosting katmanları (SPA fallback/rewrite kuralı olmayan)
+// bilinmeyen path'lere gerçek bir dosya bulamayınca 404 döner. Her panel
+// rotası için ham (boş #root) index.html şablonundan bir kopya yazarak,
+// rewrite kuralına bağlı kalmadan doğrudan disk üzerinden çözülmesini
+// sağlıyoruz - client JS yüklenir yüklenmez gerçek içeriği hydrate eder.
+const PANEL_ROUTES = [
+  "/panel",
+  "/panel/chat",
+  "/panel/courses/admin",
+  "/panel/courses",
+  "/panel/events/admin",
+  "/panel/events",
+  "/panel/stage",
+  "/panel/members",
+  "/panel/org",
+  "/panel/perks",
+  "/panel/signal",
+  "/panel/match",
+  "/panel/capital",
+  "/panel/vault",
+  "/panel/pulse",
+  "/panel/id",
+  "/panel/api",
+  "/panel/profile",
+  "/panel/faq",
+  "/panel/membership",
+  "/panel/payment/success",
+  "/panel/applications",
+  "/panel/haberler",
+  "/panel/analytics",
+  "/panel/settings",
+];
+
+function writePanelShell(relativeOut) {
+  const html = injectHead(template, {
+    title: "inner.hub panel",
+    description: "inner.hub üye paneli.",
+    canonical: `https://inner.digital${relativeOut === "panel/index.html" ? "/panel" : "/" + relativeOut.replace(/\/index\.html$/, "")}`,
+    ogType: "website",
+    ogImage: "https://inner.digital/inner-og.png",
+    jsonLd: { "@context": "https://schema.org", "@type": "WebPage", name: "inner.hub panel" },
+  }).replace(
+    /<meta name="robots"[^>]*>/i,
+    '<meta name="robots" content="noindex, nofollow" />',
+  );
+  const outPath = path.join(root, "dist", relativeOut);
+  return mkdir(path.dirname(outPath), { recursive: true }).then(() =>
+    writeFile(outPath, html, "utf-8").then(() => relativeOut),
+  );
+}
+
+const panelPages = await Promise.all(
+  PANEL_ROUTES.map((route) => writePanelShell(`${route.slice(1)}/index.html`)),
+);
+
 const written = await Promise.all(pages);
 console.log(`Prerendered ${written.length} pages:\n  ${written.join("\n  ")}`);
+console.log(`Panel shell stubs: ${panelPages.length}\n  ${panelPages.join("\n  ")}`);
