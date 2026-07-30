@@ -18925,14 +18925,14 @@ var require_etag = __commonJS({
   "../../node_modules/.pnpm/etag@1.8.1/node_modules/etag/index.js"(exports, module) {
     "use strict";
     module.exports = etag;
-    var crypto11 = __require("crypto");
+    var crypto12 = __require("crypto");
     var Stats = __require("fs").Stats;
     var toString = Object.prototype.toString;
     function entitytag(entity) {
       if (entity.length === 0) {
         return '"0-2jmj7l5rSw0yVb/vlWAYkK/YBwk"';
       }
-      var hash = crypto11.createHash("sha1").update(entity, "utf8").digest("base64").substring(0, 27);
+      var hash = crypto12.createHash("sha1").update(entity, "utf8").digest("base64").substring(0, 27);
       var len = typeof entity === "string" ? Buffer.byteLength(entity, "utf8") : entity.length;
       return '"' + len.toString(16) + "-" + hash + '"';
     }
@@ -22407,17 +22407,17 @@ var require_content_disposition = __commonJS({
 // ../../node_modules/.pnpm/cookie-signature@1.2.2/node_modules/cookie-signature/index.js
 var require_cookie_signature = __commonJS({
   "../../node_modules/.pnpm/cookie-signature@1.2.2/node_modules/cookie-signature/index.js"(exports) {
-    var crypto11 = __require("crypto");
+    var crypto12 = __require("crypto");
     exports.sign = function(val, secret) {
       if ("string" != typeof val) throw new TypeError("Cookie value must be provided as a string.");
       if (null == secret) throw new TypeError("Secret key must be provided.");
-      return val + "." + crypto11.createHmac("sha256", secret).update(val).digest("base64").replace(/\=+$/, "");
+      return val + "." + crypto12.createHmac("sha256", secret).update(val).digest("base64").replace(/\=+$/, "");
     };
     exports.unsign = function(input, secret) {
       if ("string" != typeof input) throw new TypeError("Signed cookie string must be provided.");
       if (null == secret) throw new TypeError("Secret key must be provided.");
       var tentativeValue = input.slice(0, input.lastIndexOf(".")), expectedInput = exports.sign(tentativeValue, secret), expectedBuffer = Buffer.from(expectedInput), inputBuffer = Buffer.from(input);
-      return expectedBuffer.length === inputBuffer.length && crypto11.timingSafeEqual(expectedBuffer, inputBuffer) ? tentativeValue : false;
+      return expectedBuffer.length === inputBuffer.length && crypto12.timingSafeEqual(expectedBuffer, inputBuffer) ? tentativeValue : false;
     };
   }
 });
@@ -24047,11 +24047,11 @@ var require_lib3 = __commonJS({
 // ../../node_modules/.pnpm/cookie-signature@1.0.6/node_modules/cookie-signature/index.js
 var require_cookie_signature2 = __commonJS({
   "../../node_modules/.pnpm/cookie-signature@1.0.6/node_modules/cookie-signature/index.js"(exports) {
-    var crypto11 = __require("crypto");
+    var crypto12 = __require("crypto");
     exports.sign = function(val, secret) {
       if ("string" != typeof val) throw new TypeError("Cookie value must be provided as a string.");
       if ("string" != typeof secret) throw new TypeError("Secret string must be provided.");
-      return val + "." + crypto11.createHmac("sha256", secret).update(val).digest("base64").replace(/\=+$/, "");
+      return val + "." + crypto12.createHmac("sha256", secret).update(val).digest("base64").replace(/\=+$/, "");
     };
     exports.unsign = function(val, secret) {
       if ("string" != typeof val) throw new TypeError("Signed cookie string must be provided.");
@@ -24060,7 +24060,7 @@ var require_cookie_signature2 = __commonJS({
       return sha12(mac) == sha12(val) ? str : false;
     };
     function sha12(str) {
-      return crypto11.createHash("sha1").update(str).digest("hex");
+      return crypto12.createHash("sha1").update(str).digest("hex");
     }
   }
 });
@@ -30037,7 +30037,7 @@ var require_cert_signatures = __commonJS({
 var require_sasl = __commonJS({
   "../../node_modules/.pnpm/pg@8.22.0/node_modules/pg/lib/crypto/sasl.js"(exports, module) {
     "use strict";
-    var crypto11 = require_utils5();
+    var crypto12 = require_utils5();
     var { signatureAlgorithmHashFromCertificate } = require_cert_signatures();
     function saslprep(password) {
       const nonAsciiSpace = /[\u00A0\u1680\u2000-\u200B\u202F\u205F\u3000]/g;
@@ -30055,7 +30055,7 @@ var require_sasl = __commonJS({
       if (mechanism === "SCRAM-SHA-256-PLUS" && typeof stream.getPeerCertificate !== "function") {
         throw new Error("SASL: Mechanism SCRAM-SHA-256-PLUS requires a certificate");
       }
-      const clientNonce = crypto11.randomBytes(18).toString("base64");
+      const clientNonce = crypto12.randomBytes(18).toString("base64");
       const gs2Header = mechanism === "SCRAM-SHA-256-PLUS" ? "p=tls-server-end-point" : stream ? "y" : "n";
       return {
         mechanism,
@@ -30097,20 +30097,20 @@ var require_sasl = __commonJS({
         const peerCert = stream.getPeerCertificate().raw;
         let hashName = signatureAlgorithmHashFromCertificate(peerCert);
         if (hashName === "MD5" || hashName === "SHA-1") hashName = "SHA-256";
-        const certHash = await crypto11.hashByName(hashName, peerCert);
+        const certHash = await crypto12.hashByName(hashName, peerCert);
         const bindingData = Buffer.concat([Buffer.from("p=tls-server-end-point,,"), Buffer.from(certHash)]);
         channelBinding = bindingData.toString("base64");
       }
       const clientFinalMessageWithoutProof = "c=" + channelBinding + ",r=" + sv.nonce;
       const authMessage = clientFirstMessageBare + "," + serverFirstMessage + "," + clientFinalMessageWithoutProof;
       const saltBytes = Buffer.from(sv.salt, "base64");
-      const saltedPassword = await crypto11.deriveKey(saslprep(password), saltBytes, sv.iteration);
-      const clientKey = await crypto11.hmacSha256(saltedPassword, "Client Key");
-      const storedKey = await crypto11.sha256(clientKey);
-      const clientSignature = await crypto11.hmacSha256(storedKey, authMessage);
+      const saltedPassword = await crypto12.deriveKey(saslprep(password), saltBytes, sv.iteration);
+      const clientKey = await crypto12.hmacSha256(saltedPassword, "Client Key");
+      const storedKey = await crypto12.sha256(clientKey);
+      const clientSignature = await crypto12.hmacSha256(storedKey, authMessage);
       const clientProof = xorBuffers(Buffer.from(clientKey), Buffer.from(clientSignature)).toString("base64");
-      const serverKey = await crypto11.hmacSha256(saltedPassword, "Server Key");
-      const serverSignatureBytes = await crypto11.hmacSha256(serverKey, authMessage);
+      const serverKey = await crypto12.hmacSha256(saltedPassword, "Server Key");
+      const serverSignatureBytes = await crypto12.hmacSha256(serverKey, authMessage);
       session.message = "SASLResponse";
       session.serverSignature = Buffer.from(serverSignatureBytes).toString("base64");
       session.response = clientFinalMessageWithoutProof + ",p=" + clientProof;
@@ -32340,7 +32340,7 @@ var require_client = __commonJS({
     var Query2 = require_query();
     var defaults4 = require_defaults();
     var Connection2 = require_connection();
-    var crypto11 = require_utils5();
+    var crypto12 = require_utils5();
     var activeQueryDeprecationNotice = nodeUtils.deprecate(
       () => {
       },
@@ -32591,7 +32591,7 @@ var require_client = __commonJS({
       _handleAuthMD5Password(msg) {
         this._getPassword(async () => {
           try {
-            const hashedPassword = await crypto11.postgresMd5PasswordHash(this.user, this.password, msg.salt);
+            const hashedPassword = await crypto12.postgresMd5PasswordHash(this.user, this.password, msg.salt);
             this.connection.password(hashedPassword);
           } catch (e) {
             this.emit("error", e);
@@ -53903,6 +53903,7 @@ var init_users = __esm({
       profileCompletionPct: integer("profile_completion_pct").default(0).notNull(),
       passwordHash: text("password_hash"),
       googleId: text("google_id").unique(),
+      linkedinId: text("linkedin_id").unique(),
       deletedAt: timestamp("deleted_at"),
       createdAt: timestamp("created_at").defaultNow().notNull()
     });
@@ -59063,7 +59064,7 @@ var require_le_unix = __commonJS({
 var require_mime_node = __commonJS({
   "../../node_modules/.pnpm/nodemailer@9.0.3/node_modules/nodemailer/lib/mime-node/index.js"(exports, module) {
     "use strict";
-    var crypto11 = __require("crypto");
+    var crypto12 = __require("crypto");
     var fs7 = __require("fs");
     var punycode = require_punycode();
     var { PassThrough } = __require("stream");
@@ -59082,7 +59083,7 @@ var require_mime_node = __commonJS({
       constructor(contentType, options) {
         this.nodeCounter = 0;
         options = options || {};
-        this.baseBoundary = options.baseBoundary || crypto11.randomBytes(8).toString("hex");
+        this.baseBoundary = options.baseBoundary || crypto12.randomBytes(8).toString("hex");
         this.boundaryPrefix = options.boundaryPrefix || "--_NmP";
         this.disableFileAccess = !!options.disableFileAccess;
         this.disableUrlAccess = !!options.disableUrlAccess;
@@ -60041,8 +60042,8 @@ var require_mime_node = __commonJS({
       _generateMessageId() {
         return "<" + [2, 2, 2, 6].reduce(
           // crux to generate UUID-like random strings
-          (prev, len) => prev + "-" + crypto11.randomBytes(len).toString("hex"),
-          crypto11.randomBytes(4).toString("hex")
+          (prev, len) => prev + "-" + crypto12.randomBytes(len).toString("hex"),
+          crypto12.randomBytes(4).toString("hex")
         ) + "@" + // try to use the domain of the FROM address or fallback to server hostname
         (this.getEnvelope().from || this.hostname || "localhost").split("@").pop() + ">";
       }
@@ -60672,14 +60673,14 @@ var require_relaxed_body = __commonJS({
   "../../node_modules/.pnpm/nodemailer@9.0.3/node_modules/nodemailer/lib/dkim/relaxed-body.js"(exports, module) {
     "use strict";
     var { Transform } = __require("stream");
-    var crypto11 = __require("crypto");
+    var crypto12 = __require("crypto");
     var RelaxedBody = class extends Transform {
       constructor(options) {
         super();
         options = options || {};
         this.chunkBuffer = [];
         this.chunkBufferLen = 0;
-        this.bodyHash = crypto11.createHash(options.hashAlgo || "sha256");
+        this.bodyHash = crypto12.createHash(options.hashAlgo || "sha256");
         this.remainder = "";
         this.byteLength = 0;
         this.debug = options.debug;
@@ -60782,7 +60783,7 @@ var require_sign2 = __commonJS({
     "use strict";
     var punycode = require_punycode();
     var mimeFuncs = require_mime_funcs();
-    var crypto11 = __require("crypto");
+    var crypto12 = __require("crypto");
     module.exports = (headers, hashAlgo, bodyHash, options) => {
       options = options || {};
       const defaultFieldNames = "From:Sender:Reply-To:Subject:Date:Message-ID:To:Cc:MIME-Version:Content-Type:Content-Transfer-Encoding:Content-ID:Content-Description:Resent-Date:Resent-From:Resent-Sender:Resent-To:Resent-Cc:Resent-Message-ID:In-Reply-To:References:List-Id:List-Help:List-Unsubscribe:List-Subscribe:List-Post:List-Owner:List-Archive";
@@ -60790,7 +60791,7 @@ var require_sign2 = __commonJS({
       const canonicalizedHeaderData = relaxedHeaders(headers, fieldNames, options.skipFields);
       const dkimHeader = generateDKIMHeader(options.domainName, options.keySelector, canonicalizedHeaderData.fieldNames, hashAlgo, bodyHash);
       canonicalizedHeaderData.headers += "dkim-signature:" + relaxedHeaderLine(dkimHeader);
-      const signer = crypto11.createSign(("rsa-" + hashAlgo).toUpperCase());
+      const signer = crypto12.createSign(("rsa-" + hashAlgo).toUpperCase());
       signer.update(canonicalizedHeaderData.headers);
       let signature;
       try {
@@ -60859,7 +60860,7 @@ var require_dkim = __commonJS({
     var { PassThrough } = __require("stream");
     var fs7 = __require("fs");
     var path10 = __require("path");
-    var crypto11 = __require("crypto");
+    var crypto12 = __require("crypto");
     var DKIM_ALGO = "sha256";
     var MAX_MESSAGE_SIZE = 2 * 1024 * 1024;
     var DKIMSigner = class {
@@ -60872,7 +60873,7 @@ var require_dkim = __commonJS({
         this.chunks = [];
         this.chunklen = 0;
         this.readPos = 0;
-        this.cachePath = this.cacheDir ? path10.join(this.cacheDir, "message." + Date.now() + "-" + crypto11.randomBytes(14).toString("hex")) : false;
+        this.cachePath = this.cacheDir ? path10.join(this.cacheDir, "message." + Date.now() + "-" + crypto12.randomBytes(14).toString("hex")) : false;
         this.cache = false;
         this.headers = false;
         this.bodyHash = false;
@@ -61441,7 +61442,7 @@ var require_mailer = __commonJS({
     var MailMessage = require_mail_message();
     var net2 = __require("net");
     var dns2 = __require("dns");
-    var crypto11 = __require("crypto");
+    var crypto12 = __require("crypto");
     var Mail = class extends EventEmitter2 {
       constructor(transporter2, options, defaults4) {
         super();
@@ -61784,7 +61785,7 @@ var require_mailer = __commonJS({
             html = (html || "").toString().replace(
               /(<img\b[^<>]{0,1024} src\s{0,20}=[\s"']{0,20})(data:([^;]+);[^"'>\s]+)/gi,
               (match, prefix, dataUri, mimeType) => {
-                const cid = crypto11.randomBytes(10).toString("hex") + "@localhost";
+                const cid = crypto12.randomBytes(10).toString("hex") + "@localhost";
                 if (!mail.data.attachments) {
                   mail.data.attachments = [];
                 }
@@ -61911,7 +61912,7 @@ var require_smtp_connection = __commonJS({
     var net2 = __require("net");
     var tls = __require("tls");
     var os2 = __require("os");
-    var crypto11 = __require("crypto");
+    var crypto12 = __require("crypto");
     var DataStream = require_data_stream();
     var { PassThrough } = __require("stream");
     var shared = require_shared();
@@ -61931,7 +61932,7 @@ var require_smtp_connection = __commonJS({
     var SMTPConnection = class extends EventEmitter2 {
       constructor(options) {
         super(options);
-        this.id = crypto11.randomBytes(8).toString("base64").replace(/\W/g, "");
+        this.id = crypto12.randomBytes(8).toString("base64").replace(/\W/g, "");
         this.stage = "init";
         this.options = options || {};
         this.secureConnection = !!this.options.secure;
@@ -63116,7 +63117,7 @@ var require_smtp_connection = __commonJS({
           );
         }
         const base64decoded = Buffer.from(challengeMatch[1], "base64").toString("ascii");
-        const hmacMD5 = crypto11.createHmac("md5", this._auth.credentials.pass);
+        const hmacMD5 = crypto12.createHmac("md5", this._auth.credentials.pass);
         hmacMD5.update(base64decoded);
         const prepended = this._auth.credentials.user + " " + hmacMD5.digest("hex");
         this._responseActions.push((str2) => {
@@ -63409,7 +63410,7 @@ var require_xoauth2 = __commonJS({
     "use strict";
     var { Stream: Stream2 } = __require("stream");
     var nmfetch = require_fetch();
-    var crypto11 = __require("crypto");
+    var crypto12 = __require("crypto");
     var shared = require_shared();
     var errors = require_errors();
     var XOAuth2 = class extends Stream2 {
@@ -63755,7 +63756,7 @@ var require_xoauth2 = __commonJS({
        */
       jwtSignRS256(payload) {
         payload = ['{"alg":"RS256","typ":"JWT"}', JSON.stringify(payload)].map((val) => this.toBase64URL(val)).join(".");
-        const signature = crypto11.createSign("RSA-SHA256").update(payload).sign(this.options.privateKey);
+        const signature = crypto12.createSign("RSA-SHA256").update(payload).sign(this.options.privateKey);
         return payload + "." + this.toBase64URL(signature);
       }
     };
@@ -66220,13 +66221,13 @@ var uuid42;
 var init_uuid2 = __esm({
   "../../node_modules/.pnpm/@anthropic-ai+sdk@0.110.0_zod@3.25.76/node_modules/@anthropic-ai/sdk/internal/utils/uuid.mjs"() {
     uuid42 = function() {
-      const { crypto: crypto11 } = globalThis;
-      if (crypto11?.randomUUID) {
-        uuid42 = crypto11.randomUUID.bind(crypto11);
-        return crypto11.randomUUID();
+      const { crypto: crypto12 } = globalThis;
+      if (crypto12?.randomUUID) {
+        uuid42 = crypto12.randomUUID.bind(crypto12);
+        return crypto12.randomUUID();
       }
       const u8 = new Uint8Array(1);
-      const randomByte = crypto11 ? () => crypto11.getRandomValues(u8)[0] : () => Math.random() * 255 & 255;
+      const randomByte = crypto12 ? () => crypto12.getRandomValues(u8)[0] : () => Math.random() * 255 & 255;
       return "10000000-1000-4000-8000-100000000000".replace(/[018]/g, (c) => (+c ^ randomByte() & 15 >> +c / 4).toString(16));
     };
   }
@@ -87238,22 +87239,22 @@ var require_crypto2 = __commonJS({
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.NodeCrypto = void 0;
-    var crypto11 = __require("crypto");
+    var crypto12 = __require("crypto");
     var NodeCrypto = class {
       async sha256DigestBase64(str) {
-        return crypto11.createHash("sha256").update(str).digest("base64");
+        return crypto12.createHash("sha256").update(str).digest("base64");
       }
       randomBytesBase64(count2) {
-        return crypto11.randomBytes(count2).toString("base64");
+        return crypto12.randomBytes(count2).toString("base64");
       }
       async verify(pubkey, data, signature) {
-        const verifier = crypto11.createVerify("RSA-SHA256");
+        const verifier = crypto12.createVerify("RSA-SHA256");
         verifier.update(data);
         verifier.end();
         return verifier.verify(pubkey, signature, "base64");
       }
       async sign(privateKey, data) {
-        const signer = crypto11.createSign("RSA-SHA256");
+        const signer = crypto12.createSign("RSA-SHA256");
         signer.update(data);
         signer.end();
         return signer.sign(privateKey, "base64");
@@ -87271,7 +87272,7 @@ var require_crypto2 = __commonJS({
        *   string in hexadecimal encoding.
        */
       async sha256DigestHex(str) {
-        return crypto11.createHash("sha256").update(str).digest("hex");
+        return crypto12.createHash("sha256").update(str).digest("hex");
       }
       /**
        * Computes the HMAC hash of a message using the provided crypto key and the
@@ -87283,7 +87284,7 @@ var require_crypto2 = __commonJS({
        */
       async signWithHmacSha256(key, msg) {
         const cryptoKey = typeof key === "string" ? key : toBuffer(key);
-        return toArrayBuffer(crypto11.createHmac("sha256", cryptoKey).update(msg).digest());
+        return toArrayBuffer(crypto12.createHmac("sha256", cryptoKey).update(msg).digest());
       }
     };
     exports.NodeCrypto = NodeCrypto;
@@ -88004,8 +88005,8 @@ var require_oauth2client = __commonJS({
       ClientAuthentication2["None"] = "None";
     })(ClientAuthentication || (exports.ClientAuthentication = ClientAuthentication = {}));
     var OAuth2Client2 = class _OAuth2Client extends authclient_1.AuthClient {
-      constructor(optionsOrClientId, clientSecret, redirectUri) {
-        const opts = optionsOrClientId && typeof optionsOrClientId === "object" ? optionsOrClientId : { clientId: optionsOrClientId, clientSecret, redirectUri };
+      constructor(optionsOrClientId, clientSecret2, redirectUri) {
+        const opts = optionsOrClientId && typeof optionsOrClientId === "object" ? optionsOrClientId : { clientId: optionsOrClientId, clientSecret: clientSecret2, redirectUri };
         super(opts);
         this.certificateCache = {};
         this.certificateExpiry = null;
@@ -88061,10 +88062,10 @@ var require_oauth2client = __commonJS({
        * https://github.com/googleapis/google-auth-library-nodejs/blob/main/samples/oauth2-codeVerifier.js
        */
       async generateCodeVerifierAsync() {
-        const crypto11 = (0, crypto_1.createCrypto)();
-        const randomString2 = crypto11.randomBytesBase64(96);
+        const crypto12 = (0, crypto_1.createCrypto)();
+        const randomString2 = crypto12.randomBytesBase64(96);
         const codeVerifier = randomString2.replace(/\+/g, "~").replace(/=/g, "_").replace(/\//g, "-");
-        const unencodedCodeChallenge = await crypto11.sha256DigestBase64(codeVerifier);
+        const unencodedCodeChallenge = await crypto12.sha256DigestBase64(codeVerifier);
         const codeChallenge = unencodedCodeChallenge.split("=")[0].replace(/\+/g, "-").replace(/\//g, "_");
         return { codeVerifier, codeChallenge };
       }
@@ -88508,7 +88509,7 @@ var require_oauth2client = __commonJS({
        * @return Returns a promise resolving to LoginTicket on verification.
        */
       async verifySignedJwtWithCertsAsync(jwt2, certs, requiredAudience, issuers, maxExpiry) {
-        const crypto11 = (0, crypto_1.createCrypto)();
+        const crypto12 = (0, crypto_1.createCrypto)();
         if (!maxExpiry) {
           maxExpiry = _OAuth2Client.DEFAULT_MAX_TOKEN_LIFETIME_SECS_;
         }
@@ -88521,7 +88522,7 @@ var require_oauth2client = __commonJS({
         let envelope;
         let payload;
         try {
-          envelope = JSON.parse(crypto11.decodeBase64StringUtf8(segments[0]));
+          envelope = JSON.parse(crypto12.decodeBase64StringUtf8(segments[0]));
         } catch (err) {
           if (err instanceof Error) {
             err.message = `Can't parse token envelope: ${segments[0]}': ${err.message}`;
@@ -88532,7 +88533,7 @@ var require_oauth2client = __commonJS({
           throw new Error("Can't parse token envelope: " + segments[0]);
         }
         try {
-          payload = JSON.parse(crypto11.decodeBase64StringUtf8(segments[1]));
+          payload = JSON.parse(crypto12.decodeBase64StringUtf8(segments[1]));
         } catch (err) {
           if (err instanceof Error) {
             err.message = `Can't parse token payload '${segments[0]}`;
@@ -88549,7 +88550,7 @@ var require_oauth2client = __commonJS({
         if (envelope.alg === "ES256") {
           signature = formatEcdsa.joseToDer(signature, "ES256").toString("base64");
         }
-        const verified = await crypto11.verify(cert, signed, signature);
+        const verified = await crypto12.verify(cert, signed, signature);
         if (!verified) {
           throw new Error("Invalid token signature: " + jwt2);
         }
@@ -88917,14 +88918,14 @@ var require_buffer_equal_constant_time = __commonJS({
 var require_jwa = __commonJS({
   "../../node_modules/.pnpm/jwa@2.0.1/node_modules/jwa/index.js"(exports, module) {
     var Buffer2 = require_safe_buffer().Buffer;
-    var crypto11 = __require("crypto");
+    var crypto12 = __require("crypto");
     var formatEcdsa = require_ecdsa_sig_formatter();
     var util2 = __require("util");
     var MSG_INVALID_ALGORITHM = '"%s" is not a valid algorithm.\n  Supported algorithms are:\n  "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "PS256", "PS384", "PS512", "ES256", "ES384", "ES512" and "none".';
     var MSG_INVALID_SECRET = "secret must be a string or buffer";
     var MSG_INVALID_VERIFIER_KEY = "key must be a string or a buffer";
     var MSG_INVALID_SIGNER_KEY = "key must be a string, a buffer or an object";
-    var supportsKeyObjects = typeof crypto11.createPublicKey === "function";
+    var supportsKeyObjects = typeof crypto12.createPublicKey === "function";
     if (supportsKeyObjects) {
       MSG_INVALID_VERIFIER_KEY += " or a KeyObject";
       MSG_INVALID_SECRET += "or a KeyObject";
@@ -89014,17 +89015,17 @@ var require_jwa = __commonJS({
       return function sign2(thing, secret) {
         checkIsSecretKey(secret);
         thing = normalizeInput(thing);
-        var hmac = crypto11.createHmac("sha" + bits, secret);
+        var hmac = crypto12.createHmac("sha" + bits, secret);
         var sig = (hmac.update(thing), hmac.digest("base64"));
         return fromBase64(sig);
       };
     }
     var bufferEqual;
-    var timingSafeEqual2 = "timingSafeEqual" in crypto11 ? function timingSafeEqual3(a, b) {
+    var timingSafeEqual2 = "timingSafeEqual" in crypto12 ? function timingSafeEqual3(a, b) {
       if (a.byteLength !== b.byteLength) {
         return false;
       }
-      return crypto11.timingSafeEqual(a, b);
+      return crypto12.timingSafeEqual(a, b);
     } : function timingSafeEqual3(a, b) {
       if (!bufferEqual) {
         bufferEqual = require_buffer_equal_constant_time();
@@ -89041,7 +89042,7 @@ var require_jwa = __commonJS({
       return function sign2(thing, privateKey) {
         checkIsPrivateKey(privateKey);
         thing = normalizeInput(thing);
-        var signer = crypto11.createSign("RSA-SHA" + bits);
+        var signer = crypto12.createSign("RSA-SHA" + bits);
         var sig = (signer.update(thing), signer.sign(privateKey, "base64"));
         return fromBase64(sig);
       };
@@ -89051,7 +89052,7 @@ var require_jwa = __commonJS({
         checkIsPublicKey(publicKey);
         thing = normalizeInput(thing);
         signature = toBase642(signature);
-        var verifier = crypto11.createVerify("RSA-SHA" + bits);
+        var verifier = crypto12.createVerify("RSA-SHA" + bits);
         verifier.update(thing);
         return verifier.verify(publicKey, signature, "base64");
       };
@@ -89060,11 +89061,11 @@ var require_jwa = __commonJS({
       return function sign2(thing, privateKey) {
         checkIsPrivateKey(privateKey);
         thing = normalizeInput(thing);
-        var signer = crypto11.createSign("RSA-SHA" + bits);
+        var signer = crypto12.createSign("RSA-SHA" + bits);
         var sig = (signer.update(thing), signer.sign({
           key: privateKey,
-          padding: crypto11.constants.RSA_PKCS1_PSS_PADDING,
-          saltLength: crypto11.constants.RSA_PSS_SALTLEN_DIGEST
+          padding: crypto12.constants.RSA_PKCS1_PSS_PADDING,
+          saltLength: crypto12.constants.RSA_PSS_SALTLEN_DIGEST
         }, "base64"));
         return fromBase64(sig);
       };
@@ -89074,12 +89075,12 @@ var require_jwa = __commonJS({
         checkIsPublicKey(publicKey);
         thing = normalizeInput(thing);
         signature = toBase642(signature);
-        var verifier = crypto11.createVerify("RSA-SHA" + bits);
+        var verifier = crypto12.createVerify("RSA-SHA" + bits);
         verifier.update(thing);
         return verifier.verify({
           key: publicKey,
-          padding: crypto11.constants.RSA_PKCS1_PSS_PADDING,
-          saltLength: crypto11.constants.RSA_PSS_SALTLEN_DIGEST
+          padding: crypto12.constants.RSA_PKCS1_PSS_PADDING,
+          saltLength: crypto12.constants.RSA_PSS_SALTLEN_DIGEST
         }, signature, "base64");
       };
     }
@@ -90065,10 +90066,10 @@ var require_refreshclient = __commonJS({
     var querystring_1 = __require("querystring");
     exports.USER_REFRESH_ACCOUNT_TYPE = "authorized_user";
     var UserRefreshClient = class _UserRefreshClient extends oauth2client_1.OAuth2Client {
-      constructor(optionsOrClientId, clientSecret, refreshToken, eagerRefreshThresholdMillis, forceRefreshOnFailure) {
+      constructor(optionsOrClientId, clientSecret2, refreshToken, eagerRefreshThresholdMillis, forceRefreshOnFailure) {
         const opts = optionsOrClientId && typeof optionsOrClientId === "object" ? optionsOrClientId : {
           clientId: optionsOrClientId,
-          clientSecret,
+          clientSecret: clientSecret2,
           refreshToken,
           eagerRefreshThresholdMillis,
           forceRefreshOnFailure
@@ -90390,9 +90391,9 @@ var require_oauth2common = __commonJS({
           });
         } else if (((_a3 = this.clientAuthentication) === null || _a3 === void 0 ? void 0 : _a3.confidentialClientType) === "basic") {
           opts.headers = opts.headers || {};
-          const clientId = this.clientAuthentication.clientId;
-          const clientSecret = this.clientAuthentication.clientSecret || "";
-          const base64EncodedCreds = this.crypto.encodeBase64StringUtf8(`${clientId}:${clientSecret}`);
+          const clientId2 = this.clientAuthentication.clientId;
+          const clientSecret2 = this.clientAuthentication.clientSecret || "";
+          const base64EncodedCreds = this.crypto.encodeBase64StringUtf8(`${clientId2}:${clientSecret2}`);
           Object.assign(opts.headers, {
             Authorization: `Basic ${base64EncodedCreds}`
           });
@@ -90641,8 +90642,8 @@ var require_baseexternalclient = __commonJS({
         if (type2 && type2 !== exports.EXTERNAL_ACCOUNT_TYPE) {
           throw new Error(`Expected "${exports.EXTERNAL_ACCOUNT_TYPE}" type but received "${options.type}"`);
         }
-        const clientId = opts.get("client_id");
-        const clientSecret = opts.get("client_secret");
+        const clientId2 = opts.get("client_id");
+        const clientSecret2 = opts.get("client_secret");
         const tokenUrl = (_a3 = opts.get("token_url")) !== null && _a3 !== void 0 ? _a3 : DEFAULT_TOKEN_URL.replace("{universeDomain}", this.universeDomain);
         const subjectTokenType = opts.get("subject_token_type");
         const workforcePoolUserProject = opts.get("workforce_pool_user_project");
@@ -90650,11 +90651,11 @@ var require_baseexternalclient = __commonJS({
         const serviceAccountImpersonation = opts.get("service_account_impersonation");
         const serviceAccountImpersonationLifetime = (0, util_1.originalOrCamelOptions)(serviceAccountImpersonation).get("token_lifetime_seconds");
         this.cloudResourceManagerURL = new URL(opts.get("cloud_resource_manager_url") || `https://cloudresourcemanager.${this.universeDomain}/v1/projects/`);
-        if (clientId) {
+        if (clientId2) {
           this.clientAuth = {
             confidentialClientType: "basic",
-            clientId,
-            clientSecret
+            clientId: clientId2,
+            clientSecret: clientSecret2
           };
         }
         this.stsCredential = new sts.StsCredentials(tokenUrl, this.clientAuth);
@@ -91237,14 +91238,14 @@ var require_awsrequestsigner = __commonJS({
       }
     };
     exports.AwsRequestSigner = AwsRequestSigner;
-    async function sign2(crypto11, key, msg) {
-      return await crypto11.signWithHmacSha256(key, msg);
+    async function sign2(crypto12, key, msg) {
+      return await crypto12.signWithHmacSha256(key, msg);
     }
-    async function getSigningKey2(crypto11, key, dateStamp, region, serviceName) {
-      const kDate = await sign2(crypto11, `AWS4${key}`, dateStamp);
-      const kRegion = await sign2(crypto11, kDate, region);
-      const kService = await sign2(crypto11, kRegion, serviceName);
-      const kSigning = await sign2(crypto11, kService, "aws4_request");
+    async function getSigningKey2(crypto12, key, dateStamp, region, serviceName) {
+      const kDate = await sign2(crypto12, `AWS4${key}`, dateStamp);
+      const kRegion = await sign2(crypto12, kDate, region);
+      const kService = await sign2(crypto12, kRegion, serviceName);
+      const kSigning = await sign2(crypto12, kService, "aws4_request");
       return kSigning;
     }
     async function generateAuthenticationHeaderMap(options) {
@@ -92829,24 +92830,24 @@ var require_googleauth = __commonJS({
           const signed = await client.sign(data);
           return signed.signedBlob;
         }
-        const crypto11 = (0, crypto_1.createCrypto)();
+        const crypto12 = (0, crypto_1.createCrypto)();
         if (client instanceof jwtclient_1.JWT && client.key) {
-          const sign2 = await crypto11.sign(client.key, data);
+          const sign2 = await crypto12.sign(client.key, data);
           return sign2;
         }
         const creds = await this.getCredentials();
         if (!creds.client_email) {
           throw new Error("Cannot sign data without `client_email`.");
         }
-        return this.signBlob(crypto11, creds.client_email, data, endpoint);
+        return this.signBlob(crypto12, creds.client_email, data, endpoint);
       }
-      async signBlob(crypto11, emailOrUniqueId, data, endpoint) {
+      async signBlob(crypto12, emailOrUniqueId, data, endpoint) {
         const url2 = new URL(endpoint + `${emailOrUniqueId}:signBlob`);
         const res = await this.request({
           method: "POST",
           url: url2.href,
           data: {
-            payload: crypto11.encodeBase64StringUtf8(data)
+            payload: crypto12.encodeBase64StringUtf8(data)
           },
           retry: true,
           retryConfig: {
@@ -97768,14 +97769,14 @@ function renderInnerEmailLayout(input) {
     bodyHtml,
     cta,
     footerNote = "Bu ileti inner\xB7hub ba\u015Fvuru s\xFCrecinle ilgili otomatik bir bilgilendirmedir.",
-    appUrl: appUrl2,
+    appUrl: appUrl3,
     bannerUrl
   } = input;
-  const imageSrc = bannerUrl === null ? null : escapeHtml(bannerUrl ?? `${appUrl2.replace(/\/$/, "")}${MAIL_BANNER_PATH}`);
+  const imageSrc = bannerUrl === null ? null : escapeHtml(bannerUrl ?? `${appUrl3.replace(/\/$/, "")}${MAIL_BANNER_PATH}`);
   const bannerBlock = imageSrc ? `
                 <tr>
                   <td style="padding:0;line-height:0;font-size:0;border-bottom:1px solid ${LINE_SOFT};">
-                    <a href="${escapeHtml(appUrl2)}" style="display:block;text-decoration:none;">
+                    <a href="${escapeHtml(appUrl3)}" style="display:block;text-decoration:none;">
                       <img src="${imageSrc}"
                            width="560"
                            alt="inner hub"
@@ -97861,7 +97862,7 @@ function renderInnerEmailLayout(input) {
                       ${escapeHtml(footerNote)}
                     </p>
                     <p style="margin:0;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:10px;letter-spacing:0.04em;color:${FAINT};">
-                      <a href="${escapeHtml(appUrl2)}" style="color:${BONE};text-decoration:none;text-transform:none;">inner.digital</a>
+                      <a href="${escapeHtml(appUrl3)}" style="color:${BONE};text-decoration:none;text-transform:none;">inner.digital</a>
                       &nbsp;\xB7&nbsp;
                       <a href="mailto:support@inner.digital" style="color:${MUTED};text-decoration:none;text-transform:none;">support@inner.digital</a>
                     </p>
@@ -97891,7 +97892,7 @@ function roleLine(roleLabel) {
   return `<p style="margin:16px 0 0;">Ba\u015Fvuru kap\u0131s\u0131: <strong style="color:#F4F1EC;font-weight:500;">${escapeHtml(roleLabel)}</strong></p>`;
 }
 function invitationReceivedMail(ctx) {
-  const appUrl2 = appBaseUrl();
+  const appUrl3 = appBaseUrl();
   const name = firstName(ctx.name);
   const subject = "inner hub \xB7 talebin elimize ula\u015Ft\u0131";
   const text2 = [
@@ -97909,10 +97910,10 @@ function invitationReceivedMail(ctx) {
     "\u015Eimdilik senden ek bir \u015Fey gerekmiyor. Akl\u0131na tak\u0131lan olursa: support@inner.digital",
     "",
     "inner hub",
-    appUrl2
+    appUrl3
   ].join("\n");
   const html = renderInnerEmailLayout({
-    appUrl: appUrl2,
+    appUrl: appUrl3,
     preheader: "Talebin elimize ula\u015Ft\u0131. \u0130ncelemeyi bitirince yine buradan yazaca\u011F\u0131z.",
     eyebrow: "Davetiye \xB7 al\u0131nd\u0131",
     title: `${name}, talebin elimizde.`,
@@ -97936,15 +97937,15 @@ function invitationReceivedMail(ctx) {
       <p style="margin:0;font-size:13px;color:rgba(244,241,236,0.45);">\u015Eimdilik ek bir \u015Fey gerekmiyor. Akl\u0131na tak\u0131lan olursa <a href="mailto:support@inner.digital" style="color:#F4F1EC;">support@inner.digital</a>.</p>
       ${roleLine(ctx.roleLabel)}
     `,
-    cta: { label: "inner.digital", href: appUrl2 },
+    cta: { label: "inner.digital", href: appUrl3 },
     footerNote: "Bu ileti, yapt\u0131\u011F\u0131n davet talebine yan\u0131t olarak otomatik g\xF6nderildi."
   });
   return { subject, text: text2, html, kind: "invite.received" };
 }
 function invitationApprovedMail(ctx) {
-  const appUrl2 = appBaseUrl();
+  const appUrl3 = appBaseUrl();
   const inviteCode = ctx.inviteCode?.trim() || "";
-  const panelUrl = inviteCode ? `${appUrl2}/panel?invite=${encodeURIComponent(inviteCode)}&email=${encodeURIComponent(ctx.email)}` : `${appUrl2}/panel`;
+  const panelUrl = inviteCode ? `${appUrl3}/panel?invite=${encodeURIComponent(inviteCode)}&email=${encodeURIComponent(ctx.email)}` : `${appUrl3}/panel`;
   const name = firstName(ctx.name);
   const subject = "inner hub \xB7 davetin onayland\u0131 \xB7 panele gir";
   const text2 = [
@@ -97961,7 +97962,7 @@ function invitationApprovedMail(ctx) {
     "Kay\u0131t olduktan sonra sonraki giri\u015Flerde sadece e-posta ve \u015Fifre yeter. Kod gerekmez.",
     "",
     "inner hub",
-    appUrl2
+    appUrl3
   ].join("\n");
   const codeHtml = inviteCode ? `
       <ol style="margin:0 0 16px;padding-left:18px;color:rgba(244,241,236,0.72);line-height:1.55;">
@@ -97977,7 +97978,7 @@ function invitationApprovedMail(ctx) {
       <p style="margin:0 0 12px;">Panele gidip hesab\u0131n\u0131 olu\u015Ftur. Davet kodu i\xE7in <a href="mailto:support@inner.digital" style="color:#F4F1EC;">support@inner.digital</a> yaz.</p>
     `;
   const html = renderInnerEmailLayout({
-    appUrl: appUrl2,
+    appUrl: appUrl3,
     preheader: inviteCode ? `Davetin onayland\u0131. Kod: ${inviteCode}. Panele kay\u0131t ol.` : "Davetin onayland\u0131. Panele ge\xE7ebilirsin.",
     eyebrow: "Davetiye \xB7 onay",
     title: "\xC7embere ho\u015F geldin.",
@@ -97992,7 +97993,7 @@ function invitationApprovedMail(ctx) {
   return { subject, text: text2, html, kind: "invite.approved" };
 }
 function invitationRejectedMail(ctx) {
-  const appUrl2 = appBaseUrl();
+  const appUrl3 = appBaseUrl();
   const name = firstName(ctx.name);
   const subject = "inner hub \xB7 davet talebi hakk\u0131nda";
   const text2 = [
@@ -98003,10 +98004,10 @@ function invitationRejectedMail(ctx) {
     "Sorular\u0131n i\xE7in: support@inner.digital",
     "",
     "inner hub",
-    appUrl2
+    appUrl3
   ].join("\n");
   const html = renderInnerEmailLayout({
-    appUrl: appUrl2,
+    appUrl: appUrl3,
     preheader: "Bu turda talebini olumlu sonu\xE7land\u0131ramad\u0131k.",
     eyebrow: "Davetiye \xB7 bilgilendirme",
     title: "Bu turda yer a\xE7amad\u0131k.",
@@ -98014,14 +98015,14 @@ function invitationRejectedMail(ctx) {
       <p style="margin:0 0 12px;">Merhaba ${escapeHtml(name)}. Ba\u015Fvurunu dikkatle okuduk; bu d\xF6nemde \xE7embere yeni bir yer a\xE7am\u0131yoruz.</p>
       <p style="margin:0;">Bu karar nihai bir yasak de\u011Fil; inner\xB7hub bilerek yava\u015F b\xFCy\xFCr. \u0130leride yeniden yazabilirsin. Sorun olursa <a href="mailto:support@inner.digital" style="color:#F4F1EC;">support@inner.digital</a>.</p>
     `,
-    cta: { label: "inner.digital", href: appUrl2 },
+    cta: { label: "inner.digital", href: appUrl3 },
     footerNote: "Bu ileti, davet talebinin sonucu hakk\u0131nda otomatik g\xF6nderildi."
   });
   return { subject, text: text2, html, kind: "invite.rejected" };
 }
 function adminNewRequestMail(payload) {
-  const appUrl2 = appBaseUrl();
-  const requestsUrl = `${appUrl2}/requests`;
+  const appUrl3 = appBaseUrl();
+  const requestsUrl = `${appUrl3}/requests`;
   const role = payload.role ?? "\xB7";
   const subject = `inner hub \xB7 yeni \xFCyelik talebi: ${payload.name}`;
   const lines = [
@@ -98039,7 +98040,7 @@ function adminNewRequestMail(payload) {
   ].filter(Boolean);
   const text2 = lines.join("\n");
   const html = renderInnerEmailLayout({
-    appUrl: appUrl2,
+    appUrl: appUrl3,
     preheader: `Yeni talep: ${payload.name}`,
     eyebrow: "Admin \xB7 yeni talep",
     title: payload.name,
@@ -98055,11 +98056,11 @@ function adminNewRequestMail(payload) {
   return { subject, text: text2, html, kind: "admin.new_request" };
 }
 function liveSessionReminderMail(ctx) {
-  const appUrl2 = appBaseUrl();
+  const appUrl3 = appBaseUrl();
   const name = firstName(ctx.name);
   const when = ctx.startsAt ? ctx.startsAt.toLocaleString("tr-TR", { timeZone: "Europe/Istanbul" }) : null;
   const panelPath = ctx.refType === "course" ? "/panel/courses" : "/panel/events";
-  const panelUrl = `${appUrl2}${panelPath}`;
+  const panelUrl = `${appUrl3}${panelPath}`;
   const subject = `inner hub \xB7 canl\u0131 hat\u0131rlatma: ${ctx.sessionTitle}`;
   const lead = ctx.lead?.trim() || `${ctx.sessionTitle} canl\u0131 oturumu yakla\u015F\u0131yor.`;
   const text2 = [
@@ -98070,10 +98071,10 @@ function liveSessionReminderMail(ctx) {
     ctx.meetUrl ? `Kat\u0131l\u0131m: ${ctx.meetUrl}` : `Panel: ${panelUrl}`,
     "",
     "inner hub",
-    appUrl2
+    appUrl3
   ].filter(Boolean).join("\n");
   const html = renderInnerEmailLayout({
-    appUrl: appUrl2,
+    appUrl: appUrl3,
     preheader: lead,
     eyebrow: "Canl\u0131 oturum \xB7 hat\u0131rlatma",
     title: ctx.sessionTitle,
@@ -98246,6 +98247,10 @@ var ensureUserProfileColumns = once(async () => {
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS skills text`);
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS visibility text`);
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS settings_prefs text`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS linkedin_id text`);
+  await db.execute(
+    sql`CREATE UNIQUE INDEX IF NOT EXISTS users_linkedin_id_uidx ON users (linkedin_id) WHERE linkedin_id IS NOT NULL`
+  );
 });
 var ensureCourseVideoColumns = once(async () => {
   await db.execute(sql`ALTER TABLE lessons ADD COLUMN IF NOT EXISTS duration_seconds integer`);
@@ -115920,8 +115925,8 @@ var Stripe = class _Stripe {
       return accum;
     }, {});
   }
-  setClientId(clientId) {
-    this._clientId = clientId;
+  setClientId(clientId2) {
+    this._clientId = clientId2;
   }
   getClientId() {
     return this._clientId;
@@ -116852,7 +116857,70 @@ var import_express5 = __toESM(require_express2(), 1);
 var import_bcryptjs = __toESM(require_bcryptjs(), 1);
 init_drizzle_orm();
 var import_google_auth_library = __toESM(require_src6(), 1);
+import crypto10 from "node:crypto";
 init_schema2();
+
+// src/lib/linkedin.ts
+var clientId = process.env.LINKEDIN_CLIENT_ID;
+var clientSecret = process.env.LINKEDIN_CLIENT_SECRET;
+var linkedinEnabled = Boolean(clientId && clientSecret);
+function appUrl() {
+  return (process.env.APP_URL ?? "https://inner.digital").replace(/\/$/, "");
+}
+function linkedinRedirectUri() {
+  return `${appUrl()}/api/auth/linkedin/callback`;
+}
+function linkedinAuthorizeUrl(state) {
+  const params = new URLSearchParams({
+    response_type: "code",
+    client_id: clientId ?? "",
+    redirect_uri: linkedinRedirectUri(),
+    state,
+    scope: "openid profile email"
+  });
+  return `https://www.linkedin.com/oauth/v2/authorization?${params.toString()}`;
+}
+async function fetchLinkedinProfile(code) {
+  if (!clientId || !clientSecret) {
+    throw new Error("LinkedIn yap\u0131land\u0131r\u0131lmad\u0131");
+  }
+  const tokenRes = await fetch("https://www.linkedin.com/oauth/v2/accessToken", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      grant_type: "authorization_code",
+      code,
+      redirect_uri: linkedinRedirectUri(),
+      client_id: clientId,
+      client_secret: clientSecret
+    }),
+    signal: AbortSignal.timeout(8e3)
+  });
+  if (!tokenRes.ok) {
+    throw new Error(`LinkedIn token exchange ba\u015Far\u0131s\u0131z (${tokenRes.status})`);
+  }
+  const tokenJson = await tokenRes.json();
+  if (!tokenJson.access_token) {
+    throw new Error("LinkedIn access_token al\u0131namad\u0131");
+  }
+  const infoRes = await fetch("https://api.linkedin.com/v2/userinfo", {
+    headers: { Authorization: `Bearer ${tokenJson.access_token}` },
+    signal: AbortSignal.timeout(8e3)
+  });
+  if (!infoRes.ok) {
+    throw new Error(`LinkedIn userinfo ba\u015Far\u0131s\u0131z (${infoRes.status})`);
+  }
+  const info = await infoRes.json();
+  if (!info.sub) {
+    throw new Error("LinkedIn kimli\u011Fi al\u0131namad\u0131");
+  }
+  return {
+    sub: info.sub,
+    name: info.name ?? null,
+    email: info.email ?? null,
+    picture: info.picture ?? null
+  };
+}
 
 // src/lib/auth.ts
 init_drizzle_orm();
@@ -116887,8 +116955,8 @@ async function getUserBySession(sessionId) {
   return row.user;
 }
 function publicUser(user) {
-  const { passwordHash: _passwordHash, googleId: _googleId, ...rest } = user;
-  return rest;
+  const { passwordHash: _passwordHash, googleId: _googleId, linkedinId, ...rest } = user;
+  return { ...rest, linkedinConnected: Boolean(linkedinId) };
 }
 async function attachUser(req, _res, next) {
   const sessionId = req.cookies?.[SESSION_COOKIE];
@@ -117199,7 +117267,61 @@ function parseSkills(raw) {
   return raw.split(",").map((s) => s.trim()).filter(Boolean).slice(0, 10);
 }
 router5.get("/config", (_req, res) => {
-  res.json({ googleClientId: googleClientId ?? null });
+  res.json({ googleClientId: googleClientId ?? null, linkedinEnabled });
+});
+var LINKEDIN_STATE_COOKIE = "li_oauth_state";
+router5.get("/linkedin/start", requireAuth, (req, res) => {
+  if (!linkedinEnabled) {
+    res.status(503).json({ error: "LinkedIn hen\xFCz yap\u0131land\u0131r\u0131lmad\u0131" });
+    return;
+  }
+  const state = crypto10.randomBytes(24).toString("hex");
+  res.cookie(LINKEDIN_STATE_COOKIE, state, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 10 * 60 * 1e3,
+    path: "/"
+  });
+  res.redirect(linkedinAuthorizeUrl(state));
+});
+router5.get("/linkedin/callback", async (req, res) => {
+  const profileUrl = `${(process.env.APP_URL ?? "https://inner.digital").replace(/\/$/, "")}/panel/profile`;
+  const fail = (reason) => res.redirect(`${profileUrl}?linkedin=error&reason=${encodeURIComponent(reason)}`);
+  try {
+    if (!req.user) {
+      fail("not_authenticated");
+      return;
+    }
+    const { code, state, error: liError } = req.query;
+    if (liError) {
+      fail(liError);
+      return;
+    }
+    const expectedState = req.cookies?.[LINKEDIN_STATE_COOKIE];
+    res.clearCookie(LINKEDIN_STATE_COOKIE, { path: "/" });
+    if (!code || !state || !expectedState || state !== expectedState) {
+      fail("invalid_state");
+      return;
+    }
+    const profile = await fetchLinkedinProfile(code);
+    const [clash] = await db.select({ id: usersTable.id }).from(usersTable).where(eq(usersTable.linkedinId, profile.sub)).limit(1);
+    if (clash && clash.id !== req.user.id) {
+      fail("already_linked");
+      return;
+    }
+    await db.update(usersTable).set({
+      linkedinId: profile.sub,
+      avatarUrl: req.user.avatarUrl ?? profile.picture ?? void 0
+    }).where(eq(usersTable.id, req.user.id));
+    res.redirect(`${profileUrl}?linkedin=connected`);
+  } catch (err) {
+    fail(err.message ?? "unknown");
+  }
+});
+router5.post("/linkedin/disconnect", requireAuth, async (req, res) => {
+  await db.update(usersTable).set({ linkedinId: null }).where(eq(usersTable.id, req.user.id));
+  res.json({ ok: true });
 });
 router5.post("/register", async (req, res) => {
   try {
@@ -117494,13 +117616,13 @@ function __classPrivateFieldGet2(receiver, state, kind, f) {
 
 // ../../node_modules/.pnpm/@mux+mux-node@14.1.1/node_modules/@mux/mux-node/internal/utils/uuid.mjs
 var uuid43 = function() {
-  const { crypto: crypto11 } = globalThis;
-  if (crypto11?.randomUUID) {
-    uuid43 = crypto11.randomUUID.bind(crypto11);
-    return crypto11.randomUUID();
+  const { crypto: crypto12 } = globalThis;
+  if (crypto12?.randomUUID) {
+    uuid43 = crypto12.randomUUID.bind(crypto12);
+    return crypto12.randomUUID();
   }
   const u8 = new Uint8Array(1);
-  const randomByte = crypto11 ? () => crypto11.getRandomValues(u8)[0] : () => Math.random() * 255 & 255;
+  const randomByte = crypto12 ? () => crypto12.getRandomValues(u8)[0] : () => Math.random() * 255 & 255;
   return "10000000-1000-4000-8000-100000000000".replace(/[018]/g, (c) => (+c ^ randomByte() & 15 >> +c / 4).toString(16));
 };
 
@@ -123140,9 +123262,9 @@ router8.post("/lessons/:id/complete", requireAuth, async (req, res) => {
 router8.post("/mux/uploads", requireAuth, requireAdmin, async (req, res) => {
   try {
     const mux = getMux();
-    const appUrl2 = (process.env.APP_URL ?? "https://inner.digital").replace(/\/$/, "");
+    const appUrl3 = (process.env.APP_URL ?? "https://inner.digital").replace(/\/$/, "");
     const upload = await mux.video.uploads.create({
-      cors_origin: appUrl2,
+      cors_origin: appUrl3,
       new_asset_settings: { playback_policies: ["public"] }
     });
     res.json({ uploadId: upload.id, uploadUrl: upload.url });
@@ -125279,14 +125401,14 @@ var talent_default = router18;
 // src/routes/apiKeys.ts
 var import_express19 = __toESM(require_express2(), 1);
 init_drizzle_orm();
-import crypto10 from "node:crypto";
+import crypto11 from "node:crypto";
 init_schema2();
 var router19 = (0, import_express19.Router)();
 function generateKey() {
-  const raw = crypto10.randomBytes(24).toString("base64url");
+  const raw = crypto11.randomBytes(24).toString("base64url");
   const plaintext = `ih_live_${raw}`;
   const prefix = plaintext.slice(0, 15);
-  const hash = crypto10.createHash("sha256").update(plaintext).digest("hex");
+  const hash = crypto11.createHash("sha256").update(plaintext).digest("hex");
   return { plaintext, prefix, hash };
 }
 router19.get("/api-keys", requireAuth, async (req, res) => {
@@ -126798,7 +126920,7 @@ app.use(
     }
   })
 );
-var appUrl = (process.env.APP_URL ?? "https://inner.digital").replace(/\/$/, "");
+var appUrl2 = (process.env.APP_URL ?? "https://inner.digital").replace(/\/$/, "");
 function corsOrigins(canonical) {
   const origins = /* @__PURE__ */ new Set([
     canonical,
@@ -126821,7 +126943,7 @@ function corsOrigins(canonical) {
 }
 app.use(
   (0, import_cors.default)({
-    origin: corsOrigins(appUrl),
+    origin: corsOrigins(appUrl2),
     credentials: true
   })
 );

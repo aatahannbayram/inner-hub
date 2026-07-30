@@ -48,8 +48,8 @@ export async function getUserBySession(sessionId: string | undefined): Promise<U
 }
 
 export function publicUser(user: User) {
-  const { passwordHash: _passwordHash, googleId: _googleId, ...rest } = user;
-  return rest;
+  const { passwordHash: _passwordHash, googleId: _googleId, linkedinId, ...rest } = user;
+  return { ...rest, linkedinConnected: Boolean(linkedinId) };
 }
 
 declare global {

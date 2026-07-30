@@ -39,6 +39,7 @@ export const usersTable = pgTable("users", {
   profileCompletionPct: integer("profile_completion_pct").default(0).notNull(),
   passwordHash: text("password_hash"),
   googleId: text("google_id").unique(),
+  linkedinId: text("linkedin_id").unique(),
   deletedAt: timestamp("deleted_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });

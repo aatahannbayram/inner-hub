@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { ExternalLink, Globe, Loader2, Plus, Rocket, Star, ThumbsUp, Trash2 } from "lucide-react";
+import { ExternalLink, Globe, Loader2, Plus, Rocket, Star, ThumbsUp, Trash2, X } from "lucide-react";
 import { FadeIn } from "@/components/FadeIn";
 import { Lockup } from "@/components/Lockup";
 import { useApiQuery } from "@/hooks/useApiQuery";
@@ -8,12 +8,16 @@ import { apiUrl } from "@/lib/api";
 import { LoadingBlock, ErrorState, CourseCardSkeleton } from "@/components/panel/Skeletons";
 import {
   Drawer,
+  DrawerClose,
   DrawerContent,
   DrawerHeader,
   DrawerTitle,
   DrawerDescription,
 } from "@/components/ui/drawer";
 import { useT } from "@/i18n";
+
+const STAGE_FIELD =
+  "w-full border border-[var(--ink)]/15 bg-[var(--ink)]/[0.04] px-3 py-2.5 text-sm text-[var(--ink)] placeholder:text-[var(--ink-muted)] outline-none transition-colors focus:border-[var(--ink)]/35 dark:border-white/18 dark:bg-white/[0.08] dark:text-white dark:placeholder:text-white/40 dark:focus:border-white/35";
 
 type StageProduct = {
   id: number;
@@ -279,83 +283,110 @@ function SubmitDrawer({
 
   return (
     <Drawer open={open} onOpenChange={(v) => !v && onClose()} shouldScaleBackground={false}>
-      <DrawerContent className="rounded-none panel-glass-strong border-white/10">
-        <DrawerHeader className="px-6 pt-2 text-left">
+      <DrawerContent className="max-h-[min(92dvh,720px)] rounded-t-2xl border-[var(--ink)]/10 bg-[var(--bone)] dark:border-white/12 dark:bg-[#111]">
+        <DrawerHeader className="relative px-5 pb-2 pt-1 text-left sm:px-6">
+          <DrawerClose
+            type="button"
+            aria-label={t("stage.close")}
+            className="absolute right-4 top-1 flex size-9 items-center justify-center text-[var(--ink-muted)] transition-colors hover:text-[var(--ink)] dark:text-white/45 dark:hover:text-white"
+          >
+            <X className="size-4" />
+          </DrawerClose>
           <p className="mb-1 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
             <span lang="en">inner·stage</span>
           </p>
           <DrawerTitle
-            className="font-serif text-2xl font-normal text-[var(--ink)]"
+            className="pr-10 font-serif text-2xl font-normal text-[var(--ink)]"
             style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
           >
             {t("stage.submit")}
           </DrawerTitle>
-          <DrawerDescription className="text-[var(--ink-body)]">
-            {t("stage.subtitle")}
+          <DrawerDescription className="text-sm text-[var(--ink-body)] dark:text-white/55">
+            {t("stage.submitHint")}
           </DrawerDescription>
         </DrawerHeader>
-        <div className="max-h-[70vh] space-y-3 overflow-y-auto px-6 pb-8">
-          <div className="relative">
-            <input
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              placeholder={t("stage.urlPlaceholder")}
-              className="w-full panel-glass bg-transparent px-3 py-2.5 pr-9 text-sm outline-none focus:border-[var(--ink)]/30"
-            />
-            {previewLoading && (
-              <Loader2 className="absolute right-3 top-1/2 size-3.5 -translate-y-1/2 animate-spin text-[var(--ink-subtle)]" />
-            )}
-          </div>
+        <div className="space-y-3.5 overflow-y-auto px-5 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:px-6">
+          <label className="block space-y-1.5">
+            <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-muted)]">
+              {t("stage.fieldUrl")}
+            </span>
+            <div className="relative">
+              <input
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                inputMode="url"
+                autoCapitalize="off"
+                autoCorrect="off"
+                placeholder={t("stage.urlPlaceholder")}
+                className={`${STAGE_FIELD} pr-9`}
+              />
+              {previewLoading && (
+                <Loader2 className="absolute right-3 top-1/2 size-3.5 -translate-y-1/2 animate-spin text-[var(--ink-subtle)]" />
+              )}
+            </div>
+          </label>
 
           {(previewImage || previewLoading || (url.trim() && !previewFailed)) && (
-            <div className="flex items-center gap-3 panel-glass p-3">
+            <div className="flex items-center gap-3 border border-[var(--ink)]/12 bg-[var(--ink)]/[0.03] p-3 dark:border-white/12 dark:bg-white/[0.05]">
               {previewImage ? (
                 <img
                   src={previewImage}
                   alt=""
-                  className="size-9 shrink-0 border border-[var(--ink)]/10 object-cover"
+                  className="size-9 shrink-0 border border-[var(--ink)]/10 object-cover dark:border-white/10"
                   onError={(e) => {
                     e.currentTarget.style.display = "none";
                   }}
                 />
               ) : (
-                <div className="flex size-9 shrink-0 items-center justify-center border border-[var(--ink)]/10 bg-[var(--ink)]/[0.03] text-[var(--ink-subtle)]">
+                <div className="flex size-9 shrink-0 items-center justify-center border border-[var(--ink)]/10 bg-[var(--ink)]/[0.03] text-[var(--ink-subtle)] dark:border-white/10">
                   <Globe className="size-4" />
                 </div>
               )}
-              <p className="min-w-0 truncate font-mono text-[10px] uppercase tracking-widest text-[var(--ink-muted)]">
+              <p className="min-w-0 text-xs leading-snug text-[var(--ink-muted)] dark:text-white/50">
                 {previewLoading ? t("stage.previewLoading") : t("stage.previewHint")}
               </p>
             </div>
           )}
 
-          <input
-            value={title}
-            onChange={(e) => {
-              setTitle(e.target.value);
-              setTitleTouched(true);
-            }}
-            placeholder={t("stage.titlePlaceholder")}
-            className="w-full panel-glass bg-transparent px-3 py-2.5 text-sm outline-none focus:border-[var(--ink)]/30"
-          />
-          <textarea
-            value={pitch}
-            onChange={(e) => {
-              setPitch(e.target.value);
-              setPitchTouched(true);
-            }}
-            placeholder={t("stage.pitchPlaceholder")}
-            rows={3}
-            className="w-full panel-glass bg-transparent px-3 py-2.5 text-sm outline-none focus:border-[var(--ink)]/30"
-          />
+          <label className="block space-y-1.5">
+            <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-muted)]">
+              {t("stage.fieldTitle")}
+            </span>
+            <input
+              value={title}
+              onChange={(e) => {
+                setTitle(e.target.value);
+                setTitleTouched(true);
+              }}
+              placeholder={t("stage.titlePlaceholder")}
+              className={STAGE_FIELD}
+            />
+          </label>
+
+          <label className="block space-y-1.5">
+            <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-muted)]">
+              {t("stage.fieldPitch")}
+            </span>
+            <textarea
+              value={pitch}
+              onChange={(e) => {
+                setPitch(e.target.value);
+                setPitchTouched(true);
+              }}
+              placeholder={t("stage.pitchPlaceholder")}
+              rows={3}
+              className={`${STAGE_FIELD} resize-none`}
+            />
+          </label>
+
           {error && <p className="text-xs text-[var(--error-ink)]">{error}</p>}
           <button
             type="button"
             disabled={busy || !title.trim() || !url.trim() || !pitch.trim()}
             onClick={() => void submit()}
-            className="flex items-center gap-1.5 panel-glass-ink px-4 py-2.5 font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)] transition-opacity hover:opacity-80 disabled:opacity-40"
+            className="flex w-full items-center justify-center gap-1.5 panel-glass-ink px-4 py-3 font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)] transition-opacity hover:opacity-80 disabled:opacity-40 sm:w-auto"
           >
-            <Plus className="size-3" />
+            {busy ? <Loader2 className="size-3.5 animate-spin" /> : <Plus className="size-3" />}
             {t("stage.submit")}
           </button>
         </div>

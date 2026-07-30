@@ -30,6 +30,10 @@ export const ensureUserProfileColumns = once(async () => {
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS skills text`);
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS visibility text`);
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS settings_prefs text`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS linkedin_id text`);
+  await db.execute(
+    sql`CREATE UNIQUE INDEX IF NOT EXISTS users_linkedin_id_uidx ON users (linkedin_id) WHERE linkedin_id IS NOT NULL`,
+  );
 });
 
 /** Prod/eski DB'lerde ders video süresi kolonunu idempotent ekle. */

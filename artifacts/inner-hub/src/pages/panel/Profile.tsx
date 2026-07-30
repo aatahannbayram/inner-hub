@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Lockup } from "@/components/Lockup";
 import { FadeIn } from "@/components/FadeIn";
-import { Check, Plus, X, AlertCircle, Upload, Building2, Search } from "lucide-react";
+import { Check, Plus, X, AlertCircle, Upload, Building2, Search, Linkedin, Unlink } from "lucide-react";
 import { useApiQuery } from "@/hooks/useApiQuery";
 import { apiUrl } from "@/lib/api";
 import { ErrorState, LoadingBlock } from "@/components/panel/Skeletons";
@@ -63,6 +63,7 @@ type ApiUser = {
   resolvedAvatarUrl?: string | null;
   avatarStyle?: string | null;
   org?: ApiOrg | null;
+  linkedinConnected?: boolean;
 };
 
 type OrgMine = ApiOrg & { membershipRole?: string };
@@ -595,6 +596,9 @@ export default function ProfilePage() {
   const [avatarBusy, setAvatarBusy] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [handleError, setHandleError] = useState("");
+  const [linkedinEnabled, setLinkedinEnabled] = useState(false);
+  const [linkedinNotice, setLinkedinNotice] = useState<"connected" | "error" | null>(null);
+  const [linkedinBusy, setLinkedinBusy] = useState(false);
 
   useEffect(() => {
     if (!data?.user) return;
@@ -604,6 +608,38 @@ export default function ProfilePage() {
     setSeed(data.user.handle || data.user.email || data.user.name || "inner");
     setHydrated(true);
   }, [data]);
+
+  useEffect(() => {
+    fetch(apiUrl("/api/auth/config"))
+      .then((res) => res.json())
+      .then((cfg: { linkedinEnabled?: boolean }) => setLinkedinEnabled(Boolean(cfg.linkedinEnabled)))
+      .catch(() => {});
+  }, []);
+
+  // LinkedIn OAuth callback'inden dönünce (?linkedin=connected|error) bir kere göster, URL'i temizle.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const status = params.get("linkedin");
+    if (status === "connected" || status === "error") {
+      setLinkedinNotice(status);
+      window.history.replaceState({}, "", window.location.pathname);
+      if (status === "connected") void refetch();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const disconnectLinkedin = async () => {
+    setLinkedinBusy(true);
+    try {
+      const res = await fetch(apiUrl("/api/auth/linkedin/disconnect"), {
+        method: "POST",
+        credentials: "include",
+      });
+      if (res.ok) void refetch();
+    } finally {
+      setLinkedinBusy(false);
+    }
+  };
 
   const set = <K extends keyof Profile>(key: K, value: Profile[K]) => {
     setSaved(false);
@@ -883,6 +919,50 @@ export default function ProfilePage() {
 
       <Section title={t("profile.sectionSocial")} sub={t("profile.sectionSocialSub")}>
         <div className="space-y-3">
+          {linkedinEnabled && (
+            <div className="flex flex-wrap items-center justify-between gap-3 panel-glass p-3">
+              <div className="flex items-center gap-2.5">
+                <Linkedin className="size-4 shrink-0 text-[var(--ink-muted)]" />
+                <div>
+                  <p className="font-mono text-label uppercase tracking-widest text-[var(--ink)]">
+                    {data?.user?.linkedinConnected
+                      ? t("profile.linkedinConnected")
+                      : t("profile.linkedinConnectTitle")}
+                  </p>
+                  <p className="text-xs text-[var(--ink-muted)]">{t("profile.linkedinConnectHint")}</p>
+                </div>
+              </div>
+              {data?.user?.linkedinConnected ? (
+                <button
+                  type="button"
+                  disabled={linkedinBusy}
+                  onClick={() => void disconnectLinkedin()}
+                  className="inline-flex shrink-0 items-center gap-1.5 border border-[var(--error-ink)]/25 px-3 py-1.5 font-mono text-[10px] uppercase tracking-widest text-[var(--error-ink)] transition-colors hover:bg-[var(--error-ink)]/5 disabled:opacity-40"
+                >
+                  <Unlink className="size-3" />
+                  {t("profile.linkedinDisconnect")}
+                </button>
+              ) : (
+                <a
+                  href={apiUrl("/api/auth/linkedin/start")}
+                  className="inline-flex shrink-0 items-center gap-1.5 panel-glass-ink px-3 py-1.5 font-mono text-[10px] uppercase tracking-widest text-[var(--bone-fixed)] transition-opacity hover:opacity-80"
+                >
+                  <Linkedin className="size-3" />
+                  {t("profile.linkedinConnect")}
+                </a>
+              )}
+            </div>
+          )}
+          {linkedinNotice === "connected" && (
+            <p className="flex items-center gap-1.5 text-xs text-[var(--success-ink)]">
+              <Check className="size-3.5" /> {t("profile.linkedinConnectedToast")}
+            </p>
+          )}
+          {linkedinNotice === "error" && (
+            <p className="flex items-center gap-1.5 text-xs text-[var(--error-ink)]">
+              <AlertCircle className="size-3.5" /> {t("profile.linkedinErrorToast")}
+            </p>
+          )}
           <Field label="LinkedIn" value={profile.linkedin} onChange={(v) => set("linkedin", v)} prefix="linkedin.com/in/" placeholder={t("profile.placeholderLinkedin")} mono />
           <Field label="GitHub" value={profile.github} onChange={(v) => set("github", v)} prefix="github.com/" placeholder={t("profile.placeholderGithub")} mono />
           <Field label={t("profile.behance")} value={profile.behance} onChange={(v) => set("behance", v)} prefix="behance.net/" placeholder={t("profile.placeholderBehance")} mono />

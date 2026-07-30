@@ -1,9 +1,11 @@
 import { Router } from "express";
 import bcrypt from "bcryptjs";
+import crypto from "node:crypto";
 import { and, eq, ne } from "drizzle-orm";
 import { OAuth2Client } from "google-auth-library";
 import { db } from "@workspace/db";
 import { usersTable } from "@workspace/db/schema";
+import { linkedinEnabled, linkedinAuthorizeUrl, fetchLinkedinProfile } from "../lib/linkedin";
 import {
   SESSION_COOKIE,
   sessionCookieOptions,
@@ -80,7 +82,85 @@ function parseSkills(raw: string | null | undefined): string[] {
 // ─── GET /api/auth/config ─────────────────────────────────────────────────────
 // Frontend'in Google Sign-In butonunu render edebilmesi için public client ID.
 router.get("/config", (_req, res) => {
-  res.json({ googleClientId: googleClientId ?? null });
+  res.json({ googleClientId: googleClientId ?? null, linkedinEnabled });
+});
+
+// ─── LinkedIn: mevcut hesaba bağlama (login değil, connect) ────────────────────
+const LINKEDIN_STATE_COOKIE = "li_oauth_state";
+
+router.get("/linkedin/start", requireAuth, (req, res) => {
+  if (!linkedinEnabled) {
+    res.status(503).json({ error: "LinkedIn henüz yapılandırılmadı" });
+    return;
+  }
+  const state = crypto.randomBytes(24).toString("hex");
+  res.cookie(LINKEDIN_STATE_COOKIE, state, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 10 * 60 * 1000,
+    path: "/",
+  });
+  res.redirect(linkedinAuthorizeUrl(state));
+});
+
+router.get("/linkedin/callback", async (req, res) => {
+  const profileUrl = `${(process.env.APP_URL ?? "https://inner.digital").replace(/\/$/, "")}/panel/profile`;
+  const fail = (reason: string) => res.redirect(`${profileUrl}?linkedin=error&reason=${encodeURIComponent(reason)}`);
+
+  try {
+    if (!req.user) {
+      fail("not_authenticated");
+      return;
+    }
+    const { code, state, error: liError } = req.query as {
+      code?: string;
+      state?: string;
+      error?: string;
+    };
+    if (liError) {
+      fail(liError);
+      return;
+    }
+    const expectedState = req.cookies?.[LINKEDIN_STATE_COOKIE];
+    res.clearCookie(LINKEDIN_STATE_COOKIE, { path: "/" });
+    if (!code || !state || !expectedState || state !== expectedState) {
+      fail("invalid_state");
+      return;
+    }
+
+    const profile = await fetchLinkedinProfile(code);
+
+    const [clash] = await db
+      .select({ id: usersTable.id })
+      .from(usersTable)
+      .where(eq(usersTable.linkedinId, profile.sub))
+      .limit(1);
+    if (clash && clash.id !== req.user.id) {
+      fail("already_linked");
+      return;
+    }
+
+    await db
+      .update(usersTable)
+      .set({
+        linkedinId: profile.sub,
+        avatarUrl: req.user.avatarUrl ?? profile.picture ?? undefined,
+      })
+      .where(eq(usersTable.id, req.user.id));
+
+    res.redirect(`${profileUrl}?linkedin=connected`);
+  } catch (err: any) {
+    fail(err.message ?? "unknown");
+  }
+});
+
+router.post("/linkedin/disconnect", requireAuth, async (req, res) => {
+  await db
+    .update(usersTable)
+    .set({ linkedinId: null })
+    .where(eq(usersTable.id, req.user!.id));
+  res.json({ ok: true });
 });
 
 // ─── POST /api/auth/register ──────────────────────────────────────────────────
