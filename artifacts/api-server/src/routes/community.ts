@@ -4,12 +4,12 @@ import { db } from "@workspace/db";
 import { perksTable, usersTable } from "@workspace/db/schema";
 import { requireAuth } from "../lib/auth";
 import { resolveAvatarUrl } from "../lib/identity";
-import { ensureUserMembershipColumns } from "../lib/ensureSchema";
+import { ensureUserMembershipColumns, once } from "../lib/ensureSchema";
 
 const router = Router();
 
 /** Eski DB'lerde eksik perk kolonlarını ekle (idempotent). */
-async function ensurePerkColumns() {
+const ensurePerkColumns = once(async () => {
   await db.execute(sql`ALTER TABLE perks ADD COLUMN IF NOT EXISTS category text`);
   await db.execute(sql`ALTER TABLE perks ADD COLUMN IF NOT EXISTS badge text`);
   await db.execute(sql`ALTER TABLE perks ADD COLUMN IF NOT EXISTS code text`);
@@ -19,7 +19,7 @@ async function ensurePerkColumns() {
   await db.execute(sql`ALTER TABLE perks ADD COLUMN IF NOT EXISTS source text DEFAULT 'partner'`);
   await db.execute(sql`ALTER TABLE perks ADD COLUMN IF NOT EXISTS org_id integer`);
   await db.execute(sql`ALTER TABLE perks ADD COLUMN IF NOT EXISTS campaign_id integer`);
-}
+});
 
 /** Boş katalogda üyelik değeri görünsün diye seed (prod dahil, yalnızca count=0). */
 async function ensurePerksSeed() {

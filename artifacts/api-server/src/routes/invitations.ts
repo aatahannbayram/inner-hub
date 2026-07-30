@@ -18,6 +18,7 @@ import {
 } from "../lib/orgLogo";
 import path from "node:path";
 import fs from "node:fs";
+import { once } from "../lib/ensureSchema";
 
 const router: IRouter = Router();
 
@@ -43,11 +44,11 @@ function isRateLimited(ip: string): boolean {
   return false;
 }
 
-async function ensureOrgColumns() {
+const ensureOrgColumns = once(async () => {
   await db.execute(sql`ALTER TABLE invitation_requests ADD COLUMN IF NOT EXISTS organization text`);
   await db.execute(sql`ALTER TABLE invitation_requests ADD COLUMN IF NOT EXISTS organization_domain text`);
   await db.execute(sql`ALTER TABLE invitation_requests ADD COLUMN IF NOT EXISTS organization_logo text`);
-}
+});
 
 /** Live logo preview for the invitation form. */
 router.get("/org-logo", async (req, res) => {

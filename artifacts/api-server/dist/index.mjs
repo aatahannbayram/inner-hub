@@ -19951,12 +19951,12 @@ var require_wrappy = __commonJS({
 var require_once = __commonJS({
   "../../node_modules/.pnpm/once@1.4.0/node_modules/once/once.js"(exports, module) {
     var wrappy = require_wrappy();
-    module.exports = wrappy(once);
+    module.exports = wrappy(once2);
     module.exports.strict = wrappy(onceStrict);
-    once.proto = once(function() {
+    once2.proto = once2(function() {
       Object.defineProperty(Function.prototype, "once", {
         value: function() {
-          return once(this);
+          return once2(this);
         },
         configurable: true
       });
@@ -19967,7 +19967,7 @@ var require_once = __commonJS({
         configurable: true
       });
     });
-    function once(fn) {
+    function once2(fn) {
       var f = function() {
         if (f.called) return f.value;
         f.called = true;
@@ -21052,7 +21052,7 @@ var require_application = __commonJS({
     var compileQueryParser = require_utils3().compileQueryParser;
     var compileTrust = require_utils3().compileTrust;
     var resolve4 = __require("node:path").resolve;
-    var once = require_once();
+    var once2 = require_once();
     var Router28 = require_router();
     var slice = Array.prototype.slice;
     var flatten = Array.prototype.flat;
@@ -21282,7 +21282,7 @@ var require_application = __commonJS({
       var server = http2.createServer(this);
       var args = slice.call(arguments);
       if (typeof args[args.length - 1] === "function") {
-        var done = args[args.length - 1] = once(args[args.length - 1]);
+        var done = args[args.length - 1] = once2(args[args.length - 1]);
         server.once("error", done);
       }
       return server.listen.apply(server, args);
@@ -98221,6 +98221,346 @@ function orgLogoDir() {
 // src/routes/invitations.ts
 import path2 from "node:path";
 import fs2 from "node:fs";
+
+// src/lib/ensureSchema.ts
+init_drizzle_orm();
+function once(fn) {
+  let inFlight = null;
+  return () => {
+    if (!inFlight) {
+      inFlight = fn().catch((err) => {
+        inFlight = null;
+        throw err;
+      });
+    }
+    return inFlight;
+  };
+}
+var ensureUserProfileColumns = once(async () => {
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS handle text`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS github text`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS website text`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS twitter text`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS skills text`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS visibility text`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS settings_prefs text`);
+});
+var ensureCourseVideoColumns = once(async () => {
+  await db.execute(sql`ALTER TABLE lessons ADD COLUMN IF NOT EXISTS duration_seconds integer`);
+});
+var ensureLiveSessionColumns = once(async () => {
+  await db.execute(sql`ALTER TABLE courses ADD COLUMN IF NOT EXISTS format text DEFAULT 'vod'`);
+  await db.execute(sql`ALTER TABLE courses ADD COLUMN IF NOT EXISTS starts_at timestamp`);
+  await db.execute(sql`ALTER TABLE courses ADD COLUMN IF NOT EXISTS ends_at timestamp`);
+  await db.execute(sql`ALTER TABLE courses ADD COLUMN IF NOT EXISTS meet_url text`);
+  await db.execute(sql`ALTER TABLE courses ADD COLUMN IF NOT EXISTS audience text DEFAULT 'all'`);
+  await db.execute(sql`ALTER TABLE courses ADD COLUMN IF NOT EXISTS pass_cost integer DEFAULT 0`);
+  await db.execute(sql`UPDATE courses SET format = 'vod' WHERE format IS NULL`);
+  await db.execute(sql`UPDATE courses SET audience = 'all' WHERE audience IS NULL`);
+  await db.execute(sql`UPDATE courses SET pass_cost = 0 WHERE pass_cost IS NULL`);
+  await db.execute(sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS format text DEFAULT 'in_person'`);
+  await db.execute(sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS meet_url text`);
+  await db.execute(sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS audience text DEFAULT 'all'`);
+  await db.execute(sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS pass_cost integer DEFAULT 1`);
+  await db.execute(sql`UPDATE events SET format = 'in_person' WHERE format IS NULL`);
+  await db.execute(sql`UPDATE events SET audience = 'all' WHERE audience IS NULL`);
+  await db.execute(sql`UPDATE events SET pass_cost = 1 WHERE pass_cost IS NULL`);
+});
+var ensureUserMembershipColumns = once(async () => {
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS persona text`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS membership_plan text`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS membership_status text`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS membership_period_end timestamp`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_style text DEFAULT 'lorelei'`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS primary_org_id integer`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS university text`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS behance text`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS instagram text`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS whatsapp_opt_in text`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS deleted_at timestamp`);
+});
+var ensureOrgLegalCampaignSchema = once(async () => {
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS organizations (
+      id serial PRIMARY KEY,
+      name text NOT NULL,
+      slug text NOT NULL UNIQUE,
+      domain text,
+      logo_url text,
+      type text NOT NULL DEFAULT 'startup',
+      created_by_user_id integer REFERENCES users(id),
+      verified boolean NOT NULL DEFAULT false,
+      created_at timestamp NOT NULL DEFAULT now()
+    )
+  `);
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS org_memberships (
+      id serial PRIMARY KEY,
+      org_id integer NOT NULL REFERENCES organizations(id),
+      user_id integer NOT NULL REFERENCES users(id),
+      role text NOT NULL DEFAULT 'member',
+      title text,
+      created_at timestamp NOT NULL DEFAULT now(),
+      UNIQUE (org_id, user_id)
+    )
+  `);
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS legal_documents (
+      id serial PRIMARY KEY,
+      slug text NOT NULL,
+      version text NOT NULL,
+      locale text NOT NULL DEFAULT 'tr',
+      title text NOT NULL,
+      body_markdown text NOT NULL,
+      published_at timestamp NOT NULL DEFAULT now()
+    )
+  `);
+  await db.execute(sql`
+    CREATE UNIQUE INDEX IF NOT EXISTS legal_documents_slug_ver_locale
+      ON legal_documents (slug, version, locale)
+  `);
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS legal_acceptances (
+      id serial PRIMARY KEY,
+      user_id integer NOT NULL REFERENCES users(id),
+      document_id integer NOT NULL REFERENCES legal_documents(id),
+      version text NOT NULL,
+      accepted_at timestamp NOT NULL DEFAULT now(),
+      ip text,
+      user_agent text
+    )
+  `);
+  await db.execute(sql`
+    CREATE UNIQUE INDEX IF NOT EXISTS legal_acceptances_user_doc
+      ON legal_acceptances (user_id, document_id, version)
+  `);
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS campaigns (
+      id serial PRIMARY KEY,
+      org_id integer NOT NULL REFERENCES organizations(id),
+      created_by_user_id integer NOT NULL REFERENCES users(id),
+      title text NOT NULL,
+      pitch text NOT NULL,
+      cta_url text NOT NULL,
+      code text,
+      category text DEFAULT 'Eğitim',
+      status text NOT NULL DEFAULT 'draft',
+      perk_id integer,
+      starts_at timestamp,
+      ends_at timestamp,
+      created_at timestamp NOT NULL DEFAULT now()
+    )
+  `);
+  await db.execute(sql`ALTER TABLE perks ADD COLUMN IF NOT EXISTS source text DEFAULT 'partner'`);
+  await db.execute(sql`ALTER TABLE perks ADD COLUMN IF NOT EXISTS org_id integer`);
+  await db.execute(sql`ALTER TABLE perks ADD COLUMN IF NOT EXISTS campaign_id integer`);
+  await db.execute(sql`ALTER TABLE courses ADD COLUMN IF NOT EXISTS category text DEFAULT 'business'`);
+  await db.execute(sql`UPDATE courses SET category = 'business' WHERE category IS NULL`);
+});
+var ensurePassSchema = once(async () => {
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS pass_wallets (
+      id serial PRIMARY KEY,
+      user_id integer NOT NULL UNIQUE REFERENCES users(id),
+      balance integer NOT NULL DEFAULT 0,
+      updated_at timestamp NOT NULL DEFAULT now()
+    )
+  `);
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS pass_ledger (
+      id serial PRIMARY KEY,
+      user_id integer NOT NULL REFERENCES users(id),
+      delta integer NOT NULL,
+      reason text NOT NULL,
+      ref_type text,
+      ref_id text,
+      created_at timestamp NOT NULL DEFAULT now()
+    )
+  `);
+  await db.execute(sql`
+    CREATE INDEX IF NOT EXISTS pass_ledger_user_idx ON pass_ledger (user_id)
+  `);
+});
+var ensureStageSchema = once(async () => {
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS stage_products (
+      id serial PRIMARY KEY,
+      user_id integer NOT NULL REFERENCES users(id),
+      title text NOT NULL,
+      url text NOT NULL,
+      pitch text NOT NULL,
+      status text NOT NULL DEFAULT 'published',
+      created_at timestamp NOT NULL DEFAULT now()
+    )
+  `);
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS stage_votes (
+      id serial PRIMARY KEY,
+      product_id integer NOT NULL REFERENCES stage_products(id),
+      user_id integer NOT NULL REFERENCES users(id),
+      created_at timestamp NOT NULL DEFAULT now(),
+      UNIQUE (product_id, user_id)
+    )
+  `);
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS live_notify_log (
+      id serial PRIMARY KEY,
+      ref_type text NOT NULL,
+      ref_id integer NOT NULL,
+      kind text NOT NULL,
+      created_at timestamp NOT NULL DEFAULT now()
+    )
+  `);
+  await db.execute(sql`
+    CREATE UNIQUE INDEX IF NOT EXISTS live_notify_log_uidx
+      ON live_notify_log (ref_type, ref_id, kind)
+  `);
+});
+var ensureMatchAndFaqSchema = once(async () => {
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS introduction_requests (
+      id serial PRIMARY KEY,
+      from_user_id integer NOT NULL REFERENCES users(id),
+      target_name text NOT NULL,
+      target_company text,
+      match_type text,
+      reason text,
+      score integer,
+      status text NOT NULL DEFAULT 'pending',
+      created_at timestamp NOT NULL DEFAULT now()
+    )
+  `);
+  await db.execute(sql`ALTER TABLE faq ADD COLUMN IF NOT EXISTS category text`);
+  await db.execute(sql`UPDATE faq SET category = 'Genel' WHERE category IS NULL`);
+});
+var ensureVaultCapitalSchema = once(async () => {
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS vault_documents (
+      id serial PRIMARY KEY,
+      user_id integer NOT NULL REFERENCES users(id),
+      title text NOT NULL,
+      doc_type text NOT NULL,
+      access text NOT NULL DEFAULT 'topluluk',
+      excerpt text,
+      tags text,
+      pages integer,
+      views integer NOT NULL DEFAULT 0,
+      created_at timestamp NOT NULL DEFAULT now(),
+      updated_at timestamp NOT NULL DEFAULT now()
+    )
+  `);
+  await db.execute(sql`ALTER TABLE vault_documents ADD COLUMN IF NOT EXISTS file_key text`);
+  await db.execute(sql`ALTER TABLE vault_documents ADD COLUMN IF NOT EXISTS file_name text`);
+  await db.execute(sql`ALTER TABLE vault_documents ADD COLUMN IF NOT EXISTS mime_type text`);
+  await db.execute(sql`ALTER TABLE vault_documents ADD COLUMN IF NOT EXISTS size_bytes integer`);
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS capital_deals (
+      id serial PRIMARY KEY,
+      company text NOT NULL,
+      tagline text,
+      stage text NOT NULL,
+      sector text NOT NULL,
+      raise text,
+      valuation text,
+      founders text,
+      lead_investor text,
+      round text,
+      score integer NOT NULL DEFAULT 0,
+      tags text,
+      has_spv boolean NOT NULL DEFAULT false,
+      updated_at timestamp NOT NULL DEFAULT now(),
+      created_at timestamp NOT NULL DEFAULT now()
+    )
+  `);
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS capital_spvs (
+      id serial PRIMARY KEY,
+      name text NOT NULL,
+      target text NOT NULL,
+      raised text NOT NULL,
+      pct integer NOT NULL DEFAULT 0,
+      participants integer NOT NULL DEFAULT 0,
+      closing text,
+      sector text,
+      created_at timestamp NOT NULL DEFAULT now()
+    )
+  `);
+});
+var ensureTalentSchema = once(async () => {
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS talent_posts (
+      id serial PRIMARY KEY,
+      user_id integer NOT NULL REFERENCES users(id),
+      post_type text NOT NULL,
+      role text NOT NULL,
+      description text NOT NULL,
+      tags text,
+      created_at timestamp NOT NULL DEFAULT now()
+    )
+  `);
+});
+var ensureApiKeysSchema = once(async () => {
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS api_keys (
+      id serial PRIMARY KEY,
+      user_id integer NOT NULL REFERENCES users(id),
+      name text NOT NULL,
+      key_prefix text NOT NULL,
+      key_hash text NOT NULL,
+      created_at timestamp NOT NULL DEFAULT now(),
+      last_used_at timestamp
+    )
+  `);
+});
+var ensureAnalyticsEventsSchema = once(async () => {
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS analytics_events (
+      id serial PRIMARY KEY,
+      event_name text NOT NULL DEFAULT 'page_view',
+      path text NOT NULL,
+      title text,
+      referrer text,
+      session_id text NOT NULL,
+      locale text,
+      device text,
+      user_agent text,
+      created_at timestamp NOT NULL DEFAULT now()
+    )
+  `);
+  await db.execute(sql`
+    CREATE INDEX IF NOT EXISTS analytics_events_created_idx ON analytics_events (created_at)
+  `);
+  await db.execute(sql`
+    CREATE INDEX IF NOT EXISTS analytics_events_path_idx ON analytics_events (path)
+  `);
+  await db.execute(sql`
+    CREATE INDEX IF NOT EXISTS analytics_events_session_idx ON analytics_events (session_id)
+  `);
+});
+var ensureInviteCodesSchema = once(async () => {
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS invite_codes (
+      id serial PRIMARY KEY,
+      code text NOT NULL,
+      email text NOT NULL,
+      invitation_request_id integer NOT NULL,
+      application_id integer,
+      used_at timestamp,
+      used_by_user_id integer REFERENCES users(id),
+      expires_at timestamp,
+      created_at timestamp NOT NULL DEFAULT now()
+    )
+  `);
+  await db.execute(sql`
+    CREATE UNIQUE INDEX IF NOT EXISTS invite_codes_code_uidx ON invite_codes (code)
+  `);
+  await db.execute(sql`
+    CREATE INDEX IF NOT EXISTS invite_codes_invitation_request_idx
+      ON invite_codes (invitation_request_id)
+  `);
+});
+
+// src/routes/invitations.ts
 var router2 = (0, import_express2.Router)();
 var rateLimitMap = /* @__PURE__ */ new Map();
 var RATE_LIMIT_WINDOW_MS = 60 * 60 * 1e3;
@@ -98241,11 +98581,11 @@ function isRateLimited(ip) {
   if (entry.count > RATE_LIMIT_MAX) return true;
   return false;
 }
-async function ensureOrgColumns() {
+var ensureOrgColumns = once(async () => {
   await db.execute(sql`ALTER TABLE invitation_requests ADD COLUMN IF NOT EXISTS organization text`);
   await db.execute(sql`ALTER TABLE invitation_requests ADD COLUMN IF NOT EXISTS organization_domain text`);
   await db.execute(sql`ALTER TABLE invitation_requests ADD COLUMN IF NOT EXISTS organization_logo text`);
-}
+});
 router2.get("/org-logo", async (req, res) => {
   const domain2 = normalizeDomain(String(req.query.domain ?? ""));
   if (!domain2) {
@@ -115852,334 +116192,6 @@ init_schema2();
 // src/lib/passes.ts
 init_drizzle_orm();
 init_schema2();
-
-// src/lib/ensureSchema.ts
-init_drizzle_orm();
-async function ensureUserProfileColumns() {
-  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS handle text`);
-  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS github text`);
-  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS website text`);
-  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS twitter text`);
-  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS skills text`);
-  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS visibility text`);
-  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS settings_prefs text`);
-}
-async function ensureCourseVideoColumns() {
-  await db.execute(sql`ALTER TABLE lessons ADD COLUMN IF NOT EXISTS duration_seconds integer`);
-}
-async function ensureLiveSessionColumns() {
-  await db.execute(sql`ALTER TABLE courses ADD COLUMN IF NOT EXISTS format text DEFAULT 'vod'`);
-  await db.execute(sql`ALTER TABLE courses ADD COLUMN IF NOT EXISTS starts_at timestamp`);
-  await db.execute(sql`ALTER TABLE courses ADD COLUMN IF NOT EXISTS ends_at timestamp`);
-  await db.execute(sql`ALTER TABLE courses ADD COLUMN IF NOT EXISTS meet_url text`);
-  await db.execute(sql`ALTER TABLE courses ADD COLUMN IF NOT EXISTS audience text DEFAULT 'all'`);
-  await db.execute(sql`ALTER TABLE courses ADD COLUMN IF NOT EXISTS pass_cost integer DEFAULT 0`);
-  await db.execute(sql`UPDATE courses SET format = 'vod' WHERE format IS NULL`);
-  await db.execute(sql`UPDATE courses SET audience = 'all' WHERE audience IS NULL`);
-  await db.execute(sql`UPDATE courses SET pass_cost = 0 WHERE pass_cost IS NULL`);
-  await db.execute(sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS format text DEFAULT 'in_person'`);
-  await db.execute(sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS meet_url text`);
-  await db.execute(sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS audience text DEFAULT 'all'`);
-  await db.execute(sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS pass_cost integer DEFAULT 1`);
-  await db.execute(sql`UPDATE events SET format = 'in_person' WHERE format IS NULL`);
-  await db.execute(sql`UPDATE events SET audience = 'all' WHERE audience IS NULL`);
-  await db.execute(sql`UPDATE events SET pass_cost = 1 WHERE pass_cost IS NULL`);
-}
-async function ensureUserMembershipColumns() {
-  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS persona text`);
-  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS membership_plan text`);
-  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS membership_status text`);
-  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS membership_period_end timestamp`);
-  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_style text DEFAULT 'lorelei'`);
-  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS primary_org_id integer`);
-  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS university text`);
-  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS behance text`);
-  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS instagram text`);
-  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS whatsapp_opt_in text`);
-  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS deleted_at timestamp`);
-}
-async function ensureOrgLegalCampaignSchema() {
-  await db.execute(sql`
-    CREATE TABLE IF NOT EXISTS organizations (
-      id serial PRIMARY KEY,
-      name text NOT NULL,
-      slug text NOT NULL UNIQUE,
-      domain text,
-      logo_url text,
-      type text NOT NULL DEFAULT 'startup',
-      created_by_user_id integer REFERENCES users(id),
-      verified boolean NOT NULL DEFAULT false,
-      created_at timestamp NOT NULL DEFAULT now()
-    )
-  `);
-  await db.execute(sql`
-    CREATE TABLE IF NOT EXISTS org_memberships (
-      id serial PRIMARY KEY,
-      org_id integer NOT NULL REFERENCES organizations(id),
-      user_id integer NOT NULL REFERENCES users(id),
-      role text NOT NULL DEFAULT 'member',
-      title text,
-      created_at timestamp NOT NULL DEFAULT now(),
-      UNIQUE (org_id, user_id)
-    )
-  `);
-  await db.execute(sql`
-    CREATE TABLE IF NOT EXISTS legal_documents (
-      id serial PRIMARY KEY,
-      slug text NOT NULL,
-      version text NOT NULL,
-      locale text NOT NULL DEFAULT 'tr',
-      title text NOT NULL,
-      body_markdown text NOT NULL,
-      published_at timestamp NOT NULL DEFAULT now()
-    )
-  `);
-  await db.execute(sql`
-    CREATE UNIQUE INDEX IF NOT EXISTS legal_documents_slug_ver_locale
-      ON legal_documents (slug, version, locale)
-  `);
-  await db.execute(sql`
-    CREATE TABLE IF NOT EXISTS legal_acceptances (
-      id serial PRIMARY KEY,
-      user_id integer NOT NULL REFERENCES users(id),
-      document_id integer NOT NULL REFERENCES legal_documents(id),
-      version text NOT NULL,
-      accepted_at timestamp NOT NULL DEFAULT now(),
-      ip text,
-      user_agent text
-    )
-  `);
-  await db.execute(sql`
-    CREATE UNIQUE INDEX IF NOT EXISTS legal_acceptances_user_doc
-      ON legal_acceptances (user_id, document_id, version)
-  `);
-  await db.execute(sql`
-    CREATE TABLE IF NOT EXISTS campaigns (
-      id serial PRIMARY KEY,
-      org_id integer NOT NULL REFERENCES organizations(id),
-      created_by_user_id integer NOT NULL REFERENCES users(id),
-      title text NOT NULL,
-      pitch text NOT NULL,
-      cta_url text NOT NULL,
-      code text,
-      category text DEFAULT 'Eğitim',
-      status text NOT NULL DEFAULT 'draft',
-      perk_id integer,
-      starts_at timestamp,
-      ends_at timestamp,
-      created_at timestamp NOT NULL DEFAULT now()
-    )
-  `);
-  await db.execute(sql`ALTER TABLE perks ADD COLUMN IF NOT EXISTS source text DEFAULT 'partner'`);
-  await db.execute(sql`ALTER TABLE perks ADD COLUMN IF NOT EXISTS org_id integer`);
-  await db.execute(sql`ALTER TABLE perks ADD COLUMN IF NOT EXISTS campaign_id integer`);
-  await db.execute(sql`ALTER TABLE courses ADD COLUMN IF NOT EXISTS category text DEFAULT 'business'`);
-  await db.execute(sql`UPDATE courses SET category = 'business' WHERE category IS NULL`);
-}
-async function ensurePassSchema() {
-  await db.execute(sql`
-    CREATE TABLE IF NOT EXISTS pass_wallets (
-      id serial PRIMARY KEY,
-      user_id integer NOT NULL UNIQUE REFERENCES users(id),
-      balance integer NOT NULL DEFAULT 0,
-      updated_at timestamp NOT NULL DEFAULT now()
-    )
-  `);
-  await db.execute(sql`
-    CREATE TABLE IF NOT EXISTS pass_ledger (
-      id serial PRIMARY KEY,
-      user_id integer NOT NULL REFERENCES users(id),
-      delta integer NOT NULL,
-      reason text NOT NULL,
-      ref_type text,
-      ref_id text,
-      created_at timestamp NOT NULL DEFAULT now()
-    )
-  `);
-  await db.execute(sql`
-    CREATE INDEX IF NOT EXISTS pass_ledger_user_idx ON pass_ledger (user_id)
-  `);
-}
-async function ensureStageSchema() {
-  await db.execute(sql`
-    CREATE TABLE IF NOT EXISTS stage_products (
-      id serial PRIMARY KEY,
-      user_id integer NOT NULL REFERENCES users(id),
-      title text NOT NULL,
-      url text NOT NULL,
-      pitch text NOT NULL,
-      status text NOT NULL DEFAULT 'published',
-      created_at timestamp NOT NULL DEFAULT now()
-    )
-  `);
-  await db.execute(sql`
-    CREATE TABLE IF NOT EXISTS stage_votes (
-      id serial PRIMARY KEY,
-      product_id integer NOT NULL REFERENCES stage_products(id),
-      user_id integer NOT NULL REFERENCES users(id),
-      created_at timestamp NOT NULL DEFAULT now(),
-      UNIQUE (product_id, user_id)
-    )
-  `);
-  await db.execute(sql`
-    CREATE TABLE IF NOT EXISTS live_notify_log (
-      id serial PRIMARY KEY,
-      ref_type text NOT NULL,
-      ref_id integer NOT NULL,
-      kind text NOT NULL,
-      created_at timestamp NOT NULL DEFAULT now()
-    )
-  `);
-  await db.execute(sql`
-    CREATE UNIQUE INDEX IF NOT EXISTS live_notify_log_uidx
-      ON live_notify_log (ref_type, ref_id, kind)
-  `);
-}
-async function ensureMatchAndFaqSchema() {
-  await db.execute(sql`
-    CREATE TABLE IF NOT EXISTS introduction_requests (
-      id serial PRIMARY KEY,
-      from_user_id integer NOT NULL REFERENCES users(id),
-      target_name text NOT NULL,
-      target_company text,
-      match_type text,
-      reason text,
-      score integer,
-      status text NOT NULL DEFAULT 'pending',
-      created_at timestamp NOT NULL DEFAULT now()
-    )
-  `);
-  await db.execute(sql`ALTER TABLE faq ADD COLUMN IF NOT EXISTS category text`);
-  await db.execute(sql`UPDATE faq SET category = 'Genel' WHERE category IS NULL`);
-}
-async function ensureVaultCapitalSchema() {
-  await db.execute(sql`
-    CREATE TABLE IF NOT EXISTS vault_documents (
-      id serial PRIMARY KEY,
-      user_id integer NOT NULL REFERENCES users(id),
-      title text NOT NULL,
-      doc_type text NOT NULL,
-      access text NOT NULL DEFAULT 'topluluk',
-      excerpt text,
-      tags text,
-      pages integer,
-      views integer NOT NULL DEFAULT 0,
-      created_at timestamp NOT NULL DEFAULT now(),
-      updated_at timestamp NOT NULL DEFAULT now()
-    )
-  `);
-  await db.execute(sql`ALTER TABLE vault_documents ADD COLUMN IF NOT EXISTS file_key text`);
-  await db.execute(sql`ALTER TABLE vault_documents ADD COLUMN IF NOT EXISTS file_name text`);
-  await db.execute(sql`ALTER TABLE vault_documents ADD COLUMN IF NOT EXISTS mime_type text`);
-  await db.execute(sql`ALTER TABLE vault_documents ADD COLUMN IF NOT EXISTS size_bytes integer`);
-  await db.execute(sql`
-    CREATE TABLE IF NOT EXISTS capital_deals (
-      id serial PRIMARY KEY,
-      company text NOT NULL,
-      tagline text,
-      stage text NOT NULL,
-      sector text NOT NULL,
-      raise text,
-      valuation text,
-      founders text,
-      lead_investor text,
-      round text,
-      score integer NOT NULL DEFAULT 0,
-      tags text,
-      has_spv boolean NOT NULL DEFAULT false,
-      updated_at timestamp NOT NULL DEFAULT now(),
-      created_at timestamp NOT NULL DEFAULT now()
-    )
-  `);
-  await db.execute(sql`
-    CREATE TABLE IF NOT EXISTS capital_spvs (
-      id serial PRIMARY KEY,
-      name text NOT NULL,
-      target text NOT NULL,
-      raised text NOT NULL,
-      pct integer NOT NULL DEFAULT 0,
-      participants integer NOT NULL DEFAULT 0,
-      closing text,
-      sector text,
-      created_at timestamp NOT NULL DEFAULT now()
-    )
-  `);
-}
-async function ensureTalentSchema() {
-  await db.execute(sql`
-    CREATE TABLE IF NOT EXISTS talent_posts (
-      id serial PRIMARY KEY,
-      user_id integer NOT NULL REFERENCES users(id),
-      post_type text NOT NULL,
-      role text NOT NULL,
-      description text NOT NULL,
-      tags text,
-      created_at timestamp NOT NULL DEFAULT now()
-    )
-  `);
-}
-async function ensureApiKeysSchema() {
-  await db.execute(sql`
-    CREATE TABLE IF NOT EXISTS api_keys (
-      id serial PRIMARY KEY,
-      user_id integer NOT NULL REFERENCES users(id),
-      name text NOT NULL,
-      key_prefix text NOT NULL,
-      key_hash text NOT NULL,
-      created_at timestamp NOT NULL DEFAULT now(),
-      last_used_at timestamp
-    )
-  `);
-}
-async function ensureAnalyticsEventsSchema() {
-  await db.execute(sql`
-    CREATE TABLE IF NOT EXISTS analytics_events (
-      id serial PRIMARY KEY,
-      event_name text NOT NULL DEFAULT 'page_view',
-      path text NOT NULL,
-      title text,
-      referrer text,
-      session_id text NOT NULL,
-      locale text,
-      device text,
-      user_agent text,
-      created_at timestamp NOT NULL DEFAULT now()
-    )
-  `);
-  await db.execute(sql`
-    CREATE INDEX IF NOT EXISTS analytics_events_created_idx ON analytics_events (created_at)
-  `);
-  await db.execute(sql`
-    CREATE INDEX IF NOT EXISTS analytics_events_path_idx ON analytics_events (path)
-  `);
-  await db.execute(sql`
-    CREATE INDEX IF NOT EXISTS analytics_events_session_idx ON analytics_events (session_id)
-  `);
-}
-async function ensureInviteCodesSchema() {
-  await db.execute(sql`
-    CREATE TABLE IF NOT EXISTS invite_codes (
-      id serial PRIMARY KEY,
-      code text NOT NULL,
-      email text NOT NULL,
-      invitation_request_id integer NOT NULL,
-      application_id integer,
-      used_at timestamp,
-      used_by_user_id integer REFERENCES users(id),
-      expires_at timestamp,
-      created_at timestamp NOT NULL DEFAULT now()
-    )
-  `);
-  await db.execute(sql`
-    CREATE UNIQUE INDEX IF NOT EXISTS invite_codes_code_uidx ON invite_codes (code)
-  `);
-  await db.execute(sql`
-    CREATE INDEX IF NOT EXISTS invite_codes_invitation_request_idx
-      ON invite_codes (invitation_request_id)
-  `);
-}
-
-// src/lib/passes.ts
 async function getOrCreateWallet(userId) {
   await ensurePassSchema();
   const [existing] = await db.select().from(passWalletsTable).where(eq(passWalletsTable.userId, userId)).limit(1);
@@ -122063,11 +122075,11 @@ var KIND_DEFAULT_HREF = {
   request: "/panel/applications",
   signal: "/panel/signal"
 };
-async function ensureNotificationColumns() {
+var ensureNotificationColumns = once(async () => {
   await db.execute(sql`ALTER TABLE notifications ADD COLUMN IF NOT EXISTS title text`);
   await db.execute(sql`ALTER TABLE notifications ADD COLUMN IF NOT EXISTS kind text`);
   await db.execute(sql`ALTER TABLE notifications ADD COLUMN IF NOT EXISTS href text`);
-}
+});
 function hrefForKind(kind, href) {
   if (href && href.startsWith("/panel")) return href;
   return KIND_DEFAULT_HREF[kind] ?? "/panel";
@@ -123205,13 +123217,13 @@ async function sendDecisionMail(params) {
   void revokeUnusedInviteCodes(params.invitationRequestId);
   return await notifyApplicantInvitationRejected(applicant);
 }
-async function ensureInvitationColumns() {
+var ensureInvitationColumns = once(async () => {
   await db.execute(sql`ALTER TABLE invitation_requests ADD COLUMN IF NOT EXISTS role text`);
   await db.execute(sql`ALTER TABLE invitation_requests ADD COLUMN IF NOT EXISTS linkedin text`);
   await db.execute(sql`ALTER TABLE invitation_requests ADD COLUMN IF NOT EXISTS organization text`);
   await db.execute(sql`ALTER TABLE invitation_requests ADD COLUMN IF NOT EXISTS organization_domain text`);
   await db.execute(sql`ALTER TABLE invitation_requests ADD COLUMN IF NOT EXISTS organization_logo text`);
-}
+});
 async function ensureDemoInvites() {
   if (process.env.NODE_ENV === "production") return;
   const [row] = await db.select({ id: invitationRequestsTable.id }).from(invitationRequestsTable).limit(1);
@@ -123350,7 +123362,7 @@ var import_express10 = __toESM(require_express2(), 1);
 init_drizzle_orm();
 init_schema2();
 var router10 = (0, import_express10.Router)();
-async function ensurePerkColumns() {
+var ensurePerkColumns = once(async () => {
   await db.execute(sql`ALTER TABLE perks ADD COLUMN IF NOT EXISTS category text`);
   await db.execute(sql`ALTER TABLE perks ADD COLUMN IF NOT EXISTS badge text`);
   await db.execute(sql`ALTER TABLE perks ADD COLUMN IF NOT EXISTS code text`);
@@ -123360,7 +123372,7 @@ async function ensurePerkColumns() {
   await db.execute(sql`ALTER TABLE perks ADD COLUMN IF NOT EXISTS source text DEFAULT 'partner'`);
   await db.execute(sql`ALTER TABLE perks ADD COLUMN IF NOT EXISTS org_id integer`);
   await db.execute(sql`ALTER TABLE perks ADD COLUMN IF NOT EXISTS campaign_id integer`);
-}
+});
 async function ensurePerksSeed() {
   const [row] = await db.select({ id: perksTable.id }).from(perksTable).limit(1);
   if (row) return;

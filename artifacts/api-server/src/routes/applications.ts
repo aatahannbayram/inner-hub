@@ -12,6 +12,7 @@ import {
   issueInviteCodeForApproval,
   revokeUnusedInviteCodes,
 } from "../lib/inviteCodes";
+import { once } from "../lib/ensureSchema";
 
 const router = Router();
 
@@ -60,13 +61,13 @@ async function sendDecisionMail(params: {
 }
 
 /** Eski DB'lerde role/linkedin/org kolonlarını ekle (idempotent). */
-async function ensureInvitationColumns() {
+const ensureInvitationColumns = once(async () => {
   await db.execute(sql`ALTER TABLE invitation_requests ADD COLUMN IF NOT EXISTS role text`);
   await db.execute(sql`ALTER TABLE invitation_requests ADD COLUMN IF NOT EXISTS linkedin text`);
   await db.execute(sql`ALTER TABLE invitation_requests ADD COLUMN IF NOT EXISTS organization text`);
   await db.execute(sql`ALTER TABLE invitation_requests ADD COLUMN IF NOT EXISTS organization_domain text`);
   await db.execute(sql`ALTER TABLE invitation_requests ADD COLUMN IF NOT EXISTS organization_logo text`);
-}
+});
 
 /** Dev'de boş inbox olmasın diye birkaç örnek başvuru. Prod'da dokunulmaz. */
 async function ensureDemoInvites() {

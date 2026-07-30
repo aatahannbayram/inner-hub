@@ -4,6 +4,7 @@ import { db } from "@workspace/db";
 import { notificationsTable } from "@workspace/db/schema";
 import { requireAuth } from "../lib/auth";
 import { getUserSettingsPrefs } from "./settings";
+import { once } from "../lib/ensureSchema";
 
 const router = Router();
 
@@ -27,11 +28,11 @@ const KIND_DEFAULT_HREF: Record<NotifKind, string> = {
 };
 
 /** Eski DB'lerde title/kind/href yoksa ekle (idempotent). */
-async function ensureNotificationColumns() {
+const ensureNotificationColumns = once(async () => {
   await db.execute(sql`ALTER TABLE notifications ADD COLUMN IF NOT EXISTS title text`);
   await db.execute(sql`ALTER TABLE notifications ADD COLUMN IF NOT EXISTS kind text`);
   await db.execute(sql`ALTER TABLE notifications ADD COLUMN IF NOT EXISTS href text`);
-}
+});
 
 export function hrefForKind(kind: NotifKind, href?: string | null): string {
   if (href && href.startsWith("/panel")) return href;

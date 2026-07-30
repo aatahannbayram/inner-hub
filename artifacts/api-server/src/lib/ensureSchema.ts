@@ -1,8 +1,28 @@
 import { sql } from "drizzle-orm";
 import { db } from "@workspace/db";
 
+/**
+ * Her route handler'da tekrar tekrar ALTER/CREATE çalıştırmamak için
+ * process başına bir kere memoize eder. Startup'ta zaten hepsi bir kez
+ * çalışıyor (bkz. index.ts); route'lardaki çağrılar sadece "startup
+ * başarısız olduysa on-demand retry" güvenlik ağı, her istek için tekrar
+ * DB round-trip yapmamalı. Başarısız olursa bir sonraki çağrıda retry edilir.
+ */
+export function once(fn: () => Promise<void>): () => Promise<void> {
+  let inFlight: Promise<void> | null = null;
+  return () => {
+    if (!inFlight) {
+      inFlight = fn().catch((err) => {
+        inFlight = null;
+        throw err;
+      });
+    }
+    return inFlight;
+  };
+}
+
 /** Prod/eski DB'lerde profil kolonlarını idempotent ekle. */
-export async function ensureUserProfileColumns() {
+export const ensureUserProfileColumns = once(async () => {
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS handle text`);
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS github text`);
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS website text`);
@@ -10,15 +30,15 @@ export async function ensureUserProfileColumns() {
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS skills text`);
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS visibility text`);
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS settings_prefs text`);
-}
+});
 
 /** Prod/eski DB'lerde ders video süresi kolonunu idempotent ekle. */
-export async function ensureCourseVideoColumns() {
+export const ensureCourseVideoColumns = once(async () => {
   await db.execute(sql`ALTER TABLE lessons ADD COLUMN IF NOT EXISTS duration_seconds integer`);
-}
+});
 
 /** Kurs + etkinlik canlı alanları. */
-export async function ensureLiveSessionColumns() {
+export const ensureLiveSessionColumns = once(async () => {
   await db.execute(sql`ALTER TABLE courses ADD COLUMN IF NOT EXISTS format text DEFAULT 'vod'`);
   await db.execute(sql`ALTER TABLE courses ADD COLUMN IF NOT EXISTS starts_at timestamp`);
   await db.execute(sql`ALTER TABLE courses ADD COLUMN IF NOT EXISTS ends_at timestamp`);
@@ -36,10 +56,10 @@ export async function ensureLiveSessionColumns() {
   await db.execute(sql`UPDATE events SET format = 'in_person' WHERE format IS NULL`);
   await db.execute(sql`UPDATE events SET audience = 'all' WHERE audience IS NULL`);
   await db.execute(sql`UPDATE events SET pass_cost = 1 WHERE pass_cost IS NULL`);
-}
+});
 
 /** Üye persona + membership alanları. */
-export async function ensureUserMembershipColumns() {
+export const ensureUserMembershipColumns = once(async () => {
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS persona text`);
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS membership_plan text`);
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS membership_status text`);
@@ -51,10 +71,10 @@ export async function ensureUserMembershipColumns() {
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS instagram text`);
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS whatsapp_opt_in text`);
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS deleted_at timestamp`);
-}
+});
 
 /** Org + hukuki + kampanya + kurs kategori. */
-export async function ensureOrgLegalCampaignSchema() {
+export const ensureOrgLegalCampaignSchema = once(async () => {
   await db.execute(sql`
     CREATE TABLE IF NOT EXISTS organizations (
       id serial PRIMARY KEY,
@@ -131,10 +151,10 @@ export async function ensureOrgLegalCampaignSchema() {
   await db.execute(sql`ALTER TABLE perks ADD COLUMN IF NOT EXISTS campaign_id integer`);
   await db.execute(sql`ALTER TABLE courses ADD COLUMN IF NOT EXISTS category text DEFAULT 'business'`);
   await db.execute(sql`UPDATE courses SET category = 'business' WHERE category IS NULL`);
-}
+});
 
 /** Circle Pass cüzdan + ledger. */
-export async function ensurePassSchema() {
+export const ensurePassSchema = once(async () => {
   await db.execute(sql`
     CREATE TABLE IF NOT EXISTS pass_wallets (
       id serial PRIMARY KEY,
@@ -157,10 +177,10 @@ export async function ensurePassSchema() {
   await db.execute(sql`
     CREATE INDEX IF NOT EXISTS pass_ledger_user_idx ON pass_ledger (user_id)
   `);
-}
+});
 
 /** Stage ürün + oy. */
-export async function ensureStageSchema() {
+export const ensureStageSchema = once(async () => {
   await db.execute(sql`
     CREATE TABLE IF NOT EXISTS stage_products (
       id serial PRIMARY KEY,
@@ -194,10 +214,10 @@ export async function ensureStageSchema() {
     CREATE UNIQUE INDEX IF NOT EXISTS live_notify_log_uidx
       ON live_notify_log (ref_type, ref_id, kind)
   `);
-}
+});
 
 /** Tanışma talepleri + FAQ kategori kolonu. */
-export async function ensureMatchAndFaqSchema() {
+export const ensureMatchAndFaqSchema = once(async () => {
   await db.execute(sql`
     CREATE TABLE IF NOT EXISTS introduction_requests (
       id serial PRIMARY KEY,
@@ -213,10 +233,10 @@ export async function ensureMatchAndFaqSchema() {
   `);
   await db.execute(sql`ALTER TABLE faq ADD COLUMN IF NOT EXISTS category text`);
   await db.execute(sql`UPDATE faq SET category = 'Genel' WHERE category IS NULL`);
-}
+});
 
 /** Vault + Capital tabloları. */
-export async function ensureVaultCapitalSchema() {
+export const ensureVaultCapitalSchema = once(async () => {
   await db.execute(sql`
     CREATE TABLE IF NOT EXISTS vault_documents (
       id serial PRIMARY KEY,
@@ -268,10 +288,10 @@ export async function ensureVaultCapitalSchema() {
       created_at timestamp NOT NULL DEFAULT now()
     )
   `);
-}
+});
 
 /** Talent board ilanları. */
-export async function ensureTalentSchema() {
+export const ensureTalentSchema = once(async () => {
   await db.execute(sql`
     CREATE TABLE IF NOT EXISTS talent_posts (
       id serial PRIMARY KEY,
@@ -283,10 +303,10 @@ export async function ensureTalentSchema() {
       created_at timestamp NOT NULL DEFAULT now()
     )
   `);
-}
+});
 
 /** inner·api anahtarları — plaintext hiçbir zaman saklanmaz, yalnızca hash. */
-export async function ensureApiKeysSchema() {
+export const ensureApiKeysSchema = once(async () => {
   await db.execute(sql`
     CREATE TABLE IF NOT EXISTS api_keys (
       id serial PRIMARY KEY,
@@ -298,10 +318,10 @@ export async function ensureApiKeysSchema() {
       last_used_at timestamp
     )
   `);
-}
+});
 
 /** Public site analytics beacons (Framer-style admin). */
-export async function ensureAnalyticsEventsSchema() {
+export const ensureAnalyticsEventsSchema = once(async () => {
   await db.execute(sql`
     CREATE TABLE IF NOT EXISTS analytics_events (
       id serial PRIMARY KEY,
@@ -325,10 +345,10 @@ export async function ensureAnalyticsEventsSchema() {
   await db.execute(sql`
     CREATE INDEX IF NOT EXISTS analytics_events_session_idx ON analytics_events (session_id)
   `);
-}
+});
 
 /** Onay sonrası kişiye özel davet kodları. */
-export async function ensureInviteCodesSchema() {
+export const ensureInviteCodesSchema = once(async () => {
   await db.execute(sql`
     CREATE TABLE IF NOT EXISTS invite_codes (
       id serial PRIMARY KEY,
@@ -349,4 +369,4 @@ export async function ensureInviteCodesSchema() {
     CREATE INDEX IF NOT EXISTS invite_codes_invitation_request_idx
       ON invite_codes (invitation_request_id)
   `);
-}
+});
