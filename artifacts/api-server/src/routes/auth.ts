@@ -1,22 +1,24 @@
 import { Router } from "express";
 import bcrypt from "bcryptjs";
 import crypto from "node:crypto";
-import { and, eq, ne } from "drizzle-orm";
+import { and, eq, isNull, ne } from "drizzle-orm";
 import { OAuth2Client } from "google-auth-library";
 import { db } from "@workspace/db";
-import { usersTable } from "@workspace/db/schema";
+import { passwordResetTokensTable, usersTable } from "@workspace/db/schema";
 import { linkedinEnabled, linkedinAuthorizeUrl, fetchLinkedinProfile } from "../lib/linkedin";
 import {
   SESSION_COOKIE,
   sessionCookieOptions,
   createSession,
   destroySession,
+  destroySessionsForUser,
   publicUser,
   requireAuth,
 } from "../lib/auth";
 import {
   ensureUserProfileColumns,
   ensureUserMembershipColumns,
+  ensurePasswordResetSchema,
 } from "../lib/ensureSchema";
 import {
   consumeInviteCode,
@@ -25,11 +27,33 @@ import {
   validateInviteCodeForEmail,
 } from "../lib/inviteCodes";
 import { getPrimaryOrgForUser, isAvatarStyle, resolveAvatarUrl } from "../lib/identity";
+import { notifyPasswordReset } from "../lib/mail";
+import { appBaseUrl } from "../lib/mail/transport";
+import { logger } from "../lib/logger";
 
 const router = Router();
 
 const googleClientId = process.env.GOOGLE_CLIENT_ID;
 const googleClient = googleClientId ? new OAuth2Client(googleClientId) : null;
+
+const PASSWORD_RESET_TTL_MS = 60 * 60 * 1000; // 1 hour
+const forgotHits = new Map<string, { n: number; reset: number }>();
+
+function allowForgotAttempt(key: string, limit = 5, windowMs = 60 * 60 * 1000): boolean {
+  const now = Date.now();
+  const row = forgotHits.get(key);
+  if (!row || now > row.reset) {
+    forgotHits.set(key, { n: 1, reset: now + windowMs });
+    return true;
+  }
+  if (row.n >= limit) return false;
+  row.n += 1;
+  return true;
+}
+
+function hashResetToken(token: string): string {
+  return crypto.createHash("sha256").update(token).digest("hex");
+}
 
 function calcCompletion(input: {
   name: string;
@@ -256,6 +280,144 @@ router.post("/login", async (req, res) => {
     res.json({ user: publicUser(user) });
   } catch (err: any) {
     res.status(500).json({ error: err.message ?? "Giriş sırasında hata oluştu" });
+  }
+});
+
+// ─── POST /api/auth/forgot-password ───────────────────────────────────────────
+// Body: { email }. Her zaman aynı başarı mesajı (enumeration yok).
+router.post("/forgot-password", async (req, res) => {
+  const genericOk = {
+    ok: true,
+    message:
+      "E-posta kayıtlıysa şifre sıfırlama bağlantısı gönderildi. Gelen kutunu ve spam klasörünü kontrol et.",
+  };
+
+  try {
+    const email = typeof req.body?.email === "string" ? normalizeEmail(req.body.email) : "";
+    if (!email || !email.includes("@")) {
+      res.status(400).json({ error: "Geçerli bir e-posta gerekli" });
+      return;
+    }
+
+    const ip =
+      (typeof req.headers["x-forwarded-for"] === "string"
+        ? req.headers["x-forwarded-for"].split(",")[0]?.trim()
+        : null) ||
+      req.ip ||
+      "unknown";
+
+    if (!allowForgotAttempt(`ip:${ip}`) || !allowForgotAttempt(`email:${email}`, 3)) {
+      res.status(429).json({ error: "Çok fazla deneme. Biraz sonra tekrar dene." });
+      return;
+    }
+
+    await ensurePasswordResetSchema();
+
+    const [user] = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.email, email))
+      .limit(1);
+
+    if (user && !user.deletedAt) {
+      const rawToken = crypto.randomBytes(32).toString("hex");
+      const tokenHash = hashResetToken(rawToken);
+      const expiresAt = new Date(Date.now() + PASSWORD_RESET_TTL_MS);
+
+      await db
+        .update(passwordResetTokensTable)
+        .set({ usedAt: new Date() })
+        .where(
+          and(
+            eq(passwordResetTokensTable.userId, user.id),
+            isNull(passwordResetTokensTable.usedAt),
+          ),
+        );
+
+      await db.insert(passwordResetTokensTable).values({
+        userId: user.id,
+        tokenHash,
+        expiresAt,
+      });
+
+      const resetUrl = `${appBaseUrl()}/panel?reset=${encodeURIComponent(rawToken)}`;
+      const mailResult = await notifyPasswordReset({
+        name: user.name,
+        email: user.email,
+        resetUrl,
+      });
+      if (!mailResult.ok) {
+        logger.warn({ email: user.email, error: mailResult.error }, "Password reset mail failed");
+      }
+    }
+
+    res.json(genericOk);
+  } catch (err: any) {
+    logger.error({ err }, "forgot-password failed");
+    res.status(500).json({ error: err.message ?? "Şifre sıfırlama isteği başarısız" });
+  }
+});
+
+// ─── POST /api/auth/reset-password ────────────────────────────────────────────
+// Body: { token, password }
+router.post("/reset-password", async (req, res) => {
+  try {
+    const token = typeof req.body?.token === "string" ? req.body.token.trim() : "";
+    const password = typeof req.body?.password === "string" ? req.body.password : "";
+
+    if (!token || token.length < 32) {
+      res.status(400).json({ error: "Geçersiz veya eksik sıfırlama bağlantısı" });
+      return;
+    }
+    if (!password || password.length < 8) {
+      res.status(400).json({ error: "Şifre en az 8 karakter olmalı" });
+      return;
+    }
+
+    await ensurePasswordResetSchema();
+    const tokenHash = hashResetToken(token);
+
+    const [row] = await db
+      .select()
+      .from(passwordResetTokensTable)
+      .where(eq(passwordResetTokensTable.tokenHash, tokenHash))
+      .limit(1);
+
+    if (!row || row.usedAt || row.expiresAt.getTime() < Date.now()) {
+      res.status(400).json({ error: "Bağlantı geçersiz veya süresi dolmuş. Yeni talep oluştur." });
+      return;
+    }
+
+    const passwordHash = await bcrypt.hash(password, 12);
+
+    const [user] = await db
+      .update(usersTable)
+      .set({ passwordHash })
+      .where(eq(usersTable.id, row.userId))
+      .returning();
+
+    if (!user || user.deletedAt) {
+      res.status(400).json({ error: "Hesap bulunamadı" });
+      return;
+    }
+
+    await db
+      .update(passwordResetTokensTable)
+      .set({ usedAt: new Date() })
+      .where(
+        and(
+          eq(passwordResetTokensTable.userId, user.id),
+          isNull(passwordResetTokensTable.usedAt),
+        ),
+      );
+
+    await destroySessionsForUser(user.id);
+    const sessionId = await createSession(user.id);
+    res.cookie(SESSION_COOKIE, sessionId, sessionCookieOptions);
+    res.json({ user: publicUser(user), ok: true });
+  } catch (err: any) {
+    logger.error({ err }, "reset-password failed");
+    res.status(500).json({ error: err.message ?? "Şifre sıfırlanamadı" });
   }
 });
 

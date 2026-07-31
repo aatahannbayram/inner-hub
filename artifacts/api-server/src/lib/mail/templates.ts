@@ -209,6 +209,41 @@ export function adminNewRequestMail(payload: {
   return { subject, text, html, kind: "admin.new_request" as const };
 }
 
+export function passwordResetMail(ctx: { name: string; email: string; resetUrl: string }) {
+  const appUrl = appBaseUrl();
+  const name = firstName(ctx.name);
+  const subject = "inner hub · şifre sıfırlama";
+  const text = [
+    `Merhaba ${name},`,
+    "",
+    "Hesabın için şifre sıfırlama talebi aldık.",
+    "",
+    "Yeni şifreni belirlemek için bu bağlantıyı aç (1 saat geçerli):",
+    ctx.resetUrl,
+    "",
+    "Bu talebi sen yapmadıysan bu iletiyi yok sayabilirsin. Şifren değişmez.",
+    "",
+    "inner hub",
+    appUrl,
+  ].join("\n");
+
+  const html = renderInnerEmailLayout({
+    appUrl,
+    preheader: "Şifreni sıfırlamak için bağlantı · 1 saat geçerli.",
+    eyebrow: "Hesap · şifre sıfırlama",
+    title: `${name}, şifreni yenile.`,
+    bodyHtml: `
+      <p style="margin:0 0 12px;">Merhaba ${escapeHtml(name)}, hesabın için şifre sıfırlama talebi aldık.</p>
+      <p style="margin:0 0 12px;">Aşağıdaki düğmeyle yeni şifreni belirleyebilirsin. Bağlantı <strong style="color:#F4F1EC;font-weight:500;">1 saat</strong> geçerlidir.</p>
+      <p style="margin:0;font-size:13px;color:rgba(244,241,236,0.45);">Bu talebi sen yapmadıysan bu iletiyi yok say. Şifren değişmez.</p>
+    `,
+    cta: { label: "Şifreyi sıfırla", href: ctx.resetUrl },
+    footerNote: "Bu ileti, şifre sıfırlama talebine yanıt olarak otomatik gönderildi.",
+  });
+
+  return { subject, text, html, kind: "auth.password_reset" as const };
+}
+
 export function liveSessionReminderMail(ctx: {
   name: string;
   sessionTitle: string;

@@ -5,6 +5,7 @@ import {
   invitationReceivedMail,
   invitationRejectedMail,
   liveSessionReminderMail,
+  passwordResetMail,
   type ApplicantMailContext,
 } from "./templates";
 
@@ -61,6 +62,16 @@ export async function notifyApplicantInvitationApproved(ctx: ApplicantMailContex
 /** Başvuran: red. */
 export async function notifyApplicantInvitationRejected(ctx: ApplicantMailContext) {
   const mail = invitationRejectedMail(ctx);
+  return sendTransactionalMail({ ...mail, to: ctx.email });
+}
+
+/** Şifre sıfırlama bağlantısı. */
+export async function notifyPasswordReset(ctx: {
+  name: string;
+  email: string;
+  resetUrl: string;
+}) {
+  const mail = passwordResetMail(ctx);
   return sendTransactionalMail({ ...mail, to: ctx.email });
 }
 

@@ -12,6 +12,7 @@ const LOGIN_VIDEO_SRC =
   "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260530_042513_df96a13b-6155-4f6e-8b93-c9dee66fba08.mp4";
 
 type SessionUser = { email: string; role: "member" | "admin"; name: string };
+type AuthMode = "login" | "register" | "forgot" | "reset";
 
 type PanelLoginProps = {
   onLogin: (user: SessionUser) => void;
@@ -95,16 +96,27 @@ function inviteParamsFromUrl(): { invite: string; email: string } | null {
   return { invite, email: params.get("email")?.trim() ?? "" };
 }
 
+function resetTokenFromUrl(): string | null {
+  if (typeof window === "undefined") return null;
+  return new URLSearchParams(window.location.search).get("reset")?.trim() || null;
+}
+
 export function PanelLogin({ onLogin }: PanelLoginProps) {
   const t = useT();
   const initialInvite = useRef(inviteParamsFromUrl()).current;
-  const [mode, setMode] = useState<"login" | "register">(initialInvite ? "register" : "login");
+  const initialReset = useRef(resetTokenFromUrl()).current;
+  const [mode, setMode] = useState<AuthMode>(
+    initialReset ? "reset" : initialInvite ? "register" : "login",
+  );
   const [name, setName] = useState("");
   const [email, setEmail] = useState(initialInvite?.email ?? "");
   const [password, setPassword] = useState("");
+  const [passwordConfirm, setPasswordConfirm] = useState("");
+  const [resetToken] = useState(initialReset ?? "");
   const [inviteCode, setInviteCode] = useState(initialInvite?.invite ?? "");
   const inviteFromLink = Boolean(initialInvite?.invite);
   const [error, setError] = useState("");
+  const [info, setInfo] = useState("");
   const [loading, setLoading] = useState(false);
   const [googleReady, setGoogleReady] = useState(false);
   const [emailCopied, setEmailCopied] = useState(false);
@@ -115,6 +127,7 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
   const { displayed: typedIntro, done: typedDone } = useTypewriter(t("login.typewriter"));
   const ambientLines = t("login.ambientWelcome").split("\n");
   const googleLabel = mode === "register" ? t("login.googleRegister") : t("login.googleContinue");
+  const showGoogle = mode === "login" || mode === "register";
 
   const copySupportEmail = async () => {
     try {
@@ -139,6 +152,10 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
 
   useEffect(() => {
     let cancelled = false;
+    if (!showGoogle) {
+      setGoogleReady(false);
+      return;
+    }
 
     async function setupGoogle() {
       try {
@@ -185,14 +202,36 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
     return () => {
       cancelled = true;
     };
-  }, [mode, onLogin, t]);
+  }, [mode, onLogin, showGoogle, t]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
+    setInfo("");
 
     try {
+      if (mode === "forgot") {
+        const data = await apiRequest("forgot-password", { email });
+        setInfo(data.message ?? t("login.forgotSent"));
+        return;
+      }
+
+      if (mode === "reset") {
+        if (password !== passwordConfirm) {
+          throw new Error(t("login.passwordMismatch"));
+        }
+        const { user } = await apiRequest("reset-password", {
+          token: resetToken,
+          password,
+        });
+        const url = new URL(window.location.href);
+        url.searchParams.delete("reset");
+        window.history.replaceState({}, "", url.pathname + url.search);
+        onLogin(user);
+        return;
+      }
+
       const { user } =
         mode === "login"
           ? await apiRequest("login", { email, password })
@@ -210,6 +249,29 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
     }
   };
 
+  const heading =
+    mode === "forgot"
+      ? t("login.forgotTitle")
+      : mode === "reset"
+        ? t("login.resetTitle")
+        : t("login.continueInside");
+
+  const subtitle =
+    mode === "forgot"
+      ? t("login.forgotHint")
+      : mode === "reset"
+        ? t("login.resetHint")
+        : t("login.accessByInvite");
+
+  const submitLabel =
+    mode === "forgot"
+      ? t("login.sendReset")
+      : mode === "reset"
+        ? t("login.savePassword")
+        : mode === "login"
+          ? t("login.signIn")
+          : t("login.createAccount");
+
   return (
     <div className="relative flex h-svh flex-col overflow-hidden bg-[#12100e] text-white">
       <video
@@ -222,7 +284,6 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
         style={{ objectPosition: "70% center" }}
         src={LOGIN_VIDEO_SRC}
       />
-      {/* Alt bölgede hafif blur - üstte karakter net kalsın (mouse scrub görünsün) */}
       <div
         aria-hidden="true"
         className="bottom-blur-mask pointer-events-none absolute inset-0 z-[1] bg-black/25 backdrop-blur-md"
@@ -253,7 +314,6 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
       </header>
 
       <main className="relative z-10 flex min-h-0 flex-1 flex-col justify-between gap-8 overflow-y-auto px-6 pb-10 pt-2 md:px-12 md:pb-16 lg:px-[10%]">
-        {/* Üst: ambient typewriter - absolute değil, form ile çakışmaz */}
         <div className="max-w-md shrink-0">
           <p
             aria-hidden="true"
@@ -298,7 +358,6 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
           </p>
         </div>
 
-        {/* Alt: login formu - davet sayfası glass kartı */}
         <div
           className="animate-blur-fade-up w-full max-w-md shrink-0 panel-glass-ink"
           style={{ animationDelay: "200ms" }}
@@ -309,51 +368,53 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
                 {t("login.membersOnly")}
               </p>
               <p className="font-mono text-[10px] uppercase tracking-widest text-white/40">
-                {mode === "login" ? "01 / 02" : "02 / 02"}
+                {mode === "login" || mode === "forgot" || mode === "reset" ? "01 / 02" : "02 / 02"}
               </p>
             </div>
             <div className="mb-5 h-[2px] w-full overflow-hidden bg-white/10">
               <div
                 className="h-full bg-[var(--inner-green)] transition-[width] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
-                style={{ width: mode === "login" ? "50%" : "100%" }}
+                style={{ width: mode === "register" ? "100%" : "50%" }}
               />
             </div>
           </div>
 
           <div className="px-5 py-7 sm:px-7 sm:py-8">
             <h1 className="mb-2 font-display font-serif italic text-3xl leading-[1.1] text-balance text-[var(--bone-fixed)] sm:text-4xl">
-              {t("login.continueInside")}
+              {heading}
             </h1>
-            <p className="mb-8 max-w-[40ch] text-sm leading-relaxed text-white/55">
-              {t("login.accessByInvite")}
-            </p>
+            <p className="mb-8 max-w-[40ch] text-sm leading-relaxed text-white/55">{subtitle}</p>
 
-            <div
-              className={`liquid-glass group relative mb-4 h-11 w-full ${googleReady ? "visible" : "invisible"}`}
-            >
-              <div
-                aria-hidden="true"
-                className="pointer-events-none absolute inset-0 flex items-center justify-center gap-3 border border-white/15 bg-white/[0.03] transition-all duration-300 group-hover:border-white/35 group-hover:bg-white/[0.06]"
-              >
-                <GoogleGlyph />
-                <span className="font-mono text-[11px] uppercase tracking-widest text-[var(--bone-fixed)]">
-                  {googleLabel}
-                </span>
-              </div>
-              <div
-                ref={googleButtonRef}
-                className="absolute inset-0 overflow-hidden opacity-0"
-                aria-label={googleLabel}
-              />
-            </div>
+            {showGoogle && (
+              <>
+                <div
+                  className={`liquid-glass group relative mb-4 h-11 w-full ${googleReady ? "visible" : "invisible"}`}
+                >
+                  <div
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-0 flex items-center justify-center gap-3 border border-white/15 bg-white/[0.03] transition-all duration-300 group-hover:border-white/35 group-hover:bg-white/[0.06]"
+                  >
+                    <GoogleGlyph />
+                    <span className="font-mono text-[11px] uppercase tracking-widest text-[var(--bone-fixed)]">
+                      {googleLabel}
+                    </span>
+                  </div>
+                  <div
+                    ref={googleButtonRef}
+                    className="absolute inset-0 overflow-hidden opacity-0"
+                    aria-label={googleLabel}
+                  />
+                </div>
 
-            <div
-              className={`mb-6 flex items-center gap-4 text-white/35 ${googleReady ? "" : "hidden"}`}
-            >
-              <span className="h-px flex-1 bg-white/15" />
-              <span className="font-mono text-[10px] uppercase tracking-widest">{t("login.or")}</span>
-              <span className="h-px flex-1 bg-white/15" />
-            </div>
+                <div
+                  className={`mb-6 flex items-center gap-4 text-white/35 ${googleReady ? "" : "hidden"}`}
+                >
+                  <span className="h-px flex-1 bg-white/15" />
+                  <span className="font-mono text-[10px] uppercase tracking-widest">{t("login.or")}</span>
+                  <span className="h-px flex-1 bg-white/15" />
+                </div>
+              </>
+            )}
 
             <form id="panel-login-form" onSubmit={handleSubmit} className="space-y-5">
               {mode === "register" && (
@@ -397,42 +458,85 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
                 </>
               )}
 
-              <div className="space-y-2">
-                <label className="font-mono text-[10px] uppercase tracking-widest text-white/65 sm:text-[11px]">
-                  {t("login.email")}
-                  <span className="text-[var(--inner-green)]"> *</span>
-                </label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@inner.digital"
-                  className={fieldClass}
-                  required
-                  autoComplete="email"
-                />
-              </div>
+              {(mode === "login" || mode === "register" || mode === "forgot") && (
+                <div className="space-y-2">
+                  <label className="font-mono text-[10px] uppercase tracking-widest text-white/65 sm:text-[11px]">
+                    {t("login.email")}
+                    <span className="text-[var(--inner-green)]"> *</span>
+                  </label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@inner.digital"
+                    className={fieldClass}
+                    required
+                    autoComplete="email"
+                  />
+                </div>
+              )}
 
-              <div className="space-y-2">
-                <label className="font-mono text-[10px] uppercase tracking-widest text-white/65 sm:text-[11px]">
-                  {t("login.password")}
-                  <span className="text-[var(--inner-green)]"> *</span>
-                </label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className={fieldClass}
-                  required
-                  minLength={mode === "register" ? 8 : undefined}
-                  autoComplete={mode === "login" ? "current-password" : "new-password"}
-                />
-              </div>
+              {(mode === "login" || mode === "register" || mode === "reset") && (
+                <div className="space-y-2">
+                  <label className="font-mono text-[10px] uppercase tracking-widest text-white/65 sm:text-[11px]">
+                    {mode === "reset" ? t("login.newPassword") : t("login.password")}
+                    <span className="text-[var(--inner-green)]"> *</span>
+                  </label>
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className={fieldClass}
+                    required
+                    minLength={mode === "login" ? undefined : 8}
+                    autoComplete={mode === "login" ? "current-password" : "new-password"}
+                  />
+                </div>
+              )}
+
+              {mode === "reset" && (
+                <div className="space-y-2">
+                  <label className="font-mono text-[10px] uppercase tracking-widest text-white/65 sm:text-[11px]">
+                    {t("login.confirmPassword")}
+                    <span className="text-[var(--inner-green)]"> *</span>
+                  </label>
+                  <input
+                    type="password"
+                    value={passwordConfirm}
+                    onChange={(e) => setPasswordConfirm(e.target.value)}
+                    placeholder="••••••••"
+                    className={fieldClass}
+                    required
+                    minLength={8}
+                    autoComplete="new-password"
+                  />
+                </div>
+              )}
+
+              {mode === "login" && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMode("forgot");
+                    setError("");
+                    setInfo("");
+                    setPassword("");
+                  }}
+                  className="font-mono text-[10px] uppercase tracking-widest text-white/45 transition-colors hover:text-white"
+                >
+                  {t("login.forgotPassword")}
+                </button>
+              )}
 
               {error && (
                 <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--error-ink)]">
                   {error}
+                </p>
+              )}
+              {info && (
+                <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--inner-green)]">
+                  {info}
                 </p>
               )}
             </form>
@@ -442,12 +546,23 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
             <button
               type="button"
               onClick={() => {
-                setMode(mode === "login" ? "register" : "login");
+                if (mode === "forgot" || mode === "reset") {
+                  setMode("login");
+                } else {
+                  setMode(mode === "login" ? "register" : "login");
+                }
                 setError("");
+                setInfo("");
+                setPassword("");
+                setPasswordConfirm("");
               }}
               className="font-mono text-[10px] uppercase tracking-widest text-white/50 transition-colors hover:text-white"
             >
-              {mode === "login" ? t("login.noAccount") : t("login.haveAccount")}
+              {mode === "forgot" || mode === "reset"
+                ? t("login.backToLogin")
+                : mode === "login"
+                  ? t("login.noAccount")
+                  : t("login.haveAccount")}
             </button>
 
             <button
@@ -456,7 +571,7 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
               disabled={loading}
               className="inline-flex items-center justify-center gap-2 bg-[var(--bone-fixed)] px-5 py-2.5 font-mono text-[11px] uppercase tracking-widest text-[var(--ink-fixed)] transition-opacity hover:opacity-90 disabled:opacity-35"
             >
-              {loading ? "..." : mode === "login" ? t("login.signIn") : t("login.createAccount")}
+              {loading ? "..." : submitLabel}
             </button>
           </div>
         </div>

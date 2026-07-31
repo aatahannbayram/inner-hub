@@ -168,8 +168,8 @@ export declare const insertInviteCodeSchema: z.ZodObject<{
     invitationRequestId: z.ZodInt;
     code: z.ZodString;
     expiresAt: z.ZodOptional<z.ZodNullable<z.ZodDate>>;
-    applicationId: z.ZodOptional<z.ZodNullable<z.ZodInt>>;
     usedAt: z.ZodOptional<z.ZodNullable<z.ZodDate>>;
+    applicationId: z.ZodOptional<z.ZodNullable<z.ZodInt>>;
     usedByUserId: z.ZodOptional<z.ZodNullable<z.ZodInt>>;
 }, {
     out: {};

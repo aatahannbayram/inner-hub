@@ -15,6 +15,7 @@ import {
   parseProductHuntUrl,
   resolveProductHuntLink,
 } from "../lib/productHunt";
+import { parseYoutubeId, youtubeThumbnailUrl, youtubeWatchUrl } from "../lib/youtube";
 
 const router = Router();
 
@@ -40,6 +41,7 @@ function mapProduct(
   myVote: boolean,
   author?: { name: string; handle: string | null } | null,
 ) {
+  const ytId = product.youtubeUrl ? parseYoutubeId(product.youtubeUrl) : null;
   return {
     id: product.id,
     title: product.title,
@@ -51,6 +53,8 @@ function mapProduct(
     productHuntUrl: product.productHuntUrl ?? null,
     productHuntId: product.productHuntId ?? null,
     phVotesCount: product.phVotesCount ?? null,
+    youtubeUrl: product.youtubeUrl ?? null,
+    youtubeThumbnail: ytId ? youtubeThumbnailUrl(ytId) : null,
     createdAt: product.createdAt.toISOString(),
     userId: product.userId,
     authorName: author?.name ?? null,
@@ -226,19 +230,20 @@ router.post("/stage/products", requireAuth, async (req, res) => {
   try {
     await ensureStageSchema();
     const userId = req.user!.id;
-    const { title, url, pitch, imageUrl, productHuntUrl } = req.body as {
+    const { title, url, pitch, imageUrl, productHuntUrl, youtubeUrl } = req.body as {
       title?: string;
       url?: string;
       pitch?: string;
       imageUrl?: string;
       productHuntUrl?: string;
+      youtubeUrl?: string;
     };
 
     const t = title?.trim() ?? "";
     const u = url?.trim() ?? "";
     const p = pitch?.trim() ?? "";
     const rawImage = imageUrl?.trim() ?? "";
-    const img =
+    let img =
       rawImage.length <= 500 &&
       (rawImage.startsWith("http://") ||
         rawImage.startsWith("https://") ||
@@ -265,6 +270,19 @@ router.post("/stage/products", requireAuth, async (req, res) => {
       }
     }
 
+    let ytCanonical: string | null = null;
+    const rawYoutube = youtubeUrl?.trim() ?? "";
+    if (rawYoutube) {
+      const ytId = parseYoutubeId(rawYoutube);
+      if (!ytId) {
+        res.status(400).json({ error: "Geçersiz YouTube linki" });
+        return;
+      }
+      ytCanonical = youtubeWatchUrl(ytId);
+      // Kapak görseli seçilmemişse video kapağını otomatik kullan.
+      if (!img) img = youtubeThumbnailUrl(ytId);
+    }
+
     const [created] = await db
       .insert(stageProductsTable)
       .values({
@@ -278,6 +296,7 @@ router.post("/stage/products", requireAuth, async (req, res) => {
         productHuntId: ph?.productHuntId ?? null,
         phVotesCount: ph?.phVotesCount ?? null,
         phSyncedAt: ph?.phSyncedAt ?? null,
+        youtubeUrl: ytCanonical,
       })
       .returning();
 

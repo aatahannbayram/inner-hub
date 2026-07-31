@@ -29,6 +29,10 @@ export async function destroySession(sessionId: string): Promise<void> {
   await db.delete(sessionsTable).where(eq(sessionsTable.id, sessionId));
 }
 
+export async function destroySessionsForUser(userId: number): Promise<void> {
+  await db.delete(sessionsTable).where(eq(sessionsTable.userId, userId));
+}
+
 export async function getUserBySession(sessionId: string | undefined): Promise<User | null> {
   if (!sessionId) return null;
 

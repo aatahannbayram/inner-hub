@@ -1,6 +1,18 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { ExternalLink, Globe, Loader2, Plus, Rocket, Star, ThumbsUp, Trash2 } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronRight,
+  ExternalLink,
+  Globe,
+  Loader2,
+  Play,
+  Plus,
+  Rocket,
+  Star,
+  ThumbsUp,
+  Trash2,
+} from "lucide-react";
 import { FadeIn } from "@/components/FadeIn";
 import { Lockup } from "@/components/Lockup";
 import { useApiQuery } from "@/hooks/useApiQuery";
@@ -35,6 +47,8 @@ type StageProduct = {
   productHuntUrl: string | null;
   productHuntId: string | null;
   phVotesCount: number | null;
+  youtubeUrl: string | null;
+  youtubeThumbnail: string | null;
   authorName: string | null;
   authorHandle: string | null;
 };
@@ -53,6 +67,8 @@ type LinkPreviewData = {
 };
 
 const PERIODS: StagePeriod[] = ["week", "month", "year", "all"];
+/** Bu uzunluğu aşan pitch'ler kartta kırpılır, "Devamını oku" ile açılır. */
+const PITCH_CLAMP_CHARS = 140;
 
 function ProductHuntMark({ className }: { className?: string }) {
   return (
@@ -201,92 +217,141 @@ function ProductCard({
   onRemove?: (id: number) => void;
 }) {
   const t = useT();
+  const [expanded, setExpanded] = useState(false);
+  const isPitchLong = product.pitch.length > PITCH_CLAMP_CHARS;
+  const banner = product.imageUrl;
+
   return (
-    <article className="panel-glass p-4">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="flex min-w-0 flex-1 items-start gap-3">
-          {rank !== undefined && <RankBadge rank={rank} />}
-          {product.imageUrl ? (
-            <img
-              src={product.imageUrl}
-              alt=""
-              className="size-10 shrink-0 border border-[var(--ink)]/10 object-cover"
-              loading="lazy"
-              onError={(e) => {
-                e.currentTarget.style.display = "none";
-              }}
-            />
-          ) : (
-            <div className="flex size-10 shrink-0 items-center justify-center border border-[var(--ink)]/10 bg-[var(--ink)]/[0.03] text-[var(--ink-subtle)]">
-              <Globe className="size-4" />
-            </div>
+    <article className="panel-glass overflow-hidden">
+      {banner && (
+        <a
+          href={product.youtubeUrl || product.url}
+          target="_blank"
+          rel="noreferrer"
+          className="group/banner relative block aspect-video w-full overflow-hidden border-b border-[var(--ink)]/10 bg-[var(--ink)]/[0.04]"
+        >
+          <img
+            src={banner}
+            alt=""
+            className="size-full object-cover transition-transform duration-300 group-hover/banner:scale-[1.02]"
+            loading="lazy"
+            onError={(e) => {
+              const el = e.currentTarget.closest("a");
+              if (el) (el as HTMLElement).style.display = "none";
+            }}
+          />
+          {product.youtubeUrl && (
+            <span className="absolute inset-0 flex items-center justify-center bg-black/10 transition-colors group-hover/banner:bg-black/25">
+              <span className="flex size-11 items-center justify-center rounded-full bg-black/55 text-white backdrop-blur-sm">
+                <Play className="size-4 translate-x-0.5 fill-current" />
+              </span>
+            </span>
           )}
-          <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-1.5">
-              <p className="font-serif text-lg text-[var(--ink)]">{product.title}</p>
-              {product.featured && (
-                <span className="inline-flex items-center gap-1 border border-[var(--inner-green)]/35 bg-[var(--inner-green)]/10 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-widest text-[var(--success-ink)]">
-                  <Star className="size-2.5 fill-current" />
-                  {t("stage.featuredBadge")}
-                </span>
-              )}
-              {product.productHuntUrl && (
-                <span className="inline-flex items-center gap-1 border border-[#DA552F]/35 bg-[#DA552F]/10 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-widest text-[#DA552F]">
-                  <ProductHuntMark className="size-3 shrink-0" />
-                  {product.phVotesCount != null
-                    ? t("stage.phVotes", { n: product.phVotesCount })
-                    : t("stage.phBadge")}
-                </span>
-              )}
-            </div>
-            {product.authorName ? (
-              <p className="mt-0.5 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
-                {product.authorHandle ? `@${product.authorHandle}` : product.authorName}
-              </p>
-            ) : null}
-            <p className="mt-2 text-sm leading-relaxed text-[var(--ink-body)]">{product.pitch}</p>
-            <div className="mt-2 flex flex-wrap items-center gap-3">
-              <a
-                href={product.url}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-1 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)] transition-colors hover:text-[var(--ink)]"
+        </a>
+      )}
+      <div className="p-4">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="flex min-w-0 flex-1 items-start gap-3">
+            {rank !== undefined && <RankBadge rank={rank} />}
+            {!banner && (
+              <div className="flex size-10 shrink-0 items-center justify-center border border-[var(--ink)]/10 bg-[var(--ink)]/[0.03] text-[var(--ink-subtle)]">
+                <Globe className="size-4" />
+              </div>
+            )}
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-1.5">
+                <p className="font-serif text-lg text-[var(--ink)]">{product.title}</p>
+                {product.featured && (
+                  <span className="inline-flex items-center gap-1 border border-[var(--inner-green)]/35 bg-[var(--inner-green)]/10 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-widest text-[var(--success-ink)]">
+                    <Star className="size-2.5 fill-current" />
+                    {t("stage.featuredBadge")}
+                  </span>
+                )}
+                {product.productHuntUrl && (
+                  <span className="inline-flex items-center gap-1 border border-[#DA552F]/35 bg-[#DA552F]/10 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-widest text-[#DA552F]">
+                    <ProductHuntMark className="size-3 shrink-0" />
+                    {product.phVotesCount != null
+                      ? t("stage.phVotes", { n: product.phVotesCount })
+                      : t("stage.phBadge")}
+                  </span>
+                )}
+              </div>
+              {product.authorName ? (
+                <p className="mt-0.5 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
+                  {product.authorHandle ? `@${product.authorHandle}` : product.authorName}
+                </p>
+              ) : null}
+              <p
+                className={[
+                  "mt-2 whitespace-pre-line text-sm leading-relaxed text-[var(--ink-body)]",
+                  isPitchLong && !expanded ? "line-clamp-3" : "",
+                ].join(" ")}
               >
-                {t("stage.openLink")}
-                <ExternalLink className="size-3" />
-              </a>
-              {product.productHuntUrl && (
+                {product.pitch}
+              </p>
+              {isPitchLong && (
+                <button
+                  type="button"
+                  onClick={() => setExpanded((v) => !v)}
+                  className="hit-40 mt-0.5 inline-flex items-center gap-1 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)] transition-colors hover:text-[var(--ink)]"
+                >
+                  {expanded ? t("stage.showLess") : t("stage.readMore")}
+                  {expanded ? <ChevronDown className="size-3" /> : <ChevronRight className="size-3" />}
+                </button>
+              )}
+              <div className="mt-2 flex flex-wrap items-center gap-3">
                 <a
-                  href={product.productHuntUrl}
+                  href={product.url}
                   target="_blank"
                   rel="noreferrer"
                   className="inline-flex items-center gap-1 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)] transition-colors hover:text-[var(--ink)]"
                 >
-                  {t("stage.openPh")}
+                  {t("stage.openLink")}
                   <ExternalLink className="size-3" />
                 </a>
-              )}
+                {product.productHuntUrl && (
+                  <a
+                    href={product.productHuntUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)] transition-colors hover:text-[var(--ink)]"
+                  >
+                    {t("stage.openPh")}
+                    <ExternalLink className="size-3" />
+                  </a>
+                )}
+                {product.youtubeUrl && (
+                  <a
+                    href={product.youtubeUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)] transition-colors hover:text-[var(--ink)]"
+                  >
+                    <Play className="size-3" />
+                    {t("stage.watchVideo")}
+                  </a>
+                )}
+              </div>
             </div>
           </div>
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => onVote(product.id)}
+            className={[
+              "inline-flex min-h-10 shrink-0 items-center gap-1.5 px-3 py-2 font-mono text-label uppercase tracking-widest transition-colors disabled:opacity-40",
+              product.myVote
+                ? "border border-[var(--inner-green)]/35 bg-[var(--inner-green)]/10 text-[var(--success-ink)]"
+                : "panel-glass text-[var(--ink-body)] hover:border-[var(--ink)]/30",
+            ].join(" ")}
+          >
+            <ThumbsUp className="size-3.5" />
+            {product.votes}
+          </button>
         </div>
-        <button
-          type="button"
-          disabled={busy}
-          onClick={() => onVote(product.id)}
-          className={[
-            "inline-flex min-h-10 shrink-0 items-center gap-1.5 px-3 py-2 font-mono text-label uppercase tracking-widest transition-colors disabled:opacity-40",
-            product.myVote
-              ? "border border-[var(--inner-green)]/35 bg-[var(--inner-green)]/10 text-[var(--success-ink)]"
-              : "panel-glass text-[var(--ink-body)] hover:border-[var(--ink)]/30",
-          ].join(" ")}
-        >
-          <ThumbsUp className="size-3.5" />
-          {product.votes}
-        </button>
-      </div>
 
-      {isAdmin && (
-        <div className="mt-3 flex items-center gap-1.5 border-t border-[var(--ink)]/[0.08] pt-3">
+        {isAdmin && (
+          <div className="mt-3 flex items-center gap-1.5 border-t border-[var(--ink)]/[0.08] pt-3">
           <button
             type="button"
             disabled={adminBusy}
@@ -310,8 +375,9 @@ function ProductCard({
             <Trash2 className="size-3" />
             {t("stage.adminRemove")}
           </button>
-        </div>
-      )}
+          </div>
+        )}
+      </div>
     </article>
   );
 }
@@ -330,6 +396,8 @@ function SubmitDialog({
   const [urlPath, setUrlPath] = useState("");
   const [pitch, setPitch] = useState("");
   const [phPath, setPhPath] = useState("");
+  const [youtubePath, setYoutubePath] = useState("");
+  const [coverPath, setCoverPath] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [titleTouched, setTitleTouched] = useState(false);
@@ -432,6 +500,8 @@ function SubmitDialog({
     setUrlPath("");
     setPitch("");
     setPhPath("");
+    setYoutubePath("");
+    setCoverPath("");
     setPreview(null);
     setTitleTouched(false);
     setPitchTouched(false);
@@ -449,6 +519,8 @@ function SubmitDialog({
     setError(null);
     try {
       const phAbsolute = toHttpsUrl(phPath);
+      const youtubeAbsolute = toHttpsUrl(youtubePath);
+      const coverAbsolute = toHttpsUrl(coverPath);
       const res = await fetch(apiUrl("/api/stage/products"), {
         method: "POST",
         credentials: "include",
@@ -457,8 +529,9 @@ function SubmitDialog({
           title: title.trim(),
           url: absoluteUrl,
           pitch: pitch.trim(),
-          imageUrl: preview?.image ?? null,
+          imageUrl: coverAbsolute || preview?.image || null,
           productHuntUrl: phAbsolute || undefined,
+          youtubeUrl: youtubeAbsolute || undefined,
         }),
       });
       const json = await res.json().catch(() => ({}));
@@ -575,6 +648,21 @@ function SubmitDialog({
               className={`${STAGE_FIELD} resize-none`}
             />
           </label>
+
+          <PrefixedUrlField
+            label={t("stage.fieldCover")}
+            value={coverPath}
+            onChange={setCoverPath}
+            placeholder={t("stage.coverPlaceholder")}
+          />
+
+          <PrefixedUrlField
+            label={t("stage.fieldYoutube")}
+            mark={<Play className="size-3 shrink-0" />}
+            value={youtubePath}
+            onChange={setYoutubePath}
+            placeholder={t("stage.youtubePlaceholder")}
+          />
 
           <PrefixedUrlField
             label={t("stage.fieldPh")}

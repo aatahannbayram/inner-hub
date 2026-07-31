@@ -274,6 +274,20 @@ export const sessionsTable = pgTable("sessions", {
 
 export type Session = typeof sessionsTable.$inferSelect;
 
+// ─── PASSWORD RESET TOKENS ────────────────────────────────────────────────────
+export const passwordResetTokensTable = pgTable("password_reset_tokens", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id")
+    .references(() => usersTable.id)
+    .notNull(),
+  tokenHash: text("token_hash").notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  usedAt: timestamp("used_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export type PasswordResetToken = typeof passwordResetTokensTable.$inferSelect;
+
 // ─── INNER·API ANAHTARLARI ────────────────────────────────────────────────────
 export const apiKeysTable = pgTable("api_keys", {
   id: serial("id").primaryKey(),
@@ -322,6 +336,7 @@ export const stageProductsTable = pgTable("stage_products", {
   productHuntId: text("product_hunt_id"),
   phVotesCount: integer("ph_votes_count"),
   phSyncedAt: timestamp("ph_synced_at"),
+  youtubeUrl: text("youtube_url"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

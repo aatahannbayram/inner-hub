@@ -227,6 +227,7 @@ export const ensureStageSchema = once(async () => {
   await db.execute(sql`ALTER TABLE stage_products ADD COLUMN IF NOT EXISTS product_hunt_id text`);
   await db.execute(sql`ALTER TABLE stage_products ADD COLUMN IF NOT EXISTS ph_votes_count integer`);
   await db.execute(sql`ALTER TABLE stage_products ADD COLUMN IF NOT EXISTS ph_synced_at timestamp`);
+  await db.execute(sql`ALTER TABLE stage_products ADD COLUMN IF NOT EXISTS youtube_url text`);
 });
 
 /** Tanışma talepleri + FAQ kategori kolonu. */
@@ -357,6 +358,28 @@ export const ensureAnalyticsEventsSchema = once(async () => {
   `);
   await db.execute(sql`
     CREATE INDEX IF NOT EXISTS analytics_events_session_idx ON analytics_events (session_id)
+  `);
+});
+
+/** Şifre sıfırlama token'ları — yalnızca hash saklanır. */
+export const ensurePasswordResetSchema = once(async () => {
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS password_reset_tokens (
+      id serial PRIMARY KEY,
+      user_id integer NOT NULL REFERENCES users(id),
+      token_hash text NOT NULL,
+      expires_at timestamp NOT NULL,
+      used_at timestamp,
+      created_at timestamp NOT NULL DEFAULT now()
+    )
+  `);
+  await db.execute(sql`
+    CREATE UNIQUE INDEX IF NOT EXISTS password_reset_tokens_hash_uidx
+      ON password_reset_tokens (token_hash)
+  `);
+  await db.execute(sql`
+    CREATE INDEX IF NOT EXISTS password_reset_tokens_user_idx
+      ON password_reset_tokens (user_id)
   `);
 });
 

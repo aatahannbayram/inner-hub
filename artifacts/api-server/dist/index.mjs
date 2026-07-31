@@ -53919,7 +53919,7 @@ var init_users = __esm({
 });
 
 // ../../lib/db/src/schema/hub.ts
-var applicationsTable, insertApplicationSchema, selectApplicationSchema, coursesTable, modulesTable, lessonsTable, enrollmentsTable, progressTable, insertCourseSchema, selectCourseSchema, eventsTable, eventRegistrationsTable, insertEventSchema, selectEventSchema, channelsTable, messagesTable, insertMessageSchema, perksTable, insertPerkSchema, selectPerkSchema, notificationsTable, faqTable, introductionRequestsTable, vaultDocumentsTable, capitalDealsTable, capitalSpvsTable, talentPostsTable, sessionsTable, apiKeysTable, passWalletsTable, passLedgerTable, stageProductsTable, stageVotesTable, liveNotifyLogTable, organizationsTable, orgMembershipsTable, legalDocumentsTable, legalAcceptancesTable, campaignsTable;
+var applicationsTable, insertApplicationSchema, selectApplicationSchema, coursesTable, modulesTable, lessonsTable, enrollmentsTable, progressTable, insertCourseSchema, selectCourseSchema, eventsTable, eventRegistrationsTable, insertEventSchema, selectEventSchema, channelsTable, messagesTable, insertMessageSchema, perksTable, insertPerkSchema, selectPerkSchema, notificationsTable, faqTable, introductionRequestsTable, vaultDocumentsTable, capitalDealsTable, capitalSpvsTable, talentPostsTable, sessionsTable, passwordResetTokensTable, apiKeysTable, passWalletsTable, passLedgerTable, stageProductsTable, stageVotesTable, liveNotifyLogTable, organizationsTable, orgMembershipsTable, legalDocumentsTable, legalAcceptancesTable, campaignsTable;
 var init_hub = __esm({
   "../../lib/db/src/schema/hub.ts"() {
     "use strict";
@@ -54139,6 +54139,14 @@ var init_hub = __esm({
       expiresAt: timestamp("expires_at").notNull(),
       createdAt: timestamp("created_at").defaultNow().notNull()
     });
+    passwordResetTokensTable = pgTable("password_reset_tokens", {
+      id: serial("id").primaryKey(),
+      userId: integer("user_id").references(() => usersTable.id).notNull(),
+      tokenHash: text("token_hash").notNull(),
+      expiresAt: timestamp("expires_at").notNull(),
+      usedAt: timestamp("used_at"),
+      createdAt: timestamp("created_at").defaultNow().notNull()
+    });
     apiKeysTable = pgTable("api_keys", {
       id: serial("id").primaryKey(),
       userId: integer("user_id").references(() => usersTable.id).notNull(),
@@ -54176,6 +54184,7 @@ var init_hub = __esm({
       productHuntId: text("product_hunt_id"),
       phVotesCount: integer("ph_votes_count"),
       phSyncedAt: timestamp("ph_synced_at"),
+      youtubeUrl: text("youtube_url"),
       createdAt: timestamp("created_at").defaultNow().notNull()
     });
     stageVotesTable = pgTable("stage_votes", {
@@ -54353,6 +54362,7 @@ __export(schema_exports, {
   organizationsTable: () => organizationsTable,
   passLedgerTable: () => passLedgerTable,
   passWalletsTable: () => passWalletsTable,
+  passwordResetTokensTable: () => passwordResetTokensTable,
   perksTable: () => perksTable,
   progressTable: () => progressTable,
   roleEnum: () => roleEnum,
@@ -97725,7 +97735,6 @@ async function sendTransactionalMail(mail) {
   }
   const domain2 = mailDomain();
   const messageId = `<${Date.now()}.${randomBytes(8).toString("hex")}@${domain2}>`;
-  const unsubMailto = `mailto:${mailReplyTo()}?subject=${encodeURIComponent("unsubscribe")}`;
   try {
     await transport.sendMail({
       from: mailFromHeader(),
@@ -97738,8 +97747,6 @@ async function sendTransactionalMail(mail) {
       headers: {
         "Auto-Submitted": "auto-generated",
         "X-Auto-Response-Suppress": "All",
-        "List-Unsubscribe": `<${unsubMailto}>`,
-        "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
         "X-Inner-Mail-Kind": mail.kind ?? "transactional"
       }
     });
@@ -98065,6 +98072,38 @@ function adminNewRequestMail(payload) {
   });
   return { subject, text: text2, html, kind: "admin.new_request" };
 }
+function passwordResetMail(ctx) {
+  const appUrl3 = appBaseUrl();
+  const name = firstName(ctx.name);
+  const subject = "inner hub \xB7 \u015Fifre s\u0131f\u0131rlama";
+  const text2 = [
+    `Merhaba ${name},`,
+    "",
+    "Hesab\u0131n i\xE7in \u015Fifre s\u0131f\u0131rlama talebi ald\u0131k.",
+    "",
+    "Yeni \u015Fifreni belirlemek i\xE7in bu ba\u011Flant\u0131y\u0131 a\xE7 (1 saat ge\xE7erli):",
+    ctx.resetUrl,
+    "",
+    "Bu talebi sen yapmad\u0131ysan bu iletiyi yok sayabilirsin. \u015Eifren de\u011Fi\u015Fmez.",
+    "",
+    "inner hub",
+    appUrl3
+  ].join("\n");
+  const html = renderInnerEmailLayout({
+    appUrl: appUrl3,
+    preheader: "\u015Eifreni s\u0131f\u0131rlamak i\xE7in ba\u011Flant\u0131 \xB7 1 saat ge\xE7erli.",
+    eyebrow: "Hesap \xB7 \u015Fifre s\u0131f\u0131rlama",
+    title: `${name}, \u015Fifreni yenile.`,
+    bodyHtml: `
+      <p style="margin:0 0 12px;">Merhaba ${escapeHtml(name)}, hesab\u0131n i\xE7in \u015Fifre s\u0131f\u0131rlama talebi ald\u0131k.</p>
+      <p style="margin:0 0 12px;">A\u015Fa\u011F\u0131daki d\xFC\u011Fmeyle yeni \u015Fifreni belirleyebilirsin. Ba\u011Flant\u0131 <strong style="color:#F4F1EC;font-weight:500;">1 saat</strong> ge\xE7erlidir.</p>
+      <p style="margin:0;font-size:13px;color:rgba(244,241,236,0.45);">Bu talebi sen yapmad\u0131ysan bu iletiyi yok say. \u015Eifren de\u011Fi\u015Fmez.</p>
+    `,
+    cta: { label: "\u015Eifreyi s\u0131f\u0131rla", href: ctx.resetUrl },
+    footerNote: "Bu ileti, \u015Fifre s\u0131f\u0131rlama talebine yan\u0131t olarak otomatik g\xF6nderildi."
+  });
+  return { subject, text: text2, html, kind: "auth.password_reset" };
+}
 function liveSessionReminderMail(ctx) {
   const appUrl3 = appBaseUrl();
   const name = firstName(ctx.name);
@@ -98137,6 +98176,10 @@ async function notifyApplicantInvitationApproved(ctx) {
 }
 async function notifyApplicantInvitationRejected(ctx) {
   const mail = invitationRejectedMail(ctx);
+  return sendTransactionalMail({ ...mail, to: ctx.email });
+}
+async function notifyPasswordReset(ctx) {
+  const mail = passwordResetMail(ctx);
   return sendTransactionalMail({ ...mail, to: ctx.email });
 }
 async function notifyLiveSession(ctx) {
@@ -98441,6 +98484,7 @@ var ensureStageSchema = once(async () => {
   await db.execute(sql`ALTER TABLE stage_products ADD COLUMN IF NOT EXISTS product_hunt_id text`);
   await db.execute(sql`ALTER TABLE stage_products ADD COLUMN IF NOT EXISTS ph_votes_count integer`);
   await db.execute(sql`ALTER TABLE stage_products ADD COLUMN IF NOT EXISTS ph_synced_at timestamp`);
+  await db.execute(sql`ALTER TABLE stage_products ADD COLUMN IF NOT EXISTS youtube_url text`);
 });
 var ensureMatchAndFaqSchema = once(async () => {
   await db.execute(sql`
@@ -98561,6 +98605,26 @@ var ensureAnalyticsEventsSchema = once(async () => {
   `);
   await db.execute(sql`
     CREATE INDEX IF NOT EXISTS analytics_events_session_idx ON analytics_events (session_id)
+  `);
+});
+var ensurePasswordResetSchema = once(async () => {
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS password_reset_tokens (
+      id serial PRIMARY KEY,
+      user_id integer NOT NULL REFERENCES users(id),
+      token_hash text NOT NULL,
+      expires_at timestamp NOT NULL,
+      used_at timestamp,
+      created_at timestamp NOT NULL DEFAULT now()
+    )
+  `);
+  await db.execute(sql`
+    CREATE UNIQUE INDEX IF NOT EXISTS password_reset_tokens_hash_uidx
+      ON password_reset_tokens (token_hash)
+  `);
+  await db.execute(sql`
+    CREATE INDEX IF NOT EXISTS password_reset_tokens_user_idx
+      ON password_reset_tokens (user_id)
   `);
 });
 var ensureInviteCodesSchema = once(async () => {
@@ -116961,6 +117025,9 @@ async function createSession(userId) {
 async function destroySession(sessionId) {
   await db.delete(sessionsTable).where(eq(sessionsTable.id, sessionId));
 }
+async function destroySessionsForUser(userId) {
+  await db.delete(sessionsTable).where(eq(sessionsTable.userId, userId));
+}
 async function getUserBySession(sessionId) {
   if (!sessionId) return null;
   const [row] = await db.select({ user: usersTable, expiresAt: sessionsTable.expiresAt }).from(sessionsTable).innerJoin(usersTable, eq(sessionsTable.userId, usersTable.id)).where(and(eq(sessionsTable.id, sessionId), isNull(usersTable.deletedAt))).limit(1);
@@ -117255,6 +117322,22 @@ async function userHasAcceptedLatestLegal(userId, locale = "tr") {
 var router5 = (0, import_express5.Router)();
 var googleClientId = process.env.GOOGLE_CLIENT_ID;
 var googleClient = googleClientId ? new import_google_auth_library.OAuth2Client(googleClientId) : null;
+var PASSWORD_RESET_TTL_MS = 60 * 60 * 1e3;
+var forgotHits = /* @__PURE__ */ new Map();
+function allowForgotAttempt(key, limit3 = 5, windowMs = 60 * 60 * 1e3) {
+  const now = Date.now();
+  const row = forgotHits.get(key);
+  if (!row || now > row.reset) {
+    forgotHits.set(key, { n: 1, reset: now + windowMs });
+    return true;
+  }
+  if (row.n >= limit3) return false;
+  row.n += 1;
+  return true;
+}
+function hashResetToken(token) {
+  return crypto10.createHash("sha256").update(token).digest("hex");
+}
 function calcCompletion(input) {
   const parts = input.name.trim().split(/\s+/).filter(Boolean);
   const checks = [
@@ -117403,6 +117486,95 @@ router5.post("/login", async (req, res) => {
     res.json({ user: publicUser(user) });
   } catch (err) {
     res.status(500).json({ error: err.message ?? "Giri\u015F s\u0131ras\u0131nda hata olu\u015Ftu" });
+  }
+});
+router5.post("/forgot-password", async (req, res) => {
+  const genericOk = {
+    ok: true,
+    message: "E-posta kay\u0131tl\u0131ysa \u015Fifre s\u0131f\u0131rlama ba\u011Flant\u0131s\u0131 g\xF6nderildi. Gelen kutunu ve spam klas\xF6r\xFCn\xFC kontrol et."
+  };
+  try {
+    const email3 = typeof req.body?.email === "string" ? normalizeEmail(req.body.email) : "";
+    if (!email3 || !email3.includes("@")) {
+      res.status(400).json({ error: "Ge\xE7erli bir e-posta gerekli" });
+      return;
+    }
+    const ip = (typeof req.headers["x-forwarded-for"] === "string" ? req.headers["x-forwarded-for"].split(",")[0]?.trim() : null) || req.ip || "unknown";
+    if (!allowForgotAttempt(`ip:${ip}`) || !allowForgotAttempt(`email:${email3}`, 3)) {
+      res.status(429).json({ error: "\xC7ok fazla deneme. Biraz sonra tekrar dene." });
+      return;
+    }
+    await ensurePasswordResetSchema();
+    const [user] = await db.select().from(usersTable).where(eq(usersTable.email, email3)).limit(1);
+    if (user && !user.deletedAt) {
+      const rawToken = crypto10.randomBytes(32).toString("hex");
+      const tokenHash = hashResetToken(rawToken);
+      const expiresAt = new Date(Date.now() + PASSWORD_RESET_TTL_MS);
+      await db.update(passwordResetTokensTable).set({ usedAt: /* @__PURE__ */ new Date() }).where(
+        and(
+          eq(passwordResetTokensTable.userId, user.id),
+          isNull(passwordResetTokensTable.usedAt)
+        )
+      );
+      await db.insert(passwordResetTokensTable).values({
+        userId: user.id,
+        tokenHash,
+        expiresAt
+      });
+      const resetUrl = `${appBaseUrl()}/panel?reset=${encodeURIComponent(rawToken)}`;
+      const mailResult = await notifyPasswordReset({
+        name: user.name,
+        email: user.email,
+        resetUrl
+      });
+      if (!mailResult.ok) {
+        logger.warn({ email: user.email, error: mailResult.error }, "Password reset mail failed");
+      }
+    }
+    res.json(genericOk);
+  } catch (err) {
+    logger.error({ err }, "forgot-password failed");
+    res.status(500).json({ error: err.message ?? "\u015Eifre s\u0131f\u0131rlama iste\u011Fi ba\u015Far\u0131s\u0131z" });
+  }
+});
+router5.post("/reset-password", async (req, res) => {
+  try {
+    const token = typeof req.body?.token === "string" ? req.body.token.trim() : "";
+    const password = typeof req.body?.password === "string" ? req.body.password : "";
+    if (!token || token.length < 32) {
+      res.status(400).json({ error: "Ge\xE7ersiz veya eksik s\u0131f\u0131rlama ba\u011Flant\u0131s\u0131" });
+      return;
+    }
+    if (!password || password.length < 8) {
+      res.status(400).json({ error: "\u015Eifre en az 8 karakter olmal\u0131" });
+      return;
+    }
+    await ensurePasswordResetSchema();
+    const tokenHash = hashResetToken(token);
+    const [row] = await db.select().from(passwordResetTokensTable).where(eq(passwordResetTokensTable.tokenHash, tokenHash)).limit(1);
+    if (!row || row.usedAt || row.expiresAt.getTime() < Date.now()) {
+      res.status(400).json({ error: "Ba\u011Flant\u0131 ge\xE7ersiz veya s\xFCresi dolmu\u015F. Yeni talep olu\u015Ftur." });
+      return;
+    }
+    const passwordHash = await import_bcryptjs.default.hash(password, 12);
+    const [user] = await db.update(usersTable).set({ passwordHash }).where(eq(usersTable.id, row.userId)).returning();
+    if (!user || user.deletedAt) {
+      res.status(400).json({ error: "Hesap bulunamad\u0131" });
+      return;
+    }
+    await db.update(passwordResetTokensTable).set({ usedAt: /* @__PURE__ */ new Date() }).where(
+      and(
+        eq(passwordResetTokensTable.userId, user.id),
+        isNull(passwordResetTokensTable.usedAt)
+      )
+    );
+    await destroySessionsForUser(user.id);
+    const sessionId = await createSession(user.id);
+    res.cookie(SESSION_COOKIE, sessionId, sessionCookieOptions);
+    res.json({ user: publicUser(user), ok: true });
+  } catch (err) {
+    logger.error({ err }, "reset-password failed");
+    res.status(500).json({ error: err.message ?? "\u015Eifre s\u0131f\u0131rlanamad\u0131" });
   }
 });
 router5.post("/google", async (req, res) => {
@@ -125845,6 +126017,37 @@ async function resolveProductHuntLink(rawUrl) {
   };
 }
 
+// src/lib/youtube.ts
+var YT_ID_RE = /^[\w-]{11}$/;
+function parseYoutubeId(raw) {
+  let u;
+  try {
+    u = new URL(raw);
+  } catch {
+    return null;
+  }
+  const host = u.hostname.replace(/^(www|m|music)\./, "");
+  if (host === "youtu.be") {
+    const id = u.pathname.slice(1).split("/")[0];
+    return id && YT_ID_RE.test(id) ? id : null;
+  }
+  if (host === "youtube.com") {
+    if (u.pathname === "/watch") {
+      const id = u.searchParams.get("v");
+      return id && YT_ID_RE.test(id) ? id : null;
+    }
+    const m = u.pathname.match(/^\/(?:shorts|embed|live)\/([\w-]{11})/);
+    if (m) return m[1];
+  }
+  return null;
+}
+function youtubeWatchUrl(id) {
+  return `https://www.youtube.com/watch?v=${id}`;
+}
+function youtubeThumbnailUrl(id) {
+  return `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
+}
+
 // src/routes/stage.ts
 var router21 = (0, import_express21.Router)();
 function parsePeriod(raw, fallback = "week") {
@@ -125860,6 +126063,7 @@ function periodStart(period) {
   return new Date(now - 365 * 24 * 60 * 60 * 1e3);
 }
 function mapProduct(product, voteCount, myVote, author) {
+  const ytId = product.youtubeUrl ? parseYoutubeId(product.youtubeUrl) : null;
   return {
     id: product.id,
     title: product.title,
@@ -125871,6 +126075,8 @@ function mapProduct(product, voteCount, myVote, author) {
     productHuntUrl: product.productHuntUrl ?? null,
     productHuntId: product.productHuntId ?? null,
     phVotesCount: product.phVotesCount ?? null,
+    youtubeUrl: product.youtubeUrl ?? null,
+    youtubeThumbnail: ytId ? youtubeThumbnailUrl(ytId) : null,
     createdAt: product.createdAt.toISOString(),
     userId: product.userId,
     authorName: author?.name ?? null,
@@ -126002,12 +126208,12 @@ router21.post("/stage/products", requireAuth, async (req, res) => {
   try {
     await ensureStageSchema();
     const userId = req.user.id;
-    const { title, url: url2, pitch, imageUrl, productHuntUrl } = req.body;
+    const { title, url: url2, pitch, imageUrl, productHuntUrl, youtubeUrl } = req.body;
     const t = title?.trim() ?? "";
     const u = url2?.trim() ?? "";
     const p = pitch?.trim() ?? "";
     const rawImage = imageUrl?.trim() ?? "";
-    const img = rawImage.length <= 500 && (rawImage.startsWith("http://") || rawImage.startsWith("https://") || rawImage.startsWith("/api/org-logos/")) ? rawImage : null;
+    let img = rawImage.length <= 500 && (rawImage.startsWith("http://") || rawImage.startsWith("https://") || rawImage.startsWith("/api/org-logos/")) ? rawImage : null;
     if (!t || !u || !p) {
       res.status(400).json({ error: "title, url ve pitch zorunlu" });
       return;
@@ -126025,6 +126231,17 @@ router21.post("/stage/products", requireAuth, async (req, res) => {
         return;
       }
     }
+    let ytCanonical = null;
+    const rawYoutube = youtubeUrl?.trim() ?? "";
+    if (rawYoutube) {
+      const ytId = parseYoutubeId(rawYoutube);
+      if (!ytId) {
+        res.status(400).json({ error: "Ge\xE7ersiz YouTube linki" });
+        return;
+      }
+      ytCanonical = youtubeWatchUrl(ytId);
+      if (!img) img = youtubeThumbnailUrl(ytId);
+    }
     const [created] = await db.insert(stageProductsTable).values({
       userId,
       title: t,
@@ -126035,7 +126252,8 @@ router21.post("/stage/products", requireAuth, async (req, res) => {
       productHuntUrl: ph?.productHuntUrl ?? null,
       productHuntId: ph?.productHuntId ?? null,
       phVotesCount: ph?.phVotesCount ?? null,
-      phSyncedAt: ph?.phSyncedAt ?? null
+      phSyncedAt: ph?.phSyncedAt ?? null,
+      youtubeUrl: ytCanonical
     }).returning();
     res.status(201).json(
       mapProduct(created, 0, false, {
@@ -127292,7 +127510,8 @@ Promise.all([
   ensureUserMembershipColumns(),
   ensurePassSchema(),
   ensureStageSchema(),
-  ensureOrgLegalCampaignSchema()
+  ensureOrgLegalCampaignSchema(),
+  ensurePasswordResetSchema()
 ]).catch((err) => {
   logger.warn({ err }, "Schema ensure failed (will retry on demand)");
 }).finally(() => {
