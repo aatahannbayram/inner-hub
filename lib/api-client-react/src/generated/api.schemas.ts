@@ -44,6 +44,8 @@ export interface InvitationInput {
   organizationDomain?: string | null;
   /** @nullable */
   organizationLogo?: string | null;
+  /** @nullable */
+  organizationDescription?: string | null;
   /**
      * Honeypot field — must be empty
      * @nullable
@@ -79,6 +81,8 @@ export interface InvitationRecord {
   organizationDomain?: string | null;
   /** @nullable */
   organizationLogo?: string | null;
+  /** @nullable */
+  organizationDescription?: string | null;
   /** @nullable */
   ipAddress?: string | null;
   createdAt: string;

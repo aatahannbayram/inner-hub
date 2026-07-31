@@ -34,6 +34,7 @@ export async function notifyNewInvitationRequest(req: {
   organization?: string | null;
   organizationDomain?: string | null;
   organizationLogo?: string | null;
+  organizationDescription?: string | null;
 }) {
   const mail = adminNewRequestMail({
     ...req,

@@ -26,6 +26,8 @@ export interface InvitationRecord {
   /** @nullable */
   organizationLogo?: string | null;
   /** @nullable */
+  organizationDescription?: string | null;
+  /** @nullable */
   ipAddress?: string | null;
   createdAt: Date;
 }

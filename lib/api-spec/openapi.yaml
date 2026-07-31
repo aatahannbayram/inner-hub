@@ -127,6 +127,9 @@ components:
         organizationLogo:
           type: ["string", "null"]
           description: Optional pre-resolved logo URL; server may override after caching
+        organizationDescription:
+          type: ["string", "null"]
+          description: Auto-fetched company site description (og:description), for admin review context
         fax:
           type: ["string", "null"]
           description: Honeypot field — must be empty
@@ -170,6 +173,8 @@ components:
         organizationDomain:
           type: ["string", "null"]
         organizationLogo:
+          type: ["string", "null"]
+        organizationDescription:
           type: ["string", "null"]
         ipAddress:
           type: ["string", "null"]

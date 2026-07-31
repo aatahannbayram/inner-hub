@@ -98149,6 +98149,7 @@ function adminNewRequestMail(payload) {
     `Kimlik: ${role}`,
     payload.organization ? `Kurum: ${payload.organization}` : null,
     payload.organizationDomain ? `Domain: ${payload.organizationDomain}` : null,
+    payload.organizationDescription ? `Kurum a\xE7\u0131klamas\u0131: ${payload.organizationDescription}` : null,
     payload.linkedin ? `LinkedIn: ${payload.linkedin}` : null,
     `Kim: ${payload.whoYouAre}`,
     payload.link ? `Link: ${payload.link}` : null,
@@ -98166,7 +98167,8 @@ function adminNewRequestMail(payload) {
       <p style="margin:0 0 8px;"><strong style="color:#F4F1EC;">${escapeHtml(payload.email)}</strong></p>
       <p style="margin:0 0 16px;">Kap\u0131: ${escapeHtml(role)}</p>
       <p style="margin:0 0 12px;white-space:pre-wrap;">${escapeHtml(payload.whoYouAre)}</p>
-      ${payload.organization ? `<p style="margin:0;">Kurum: ${escapeHtml(payload.organization)}</p>` : ""}
+      ${payload.organization ? `<p style="margin:0 0 8px;">Kurum: ${escapeHtml(payload.organization)}</p>` : ""}
+      ${payload.organizationDescription ? `<p style="margin:0;color:#B8B4AC;">${escapeHtml(payload.organizationDescription)}</p>` : ""}
     `,
     cta: { label: "Ba\u015Fvurular\u0131 a\xE7", href: requestsUrl },
     footerNote: "\u0130\xE7 bildirim; yaln\u0131zca ekip adresine gider."
@@ -98921,6 +98923,7 @@ var ensureOrgColumns = once(async () => {
   await db.execute(sql`ALTER TABLE invitation_requests ADD COLUMN IF NOT EXISTS organization text`);
   await db.execute(sql`ALTER TABLE invitation_requests ADD COLUMN IF NOT EXISTS organization_domain text`);
   await db.execute(sql`ALTER TABLE invitation_requests ADD COLUMN IF NOT EXISTS organization_logo text`);
+  await db.execute(sql`ALTER TABLE invitation_requests ADD COLUMN IF NOT EXISTS organization_description text`);
 });
 router2.get("/org-logo", async (req, res) => {
   const domain2 = normalizeDomain(String(req.query.domain ?? ""));
@@ -98929,10 +98932,12 @@ router2.get("/org-logo", async (req, res) => {
     return;
   }
   let name = null;
+  let description = null;
   let logoUrl = null;
   try {
     const preview = await fetchLinkPreview(`https://${domain2}`);
     name = preview.siteName?.trim() || preview.title?.trim() || null;
+    description = preview.description?.trim() || null;
     logoUrl = preview.image ?? null;
   } catch (err) {
     logger.debug({ err, domain: domain2 }, "org preview fetch failed, falling back to favicon-only");
@@ -98945,7 +98950,7 @@ router2.get("/org-logo", async (req, res) => {
     res.status(404).json({ error: "Logo not found", domain: domain2 });
     return;
   }
-  res.json({ domain: domain2, name, logoUrl });
+  res.json({ domain: domain2, name, description, logoUrl });
 });
 router2.post("/request", async (req, res) => {
   const parsed = SubmitRequestBody.safeParse(req.body);
@@ -98964,6 +98969,7 @@ router2.post("/request", async (req, res) => {
     organization,
     organizationDomain,
     organizationLogo,
+    organizationDescription,
     company,
     fax
   } = parsed.data;
@@ -98984,6 +98990,7 @@ router2.post("/request", async (req, res) => {
   const trimmedLink = link?.trim() || null;
   const trimmedWhoIntroduced = whoIntroduced?.trim() || null;
   const trimmedOrg = organization?.trim() || null;
+  const trimmedOrgDescription = organizationDescription?.trim().slice(0, 500) || null;
   let domain2 = normalizeDomain(organizationDomain) || normalizeDomain(trimmedLink) || domainFromEmail(trimmedEmail);
   let logoUrl = organizationLogo?.trim() || null;
   if (domain2) {
@@ -99008,6 +99015,7 @@ router2.post("/request", async (req, res) => {
     organization: trimmedOrg,
     organizationDomain: domain2,
     organizationLogo: logoUrl,
+    organizationDescription: trimmedOrgDescription,
     ipAddress: ip
   });
   void notifyNewInvitationRequest({
@@ -99020,7 +99028,8 @@ router2.post("/request", async (req, res) => {
     whoIntroduced: trimmedWhoIntroduced,
     organization: trimmedOrg,
     organizationDomain: domain2,
-    organizationLogo: logoUrl
+    organizationLogo: logoUrl,
+    organizationDescription: trimmedOrgDescription
   });
   void notifyApplicantInvitationReceived({
     name: trimmedName,

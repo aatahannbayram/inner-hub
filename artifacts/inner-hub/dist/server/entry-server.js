@@ -9010,6 +9010,7 @@ function Invitation() {
   const [organization, setOrganization] = useState("");
   const [organizationDomain, setOrganizationDomain] = useState("");
   const [organizationLogo, setOrganizationLogo] = useState(null);
+  const [organizationDescription, setOrganizationDescription] = useState(null);
   const [logoLoading, setLogoLoading] = useState(false);
   const [whoYouAre, setWhoYouAre] = useState("");
   const [whoIntroduced, setWhoIntroduced] = useState("");
@@ -9058,6 +9059,7 @@ function Invitation() {
     const domain = normalizeDomainInput(organizationDomain);
     if (!domain || !domain.includes(".")) {
       setOrganizationLogo(null);
+      setOrganizationDescription(null);
       return;
     }
     let cancelled = false;
@@ -9072,6 +9074,7 @@ function Invitation() {
         const data = await res.json();
         if (cancelled) return;
         setOrganizationLogo(data.logoUrl ?? null);
+        setOrganizationDescription(data.description?.trim() || null);
         if (data.name) {
           setOrganization((current) => current.trim() ? current : data.name ?? current);
         }
@@ -9121,6 +9124,7 @@ function Invitation() {
         organization: organization.trim() || null,
         organizationDomain: organizationDomain.trim() || null,
         organizationLogo: organizationLogo || null,
+        organizationDescription: organizationDescription || null,
         fax: fax || null,
         company: null
       }

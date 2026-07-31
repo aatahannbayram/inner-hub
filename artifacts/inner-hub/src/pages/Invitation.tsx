@@ -101,6 +101,7 @@ export default function Invitation() {
   const [organization, setOrganization] = useState("");
   const [organizationDomain, setOrganizationDomain] = useState("");
   const [organizationLogo, setOrganizationLogo] = useState<string | null>(null);
+  const [organizationDescription, setOrganizationDescription] = useState<string | null>(null);
   const [logoLoading, setLogoLoading] = useState(false);
   const [whoYouAre, setWhoYouAre] = useState("");
   const [whoIntroduced, setWhoIntroduced] = useState("");
@@ -156,6 +157,7 @@ export default function Invitation() {
     const domain = normalizeDomainInput(organizationDomain);
     if (!domain || !domain.includes(".")) {
       setOrganizationLogo(null);
+      setOrganizationDescription(null);
       return;
     }
     let cancelled = false;
@@ -167,9 +169,10 @@ export default function Invitation() {
           if (!cancelled) setOrganizationLogo(null);
           return;
         }
-        const data = (await res.json()) as { logoUrl?: string; name?: string };
+        const data = (await res.json()) as { logoUrl?: string; name?: string; description?: string };
         if (cancelled) return;
         setOrganizationLogo(data.logoUrl ?? null);
+        setOrganizationDescription(data.description?.trim() || null);
         if (data.name) {
           // Kullanıcı zaten kurum adı yazdıysa üzerine yazma.
           setOrganization((current) => (current.trim() ? current : data.name ?? current));
@@ -226,6 +229,7 @@ export default function Invitation() {
         organization: organization.trim() || null,
         organizationDomain: organizationDomain.trim() || null,
         organizationLogo: organizationLogo || null,
+        organizationDescription: organizationDescription || null,
         fax: fax || null,
         company: null,
       },

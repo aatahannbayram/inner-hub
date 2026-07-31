@@ -35,6 +35,7 @@ export const SubmitRequestBody = zod.object({
   "organization": zod.string().nullish(),
   "organizationDomain": zod.string().nullish(),
   "organizationLogo": zod.string().nullish(),
+  "organizationDescription": zod.string().nullish(),
   "fax": zod.string().nullish().describe('Honeypot field — must be empty'),
   "company": zod.string().nullish().describe('Legacy honeypot field — must be empty')
 })

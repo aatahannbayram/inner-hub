@@ -47,6 +47,7 @@ const ensureOrgColumns = once(async () => {
   await db.execute(sql`ALTER TABLE invitation_requests ADD COLUMN IF NOT EXISTS organization text`);
   await db.execute(sql`ALTER TABLE invitation_requests ADD COLUMN IF NOT EXISTS organization_domain text`);
   await db.execute(sql`ALTER TABLE invitation_requests ADD COLUMN IF NOT EXISTS organization_logo text`);
+  await db.execute(sql`ALTER TABLE invitation_requests ADD COLUMN IF NOT EXISTS organization_description text`);
 });
 
 /**
@@ -62,11 +63,13 @@ router.get("/org-logo", async (req, res) => {
   }
 
   let name: string | null = null;
+  let description: string | null = null;
   let logoUrl: string | null = null;
 
   try {
     const preview = await fetchLinkPreview(`https://${domain}`);
     name = preview.siteName?.trim() || preview.title?.trim() || null;
+    description = preview.description?.trim() || null;
     logoUrl = preview.image ?? null;
   } catch (err) {
     logger.debug({ err, domain }, "org preview fetch failed, falling back to favicon-only");
@@ -81,7 +84,7 @@ router.get("/org-logo", async (req, res) => {
     res.status(404).json({ error: "Logo not found", domain });
     return;
   }
-  res.json({ domain, name, logoUrl });
+  res.json({ domain, name, description, logoUrl });
 });
 
 router.post("/request", async (req, res) => {
@@ -102,12 +105,14 @@ router.post("/request", async (req, res) => {
     organization,
     organizationDomain,
     organizationLogo,
+    organizationDescription,
     company,
     fax,
   } = parsed.data as typeof parsed.data & {
     organization?: string | null;
     organizationDomain?: string | null;
     organizationLogo?: string | null;
+    organizationDescription?: string | null;
     fax?: string | null;
   };
 
@@ -131,6 +136,7 @@ router.post("/request", async (req, res) => {
   const trimmedLink = link?.trim() || null;
   const trimmedWhoIntroduced = whoIntroduced?.trim() || null;
   const trimmedOrg = organization?.trim() || null;
+  const trimmedOrgDescription = organizationDescription?.trim().slice(0, 500) || null;
 
   let domain =
     normalizeDomain(organizationDomain) ||
@@ -163,6 +169,7 @@ router.post("/request", async (req, res) => {
     organization: trimmedOrg,
     organizationDomain: domain,
     organizationLogo: logoUrl,
+    organizationDescription: trimmedOrgDescription,
     ipAddress: ip,
   });
 
@@ -177,6 +184,7 @@ router.post("/request", async (req, res) => {
     organization: trimmedOrg,
     organizationDomain: domain,
     organizationLogo: logoUrl,
+    organizationDescription: trimmedOrgDescription,
   });
 
   void notifyApplicantInvitationReceived({

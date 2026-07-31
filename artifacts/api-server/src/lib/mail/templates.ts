@@ -187,6 +187,7 @@ export function adminNewRequestMail(payload: {
   organization?: string | null;
   organizationDomain?: string | null;
   organizationLogo?: string | null;
+  organizationDescription?: string | null;
   linkedin?: string | null;
   whoYouAre: string;
   link?: string | null;
@@ -202,6 +203,7 @@ export function adminNewRequestMail(payload: {
     `Kimlik: ${role}`,
     payload.organization ? `Kurum: ${payload.organization}` : null,
     payload.organizationDomain ? `Domain: ${payload.organizationDomain}` : null,
+    payload.organizationDescription ? `Kurum açıklaması: ${payload.organizationDescription}` : null,
     payload.linkedin ? `LinkedIn: ${payload.linkedin}` : null,
     `Kim: ${payload.whoYouAre}`,
     payload.link ? `Link: ${payload.link}` : null,
@@ -220,7 +222,8 @@ export function adminNewRequestMail(payload: {
       <p style="margin:0 0 8px;"><strong style="color:#F4F1EC;">${escapeHtml(payload.email)}</strong></p>
       <p style="margin:0 0 16px;">Kapı: ${escapeHtml(role)}</p>
       <p style="margin:0 0 12px;white-space:pre-wrap;">${escapeHtml(payload.whoYouAre)}</p>
-      ${payload.organization ? `<p style="margin:0;">Kurum: ${escapeHtml(payload.organization)}</p>` : ""}
+      ${payload.organization ? `<p style="margin:0 0 8px;">Kurum: ${escapeHtml(payload.organization)}</p>` : ""}
+      ${payload.organizationDescription ? `<p style="margin:0;color:#B8B4AC;">${escapeHtml(payload.organizationDescription)}</p>` : ""}
     `,
     cta: { label: "Başvuruları aç", href: requestsUrl },
     footerNote: "İç bildirim; yalnızca ekip adresine gider.",
