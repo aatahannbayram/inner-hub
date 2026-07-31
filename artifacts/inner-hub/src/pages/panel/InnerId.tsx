@@ -16,6 +16,7 @@ import {
   Check,
   X,
   Link2,
+  Loader2,
 } from "lucide-react";
 import { Link } from "wouter";
 import { useApiQuery } from "@/hooks/useApiQuery";
@@ -37,6 +38,7 @@ type ApiUser = {
   linkedin?: string | null;
   github?: string | null;
   website?: string | null;
+  websiteLogoUrl?: string | null;
   twitter?: string | null;
   skills?: string[];
   visibility?: string | null;
@@ -46,12 +48,38 @@ type ApiUser = {
 
 type LinkKey = "linkedin" | "github" | "website";
 
+type SitePreview = {
+  title: string | null;
+  description: string | null;
+  image: string | null;
+};
+
 function stripPrefix(value: string, prefixes: string[]): string {
   let v = value.trim();
   for (const p of prefixes) {
     if (v.toLowerCase().startsWith(p.toLowerCase())) v = v.slice(p.length);
   }
   return v.replace(/^\/+/, "");
+}
+
+function toAbsoluteWebsite(raw: string): string | null {
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+  try {
+    const u = new URL(trimmed.includes("://") ? trimmed : `https://${trimmed}`);
+    if (u.protocol !== "http:" && u.protocol !== "https:") return null;
+    return u.toString();
+  } catch {
+    return null;
+  }
+}
+
+function cleanSiteTitle(title: string, hostname: string): string {
+  let t = title.trim();
+  const host = hostname.replace(/^www\./i, "");
+  t = t.replace(new RegExp(`[\\s|\\-–—:·]+${host.replace(/\./g, "\\.")}.*$`, "i"), "").trim();
+  t = t.replace(/\s*[|\-–—·]\s*(Home|Anasayfa|Official(?: Site)?|Welcome).*$/i, "").trim();
+  return t.slice(0, 50);
 }
 
 function handleFromUser(user: ApiUser): string {
@@ -243,10 +271,12 @@ function PlatformBindRow({
   desc,
   brandColor,
   iconOnLight,
+  logoUrl,
   prefix,
   value,
   placeholder,
   connected,
+  enableSitePreview,
   onSave,
   onUnlink,
 }: {
@@ -254,13 +284,17 @@ function PlatformBindRow({
   label: string;
   desc: string;
   brandColor?: string;
-  /** Açık zemin (ör. GitHub beyaz kutu) → koyu ikon. */
   iconOnLight?: boolean;
+  logoUrl?: string | null;
   prefix: string;
   value: string;
   placeholder: string;
   connected: boolean;
-  onSave: (v: string) => Promise<void>;
+  enableSitePreview?: boolean;
+  onSave: (payload: {
+    value: string;
+    preview?: SitePreview | null;
+  }) => Promise<void>;
   onUnlink: () => Promise<void>;
 }) {
   const t = useT();
@@ -268,16 +302,60 @@ function PlatformBindRow({
   const [draft, setDraft] = useState(value);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [preview, setPreview] = useState<SitePreview | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [previewFailed, setPreviewFailed] = useState(false);
 
   useEffect(() => {
     setDraft(value);
   }, [value]);
 
+  useEffect(() => {
+    if (!enableSitePreview || !editing) return;
+    const absolute = toAbsoluteWebsite(draft);
+    if (!absolute) {
+      setPreview(null);
+      setPreviewFailed(false);
+      return;
+    }
+    let cancelled = false;
+    const timer = window.setTimeout(async () => {
+      setPreviewLoading(true);
+      setPreviewFailed(false);
+      try {
+        const res = await fetch(
+          apiUrl(`/api/stage/link-preview?url=${encodeURIComponent(absolute)}`),
+          { credentials: "include" },
+        );
+        if (!res.ok) {
+          if (!cancelled) {
+            setPreview(null);
+            setPreviewFailed(true);
+          }
+          return;
+        }
+        const data = (await res.json()) as SitePreview;
+        if (!cancelled) setPreview(data);
+      } catch {
+        if (!cancelled) {
+          setPreview(null);
+          setPreviewFailed(true);
+        }
+      } finally {
+        if (!cancelled) setPreviewLoading(false);
+      }
+    }, 500);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [draft, editing, enableSitePreview]);
+
   const save = async () => {
     setBusy(true);
     setError(null);
     try {
-      await onSave(draft.trim());
+      await onSave({ value: draft.trim(), preview: enableSitePreview ? preview : null });
       setEditing(false);
     } catch (e: any) {
       setError(e.message ?? t("id.saveFailed"));
@@ -292,6 +370,7 @@ function PlatformBindRow({
     try {
       await onUnlink();
       setEditing(false);
+      setPreview(null);
     } catch (e: any) {
       setError(e.message ?? t("id.removeFailed"));
     } finally {
@@ -299,33 +378,48 @@ function PlatformBindRow({
     }
   };
 
+  const displayLogo = (editing && preview?.image) || logoUrl || null;
+
   return (
     <div className="panel-glass p-4 transition-all hover:border-[var(--ink)]/20">
       <div className="flex items-center gap-4">
         <div
           className={
-            brandColor
-              ? "flex size-9 shrink-0 items-center justify-center border shadow-sm"
+            brandColor || displayLogo
+              ? "flex size-9 shrink-0 items-center justify-center overflow-hidden border shadow-sm"
               : "flex size-9 shrink-0 items-center justify-center panel-glass"
           }
           style={
-            brandColor
+            brandColor && !displayLogo
               ? {
                   backgroundColor: brandColor,
                   borderColor: iconOnLight ? "rgba(255,255,255,0.25)" : brandColor,
                 }
-              : undefined
+              : displayLogo
+                ? { backgroundColor: "#fff", borderColor: "rgba(255,255,255,0.2)" }
+                : undefined
           }
         >
-          <Icon
-            className={
-              brandColor
-                ? iconOnLight
-                  ? "size-[18px] text-[#0d1117] [&_path]:fill-current"
-                  : "size-4 text-[var(--bone-fixed,#F4F1EC)]"
-                : "size-4 text-[var(--ink)]"
-            }
-          />
+          {displayLogo ? (
+            <img
+              src={displayLogo}
+              alt=""
+              className="size-full object-contain p-0.5"
+              onError={(e) => {
+                e.currentTarget.style.display = "none";
+              }}
+            />
+          ) : (
+            <Icon
+              className={
+                brandColor
+                  ? iconOnLight
+                    ? "size-[18px] text-[#0d1117] [&_path]:fill-current"
+                    : "size-4 text-[var(--bone-fixed,#F4F1EC)]"
+                  : "size-4 text-[var(--ink)]"
+              }
+            />
+          )}
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
@@ -347,6 +441,7 @@ function PlatformBindRow({
               setDraft(value);
               setEditing(true);
               setError(null);
+              setPreview(null);
             }}
             className="flex shrink-0 items-center gap-1.5 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)] transition-colors hover:text-[var(--ink)]"
           >
@@ -368,7 +463,49 @@ function PlatformBindRow({
               className="flex-1 bg-transparent px-3 py-2 font-mono text-caption text-[var(--ink)] outline-none"
               autoFocus
             />
+            {enableSitePreview && previewLoading && (
+              <span className="flex items-center pr-3">
+                <Loader2 className="size-3.5 animate-spin text-[var(--ink-subtle)]" />
+              </span>
+            )}
           </div>
+
+          {enableSitePreview && (preview || previewLoading || (draft.trim() && !previewFailed)) && (
+            <div className="flex items-start gap-3 border border-[var(--ink)]/12 bg-[var(--ink)]/[0.03] p-3 dark:border-white/10 dark:bg-white/[0.04]">
+              {preview?.image ? (
+                <img
+                  src={preview.image}
+                  alt=""
+                  className="size-9 shrink-0 border border-[var(--ink)]/10 bg-white object-contain p-0.5"
+                  onError={(e) => {
+                    e.currentTarget.style.display = "none";
+                  }}
+                />
+              ) : (
+                <div className="flex size-9 shrink-0 items-center justify-center border border-[var(--ink)]/10 text-[var(--ink-subtle)]">
+                  <Globe className="size-4" />
+                </div>
+              )}
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm text-[var(--ink)]">
+                  {previewLoading
+                    ? t("id.sitePreviewLoading")
+                    : preview?.title || t("id.sitePreviewHint")}
+                </p>
+                {preview?.description && (
+                  <p className="mt-0.5 line-clamp-2 text-xs text-[var(--ink-muted)]">
+                    {preview.description}
+                  </p>
+                )}
+                {!previewLoading && preview && (
+                  <p className="mt-1 font-mono text-[9px] uppercase tracking-widest text-[var(--ink-subtle)]">
+                    {t("id.siteBridgeHint")}
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
           {error && (
             <p className="font-mono text-label text-[var(--error-ink)]" role="alert">
               {error}
@@ -423,9 +560,10 @@ export default function InnerId() {
   const linkedin = stripPrefix(user?.linkedin ?? "", ["https://", "http://", "www.", "linkedin.com/in/"]);
   const github = stripPrefix(user?.github ?? "", ["https://", "http://", "www.", "github.com/"]);
   const website = stripPrefix(user?.website ?? "", ["https://", "http://"]);
+  const websiteLogoUrl = user?.websiteLogoUrl ?? null;
   const publicUrl = handle ? `inner.digital/u/${handle}` : "inner.digital/u/…";
 
-  const patchLinks = async (patch: Partial<Record<LinkKey, string | null>>) => {
+  const patchProfile = async (fields: Record<string, unknown>) => {
     if (!user) return;
     const parts = user.name.trim().split(/\s+/).filter(Boolean);
     const res = await fetch(apiUrl("/api/auth/me"), {
@@ -440,20 +578,36 @@ export default function InnerId() {
         company: user.company ?? "",
         bio: user.bio ?? "",
         skills,
-        linkedin: patch.linkedin !== undefined ? patch.linkedin ?? "" : linkedin,
-        github: patch.github !== undefined ? patch.github ?? "" : github,
-        website: patch.website !== undefined ? patch.website ?? "" : website,
+        linkedin,
+        github,
+        website,
+        websiteLogoUrl: websiteLogoUrl ?? "",
         twitter: stripPrefix(user.twitter ?? "", ["https://", "http://", "www.", "x.com/", "twitter.com/"]),
         visibility:
           user.visibility === "public" || user.visibility === "private" || user.visibility === "members"
             ? user.visibility
             : "members",
+        ...fields,
       }),
     });
     const json = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(json.error ?? t("id.saveFailed"));
     await queryClient.invalidateQueries({ queryKey: ["auth-me"] });
     window.dispatchEvent(new CustomEvent("inner-profile-updated", { detail: json.user }));
+  };
+
+  const patchLinks = async (patch: Partial<Record<LinkKey, string | null>> & { websiteLogoUrl?: string | null }) => {
+    await patchProfile({
+      linkedin: patch.linkedin !== undefined ? patch.linkedin ?? "" : linkedin,
+      github: patch.github !== undefined ? patch.github ?? "" : github,
+      website: patch.website !== undefined ? patch.website ?? "" : website,
+      websiteLogoUrl:
+        patch.websiteLogoUrl !== undefined
+          ? patch.websiteLogoUrl ?? ""
+          : patch.website === "" || patch.website === null
+            ? ""
+            : websiteLogoUrl ?? "",
+    });
   };
 
   if (isLoading && !user) {
@@ -590,7 +744,11 @@ export default function InnerId() {
             placeholder="profiladin"
             value={linkedin}
             connected={!!linkedin}
-            onSave={(v) => patchLinks({ linkedin: stripPrefix(v, ["linkedin.com/in/", "https://", "http://"]) })}
+            onSave={async ({ value: v }) => {
+              await patchLinks({
+                linkedin: stripPrefix(v, ["linkedin.com/in/", "https://", "http://"]),
+              });
+            }}
             onUnlink={() => patchLinks({ linkedin: "" })}
           />
           <PlatformBindRow
@@ -603,19 +761,48 @@ export default function InnerId() {
             placeholder="kullaniciadi"
             value={github}
             connected={!!github}
-            onSave={(v) => patchLinks({ github: stripPrefix(v, ["github.com/", "https://", "http://"]) })}
+            onSave={async ({ value: v }) => {
+              await patchLinks({
+                github: stripPrefix(v, ["github.com/", "https://", "http://"]),
+              });
+            }}
             onUnlink={() => patchLinks({ github: "" })}
           />
           <PlatformBindRow
             icon={Globe}
             label={t("id.personalSite")}
             desc={t("id.websiteDesc")}
+            logoUrl={websiteLogoUrl}
             prefix="https://"
             placeholder="siteadresin.com"
             value={website}
             connected={!!website}
-            onSave={(v) => patchLinks({ website: stripPrefix(v, ["https://", "http://"]) })}
-            onUnlink={() => patchLinks({ website: "" })}
+            enableSitePreview
+            onSave={async ({ value: v, preview }) => {
+              const cleaned = stripPrefix(v, ["https://", "http://"]);
+              const absolute = toAbsoluteWebsite(cleaned);
+              let host = "";
+              try {
+                host = absolute ? new URL(absolute).hostname : "";
+              } catch {
+                host = "";
+              }
+              const nextCompany =
+                !user.company?.trim() && preview?.title
+                  ? cleanSiteTitle(preview.title, host || cleaned)
+                  : undefined;
+              const nextBio =
+                !user.bio?.trim() && preview?.description
+                  ? preview.description.slice(0, 160)
+                  : undefined;
+              await patchProfile({
+                website: cleaned,
+                websiteLogoUrl: preview?.image ?? "",
+                ...(nextCompany ? { company: nextCompany } : {}),
+                ...(nextBio ? { bio: nextBio } : {}),
+              });
+            }}
+            onUnlink={() => patchLinks({ website: "", websiteLogoUrl: "" })}
           />
         </div>
       </section>

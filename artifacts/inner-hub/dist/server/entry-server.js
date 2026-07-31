@@ -574,6 +574,9 @@ const tr = {
     linkedinDesc: "Profilinde inner·hub üyeliğini doğrulat",
     githubDesc: "README'ne rozet ekle, profili verify et",
     websiteDesc: "HTML embed kodu ile siteye entegre et",
+    sitePreviewLoading: "Site bilgileri getiriliyor…",
+    sitePreviewHint: "Başlık ve logo otomatik doldurulacak",
+    siteBridgeHint: "Boş şirket / bio alanlarına köprülenir · Profil ile paylaşılır",
     none: "Yok",
     removeFailed: "Kaldırılamadı",
     saveFailed: "Kaydedilemedi"
@@ -2058,6 +2061,9 @@ const en = {
     linkedinDesc: "Verify your inner·hub membership on your profile",
     githubDesc: "Add the badge to your README and verify the profile",
     websiteDesc: "Integrate with the HTML embed snippet",
+    sitePreviewLoading: "Fetching site info…",
+    sitePreviewHint: "Title and logo will autofill",
+    siteBridgeHint: "Fills empty company / bio · shared with Profile",
     none: "None",
     removeFailed: "Could not remove",
     saveFailed: "Could not save"

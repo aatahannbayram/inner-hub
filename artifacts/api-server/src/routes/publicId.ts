@@ -58,6 +58,7 @@ function publicPayload(user: typeof usersTable.$inferSelect) {
     linkedin: user.linkedin,
     github: user.github,
     website: user.website,
+    websiteLogoUrl: user.websiteLogoUrl ?? null,
     twitter: user.twitter,
     visibility: user.visibility ?? "members",
     role: user.role,

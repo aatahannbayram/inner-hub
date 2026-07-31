@@ -53896,6 +53896,8 @@ var init_users = __esm({
       handle: text("handle"),
       github: text("github"),
       website: text("website"),
+      /** Kişisel site favicon / og:image (link preview) */
+      websiteLogoUrl: text("website_logo_url"),
       twitter: text("twitter"),
       skills: text("skills"),
       visibility: text("visibility").default("members"),
@@ -98247,6 +98249,7 @@ var ensureUserProfileColumns = once(async () => {
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS handle text`);
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS github text`);
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS website text`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS website_logo_url text`);
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS twitter text`);
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS skills text`);
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS visibility text`);
@@ -117496,6 +117499,8 @@ router5.patch("/me", requireAuth, async (req, res) => {
     const linkedin = typeof body.linkedin === "string" ? body.linkedin.trim().slice(0, 120) : "";
     const github = typeof body.github === "string" ? body.github.trim().slice(0, 120) : "";
     const website = typeof body.website === "string" ? body.website.trim().slice(0, 120) : "";
+    const websiteLogoUrlRaw = typeof body.websiteLogoUrl === "string" ? body.websiteLogoUrl.trim().slice(0, 500) : void 0;
+    const websiteLogoUrl = websiteLogoUrlRaw === void 0 ? void 0 : websiteLogoUrlRaw.length > 0 && (websiteLogoUrlRaw.startsWith("http://") || websiteLogoUrlRaw.startsWith("https://") || websiteLogoUrlRaw.startsWith("/api/")) ? websiteLogoUrlRaw : null;
     const twitter = typeof body.twitter === "string" ? body.twitter.trim().slice(0, 120) : "";
     const university = typeof body.university === "string" ? body.university.trim().slice(0, 120) : "";
     const behance = typeof body.behance === "string" ? body.behance.trim().slice(0, 120) : "";
@@ -117537,6 +117542,7 @@ router5.patch("/me", requireAuth, async (req, res) => {
       linkedin: linkedin || null,
       github: github || null,
       website: website || null,
+      ...websiteLogoUrl !== void 0 ? { websiteLogoUrl: website ? websiteLogoUrl : null } : !website ? { websiteLogoUrl: null } : {},
       twitter: twitter || null,
       university: university || null,
       behance: behance || null,
@@ -124729,6 +124735,7 @@ function publicPayload(user) {
     linkedin: user.linkedin,
     github: user.github,
     website: user.website,
+    websiteLogoUrl: user.websiteLogoUrl ?? null,
     twitter: user.twitter,
     visibility: user.visibility ?? "members",
     role: user.role,
@@ -125566,6 +125573,17 @@ function extractTitle(html) {
   const m = html.match(/<title[^>]*>([^<]*)<\/title>/i);
   return m?.[1] ? decodeEntities(m[1]) : null;
 }
+function extractIconHref(html) {
+  const patterns = [
+    /<link[^>]+rel=["'](?:apple-touch-icon(?:-precomposed)?|icon|shortcut icon)["'][^>]*href=["']([^"']+)["']/i,
+    /<link[^>]+href=["']([^"']+)["'][^>]*rel=["'](?:apple-touch-icon(?:-precomposed)?|icon|shortcut icon)["']/i
+  ];
+  for (const re of patterns) {
+    const m = html.match(re);
+    if (m?.[1]) return decodeEntities(m[1]);
+  }
+  return null;
+}
 async function readCapped(res, maxBytes) {
   const reader = res.body?.getReader();
   if (!reader) return "";
@@ -125623,6 +125641,16 @@ async function fetchLinkPreview(rawUrl) {
       image = new URL(image, target).toString();
     } catch {
       image = null;
+    }
+  }
+  if (!image) {
+    const iconHref = extractIconHref(html);
+    if (iconHref) {
+      try {
+        image = new URL(iconHref, target).toString();
+      } catch {
+        image = null;
+      }
     }
   }
   if (!image) {

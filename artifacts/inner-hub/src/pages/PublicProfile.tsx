@@ -23,6 +23,7 @@ type PublicProfile = {
   linkedin: string | null;
   github: string | null;
   website: string | null;
+  websiteLogoUrl: string | null;
   twitter: string | null;
   visibility: string;
   role: "member" | "admin";
@@ -248,7 +249,19 @@ export default function PublicProfilePage() {
                         rel="noopener noreferrer"
                         className="flex items-center gap-2 border border-[var(--ink)]/[0.08] px-3 py-2 font-mono text-caption text-[var(--ink-body)] hover:border-[var(--ink)]/25"
                       >
-                        <Globe className="size-3.5" /> {profile.website}
+                        {profile.websiteLogoUrl ? (
+                          <img
+                            src={profile.websiteLogoUrl}
+                            alt=""
+                            className="size-3.5 shrink-0 object-contain"
+                            onError={(e) => {
+                              e.currentTarget.style.display = "none";
+                            }}
+                          />
+                        ) : (
+                          <Globe className="size-3.5" />
+                        )}
+                        {profile.website}
                       </a>
                     )}
                   </div>

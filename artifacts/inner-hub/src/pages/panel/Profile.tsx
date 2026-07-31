@@ -721,6 +721,26 @@ export default function ProfilePage() {
     setSaving(true);
     setSaveError(null);
     try {
+      let websiteLogoUrl: string | undefined;
+      const site = profile.website.trim();
+      if (site) {
+        try {
+          const abs = site.includes("://") ? site : `https://${site}`;
+          const pre = await fetch(
+            apiUrl(`/api/stage/link-preview?url=${encodeURIComponent(abs)}`),
+            { credentials: "include" },
+          );
+          if (pre.ok) {
+            const meta = (await pre.json()) as { image?: string | null };
+            if (meta.image) websiteLogoUrl = meta.image;
+          }
+        } catch {
+          /* preview optional */
+        }
+      } else {
+        websiteLogoUrl = "";
+      }
+
       const res = await fetch(apiUrl("/api/auth/me"), {
         method: "PATCH",
         credentials: "include",
@@ -736,6 +756,7 @@ export default function ProfilePage() {
           linkedin: profile.linkedin,
           github: profile.github,
           website: profile.website,
+          ...(websiteLogoUrl !== undefined ? { websiteLogoUrl } : {}),
           twitter: profile.twitter,
           university: profile.university,
           behance: profile.behance,

@@ -63,6 +63,18 @@ function extractTitle(html: string): string | null {
   return m?.[1] ? decodeEntities(m[1]) : null;
 }
 
+function extractIconHref(html: string): string | null {
+  const patterns = [
+    /<link[^>]+rel=["'](?:apple-touch-icon(?:-precomposed)?|icon|shortcut icon)["'][^>]*href=["']([^"']+)["']/i,
+    /<link[^>]+href=["']([^"']+)["'][^>]*rel=["'](?:apple-touch-icon(?:-precomposed)?|icon|shortcut icon)["']/i,
+  ];
+  for (const re of patterns) {
+    const m = html.match(re);
+    if (m?.[1]) return decodeEntities(m[1]);
+  }
+  return null;
+}
+
 /** Yanıt gövdesini text/html ise en fazla `maxBytes` kadar okur, sonra keser. */
 async function readCapped(res: Response, maxBytes: number): Promise<string> {
   const reader = res.body?.getReader();
@@ -139,6 +151,16 @@ export async function fetchLinkPreview(rawUrl: string): Promise<LinkPreview> {
       image = new URL(image, target).toString();
     } catch {
       image = null;
+    }
+  }
+  if (!image) {
+    const iconHref = extractIconHref(html);
+    if (iconHref) {
+      try {
+        image = new URL(iconHref, target).toString();
+      } catch {
+        image = null;
+      }
     }
   }
   if (!image) {

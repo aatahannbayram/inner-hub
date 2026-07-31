@@ -393,6 +393,17 @@ router.patch("/me", requireAuth, async (req, res) => {
     const linkedin = typeof body.linkedin === "string" ? body.linkedin.trim().slice(0, 120) : "";
     const github = typeof body.github === "string" ? body.github.trim().slice(0, 120) : "";
     const website = typeof body.website === "string" ? body.website.trim().slice(0, 120) : "";
+    const websiteLogoUrlRaw =
+      typeof body.websiteLogoUrl === "string" ? body.websiteLogoUrl.trim().slice(0, 500) : undefined;
+    const websiteLogoUrl =
+      websiteLogoUrlRaw === undefined
+        ? undefined
+        : websiteLogoUrlRaw.length > 0 &&
+            (websiteLogoUrlRaw.startsWith("http://") ||
+              websiteLogoUrlRaw.startsWith("https://") ||
+              websiteLogoUrlRaw.startsWith("/api/"))
+          ? websiteLogoUrlRaw
+          : null;
     const twitter = typeof body.twitter === "string" ? body.twitter.trim().slice(0, 120) : "";
     const university = typeof body.university === "string" ? body.university.trim().slice(0, 120) : "";
     const behance = typeof body.behance === "string" ? body.behance.trim().slice(0, 120) : "";
@@ -453,6 +464,11 @@ router.patch("/me", requireAuth, async (req, res) => {
         linkedin: linkedin || null,
         github: github || null,
         website: website || null,
+        ...(websiteLogoUrl !== undefined
+          ? { websiteLogoUrl: website ? websiteLogoUrl : null }
+          : !website
+            ? { websiteLogoUrl: null }
+            : {}),
         twitter: twitter || null,
         university: university || null,
         behance: behance || null,

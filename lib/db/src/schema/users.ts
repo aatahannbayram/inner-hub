@@ -32,6 +32,8 @@ export const usersTable = pgTable("users", {
   handle: text("handle"),
   github: text("github"),
   website: text("website"),
+  /** Kişisel site favicon / og:image (link preview) */
+  websiteLogoUrl: text("website_logo_url"),
   twitter: text("twitter"),
   skills: text("skills"),
   visibility: text("visibility").default("members"),
