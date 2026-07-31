@@ -97801,7 +97801,19 @@ async function sendTransactionalMail(mail) {
   const apiKey = resendApiKey();
   try {
     if (apiKey) {
-      return await sendViaResend(mail, messageId, apiKey);
+      const resendResult = await sendViaResend(mail, messageId, apiKey);
+      if (resendResult.ok) return resendResult;
+      logger.warn(
+        { kind: mail.kind, to: mail.to, error: resendResult.error },
+        "Resend failed \u2014 trying SMTP fallback"
+      );
+      const smtpResult2 = await sendViaSmtp(mail, messageId);
+      if (smtpResult2.ok) return smtpResult2;
+      return {
+        ok: false,
+        error: `Resend: ${resendResult.error}; SMTP: ${smtpResult2.error}`,
+        provider: "resend"
+      };
     }
     const smtpResult = await sendViaSmtp(mail, messageId);
     if (!smtpResult.ok && smtpResult.error?.includes("yap\u0131land\u0131r\u0131lmam\u0131\u015F")) {

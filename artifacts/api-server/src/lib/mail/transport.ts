@@ -168,7 +168,19 @@ export async function sendTransactionalMail(mail: OutboundMail): Promise<MailRes
 
   try {
     if (apiKey) {
-      return await sendViaResend(mail, messageId, apiKey);
+      const resendResult = await sendViaResend(mail, messageId, apiKey);
+      if (resendResult.ok) return resendResult;
+      logger.warn(
+        { kind: mail.kind, to: mail.to, error: resendResult.error },
+        "Resend failed — trying SMTP fallback",
+      );
+      const smtpResult = await sendViaSmtp(mail, messageId);
+      if (smtpResult.ok) return smtpResult;
+      return {
+        ok: false,
+        error: `Resend: ${resendResult.error}; SMTP: ${smtpResult.error}`,
+        provider: "resend",
+      };
     }
 
     const smtpResult = await sendViaSmtp(mail, messageId);
