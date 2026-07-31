@@ -260,19 +260,27 @@ export default function Pulse() {
         />
       )}
 
-      {/* Phosphor portrait - the community's pulse, rendered as a live signal */}
+      {/* Phosphor portrait - the community's pulse, rendered as a live signal.
+          Bu yüzey her zaman koyu (ProceduralPortrait'in kendi #0A0A0A zemini);
+          bu yüzden üstündeki metin tema ile ters dönen --bone/--success-ink
+          değil, sabit kalan --bone-fixed/--inner-green token'larını kullanır -
+          aksi halde karanlık temada metin neredeyse siyah render olup ASCII
+          dokusunun içinde kayboluyordu. */}
       <FadeIn delay={0.03}>
         <div className="relative overflow-hidden panel-glass">
           <ProceduralPortrait
             src="/editorial/circle-portrait.jpg"
             config={PHOSPHOR_CONFIG}
-            className="aspect-[21/9] w-full md:aspect-[24/9]"
+            className="aspect-[4/3] w-full sm:aspect-[16/9] md:aspect-[21/9]"
           />
-          <div className="pointer-events-none absolute inset-0 flex flex-col justify-end p-6 md:p-8">
-            <p className="mb-1 font-mono text-label uppercase tracking-widest text-[var(--success-ink)]/70">
+          <div className="pointer-events-none absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/85 via-black/15 to-transparent p-6 md:p-8">
+            <p className="mb-1.5 font-mono text-label uppercase tracking-widest text-[var(--inner-green)]/90">
               {t("pulse.heroLabel")}
             </p>
-            <p className="max-w-[26ch] font-serif text-2xl text-[var(--bone)] md:text-3xl" style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 300 }}>
+            <p
+              className="max-w-[26ch] font-serif text-2xl text-[var(--bone-fixed)] md:text-3xl"
+              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 300 }}
+            >
               {t("pulse.heroQuote")}
             </p>
           </div>
@@ -280,13 +288,12 @@ export default function Pulse() {
       </FadeIn>
 
       {showEmpty && (
-        <div className="border border-dashed border-[var(--ink)]/15 p-8 text-center">
-          <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)] mb-2">
+        <div className="panel-glass flex flex-col items-center gap-3 px-6 py-10 text-center">
+          <Radio className="size-6 text-[var(--ink-subtle)]" />
+          <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
             {t("pulse.empty")}
           </p>
-          <p className="text-sm text-[var(--ink-body)] max-w-md mx-auto">
-            {t("pulse.emptyHint")}
-          </p>
+          <p className="max-w-md text-sm text-[var(--ink-body)]">{t("pulse.emptyHint")}</p>
         </div>
       )}
 
