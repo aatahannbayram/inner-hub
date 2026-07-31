@@ -157,7 +157,10 @@ export async function fetchLinkPreview(rawUrl: string): Promise<LinkPreview> {
   }
   if (!image) {
     const iconHref = extractIconHref(html);
-    if (iconHref) {
+    // Bazı siteler favicon'u kasten devre dışı bırakmak için `href="data:,"`
+    // gibi boş data URI'ler kullanıyor (örn. example.com) — gerçek bir görsel
+    // değil, filtrele.
+    if (iconHref && !iconHref.trim().toLowerCase().startsWith("data:")) {
       try {
         image = new URL(iconHref, target).toString();
       } catch {

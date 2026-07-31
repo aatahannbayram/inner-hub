@@ -141,7 +141,8 @@ export default function Invitation() {
     }
   }, [email, organizationDomain]);
 
-  // Resolve + preview logo when domain changes
+  // Domain değiştiğinde kurum adı + logosunu otomatik çek (Stage'deki link
+  // önizleme modülüyle aynı altyapı: og:site_name/<title> + favicon fallback).
   useEffect(() => {
     const domain = organizationDomain.trim().toLowerCase().replace(/^https?:\/\//, "").replace(/^www\./, "").split("/")[0];
     if (!domain || !domain.includes(".")) {
@@ -157,8 +158,13 @@ export default function Invitation() {
           if (!cancelled) setOrganizationLogo(null);
           return;
         }
-        const data = (await res.json()) as { logoUrl?: string };
-        if (!cancelled) setOrganizationLogo(data.logoUrl ?? null);
+        const data = (await res.json()) as { logoUrl?: string; name?: string };
+        if (cancelled) return;
+        setOrganizationLogo(data.logoUrl ?? null);
+        if (data.name) {
+          // Kullanıcı zaten kurum adı yazdıysa üzerine yazma.
+          setOrganization((current) => (current.trim() ? current : data.name ?? current));
+        }
       } catch {
         if (!cancelled) setOrganizationLogo(null);
       } finally {

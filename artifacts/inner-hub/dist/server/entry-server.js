@@ -9070,7 +9070,11 @@ function Invitation() {
           return;
         }
         const data = await res.json();
-        if (!cancelled) setOrganizationLogo(data.logoUrl ?? null);
+        if (cancelled) return;
+        setOrganizationLogo(data.logoUrl ?? null);
+        if (data.name) {
+          setOrganization((current) => current.trim() ? current : data.name ?? current);
+        }
       } catch {
         if (!cancelled) setOrganizationLogo(null);
       } finally {

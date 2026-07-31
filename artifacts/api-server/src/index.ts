@@ -11,6 +11,7 @@ import {
   ensureStageSchema,
   ensureOrgLegalCampaignSchema,
   ensurePasswordResetSchema,
+  ensureOrgLogoCacheSchema,
 } from "./lib/ensureSchema";
 
 const rawPort = process.env["PORT"];
@@ -38,6 +39,7 @@ Promise.all([
   ensureStageSchema(),
   ensureOrgLegalCampaignSchema(),
   ensurePasswordResetSchema(),
+  ensureOrgLogoCacheSchema(),
 ])
   .catch((err) => {
     logger.warn({ err }, "Schema ensure failed (will retry on demand)");

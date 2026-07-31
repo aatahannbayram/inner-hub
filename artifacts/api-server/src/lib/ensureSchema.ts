@@ -406,3 +406,19 @@ export const ensureInviteCodesSchema = once(async () => {
       ON invite_codes (invitation_request_id)
   `);
 });
+
+/**
+ * Kurum logolarını DB'de (base64 data URL) önbelleğe alır. Hostinger birden
+ * fazla Node worker'ı paylaşımsız yerel diskle çalıştırdığından, dosya
+ * sistemine yazılan bir logo başka bir worker'da 404 dönebiliyordu — DB
+ * tüm worker'lar arasında paylaşılan tek gerçek kaynak.
+ */
+export const ensureOrgLogoCacheSchema = once(async () => {
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS org_logo_cache (
+      domain text PRIMARY KEY,
+      data_url text,
+      fetched_at timestamp NOT NULL DEFAULT now()
+    )
+  `);
+});

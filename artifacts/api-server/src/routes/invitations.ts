@@ -13,12 +13,11 @@ import {
 import {
   domainFromEmail,
   normalizeDomain,
-  orgLogoDir,
   resolveAndCacheOrgLogo,
 } from "../lib/orgLogo";
-import path from "node:path";
-import fs from "node:fs";
+import { fetchLinkPreview } from "../lib/linkPreview";
 import { once } from "../lib/ensureSchema";
+import { logger } from "../lib/logger";
 
 const router: IRouter = Router();
 
@@ -50,39 +49,39 @@ const ensureOrgColumns = once(async () => {
   await db.execute(sql`ALTER TABLE invitation_requests ADD COLUMN IF NOT EXISTS organization_logo text`);
 });
 
-/** Live logo preview for the invitation form. */
+/**
+ * Davet formu için otomatik kurum önizlemesi: domain'den site adı (og:site_name
+ * / <title>) + logo çeker. Stage alanındaki linkPreview modülüyle aynı SSRF-korumalı
+ * altyapıyı kullanır; site meta verisi alınamazsa favicon aramasına düşer.
+ */
 router.get("/org-logo", async (req, res) => {
   const domain = normalizeDomain(String(req.query.domain ?? ""));
   if (!domain) {
     res.status(400).json({ error: "domain required" });
     return;
   }
-  try {
-    const resolved = await resolveAndCacheOrgLogo(domain);
-    if (!resolved) {
-      res.status(404).json({ error: "Logo not found", domain });
-      return;
-    }
-    res.json({ domain: resolved.domain, logoUrl: resolved.logoPath });
-  } catch {
-    res.status(500).json({ error: "Logo resolve failed" });
-  }
-});
 
-/** Serve cached org logos. */
-router.get("/org-logos/:file", (req, res) => {
-  const file = path.basename(String(req.params.file ?? ""));
-  if (!file || file.includes("..")) {
-    res.status(400).end();
+  let name: string | null = null;
+  let logoUrl: string | null = null;
+
+  try {
+    const preview = await fetchLinkPreview(`https://${domain}`);
+    name = preview.siteName?.trim() || preview.title?.trim() || null;
+    logoUrl = preview.image ?? null;
+  } catch (err) {
+    logger.debug({ err, domain }, "org preview fetch failed, falling back to favicon-only");
+  }
+
+  if (!logoUrl) {
+    const resolved = await resolveAndCacheOrgLogo(domain).catch(() => null);
+    logoUrl = resolved?.logoPath ?? null;
+  }
+
+  if (!logoUrl && !name) {
+    res.status(404).json({ error: "Logo not found", domain });
     return;
   }
-  const full = path.join(orgLogoDir(), file);
-  if (!fs.existsSync(full)) {
-    res.status(404).end();
-    return;
-  }
-  res.setHeader("Cache-Control", "public, max-age=604800, immutable");
-  res.sendFile(full);
+  res.json({ domain, name, logoUrl });
 });
 
 router.post("/request", async (req, res) => {

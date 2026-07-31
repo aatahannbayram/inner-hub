@@ -1,9 +1,7 @@
-import fs from "node:fs/promises";
-import path from "node:path";
+import { sql } from "drizzle-orm";
+import { db } from "@workspace/db";
 import { logger } from "./logger";
-
-const LOGO_DIR =
-  process.env.ORG_LOGO_DIR || path.resolve(process.cwd(), "data/org-logos");
+import { ensureOrgLogoCacheSchema } from "./ensureSchema";
 
 const CONSUMER_DOMAINS = new Set([
   "gmail.com",
@@ -42,13 +40,9 @@ export function domainFromEmail(email: string): string | null {
   return domain;
 }
 
-function safeFileStem(domain: string): string {
-  return domain.replace(/[^a-z0-9.-]/gi, "_").slice(0, 120);
-}
-
-async function fetchLogoBytes(domain: string): Promise<{ buf: Buffer; ext: string } | null> {
+async function fetchLogoBytes(domain: string): Promise<{ buf: Buffer; contentType: string } | null> {
+  // logo.clearbit.com kalıcı olarak DNS çözümlenmiyor (servis kapandı) — aday listesinden çıkarıldı.
   const candidates = [
-    `https://logo.clearbit.com/${domain}`,
     `https://icons.duckduckgo.com/ip3/${domain}.ico`,
     `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=128`,
   ];
@@ -61,22 +55,11 @@ async function fetchLogoBytes(domain: string): Promise<{ buf: Buffer; ext: strin
         redirect: "follow",
       });
       if (!res.ok) continue;
-      const ct = res.headers.get("content-type") ?? "";
+      const ct = (res.headers.get("content-type") ?? "image/png").split(";")[0]?.trim() || "image/png";
       if (ct.includes("text/html")) continue;
       const ab = await res.arrayBuffer();
       if (ab.byteLength < 80 || ab.byteLength > 2_000_000) continue;
-      const ext = ct.includes("png")
-        ? "png"
-        : ct.includes("jpeg") || ct.includes("jpg")
-          ? "jpg"
-          : ct.includes("svg")
-            ? "svg"
-            : ct.includes("webp")
-              ? "webp"
-              : ct.includes("icon")
-                ? "ico"
-                : "png";
-      return { buf: Buffer.from(ab), ext };
+      return { buf: Buffer.from(ab), contentType: ct };
     } catch (err) {
       logger.debug({ err, url }, "org logo candidate failed");
     }
@@ -85,7 +68,10 @@ async function fetchLogoBytes(domain: string): Promise<{ buf: Buffer; ext: strin
 }
 
 /**
- * Download + cache org logo. Returns public API path or null.
+ * Kurum logosunu getirir + DB'de base64 data URL olarak önbelleğe alır.
+ * Yerel diske yazmıyoruz: Hostinger paylaşımsız disklere sahip birden fazla
+ * worker çalıştırabiliyor, bu da "yaz başarılı ama farklı worker'da oku 404"
+ * durumuna yol açıyordu. DB tüm worker'lar arasında paylaşılan tek kaynak.
  */
 export async function resolveAndCacheOrgLogo(
   domainRaw: string | null | undefined,
@@ -93,25 +79,25 @@ export async function resolveAndCacheOrgLogo(
   const domain = normalizeDomain(domainRaw);
   if (!domain) return null;
 
-  await fs.mkdir(LOGO_DIR, { recursive: true });
-  const stem = safeFileStem(domain);
+  await ensureOrgLogoCacheSchema();
 
-  // Reuse existing cache
-  const existing = await fs.readdir(LOGO_DIR).catch(() => [] as string[]);
-  const hit = existing.find((f) => f.startsWith(`${stem}.`));
-  if (hit) {
-    return { domain, logoPath: `/api/org-logos/${hit}` };
+  const cached = await db.execute(
+    sql`SELECT data_url FROM org_logo_cache WHERE domain = ${domain} LIMIT 1`,
+  );
+  const cachedRow = cached.rows[0] as { data_url: string | null } | undefined;
+  if (cachedRow?.data_url) {
+    return { domain, logoPath: cachedRow.data_url };
   }
 
   const fetched = await fetchLogoBytes(domain);
-  if (!fetched) return null;
+  if (!fetched) return null; // Bulunamadı — kalıcı olarak önbelleğe alma, sonraki istekte tekrar dene.
 
-  const filename = `${stem}.${fetched.ext}`;
-  const full = path.join(LOGO_DIR, filename);
-  await fs.writeFile(full, fetched.buf);
-  return { domain, logoPath: `/api/org-logos/${filename}` };
-}
+  const dataUrl = `data:${fetched.contentType};base64,${fetched.buf.toString("base64")}`;
+  await db.execute(sql`
+    INSERT INTO org_logo_cache (domain, data_url, fetched_at)
+    VALUES (${domain}, ${dataUrl}, now())
+    ON CONFLICT (domain) DO UPDATE SET data_url = EXCLUDED.data_url, fetched_at = now()
+  `);
 
-export function orgLogoDir() {
-  return LOGO_DIR;
+  return { domain, logoPath: dataUrl };
 }
