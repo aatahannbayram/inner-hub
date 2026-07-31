@@ -27,10 +27,14 @@ export const usersTable = pgTable("users", {
   behance: text("behance"),
   instagram: text("instagram"),
   linkedin: text("linkedin"),
+  /** LinkedIn profil görseli (link preview / OAuth) */
+  linkedinLogoUrl: text("linkedin_logo_url"),
   phone: text("phone"),
   whatsappOptIn: text("whatsapp_opt_in"),
   handle: text("handle"),
   github: text("github"),
+  /** GitHub avatar (API preview) */
+  githubLogoUrl: text("github_logo_url"),
   website: text("website"),
   /** Kişisel site favicon / og:image (link preview) */
   websiteLogoUrl: text("website_logo_url"),

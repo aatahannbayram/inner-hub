@@ -6,6 +6,10 @@ import { requireAuth, requireAdmin } from "../lib/auth";
 import { ensureStageSchema } from "../lib/ensureSchema";
 import { fetchLinkPreview } from "../lib/linkPreview";
 import {
+  fetchGithubSocialPreview,
+  fetchLinkedinSocialPreview,
+} from "../lib/socialPreview";
+import {
   fetchProductHuntPost,
   isPhSyncStale,
   parseProductHuntUrl,
@@ -166,6 +170,39 @@ router.get("/stage/link-preview", requireAuth, async (req, res) => {
   try {
     const preview = await fetchLinkPreview(url);
     res.json(preview);
+  } catch (err: any) {
+    res.status(422).json({ error: err.message ?? "Önizleme alınamadı" });
+  }
+});
+
+/** GET /api/social-preview?network=linkedin|github&handle=... */
+router.get("/social-preview", requireAuth, async (req, res) => {
+  const network = String(req.query.network ?? "").toLowerCase();
+  const handle = String(req.query.handle ?? "").trim();
+  if (!handle) {
+    res.status(400).json({ error: "handle zorunlu" });
+    return;
+  }
+  try {
+    if (network === "github") {
+      const preview = await fetchGithubSocialPreview(handle);
+      if (!preview) {
+        res.status(404).json({ error: "GitHub kullanıcısı bulunamadı" });
+        return;
+      }
+      res.json(preview);
+      return;
+    }
+    if (network === "linkedin") {
+      const preview = await fetchLinkedinSocialPreview(handle);
+      if (!preview) {
+        res.status(404).json({ error: "LinkedIn profili bulunamadı" });
+        return;
+      }
+      res.json(preview);
+      return;
+    }
+    res.status(400).json({ error: "network linkedin veya github olmalı" });
   } catch (err: any) {
     res.status(422).json({ error: err.message ?? "Önizleme alınamadı" });
   }

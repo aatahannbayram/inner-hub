@@ -39,6 +39,8 @@ type ApiUser = {
   github?: string | null;
   website?: string | null;
   websiteLogoUrl?: string | null;
+  linkedinLogoUrl?: string | null;
+  githubLogoUrl?: string | null;
   twitter?: string | null;
   skills?: string[];
   visibility?: string | null;
@@ -52,7 +54,11 @@ type SitePreview = {
   title: string | null;
   description: string | null;
   image: string | null;
+  company?: string | null;
+  website?: string | null;
 };
+
+type PreviewNetwork = "website" | "linkedin" | "github";
 
 function stripPrefix(value: string, prefixes: string[]): string {
   let v = value.trim();
@@ -276,7 +282,7 @@ function PlatformBindRow({
   value,
   placeholder,
   connected,
-  enableSitePreview,
+  previewNetwork,
   onSave,
   onUnlink,
 }: {
@@ -290,7 +296,7 @@ function PlatformBindRow({
   value: string;
   placeholder: string;
   connected: boolean;
-  enableSitePreview?: boolean;
+  previewNetwork?: PreviewNetwork;
   onSave: (payload: {
     value: string;
     preview?: SitePreview | null;
@@ -305,36 +311,52 @@ function PlatformBindRow({
   const [preview, setPreview] = useState<SitePreview | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
   const [previewFailed, setPreviewFailed] = useState(false);
+  const enableSitePreview = Boolean(previewNetwork);
 
   useEffect(() => {
     setDraft(value);
   }, [value]);
 
   useEffect(() => {
-    if (!enableSitePreview || !editing) return;
-    const absolute = toAbsoluteWebsite(draft);
-    if (!absolute) {
+    if (!previewNetwork || !editing) return;
+    const trimmed = draft.trim();
+    if (!trimmed) {
       setPreview(null);
       setPreviewFailed(false);
       return;
     }
+
     let cancelled = false;
     const timer = window.setTimeout(async () => {
       setPreviewLoading(true);
       setPreviewFailed(false);
       try {
-        const res = await fetch(
-          apiUrl(`/api/stage/link-preview?url=${encodeURIComponent(absolute)}`),
-          { credentials: "include" },
-        );
-        if (!res.ok) {
-          if (!cancelled) {
-            setPreview(null);
-            setPreviewFailed(true);
+        let data: SitePreview | null = null;
+        if (previewNetwork === "website") {
+          const absolute = toAbsoluteWebsite(trimmed);
+          if (!absolute) {
+            if (!cancelled) {
+              setPreview(null);
+              setPreviewFailed(false);
+            }
+            return;
           }
-          return;
+          const res = await fetch(
+            apiUrl(`/api/stage/link-preview?url=${encodeURIComponent(absolute)}`),
+            { credentials: "include" },
+          );
+          if (!res.ok) throw new Error("preview failed");
+          data = (await res.json()) as SitePreview;
+        } else {
+          const res = await fetch(
+            apiUrl(
+              `/api/social-preview?network=${previewNetwork}&handle=${encodeURIComponent(trimmed)}`,
+            ),
+            { credentials: "include" },
+          );
+          if (!res.ok) throw new Error("preview failed");
+          data = (await res.json()) as SitePreview;
         }
-        const data = (await res.json()) as SitePreview;
         if (!cancelled) setPreview(data);
       } catch {
         if (!cancelled) {
@@ -349,7 +371,7 @@ function PlatformBindRow({
       cancelled = true;
       window.clearTimeout(timer);
     };
-  }, [draft, editing, enableSitePreview]);
+  }, [draft, editing, previewNetwork]);
 
   const save = async () => {
     setBusy(true);
@@ -561,6 +583,8 @@ export default function InnerId() {
   const github = stripPrefix(user?.github ?? "", ["https://", "http://", "www.", "github.com/"]);
   const website = stripPrefix(user?.website ?? "", ["https://", "http://"]);
   const websiteLogoUrl = user?.websiteLogoUrl ?? null;
+  const linkedinLogoUrl = user?.linkedinLogoUrl ?? null;
+  const githubLogoUrl = user?.githubLogoUrl ?? null;
   const publicUrl = handle ? `inner.digital/u/${handle}` : "inner.digital/u/…";
 
   const patchProfile = async (fields: Record<string, unknown>) => {
@@ -582,6 +606,8 @@ export default function InnerId() {
         github,
         website,
         websiteLogoUrl: websiteLogoUrl ?? "",
+        linkedinLogoUrl: linkedinLogoUrl ?? "",
+        githubLogoUrl: githubLogoUrl ?? "",
         twitter: stripPrefix(user.twitter ?? "", ["https://", "http://", "www.", "x.com/", "twitter.com/"]),
         visibility:
           user.visibility === "public" || user.visibility === "private" || user.visibility === "members"
@@ -596,7 +622,13 @@ export default function InnerId() {
     window.dispatchEvent(new CustomEvent("inner-profile-updated", { detail: json.user }));
   };
 
-  const patchLinks = async (patch: Partial<Record<LinkKey, string | null>> & { websiteLogoUrl?: string | null }) => {
+  const patchLinks = async (
+    patch: Partial<Record<LinkKey, string | null>> & {
+      websiteLogoUrl?: string | null;
+      linkedinLogoUrl?: string | null;
+      githubLogoUrl?: string | null;
+    },
+  ) => {
     await patchProfile({
       linkedin: patch.linkedin !== undefined ? patch.linkedin ?? "" : linkedin,
       github: patch.github !== undefined ? patch.github ?? "" : github,
@@ -607,6 +639,18 @@ export default function InnerId() {
           : patch.website === "" || patch.website === null
             ? ""
             : websiteLogoUrl ?? "",
+      linkedinLogoUrl:
+        patch.linkedinLogoUrl !== undefined
+          ? patch.linkedinLogoUrl ?? ""
+          : patch.linkedin === "" || patch.linkedin === null
+            ? ""
+            : linkedinLogoUrl ?? "",
+      githubLogoUrl:
+        patch.githubLogoUrl !== undefined
+          ? patch.githubLogoUrl ?? ""
+          : patch.github === "" || patch.github === null
+            ? ""
+            : githubLogoUrl ?? "",
     });
   };
 
@@ -740,16 +784,42 @@ export default function InnerId() {
             label="LinkedIn"
             desc={t("id.linkedinDesc")}
             brandColor="#0A66C2"
+            logoUrl={linkedinLogoUrl}
             prefix="linkedin.com/in/"
             placeholder="profiladin"
             value={linkedin}
             connected={!!linkedin}
-            onSave={async ({ value: v }) => {
-              await patchLinks({
-                linkedin: stripPrefix(v, ["linkedin.com/in/", "https://", "http://"]),
+            previewNetwork="linkedin"
+            onSave={async ({ value: v, preview }) => {
+              const cleaned = stripPrefix(v, [
+                "linkedin.com/in/",
+                "www.linkedin.com/in/",
+                "https://",
+                "http://",
+              ]);
+              const nextCompany =
+                !user.company?.trim() && preview?.company ? preview.company : undefined;
+              const nextBio =
+                !user.bio?.trim() && preview?.description
+                  ? preview.description.slice(0, 160)
+                  : undefined;
+              const nextTitle =
+                !user.title?.trim() && preview?.company && preview?.title
+                  ? undefined
+                  : !user.title?.trim() &&
+                      preview?.description &&
+                      preview.description.length <= 50
+                    ? preview.description
+                    : undefined;
+              await patchProfile({
+                linkedin: cleaned,
+                linkedinLogoUrl: preview?.image ?? "",
+                ...(nextCompany ? { company: nextCompany } : {}),
+                ...(nextBio ? { bio: nextBio } : {}),
+                ...(nextTitle ? { title: nextTitle } : {}),
               });
             }}
-            onUnlink={() => patchLinks({ linkedin: "" })}
+            onUnlink={() => patchLinks({ linkedin: "", linkedinLogoUrl: "" })}
           />
           <PlatformBindRow
             icon={Github}
@@ -757,16 +827,35 @@ export default function InnerId() {
             desc={t("id.githubDesc")}
             brandColor="#FFFFFF"
             iconOnLight
+            logoUrl={githubLogoUrl}
             prefix="github.com/"
             placeholder="kullaniciadi"
             value={github}
             connected={!!github}
-            onSave={async ({ value: v }) => {
-              await patchLinks({
-                github: stripPrefix(v, ["github.com/", "https://", "http://"]),
+            previewNetwork="github"
+            onSave={async ({ value: v, preview }) => {
+              const cleaned = stripPrefix(v, ["github.com/", "https://", "http://", "www."]);
+              const nextCompany =
+                !user.company?.trim() && preview?.company ? preview.company : undefined;
+              const nextBio =
+                !user.bio?.trim() && preview?.description
+                  ? preview.description.slice(0, 160)
+                  : undefined;
+              const nextWebsite =
+                !user.website?.trim() && preview?.website
+                  ? stripPrefix(preview.website, ["https://", "http://"])
+                  : undefined;
+              await patchProfile({
+                github: cleaned,
+                githubLogoUrl: preview?.image ?? `https://github.com/${cleaned}.png`,
+                ...(nextCompany ? { company: nextCompany } : {}),
+                ...(nextBio ? { bio: nextBio } : {}),
+                ...(nextWebsite
+                  ? { website: nextWebsite, websiteLogoUrl: websiteLogoUrl ?? "" }
+                  : {}),
               });
             }}
-            onUnlink={() => patchLinks({ github: "" })}
+            onUnlink={() => patchLinks({ github: "", githubLogoUrl: "" })}
           />
           <PlatformBindRow
             icon={Globe}
@@ -777,7 +866,7 @@ export default function InnerId() {
             placeholder="siteadresin.com"
             value={website}
             connected={!!website}
-            enableSitePreview
+            previewNetwork="website"
             onSave={async ({ value: v, preview }) => {
               const cleaned = stripPrefix(v, ["https://", "http://"]);
               const absolute = toAbsoluteWebsite(cleaned);
@@ -793,7 +882,7 @@ export default function InnerId() {
                   : undefined;
               const nextBio =
                 !user.bio?.trim() && preview?.description
-                  ? preview.description.slice(0, 160)
+                  ? preview.description.slice(0, 500).slice(0, 160)
                   : undefined;
               await patchProfile({
                 website: cleaned,

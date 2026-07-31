@@ -146,6 +146,7 @@ router.get("/linkedin/callback", async (req, res) => {
       .set({
         linkedinId: profile.sub,
         avatarUrl: req.user.avatarUrl ?? profile.picture ?? undefined,
+        linkedinLogoUrl: profile.picture ?? req.user.linkedinLogoUrl ?? undefined,
       })
       .where(eq(usersTable.id, req.user.id));
 
@@ -391,7 +392,25 @@ router.patch("/me", requireAuth, async (req, res) => {
     const company = typeof body.company === "string" ? body.company.trim().slice(0, 50) : "";
     const bio = typeof body.bio === "string" ? body.bio.trim().slice(0, 160) : "";
     const linkedin = typeof body.linkedin === "string" ? body.linkedin.trim().slice(0, 120) : "";
+    const linkedinLogoUrlRaw =
+      typeof body.linkedinLogoUrl === "string" ? body.linkedinLogoUrl.trim().slice(0, 500) : undefined;
+    const linkedinLogoUrl =
+      linkedinLogoUrlRaw === undefined
+        ? undefined
+        : linkedinLogoUrlRaw.length > 0 &&
+            (linkedinLogoUrlRaw.startsWith("http://") || linkedinLogoUrlRaw.startsWith("https://"))
+          ? linkedinLogoUrlRaw
+          : null;
     const github = typeof body.github === "string" ? body.github.trim().slice(0, 120) : "";
+    const githubLogoUrlRaw =
+      typeof body.githubLogoUrl === "string" ? body.githubLogoUrl.trim().slice(0, 500) : undefined;
+    const githubLogoUrl =
+      githubLogoUrlRaw === undefined
+        ? undefined
+        : githubLogoUrlRaw.length > 0 &&
+            (githubLogoUrlRaw.startsWith("http://") || githubLogoUrlRaw.startsWith("https://"))
+          ? githubLogoUrlRaw
+          : null;
     const website = typeof body.website === "string" ? body.website.trim().slice(0, 120) : "";
     const websiteLogoUrlRaw =
       typeof body.websiteLogoUrl === "string" ? body.websiteLogoUrl.trim().slice(0, 500) : undefined;
@@ -462,7 +481,17 @@ router.patch("/me", requireAuth, async (req, res) => {
         company: company || null,
         bio: bio || null,
         linkedin: linkedin || null,
+        ...(linkedinLogoUrl !== undefined
+          ? { linkedinLogoUrl: linkedin ? linkedinLogoUrl : null }
+          : !linkedin
+            ? { linkedinLogoUrl: null }
+            : {}),
         github: github || null,
+        ...(githubLogoUrl !== undefined
+          ? { githubLogoUrl: github ? githubLogoUrl : null }
+          : !github
+            ? { githubLogoUrl: null }
+            : {}),
         website: website || null,
         ...(websiteLogoUrl !== undefined
           ? { websiteLogoUrl: website ? websiteLogoUrl : null }

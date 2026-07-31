@@ -53891,10 +53891,14 @@ var init_users = __esm({
       behance: text("behance"),
       instagram: text("instagram"),
       linkedin: text("linkedin"),
+      /** LinkedIn profil görseli (link preview / OAuth) */
+      linkedinLogoUrl: text("linkedin_logo_url"),
       phone: text("phone"),
       whatsappOptIn: text("whatsapp_opt_in"),
       handle: text("handle"),
       github: text("github"),
+      /** GitHub avatar (API preview) */
+      githubLogoUrl: text("github_logo_url"),
       website: text("website"),
       /** Kişisel site favicon / og:image (link preview) */
       websiteLogoUrl: text("website_logo_url"),
@@ -98250,6 +98254,8 @@ var ensureUserProfileColumns = once(async () => {
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS github text`);
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS website text`);
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS website_logo_url text`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS linkedin_logo_url text`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS github_logo_url text`);
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS twitter text`);
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS skills text`);
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS visibility text`);
@@ -117323,7 +117329,8 @@ router5.get("/linkedin/callback", async (req, res) => {
     }
     await db.update(usersTable).set({
       linkedinId: profile.sub,
-      avatarUrl: req.user.avatarUrl ?? profile.picture ?? void 0
+      avatarUrl: req.user.avatarUrl ?? profile.picture ?? void 0,
+      linkedinLogoUrl: profile.picture ?? req.user.linkedinLogoUrl ?? void 0
     }).where(eq(usersTable.id, req.user.id));
     res.redirect(`${profileUrl}?linkedin=connected`);
   } catch (err) {
@@ -117497,7 +117504,11 @@ router5.patch("/me", requireAuth, async (req, res) => {
     const company = typeof body.company === "string" ? body.company.trim().slice(0, 50) : "";
     const bio = typeof body.bio === "string" ? body.bio.trim().slice(0, 160) : "";
     const linkedin = typeof body.linkedin === "string" ? body.linkedin.trim().slice(0, 120) : "";
+    const linkedinLogoUrlRaw = typeof body.linkedinLogoUrl === "string" ? body.linkedinLogoUrl.trim().slice(0, 500) : void 0;
+    const linkedinLogoUrl = linkedinLogoUrlRaw === void 0 ? void 0 : linkedinLogoUrlRaw.length > 0 && (linkedinLogoUrlRaw.startsWith("http://") || linkedinLogoUrlRaw.startsWith("https://")) ? linkedinLogoUrlRaw : null;
     const github = typeof body.github === "string" ? body.github.trim().slice(0, 120) : "";
+    const githubLogoUrlRaw = typeof body.githubLogoUrl === "string" ? body.githubLogoUrl.trim().slice(0, 500) : void 0;
+    const githubLogoUrl = githubLogoUrlRaw === void 0 ? void 0 : githubLogoUrlRaw.length > 0 && (githubLogoUrlRaw.startsWith("http://") || githubLogoUrlRaw.startsWith("https://")) ? githubLogoUrlRaw : null;
     const website = typeof body.website === "string" ? body.website.trim().slice(0, 120) : "";
     const websiteLogoUrlRaw = typeof body.websiteLogoUrl === "string" ? body.websiteLogoUrl.trim().slice(0, 500) : void 0;
     const websiteLogoUrl = websiteLogoUrlRaw === void 0 ? void 0 : websiteLogoUrlRaw.length > 0 && (websiteLogoUrlRaw.startsWith("http://") || websiteLogoUrlRaw.startsWith("https://") || websiteLogoUrlRaw.startsWith("/api/")) ? websiteLogoUrlRaw : null;
@@ -117540,7 +117551,9 @@ router5.patch("/me", requireAuth, async (req, res) => {
       company: company || null,
       bio: bio || null,
       linkedin: linkedin || null,
+      ...linkedinLogoUrl !== void 0 ? { linkedinLogoUrl: linkedin ? linkedinLogoUrl : null } : !linkedin ? { linkedinLogoUrl: null } : {},
       github: github || null,
+      ...githubLogoUrl !== void 0 ? { githubLogoUrl: github ? githubLogoUrl : null } : !github ? { githubLogoUrl: null } : {},
       website: website || null,
       ...websiteLogoUrl !== void 0 ? { websiteLogoUrl: website ? websiteLogoUrl : null } : !website ? { websiteLogoUrl: null } : {},
       twitter: twitter || null,
@@ -124733,7 +124746,9 @@ function publicPayload(user) {
     bio: user.bio,
     skills: parseSkills2(user.skills),
     linkedin: user.linkedin,
+    linkedinLogoUrl: user.linkedinLogoUrl ?? null,
     github: user.github,
+    githubLogoUrl: user.githubLogoUrl ?? null,
     website: user.website,
     websiteLogoUrl: user.websiteLogoUrl ?? null,
     twitter: user.twitter,
@@ -125617,8 +125632,8 @@ async function fetchLinkPreview(rawUrl) {
       signal: AbortSignal.timeout(9e3),
       redirect: "manual",
       headers: {
-        "User-Agent": "inner-hub-link-preview/1.0 (+https://inner.digital)",
-        Accept: "text/html"
+        "User-Agent": "Mozilla/5.0 (compatible; inner-hub-link-preview/1.0; +https://inner.digital)",
+        Accept: "text/html,application/xhtml+xml"
       }
     });
     if (res.status >= 300 && res.status < 400) {
@@ -125662,6 +125677,81 @@ async function fetchLinkPreview(rawUrl) {
     description: description?.slice(0, 500) ?? null,
     image
   };
+}
+
+// src/lib/socialPreview.ts
+function cleanHandle(raw, network) {
+  let h = raw.trim().replace(/^\/+|\/+$/g, "");
+  h = h.replace(/^https?:\/\//i, "");
+  h = h.replace(/^(www\.)?/i, "");
+  if (network === "linkedin") {
+    h = h.replace(/^linkedin\.com\/in\//i, "").replace(/^in\//i, "");
+  } else {
+    h = h.replace(/^github\.com\//i, "");
+  }
+  h = h.split(/[/?#]/)[0] ?? "";
+  return h.replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 100);
+}
+function parseLinkedinOgTitle(title) {
+  const cleaned = title.replace(/\s*\|\s*LinkedIn\s*$/i, "").trim();
+  if (!cleaned) return { name: null, headline: null, company: null };
+  const parts = cleaned.split(/\s+[-–—]\s+/).map((p) => p.trim()).filter(Boolean);
+  const name = parts[0] ?? null;
+  const rest = parts.slice(1).join(" - ");
+  let company = null;
+  let headline = rest || null;
+  const at = rest.match(/\bat\s+(.+)$/i);
+  if (at?.[1]) {
+    company = at[1].trim().slice(0, 50);
+    headline = rest.replace(/\s+at\s+.+$/i, "").trim() || null;
+  }
+  return { name, headline: headline?.slice(0, 50) ?? null, company };
+}
+async function fetchGithubSocialPreview(rawHandle) {
+  const handle = cleanHandle(rawHandle, "github");
+  if (!handle) return null;
+  const res = await fetch(`https://api.github.com/users/${encodeURIComponent(handle)}`, {
+    headers: {
+      Accept: "application/vnd.github+json",
+      "User-Agent": "inner-hub-social-preview/1.0 (+https://inner.digital)",
+      "X-GitHub-Api-Version": "2022-11-28"
+    },
+    signal: AbortSignal.timeout(8e3)
+  });
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`GitHub yan\u0131t vermedi (${res.status})`);
+  const json3 = await res.json();
+  return {
+    title: (json3.name || json3.login || handle).slice(0, 200),
+    description: json3.bio?.slice(0, 500) ?? null,
+    image: json3.avatar_url ?? `https://github.com/${handle}.png`,
+    company: json3.company?.replace(/^@/, "").trim().slice(0, 50) || null,
+    website: json3.blog?.trim().slice(0, 120) || null
+  };
+}
+async function fetchLinkedinSocialPreview(rawHandle) {
+  const handle = cleanHandle(rawHandle, "linkedin");
+  if (!handle) return null;
+  const url2 = `https://www.linkedin.com/in/${handle}`;
+  try {
+    const preview = await fetchLinkPreview(url2);
+    const parsed = preview.title ? parseLinkedinOgTitle(preview.title) : null;
+    return {
+      title: parsed?.name ?? preview.title,
+      description: preview.description ?? parsed?.headline ?? null,
+      image: preview.image,
+      company: parsed?.company ?? null,
+      website: null
+    };
+  } catch {
+    return {
+      title: handle,
+      description: null,
+      image: null,
+      company: null,
+      website: null
+    };
+  }
 }
 
 // src/lib/productHunt.ts
@@ -125861,6 +125951,37 @@ router21.get("/stage/link-preview", requireAuth, async (req, res) => {
   try {
     const preview = await fetchLinkPreview(url2);
     res.json(preview);
+  } catch (err) {
+    res.status(422).json({ error: err.message ?? "\xD6nizleme al\u0131namad\u0131" });
+  }
+});
+router21.get("/social-preview", requireAuth, async (req, res) => {
+  const network = String(req.query.network ?? "").toLowerCase();
+  const handle = String(req.query.handle ?? "").trim();
+  if (!handle) {
+    res.status(400).json({ error: "handle zorunlu" });
+    return;
+  }
+  try {
+    if (network === "github") {
+      const preview = await fetchGithubSocialPreview(handle);
+      if (!preview) {
+        res.status(404).json({ error: "GitHub kullan\u0131c\u0131s\u0131 bulunamad\u0131" });
+        return;
+      }
+      res.json(preview);
+      return;
+    }
+    if (network === "linkedin") {
+      const preview = await fetchLinkedinSocialPreview(handle);
+      if (!preview) {
+        res.status(404).json({ error: "LinkedIn profili bulunamad\u0131" });
+        return;
+      }
+      res.json(preview);
+      return;
+    }
+    res.status(400).json({ error: "network linkedin veya github olmal\u0131" });
   } catch (err) {
     res.status(422).json({ error: err.message ?? "\xD6nizleme al\u0131namad\u0131" });
   }

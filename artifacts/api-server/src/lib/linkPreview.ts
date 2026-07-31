@@ -118,8 +118,9 @@ export async function fetchLinkPreview(rawUrl: string): Promise<LinkPreview> {
       signal: AbortSignal.timeout(9000),
       redirect: "manual",
       headers: {
-        "User-Agent": "inner-hub-link-preview/1.0 (+https://inner.digital)",
-        Accept: "text/html",
+        "User-Agent":
+          "Mozilla/5.0 (compatible; inner-hub-link-preview/1.0; +https://inner.digital)",
+        Accept: "text/html,application/xhtml+xml",
       },
     });
 

@@ -21,7 +21,9 @@ type PublicProfile = {
   bio: string | null;
   skills: string[];
   linkedin: string | null;
+  linkedinLogoUrl: string | null;
   github: string | null;
+  githubLogoUrl: string | null;
   website: string | null;
   websiteLogoUrl: string | null;
   twitter: string | null;
@@ -229,7 +231,19 @@ export default function PublicProfilePage() {
                         rel="noopener noreferrer"
                         className="flex items-center gap-2 border border-[var(--ink)]/[0.08] px-3 py-2 font-mono text-caption text-[var(--ink-body)] hover:border-[var(--ink)]/25"
                       >
-                        <Linkedin className="size-3.5" /> linkedin.com/in/{profile.linkedin.replace(/^.*\//, "")}
+                        {profile.linkedinLogoUrl ? (
+                          <img
+                            src={profile.linkedinLogoUrl}
+                            alt=""
+                            className="size-3.5 shrink-0 rounded-sm object-cover"
+                            onError={(e) => {
+                              e.currentTarget.style.display = "none";
+                            }}
+                          />
+                        ) : (
+                          <Linkedin className="size-3.5" />
+                        )}
+                        linkedin.com/in/{profile.linkedin.replace(/^.*\//, "")}
                       </a>
                     )}
                     {profile.github && (
@@ -239,7 +253,19 @@ export default function PublicProfilePage() {
                         rel="noopener noreferrer"
                         className="flex items-center gap-2 border border-[var(--ink)]/[0.08] px-3 py-2 font-mono text-caption text-[var(--ink-body)] hover:border-[var(--ink)]/25"
                       >
-                        <Github className="size-3.5" /> github.com/{profile.github.replace(/^.*\//, "")}
+                        {profile.githubLogoUrl ? (
+                          <img
+                            src={profile.githubLogoUrl}
+                            alt=""
+                            className="size-3.5 shrink-0 rounded-sm object-cover"
+                            onError={(e) => {
+                              e.currentTarget.style.display = "none";
+                            }}
+                          />
+                        ) : (
+                          <Github className="size-3.5" />
+                        )}
+                        github.com/{profile.github.replace(/^.*\//, "")}
                       </a>
                     )}
                     {profile.website && (

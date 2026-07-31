@@ -576,7 +576,7 @@ const tr = {
     websiteDesc: "HTML embed kodu ile siteye entegre et",
     sitePreviewLoading: "Site bilgileri getiriliyor…",
     sitePreviewHint: "Başlık ve logo otomatik doldurulacak",
-    siteBridgeHint: "Boş şirket / bio alanlarına köprülenir · Profil ile paylaşılır",
+    siteBridgeHint: "Boş ünvan / şirket / bio alanlarına köprülenir · Profil ile paylaşılır",
     none: "Yok",
     removeFailed: "Kaldırılamadı",
     saveFailed: "Kaydedilemedi"
@@ -2063,7 +2063,7 @@ const en = {
     websiteDesc: "Integrate with the HTML embed snippet",
     sitePreviewLoading: "Fetching site info…",
     sitePreviewHint: "Title and logo will autofill",
-    siteBridgeHint: "Fills empty company / bio · shared with Profile",
+    siteBridgeHint: "Fills empty title / company / bio · shared with Profile",
     none: "None",
     removeFailed: "Could not remove",
     saveFailed: "Could not save"
