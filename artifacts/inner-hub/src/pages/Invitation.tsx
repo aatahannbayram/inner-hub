@@ -25,6 +25,16 @@ type Role = (typeof ROLE_DEFS)[number]["value"];
 
 const STEP_IDS = ["role", "identity", "org", "story", "intro"] as const;
 
+/** Kullanıcı "flexlore.com" da yazsa "https://www.flexlore.com/" da yapıştırsa aynı çıplak domain'e indirger. */
+function normalizeDomainInput(raw: string): string {
+  return raw
+    .trim()
+    .toLowerCase()
+    .replace(/^https?:\/\//, "")
+    .replace(/^www\./, "")
+    .split("/")[0];
+}
+
 const fieldClass =
   "w-full border-0 border-b border-white/20 bg-transparent px-0 py-3.5 text-[15px] text-[var(--bone-fixed)] shadow-none placeholder:text-white/35 focus-visible:border-[var(--inner-green)] focus-visible:outline-none focus-visible:ring-0 transition-colors";
 
@@ -88,7 +98,6 @@ export default function Invitation() {
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<Role | null>(null);
   const [linkedin, setLinkedin] = useState("");
-  const [link, setLink] = useState("");
   const [organization, setOrganization] = useState("");
   const [organizationDomain, setOrganizationDomain] = useState("");
   const [organizationLogo, setOrganizationLogo] = useState<string | null>(null);
@@ -144,7 +153,7 @@ export default function Invitation() {
   // Domain değiştiğinde kurum adı + logosunu otomatik çek (Stage'deki link
   // önizleme modülüyle aynı altyapı: og:site_name/<title> + favicon fallback).
   useEffect(() => {
-    const domain = organizationDomain.trim().toLowerCase().replace(/^https?:\/\//, "").replace(/^www\./, "").split("/")[0];
+    const domain = normalizeDomainInput(organizationDomain);
     if (!domain || !domain.includes(".")) {
       setOrganizationLogo(null);
       return;
@@ -204,6 +213,7 @@ export default function Invitation() {
 
   const handleSubmit = () => {
     if (!role || !canNext) return;
+    const domain = normalizeDomainInput(organizationDomain);
     submitRequest({
       data: {
         name: name.trim(),
@@ -211,7 +221,7 @@ export default function Invitation() {
         role,
         linkedin: linkedin || null,
         whoYouAre: whoYouAre.trim(),
-        link: link || null,
+        link: domain ? `https://${domain}` : null,
         whoIntroduced: whoIntroduced || null,
         organization: organization.trim() || null,
         organizationDomain: organizationDomain.trim() || null,
@@ -517,17 +527,6 @@ export default function Invitation() {
                             value={linkedin}
                             onChange={(e) => setLinkedin(e.target.value)}
                             placeholder="https://linkedin.com/in/..."
-                            className={fieldClass}
-                            autoComplete="off"
-                          />
-                        </Field>
-
-                        <Field label={t("invite.org")} hint={t("invite.optional")}>
-                          <input
-                            type="url"
-                            value={link}
-                            onChange={(e) => setLink(e.target.value)}
-                            placeholder="https://"
                             className={fieldClass}
                             autoComplete="off"
                           />

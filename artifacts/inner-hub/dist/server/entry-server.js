@@ -415,7 +415,6 @@ const tr = {
     roleCompanyHint: "Çembere birlikte girmek isteyen ekip.",
     fullName: "Ad Soyad",
     email: "E-posta",
-    org: "Web sitesi",
     linkedin: "LinkedIn",
     city: "Şehir",
     story: "Hikâyen",
@@ -439,7 +438,7 @@ const tr = {
     phEmail: "you@company.com",
     orgLabel: "Kurum / Fon / Şirket",
     orgDomain: "Kurum domaini",
-    forLogo: "Logo için",
+    forLogo: "Logo + link için",
     required: "Zorunlu",
     optional: "Opsiyonel",
     logoFound: "Logo bulundu",
@@ -1930,7 +1929,6 @@ const en = {
     roleCompanyHint: "Team looking to enter the circle together.",
     fullName: "Full name",
     email: "Email",
-    org: "Website",
     linkedin: "LinkedIn",
     city: "City",
     story: "Your story",
@@ -1954,7 +1952,7 @@ const en = {
     phEmail: "you@company.com",
     orgLabel: "Org / Fund / Company",
     orgDomain: "Organization domain",
-    forLogo: "For logo",
+    forLogo: "For logo + link",
     required: "Required",
     optional: "Optional",
     logoFound: "Logo found",
@@ -8965,6 +8963,9 @@ const ROLE_DEFS = [
   { value: "company", icon: Building2 }
 ];
 const STEP_IDS = ["role", "identity", "org", "story", "intro"];
+function normalizeDomainInput(raw) {
+  return raw.trim().toLowerCase().replace(/^https?:\/\//, "").replace(/^www\./, "").split("/")[0];
+}
 const fieldClass = "w-full border-0 border-b border-white/20 bg-transparent px-0 py-3.5 text-[15px] text-[var(--bone-fixed)] shadow-none placeholder:text-white/35 focus-visible:border-[var(--inner-green)] focus-visible:outline-none focus-visible:ring-0 transition-colors";
 function Invitation() {
   const t = useT();
@@ -9006,7 +9007,6 @@ function Invitation() {
   const [email, setEmail] = useState("");
   const [role, setRole] = useState(null);
   const [linkedin, setLinkedin] = useState("");
-  const [link, setLink] = useState("");
   const [organization, setOrganization] = useState("");
   const [organizationDomain, setOrganizationDomain] = useState("");
   const [organizationLogo, setOrganizationLogo] = useState(null);
@@ -9055,7 +9055,7 @@ function Invitation() {
     }
   }, [email, organizationDomain]);
   useEffect(() => {
-    const domain = organizationDomain.trim().toLowerCase().replace(/^https?:\/\//, "").replace(/^www\./, "").split("/")[0];
+    const domain = normalizeDomainInput(organizationDomain);
     if (!domain || !domain.includes(".")) {
       setOrganizationLogo(null);
       return;
@@ -9108,6 +9108,7 @@ function Invitation() {
   };
   const handleSubmit = () => {
     if (!role || !canNext) return;
+    const domain = normalizeDomainInput(organizationDomain);
     submitRequest2({
       data: {
         name: name.trim(),
@@ -9115,7 +9116,7 @@ function Invitation() {
         role,
         linkedin: linkedin || null,
         whoYouAre: whoYouAre.trim(),
-        link: link || null,
+        link: domain ? `https://${domain}` : null,
         whoIntroduced: whoIntroduced || null,
         organization: organization.trim() || null,
         organizationDomain: organizationDomain.trim() || null,
@@ -9401,17 +9402,6 @@ function Invitation() {
                       value: linkedin,
                       onChange: (e) => setLinkedin(e.target.value),
                       placeholder: "https://linkedin.com/in/...",
-                      className: fieldClass,
-                      autoComplete: "off"
-                    }
-                  ) }),
-                  /* @__PURE__ */ jsx(Field, { label: t("invite.org"), hint: t("invite.optional"), children: /* @__PURE__ */ jsx(
-                    "input",
-                    {
-                      type: "url",
-                      value: link,
-                      onChange: (e) => setLink(e.target.value),
-                      placeholder: "https://",
                       className: fieldClass,
                       autoComplete: "off"
                     }
