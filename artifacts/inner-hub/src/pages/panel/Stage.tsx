@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   ChevronDown,
@@ -12,6 +12,8 @@ import {
   Star,
   ThumbsUp,
   Trash2,
+  Upload,
+  X,
 } from "lucide-react";
 import { FadeIn } from "@/components/FadeIn";
 import { Lockup } from "@/components/Lockup";
@@ -82,11 +84,16 @@ function ProductHuntMark({ className }: { className?: string }) {
   );
 }
 
+/** Yapıştırılan metin başında değil de içinde bir http(s) linki taşıyorsa
+ *  (ör. "[Ürünüm](https://site.com/x)" gibi zengin metin/markdown) o linki
+ *  bulup çıkarır; yoksa metnin tamamını kullanır. Ardından şemayı ve baştaki
+ *  eğik çizgileri temizler. "https://" ile yapıştırılan linkler de dahil,
+ *  kullanıcının ne şekilde yapıştırdığından bağımsız tek bir temiz linke çevirir. */
 function stripUrlScheme(raw: string): string {
-  return raw
-    .trim()
-    .replace(/^https?:\/\//i, "")
-    .replace(/^\/+/, "");
+  const trimmed = raw.trim();
+  const embedded = trimmed.match(/https?:\/\/[^\s)\]"'<>]+/i);
+  const candidate = embedded ? embedded[0] : trimmed;
+  return candidate.replace(/^https?:\/\//i, "").replace(/^\/+/, "");
 }
 
 function toHttpsUrl(hostPath: string): string | null {
@@ -140,7 +147,7 @@ function PrefixedUrlField({
           onChange={(e) => onChange(stripUrlScheme(e.target.value))}
           onPaste={(e) => {
             const text = e.clipboardData.getData("text");
-            if (/^https?:\/\//i.test(text.trim())) {
+            if (/https?:\/\//i.test(text)) {
               e.preventDefault();
               onChange(stripUrlScheme(text));
             }
@@ -159,6 +166,177 @@ function PrefixedUrlField({
         )}
       </div>
     </label>
+  );
+}
+
+/** Dosyayı canvas üzerinden JPEG'e sıkıştırıp data URL'e çevirir (avatar
+ *  yüklemedeki desenle aynı - ayrı bir dosya depolama servisi gerekmez). */
+async function compressImageToDataUrl(file: File, maxChars = 280_000): Promise<string> {
+  const bitmap = await createImageBitmap(file);
+  let w = bitmap.width;
+  let h = bitmap.height;
+  const maxDim = 1200;
+  if (Math.max(w, h) > maxDim) {
+    const scale = maxDim / Math.max(w, h);
+    w = Math.round(w * scale);
+    h = Math.round(h * scale);
+  }
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("canvas");
+  let quality = 0.85;
+  let dataUrl = "";
+  for (let attempt = 0; attempt < 12; attempt++) {
+    canvas.width = w;
+    canvas.height = h;
+    ctx.drawImage(bitmap, 0, 0, w, h);
+    dataUrl = canvas.toDataURL("image/jpeg", quality);
+    if (dataUrl.length <= maxChars) break;
+    if (quality > 0.45) quality -= 0.1;
+    else {
+      w = Math.max(160, Math.round(w * 0.75));
+      h = Math.max(160, Math.round(h * 0.75));
+    }
+  }
+  bitmap.close();
+  if (dataUrl.length > maxChars) throw new Error("too_large");
+  return dataUrl;
+}
+
+/** Kapak görseli alanı: link yapıştırma + sürükle-bırak/dosya seçme ile yükleme bir arada. */
+function CoverImageField({
+  urlPath,
+  onUrlChange,
+  uploadDataUrl,
+  onUploadChange,
+  label,
+  placeholder,
+}: {
+  urlPath: string;
+  onUrlChange: (hostPath: string) => void;
+  uploadDataUrl: string | null;
+  onUploadChange: (dataUrl: string | null) => void;
+  label: ReactNode;
+  placeholder: string;
+}) {
+  const t = useT();
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [dragOver, setDragOver] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState(false);
+
+  const handleFile = async (file: File | null | undefined) => {
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      setError(true);
+      return;
+    }
+    setBusy(true);
+    setError(false);
+    try {
+      const dataUrl = await compressImageToDataUrl(file);
+      onUploadChange(dataUrl);
+    } catch {
+      setError(true);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  if (uploadDataUrl) {
+    return (
+      <div className="space-y-1.5">
+        <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-muted)]">
+          {label}
+        </span>
+        <div className="flex items-center gap-3 border border-[var(--ink)]/15 bg-[var(--ink)]/[0.04] p-2 dark:border-white/18 dark:bg-white/[0.08]">
+          <img
+            src={uploadDataUrl}
+            alt=""
+            className="size-10 shrink-0 border border-[var(--ink)]/10 object-cover dark:border-white/10"
+          />
+          <p className="min-w-0 flex-1 truncate text-xs text-[var(--ink-muted)] dark:text-white/55">
+            {t("stage.coverUploaded")}
+          </p>
+          <button
+            type="button"
+            onClick={() => onUploadChange(null)}
+            className="hit-40 flex shrink-0 items-center justify-center text-[var(--ink-muted)] transition-colors hover:text-[var(--ink)] dark:text-white/50 dark:hover:text-white"
+          >
+            <X className="size-4" />
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-1.5">
+      <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-muted)]">
+        {label}
+      </span>
+      <div
+        onDragOver={(e) => {
+          e.preventDefault();
+          setDragOver(true);
+        }}
+        onDragLeave={() => setDragOver(false)}
+        onDrop={(e) => {
+          e.preventDefault();
+          setDragOver(false);
+          void handleFile(e.dataTransfer.files?.[0]);
+        }}
+        className={[
+          "flex items-stretch border bg-[var(--ink)]/[0.04] transition-colors focus-within:border-[var(--ink)]/35 dark:bg-white/[0.08] dark:focus-within:border-white/35",
+          dragOver
+            ? "border-[var(--inner-green)]/60 bg-[var(--inner-green)]/5"
+            : "border-[var(--ink)]/15 dark:border-white/18",
+        ].join(" ")}
+      >
+        <span className="flex shrink-0 items-center border-r border-[var(--ink)]/10 bg-[var(--ink)]/[0.03] px-2.5 font-mono text-[11px] text-[var(--ink-muted)] dark:border-white/10">
+          https://
+        </span>
+        <input
+          value={urlPath}
+          onChange={(e) => onUrlChange(stripUrlScheme(e.target.value))}
+          onPaste={(e) => {
+            const text = e.clipboardData.getData("text");
+            if (/https?:\/\//i.test(text)) {
+              e.preventDefault();
+              onUrlChange(stripUrlScheme(text));
+            }
+          }}
+          inputMode="url"
+          autoCapitalize="off"
+          autoCorrect="off"
+          spellCheck={false}
+          placeholder={dragOver ? t("stage.coverDropHint") : placeholder}
+          className={STAGE_URL_INPUT}
+        />
+        <button
+          type="button"
+          disabled={busy}
+          onClick={() => fileRef.current?.click()}
+          className="hit-40 flex shrink-0 items-center gap-1 border-l border-[var(--ink)]/10 px-2.5 font-mono text-[10px] uppercase tracking-widest text-[var(--ink-muted)] transition-colors hover:text-[var(--ink)] disabled:opacity-40 dark:border-white/10 dark:text-white/50 dark:hover:text-white"
+        >
+          {busy ? (
+            <Loader2 className="size-3.5 animate-spin" />
+          ) : (
+            <Upload className="size-3.5" />
+          )}
+        </button>
+        <input
+          ref={fileRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={(e) => void handleFile(e.target.files?.[0])}
+        />
+      </div>
+      <p className="font-mono text-[9px] uppercase tracking-wide text-[var(--ink-subtle)] dark:text-white/35">
+        {error ? t("stage.coverUploadFailed") : t("stage.coverDragHint")}
+      </p>
+    </div>
   );
 }
 
@@ -398,6 +576,7 @@ function SubmitDialog({
   const [phPath, setPhPath] = useState("");
   const [youtubePath, setYoutubePath] = useState("");
   const [coverPath, setCoverPath] = useState("");
+  const [coverUpload, setCoverUpload] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [titleTouched, setTitleTouched] = useState(false);
@@ -502,6 +681,7 @@ function SubmitDialog({
     setPhPath("");
     setYoutubePath("");
     setCoverPath("");
+    setCoverUpload(null);
     setPreview(null);
     setTitleTouched(false);
     setPitchTouched(false);
@@ -529,7 +709,7 @@ function SubmitDialog({
           title: title.trim(),
           url: absoluteUrl,
           pitch: pitch.trim(),
-          imageUrl: coverAbsolute || preview?.image || null,
+          imageUrl: coverUpload || coverAbsolute || preview?.image || null,
           productHuntUrl: phAbsolute || undefined,
           youtubeUrl: youtubeAbsolute || undefined,
         }),
@@ -649,10 +829,12 @@ function SubmitDialog({
             />
           </label>
 
-          <PrefixedUrlField
+          <CoverImageField
             label={t("stage.fieldCover")}
-            value={coverPath}
-            onChange={setCoverPath}
+            urlPath={coverPath}
+            onUrlChange={setCoverPath}
+            uploadDataUrl={coverUpload}
+            onUploadChange={setCoverUpload}
             placeholder={t("stage.coverPlaceholder")}
           />
 

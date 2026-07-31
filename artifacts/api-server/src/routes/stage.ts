@@ -243,11 +243,17 @@ router.post("/stage/products", requireAuth, async (req, res) => {
     const u = url?.trim() ?? "";
     const p = pitch?.trim() ?? "";
     const rawImage = imageUrl?.trim() ?? "";
-    let img =
-      rawImage.length <= 500 &&
-      (rawImage.startsWith("http://") ||
-        rawImage.startsWith("https://") ||
-        rawImage.startsWith("/api/org-logos/"))
+    // Sürükle-bırak / dosya seçimiyle yüklenen kapak görselleri base64 data
+    // URL olarak gelir (avatar yüklemedeki desenle aynı) - ayrı dosya
+    // depolama altyapısı gerekmez, doğrudan sütuna yazılır.
+    let img = rawImage.startsWith("data:image/")
+      ? rawImage.length <= 300_000
+        ? rawImage
+        : null
+      : rawImage.length <= 500 &&
+          (rawImage.startsWith("http://") ||
+            rawImage.startsWith("https://") ||
+            rawImage.startsWith("/api/org-logos/"))
         ? rawImage
         : null;
 

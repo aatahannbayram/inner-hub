@@ -126269,7 +126269,7 @@ router21.post("/stage/products", requireAuth, async (req, res) => {
     const u = url2?.trim() ?? "";
     const p = pitch?.trim() ?? "";
     const rawImage = imageUrl?.trim() ?? "";
-    let img = rawImage.length <= 500 && (rawImage.startsWith("http://") || rawImage.startsWith("https://") || rawImage.startsWith("/api/org-logos/")) ? rawImage : null;
+    let img = rawImage.startsWith("data:image/") ? rawImage.length <= 3e5 ? rawImage : null : rawImage.length <= 500 && (rawImage.startsWith("http://") || rawImage.startsWith("https://") || rawImage.startsWith("/api/org-logos/")) ? rawImage : null;
     if (!t || !u || !p) {
       res.status(400).json({ error: "title, url ve pitch zorunlu" });
       return;
