@@ -149,6 +149,50 @@ router.post("/mail-test", async (req, res) => {
   res.status(result.ok ? 200 : 502).json({ ok: result.ok, to, status, result });
 });
 
+/** POST /api/auth/admin/user-lookup — { passcode, email } ADMIN_PASSCODE ile destek teşhisi.
+ *  "Şifre sıfırlama maili gelmedi" şikayetlerinde bu email gerçekten kayıtlı mı, silinmiş mi,
+ *  şifresi var mı diye görmeye yarar - forgot-password'daki enumeration-önleyici genel mesajın
+ *  arkasında ne olduğunu admin'e gösterir. Genel kullanıcıya asla açık değil. */
+router.post("/admin/user-lookup", async (req, res) => {
+  const expected = process.env.ADMIN_PASSCODE?.trim();
+  const got =
+    (typeof req.headers["x-admin-passcode"] === "string" ? req.headers["x-admin-passcode"] : "") ||
+    (typeof req.body?.passcode === "string" ? req.body.passcode : "");
+  if (!expected || got !== expected) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
+  }
+
+  const email = typeof req.body?.email === "string" ? normalizeEmail(req.body.email) : "";
+  if (!email || !email.includes("@")) {
+    res.status(400).json({ error: "Geçerli bir e-posta gerekli" });
+    return;
+  }
+
+  const [user] = await db
+    .select()
+    .from(usersTable)
+    .where(eq(usersTable.email, email))
+    .limit(1);
+
+  if (!user) {
+    res.json({ found: false, email });
+    return;
+  }
+
+  res.json({
+    found: true,
+    id: user.id,
+    email: user.email,
+    name: user.name,
+    role: user.role,
+    createdAt: user.createdAt,
+    deletedAt: user.deletedAt,
+    hasPassword: Boolean(user.passwordHash),
+    handle: user.handle,
+  });
+});
+
 // ─── LinkedIn: mevcut hesaba bağlama (login değil, connect) ────────────────────
 const LINKEDIN_STATE_COOKIE = "li_oauth_state";
 

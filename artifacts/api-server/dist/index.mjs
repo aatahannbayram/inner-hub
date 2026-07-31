@@ -117481,6 +117481,35 @@ SMTP: ${status.smtpConfigured}
   });
   res.status(result.ok ? 200 : 502).json({ ok: result.ok, to, status, result });
 });
+router5.post("/admin/user-lookup", async (req, res) => {
+  const expected = process.env.ADMIN_PASSCODE?.trim();
+  const got = (typeof req.headers["x-admin-passcode"] === "string" ? req.headers["x-admin-passcode"] : "") || (typeof req.body?.passcode === "string" ? req.body.passcode : "");
+  if (!expected || got !== expected) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
+  }
+  const email3 = typeof req.body?.email === "string" ? normalizeEmail(req.body.email) : "";
+  if (!email3 || !email3.includes("@")) {
+    res.status(400).json({ error: "Ge\xE7erli bir e-posta gerekli" });
+    return;
+  }
+  const [user] = await db.select().from(usersTable).where(eq(usersTable.email, email3)).limit(1);
+  if (!user) {
+    res.json({ found: false, email: email3 });
+    return;
+  }
+  res.json({
+    found: true,
+    id: user.id,
+    email: user.email,
+    name: user.name,
+    role: user.role,
+    createdAt: user.createdAt,
+    deletedAt: user.deletedAt,
+    hasPassword: Boolean(user.passwordHash),
+    handle: user.handle
+  });
+});
 var LINKEDIN_STATE_COOKIE = "li_oauth_state";
 router5.get("/linkedin/start", requireAuth, (req, res) => {
   if (!linkedinEnabled) {
