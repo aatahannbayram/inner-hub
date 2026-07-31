@@ -1,19 +1,18 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { ExternalLink, Globe, Loader2, Plus, Rocket, Star, ThumbsUp, Trash2, X } from "lucide-react";
+import { ExternalLink, Globe, Loader2, Plus, Rocket, Star, ThumbsUp, Trash2 } from "lucide-react";
 import { FadeIn } from "@/components/FadeIn";
 import { Lockup } from "@/components/Lockup";
 import { useApiQuery } from "@/hooks/useApiQuery";
 import { apiUrl } from "@/lib/api";
 import { LoadingBlock, ErrorState, CourseCardSkeleton } from "@/components/panel/Skeletons";
 import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerDescription,
-} from "@/components/ui/drawer";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { useT } from "@/i18n";
 
 const STAGE_FIELD =
@@ -181,7 +180,7 @@ function ProductCard({
   );
 }
 
-function SubmitDrawer({
+function SubmitDialog({
   open,
   onClose,
   onAdded,
@@ -282,30 +281,23 @@ function SubmitDrawer({
   };
 
   return (
-    <Drawer open={open} onOpenChange={(v) => !v && onClose()} shouldScaleBackground={false}>
-      <DrawerContent className="max-h-[min(92dvh,720px)] rounded-t-2xl border-[var(--ink)]/10 bg-[var(--bone)] dark:border-white/12 dark:bg-[#111]">
-        <DrawerHeader className="relative px-5 pb-2 pt-1 text-left sm:px-6">
-          <DrawerClose
-            type="button"
-            aria-label={t("stage.close")}
-            className="absolute right-4 top-1 flex size-9 items-center justify-center text-[var(--ink-muted)] transition-colors hover:text-[var(--ink)] dark:text-white/45 dark:hover:text-white"
-          >
-            <X className="size-4" />
-          </DrawerClose>
-          <p className="mb-1 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
+    <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
+      <DialogContent className="max-h-[min(88dvh,560px)] w-[calc(100%-1.5rem)] max-w-md gap-0 overflow-y-auto rounded-none border-[var(--ink)]/10 bg-[var(--bone)] p-0 dark:border-white/12 dark:bg-[#141414] sm:rounded-none">
+        <DialogHeader className="space-y-1 border-b border-[var(--ink)]/[0.08] px-5 py-4 text-left dark:border-white/10">
+          <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
             <span lang="en">inner·stage</span>
           </p>
-          <DrawerTitle
-            className="pr-10 font-serif text-2xl font-normal text-[var(--ink)]"
+          <DialogTitle
+            className="font-serif text-2xl font-normal text-[var(--ink)]"
             style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
           >
             {t("stage.submit")}
-          </DrawerTitle>
-          <DrawerDescription className="text-sm text-[var(--ink-body)] dark:text-white/55">
+          </DialogTitle>
+          <DialogDescription className="text-sm text-[var(--ink-body)] dark:text-white/55">
             {t("stage.submitHint")}
-          </DrawerDescription>
-        </DrawerHeader>
-        <div className="space-y-3.5 overflow-y-auto px-5 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:px-6">
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3 px-5 py-4">
           <label className="block space-y-1.5">
             <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-muted)]">
               {t("stage.fieldUrl")}
@@ -384,14 +376,14 @@ function SubmitDrawer({
             type="button"
             disabled={busy || !title.trim() || !url.trim() || !pitch.trim()}
             onClick={() => void submit()}
-            className="flex w-full items-center justify-center gap-1.5 panel-glass-ink px-4 py-3 font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)] transition-opacity hover:opacity-80 disabled:opacity-40 sm:w-auto"
+            className="flex w-full items-center justify-center gap-1.5 panel-glass-ink px-4 py-2.5 font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)] transition-opacity hover:opacity-80 disabled:opacity-40"
           >
             {busy ? <Loader2 className="size-3.5 animate-spin" /> : <Plus className="size-3" />}
             {t("stage.submit")}
           </button>
         </div>
-      </DrawerContent>
-    </Drawer>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -630,7 +622,7 @@ export default function Stage() {
         </>
       )}
 
-      <SubmitDrawer open={composeOpen} onClose={() => setComposeOpen(false)} onAdded={refresh} />
+      <SubmitDialog open={composeOpen} onClose={() => setComposeOpen(false)} onAdded={refresh} />
     </div>
   );
 }

@@ -82,9 +82,17 @@ export function SiteFooter() {
       </div>
 
       <div className="relative z-10 mt-14 flex flex-col gap-6 border-t border-white/10 pt-6 md:flex-row md:items-end md:justify-between">
-        <p className="font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)]/35">
-          {t("home.footerRights")}
-        </p>
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          <p className="font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)]/35">
+            {t("home.footerRights")}
+          </p>
+          <a
+            href="/privacy"
+            className="font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)]/35 underline decoration-white/20 underline-offset-2 transition-colors hover:text-[var(--bone-fixed)]/70"
+          >
+            {t("home.footerPrivacy")}
+          </a>
+        </div>
         <div className="leading-none text-[var(--bone-fixed)]" aria-hidden="true">
           <Lockup fontSize="clamp(2.75rem, 10vw, 7.5rem)" />
         </div>

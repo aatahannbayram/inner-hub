@@ -10,6 +10,7 @@ import Requests from "@/pages/Requests";
 import PublicProfile from "@/pages/PublicProfile";
 import ArtifactsPage from "@/pages/Artifacts";
 import ArtifactDetailPage from "@/pages/ArtifactDetail";
+import PrivacyPage from "@/pages/Privacy";
 import { PanelShell, type PanelUser } from "@/components/panel/PanelShell";
 import { PanelPageSkeleton } from "@/components/panel/Skeletons";
 import { apiUrl } from "@/lib/api";
@@ -200,6 +201,7 @@ function Router() {
         <Route path="/artifacts/:slug" component={RedirectArtifactsSlug} />
         <Route path="/artifacts" component={RedirectArtifactsIndex} />
         <Route path="/requests"   component={Requests} />
+        <Route path="/privacy"    component={PrivacyPage} />
         <Route path="/u/:handle"  component={PublicProfile} />
         <Route path="/panel" component={PanelApp} />
         <Route path="/panel/*" component={PanelApp} />

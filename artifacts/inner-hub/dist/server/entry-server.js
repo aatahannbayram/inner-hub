@@ -385,6 +385,7 @@ const tr = {
     footerNavigate: "Gezin",
     footerConnect: "Bağlan",
     footerRights: "© 2026 inner hub · Tüm hakları saklıdır",
+    footerPrivacy: "Gizlilik Politikası",
     langSwitch: "Dil",
     panel: "Panel"
   },
@@ -1853,6 +1854,7 @@ const en = {
     footerNavigate: "Navigate",
     footerConnect: "Connect",
     footerRights: "© 2026 inner hub · All rights reserved",
+    footerPrivacy: "Privacy Policy",
     langSwitch: "Language",
     panel: "Panel"
   },
@@ -3342,7 +3344,17 @@ function SiteFooter() {
           ] })
         ] }),
         /* @__PURE__ */ jsxs("div", { className: "relative z-10 mt-14 flex flex-col gap-6 border-t border-white/10 pt-6 md:flex-row md:items-end md:justify-between", children: [
-          /* @__PURE__ */ jsx("p", { className: "font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)]/35", children: t("home.footerRights") }),
+          /* @__PURE__ */ jsxs("div", { className: "flex flex-wrap items-center gap-x-4 gap-y-2", children: [
+            /* @__PURE__ */ jsx("p", { className: "font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)]/35", children: t("home.footerRights") }),
+            /* @__PURE__ */ jsx(
+              "a",
+              {
+                href: "/privacy",
+                className: "font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)]/35 underline decoration-white/20 underline-offset-2 transition-colors hover:text-[var(--bone-fixed)]/70",
+                children: t("home.footerPrivacy")
+              }
+            )
+          ] }),
           /* @__PURE__ */ jsx("div", { className: "leading-none text-[var(--bone-fixed)]", "aria-hidden": "true", children: /* @__PURE__ */ jsx(Lockup, { fontSize: "clamp(2.75rem, 10vw, 7.5rem)" }) })
         ] }),
         /* @__PURE__ */ jsx("span", { className: "sr-only", children: "inner hub" })
@@ -10309,12 +10321,216 @@ function ArtifactDetailPage() {
     ] })
   ] }) });
 }
+const TR = {
+  title: "Gizlilik Politikası",
+  updated: "Son güncelleme: 31 Temmuz 2026",
+  intro: [
+    'inner.hub ("biz", "platform"), davetiye ile katılan kurucular, yatırımcılar ve araştırmacılardan oluşan kapalı bir topluluk platformudur. Bu sayfa, inner.digital üzerinden bize sağladığınız kişisel verileri nasıl topladığımızı, kullandığımızı ve koruduğumuzu açıklar.',
+    "Platformu kullanarak bu politikayı kabul etmiş olursunuz. Sorularınız için support@inner.digital adresinden bize ulaşabilirsiniz."
+  ],
+  sections: [
+    {
+      heading: "1. Topladığımız Veriler",
+      body: [
+        "Hesap bilgileri: ad, e-posta adresi, şifre (hash'lenmiş olarak saklanır).",
+        "Profil bilgileri: unvan, şirket, biyografi, uzmanlık alanları, üniversite, telefon, sosyal medya bağlantıları (LinkedIn, GitHub, Behance, Instagram, X, kişisel site).",
+        "Google veya LinkedIn ile bağlandığınızda: ilgili sağlayıcının bize ilettiği ad, e-posta ve profil fotoğrafı URL'si. Şifrenize veya diğer hesap verilerinize erişimimiz olmaz.",
+        "Kullanım verileri: etkinlik kayıtları, kurs ilerlemesi, topluluk sohbet mesajları, oylar, gönderilen ürünler (inner·stage) ve bildirim tercihleri.",
+        "Ödeme bilgileri: üyelik ve Circle Pass satın alımları Stripe üzerinden işlenir; kart numaranız bizim sunucularımızda saklanmaz.",
+        "Teknik veriler: oturum çerezi, IP adresi (güvenlik ve hız sınırlama amaçlı), tarayıcı bilgisi ve sayfa ziyaretlerine dair anonim analiz verisi (Google Analytics 4)."
+      ]
+    },
+    {
+      heading: "2. Verileri Nasıl Kullanıyoruz",
+      body: [
+        "Üyeliğinizi yönetmek, kimliğinizi doğrulamak ve hesabınızı güvenli tutmak.",
+        "Topluluk içi eşleştirme, tanışma önerileri ve bildirimler sunmak.",
+        "Etkinlik, kurs ve inner·stage gibi platform içi ürünleri işletmek.",
+        "Üyelik ve Circle Pass ödemelerini Stripe aracılığıyla işlemek.",
+        "Platformun kullanımını anlamak ve iyileştirmek için toplu, anonimleştirilmiş analiz yapmak.",
+        "Yasal yükümlülüklere uymak ve kötüye kullanımı önlemek."
+      ]
+    },
+    {
+      heading: "3. Üçüncü Taraf Hizmetler",
+      body: [
+        'Google ve LinkedIn: isteğe bağlı "ile bağlan" girişleri için kimlik doğrulama sağlayıcıları olarak kullanılır.',
+        "Stripe: ödeme işleme. Kart verileriniz doğrudan Stripe'a gider, bizim sistemlerimize dokunmaz.",
+        "Google Analytics 4: anonimleştirilmiş kullanım istatistikleri.",
+        "Hostinger (SMTP): işlemsel e-postaların (davet, onay, bildirim) gönderimi.",
+        "Mux: kurs videolarının barındırılması ve oynatılması.",
+        "Higgsfield: platform içi görsel/medya üretim araçları (yalnızca siz talep ettiğinizde kullanılır).",
+        "Bu sağlayıcıların her biri kendi gizlilik politikasına tabidir; verilerinizi yalnızca belirtilen amaçlar için onlarla paylaşırız."
+      ]
+    },
+    {
+      heading: "4. Çerezler",
+      body: [
+        "Oturumunuzu açık tutmak için yalnızca zorunlu, HTTP-only bir oturum çerezi kullanırız. Bu çerez reklam veya izleme amacıyla kullanılmaz.",
+        "Google Analytics, tarayıcınıza anonimleştirilmiş ölçüm çerezleri yerleştirebilir; bunları tarayıcı ayarlarınızdan reddedebilirsiniz."
+      ]
+    },
+    {
+      heading: "5. Veri Saklama ve Silme",
+      body: [
+        "Verilerinizi hesabınız aktif olduğu sürece saklarız.",
+        "Panel > Ayarlar bölümünden hesabınızı silme talebinde bulunabilirsiniz; bu işlem kişisel verilerinizi (ad, e-posta, sosyal bağlantılar, biyografi vb.) geri alınamaz şekilde anonimleştirir.",
+        "Yasal veya muhasebe yükümlülükleri nedeniyle bazı işlem kayıtları (örn. ödeme geçmişi) daha uzun süre saklanabilir."
+      ]
+    },
+    {
+      heading: "6. Haklarınız",
+      body: [
+        "6698 sayılı KVKK ve ilgili mevzuat kapsamında; verilerinize erişim, düzeltme, silme, işlemeye itiraz ve veri taşınabilirliği haklarına sahipsiniz.",
+        "Bu haklarınızı kullanmak için support@inner.digital adresine yazabilirsiniz; talebinizi makul bir süre içinde yanıtlarız."
+      ]
+    },
+    {
+      heading: "7. Çocukların Gizliliği",
+      body: [
+        "inner.hub davetiye ile katılan, profesyonel bir yetişkin topluluğudur. Platform 18 yaş altındaki kişilere yönelik değildir ve bilerek onlardan veri toplamayız."
+      ]
+    },
+    {
+      heading: "8. Bu Politikadaki Değişiklikler",
+      body: [
+        "Bu politikayı zaman zaman güncelleyebiliriz. Önemli değişikliklerde üyeleri e-posta veya panel içi bildirim ile bilgilendiririz. Bu sayfanın üst kısmında en son güncelleme tarihi belirtilir."
+      ]
+    }
+  ]
+};
+const EN = {
+  title: "Privacy Policy",
+  updated: "Last updated: July 31, 2026",
+  intro: [
+    'inner.hub ("we", "the platform") is an invitation-only community of founders, investors, and researchers. This page explains how we collect, use, and protect the personal data you share with us through inner.digital.',
+    "By using the platform, you agree to this policy. Questions can be sent to support@inner.digital."
+  ],
+  sections: [
+    {
+      heading: "1. Data We Collect",
+      body: [
+        "Account information: name, email address, password (stored hashed).",
+        "Profile information: title, company, bio, skills, university, phone, social links (LinkedIn, GitHub, Behance, Instagram, X, personal site).",
+        "When you connect with Google or LinkedIn: the name, email, and profile picture URL provided by that service. We never see your password or other account data.",
+        "Usage data: event registrations, course progress, community chat messages, votes, submitted products (inner·stage), and notification preferences.",
+        "Payment information: membership and Circle Pass purchases are processed via Stripe; we never store your card number on our servers.",
+        "Technical data: session cookie, IP address (for security and rate limiting), browser information, and anonymized page-visit analytics (Google Analytics 4)."
+      ]
+    },
+    {
+      heading: "2. How We Use Your Data",
+      body: [
+        "To manage your membership, verify your identity, and keep your account secure.",
+        "To power community matching, introduction suggestions, and notifications.",
+        "To operate in-platform products such as events, courses, and inner·stage.",
+        "To process membership and Circle Pass payments through Stripe.",
+        "To understand and improve the platform through aggregated, anonymized analytics.",
+        "To comply with legal obligations and prevent misuse."
+      ]
+    },
+    {
+      heading: "3. Third-Party Services",
+      body: [
+        'Google and LinkedIn: used as identity providers for the optional "connect" sign-in flows.',
+        "Stripe: payment processing. Your card details go directly to Stripe and never touch our systems.",
+        "Google Analytics 4: anonymized usage statistics.",
+        "Hostinger (SMTP): delivery of transactional emails (invitations, approvals, notifications).",
+        "Mux: hosting and playback of course videos.",
+        "Higgsfield: in-platform media generation tools (used only when you explicitly request them).",
+        "Each provider is subject to its own privacy policy; we only share your data with them for the purposes listed above."
+      ]
+    },
+    {
+      heading: "4. Cookies",
+      body: [
+        "We use only a strictly necessary, HTTP-only session cookie to keep you signed in. It is never used for advertising or tracking.",
+        "Google Analytics may set anonymized measurement cookies in your browser; you can opt out via your browser settings."
+      ]
+    },
+    {
+      heading: "5. Data Retention & Deletion",
+      body: [
+        "We retain your data for as long as your account remains active.",
+        "You can request account deletion from Panel > Settings; this irreversibly anonymizes your personal data (name, email, social links, bio, etc.).",
+        "Some transaction records (e.g. payment history) may be retained longer where required by law or accounting obligations."
+      ]
+    },
+    {
+      heading: "6. Your Rights",
+      body: [
+        "Depending on your jurisdiction, you may have rights to access, correct, delete, object to processing, and port your data (including under Turkish law, KVKK).",
+        "To exercise these rights, email support@inner.digital; we respond within a reasonable timeframe."
+      ]
+    },
+    {
+      heading: "7. Children's Privacy",
+      body: [
+        "inner.hub is an invitation-only, professional community for adults. The platform is not directed at anyone under 18, and we do not knowingly collect data from them."
+      ]
+    },
+    {
+      heading: "8. Changes to This Policy",
+      body: [
+        "We may update this policy from time to time. We'll notify members of material changes by email or in-panel notification. The date at the top of this page reflects the latest revision."
+      ]
+    }
+  ]
+};
+function PrivacyPage() {
+  const t = useT();
+  const { locale } = useLocale();
+  const copy = locale === "en" ? EN : TR;
+  useSeo({
+    title: copy.title,
+    description: locale === "en" ? "How inner.hub collects, uses, and protects your personal data." : "inner.hub kişisel verilerinizi nasıl topluyor, kullanıyor ve koruyor.",
+    canonicalPath: "/privacy",
+    type: "website"
+  });
+  return /* @__PURE__ */ jsx(SitePublicShell, { children: /* @__PURE__ */ jsxs("article", { className: "mx-auto max-w-3xl px-4 py-12 sm:px-6 md:py-16 lg:px-0", children: [
+    /* @__PURE__ */ jsxs(
+      Link,
+      {
+        href: "/",
+        className: "mb-10 inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-white/45 transition-colors hover:text-[var(--bone-fixed)]",
+        children: [
+          /* @__PURE__ */ jsx(ArrowLeft, { className: "size-3" }),
+          t("common.back")
+        ]
+      }
+    ),
+    /* @__PURE__ */ jsxs(FadeIn, { children: [
+      /* @__PURE__ */ jsx(
+        "h1",
+        {
+          className: "font-serif font-display text-4xl text-[var(--bone-fixed)] md:text-5xl",
+          style: { fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 },
+          children: copy.title
+        }
+      ),
+      /* @__PURE__ */ jsx("p", { className: "mt-3 font-mono text-[10px] uppercase tracking-widest text-white/40", children: copy.updated })
+    ] }),
+    /* @__PURE__ */ jsx(FadeIn, { delay: 0.04, children: /* @__PURE__ */ jsx("div", { className: "mt-8 space-y-4", children: copy.intro.map((p, i) => /* @__PURE__ */ jsx("p", { className: "text-base leading-relaxed text-[var(--bone-fixed)]/75", children: p }, i)) }) }),
+    /* @__PURE__ */ jsx("div", { className: "mt-12 space-y-10", children: copy.sections.map((section, i) => /* @__PURE__ */ jsx(FadeIn, { delay: 0.06 + i * 0.02, children: /* @__PURE__ */ jsxs("section", { className: "border-t border-white/10 pt-6", children: [
+      /* @__PURE__ */ jsx("h2", { className: "font-serif text-xl text-[var(--bone-fixed)]", children: section.heading }),
+      /* @__PURE__ */ jsx("ul", { className: "mt-3 space-y-2.5", children: section.body.map((line, j) => /* @__PURE__ */ jsx(
+        "li",
+        {
+          className: "text-sm leading-relaxed text-[var(--bone-fixed)]/70",
+          children: line
+        },
+        j
+      )) })
+    ] }) }, section.heading)) })
+  ] }) });
+}
 function PublicRoutes() {
   return /* @__PURE__ */ jsxs(Switch, { children: [
     /* @__PURE__ */ jsx(Route, { path: "/", component: Home }),
     /* @__PURE__ */ jsx(Route, { path: "/invitation", component: Invitation }),
     /* @__PURE__ */ jsx(Route, { path: "/haberler", component: ArtifactsPage }),
     /* @__PURE__ */ jsx(Route, { path: "/haberler/:slug", component: ArtifactDetailPage }),
+    /* @__PURE__ */ jsx(Route, { path: "/privacy", component: PrivacyPage }),
     /* @__PURE__ */ jsx(Route, { component: NotFound })
   ] });
 }

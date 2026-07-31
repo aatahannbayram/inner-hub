@@ -7,6 +7,7 @@ import Home from "@/pages/Home";
 import Invitation from "@/pages/Invitation";
 import ArtifactsPage from "@/pages/Artifacts";
 import ArtifactDetailPage from "@/pages/ArtifactDetail";
+import PrivacyPage from "@/pages/Privacy";
 import NotFound from "@/pages/not-found";
 
 function PublicRoutes() {
@@ -16,6 +17,7 @@ function PublicRoutes() {
       <Route path="/invitation" component={Invitation} />
       <Route path="/haberler" component={ArtifactsPage} />
       <Route path="/haberler/:slug" component={ArtifactDetailPage} />
+      <Route path="/privacy" component={PrivacyPage} />
       <Route component={NotFound} />
     </Switch>
   );

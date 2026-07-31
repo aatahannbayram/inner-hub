@@ -192,6 +192,22 @@ pages.push(
 );
 
 pages.push(
+  writePage("privacy/index.html", "/privacy", {
+    title: "Gizlilik Politikası · inner.hub",
+    description: "inner.hub kişisel verilerinizi nasıl topluyor, kullanıyor ve koruyor.",
+    canonical: "https://inner.digital/privacy",
+    ogType: "website",
+    ogImage: "https://inner.digital/inner-og.png",
+    jsonLd: {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      name: "Gizlilik Politikası",
+      url: "https://inner.digital/privacy",
+    },
+  }),
+);
+
+pages.push(
   writePage("haberler/index.html", "/haberler", {
     title: "Haberler · inner.hub",
     description:
