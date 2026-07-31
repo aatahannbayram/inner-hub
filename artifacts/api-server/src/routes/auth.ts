@@ -28,7 +28,7 @@ import {
 } from "../lib/inviteCodes";
 import { getPrimaryOrgForUser, isAvatarStyle, resolveAvatarUrl } from "../lib/identity";
 import { notifyPasswordReset } from "../lib/mail";
-import { appBaseUrl, mailProviderStatus } from "../lib/mail/transport";
+import { appBaseUrl, mailProviderStatus, sendTransactionalMail } from "../lib/mail/transport";
 import { logger } from "../lib/logger";
 
 const router = Router();
@@ -111,6 +111,42 @@ router.get("/config", (_req, res) => {
     linkedinEnabled,
     mail: mailProviderStatus(),
   });
+});
+
+/** POST /api/auth/mail-test — { passcode, to? } ADMIN_PASSCODE ile Resend/SMTP smoke. */
+router.post("/mail-test", async (req, res) => {
+  const expected = process.env.ADMIN_PASSCODE?.trim();
+  const got =
+    (typeof req.headers["x-admin-passcode"] === "string"
+      ? req.headers["x-admin-passcode"]
+      : "") ||
+    (typeof req.body?.passcode === "string" ? req.body.passcode : "");
+  if (!expected || got !== expected) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
+  }
+
+  const to =
+    (typeof req.body?.to === "string" && req.body.to.includes("@")
+      ? normalizeEmail(req.body.to)
+      : null) ||
+    process.env.NOTIFY_EMAIL ||
+    process.env.MAIL_REPLY_TO;
+  if (!to) {
+    res.status(400).json({ error: "to veya NOTIFY_EMAIL gerekli" });
+    return;
+  }
+
+  const status = mailProviderStatus();
+  const result = await sendTransactionalMail({
+    to,
+    subject: "inner hub · mail test",
+    text: `Bu bir test iletidir.\nFrom: ${status.from}\nResend: ${status.resendConfigured}\nSMTP: ${status.smtpConfigured}\n`,
+    html: `<p>Bu bir test iletidir.</p><p>From: <code>${status.from}</code></p>`,
+    kind: "auth.mail_test",
+  });
+
+  res.status(result.ok ? 200 : 502).json({ ok: result.ok, to, status, result });
 });
 
 // ─── LinkedIn: mevcut hesaba bağlama (login değil, connect) ────────────────────
@@ -351,8 +387,21 @@ router.post("/forgot-password", async (req, res) => {
         resetUrl,
       });
       if (!mailResult.ok) {
-        logger.warn({ email: user.email, error: mailResult.error }, "Password reset mail failed");
+        logger.warn(
+          { email: user.email, error: mailResult.error, provider: mailResult.provider },
+          "Password reset mail failed",
+        );
+        res.status(502).json({
+          error: "Sıfırlama maili gönderilemedi. Biraz sonra tekrar dene veya support@inner.digital yaz.",
+        });
+        return;
       }
+      logger.info(
+        { email: user.email, provider: mailResult.provider },
+        "Password reset mail accepted",
+      );
+    } else {
+      logger.info({ email }, "Password reset requested for unknown email");
     }
 
     res.json(genericOk);

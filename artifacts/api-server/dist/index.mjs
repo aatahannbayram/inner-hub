@@ -117455,6 +117455,32 @@ router5.get("/config", (_req, res) => {
     mail: mailProviderStatus()
   });
 });
+router5.post("/mail-test", async (req, res) => {
+  const expected = process.env.ADMIN_PASSCODE?.trim();
+  const got = (typeof req.headers["x-admin-passcode"] === "string" ? req.headers["x-admin-passcode"] : "") || (typeof req.body?.passcode === "string" ? req.body.passcode : "");
+  if (!expected || got !== expected) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
+  }
+  const to = (typeof req.body?.to === "string" && req.body.to.includes("@") ? normalizeEmail(req.body.to) : null) || process.env.NOTIFY_EMAIL || process.env.MAIL_REPLY_TO;
+  if (!to) {
+    res.status(400).json({ error: "to veya NOTIFY_EMAIL gerekli" });
+    return;
+  }
+  const status = mailProviderStatus();
+  const result = await sendTransactionalMail({
+    to,
+    subject: "inner hub \xB7 mail test",
+    text: `Bu bir test iletidir.
+From: ${status.from}
+Resend: ${status.resendConfigured}
+SMTP: ${status.smtpConfigured}
+`,
+    html: `<p>Bu bir test iletidir.</p><p>From: <code>${status.from}</code></p>`,
+    kind: "auth.mail_test"
+  });
+  res.status(result.ok ? 200 : 502).json({ ok: result.ok, to, status, result });
+});
 var LINKEDIN_STATE_COOKIE = "li_oauth_state";
 router5.get("/linkedin/start", requireAuth, (req, res) => {
   if (!linkedinEnabled) {
@@ -117614,8 +117640,21 @@ router5.post("/forgot-password", async (req, res) => {
         resetUrl
       });
       if (!mailResult.ok) {
-        logger.warn({ email: user.email, error: mailResult.error }, "Password reset mail failed");
+        logger.warn(
+          { email: user.email, error: mailResult.error, provider: mailResult.provider },
+          "Password reset mail failed"
+        );
+        res.status(502).json({
+          error: "S\u0131f\u0131rlama maili g\xF6nderilemedi. Biraz sonra tekrar dene veya support@inner.digital yaz."
+        });
+        return;
       }
+      logger.info(
+        { email: user.email, provider: mailResult.provider },
+        "Password reset mail accepted"
+      );
+    } else {
+      logger.info({ email: email3 }, "Password reset requested for unknown email");
     }
     res.json(genericOk);
   } catch (err) {
