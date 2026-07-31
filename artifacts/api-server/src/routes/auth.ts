@@ -28,7 +28,7 @@ import {
 } from "../lib/inviteCodes";
 import { getPrimaryOrgForUser, isAvatarStyle, resolveAvatarUrl } from "../lib/identity";
 import { notifyPasswordReset } from "../lib/mail";
-import { appBaseUrl } from "../lib/mail/transport";
+import { appBaseUrl, mailProviderStatus } from "../lib/mail/transport";
 import { logger } from "../lib/logger";
 
 const router = Router();
@@ -106,7 +106,11 @@ function parseSkills(raw: string | null | undefined): string[] {
 // ─── GET /api/auth/config ─────────────────────────────────────────────────────
 // Frontend'in Google Sign-In butonunu render edebilmesi için public client ID.
 router.get("/config", (_req, res) => {
-  res.json({ googleClientId: googleClientId ?? null, linkedinEnabled });
+  res.json({
+    googleClientId: googleClientId ?? null,
+    linkedinEnabled,
+    mail: mailProviderStatus(),
+  });
 });
 
 // ─── LinkedIn: mevcut hesaba bağlama (login değil, connect) ────────────────────

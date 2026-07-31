@@ -97722,8 +97722,22 @@ function mailFromHeader() {
   const addr = explicit || mailFromAddress();
   return `"${name.replace(/"/g, "")}" <${addr}>`;
 }
+function smtpFromHeader() {
+  const name = process.env.MAIL_FROM_NAME ?? "inner hub";
+  const addr = process.env.SMTP_USER?.trim() || mailFromAddress();
+  return `"${name.replace(/"/g, "")}" <${addr}>`;
+}
 function mailReplyTo() {
   return process.env.MAIL_REPLY_TO ?? "support@inner.digital";
+}
+function mailProviderStatus() {
+  const { SMTP_HOST, SMTP_USER, SMTP_PASS } = process.env;
+  return {
+    resendConfigured: Boolean(resendApiKey()),
+    smtpConfigured: Boolean(SMTP_HOST && SMTP_USER && SMTP_PASS),
+    from: mailFromAddress(),
+    replyTo: mailReplyTo()
+  };
 }
 function mailDomain() {
   const from = mailFromAddress();
@@ -97779,7 +97793,7 @@ async function sendViaSmtp(mail, messageId) {
     };
   }
   await transport.sendMail({
-    from: mailFromHeader(),
+    from: smtpFromHeader(),
     to: mail.to,
     replyTo: mailReplyTo(),
     subject: mail.subject,
@@ -117435,7 +117449,11 @@ function parseSkills(raw) {
   return raw.split(",").map((s) => s.trim()).filter(Boolean).slice(0, 10);
 }
 router5.get("/config", (_req, res) => {
-  res.json({ googleClientId: googleClientId ?? null, linkedinEnabled });
+  res.json({
+    googleClientId: googleClientId ?? null,
+    linkedinEnabled,
+    mail: mailProviderStatus()
+  });
 });
 var LINKEDIN_STATE_COOKIE = "li_oauth_state";
 router5.get("/linkedin/start", requireAuth, (req, res) => {

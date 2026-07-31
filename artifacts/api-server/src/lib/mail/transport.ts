@@ -50,8 +50,25 @@ export function mailFromHeader(): string {
   return `"${name.replace(/"/g, "")}" <${addr}>`;
 }
 
+/** Hostinger SMTP From: auth mailbox ile hizalı olmalı (MAIL_FROM Resend subdomain olabilir). */
+export function smtpFromHeader(): string {
+  const name = process.env.MAIL_FROM_NAME ?? "inner hub";
+  const addr = process.env.SMTP_USER?.trim() || mailFromAddress();
+  return `"${name.replace(/"/g, "")}" <${addr}>`;
+}
+
 export function mailReplyTo(): string {
   return process.env.MAIL_REPLY_TO ?? "support@inner.digital";
+}
+
+export function mailProviderStatus() {
+  const { SMTP_HOST, SMTP_USER, SMTP_PASS } = process.env;
+  return {
+    resendConfigured: Boolean(resendApiKey()),
+    smtpConfigured: Boolean(SMTP_HOST && SMTP_USER && SMTP_PASS),
+    from: mailFromAddress(),
+    replyTo: mailReplyTo(),
+  };
 }
 
 function mailDomain(): string {
@@ -144,7 +161,7 @@ async function sendViaSmtp(mail: OutboundMail, messageId: string): Promise<MailR
   }
 
   await transport.sendMail({
-    from: mailFromHeader(),
+    from: smtpFromHeader(),
     to: mail.to,
     replyTo: mailReplyTo(),
     subject: mail.subject,
