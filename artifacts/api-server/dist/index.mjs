@@ -97713,7 +97713,7 @@ function appBaseUrl() {
   return (process.env.APP_URL ?? "https://inner.digital").replace(/\/$/, "");
 }
 function mailFromAddress() {
-  return process.env.RESEND_FROM?.replace(/^.*<([^>]+)>.*$/, "$1").trim() || process.env.MAIL_FROM || process.env.SMTP_USER || "noreply@inner.digital";
+  return process.env.RESEND_FROM?.replace(/^.*<([^>]+)>.*$/, "$1").trim() || process.env.MAIL_FROM || process.env.SMTP_USER || "noreply@mail.inner.digital";
 }
 function mailFromHeader() {
   const explicit = process.env.RESEND_FROM?.trim();

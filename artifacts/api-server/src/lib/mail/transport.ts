@@ -38,7 +38,7 @@ export function mailFromAddress(): string {
     process.env.RESEND_FROM?.replace(/^.*<([^>]+)>.*$/, "$1").trim() ||
     process.env.MAIL_FROM ||
     process.env.SMTP_USER ||
-    "noreply@inner.digital"
+    "noreply@mail.inner.digital"
   );
 }
 

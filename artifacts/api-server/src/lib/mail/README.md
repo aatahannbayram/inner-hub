@@ -4,11 +4,13 @@
 
 | Rol | Sağlayıcı |
 |-----|-----------|
-| Gelen kutu / MX / webmail | Hostinger Email (`mx1/mx2.hostinger.com`) |
-| Uygulamadan giden transactional | **Resend** (`RESEND_API_KEY`) |
-| Fallback (key yoksa) | Hostinger SMTP (`smtp.hostinger.com`) |
+| Gelen kutu / MX / webmail | Hostinger Email (`mx1/mx2.hostinger.com`, apex `@inner.digital`) |
+| Uygulamadan giden transactional | **Resend** — From: `noreply@mail.inner.digital` |
+| Fallback (key yoksa) | Hostinger SMTP (`smtp.hostinger.com`, apex mailbox) |
 
 Şablonlar (`templates.ts`) ve `notify*` API değişmez; yalnızca [`transport.ts`](./transport.ts) gönderir.
+
+DNS: alan adı GoDaddy’de olsa bile **NS Hostinger’daysa** kayıtlar Hostinger DNS Zone’a (`inner.digital`) eklenir. GoDaddy zone kullanılmaz.
 
 ## Ne gönderilir
 
@@ -24,59 +26,41 @@
 ## Env
 
 ```
-# Öncelik: Resend
 RESEND_API_KEY=re_xxxxxxxx
-# Opsiyonel; yoksa MAIL_FROM kullanılır (domain Resend’de verified olmalı)
-# RESEND_FROM="inner hub <noreply@inner.digital>"
+# Opsiyonel; yoksa MAIL_FROM kullanılır
+# RESEND_FROM="inner hub <noreply@mail.inner.digital>"
 
-MAIL_FROM=noreply@inner.digital
+MAIL_FROM=noreply@mail.inner.digital
 MAIL_FROM_NAME=inner hub
 MAIL_REPLY_TO=support@inner.digital
 NOTIFY_EMAIL=hey@inner.digital
 APP_URL=https://inner.digital
 
-# Fallback (RESEND_API_KEY yoksa)
+# Fallback (RESEND_API_KEY yoksa) — Hostinger apex SMTP
 SMTP_HOST=smtp.hostinger.com
 SMTP_PORT=465
 SMTP_USER=noreply@inner.digital
 SMTP_PASS=
 ```
 
-## Resend domain kurulumu (manuel, ~10 dk)
+## Resend domain kurulumu
 
-1. [resend.com](https://resend.com) → Domains → **Add** `inner.digital`
-2. Dashboard’daki DNS kayıtlarını ekle (genelde DKIM CNAME’ler).
-3. **MX değiştirme** — Hostinger MX kalsın (gelen kutu).
-4. **SPF — tek satır, birleştir** (iki ayrı SPF yazma):
+1. [resend.com/domains](https://resend.com/domains) → Add → **`mail.inner.digital`** (apex değil)
+2. Region: Ireland · Return-Path: `send` · Tracking: `links` (sadece kısa etiket, noktasız)
+3. DNS kayıtlarını **Hostinger → inner.digital → DNS Zone**’a ekle (MX apex’e dokunma)
+4. Enable Receiving: **kapalı** (gelen kutu Hostinger’da)
+5. Domain **Verified** → API key → env `RESEND_API_KEY` + `MAIL_FROM=noreply@mail.inner.digital` → API restart
 
-Şu an:
-```
-v=spf1 include:_spf.mail.hostinger.com ~all
-```
-
-Hedef (Resend UI’daki exact `include` değerini kullan; çoğu zaman `amazonses.com`):
-```
-v=spf1 include:_spf.mail.hostinger.com include:amazonses.com ~all
-```
-
-5. Resend’de domain **Verified** olana kadar bekle.
-6. API key oluştur → prod env: `RESEND_API_KEY` → API restart.
-7. `MAIL_FROM` / `RESEND_FROM` verified domain’den olmalı (`@inner.digital`).
-
-Hostinger `hostingermail-a` DKIM kaydını **silme** (webmail gideni için).
+Hostinger’da `mail` için **mailbox açma** gerekmez. Website “alt alan adı” da zorunlu değil; sadece DNS yeterli.
 
 ## Doğrulama
 
 ```bash
-# Preview HTML
 node artifacts/api-server/scripts/generate-mail-preview.mjs
-
-# Resend veya SMTP ile test
 node --env-file=.env artifacts/api-server/scripts/test-mail-pipeline.mjs --to sen@mail.com
 ```
 
-Gmail → spam/inbox mail → ⋮ → **Orijinali göster** → `DKIM: PASS` (Resend selector), SPF/DMARC uyumu.  
-https://www.mail-tester.com hedef ≥ 8/10.
+Gmail → ⋮ → **Orijinali göster** → From `mail.inner.digital`, `DKIM: PASS` (Resend).
 
 ## Kod notları
 
