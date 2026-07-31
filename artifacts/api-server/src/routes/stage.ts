@@ -1,12 +1,34 @@
 import { Router } from "express";
-import { and, count, desc, eq, gte, or, sql } from "drizzle-orm";
+import { and, count, desc, eq, gte, sql } from "drizzle-orm";
 import { db } from "@workspace/db";
 import { stageProductsTable, stageVotesTable, usersTable } from "@workspace/db/schema";
 import { requireAuth, requireAdmin } from "../lib/auth";
 import { ensureStageSchema } from "../lib/ensureSchema";
 import { fetchLinkPreview } from "../lib/linkPreview";
+import {
+  fetchProductHuntPost,
+  isPhSyncStale,
+  parseProductHuntUrl,
+  resolveProductHuntLink,
+} from "../lib/productHunt";
 
 const router = Router();
+
+export type StagePeriod = "week" | "month" | "year" | "all";
+
+function parsePeriod(raw: unknown, fallback: StagePeriod = "week"): StagePeriod {
+  const v = String(raw ?? "").toLowerCase();
+  if (v === "week" || v === "month" || v === "year" || v === "all") return v;
+  return fallback;
+}
+
+function periodStart(period: StagePeriod): Date | null {
+  if (period === "all") return null;
+  const now = Date.now();
+  if (period === "week") return new Date(now - 7 * 24 * 60 * 60 * 1000);
+  if (period === "month") return new Date(now - 30 * 24 * 60 * 60 * 1000);
+  return new Date(now - 365 * 24 * 60 * 60 * 1000);
+}
 
 function mapProduct(
   product: typeof stageProductsTable.$inferSelect,
@@ -22,12 +44,115 @@ function mapProduct(
     status: product.status,
     featured: product.featured,
     imageUrl: product.imageUrl,
+    productHuntUrl: product.productHuntUrl ?? null,
+    productHuntId: product.productHuntId ?? null,
+    phVotesCount: product.phVotesCount ?? null,
     createdAt: product.createdAt.toISOString(),
     userId: product.userId,
     authorName: author?.name ?? null,
     authorHandle: author?.handle ?? null,
     votes: voteCount,
     myVote,
+  };
+}
+
+/** Stale PH bağları için votesCount yenile (en fazla 5). */
+async function refreshStalePhVotes(
+  products: (typeof stageProductsTable.$inferSelect)[],
+): Promise<Map<number, typeof stageProductsTable.$inferSelect>> {
+  const updated = new Map<number, typeof stageProductsTable.$inferSelect>();
+  const stale = products
+    .filter((p) => p.productHuntUrl && isPhSyncStale(p.phSyncedAt))
+    .slice(0, 5);
+
+  await Promise.all(
+    stale.map(async (p) => {
+      const parsed = parseProductHuntUrl(p.productHuntUrl!);
+      if (!parsed) return;
+      const post = await fetchProductHuntPost(parsed.slug);
+      if (!post) return;
+      const [row] = await db
+        .update(stageProductsTable)
+        .set({
+          productHuntId: post.id,
+          productHuntUrl: post.url,
+          phVotesCount: post.votesCount,
+          phSyncedAt: new Date(),
+        })
+        .where(eq(stageProductsTable.id, p.id))
+        .returning();
+      if (row) updated.set(row.id, row);
+    }),
+  );
+  return updated;
+}
+
+async function loadPeriodProducts(userId: number, period: StagePeriod, opts?: { showcase?: boolean }) {
+  const start = periodStart(period);
+
+  const voteJoin =
+    start != null
+      ? and(eq(stageVotesTable.productId, stageProductsTable.id), gte(stageVotesTable.createdAt, start))
+      : eq(stageVotesTable.productId, stageProductsTable.id);
+
+  const products = await db
+    .select({
+      product: stageProductsTable,
+      authorName: usersTable.name,
+      authorHandle: usersTable.handle,
+      votes: sql<number>`coalesce(count(${stageVotesTable.id}), 0)::int`,
+    })
+    .from(stageProductsTable)
+    .leftJoin(usersTable, eq(usersTable.id, stageProductsTable.userId))
+    .leftJoin(stageVotesTable, voteJoin)
+    .where(eq(stageProductsTable.status, "published"))
+    .groupBy(stageProductsTable.id, usersTable.name, usersTable.handle)
+    .orderBy(
+      desc(stageProductsTable.featured),
+      sql`coalesce(count(${stageVotesTable.id}), 0) desc`,
+      desc(stageProductsTable.createdAt),
+    );
+
+  let rows = products;
+
+  if (opts?.showcase) {
+    rows = products
+      .filter((row) => row.product.featured || Number(row.votes) > 0)
+      .slice(0, 20);
+  }
+
+  const phUpdates = await refreshStalePhVotes(rows.map((r) => r.product));
+  rows = rows.map((row) => ({
+    ...row,
+    product: phUpdates.get(row.product.id) ?? row.product,
+  }));
+
+  const myVotes = await db
+    .select({ productId: stageVotesTable.productId })
+    .from(stageVotesTable)
+    .where(eq(stageVotesTable.userId, userId));
+  const myVoteSet = new Set(myVotes.map((v) => v.productId));
+
+  const mapped = rows.map((row) =>
+    mapProduct(
+      row.product,
+      Number(row.votes) || 0,
+      myVoteSet.has(row.product.id),
+      { name: row.authorName ?? "", handle: row.authorHandle },
+    ),
+  );
+
+  const totalVotes = mapped.reduce((sum, p) => sum + p.votes, 0);
+  const productsWithVotes = mapped.filter((p) => p.votes > 0).length;
+
+  return {
+    products: mapped,
+    stats: {
+      products: period === "all" ? mapped.length : productsWithVotes,
+      votes: totalVotes,
+      showcase: mapped.filter((p) => p.featured || p.votes > 0).length,
+    },
+    period,
   };
 }
 
@@ -46,45 +171,14 @@ router.get("/stage/link-preview", requireAuth, async (req, res) => {
   }
 });
 
-/** GET /api/stage/products — yayınlanmış ürünler + oy sayıları */
+/** GET /api/stage/products?period=week|month|year|all */
 router.get("/stage/products", requireAuth, async (req, res) => {
   try {
     await ensureStageSchema();
     const userId = req.user!.id;
-
-    const products = await db
-      .select({
-        product: stageProductsTable,
-        authorName: usersTable.name,
-        authorHandle: usersTable.handle,
-        votes: sql<number>`coalesce(count(${stageVotesTable.id}), 0)::int`,
-      })
-      .from(stageProductsTable)
-      .leftJoin(usersTable, eq(usersTable.id, stageProductsTable.userId))
-      .leftJoin(stageVotesTable, eq(stageVotesTable.productId, stageProductsTable.id))
-      .where(eq(stageProductsTable.status, "published"))
-      .groupBy(stageProductsTable.id, usersTable.name, usersTable.handle)
-      .orderBy(
-        sql`coalesce(count(${stageVotesTable.id}), 0) desc`,
-        desc(stageProductsTable.createdAt),
-      );
-
-    const myVotes = await db
-      .select({ productId: stageVotesTable.productId })
-      .from(stageVotesTable)
-      .where(eq(stageVotesTable.userId, userId));
-    const myVoteSet = new Set(myVotes.map((v) => v.productId));
-
-    res.json({
-      products: products.map((row) =>
-        mapProduct(
-          row.product,
-          Number(row.votes) || 0,
-          myVoteSet.has(row.product.id),
-          { name: row.authorName ?? "", handle: row.authorHandle },
-        ),
-      ),
-    });
+    const period = parsePeriod(req.query.period, "all");
+    const data = await loadPeriodProducts(userId, period);
+    res.json(data);
   } catch (err: any) {
     res.status(500).json({ error: err.message ?? "Ürünler yüklenemedi" });
   }
@@ -95,11 +189,12 @@ router.post("/stage/products", requireAuth, async (req, res) => {
   try {
     await ensureStageSchema();
     const userId = req.user!.id;
-    const { title, url, pitch, imageUrl } = req.body as {
+    const { title, url, pitch, imageUrl, productHuntUrl } = req.body as {
       title?: string;
       url?: string;
       pitch?: string;
       imageUrl?: string;
+      productHuntUrl?: string;
     };
 
     const t = title?.trim() ?? "";
@@ -123,6 +218,16 @@ router.post("/stage/products", requireAuth, async (req, res) => {
       return;
     }
 
+    let ph: Awaited<ReturnType<typeof resolveProductHuntLink>> = null;
+    const rawPh = productHuntUrl?.trim() ?? "";
+    if (rawPh) {
+      ph = await resolveProductHuntLink(rawPh);
+      if (!ph) {
+        res.status(400).json({ error: "Geçersiz Product Hunt URL" });
+        return;
+      }
+    }
+
     const [created] = await db
       .insert(stageProductsTable)
       .values({
@@ -132,6 +237,10 @@ router.post("/stage/products", requireAuth, async (req, res) => {
         pitch: p,
         imageUrl: img,
         status: "published",
+        productHuntUrl: ph?.productHuntUrl ?? null,
+        productHuntId: ph?.productHuntId ?? null,
+        phVotesCount: ph?.phVotesCount ?? null,
+        phSyncedAt: ph?.phSyncedAt ?? null,
       })
       .returning();
 
@@ -193,52 +302,21 @@ router.post("/stage/products/:id/vote", requireAuth, async (req, res) => {
   }
 });
 
-/** GET /api/stage/showcase — son 7 günde en çok oy alanlar */
+/** GET /api/stage/showcase?period=week|month|year|all — dönem oylarına göre vitrin */
 router.get("/stage/showcase", requireAuth, async (req, res) => {
   try {
     await ensureStageSchema();
     const userId = req.user!.id;
-    const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-
-    const products = await db
-      .select({
-        product: stageProductsTable,
-        authorName: usersTable.name,
-        authorHandle: usersTable.handle,
-        votes: sql<number>`coalesce(count(${stageVotesTable.id}), 0)::int`,
-      })
-      .from(stageProductsTable)
-      .leftJoin(usersTable, eq(usersTable.id, stageProductsTable.userId))
-      .leftJoin(stageVotesTable, eq(stageVotesTable.productId, stageProductsTable.id))
-      .where(
-        and(
-          eq(stageProductsTable.status, "published"),
-          or(gte(stageProductsTable.createdAt, weekAgo), eq(stageProductsTable.featured, true)),
-        ),
-      )
-      .groupBy(stageProductsTable.id, usersTable.name, usersTable.handle)
-      .orderBy(
-        desc(stageProductsTable.featured),
-        sql`coalesce(count(${stageVotesTable.id}), 0) desc`,
-        desc(stageProductsTable.createdAt),
-      )
-      .limit(20);
-
-    const myVotes = await db
-      .select({ productId: stageVotesTable.productId })
-      .from(stageVotesTable)
-      .where(eq(stageVotesTable.userId, userId));
-    const myVoteSet = new Set(myVotes.map((v) => v.productId));
-
+    const period = parsePeriod(req.query.period, "week");
+    const data = await loadPeriodProducts(userId, period, { showcase: true });
+    // Showcase stats: ürün sayısı dönem oylu + featured sayısı
     res.json({
-      products: products.map((row) =>
-        mapProduct(
-          row.product,
-          Number(row.votes) || 0,
-          myVoteSet.has(row.product.id),
-          { name: row.authorName ?? "", handle: row.authorHandle },
-        ),
-      ),
+      ...data,
+      stats: {
+        products: data.stats.products,
+        votes: data.stats.votes,
+        showcase: data.products.length,
+      },
     });
   } catch (err: any) {
     res.status(500).json({ error: err.message ?? "Showcase yüklenemedi" });

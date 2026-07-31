@@ -318,6 +318,10 @@ export const stageProductsTable = pgTable("stage_products", {
   status: text("status").default("published").notNull(),
   featured: boolean("featured").default(false).notNull(),
   imageUrl: text("image_url"),
+  productHuntUrl: text("product_hunt_url"),
+  productHuntId: text("product_hunt_id"),
+  phVotesCount: integer("ph_votes_count"),
+  phSyncedAt: timestamp("ph_synced_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

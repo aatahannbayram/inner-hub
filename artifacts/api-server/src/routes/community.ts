@@ -194,6 +194,7 @@ router.get("/members", requireAuth, async (_req, res) => {
         email: usersTable.email,
         persona: usersTable.persona,
         role: usersTable.role,
+        linkedinId: usersTable.linkedinId,
       })
       .from(usersTable)
       .where(isNull(usersTable.deletedAt))
@@ -209,6 +210,7 @@ router.get("/members", requireAuth, async (_req, res) => {
         bio: u.bio ?? "",
         tags: [u.title, u.company, u.persona].filter((t): t is string => Boolean(t && t.trim())),
         linkedin: u.linkedin,
+        linkedinConnected: Boolean(u.linkedinId),
         avatarUrl: resolveAvatarUrl(u),
         persona: u.persona,
         isAvailable: false,

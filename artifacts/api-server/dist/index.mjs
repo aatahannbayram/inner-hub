@@ -54166,6 +54166,10 @@ var init_hub = __esm({
       status: text("status").default("published").notNull(),
       featured: boolean("featured").default(false).notNull(),
       imageUrl: text("image_url"),
+      productHuntUrl: text("product_hunt_url"),
+      productHuntId: text("product_hunt_id"),
+      phVotesCount: integer("ph_votes_count"),
+      phSyncedAt: timestamp("ph_synced_at"),
       createdAt: timestamp("created_at").defaultNow().notNull()
     });
     stageVotesTable = pgTable("stage_votes", {
@@ -98424,6 +98428,10 @@ var ensureStageSchema = once(async () => {
   `);
   await db.execute(sql`ALTER TABLE stage_products ADD COLUMN IF NOT EXISTS featured boolean NOT NULL DEFAULT false`);
   await db.execute(sql`ALTER TABLE stage_products ADD COLUMN IF NOT EXISTS image_url text`);
+  await db.execute(sql`ALTER TABLE stage_products ADD COLUMN IF NOT EXISTS product_hunt_url text`);
+  await db.execute(sql`ALTER TABLE stage_products ADD COLUMN IF NOT EXISTS product_hunt_id text`);
+  await db.execute(sql`ALTER TABLE stage_products ADD COLUMN IF NOT EXISTS ph_votes_count integer`);
+  await db.execute(sql`ALTER TABLE stage_products ADD COLUMN IF NOT EXISTS ph_synced_at timestamp`);
 });
 var ensureMatchAndFaqSchema = once(async () => {
   await db.execute(sql`
@@ -123648,7 +123656,8 @@ router10.get("/members", requireAuth, async (_req, res) => {
       handle: usersTable.handle,
       email: usersTable.email,
       persona: usersTable.persona,
-      role: usersTable.role
+      role: usersTable.role,
+      linkedinId: usersTable.linkedinId
     }).from(usersTable).where(isNull(usersTable.deletedAt)).orderBy(asc(usersTable.name));
     res.json({
       members: rows.map((u) => ({
@@ -123660,6 +123669,7 @@ router10.get("/members", requireAuth, async (_req, res) => {
         bio: u.bio ?? "",
         tags: [u.title, u.company, u.persona].filter((t) => Boolean(t && t.trim())),
         linkedin: u.linkedin,
+        linkedinConnected: Boolean(u.linkedinId),
         avatarUrl: resolveAvatarUrl(u),
         persona: u.persona,
         isAvailable: false
@@ -124724,7 +124734,7 @@ function publicPayload(user) {
     role: user.role,
     profileCompletionPct: user.profileCompletionPct,
     createdAt: user.createdAt.toISOString(),
-    verified: true,
+    verified: Boolean(user.linkedinId),
     tier: user.role === "admin" ? "Kurucu \xDCye" : "\xDCye"
   };
 }
@@ -125626,8 +125636,110 @@ async function fetchLinkPreview(rawUrl) {
   };
 }
 
+// src/lib/productHunt.ts
+var PH_GRAPHQL = "https://api.producthunt.com/v2/api/graphql";
+var STALE_MS = 60 * 60 * 1e3;
+function parseProductHuntUrl(raw) {
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+  let parsed;
+  try {
+    parsed = new URL(trimmed.startsWith("http") ? trimmed : `https://${trimmed}`);
+  } catch {
+    return null;
+  }
+  const host = parsed.hostname.replace(/^www\./, "");
+  if (host !== "producthunt.com") return null;
+  const parts = parsed.pathname.split("/").filter(Boolean);
+  if (parts.length >= 2 && (parts[0] === "posts" || parts[0] === "products")) {
+    const slug = parts[1];
+    if (!/^[a-zA-Z0-9][a-zA-Z0-9_-]*$/.test(slug)) return null;
+    return {
+      slug,
+      url: `https://www.producthunt.com/posts/${slug}`
+    };
+  }
+  return null;
+}
+function isPhSyncStale(syncedAt) {
+  if (!syncedAt) return true;
+  return Date.now() - syncedAt.getTime() > STALE_MS;
+}
+function getToken() {
+  const t = process.env.PRODUCT_HUNT_TOKEN?.trim();
+  return t || null;
+}
+async function fetchProductHuntPost(slug) {
+  const token = getToken();
+  if (!token) return null;
+  const query = `
+    query PostBySlug($slug: String!) {
+      post(slug: $slug) {
+        id
+        slug
+        url
+        votesCount
+      }
+    }
+  `;
+  try {
+    const res = await fetch(PH_GRAPHQL, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({ query, variables: { slug } })
+    });
+    if (!res.ok) return null;
+    const json3 = await res.json();
+    const post = json3.data?.post;
+    if (!post?.id) return null;
+    return {
+      id: String(post.id),
+      slug: post.slug || slug,
+      url: post.url || `https://www.producthunt.com/posts/${slug}`,
+      votesCount: Number(post.votesCount) || 0
+    };
+  } catch {
+    return null;
+  }
+}
+async function resolveProductHuntLink(rawUrl) {
+  const parsed = parseProductHuntUrl(rawUrl);
+  if (!parsed) return null;
+  const post = await fetchProductHuntPost(parsed.slug);
+  if (post) {
+    return {
+      productHuntUrl: post.url,
+      productHuntId: post.id,
+      phVotesCount: post.votesCount,
+      phSyncedAt: /* @__PURE__ */ new Date()
+    };
+  }
+  return {
+    productHuntUrl: parsed.url,
+    productHuntId: null,
+    phVotesCount: null,
+    phSyncedAt: null
+  };
+}
+
 // src/routes/stage.ts
 var router21 = (0, import_express21.Router)();
+function parsePeriod(raw, fallback = "week") {
+  const v = String(raw ?? "").toLowerCase();
+  if (v === "week" || v === "month" || v === "year" || v === "all") return v;
+  return fallback;
+}
+function periodStart(period) {
+  if (period === "all") return null;
+  const now = Date.now();
+  if (period === "week") return new Date(now - 7 * 24 * 60 * 60 * 1e3);
+  if (period === "month") return new Date(now - 30 * 24 * 60 * 60 * 1e3);
+  return new Date(now - 365 * 24 * 60 * 60 * 1e3);
+}
 function mapProduct(product, voteCount, myVote, author) {
   return {
     id: product.id,
@@ -125637,12 +125749,79 @@ function mapProduct(product, voteCount, myVote, author) {
     status: product.status,
     featured: product.featured,
     imageUrl: product.imageUrl,
+    productHuntUrl: product.productHuntUrl ?? null,
+    productHuntId: product.productHuntId ?? null,
+    phVotesCount: product.phVotesCount ?? null,
     createdAt: product.createdAt.toISOString(),
     userId: product.userId,
     authorName: author?.name ?? null,
     authorHandle: author?.handle ?? null,
     votes: voteCount,
     myVote
+  };
+}
+async function refreshStalePhVotes(products) {
+  const updated = /* @__PURE__ */ new Map();
+  const stale = products.filter((p) => p.productHuntUrl && isPhSyncStale(p.phSyncedAt)).slice(0, 5);
+  await Promise.all(
+    stale.map(async (p) => {
+      const parsed = parseProductHuntUrl(p.productHuntUrl);
+      if (!parsed) return;
+      const post = await fetchProductHuntPost(parsed.slug);
+      if (!post) return;
+      const [row] = await db.update(stageProductsTable).set({
+        productHuntId: post.id,
+        productHuntUrl: post.url,
+        phVotesCount: post.votesCount,
+        phSyncedAt: /* @__PURE__ */ new Date()
+      }).where(eq(stageProductsTable.id, p.id)).returning();
+      if (row) updated.set(row.id, row);
+    })
+  );
+  return updated;
+}
+async function loadPeriodProducts(userId, period, opts) {
+  const start = periodStart(period);
+  const voteJoin = start != null ? and(eq(stageVotesTable.productId, stageProductsTable.id), gte(stageVotesTable.createdAt, start)) : eq(stageVotesTable.productId, stageProductsTable.id);
+  const products = await db.select({
+    product: stageProductsTable,
+    authorName: usersTable.name,
+    authorHandle: usersTable.handle,
+    votes: sql`coalesce(count(${stageVotesTable.id}), 0)::int`
+  }).from(stageProductsTable).leftJoin(usersTable, eq(usersTable.id, stageProductsTable.userId)).leftJoin(stageVotesTable, voteJoin).where(eq(stageProductsTable.status, "published")).groupBy(stageProductsTable.id, usersTable.name, usersTable.handle).orderBy(
+    desc(stageProductsTable.featured),
+    sql`coalesce(count(${stageVotesTable.id}), 0) desc`,
+    desc(stageProductsTable.createdAt)
+  );
+  let rows = products;
+  if (opts?.showcase) {
+    rows = products.filter((row) => row.product.featured || Number(row.votes) > 0).slice(0, 20);
+  }
+  const phUpdates = await refreshStalePhVotes(rows.map((r) => r.product));
+  rows = rows.map((row) => ({
+    ...row,
+    product: phUpdates.get(row.product.id) ?? row.product
+  }));
+  const myVotes = await db.select({ productId: stageVotesTable.productId }).from(stageVotesTable).where(eq(stageVotesTable.userId, userId));
+  const myVoteSet = new Set(myVotes.map((v) => v.productId));
+  const mapped = rows.map(
+    (row) => mapProduct(
+      row.product,
+      Number(row.votes) || 0,
+      myVoteSet.has(row.product.id),
+      { name: row.authorName ?? "", handle: row.authorHandle }
+    )
+  );
+  const totalVotes = mapped.reduce((sum, p) => sum + p.votes, 0);
+  const productsWithVotes = mapped.filter((p) => p.votes > 0).length;
+  return {
+    products: mapped,
+    stats: {
+      products: period === "all" ? mapped.length : productsWithVotes,
+      votes: totalVotes,
+      showcase: mapped.filter((p) => p.featured || p.votes > 0).length
+    },
+    period
   };
 }
 router21.get("/stage/link-preview", requireAuth, async (req, res) => {
@@ -125662,27 +125841,9 @@ router21.get("/stage/products", requireAuth, async (req, res) => {
   try {
     await ensureStageSchema();
     const userId = req.user.id;
-    const products = await db.select({
-      product: stageProductsTable,
-      authorName: usersTable.name,
-      authorHandle: usersTable.handle,
-      votes: sql`coalesce(count(${stageVotesTable.id}), 0)::int`
-    }).from(stageProductsTable).leftJoin(usersTable, eq(usersTable.id, stageProductsTable.userId)).leftJoin(stageVotesTable, eq(stageVotesTable.productId, stageProductsTable.id)).where(eq(stageProductsTable.status, "published")).groupBy(stageProductsTable.id, usersTable.name, usersTable.handle).orderBy(
-      sql`coalesce(count(${stageVotesTable.id}), 0) desc`,
-      desc(stageProductsTable.createdAt)
-    );
-    const myVotes = await db.select({ productId: stageVotesTable.productId }).from(stageVotesTable).where(eq(stageVotesTable.userId, userId));
-    const myVoteSet = new Set(myVotes.map((v) => v.productId));
-    res.json({
-      products: products.map(
-        (row) => mapProduct(
-          row.product,
-          Number(row.votes) || 0,
-          myVoteSet.has(row.product.id),
-          { name: row.authorName ?? "", handle: row.authorHandle }
-        )
-      )
-    });
+    const period = parsePeriod(req.query.period, "all");
+    const data = await loadPeriodProducts(userId, period);
+    res.json(data);
   } catch (err) {
     res.status(500).json({ error: err.message ?? "\xDCr\xFCnler y\xFCklenemedi" });
   }
@@ -125691,7 +125852,7 @@ router21.post("/stage/products", requireAuth, async (req, res) => {
   try {
     await ensureStageSchema();
     const userId = req.user.id;
-    const { title, url: url2, pitch, imageUrl } = req.body;
+    const { title, url: url2, pitch, imageUrl, productHuntUrl } = req.body;
     const t = title?.trim() ?? "";
     const u = url2?.trim() ?? "";
     const p = pitch?.trim() ?? "";
@@ -125705,13 +125866,26 @@ router21.post("/stage/products", requireAuth, async (req, res) => {
       res.status(400).json({ error: "Ba\u015Fl\u0131k veya pitch \xE7ok uzun" });
       return;
     }
+    let ph = null;
+    const rawPh = productHuntUrl?.trim() ?? "";
+    if (rawPh) {
+      ph = await resolveProductHuntLink(rawPh);
+      if (!ph) {
+        res.status(400).json({ error: "Ge\xE7ersiz Product Hunt URL" });
+        return;
+      }
+    }
     const [created] = await db.insert(stageProductsTable).values({
       userId,
       title: t,
       url: u,
       pitch: p,
       imageUrl: img,
-      status: "published"
+      status: "published",
+      productHuntUrl: ph?.productHuntUrl ?? null,
+      productHuntId: ph?.productHuntId ?? null,
+      phVotesCount: ph?.phVotesCount ?? null,
+      phSyncedAt: ph?.phSyncedAt ?? null
     }).returning();
     res.status(201).json(
       mapProduct(created, 0, false, {
@@ -125756,33 +125930,15 @@ router21.get("/stage/showcase", requireAuth, async (req, res) => {
   try {
     await ensureStageSchema();
     const userId = req.user.id;
-    const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1e3);
-    const products = await db.select({
-      product: stageProductsTable,
-      authorName: usersTable.name,
-      authorHandle: usersTable.handle,
-      votes: sql`coalesce(count(${stageVotesTable.id}), 0)::int`
-    }).from(stageProductsTable).leftJoin(usersTable, eq(usersTable.id, stageProductsTable.userId)).leftJoin(stageVotesTable, eq(stageVotesTable.productId, stageProductsTable.id)).where(
-      and(
-        eq(stageProductsTable.status, "published"),
-        or(gte(stageProductsTable.createdAt, weekAgo), eq(stageProductsTable.featured, true))
-      )
-    ).groupBy(stageProductsTable.id, usersTable.name, usersTable.handle).orderBy(
-      desc(stageProductsTable.featured),
-      sql`coalesce(count(${stageVotesTable.id}), 0) desc`,
-      desc(stageProductsTable.createdAt)
-    ).limit(20);
-    const myVotes = await db.select({ productId: stageVotesTable.productId }).from(stageVotesTable).where(eq(stageVotesTable.userId, userId));
-    const myVoteSet = new Set(myVotes.map((v) => v.productId));
+    const period = parsePeriod(req.query.period, "week");
+    const data = await loadPeriodProducts(userId, period, { showcase: true });
     res.json({
-      products: products.map(
-        (row) => mapProduct(
-          row.product,
-          Number(row.votes) || 0,
-          myVoteSet.has(row.product.id),
-          { name: row.authorName ?? "", handle: row.authorHandle }
-        )
-      )
+      ...data,
+      stats: {
+        products: data.stats.products,
+        votes: data.stats.votes,
+        showcase: data.products.length
+      }
     });
   } catch (err) {
     res.status(500).json({ error: err.message ?? "Showcase y\xFCklenemedi" });

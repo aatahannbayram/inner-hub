@@ -169,7 +169,12 @@ export default function PublicProfilePage() {
                     {profile.name}
                   </h1>
                   {profile.verified && (
-                    <CheckCircle2 className="size-5 text-[var(--success-ink)]" />
+                    <CheckCircle2
+                      className="size-5 text-[var(--success-ink)]"
+                      aria-label={t("publicProfile.linkedinVerified")}
+                    >
+                      <title>{t("publicProfile.linkedinVerified")}</title>
+                    </CheckCircle2>
                   )}
                 </div>
                 <p className="font-mono text-caption text-[var(--ink-muted)]">

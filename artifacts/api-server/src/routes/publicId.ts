@@ -63,7 +63,7 @@ function publicPayload(user: typeof usersTable.$inferSelect) {
     role: user.role,
     profileCompletionPct: user.profileCompletionPct,
     createdAt: user.createdAt.toISOString(),
-    verified: true,
+    verified: Boolean(user.linkedinId),
     tier: user.role === "admin" ? "Kurucu Üye" : "Üye",
   };
 }

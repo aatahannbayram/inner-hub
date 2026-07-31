@@ -18,6 +18,8 @@ import { useT } from "@/i18n";
 const STAGE_FIELD =
   "w-full border border-[var(--ink)]/15 bg-[var(--ink)]/[0.04] px-3 py-2.5 text-sm text-[var(--ink)] placeholder:text-[var(--ink-muted)] outline-none transition-colors focus:border-[var(--ink)]/35 dark:border-white/18 dark:bg-white/[0.08] dark:text-white dark:placeholder:text-white/40 dark:focus:border-white/35";
 
+type StagePeriod = "week" | "month" | "year" | "all";
+
 type StageProduct = {
   id: number;
   title: string;
@@ -27,9 +29,20 @@ type StageProduct = {
   myVote: boolean;
   featured: boolean;
   imageUrl: string | null;
+  productHuntUrl: string | null;
+  productHuntId: string | null;
+  phVotesCount: number | null;
   authorName: string | null;
   authorHandle: string | null;
 };
+
+type StageListResponse = {
+  products: StageProduct[];
+  stats?: { products: number; votes: number; showcase: number };
+  period?: StagePeriod;
+};
+
+const PERIODS: StagePeriod[] = ["week", "month", "year", "all"];
 
 const RANK_STYLES: Record<number, string> = {
   1: "border-[var(--inner-green)]/45 bg-[var(--inner-green)]/12 text-[var(--success-ink)]",
@@ -115,6 +128,13 @@ function ProductCard({
                   {t("stage.featuredBadge")}
                 </span>
               )}
+              {product.productHuntUrl && (
+                <span className="inline-flex items-center gap-1 border border-[var(--ink)]/15 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)]">
+                  {product.phVotesCount != null
+                    ? t("stage.phVotes", { n: product.phVotesCount })
+                    : t("stage.phBadge")}
+                </span>
+              )}
             </div>
             {product.authorName ? (
               <p className="mt-0.5 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
@@ -122,15 +142,28 @@ function ProductCard({
               </p>
             ) : null}
             <p className="mt-2 text-sm leading-relaxed text-[var(--ink-body)]">{product.pitch}</p>
-            <a
-              href={product.url}
-              target="_blank"
-              rel="noreferrer"
-              className="mt-2 inline-flex items-center gap-1 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)] transition-colors hover:text-[var(--ink)]"
-            >
-              {t("stage.openLink")}
-              <ExternalLink className="size-3" />
-            </a>
+            <div className="mt-2 flex flex-wrap items-center gap-3">
+              <a
+                href={product.url}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)] transition-colors hover:text-[var(--ink)]"
+              >
+                {t("stage.openLink")}
+                <ExternalLink className="size-3" />
+              </a>
+              {product.productHuntUrl && (
+                <a
+                  href={product.productHuntUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)] transition-colors hover:text-[var(--ink)]"
+                >
+                  {t("stage.openPh")}
+                  <ExternalLink className="size-3" />
+                </a>
+              )}
+            </div>
           </div>
         </div>
         <button
@@ -193,6 +226,7 @@ function SubmitDialog({
   const [title, setTitle] = useState("");
   const [url, setUrl] = useState("");
   const [pitch, setPitch] = useState("");
+  const [productHuntUrl, setProductHuntUrl] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [titleTouched, setTitleTouched] = useState(false);
@@ -201,8 +235,6 @@ function SubmitDialog({
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [previewFailed, setPreviewFailed] = useState(false);
 
-  // URL girilince site meta verisini (başlık/açıklama/logo) otomatik çek;
-  // kullanıcı zaten kendi başlık/pitch'ini yazdıysa üzerine yazma.
   useEffect(() => {
     const trimmed = url.trim();
     let valid: string | null = null;
@@ -261,13 +293,20 @@ function SubmitDialog({
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, url, pitch, imageUrl: previewImage }),
+        body: JSON.stringify({
+          title,
+          url,
+          pitch,
+          imageUrl: previewImage,
+          productHuntUrl: productHuntUrl.trim() || undefined,
+        }),
       });
       const json = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(json.error ?? t("stage.submitFailed"));
       setTitle("");
       setUrl("");
       setPitch("");
+      setProductHuntUrl("");
       setPreviewImage(null);
       setTitleTouched(false);
       setPitchTouched(false);
@@ -282,7 +321,7 @@ function SubmitDialog({
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="max-h-[min(88dvh,560px)] w-[calc(100%-1.5rem)] max-w-md gap-0 overflow-y-auto rounded-none border-[var(--ink)]/10 bg-[var(--bone)] p-0 dark:border-white/12 dark:bg-[#141414] sm:rounded-none">
+      <DialogContent className="max-h-[min(88dvh,620px)] w-[calc(100%-1.5rem)] max-w-md gap-0 overflow-y-auto rounded-none border-[var(--ink)]/10 bg-[var(--bone)] p-0 dark:border-white/12 dark:bg-[#141414] sm:rounded-none">
         <DialogHeader className="space-y-1 border-b border-[var(--ink)]/[0.08] px-5 py-4 text-left dark:border-white/10">
           <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
             <span lang="en">inner·stage</span>
@@ -371,6 +410,21 @@ function SubmitDialog({
             />
           </label>
 
+          <label className="block space-y-1.5">
+            <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-muted)]">
+              {t("stage.fieldPh")}
+            </span>
+            <input
+              value={productHuntUrl}
+              onChange={(e) => setProductHuntUrl(e.target.value)}
+              inputMode="url"
+              autoCapitalize="off"
+              autoCorrect="off"
+              placeholder={t("stage.phPlaceholder")}
+              className={STAGE_FIELD}
+            />
+          </label>
+
           {error && <p className="text-xs text-[var(--error-ink)]">{error}</p>}
           <button
             type="button"
@@ -394,14 +448,15 @@ export default function Stage() {
   const [adminBusyId, setAdminBusyId] = useState<number | null>(null);
   const [composeOpen, setComposeOpen] = useState(false);
   const [sortMode, setSortMode] = useState<"votes" | "newest">("votes");
+  const [period, setPeriod] = useState<StagePeriod>("week");
 
-  const showcase = useApiQuery<{ products: StageProduct[] }>(
-    ["stage-showcase"],
-    "/api/stage/showcase",
+  const showcase = useApiQuery<StageListResponse>(
+    ["stage-showcase", period],
+    `/api/stage/showcase?period=${period}`,
   );
-  const products = useApiQuery<{ products: StageProduct[] }>(
-    ["stage-products"],
-    "/api/stage/products",
+  const products = useApiQuery<StageListResponse>(
+    ["stage-products", period],
+    `/api/stage/products?period=${period}`,
   );
   const { data: meData } = useApiQuery<{ user: { role: "member" | "admin" } }>(
     ["auth-me"],
@@ -463,13 +518,31 @@ export default function Stage() {
 
   const sortedProducts = useMemo(() => {
     const list = [...productList];
-    // createdAt frontend'e taşınmıyor; serial id kayıt sırasıyla birebir arttığı
-    // için "en yeni" sıralamasını id desc ile karşılıyoruz.
     if (sortMode === "newest") list.sort((a, b) => b.id - a.id);
     return list;
   }, [productList, sortMode]);
 
-  const totalVotes = productList.reduce((sum, p) => sum + p.votes, 0);
+  const statsProducts = products.data?.stats?.products ?? productList.length;
+  const statsVotes = products.data?.stats?.votes ?? productList.reduce((s, p) => s + p.votes, 0);
+  const statsShowcase = showcaseList.length;
+
+  const showcaseHintKey =
+    period === "week"
+      ? "stage.showcaseHintWeek"
+      : period === "month"
+        ? "stage.showcaseHintMonth"
+        : period === "year"
+          ? "stage.showcaseHintYear"
+          : "stage.showcaseHintAll";
+
+  const periodLabel = (p: StagePeriod) =>
+    p === "week"
+      ? t("stage.periodWeek")
+      : p === "month"
+        ? t("stage.periodMonth")
+        : p === "year"
+          ? t("stage.periodYear")
+          : t("stage.periodAll");
 
   return (
     <div className="min-w-0 max-w-2xl space-y-8">
@@ -485,6 +558,26 @@ export default function Stage() {
             {t("stage.title")}
           </h1>
           <p className="mt-2 text-sm font-light text-[var(--ink-muted)]">{t("stage.subtitle")}</p>
+        </div>
+      </FadeIn>
+
+      <FadeIn delay={0.01}>
+        <div className="flex flex-wrap gap-1 border border-[var(--ink)]/10 p-0.5">
+          {PERIODS.map((p) => (
+            <button
+              key={p}
+              type="button"
+              onClick={() => setPeriod(p)}
+              className={[
+                "flex-1 px-3 py-2 font-mono text-[10px] uppercase tracking-widest transition-colors sm:flex-none",
+                period === p
+                  ? "bg-[var(--ink)] text-[var(--bone)]"
+                  : "text-[var(--ink-muted)] hover:text-[var(--ink)]",
+              ].join(" ")}
+            >
+              {periodLabel(p)}
+            </button>
+          ))}
         </div>
       </FadeIn>
 
@@ -507,9 +600,9 @@ export default function Stage() {
         <>
           <FadeIn delay={0.02}>
             <div className="grid grid-cols-3 gap-2 sm:gap-3">
-              <StageStat value={productList.length} label={t("stage.statsProducts")} />
-              <StageStat value={totalVotes} label={t("stage.statsVotes")} />
-              <StageStat value={showcaseList.length} label={t("stage.statsShowcase")} />
+              <StageStat value={statsProducts} label={t("stage.statsProducts")} />
+              <StageStat value={statsVotes} label={t("stage.statsVotes")} />
+              <StageStat value={statsShowcase} label={t("stage.statsShowcase")} />
             </div>
           </FadeIn>
 
@@ -520,7 +613,7 @@ export default function Stage() {
                   <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
                     {t("stage.showcase")}
                   </p>
-                  <p className="mt-1 text-xs text-[var(--ink-muted)]">{t("stage.showcaseHint")}</p>
+                  <p className="mt-1 text-xs text-[var(--ink-muted)]">{t(showcaseHintKey)}</p>
                 </div>
                 <div className="space-y-3">
                   {showcaseList.map((p, i) => (

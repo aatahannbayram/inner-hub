@@ -43,6 +43,7 @@ interface Member {
   bio: string;
   tags: string[];
   linkedin: string | null;
+  linkedinConnected?: boolean;
   avatarUrl?: string | null;
   isAvailable?: boolean;
 }
@@ -62,6 +63,7 @@ interface TalentPost {
 }
 
 function MemberCard({ member, onSelect }: { member: Member; onSelect: (m: Member) => void }) {
+  const t = useT();
   return (
     <div
       className="group flex flex-col overflow-hidden panel-glass transition-all duration-200 hover:border-white/20 cursor-pointer dark:hover:border-white/20"
@@ -87,10 +89,18 @@ function MemberCard({ member, onSelect }: { member: Member; onSelect: (m: Member
       </div>
       <div className="flex flex-1 flex-col p-4 sm:p-5">
         <p
-          className="truncate font-serif text-lg text-[var(--ink)] leading-snug"
+          className="flex items-center gap-1.5 truncate font-serif text-lg text-[var(--ink)] leading-snug"
           style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
         >
-          {member.name}
+          <span className="truncate">{member.name}</span>
+          {member.linkedinConnected && (
+            <CheckCircle2
+              className="size-3.5 shrink-0 text-[var(--success-ink)]"
+              aria-label={t("publicProfile.linkedinVerified")}
+            >
+              <title>{t("publicProfile.linkedinVerified")}</title>
+            </CheckCircle2>
+          )}
         </p>
         {(member.title || member.company) && (
           <p className="mt-1 truncate text-xs text-[var(--ink-muted)]">
