@@ -125675,7 +125675,8 @@ async function fetchLinkPreview(rawUrl) {
   return {
     title: title?.slice(0, 200) ?? null,
     description: description?.slice(0, 500) ?? null,
-    image
+    image,
+    siteName: extractMeta(html, "property", "og:site_name")?.slice(0, 120) ?? null
   };
 }
 

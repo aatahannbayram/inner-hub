@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { ExternalLink, Globe, Loader2, Plus, Rocket, Star, ThumbsUp, Trash2 } from "lucide-react";
 import { FadeIn } from "@/components/FadeIn";
@@ -17,6 +17,9 @@ import { useT } from "@/i18n";
 
 const STAGE_FIELD =
   "w-full border border-[var(--ink)]/15 bg-[var(--ink)]/[0.04] px-3 py-2.5 text-sm text-[var(--ink)] placeholder:text-[var(--ink-muted)] outline-none transition-colors focus:border-[var(--ink)]/35 dark:border-white/18 dark:bg-white/[0.08] dark:text-white dark:placeholder:text-white/40 dark:focus:border-white/35";
+
+const STAGE_URL_INPUT =
+  "min-w-0 flex-1 bg-transparent px-3 py-2.5 text-sm text-[var(--ink)] placeholder:text-[var(--ink-muted)] outline-none dark:text-white dark:placeholder:text-white/40";
 
 type StagePeriod = "week" | "month" | "year" | "all";
 
@@ -42,7 +45,106 @@ type StageListResponse = {
   period?: StagePeriod;
 };
 
+type LinkPreviewData = {
+  title: string | null;
+  description: string | null;
+  image: string | null;
+  siteName: string | null;
+};
+
 const PERIODS: StagePeriod[] = ["week", "month", "year", "all"];
+
+function ProductHuntMark({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 40 40" className={className} aria-hidden focusable="false">
+      <circle cx="20" cy="20" r="20" fill="#DA552F" />
+      <path
+        fill="#fff"
+        d="M22.7 12.5h-7.2c-.5 0-.9.4-.9.9v13.2c0 .5.4.9.9.9h2.2c.5 0 .9-.4.9-.9v-3.6h4.1c3.4 0 6.1-2.7 6.1-6.1s-2.7-6.4-6.1-6.4zm-.2 8.5h-3.9v-4.8h3.9c1.3 0 2.4 1.1 2.4 2.4s-1.1 2.4-2.4 2.4z"
+      />
+    </svg>
+  );
+}
+
+function stripUrlScheme(raw: string): string {
+  return raw
+    .trim()
+    .replace(/^https?:\/\//i, "")
+    .replace(/^\/+/, "");
+}
+
+function toHttpsUrl(hostPath: string): string | null {
+  const cleaned = stripUrlScheme(hostPath);
+  if (!cleaned || !cleaned.includes(".")) return null;
+  try {
+    const u = new URL(`https://${cleaned}`);
+    return u.toString();
+  } catch {
+    return null;
+  }
+}
+
+function isProductHuntUrl(url: string): boolean {
+  try {
+    return new URL(url).hostname.replace(/^www\./, "") === "producthunt.com";
+  } catch {
+    return false;
+  }
+}
+
+function PrefixedUrlField({
+  label,
+  prefix = "https://",
+  value,
+  onChange,
+  placeholder,
+  loading,
+  mark,
+}: {
+  label: ReactNode;
+  prefix?: string;
+  value: string;
+  onChange: (hostPath: string) => void;
+  placeholder: string;
+  loading?: boolean;
+  mark?: ReactNode;
+}) {
+  return (
+    <label className="block space-y-1.5">
+      <span className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-[var(--ink-muted)]">
+        {mark}
+        {label}
+      </span>
+      <div className="flex items-stretch border border-[var(--ink)]/15 bg-[var(--ink)]/[0.04] focus-within:border-[var(--ink)]/35 dark:border-white/18 dark:bg-white/[0.08] dark:focus-within:border-white/35">
+        <span className="flex shrink-0 items-center border-r border-[var(--ink)]/10 bg-[var(--ink)]/[0.03] px-2.5 font-mono text-[11px] text-[var(--ink-muted)] dark:border-white/10">
+          {prefix}
+        </span>
+        <input
+          value={value}
+          onChange={(e) => onChange(stripUrlScheme(e.target.value))}
+          onPaste={(e) => {
+            const text = e.clipboardData.getData("text");
+            if (/^https?:\/\//i.test(text.trim())) {
+              e.preventDefault();
+              onChange(stripUrlScheme(text));
+            }
+          }}
+          inputMode="url"
+          autoCapitalize="off"
+          autoCorrect="off"
+          spellCheck={false}
+          placeholder={placeholder}
+          className={STAGE_URL_INPUT}
+        />
+        {loading && (
+          <span className="flex items-center pr-3">
+            <Loader2 className="size-3.5 animate-spin text-[var(--ink-subtle)]" />
+          </span>
+        )}
+      </div>
+    </label>
+  );
+}
 
 const RANK_STYLES: Record<number, string> = {
   1: "border-[var(--inner-green)]/45 bg-[var(--inner-green)]/12 text-[var(--success-ink)]",
@@ -129,7 +231,8 @@ function ProductCard({
                 </span>
               )}
               {product.productHuntUrl && (
-                <span className="inline-flex items-center gap-1 border border-[var(--ink)]/15 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)]">
+                <span className="inline-flex items-center gap-1 border border-[#DA552F]/35 bg-[#DA552F]/10 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-widest text-[#DA552F]">
+                  <ProductHuntMark className="size-3 shrink-0" />
                   {product.phVotesCount != null
                     ? t("stage.phVotes", { n: product.phVotesCount })
                     : t("stage.phBadge")}
@@ -224,28 +327,29 @@ function SubmitDialog({
 }) {
   const t = useT();
   const [title, setTitle] = useState("");
-  const [url, setUrl] = useState("");
+  const [urlPath, setUrlPath] = useState("");
   const [pitch, setPitch] = useState("");
-  const [productHuntUrl, setProductHuntUrl] = useState("");
+  const [phPath, setPhPath] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [titleTouched, setTitleTouched] = useState(false);
   const [pitchTouched, setPitchTouched] = useState(false);
   const [previewLoading, setPreviewLoading] = useState(false);
-  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [phPreviewLoading, setPhPreviewLoading] = useState(false);
+  const [preview, setPreview] = useState<LinkPreviewData | null>(null);
   const [previewFailed, setPreviewFailed] = useState(false);
 
+  const applyPreview = (data: LinkPreviewData, opts?: { force?: boolean }) => {
+    setPreview(data);
+    if ((!titleTouched || opts?.force) && data.title) setTitle(data.title.slice(0, 120));
+    if ((!pitchTouched || opts?.force) && data.description) setPitch(data.description.slice(0, 500));
+  };
+
+  // Ürün URL → başlık, pitch, logo, site adı; PH ise PH alanını da doldur
   useEffect(() => {
-    const trimmed = url.trim();
-    let valid: string | null = null;
-    try {
-      const u = new URL(trimmed);
-      if (u.protocol === "http:" || u.protocol === "https:") valid = u.toString();
-    } catch {
-      valid = null;
-    }
-    if (!valid) {
-      setPreviewImage(null);
+    const absolute = toHttpsUrl(urlPath);
+    if (!absolute) {
+      setPreview(null);
       setPreviewFailed(false);
       return;
     }
@@ -255,61 +359,111 @@ function SubmitDialog({
       setPreviewFailed(false);
       try {
         const res = await fetch(
-          apiUrl(`/api/stage/link-preview?url=${encodeURIComponent(valid!)}`),
+          apiUrl(`/api/stage/link-preview?url=${encodeURIComponent(absolute)}`),
           { credentials: "include" },
         );
         if (!res.ok) {
           if (!cancelled) setPreviewFailed(true);
           return;
         }
-        const data = (await res.json()) as {
-          title: string | null;
-          description: string | null;
-          image: string | null;
-        };
+        const data = (await res.json()) as LinkPreviewData;
         if (cancelled) return;
-        setPreviewImage(data.image ?? null);
-        if (!titleTouched && data.title) setTitle(data.title);
-        if (!pitchTouched && data.description) setPitch(data.description.slice(0, 500));
+        applyPreview(data);
+        if (isProductHuntUrl(absolute) && !phPath.trim()) {
+          setPhPath(stripUrlScheme(absolute));
+        }
       } catch {
         if (!cancelled) setPreviewFailed(true);
       } finally {
         if (!cancelled) setPreviewLoading(false);
       }
-    }, 550);
+    }, 450);
     return () => {
       cancelled = true;
       window.clearTimeout(timer);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [url]);
+  }, [urlPath]);
+
+  // Product Hunt URL → eksik alanları tamamla (ürün URL'si yoksa birincil kaynak)
+  useEffect(() => {
+    const absolute = toHttpsUrl(phPath);
+    if (!absolute || !isProductHuntUrl(absolute)) return;
+    let cancelled = false;
+    const timer = window.setTimeout(async () => {
+      setPhPreviewLoading(true);
+      try {
+        const res = await fetch(
+          apiUrl(`/api/stage/link-preview?url=${encodeURIComponent(absolute)}`),
+          { credentials: "include" },
+        );
+        if (!res.ok || cancelled) return;
+        const data = (await res.json()) as LinkPreviewData;
+        if (cancelled) return;
+        if (!title.trim() || !titleTouched) {
+          if (data.title) setTitle(data.title.slice(0, 120));
+        }
+        if (!pitch.trim() || !pitchTouched) {
+          if (data.description) setPitch(data.description.slice(0, 500));
+        }
+        if (!preview?.image && data.image) {
+          setPreview((prev) => ({
+            title: prev?.title ?? data.title,
+            description: prev?.description ?? data.description,
+            image: data.image,
+            siteName: prev?.siteName ?? data.siteName ?? "Product Hunt",
+          }));
+        }
+      } catch {
+        /* PH scrape opsiyonel */
+      } finally {
+        if (!cancelled) setPhPreviewLoading(false);
+      }
+    }, 450);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phPath]);
+
+  const resetForm = () => {
+    setTitle("");
+    setUrlPath("");
+    setPitch("");
+    setPhPath("");
+    setPreview(null);
+    setTitleTouched(false);
+    setPitchTouched(false);
+    setPreviewFailed(false);
+    setError(null);
+  };
 
   const submit = async () => {
-    if (!title.trim() || !url.trim() || !pitch.trim()) return;
+    const absoluteUrl = toHttpsUrl(urlPath);
+    if (!title.trim() || !absoluteUrl || !pitch.trim()) {
+      setError(t("stage.urlInvalid"));
+      return;
+    }
     setBusy(true);
     setError(null);
     try {
+      const phAbsolute = toHttpsUrl(phPath);
       const res = await fetch(apiUrl("/api/stage/products"), {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          title,
-          url,
-          pitch,
-          imageUrl: previewImage,
-          productHuntUrl: productHuntUrl.trim() || undefined,
+          title: title.trim(),
+          url: absoluteUrl,
+          pitch: pitch.trim(),
+          imageUrl: preview?.image ?? null,
+          productHuntUrl: phAbsolute || undefined,
         }),
       });
       const json = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(json.error ?? t("stage.submitFailed"));
-      setTitle("");
-      setUrl("");
-      setPitch("");
-      setProductHuntUrl("");
-      setPreviewImage(null);
-      setTitleTouched(false);
-      setPitchTouched(false);
+      resetForm();
       onAdded();
       onClose();
     } catch (e: any) {
@@ -319,9 +473,19 @@ function SubmitDialog({
     }
   };
 
+  const canSubmit = Boolean(title.trim() && toHttpsUrl(urlPath) && pitch.trim());
+
   return (
-    <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="max-h-[min(88dvh,620px)] w-[calc(100%-1.5rem)] max-w-md gap-0 overflow-y-auto rounded-none border-[var(--ink)]/10 bg-[var(--bone)] p-0 dark:border-white/12 dark:bg-[#141414] sm:rounded-none">
+    <Dialog
+      open={open}
+      onOpenChange={(v) => {
+        if (!v) {
+          resetForm();
+          onClose();
+        }
+      }}
+    >
+      <DialogContent className="max-h-[min(92dvh,680px)] w-[calc(100%-1.5rem)] max-w-md gap-0 overflow-y-auto rounded-none border-[var(--ink)]/10 bg-[var(--bone)] p-0 dark:border-white/12 dark:bg-[#141414] sm:rounded-none">
         <DialogHeader className="space-y-1 border-b border-[var(--ink)]/[0.08] px-5 py-4 text-left dark:border-white/10">
           <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
             <span lang="en">inner·stage</span>
@@ -336,46 +500,48 @@ function SubmitDialog({
             {t("stage.submitHint")}
           </DialogDescription>
         </DialogHeader>
-        <div className="space-y-3 px-5 py-4">
-          <label className="block space-y-1.5">
-            <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-muted)]">
-              {t("stage.fieldUrl")}
-            </span>
-            <div className="relative">
-              <input
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-                inputMode="url"
-                autoCapitalize="off"
-                autoCorrect="off"
-                placeholder={t("stage.urlPlaceholder")}
-                className={`${STAGE_FIELD} pr-9`}
-              />
-              {previewLoading && (
-                <Loader2 className="absolute right-3 top-1/2 size-3.5 -translate-y-1/2 animate-spin text-[var(--ink-subtle)]" />
-              )}
-            </div>
-          </label>
+        <div className="space-y-3.5 px-5 py-4">
+          <PrefixedUrlField
+            label={t("stage.fieldUrl")}
+            value={urlPath}
+            onChange={setUrlPath}
+            placeholder={t("stage.urlPlaceholder")}
+            loading={previewLoading}
+          />
 
-          {(previewImage || previewLoading || (url.trim() && !previewFailed)) && (
-            <div className="flex items-center gap-3 border border-[var(--ink)]/12 bg-[var(--ink)]/[0.03] p-3 dark:border-white/12 dark:bg-white/[0.05]">
-              {previewImage ? (
+          {(preview || previewLoading || (urlPath.trim() && !previewFailed)) && (
+            <div className="flex items-start gap-3 border border-[var(--ink)]/12 bg-[var(--ink)]/[0.03] p-3 dark:border-white/12 dark:bg-white/[0.05]">
+              {preview?.image ? (
                 <img
-                  src={previewImage}
+                  src={preview.image}
                   alt=""
-                  className="size-9 shrink-0 border border-[var(--ink)]/10 object-cover dark:border-white/10"
+                  className="size-10 shrink-0 border border-[var(--ink)]/10 bg-white object-contain p-0.5 dark:border-white/10"
                   onError={(e) => {
                     e.currentTarget.style.display = "none";
                   }}
                 />
               ) : (
-                <div className="flex size-9 shrink-0 items-center justify-center border border-[var(--ink)]/10 bg-[var(--ink)]/[0.03] text-[var(--ink-subtle)] dark:border-white/10">
+                <div className="flex size-10 shrink-0 items-center justify-center border border-[var(--ink)]/10 text-[var(--ink-subtle)] dark:border-white/10">
                   <Globe className="size-4" />
                 </div>
               )}
-              <p className="min-w-0 text-xs leading-snug text-[var(--ink-muted)] dark:text-white/50">
-                {previewLoading ? t("stage.previewLoading") : t("stage.previewHint")}
-              </p>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm text-[var(--ink)]">
+                  {previewLoading
+                    ? t("stage.previewLoading")
+                    : preview?.title || t("stage.previewHint")}
+                </p>
+                {preview?.siteName && (
+                  <p className="mt-0.5 font-mono text-[10px] uppercase tracking-widest text-[var(--ink-subtle)]">
+                    {preview.siteName}
+                  </p>
+                )}
+                {preview?.description && (
+                  <p className="mt-1 line-clamp-2 text-xs leading-snug text-[var(--ink-muted)]">
+                    {preview.description}
+                  </p>
+                )}
+              </div>
             </div>
           )}
 
@@ -410,25 +576,19 @@ function SubmitDialog({
             />
           </label>
 
-          <label className="block space-y-1.5">
-            <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-muted)]">
-              {t("stage.fieldPh")}
-            </span>
-            <input
-              value={productHuntUrl}
-              onChange={(e) => setProductHuntUrl(e.target.value)}
-              inputMode="url"
-              autoCapitalize="off"
-              autoCorrect="off"
-              placeholder={t("stage.phPlaceholder")}
-              className={STAGE_FIELD}
-            />
-          </label>
+          <PrefixedUrlField
+            label={t("stage.fieldPh")}
+            mark={<ProductHuntMark className="size-3.5 shrink-0" />}
+            value={phPath}
+            onChange={setPhPath}
+            placeholder={t("stage.phPlaceholder")}
+            loading={phPreviewLoading}
+          />
 
           {error && <p className="text-xs text-[var(--error-ink)]">{error}</p>}
           <button
             type="button"
-            disabled={busy || !title.trim() || !url.trim() || !pitch.trim()}
+            disabled={busy || !canSubmit}
             onClick={() => void submit()}
             className="flex w-full items-center justify-center gap-1.5 panel-glass-ink px-4 py-2.5 font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)] transition-opacity hover:opacity-80 disabled:opacity-40"
           >
@@ -440,6 +600,7 @@ function SubmitDialog({
     </Dialog>
   );
 }
+
 
 export default function Stage() {
   const t = useT();

@@ -96,6 +96,7 @@ export type LinkPreview = {
   title: string | null;
   description: string | null;
   image: string | null;
+  siteName: string | null;
 };
 
 /** Kullanıcı tarafından verilen bir URL'den başlık/açıklama/görsel çeker. SSRF korumalı, yönlendirmeleri elle takip eder. */
@@ -173,5 +174,6 @@ export async function fetchLinkPreview(rawUrl: string): Promise<LinkPreview> {
     title: title?.slice(0, 200) ?? null,
     description: description?.slice(0, 500) ?? null,
     image,
+    siteName: extractMeta(html, "property", "og:site_name")?.slice(0, 120) ?? null,
   };
 }
