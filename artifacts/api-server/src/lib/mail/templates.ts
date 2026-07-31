@@ -82,47 +82,67 @@ export function invitationApprovedMail(ctx: ApplicantMailContext) {
     "",
     "Davet talebin onaylandı. Çembere hoş geldin.",
     "",
-    "Panele nasıl girersin:",
-    `1) Aç: ${panelUrl}`,
-    "2) Açılan ekranda kayıt formunu göreceksin — e-posta ve davet kodu zaten dolu",
-    "3) Kendine bir şifre belirle, adını yaz, kayıt ol",
-    inviteCode ? `(Davet kodun: ${inviteCode} — link açılınca otomatik dolu gelir)` : "Davet kodun için support@inner.digital yaz",
+    `Panele git (kayıt): ${panelUrl}`,
+    inviteCode ? `Davet kodun: ${inviteCode}` : null,
     "",
-    "Kayıt olduktan sonra sonraki girişlerde sadece e-posta ve şifre yeter. Kod gerekmez.",
+    "1) Yukarıdaki linki aç — e-posta ve davet kodu otomatik dolu gelir",
+    "2) Şifreni belirle, adını yaz",
+    "3) Kayıt ol",
+    "",
+    "Kayıttan sonra girişlerde sadece e-posta ve şifre yeter; kod gerekmez.",
+    "Link açılmazsa kodu elle girebilirsin. Sorun: support@inner.digital",
     "",
     "inner hub",
     appUrl,
-  ].join("\n");
+  ]
+    .filter((line) => line !== null)
+    .join("\n");
+
+  const primaryCta = `
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 24px;">
+        <tr>
+          <td style="border-radius:0;background:#18FF85;">
+            <a href="${escapeHtml(panelUrl)}"
+               style="display:inline-block;background:#18FF85;color:#0A0A0A;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;text-decoration:none;padding:16px 28px;border:0;font-weight:600;">
+              Panele git · kayıt ol&nbsp;&nbsp;↗
+            </a>
+          </td>
+        </tr>
+      </table>`;
 
   const codeHtml = inviteCode
     ? `
-      <ol style="margin:0 0 16px;padding-left:18px;color:rgba(244,241,236,0.72);line-height:1.55;">
-        <li style="margin:0 0 8px;"><a href="${escapeHtml(panelUrl)}" style="color:#F4F1EC;">Panele git</a> — e-posta ve davet kodun otomatik dolu gelir</li>
-        <li style="margin:0 0 8px;">Kendine bir <strong style="color:#F4F1EC;font-weight:500;">şifre belirle</strong>, adını yaz</li>
-        <li style="margin:0;">Kayıt ol butonuna bas, içeri gir</li>
-      </ol>
-      <p style="margin:0 0 16px;padding:14px 16px;border:1px solid rgba(255,255,255,0.14);background:rgba(255,255,255,0.04);font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:18px;letter-spacing:0.12em;color:#F4F1EC;">
+      ${primaryCta}
+      <p style="margin:0 0 10px;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:rgba(244,241,236,0.45);">Davet kodun · tek kullanımlık</p>
+      <p style="margin:0 0 20px;padding:16px 18px;border:1px solid rgba(255,255,255,0.14);background:rgba(255,255,255,0.04);font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:20px;letter-spacing:0.14em;color:#F4F1EC;">
         ${escapeHtml(inviteCode)}
       </p>
-      <p style="margin:0 0 12px;font-size:13px;color:rgba(244,241,236,0.45);">Link açılmazsa ya da kod otomatik gelmezse yukarıdaki kodu elle girebilirsin. Kod sana özel ve tek kullanımlık, kayıttan sonra girişlerde gerekmez. Sorun olursa <a href="mailto:support@inner.digital" style="color:#F4F1EC;">support@inner.digital</a>.</p>
+      <p style="margin:0 0 8px;font-size:14px;color:rgba(244,241,236,0.72);">Sonraki adımlar:</p>
+      <ol style="margin:0 0 16px;padding-left:18px;color:rgba(244,241,236,0.72);line-height:1.55;">
+        <li style="margin:0 0 8px;">Yukarıdaki <strong style="color:#F4F1EC;font-weight:500;">Panele git</strong> butonuna bas — e-posta ve kod otomatik dolar</li>
+        <li style="margin:0 0 8px;">Şifreni belirle, adını yaz</li>
+        <li style="margin:0;">Kayıt ol, içeri gir</li>
+      </ol>
+      <p style="margin:0;font-size:13px;color:rgba(244,241,236,0.45);">Buton açılmazsa kodu elle girebilirsin. Kayıttan sonra girişlerde kod gerekmez. Sorun: <a href="mailto:support@inner.digital" style="color:#F4F1EC;">support@inner.digital</a>.</p>
     `
     : `
-      <p style="margin:0 0 12px;">Panele gidip hesabını oluştur. Davet kodu için <a href="mailto:support@inner.digital" style="color:#F4F1EC;">support@inner.digital</a> yaz.</p>
+      ${primaryCta}
+      <p style="margin:0;">Panele gidip hesabını oluştur. Davet kodu için <a href="mailto:support@inner.digital" style="color:#F4F1EC;">support@inner.digital</a> yaz.</p>
     `;
 
   const html = renderInnerEmailLayout({
     appUrl,
     preheader: inviteCode
-      ? `Davetin onaylandı. Kod: ${inviteCode}. Panele kayıt ol.`
+      ? `Davetin onaylandı. Panele git · kod: ${inviteCode}`
       : "Davetin onaylandı. Panele geçebilirsin.",
     eyebrow: "Davetiye · onay",
     title: "Çembere hoş geldin.",
     bodyHtml: `
-      <p style="margin:0 0 12px;">Merhaba ${escapeHtml(name)}, başvurun onaylandı. inner·hub artık senin için açık.</p>
+      <p style="margin:0 0 18px;">Merhaba ${escapeHtml(name)}, başvurun onaylandı. inner·hub artık senin için açık.</p>
       ${codeHtml}
       ${roleLine(ctx.roleLabel)}
     `,
-    cta: { label: "Panele git ve kayıt ol", href: panelUrl },
+    cta: { label: "Panele git · kayıt ol", href: panelUrl },
     footerNote: "Bu ileti, davet talebinin onaylanması üzerine otomatik gönderildi.",
   });
 

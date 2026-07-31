@@ -53848,6 +53848,7 @@ var init_invitationRequests = __esm({
       organization: text("organization"),
       organizationDomain: text("organization_domain"),
       organizationLogo: text("organization_logo"),
+      organizationDescription: text("organization_description"),
       ipAddress: text("ip_address"),
       createdAt: timestamp("created_at").defaultNow().notNull()
     });
@@ -97286,6 +97287,7 @@ var SubmitRequestBody = objectType({
   "organization": stringType().nullish(),
   "organizationDomain": stringType().nullish(),
   "organizationLogo": stringType().nullish(),
+  "organizationDescription": stringType().nullish(),
   "fax": stringType().nullish().describe("Honeypot field \u2014 must be empty"),
   "company": stringType().nullish().describe("Legacy honeypot field \u2014 must be empty")
 });
@@ -98052,41 +98054,58 @@ function invitationApprovedMail(ctx) {
     "",
     "Davet talebin onayland\u0131. \xC7embere ho\u015F geldin.",
     "",
-    "Panele nas\u0131l girersin:",
-    `1) A\xE7: ${panelUrl}`,
-    "2) A\xE7\u0131lan ekranda kay\u0131t formunu g\xF6receksin \u2014 e-posta ve davet kodu zaten dolu",
-    "3) Kendine bir \u015Fifre belirle, ad\u0131n\u0131 yaz, kay\u0131t ol",
-    inviteCode ? `(Davet kodun: ${inviteCode} \u2014 link a\xE7\u0131l\u0131nca otomatik dolu gelir)` : "Davet kodun i\xE7in support@inner.digital yaz",
+    `Panele git (kay\u0131t): ${panelUrl}`,
+    inviteCode ? `Davet kodun: ${inviteCode}` : null,
     "",
-    "Kay\u0131t olduktan sonra sonraki giri\u015Flerde sadece e-posta ve \u015Fifre yeter. Kod gerekmez.",
+    "1) Yukar\u0131daki linki a\xE7 \u2014 e-posta ve davet kodu otomatik dolu gelir",
+    "2) \u015Eifreni belirle, ad\u0131n\u0131 yaz",
+    "3) Kay\u0131t ol",
+    "",
+    "Kay\u0131ttan sonra giri\u015Flerde sadece e-posta ve \u015Fifre yeter; kod gerekmez.",
+    "Link a\xE7\u0131lmazsa kodu elle girebilirsin. Sorun: support@inner.digital",
     "",
     "inner hub",
     appUrl3
-  ].join("\n");
+  ].filter((line2) => line2 !== null).join("\n");
+  const primaryCta = `
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 24px;">
+        <tr>
+          <td style="border-radius:0;background:#18FF85;">
+            <a href="${escapeHtml(panelUrl)}"
+               style="display:inline-block;background:#18FF85;color:#0A0A0A;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;text-decoration:none;padding:16px 28px;border:0;font-weight:600;">
+              Panele git \xB7 kay\u0131t ol&nbsp;&nbsp;\u2197
+            </a>
+          </td>
+        </tr>
+      </table>`;
   const codeHtml = inviteCode ? `
-      <ol style="margin:0 0 16px;padding-left:18px;color:rgba(244,241,236,0.72);line-height:1.55;">
-        <li style="margin:0 0 8px;"><a href="${escapeHtml(panelUrl)}" style="color:#F4F1EC;">Panele git</a> \u2014 e-posta ve davet kodun otomatik dolu gelir</li>
-        <li style="margin:0 0 8px;">Kendine bir <strong style="color:#F4F1EC;font-weight:500;">\u015Fifre belirle</strong>, ad\u0131n\u0131 yaz</li>
-        <li style="margin:0;">Kay\u0131t ol butonuna bas, i\xE7eri gir</li>
-      </ol>
-      <p style="margin:0 0 16px;padding:14px 16px;border:1px solid rgba(255,255,255,0.14);background:rgba(255,255,255,0.04);font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:18px;letter-spacing:0.12em;color:#F4F1EC;">
+      ${primaryCta}
+      <p style="margin:0 0 10px;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:rgba(244,241,236,0.45);">Davet kodun \xB7 tek kullan\u0131ml\u0131k</p>
+      <p style="margin:0 0 20px;padding:16px 18px;border:1px solid rgba(255,255,255,0.14);background:rgba(255,255,255,0.04);font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:20px;letter-spacing:0.14em;color:#F4F1EC;">
         ${escapeHtml(inviteCode)}
       </p>
-      <p style="margin:0 0 12px;font-size:13px;color:rgba(244,241,236,0.45);">Link a\xE7\u0131lmazsa ya da kod otomatik gelmezse yukar\u0131daki kodu elle girebilirsin. Kod sana \xF6zel ve tek kullan\u0131ml\u0131k, kay\u0131ttan sonra giri\u015Flerde gerekmez. Sorun olursa <a href="mailto:support@inner.digital" style="color:#F4F1EC;">support@inner.digital</a>.</p>
+      <p style="margin:0 0 8px;font-size:14px;color:rgba(244,241,236,0.72);">Sonraki ad\u0131mlar:</p>
+      <ol style="margin:0 0 16px;padding-left:18px;color:rgba(244,241,236,0.72);line-height:1.55;">
+        <li style="margin:0 0 8px;">Yukar\u0131daki <strong style="color:#F4F1EC;font-weight:500;">Panele git</strong> butonuna bas \u2014 e-posta ve kod otomatik dolar</li>
+        <li style="margin:0 0 8px;">\u015Eifreni belirle, ad\u0131n\u0131 yaz</li>
+        <li style="margin:0;">Kay\u0131t ol, i\xE7eri gir</li>
+      </ol>
+      <p style="margin:0;font-size:13px;color:rgba(244,241,236,0.45);">Buton a\xE7\u0131lmazsa kodu elle girebilirsin. Kay\u0131ttan sonra giri\u015Flerde kod gerekmez. Sorun: <a href="mailto:support@inner.digital" style="color:#F4F1EC;">support@inner.digital</a>.</p>
     ` : `
-      <p style="margin:0 0 12px;">Panele gidip hesab\u0131n\u0131 olu\u015Ftur. Davet kodu i\xE7in <a href="mailto:support@inner.digital" style="color:#F4F1EC;">support@inner.digital</a> yaz.</p>
+      ${primaryCta}
+      <p style="margin:0;">Panele gidip hesab\u0131n\u0131 olu\u015Ftur. Davet kodu i\xE7in <a href="mailto:support@inner.digital" style="color:#F4F1EC;">support@inner.digital</a> yaz.</p>
     `;
   const html = renderInnerEmailLayout({
     appUrl: appUrl3,
-    preheader: inviteCode ? `Davetin onayland\u0131. Kod: ${inviteCode}. Panele kay\u0131t ol.` : "Davetin onayland\u0131. Panele ge\xE7ebilirsin.",
+    preheader: inviteCode ? `Davetin onayland\u0131. Panele git \xB7 kod: ${inviteCode}` : "Davetin onayland\u0131. Panele ge\xE7ebilirsin.",
     eyebrow: "Davetiye \xB7 onay",
     title: "\xC7embere ho\u015F geldin.",
     bodyHtml: `
-      <p style="margin:0 0 12px;">Merhaba ${escapeHtml(name)}, ba\u015Fvurun onayland\u0131. inner\xB7hub art\u0131k senin i\xE7in a\xE7\u0131k.</p>
+      <p style="margin:0 0 18px;">Merhaba ${escapeHtml(name)}, ba\u015Fvurun onayland\u0131. inner\xB7hub art\u0131k senin i\xE7in a\xE7\u0131k.</p>
       ${codeHtml}
       ${roleLine(ctx.roleLabel)}
     `,
-    cta: { label: "Panele git ve kay\u0131t ol", href: panelUrl },
+    cta: { label: "Panele git \xB7 kay\u0131t ol", href: panelUrl },
     footerNote: "Bu ileti, davet talebinin onaylanmas\u0131 \xFCzerine otomatik g\xF6nderildi."
   });
   return { subject, text: text2, html, kind: "invite.approved" };
