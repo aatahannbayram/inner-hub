@@ -8,6 +8,7 @@ import { ErrorState, LoadingBlock } from "@/components/panel/Skeletons";
 import { MemberAvatar } from "@/components/panel/MemberAvatar";
 import { useT } from "@/i18n";
 import { useQueryClient } from "@tanstack/react-query";
+import { useJourneyVisit } from "@/hooks/useJourneyVisit";
 
 const AVATAR_STYLES = ["lorelei", "shapes", "notionists", "avataaars", "bottts"] as const;
 type AvatarStyle = (typeof AVATAR_STYLES)[number];
@@ -580,7 +581,9 @@ function OrgSection() {
 
 export default function ProfilePage() {
   const t = useT();
+  useJourneyVisit("profile");
   const fileRef = useRef<HTMLInputElement>(null);
+  const queryClient = useQueryClient();
   const { data, isLoading, isError, error, refetch } = useApiQuery<{ user: ApiUser }>(
     ["auth-me"],
     "/api/auth/me",
@@ -769,6 +772,7 @@ export default function ProfilePage() {
       const json = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(json.error ?? t("profile.saveError"));
       if (json.user) applyUser(json.user);
+      void queryClient.invalidateQueries({ queryKey: ["journey"] });
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
     } catch (e: unknown) {

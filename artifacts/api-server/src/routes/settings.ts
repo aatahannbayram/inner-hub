@@ -115,12 +115,30 @@ router.get("/settings", requireAuth, async (req, res) => {
 router.put("/settings", requireAuth, async (req, res) => {
   try {
     await ensureUserProfileColumns();
-    const prefs = sanitizeBody(req.body?.prefs ?? req.body);
     const userId = req.user!.id;
+    const [existing] = await db
+      .select({ settingsPrefs: usersTable.settingsPrefs })
+      .from(usersTable)
+      .where(eq(usersTable.id, userId))
+      .limit(1);
+
+    let journeyBlob: unknown;
+    try {
+      const raw = existing?.settingsPrefs ? JSON.parse(existing.settingsPrefs) : {};
+      journeyBlob = raw?.journey;
+    } catch {
+      journeyBlob = undefined;
+    }
+
+    const prefs = sanitizeBody(req.body?.prefs ?? req.body);
+    const stored = {
+      ...prefs,
+      ...(journeyBlob !== undefined ? { journey: journeyBlob } : {}),
+    };
 
     await db
       .update(usersTable)
-      .set({ settingsPrefs: JSON.stringify(prefs) })
+      .set({ settingsPrefs: JSON.stringify(stored) })
       .where(eq(usersTable.id, userId));
 
     res.json({ prefs });

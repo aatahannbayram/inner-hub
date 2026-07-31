@@ -438,7 +438,7 @@ export const tr = {
     profileEyebrow: "05 · Profil",
     profileTitle: "Kendini görünür kıl.",
     profileBody:
-      "Profilini tamamladıkça eşleşme ve güven artar. Sol alttaki tamamlanma çubuğu seni hatırlatır.",
+      "Tur bitince dashboard’da yolculuğun açılır: önce profil, sonra daireyi keşfet. Görevler seviye ve rozet kazandırır.",
     coachNavTitle: "Ana menü",
     coachNavBody: "Tüm modüller burada. Dar ekranda hamburger ile açılır.",
     coachNotifTitle: "Bildirimler",
@@ -474,6 +474,82 @@ export const tr = {
         body: "Org sayfası, kampanyalar ve ekip üyeleri buradan yönetilir. Perks ekosisteminde görünür ol.",
         coachTitle: "Şirket menüsü",
         coachBody: "Org ve Perks ile ekosisteme katkı ver; kampanya yayınlamak 1 Pass.",
+      },
+    },
+  },
+  journey: {
+    eyebrow: "Üye yolculuğu",
+    subtitle: "Tooltip turundan sonra buradan devam et. Önce profilini netleştir, sonra daireyi keşfet.",
+    progress: "görev",
+    nextUp: "Sıradaki adım",
+    doIt: "Hadi",
+    dismiss: "Kartı gizle",
+    phase1: "01 · Profil",
+    phase2: "02 · Keşif",
+    badges: "Rozetler",
+    level1: "Yeni üye",
+    level2: "Görünür üye",
+    level3: "Aktif üye",
+    level4: "Circle regular",
+    level5: "Inner circle",
+    tasks: {
+      bio: {
+        title: "Biyografini yaz",
+        body: "Hakkında bölümü boş kalmasın · kim olduğunu anlat.",
+      },
+      avatar: {
+        title: "Fotoğrafını ekle",
+        body: "Yüzün görünsün · kartlarda ve sohbette tanın.",
+      },
+      role: {
+        title: "Rol ve şirket",
+        body: "Ünvan + şirket · eşleşmeler için kritik.",
+      },
+      skills: {
+        title: "En az 2 uzmanlık",
+        body: "inner·id ve match’te görünür.",
+      },
+      linkedin: {
+        title: "LinkedIn bağla",
+        body: "Kimliğini doğrula · inner·id kartında yer alır.",
+      },
+      visit_members: {
+        title: "Üyeleri gez",
+        body: "Katılımcılar sayfasını aç · daireyi tanı.",
+      },
+      visit_signal: {
+        title: "Signal’i aç",
+        body: "Günün sinyalini oku.",
+      },
+      visit_stage: {
+        title: "Stage’e bak",
+        body: "Ürün vitrinine göz at.",
+      },
+    },
+    badge: {
+      first_words: {
+        title: "İlk kelimeler",
+        body: "Biyografi yazıldı",
+      },
+      face_known: {
+        title: "Yüz tanındı",
+        body: "Profil fotoğrafı eklendi",
+      },
+      craft: {
+        title: "Craft",
+        body: "Uzmanlıklar seçildi",
+      },
+      linked_in: {
+        title: "Linked in",
+        body: "LinkedIn eklendi",
+      },
+      explorer: {
+        title: "Kaşif",
+        body: "En az iki alanı gezdin",
+      },
+      inner_circle: {
+        title: "Inner circle",
+        body: "Profil güçlü · yolculuk ilerledi",
       },
     },
   },
@@ -1244,6 +1320,7 @@ export const tr = {
     about: "Hakkında",
     skills: "Uzmanlık",
     noBio: "Bio henüz eklenmedi.",
+    noBioCta: "Profilini tamamla →",
     message: "Mesaj",
     connect: "Bağlan",
     publish: "Yayınla",
@@ -1986,7 +2063,7 @@ export const en: Messages = {
     profileEyebrow: "05 · Profile",
     profileTitle: "Make yourself visible.",
     profileBody:
-      "As you complete your profile, matching and trust improve. The completion bar bottom-left reminds you.",
+      "After the tour, your journey opens on the dashboard: profile first, then explore the circle. Tasks unlock levels and badges.",
     coachNavTitle: "Main menu",
     coachNavBody: "All modules live here. On small screens, open via the hamburger.",
     coachNotifTitle: "Notifications",
@@ -2022,6 +2099,82 @@ export const en: Messages = {
         body: "Manage your org page, campaigns, and team here. Show up in the Perks ecosystem.",
         coachTitle: "Company menu",
         coachBody: "Contribute via Org and Perks; publishing a campaign costs 1 Pass.",
+      },
+    },
+  },
+  journey: {
+    eyebrow: "Member journey",
+    subtitle: "After the tooltip tour, continue here. Sharpen your profile first, then explore the circle.",
+    progress: "tasks",
+    nextUp: "Next up",
+    doIt: "Let's go",
+    dismiss: "Hide card",
+    phase1: "01 · Profile",
+    phase2: "02 · Explore",
+    badges: "Badges",
+    level1: "New member",
+    level2: "Visible member",
+    level3: "Active member",
+    level4: "Circle regular",
+    level5: "Inner circle",
+    tasks: {
+      bio: {
+        title: "Write your bio",
+        body: "Don't leave About empty · tell who you are.",
+      },
+      avatar: {
+        title: "Add a photo",
+        body: "Show your face · be recognized on cards and chat.",
+      },
+      role: {
+        title: "Role and company",
+        body: "Title + company · critical for matching.",
+      },
+      skills: {
+        title: "At least 2 skills",
+        body: "Visible on inner·id and match.",
+      },
+      linkedin: {
+        title: "Connect LinkedIn",
+        body: "Verify identity · shows on your inner·id card.",
+      },
+      visit_members: {
+        title: "Browse members",
+        body: "Open Members · meet the circle.",
+      },
+      visit_signal: {
+        title: "Open Signal",
+        body: "Read today's signal.",
+      },
+      visit_stage: {
+        title: "Check Stage",
+        body: "Peek at the product showcase.",
+      },
+    },
+    badge: {
+      first_words: {
+        title: "First words",
+        body: "Bio written",
+      },
+      face_known: {
+        title: "Face known",
+        body: "Profile photo added",
+      },
+      craft: {
+        title: "Craft",
+        body: "Skills selected",
+      },
+      linked_in: {
+        title: "Linked in",
+        body: "LinkedIn added",
+      },
+      explorer: {
+        title: "Explorer",
+        body: "You visited at least two areas",
+      },
+      inner_circle: {
+        title: "Inner circle",
+        body: "Strong profile · journey advanced",
       },
     },
   },
@@ -2792,6 +2945,7 @@ export const en: Messages = {
     about: "About",
     skills: "Skills",
     noBio: "No bio yet.",
+    noBioCta: "Complete your profile →",
     message: "Message",
     connect: "Connect",
     publish: "Publish",

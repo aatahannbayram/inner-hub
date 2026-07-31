@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { FadeIn } from "@/components/FadeIn";
 import { AnimatedHeading } from "@/components/AnimatedHeading";
+import { Link } from "wouter";
 import { cn } from "@/lib/utils";
 import { PersonAvatar } from "@/components/panel/PersonAvatar";
 import { HeroVideo } from "@/components/HeroVideo";
@@ -31,6 +32,7 @@ import {
   DrawerDescription,
 } from "@/components/ui/drawer";
 import { useT } from "@/i18n";
+import { useJourneyVisit } from "@/hooks/useJourneyVisit";
 
 type Tab = "uyeler" | "talent";
 
@@ -177,7 +179,19 @@ function MemberDetailPanel({ member, onClose }: { member: Member; onClose: () =>
         <div className="flex-1 space-y-5 overflow-y-auto p-5">
           <div>
             <p className="mb-2 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">{t("members.about")}</p>
-            <p className="text-sm leading-relaxed text-[var(--ink-body)]">{member.bio || t("members.noBio")}</p>
+            {member.bio ? (
+              <p className="text-sm leading-relaxed text-[var(--ink-body)]">{member.bio}</p>
+            ) : (
+              <div className="space-y-2">
+                <p className="text-sm leading-relaxed text-[var(--ink-muted)]">{t("members.noBio")}</p>
+                <Link
+                  href="/panel/profile"
+                  className="inline-flex font-mono text-[11px] uppercase tracking-widest text-[var(--inner-green)] hover:underline"
+                >
+                  {t("members.noBioCta")}
+                </Link>
+              </div>
+            )}
           </div>
           {member.tags.length > 0 && (
             <div>
@@ -574,6 +588,7 @@ function TalentCompose({
 
 export default function Members() {
   const t = useT();
+  useJourneyVisit("members");
   const queryClient = useQueryClient();
   const [tab, setTab] = useState<Tab>("uyeler");
   const [search, setSearch] = useState("");

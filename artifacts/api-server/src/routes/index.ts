@@ -25,6 +25,7 @@ import orgsRouter from "./orgs";
 import legalRouter from "./legal";
 import campaignsRouter from "./campaigns";
 import searchRouter from "./search";
+import journeyRouter from "./journey";
 
 const router: IRouter = Router();
 
@@ -33,6 +34,7 @@ router.use(invitationsRouter);
 router.use("/payments", paymentsRouter);
 router.use("/ai", aiRouter);
 router.use("/auth", authRouter);
+router.use(journeyRouter);
 router.use(catalogRouter);
 router.use(applicationsRouter);
 router.use(communityRouter);

@@ -25,6 +25,7 @@ import { CourseCardSkeleton, LoadingBlock, ErrorState } from "@/components/panel
 import { apiUrl } from "@/lib/api";
 import { cleanDisplayText } from "@/lib/displayText";
 import { useT, useLocale } from "@/i18n";
+import { useJourneyVisit } from "@/hooks/useJourneyVisit";
 
 interface Theme {
   topic: string;
@@ -358,6 +359,7 @@ function scrollToSection(id: SectionId) {
 
 export default function Signal() {
   const t = useT();
+  useJourneyVisit("signal");
   const { locale } = useLocale();
   const [data, setData] = useState<SignalData | null>(null);
   const [loading, setLoading] = useState(true);

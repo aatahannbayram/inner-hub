@@ -24,6 +24,8 @@ import {
   consumeInviteCode,
   normalizeEmail,
   personaFromInviteRequest,
+  profileSeedFromInviteRequest,
+  hydrateUserProfileFromInvite,
   validateInviteCodeForEmail,
 } from "../lib/inviteCodes";
 import { getPrimaryOrgForUser, isAvatarStyle, resolveAvatarUrl } from "../lib/identity";
@@ -310,8 +312,24 @@ router.post("/register", async (req, res) => {
 
     await ensureUserMembershipColumns();
     const persona = await personaFromInviteRequest(invite.invitationRequestId);
+    const seed = await profileSeedFromInviteRequest(invite.invitationRequestId);
 
     const passwordHash = await bcrypt.hash(password, 12);
+    const profileCompletionPct = calcCompletion({
+      name: name.trim(),
+      handle: "",
+      title: seed.title ?? "",
+      company: seed.company ?? "",
+      bio: seed.bio ?? "",
+      skills: [],
+      linkedin: seed.linkedin ?? "",
+      github: "",
+      website: seed.website ?? "",
+      university: "",
+      behance: "",
+      hasAvatar: false,
+    });
+
     const [user] = await db
       .insert(usersTable)
       .values({
@@ -319,6 +337,12 @@ router.post("/register", async (req, res) => {
         name: name.trim(),
         passwordHash,
         persona: persona ?? undefined,
+        bio: seed.bio,
+        company: seed.company,
+        linkedin: seed.linkedin,
+        website: seed.website,
+        title: seed.title,
+        profileCompletionPct,
       })
       .returning();
 
@@ -562,14 +586,36 @@ router.post("/google", async (req, res) => {
       }
       await ensureUserMembershipColumns();
       const persona = await personaFromInviteRequest(invite.invitationRequestId);
+      const seed = await profileSeedFromInviteRequest(invite.invitationRequestId);
+      const displayName = payload.name ?? normalizedEmail;
+      const profileCompletionPct = calcCompletion({
+        name: displayName,
+        handle: "",
+        title: seed.title ?? "",
+        company: seed.company ?? "",
+        bio: seed.bio ?? "",
+        skills: [],
+        linkedin: seed.linkedin ?? "",
+        github: "",
+        website: seed.website ?? "",
+        university: "",
+        behance: "",
+        hasAvatar: Boolean(payload.picture),
+      });
       [user] = await db
         .insert(usersTable)
         .values({
           email: normalizedEmail,
-          name: payload.name ?? normalizedEmail,
+          name: displayName,
           avatarUrl: payload.picture,
           googleId: payload.sub,
           persona: persona ?? undefined,
+          bio: seed.bio,
+          company: seed.company,
+          linkedin: seed.linkedin,
+          website: seed.website,
+          title: seed.title,
+          profileCompletionPct,
         })
         .returning();
       await consumeInviteCode(invite.id, user.id);
@@ -611,7 +657,16 @@ router.get("/me", async (req, res) => {
       .from(usersTable)
       .where(eq(usersTable.id, req.user.id))
       .limit(1);
-    const user = fresh ?? req.user;
+    let user = fresh ?? req.user;
+    const hydrated = await hydrateUserProfileFromInvite(user);
+    if (hydrated) {
+      const [again] = await db
+        .select()
+        .from(usersTable)
+        .where(eq(usersTable.id, user.id))
+        .limit(1);
+      if (again) user = again;
+    }
     const org = await getPrimaryOrgForUser(user.id);
     res.json({
       user: {

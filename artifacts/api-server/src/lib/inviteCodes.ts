@@ -169,6 +169,143 @@ export async function personaFromInviteRequest(
   return null;
 }
 
+/** Kayıtta / backfill’te profili başvuru metniyle doldur (bio boş kalmasın). */
+export async function profileSeedFromInviteRequest(
+  invitationRequestId: number | null | undefined,
+): Promise<{
+  bio?: string;
+  company?: string;
+  linkedin?: string;
+  website?: string;
+  title?: string;
+}> {
+  if (invitationRequestId == null || invitationRequestId < 0) return {};
+  const { invitationRequestsTable } = await import("@workspace/db/schema");
+  const [inv] = await db
+    .select({
+      whoYouAre: invitationRequestsTable.whoYouAre,
+      organization: invitationRequestsTable.organization,
+      linkedin: invitationRequestsTable.linkedin,
+      link: invitationRequestsTable.link,
+      role: invitationRequestsTable.role,
+    })
+    .from(invitationRequestsTable)
+    .where(eq(invitationRequestsTable.id, invitationRequestId))
+    .limit(1);
+  if (!inv) return {};
+
+  const bio = (inv.whoYouAre ?? "").trim().slice(0, 1600);
+  const company = (inv.organization ?? "").trim().slice(0, 120) || undefined;
+  const linkedin = (inv.linkedin ?? "").trim().slice(0, 240) || undefined;
+  const website = (inv.link ?? "").trim().slice(0, 240) || undefined;
+  const role = (inv.role ?? "").trim().toLowerCase();
+  const titleByRole: Record<string, string> = {
+    founder: "Founder",
+    investor: "Investor",
+    builder: "Builder",
+    operator: "Builder",
+    company: "Company",
+  };
+  const title = titleByRole[role];
+
+  return {
+    ...(bio.length >= 8 ? { bio } : {}),
+    ...(company ? { company } : {}),
+    ...(linkedin ? { linkedin } : {}),
+    ...(website ? { website } : {}),
+    ...(title ? { title } : {}),
+  };
+}
+
+/**
+ * Mevcut üyede boş kalan bio/şirket/linkedin’i davet başvurusundan bir kez doldur.
+ * (Eski kayıtlar için; alan doluysa dokunmaz.)
+ */
+export async function hydrateUserProfileFromInvite(user: {
+  id: number;
+  email: string;
+  bio: string | null;
+  company: string | null;
+  linkedin: string | null;
+  website: string | null;
+  title?: string | null;
+  profileCompletionPct: number | null;
+}): Promise<{
+  id: number;
+  email: string;
+  bio: string | null;
+  company: string | null;
+  linkedin: string | null;
+  website: string | null;
+  title?: string | null;
+  profileCompletionPct: number | null;
+} | null> {
+  const needsBio = !(user.bio ?? "").trim();
+  const needsCompany = !(user.company ?? "").trim();
+  const needsLinkedin = !(user.linkedin ?? "").trim();
+  const needsWebsite = !(user.website ?? "").trim();
+  const needsTitle = !(user.title ?? "").trim();
+  if (!needsBio && !needsCompany && !needsLinkedin && !needsWebsite && !needsTitle) return null;
+
+  const { invitationRequestsTable, usersTable } = await import("@workspace/db/schema");
+
+  let invitationRequestId: number | null = null;
+  const [codeRow] = await db
+    .select({ invitationRequestId: inviteCodesTable.invitationRequestId })
+    .from(inviteCodesTable)
+    .where(eq(inviteCodesTable.usedByUserId, user.id))
+    .limit(1);
+  if (codeRow?.invitationRequestId) {
+    invitationRequestId = codeRow.invitationRequestId;
+  } else {
+    const [byEmail] = await db
+      .select({ id: invitationRequestsTable.id })
+      .from(invitationRequestsTable)
+      .where(eq(invitationRequestsTable.email, normalizeEmail(user.email)))
+      .limit(1);
+    if (byEmail) invitationRequestId = byEmail.id;
+  }
+
+  const seed = await profileSeedFromInviteRequest(invitationRequestId);
+  if (!seed.bio && !seed.company && !seed.linkedin && !seed.website && !seed.title) return null;
+
+  const nextBio = needsBio && seed.bio ? seed.bio : user.bio;
+  const nextCompany = needsCompany && seed.company ? seed.company : user.company;
+  const nextLinkedin = needsLinkedin && seed.linkedin ? seed.linkedin : user.linkedin;
+  const nextWebsite = needsWebsite && seed.website ? seed.website : user.website;
+  const nextTitle = needsTitle && seed.title ? seed.title : user.title ?? null;
+
+  if (
+    nextBio === user.bio &&
+    nextCompany === user.company &&
+    nextLinkedin === user.linkedin &&
+    nextWebsite === user.website &&
+    nextTitle === (user.title ?? null)
+  ) {
+    return null;
+  }
+
+  let pct = user.profileCompletionPct ?? 0;
+  if (needsBio && (nextBio ?? "").trim().length > 20) pct = Math.min(100, pct + 9);
+  if (needsCompany && (nextCompany ?? "").trim()) pct = Math.min(100, pct + 9);
+  if (needsTitle && (nextTitle ?? "").trim()) pct = Math.min(100, pct + 9);
+
+  const [updated] = await db
+    .update(usersTable)
+    .set({
+      bio: nextBio,
+      company: nextCompany,
+      linkedin: nextLinkedin,
+      website: nextWebsite,
+      title: nextTitle,
+      profileCompletionPct: pct,
+    })
+    .where(eq(usersTable.id, user.id))
+    .returning();
+
+  return updated ?? null;
+}
+
 export async function consumeInviteCode(inviteCodeId: number, userId: number) {
   if (inviteCodeId < 0) return; // master passcode
   await db

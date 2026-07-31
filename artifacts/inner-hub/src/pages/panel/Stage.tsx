@@ -28,6 +28,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useT, useLocale } from "@/i18n";
+import { useJourneyVisit } from "@/hooks/useJourneyVisit";
 
 const STAGE_FIELD =
   "w-full border border-[var(--ink)]/15 bg-[var(--ink)]/[0.04] px-3 py-2.5 text-sm text-[var(--ink)] placeholder:text-[var(--ink-muted)] outline-none transition-colors focus:border-[var(--ink)]/35 dark:border-white/18 dark:bg-white/[0.08] dark:text-white dark:placeholder:text-white/40 dark:focus:border-white/35";
@@ -1158,6 +1159,7 @@ function SubmitDialog({
 
 export default function Stage() {
   const t = useT();
+  useJourneyVisit("stage");
   const queryClient = useQueryClient();
   const [busyId, setBusyId] = useState<number | null>(null);
   const [adminBusyId, setAdminBusyId] = useState<number | null>(null);
