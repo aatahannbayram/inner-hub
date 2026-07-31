@@ -1304,7 +1304,7 @@ const tr = {
     emptyPeriod: "Bu dönemde henüz oy yok.",
     emptyCta: "İlk ürünü gönder",
     submit: "Ürün Gönder",
-    submitHint: "Ürün linkini yapıştır · başlık, pitch ve logo otomatik dolsun. İstersen düzenle.",
+    submitHint: "Linki yapıştır · başlık, pitch ve kapak otomatik dolsun. Taslak kaybolmaz.",
     addProduct: "Ürün Ekle",
     fieldUrl: "Ürün linki",
     fieldTitle: "Ürün adı",
@@ -1317,6 +1317,7 @@ const tr = {
     coverDropHint: "Bırak, yükleyelim…",
     coverUploaded: "Görsel yüklendi",
     coverUploadFailed: "Görsel yüklenemedi · başka bir dosya dene",
+    coverFromPreview: "Siteden gelen görsel kullanılacak",
     fieldYoutube: "YouTube (opsiyonel)",
     youtubePlaceholder: "youtube.com/watch?v=…",
     titlePlaceholder: "Ürün adı",
@@ -1351,7 +1352,11 @@ const tr = {
     adminRemove: "Kaldır",
     confirmRemove: "Bu ürünü kaldırmak istediğine emin misin?",
     previewLoading: "Site bilgileri getiriliyor…",
-    previewHint: "Başlık, açıklama ve logo otomatik doldurulacak"
+    previewHint: "Başlık, açıklama ve logo otomatik doldurulacak",
+    applyPreview: "Önizlemeyi alanlara yaz",
+    draftSaved: "Taslak saklandı · kaldığın yerden devam",
+    clearDraft: "Taslağı temizle",
+    prefilledFromProfile: "Profilindeki site linki hazır"
   },
   members: {
     title: "Katılımcılar",
@@ -2895,7 +2900,7 @@ const en = {
     emptyPeriod: "No votes in this period yet.",
     emptyCta: "Submit the first one",
     submit: "Submit product",
-    submitHint: "Paste the product link · title, pitch, and logo autofill. Edit if you want.",
+    submitHint: "Paste the link · title, pitch, and cover autofill. Your draft is kept.",
     addProduct: "Add product",
     fieldUrl: "Product link",
     fieldTitle: "Product name",
@@ -2908,6 +2913,7 @@ const en = {
     coverDropHint: "Drop to upload…",
     coverUploaded: "Image uploaded",
     coverUploadFailed: "Could not upload · try a different file",
+    coverFromPreview: "Site image will be used",
     fieldYoutube: "YouTube (optional)",
     youtubePlaceholder: "youtube.com/watch?v=…",
     titlePlaceholder: "Product name",
@@ -2942,7 +2948,11 @@ const en = {
     adminRemove: "Remove",
     confirmRemove: "Remove this product?",
     previewLoading: "Fetching site info…",
-    previewHint: "Title, description, and logo will autofill"
+    previewHint: "Title, description, and logo will autofill",
+    applyPreview: "Apply preview to fields",
+    draftSaved: "Draft saved · pick up where you left off",
+    clearDraft: "Clear draft",
+    prefilledFromProfile: "Your profile website is ready"
   },
   members: {
     title: "Members",

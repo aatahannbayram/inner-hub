@@ -845,6 +845,60 @@ function ProductDetailPanel({
   );
 }
 
+const STAGE_DRAFT_KEY = "inner_stage_submit_draft_v1";
+
+type StageSubmitDraft = {
+  title: string;
+  urlPath: string;
+  pitch: string;
+  phPath: string;
+  youtubePath: string;
+  coverPath: string;
+};
+
+function readStageDraft(): StageSubmitDraft | null {
+  try {
+    const raw = localStorage.getItem(STAGE_DRAFT_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Partial<StageSubmitDraft>;
+    if (!parsed || typeof parsed !== "object") return null;
+    return {
+      title: typeof parsed.title === "string" ? parsed.title : "",
+      urlPath: typeof parsed.urlPath === "string" ? parsed.urlPath : "",
+      pitch: typeof parsed.pitch === "string" ? parsed.pitch : "",
+      phPath: typeof parsed.phPath === "string" ? parsed.phPath : "",
+      youtubePath: typeof parsed.youtubePath === "string" ? parsed.youtubePath : "",
+      coverPath: typeof parsed.coverPath === "string" ? parsed.coverPath : "",
+    };
+  } catch {
+    return null;
+  }
+}
+
+function writeStageDraft(draft: StageSubmitDraft) {
+  try {
+    const empty =
+      !draft.title.trim() &&
+      !draft.urlPath.trim() &&
+      !draft.pitch.trim() &&
+      !draft.phPath.trim() &&
+      !draft.youtubePath.trim() &&
+      !draft.coverPath.trim();
+    if (empty) localStorage.removeItem(STAGE_DRAFT_KEY);
+    else localStorage.setItem(STAGE_DRAFT_KEY, JSON.stringify(draft));
+  } catch {
+    /* ignore quota */
+  }
+}
+
+function clearStageDraft() {
+  try {
+    localStorage.removeItem(STAGE_DRAFT_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
 function SubmitDialog({
   open,
   onClose,
@@ -866,18 +920,103 @@ function SubmitDialog({
   const [error, setError] = useState<string | null>(null);
   const [titleTouched, setTitleTouched] = useState(false);
   const [pitchTouched, setPitchTouched] = useState(false);
+  const [coverTouched, setCoverTouched] = useState(false);
   const [previewLoading, setPreviewLoading] = useState(false);
   const [phPreviewLoading, setPhPreviewLoading] = useState(false);
   const [preview, setPreview] = useState<LinkPreviewData | null>(null);
   const [previewFailed, setPreviewFailed] = useState(false);
+  const [draftNotice, setDraftNotice] = useState<"draft" | "profile" | null>(null);
+  const hydratedRef = useRef(false);
 
   const applyPreview = (data: LinkPreviewData, opts?: { force?: boolean }) => {
     setPreview(data);
-    if ((!titleTouched || opts?.force) && data.title) setTitle(data.title.slice(0, 120));
-    if ((!pitchTouched || opts?.force) && data.description) setPitch(data.description.slice(0, 500));
+    const force = opts?.force === true;
+    if (data.title) {
+      setTitle((prev) => (force || !prev.trim() ? data.title!.slice(0, 120) : prev));
+    }
+    if (data.description) {
+      setPitch((prev) => (force || !prev.trim() ? data.description!.slice(0, 500) : prev));
+    }
+    if (data.image) {
+      setCoverUpload((upload) => {
+        if (force || !upload) {
+          setCoverPath((prev) => (force || !prev.trim() ? stripUrlScheme(data.image!) : prev));
+        }
+        return force ? null : upload;
+      });
+    }
   };
 
-  // Ürün URL → başlık, pitch, logo, site adı; PH ise PH alanını da doldur
+  // Modal açılınca: taslak veya profil sitesi · kapanınca sıfırlama yok
+  useEffect(() => {
+    if (!open) {
+      hydratedRef.current = false;
+      return;
+    }
+    if (hydratedRef.current) return;
+    hydratedRef.current = true;
+
+    const hasLocal =
+      title.trim() ||
+      urlPath.trim() ||
+      pitch.trim() ||
+      phPath.trim() ||
+      youtubePath.trim() ||
+      coverPath.trim() ||
+      coverUpload;
+    if (hasLocal) {
+      setDraftNotice("draft");
+      return;
+    }
+
+    const draft = readStageDraft();
+    if (
+      draft &&
+      (draft.title || draft.urlPath || draft.pitch || draft.phPath || draft.youtubePath || draft.coverPath)
+    ) {
+      setTitle(draft.title);
+      setUrlPath(draft.urlPath);
+      setPitch(draft.pitch);
+      setPhPath(draft.phPath);
+      setYoutubePath(draft.youtubePath);
+      setCoverPath(draft.coverPath);
+      setDraftNotice("draft");
+      return;
+    }
+
+    let cancelled = false;
+    void (async () => {
+      try {
+        const res = await fetch(apiUrl("/api/auth/me"), { credentials: "include" });
+        if (!res.ok || cancelled) return;
+        const json = (await res.json()) as {
+          user?: { website?: string | null; org?: { name?: string | null } | null };
+        };
+        const site = (json.user?.website ?? "").trim();
+        if (site && toHttpsUrl(site)) {
+          setUrlPath(stripUrlScheme(site));
+          setDraftNotice("profile");
+        }
+      } catch {
+        /* ignore */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
+  // Yazarken taslağı sakla (kapak dosyası data URL hariç · localStorage şişmesin)
+  useEffect(() => {
+    if (!open) return;
+    const timer = window.setTimeout(() => {
+      writeStageDraft({ title, urlPath, pitch, phPath, youtubePath, coverPath });
+    }, 350);
+    return () => window.clearTimeout(timer);
+  }, [open, title, urlPath, pitch, phPath, youtubePath, coverPath]);
+
+  // Ürün URL → başlık, pitch, kapak; PH ise PH alanını da doldur
   useEffect(() => {
     const absolute = toHttpsUrl(urlPath);
     if (!absolute) {
@@ -917,7 +1056,7 @@ function SubmitDialog({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [urlPath]);
 
-  // Product Hunt URL → eksik alanları tamamla (ürün URL'si yoksa birincil kaynak)
+  // Product Hunt URL → eksik alanları tamamla
   useEffect(() => {
     const absolute = toHttpsUrl(phPath);
     if (!absolute || !isProductHuntUrl(absolute)) return;
@@ -932,12 +1071,7 @@ function SubmitDialog({
         if (!res.ok || cancelled) return;
         const data = (await res.json()) as LinkPreviewData;
         if (cancelled) return;
-        if (!title.trim() || !titleTouched) {
-          if (data.title) setTitle(data.title.slice(0, 120));
-        }
-        if (!pitch.trim() || !pitchTouched) {
-          if (data.description) setPitch(data.description.slice(0, 500));
-        }
+        applyPreview(data);
         if (!preview?.image && data.image) {
           setPreview((prev) => ({
             title: prev?.title ?? data.title,
@@ -970,8 +1104,11 @@ function SubmitDialog({
     setPreview(null);
     setTitleTouched(false);
     setPitchTouched(false);
+    setCoverTouched(false);
     setPreviewFailed(false);
     setError(null);
+    setDraftNotice(null);
+    clearStageDraft();
   };
 
   const submit = async () => {
@@ -1012,13 +1149,20 @@ function SubmitDialog({
   };
 
   const canSubmit = Boolean(title.trim() && toHttpsUrl(urlPath) && pitch.trim());
+  const hasDraftBits =
+    title.trim() ||
+    urlPath.trim() ||
+    pitch.trim() ||
+    phPath.trim() ||
+    youtubePath.trim() ||
+    coverPath.trim();
 
   return (
     <Dialog
       open={open}
       onOpenChange={(v) => {
         if (!v) {
-          resetForm();
+          writeStageDraft({ title, urlPath, pitch, phPath, youtubePath, coverPath });
           onClose();
         }
       }}
@@ -1037,6 +1181,22 @@ function SubmitDialog({
           <DialogDescription className="text-sm text-[var(--ink-body)] dark:text-white/55">
             {t("stage.submitHint")}
           </DialogDescription>
+          {draftNotice && (
+            <div className="flex items-center justify-between gap-2 pt-1">
+              <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--inner-green)]">
+                {draftNotice === "profile" ? t("stage.prefilledFromProfile") : t("stage.draftSaved")}
+              </p>
+              {hasDraftBits && (
+                <button
+                  type="button"
+                  onClick={() => resetForm()}
+                  className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-muted)] underline-offset-2 hover:text-[var(--ink)] hover:underline"
+                >
+                  {t("stage.clearDraft")}
+                </button>
+              )}
+            </div>
+          )}
         </DialogHeader>
         <div className="space-y-3.5 px-5 py-4">
           <PrefixedUrlField
@@ -1048,38 +1208,49 @@ function SubmitDialog({
           />
 
           {(preview || previewLoading || (urlPath.trim() && !previewFailed)) && (
-            <div className="flex items-start gap-3 border border-[var(--ink)]/12 bg-[var(--ink)]/[0.03] p-3 dark:border-white/12 dark:bg-white/[0.05]">
-              {preview?.image ? (
-                <img
-                  src={preview.image}
-                  alt=""
-                  className="size-10 shrink-0 border border-[var(--ink)]/10 bg-white object-contain p-0.5 dark:border-white/10"
-                  onError={(e) => {
-                    e.currentTarget.style.display = "none";
-                  }}
-                />
-              ) : (
-                <div className="flex size-10 shrink-0 items-center justify-center border border-[var(--ink)]/10 text-[var(--ink-subtle)] dark:border-white/10">
-                  <Globe className="size-4" />
+            <div className="space-y-2 border border-[var(--ink)]/12 bg-[var(--ink)]/[0.03] p-3 dark:border-white/12 dark:bg-white/[0.05]">
+              <div className="flex items-start gap-3">
+                {preview?.image ? (
+                  <img
+                    src={preview.image}
+                    alt=""
+                    className="size-10 shrink-0 border border-[var(--ink)]/10 bg-white object-contain p-0.5 dark:border-white/10"
+                    onError={(e) => {
+                      e.currentTarget.style.display = "none";
+                    }}
+                  />
+                ) : (
+                  <div className="flex size-10 shrink-0 items-center justify-center border border-[var(--ink)]/10 text-[var(--ink-subtle)] dark:border-white/10">
+                    <Globe className="size-4" />
+                  </div>
+                )}
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm text-[var(--ink)]">
+                    {previewLoading
+                      ? t("stage.previewLoading")
+                      : preview?.title || t("stage.previewHint")}
+                  </p>
+                  {preview?.siteName && (
+                    <p className="mt-0.5 font-mono text-[10px] uppercase tracking-widest text-[var(--ink-subtle)]">
+                      {preview.siteName}
+                    </p>
+                  )}
+                  {preview?.description && (
+                    <p className="mt-1 line-clamp-2 text-xs leading-snug text-[var(--ink-muted)]">
+                      {preview.description}
+                    </p>
+                  )}
                 </div>
-              )}
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm text-[var(--ink)]">
-                  {previewLoading
-                    ? t("stage.previewLoading")
-                    : preview?.title || t("stage.previewHint")}
-                </p>
-                {preview?.siteName && (
-                  <p className="mt-0.5 font-mono text-[10px] uppercase tracking-widest text-[var(--ink-subtle)]">
-                    {preview.siteName}
-                  </p>
-                )}
-                {preview?.description && (
-                  <p className="mt-1 line-clamp-2 text-xs leading-snug text-[var(--ink-muted)]">
-                    {preview.description}
-                  </p>
-                )}
               </div>
+              {preview && (preview.title || preview.description || preview.image) && (
+                <button
+                  type="button"
+                  onClick={() => applyPreview(preview, { force: true })}
+                  className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink)] underline underline-offset-2 hover:text-[var(--inner-green)]"
+                >
+                  {t("stage.applyPreview")}
+                </button>
+              )}
             </div>
           )}
 
@@ -1117,11 +1288,22 @@ function SubmitDialog({
           <CoverImageField
             label={t("stage.fieldCover")}
             urlPath={coverPath}
-            onUrlChange={setCoverPath}
+            onUrlChange={(v) => {
+              setCoverPath(v);
+              setCoverTouched(true);
+            }}
             uploadDataUrl={coverUpload}
-            onUploadChange={setCoverUpload}
+            onUploadChange={(v) => {
+              setCoverUpload(v);
+              setCoverTouched(true);
+            }}
             placeholder={t("stage.coverPlaceholder")}
           />
+          {!coverPath.trim() && !coverUpload && preview?.image && (
+            <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-muted)]">
+              {t("stage.coverFromPreview")}
+            </p>
+          )}
 
           <PrefixedUrlField
             label={t("stage.fieldYoutube")}
