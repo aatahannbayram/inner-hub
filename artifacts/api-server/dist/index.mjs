@@ -97713,11 +97713,14 @@ function appBaseUrl() {
   return (process.env.APP_URL ?? "https://inner.digital").replace(/\/$/, "");
 }
 function mailFromAddress() {
-  return process.env.MAIL_FROM ?? process.env.SMTP_USER ?? "noreply@inner.digital";
+  return process.env.RESEND_FROM?.replace(/^.*<([^>]+)>.*$/, "$1").trim() || process.env.MAIL_FROM || process.env.SMTP_USER || "noreply@inner.digital";
 }
 function mailFromHeader() {
+  const explicit = process.env.RESEND_FROM?.trim();
+  if (explicit?.includes("<")) return explicit;
   const name = process.env.MAIL_FROM_NAME ?? "inner hub";
-  return `"${name.replace(/"/g, "")}" <${mailFromAddress()}>`;
+  const addr = explicit || mailFromAddress();
+  return `"${name.replace(/"/g, "")}" <${addr}>`;
 }
 function mailReplyTo() {
   return process.env.MAIL_REPLY_TO ?? "support@inner.digital";
@@ -97727,31 +97730,84 @@ function mailDomain() {
   const at = from.lastIndexOf("@");
   return at >= 0 ? from.slice(at + 1) : "inner.digital";
 }
-async function sendTransactionalMail(mail) {
-  const transport = getMailTransporter();
-  if (!transport) {
-    logger.info({ kind: mail.kind, to: mail.to }, "SMTP not configured \u2014 mail skipped");
-    return { ok: false, error: "SMTP yap\u0131land\u0131r\u0131lmam\u0131\u015F (SMTP_HOST/SMTP_USER/SMTP_PASS eksik)" };
-  }
-  const domain2 = mailDomain();
-  const messageId = `<${Date.now()}.${randomBytes(8).toString("hex")}@${domain2}>`;
-  try {
-    await transport.sendMail({
+function resendApiKey() {
+  const key = process.env.RESEND_API_KEY?.trim();
+  return key || void 0;
+}
+async function sendViaResend(mail, messageId, apiKey) {
+  const res = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
       from: mailFromHeader(),
-      to: mail.to,
-      replyTo: mailReplyTo(),
+      to: [mail.to],
+      reply_to: mailReplyTo(),
       subject: mail.subject,
       text: mail.text,
       html: mail.html,
-      messageId,
       headers: {
+        "Message-ID": messageId,
         "Auto-Submitted": "auto-generated",
         "X-Auto-Response-Suppress": "All",
         "X-Inner-Mail-Kind": mail.kind ?? "transactional"
-      }
-    });
-    logger.info({ kind: mail.kind, to: mail.to, messageId }, "Transactional mail sent");
-    return { ok: true };
+      },
+      tags: mail.kind ? [{ name: "kind", value: mail.kind.replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 40) }] : void 0
+    })
+  });
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const errMsg = body.message || body.name || `Resend HTTP ${res.status}`;
+    logger.error({ kind: mail.kind, to: mail.to, status: res.status, body }, "Resend mail failed");
+    return { ok: false, error: errMsg, provider: "resend" };
+  }
+  logger.info(
+    { kind: mail.kind, to: mail.to, messageId, resendId: body.id },
+    "Transactional mail sent via Resend"
+  );
+  return { ok: true, provider: "resend" };
+}
+async function sendViaSmtp(mail, messageId) {
+  const transport = getMailTransporter();
+  if (!transport) {
+    return {
+      ok: false,
+      error: "Mail yap\u0131land\u0131r\u0131lmam\u0131\u015F (RESEND_API_KEY veya SMTP_HOST/SMTP_USER/SMTP_PASS)",
+      provider: "smtp"
+    };
+  }
+  await transport.sendMail({
+    from: mailFromHeader(),
+    to: mail.to,
+    replyTo: mailReplyTo(),
+    subject: mail.subject,
+    text: mail.text,
+    html: mail.html,
+    messageId,
+    headers: {
+      "Auto-Submitted": "auto-generated",
+      "X-Auto-Response-Suppress": "All",
+      "X-Inner-Mail-Kind": mail.kind ?? "transactional"
+    }
+  });
+  logger.info({ kind: mail.kind, to: mail.to, messageId }, "Transactional mail sent via SMTP");
+  return { ok: true, provider: "smtp" };
+}
+async function sendTransactionalMail(mail) {
+  const domain2 = mailDomain();
+  const messageId = `<${Date.now()}.${randomBytes(8).toString("hex")}@${domain2}>`;
+  const apiKey = resendApiKey();
+  try {
+    if (apiKey) {
+      return await sendViaResend(mail, messageId, apiKey);
+    }
+    const smtpResult = await sendViaSmtp(mail, messageId);
+    if (!smtpResult.ok && smtpResult.error?.includes("yap\u0131land\u0131r\u0131lmam\u0131\u015F")) {
+      logger.info({ kind: mail.kind, to: mail.to }, "Mail not configured \u2014 skipped");
+    }
+    return smtpResult;
   } catch (err) {
     logger.error({ err, kind: mail.kind, to: mail.to }, "Transactional mail failed");
     return { ok: false, error: err instanceof Error ? err.message : String(err) };
