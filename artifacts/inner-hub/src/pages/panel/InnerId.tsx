@@ -242,6 +242,7 @@ function PlatformBindRow({
   label,
   desc,
   brandColor,
+  iconOnLight,
   prefix,
   value,
   placeholder,
@@ -253,6 +254,8 @@ function PlatformBindRow({
   label: string;
   desc: string;
   brandColor?: string;
+  /** Açık zemin (ör. GitHub beyaz kutu) → koyu ikon. */
+  iconOnLight?: boolean;
   prefix: string;
   value: string;
   placeholder: string;
@@ -302,12 +305,27 @@ function PlatformBindRow({
         <div
           className={
             brandColor
-              ? "flex size-9 shrink-0 items-center justify-center border"
+              ? "flex size-9 shrink-0 items-center justify-center border shadow-sm"
               : "flex size-9 shrink-0 items-center justify-center panel-glass"
           }
-          style={brandColor ? { backgroundColor: brandColor, borderColor: brandColor } : undefined}
+          style={
+            brandColor
+              ? {
+                  backgroundColor: brandColor,
+                  borderColor: iconOnLight ? "rgba(255,255,255,0.25)" : brandColor,
+                }
+              : undefined
+          }
         >
-          <Icon className={brandColor ? "size-4 text-[var(--bone)]" : "size-4 text-[var(--ink-body)]"} />
+          <Icon
+            className={
+              brandColor
+                ? iconOnLight
+                  ? "size-[18px] text-[#0d1117] [&_path]:fill-current"
+                  : "size-4 text-[var(--bone-fixed,#F4F1EC)]"
+                : "size-4 text-[var(--ink)]"
+            }
+          />
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
@@ -579,7 +597,8 @@ export default function InnerId() {
             icon={Github}
             label="GitHub"
             desc={t("id.githubDesc")}
-            brandColor="#181717"
+            brandColor="#FFFFFF"
+            iconOnLight
             prefix="github.com/"
             placeholder="kullaniciadi"
             value={github}
