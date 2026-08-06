@@ -1,4 +1,4 @@
-import { pgTable, serial, text, timestamp, pgEnum, integer } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, timestamp, pgEnum, integer, boolean } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
@@ -47,6 +47,8 @@ export const usersTable = pgTable("users", {
   googleId: text("google_id").unique(),
   linkedinId: text("linkedin_id").unique(),
   deletedAt: timestamp("deleted_at"),
+  /** Seed / test / sistem hesapları — üye dizininde ve talent board’da gizlenir */
+  isSystem: boolean("is_system").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

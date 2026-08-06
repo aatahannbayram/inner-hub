@@ -3,7 +3,8 @@ import { desc, eq } from "drizzle-orm";
 import { db } from "@workspace/db";
 import { talentPostsTable, usersTable } from "@workspace/db/schema";
 import { requireAuth } from "../lib/auth";
-import { ensureTalentSchema } from "../lib/ensureSchema";
+import { ensureTalentSchema, ensureUserMembershipColumns } from "../lib/ensureSchema";
+import { isTestOrSystemAccount } from "../lib/directoryMembers";
 
 const router = Router();
 
@@ -63,13 +64,25 @@ function mapPost(
   };
 }
 
-async function ensureTalentSeed(adminUserId: number) {
+async function ensureTalentSeed(fallbackUserId: number) {
   const [row] = await db.select({ id: talentPostsTable.id }).from(talentPostsTable).limit(1);
   if (row) return;
 
+  const candidates = await db
+    .select({
+      id: usersTable.id,
+      email: usersTable.email,
+      name: usersTable.name,
+      isSystem: usersTable.isSystem,
+    })
+    .from(usersTable)
+    .limit(40);
+  const owner =
+    candidates.find((u) => !isTestOrSystemAccount(u))?.id ?? fallbackUserId;
+
   await db.insert(talentPostsTable).values([
     {
-      userId: adminUserId,
+      userId: owner,
       postType: "arıyor",
       role: "Fullstack Developer (React + Node.js)",
       description:
@@ -77,7 +90,7 @@ async function ensureTalentSeed(adminUserId: number) {
       tags: JSON.stringify(["React", "Node.js", "Remote", "Equity"]),
     },
     {
-      userId: adminUserId,
+      userId: owner,
       postType: "arıyor",
       role: "AI/ML Engineer (Part-time)",
       description:
@@ -85,7 +98,7 @@ async function ensureTalentSeed(adminUserId: number) {
       tags: JSON.stringify(["AI", "LLM", "Part-time"]),
     },
     {
-      userId: adminUserId,
+      userId: owner,
       postType: "sunuyor",
       role: "CTO Danışmanlığı — Erken Aşama Startuplar",
       description:
@@ -93,7 +106,7 @@ async function ensureTalentSeed(adminUserId: number) {
       tags: JSON.stringify(["CTO", "Danışmanlık", "Teknik"]),
     },
     {
-      userId: adminUserId,
+      userId: owner,
       postType: "sunuyor",
       role: "Startup Hukuk Danışmanlığı",
       description:
@@ -101,7 +114,7 @@ async function ensureTalentSeed(adminUserId: number) {
       tags: JSON.stringify(["Hukuk", "SAFE", "Yatırım"]),
     },
     {
-      userId: adminUserId,
+      userId: owner,
       postType: "arıyor",
       role: "Co-founder (Sales & Marketing)",
       description:
@@ -115,6 +128,7 @@ async function ensureTalentSeed(adminUserId: number) {
 router.get("/talent", requireAuth, async (req, res) => {
   try {
     await ensureTalentSchema();
+    await ensureUserMembershipColumns();
     const userId = req.user!.id;
     const [admin] = await db
       .select({ id: usersTable.id })
@@ -129,13 +143,20 @@ router.get("/talent", requireAuth, async (req, res) => {
         name: usersTable.name,
         company: usersTable.company,
         handle: usersTable.handle,
+        email: usersTable.email,
+        isSystem: usersTable.isSystem,
       })
       .from(talentPostsTable)
       .innerJoin(usersTable, eq(talentPostsTable.userId, usersTable.id))
       .orderBy(desc(talentPostsTable.createdAt));
 
+    const visible = rows.filter(
+      ({ email, name, isSystem }) =>
+        !isTestOrSystemAccount({ email, name, isSystem }),
+    );
+
     res.json({
-      posts: rows.map(({ post, name, company, handle }) =>
+      posts: visible.map(({ post, name, company, handle }) =>
         mapPost(post, { name, company, handle }, post.userId === userId),
       ),
     });

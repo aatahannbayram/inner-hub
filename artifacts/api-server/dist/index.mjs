@@ -53912,6 +53912,8 @@ var init_users = __esm({
       googleId: text("google_id").unique(),
       linkedinId: text("linkedin_id").unique(),
       deletedAt: timestamp("deleted_at"),
+      /** Seed / test / sistem hesapları — üye dizininde ve talent board’da gizlenir */
+      isSystem: boolean("is_system").default(false).notNull(),
       createdAt: timestamp("created_at").defaultNow().notNull()
     });
     insertUserSchema = createInsertSchema(usersTable).omit({ id: true, createdAt: true });
@@ -98356,6 +98358,18 @@ var ensureUserMembershipColumns = once(async () => {
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS instagram text`);
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS whatsapp_opt_in text`);
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS deleted_at timestamp`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS is_system boolean NOT NULL DEFAULT false`);
+  await db.execute(sql`
+    UPDATE users SET is_system = true
+    WHERE is_system = false AND (
+      lower(trim(name)) IN ('admin', 'member', 'member test', 'kod testi', 'invitee', 'onboarding test', 'test', 'test user', 'smoke test')
+      OR lower(email) IN ('admin@inner.digital', 'member@inner.digital', 'admin@inner.co')
+      OR email ILIKE '%@test.com'
+      OR email ILIKE 'invitee-%'
+      OR email ILIKE 'onboarding-test-%'
+      OR email ILIKE 'test-smoke%'
+    )
+  `);
 });
 var ensureOrgLegalCampaignSchema = once(async () => {
   await db.execute(sql`
@@ -124173,8 +124187,8 @@ var TEST_NAME_EXACT = /* @__PURE__ */ new Set([
   "test",
   "smoke test"
 ]);
-var PLACEHOLDER_COMPANY = /* @__PURE__ */ new Set(["\u2014", "-", "n/a", "na", "test", "inner hub", "innerhub"]);
 function isTestOrSystemAccount(input) {
+  if (input.isSystem) return true;
   const email3 = (input.email ?? "").trim().toLowerCase();
   const name = (input.name ?? "").trim().toLowerCase();
   if (!email3 && !name) return true;
@@ -124190,14 +124204,8 @@ function isTestOrSystemAccount(input) {
 }
 function isDirectoryMember(input) {
   if (isTestOrSystemAccount(input)) return false;
-  const bio = (input.bio ?? "").trim();
-  const company = (input.company ?? "").trim();
-  const linkedin = (input.linkedin ?? "").trim();
-  if (bio.length >= 20) return true;
-  if (company.length > 1 && !PLACEHOLDER_COMPANY.has(company.toLowerCase())) return true;
-  if (linkedin.length > 0 || Boolean(input.linkedinId)) return true;
-  if (Boolean(input.avatarUrl)) return true;
-  return false;
+  const name = (input.name ?? "").trim();
+  return name.length > 0;
 }
 
 // src/lib/displayLabel.ts
@@ -124372,7 +124380,9 @@ router10.get("/members", requireAuth, async (_req, res) => {
       persona: usersTable.persona,
       role: usersTable.role,
       linkedinId: usersTable.linkedinId,
-      skills: usersTable.skills
+      skills: usersTable.skills,
+      isSystem: usersTable.isSystem,
+      profileCompletionPct: usersTable.profileCompletionPct
     }).from(usersTable).where(isNull(usersTable.deletedAt)).orderBy(asc(usersTable.name));
     const listed = rows.filter(
       (u) => isDirectoryMember({
@@ -124384,13 +124394,15 @@ router10.get("/members", requireAuth, async (_req, res) => {
         linkedin: u.linkedin,
         linkedinId: u.linkedinId,
         avatarUrl: u.avatarUrl,
-        persona: u.persona
+        persona: u.persona,
+        isSystem: u.isSystem
       })
     );
     res.json({
       members: listed.map((u) => {
         const title = isDecorativeLabel(u.title) ? null : u.title?.trim() || null;
-        const company = u.company?.trim() || null;
+        const companyRaw = u.company?.trim() || null;
+        const company = companyRaw && !["\u2014", "-", "n/a", "na"].includes(companyRaw.toLowerCase()) ? companyRaw : null;
         let skills = [];
         if (u.skills) {
           try {
@@ -124402,7 +124414,10 @@ router10.get("/members", requireAuth, async (_req, res) => {
             skills = u.skills.split(",").map((s) => s.trim()).filter(Boolean);
           }
         }
-        const tags = [...skills, u.persona].filter((t) => Boolean(t && String(t).trim())).map((t) => String(t).trim()).filter((t, i, arr) => arr.findIndex((x) => x.toLowerCase() === t.toLowerCase()) === i).slice(0, 6);
+        const block = new Set(
+          [title, company, u.persona].filter((x) => Boolean(x && String(x).trim())).map((x) => x.trim().toLowerCase())
+        );
+        const tags = skills.map((t) => t.trim()).filter(Boolean).filter((t) => !block.has(t.toLowerCase())).filter((t, i, arr) => arr.findIndex((x) => x.toLowerCase() === t.toLowerCase()) === i).slice(0, 6);
         return {
           id: u.id,
           name: u.name,
@@ -124415,6 +124430,7 @@ router10.get("/members", requireAuth, async (_req, res) => {
           linkedinConnected: Boolean(u.linkedinId),
           avatarUrl: resolveAvatarUrl(u),
           persona: u.persona,
+          profileCompletionPct: u.profileCompletionPct ?? 0,
           isAvailable: false
         };
       })
@@ -126029,40 +126045,47 @@ function mapPost(post, user, mine) {
     mine
   };
 }
-async function ensureTalentSeed(adminUserId) {
+async function ensureTalentSeed(fallbackUserId) {
   const [row] = await db.select({ id: talentPostsTable.id }).from(talentPostsTable).limit(1);
   if (row) return;
+  const candidates = await db.select({
+    id: usersTable.id,
+    email: usersTable.email,
+    name: usersTable.name,
+    isSystem: usersTable.isSystem
+  }).from(usersTable).limit(40);
+  const owner = candidates.find((u) => !isTestOrSystemAccount(u))?.id ?? fallbackUserId;
   await db.insert(talentPostsTable).values([
     {
-      userId: adminUserId,
+      userId: owner,
       postType: "ar\u0131yor",
       role: "Fullstack Developer (React + Node.js)",
       description: "\xDCr\xFCn\xFC \u015Fekillendirmeye katk\u0131 sa\u011Flayacak fullstack developer ar\u0131yoruz. Remote, equity var.",
       tags: JSON.stringify(["React", "Node.js", "Remote", "Equity"])
     },
     {
-      userId: adminUserId,
+      userId: owner,
       postType: "ar\u0131yor",
       role: "AI/ML Engineer (Part-time)",
       description: "Yan proje i\xE7in haftal\u0131k 10-15 saat \xE7al\u0131\u015Fabilecek ML m\xFChendisi. LLM fine-tuning deneyimi \u015Fart.",
       tags: JSON.stringify(["AI", "LLM", "Part-time"])
     },
     {
-      userId: adminUserId,
+      userId: owner,
       postType: "sunuyor",
       role: "CTO Dan\u0131\u015Fmanl\u0131\u011F\u0131 \u2014 Erken A\u015Fama Startuplar",
       description: "Pre-seed ve seed a\u015Famas\u0131ndaki giri\u015Fimlere teknik liderlik ve m\xFChendislik ekibi kurulumu konusunda destek.",
       tags: JSON.stringify(["CTO", "Dan\u0131\u015Fmanl\u0131k", "Teknik"])
     },
     {
-      userId: adminUserId,
+      userId: owner,
       postType: "sunuyor",
       role: "Startup Hukuk Dan\u0131\u015Fmanl\u0131\u011F\u0131",
       description: "Kurulu\u015F s\xF6zle\u015Fmeleri, SAFE/KISS notlar\u0131, yat\u0131r\u0131mc\u0131 s\xFCre\xE7lerinde inner\xB7hub \xFCyelerine %20 indirim.",
       tags: JSON.stringify(["Hukuk", "SAFE", "Yat\u0131r\u0131m"])
     },
     {
-      userId: adminUserId,
+      userId: owner,
       postType: "ar\u0131yor",
       role: "Co-founder (Sales & Marketing)",
       description: "Yan proje i\xE7in sat\u0131\u015F ve pazarlamaya odaklanacak co-founder ar\u0131yoruz. B2B SaaS deneyimi art\u0131.",
@@ -126073,6 +126096,7 @@ async function ensureTalentSeed(adminUserId) {
 router18.get("/talent", requireAuth, async (req, res) => {
   try {
     await ensureTalentSchema();
+    await ensureUserMembershipColumns();
     const userId = req.user.id;
     const [admin] = await db.select({ id: usersTable.id }).from(usersTable).where(eq(usersTable.role, "admin")).limit(1);
     await ensureTalentSeed(admin?.id ?? userId);
@@ -126080,10 +126104,15 @@ router18.get("/talent", requireAuth, async (req, res) => {
       post: talentPostsTable,
       name: usersTable.name,
       company: usersTable.company,
-      handle: usersTable.handle
+      handle: usersTable.handle,
+      email: usersTable.email,
+      isSystem: usersTable.isSystem
     }).from(talentPostsTable).innerJoin(usersTable, eq(talentPostsTable.userId, usersTable.id)).orderBy(desc(talentPostsTable.createdAt));
+    const visible = rows.filter(
+      ({ email: email3, name, isSystem }) => !isTestOrSystemAccount({ email: email3, name, isSystem })
+    );
     res.json({
-      posts: rows.map(
+      posts: visible.map(
         ({ post, name, company, handle }) => mapPost(post, { name, company, handle }, post.userId === userId)
       )
     });

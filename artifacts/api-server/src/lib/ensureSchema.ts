@@ -78,6 +78,18 @@ export const ensureUserMembershipColumns = once(async () => {
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS instagram text`);
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS whatsapp_opt_in text`);
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS deleted_at timestamp`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS is_system boolean NOT NULL DEFAULT false`);
+  await db.execute(sql`
+    UPDATE users SET is_system = true
+    WHERE is_system = false AND (
+      lower(trim(name)) IN ('admin', 'member', 'member test', 'kod testi', 'invitee', 'onboarding test', 'test', 'test user', 'smoke test')
+      OR lower(email) IN ('admin@inner.digital', 'member@inner.digital', 'admin@inner.co')
+      OR email ILIKE '%@test.com'
+      OR email ILIKE 'invitee-%'
+      OR email ILIKE 'onboarding-test-%'
+      OR email ILIKE 'test-smoke%'
+    )
+  `);
 });
 
 /** Org + hukuki + kampanya + kurs kategori. */

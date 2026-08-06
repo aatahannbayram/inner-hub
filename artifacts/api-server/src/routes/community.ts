@@ -199,6 +199,8 @@ router.get("/members", requireAuth, async (_req, res) => {
         role: usersTable.role,
         linkedinId: usersTable.linkedinId,
         skills: usersTable.skills,
+        isSystem: usersTable.isSystem,
+        profileCompletionPct: usersTable.profileCompletionPct,
       })
       .from(usersTable)
       .where(isNull(usersTable.deletedAt))
@@ -215,13 +217,18 @@ router.get("/members", requireAuth, async (_req, res) => {
         linkedinId: u.linkedinId,
         avatarUrl: u.avatarUrl,
         persona: u.persona,
+        isSystem: u.isSystem,
       }),
     );
 
     res.json({
       members: listed.map((u) => {
         const title = isDecorativeLabel(u.title) ? null : u.title?.trim() || null;
-        const company = u.company?.trim() || null;
+        const companyRaw = u.company?.trim() || null;
+        const company =
+          companyRaw && !["—", "-", "n/a", "na"].includes(companyRaw.toLowerCase())
+            ? companyRaw
+            : null;
         let skills: string[] = [];
         if (u.skills) {
           try {
@@ -236,9 +243,15 @@ router.get("/members", requireAuth, async (_req, res) => {
               .filter(Boolean);
           }
         }
-        const tags = [...skills, u.persona]
-          .filter((t): t is string => Boolean(t && String(t).trim()))
-          .map((t) => String(t).trim())
+        const block = new Set(
+          [title, company, u.persona]
+            .filter((x): x is string => Boolean(x && String(x).trim()))
+            .map((x) => x.trim().toLowerCase()),
+        );
+        const tags = skills
+          .map((t) => t.trim())
+          .filter(Boolean)
+          .filter((t) => !block.has(t.toLowerCase()))
           .filter((t, i, arr) => arr.findIndex((x) => x.toLowerCase() === t.toLowerCase()) === i)
           .slice(0, 6);
 
@@ -254,6 +267,7 @@ router.get("/members", requireAuth, async (_req, res) => {
           linkedinConnected: Boolean(u.linkedinId),
           avatarUrl: resolveAvatarUrl(u),
           persona: u.persona,
+          profileCompletionPct: u.profileCompletionPct ?? 0,
           isAvailable: false,
         };
       }),
