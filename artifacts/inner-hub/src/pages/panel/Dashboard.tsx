@@ -151,51 +151,67 @@ function CourseRow({ course }: { course: DashCourse }) {
   );
 }
 
-function PerkCard({
+function perkOfferLabel(perk: {
+  brand: string;
+  title: string;
+  badge: string;
+}): string {
+  const badge = (perk.badge ?? "").trim();
+  if (badge) return badge;
+  const title = cleanDisplayText(perk.title).replace(/!+\s*$/, "");
+  // "Monolite İlk Ay Ücretsiz" → markayı baştan düşür, tekrarı kes
+  const brand = perk.brand.trim();
+  if (brand && title.toLowerCase().startsWith(brand.toLowerCase())) {
+    return title.slice(brand.length).replace(/^[\s·\-–—]+/, "").trim() || title;
+  }
+  return title;
+}
+
+function PerkRow({
   perk,
 }: {
   perk: { id: number; brand: string; title: string; description: string; logoUrl: string | null; badge: string };
 }) {
   const t = useT();
-  const title = cleanDisplayText(perk.title).replace(/!+\s*$/, "");
+  const offer = perkOfferLabel(perk);
+
   return (
     <Link
       href="/panel/perks"
-      aria-label={`${perk.brand} - ${title}`}
-      className={`group relative flex h-full min-h-11 flex-col overflow-hidden panel-glass p-4 sm:p-5 ${STAT_CARD_INTERACTIVE}`}
+      aria-label={`${perk.brand} · ${offer}`}
+      className="group relative flex items-center gap-3 overflow-hidden panel-glass px-4 py-3.5 transition-colors hover:border-[var(--ink)]/28 sm:gap-4 sm:px-5 sm:py-4"
     >
-      <span aria-hidden className={STAT_CARD_ACCENT} />
-      <div className="mb-3 flex items-start justify-between gap-2 pl-1">
-        <div className="flex min-w-0 items-center gap-3">
-          <div className="flex size-10 shrink-0 items-center justify-center border border-[var(--ink)]/12 bg-[var(--ink)]/[0.04] text-[var(--ink-muted)]">
-            {perk.logoUrl ? (
-              <img src={perk.logoUrl} alt="" className="size-6 object-contain" />
-            ) : (
-              <span className="font-mono text-[10px] uppercase tracking-wide" lang="en">
-                {perk.brand.slice(0, 2)}
-              </span>
-            )}
-          </div>
-          <p className="truncate font-mono text-[11px] uppercase tracking-[0.12em] text-[var(--ink-muted)]">
-            {perk.brand}
-          </p>
+      <span
+        aria-hidden
+        className="absolute inset-y-0 left-0 w-[3px] bg-[var(--inner-green)]/35 transition-colors group-hover:bg-[var(--inner-green)]"
+      />
+      {perk.logoUrl ? (
+        <div className="ml-1 flex size-9 shrink-0 items-center justify-center border border-[var(--ink)]/10 bg-[var(--ink)]/[0.03] p-1.5">
+          <img src={perk.logoUrl} alt="" className="size-full object-contain" />
         </div>
-        {perk.badge && (
+      ) : null}
+      <div className="min-w-0 flex-1 pl-1">
+        <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
           <span
-            lang="tr"
-            className="shrink-0 border border-[var(--inner-green)]/40 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.1em] text-[var(--inner-green)]"
+            lang="en"
+            className="font-mono text-[11px] uppercase tracking-[0.14em] text-[var(--ink)]"
           >
-            {perk.badge}
+            {perk.brand}
           </span>
-        )}
+          {offer && (
+            <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-[var(--inner-green)]">
+              {offer}
+            </span>
+          )}
+        </div>
+        <p className="mt-1 line-clamp-1 text-sm leading-snug text-[var(--ink-muted)]">
+          {perk.description}
+        </p>
       </div>
-      <h3 className="mb-1.5 pl-1 font-sans text-base font-medium leading-snug text-[var(--ink)]">{title}</h3>
-      <p className="mb-4 flex-1 pl-1 text-sm leading-relaxed text-[var(--ink-body)] line-clamp-2">
-        {perk.description}
-      </p>
-      <span className="mt-auto inline-flex items-center gap-1 pl-1 font-mono text-[11px] uppercase tracking-[0.12em] text-[var(--ink-muted)] transition-colors duration-150 ease-out group-hover:text-[var(--ink)] motion-reduce:transition-none">
+      <span className="hidden shrink-0 items-center gap-1 font-mono text-[10px] uppercase tracking-widest text-[var(--ink-muted)] transition-colors group-hover:text-[var(--ink)] sm:inline-flex">
         {t("dashboard.details")} <ArrowRight className="size-3" />
       </span>
+      <ArrowRight className="size-3.5 shrink-0 text-[var(--ink-muted)] transition-colors group-hover:text-[var(--ink)] sm:hidden" />
     </Link>
   );
 }
@@ -467,13 +483,14 @@ export default function Dashboard({
       <FadeIn delay={0.15} className="-mt-5">
         <section>
           <div className="mb-3 flex items-end justify-between gap-3 border-t border-[var(--ink)]/[0.05] pt-4">
-            <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-[var(--ink)]">
-              {t("nav.perks")}
-              <span className="text-[var(--ink-muted)]">
-                {" "}
-                · {perks.length} {t("dashboard.activePerks")}
-              </span>
-            </p>
+            <div>
+              <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-[var(--ink)]">
+                {t("nav.perks")}
+              </p>
+              <p className="mt-0.5 text-sm text-[var(--ink-muted)]">
+                {perks.length} {t("dashboard.activePerks")}
+              </p>
+            </div>
             <Link
               href="/panel/perks"
               className="inline-flex min-h-10 shrink-0 items-center gap-1 font-mono text-[11px] uppercase tracking-[0.12em] text-[var(--ink-muted)] transition-colors duration-150 ease-out hover:text-[var(--ink)] motion-reduce:transition-none"
@@ -481,9 +498,9 @@ export default function Dashboard({
               {t("dashboard.viewAll")} <ArrowRight className="size-3" />
             </Link>
           </div>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {perks.slice(0, 3).map((perk) => (
-              <PerkCard key={perk.id} perk={perk} />
+          <div className="space-y-2">
+            {perks.slice(0, 4).map((perk) => (
+              <PerkRow key={perk.id} perk={perk} />
             ))}
           </div>
         </section>
