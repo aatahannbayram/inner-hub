@@ -148,7 +148,7 @@ function ProductLabel({ mark, active }: { mark: string; active: boolean }) {
           "shrink-0",
           active
             ? "text-[var(--ink)]/45 dark:text-white/45"
-            : "text-[var(--ink-muted)] dark:text-white/35",
+            : "text-[var(--ink-body)]/70 dark:text-white/50",
         )}
       >
         inner.
