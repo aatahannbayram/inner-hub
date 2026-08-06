@@ -38,6 +38,7 @@ export const tr = {
     searchPlaceholder: "Ara…",
   },
   nav: {
+    mobileMenuLabel: "Gezinme menüsü",
     sectionMain: "Ana",
     sectionPlatform: "Platform",
     sectionAccount: "Hesap",
@@ -1699,6 +1700,7 @@ export const en: Messages = {
     searchPlaceholder: "Search…",
   },
   nav: {
+    mobileMenuLabel: "Navigation menu",
     sectionMain: "Main",
     sectionPlatform: "Platform",
     sectionAccount: "Account",

@@ -470,6 +470,11 @@ function MobileDrawer({
   user: PanelUser;
   onLogout?: () => void;
 }) {
+  const t = useT();
+  const asideRef = useRef<HTMLElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const triggerRef = useRef<HTMLElement | null>(null);
+
   useEffect(() => {
     if (!open) return;
     const handler = (e: KeyboardEvent) => e.key === "Escape" && onClose();
@@ -480,6 +485,41 @@ function MobileDrawer({
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
+  }, [open]);
+
+  // Odak yönetimi: açılınca drawer'a odaklan (kapatma butonu), kapanınca
+  // tetikleyen elemana (hamburger butonu) geri dön (S-08).
+  useEffect(() => {
+    if (open) {
+      triggerRef.current = document.activeElement as HTMLElement | null;
+      closeButtonRef.current?.focus();
+    } else {
+      triggerRef.current?.focus();
+    }
+  }, [open]);
+
+  // Odak tuzağı: Tab, drawer içindeki odaklanabilir öğeler arasında döner,
+  // arka plandaki sayfaya kaçmaz (S-08).
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key !== "Tab" || !asideRef.current) return;
+      const focusable = asideRef.current.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), input, [tabindex]:not([tabindex="-1"])',
+      );
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
   }, [open]);
 
   return (
@@ -494,6 +534,10 @@ function MobileDrawer({
             onClick={onClose}
           />
           <motion.aside
+            ref={asideRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label={t("nav.mobileMenuLabel")}
             initial={{ x: "-100%" }}
             animate={{ x: 0 }}
             exit={{ x: "-100%" }}
@@ -502,7 +546,13 @@ function MobileDrawer({
           >
             <div className="flex h-[60px] items-center justify-between border-b border-[var(--ink)]/[0.08] px-4">
               <BrandMark collapsed={false} />
-              <button type="button" onClick={onClose} className="text-[var(--ink-body)] hover:text-[var(--ink)]">
+              <button
+                ref={closeButtonRef}
+                type="button"
+                onClick={onClose}
+                aria-label={t("shell.closeMenu")}
+                className="text-[var(--ink-body)] hover:text-[var(--ink)]"
+              >
                 <X className="size-5" />
               </button>
             </div>
