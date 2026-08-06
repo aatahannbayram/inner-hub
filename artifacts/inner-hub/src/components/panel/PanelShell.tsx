@@ -326,23 +326,35 @@ function SidebarFooter({
           )}
         </p>
       </div>
-      {user.profileCompletionPct < 100 && (
-        <div className="space-y-1.5">
-          <div className="flex justify-between">
-            <span className="font-mono text-label font-semibold uppercase tracking-widest text-[var(--ink-strong)] dark:text-white/55">
-              {t("shell.profileCompletion")}
-            </span>
-            <span className="font-mono text-label font-semibold tabular-nums text-[var(--ink-strong)] dark:text-white/55">
-              %{user.profileCompletionPct}
-            </span>
+      {user.profileCompletionPct === 0 ? (
+        // %0'da boş bir çubuk + "%0" yazısı hiçbir bilgi/aksiyon taşımıyordu
+        // (S-04) — yerine doğrudan aksiyon veren tek satır.
+        <Link
+          href="/panel/profile"
+          className="flex items-center gap-1 font-mono text-label font-semibold uppercase tracking-widest text-[var(--inner-green)] hover:underline"
+        >
+          {t("shell.createProfile")}
+          <ArrowUpRight className="size-3" />
+        </Link>
+      ) : (
+        user.profileCompletionPct < 100 && (
+          <div className="space-y-1.5">
+            <div className="flex justify-between">
+              <span className="font-mono text-label font-semibold uppercase tracking-widest text-[var(--ink-strong)] dark:text-white/55">
+                {t("shell.profileCompletion")}
+              </span>
+              <span className="font-mono text-label font-semibold tabular-nums text-[var(--ink-strong)] dark:text-white/55">
+                %{user.profileCompletionPct}
+              </span>
+            </div>
+            <div className="relative h-1 w-full overflow-visible bg-[var(--ink)]/10 dark:bg-white/10">
+              <div
+                className="h-full bg-[var(--inner-green)] shadow-[0_0_6px_var(--inner-green)] transition-all duration-700"
+                style={{ width: `${user.profileCompletionPct}%` }}
+              />
+            </div>
           </div>
-          <div className="relative h-1 w-full overflow-visible bg-[var(--ink)]/10 dark:bg-white/10">
-            <div
-              className="h-full bg-[var(--inner-green)] shadow-[0_0_6px_var(--inner-green)] transition-all duration-700"
-              style={{ width: `${user.profileCompletionPct}%` }}
-            />
-          </div>
-        </div>
+        )
       )}
       <button
         type="button"
