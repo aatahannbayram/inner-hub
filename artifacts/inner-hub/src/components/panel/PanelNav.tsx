@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import {
   LayoutDashboard,
@@ -24,6 +25,7 @@ import {
   Newspaper,
   Mic2,
   Building2,
+  ChevronDown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useT } from "@/i18n";
@@ -40,6 +42,7 @@ type NavSection = {
   id: string;
   titleKey: string;
   items: NavItem[];
+  collapsible?: boolean;
 };
 
 const PREFETCH: Record<string, () => Promise<unknown>> = {
@@ -86,6 +89,7 @@ const SECTION_DEFS: NavSection[] = [
   {
     id: "platform",
     titleKey: "nav.sectionPlatform",
+    collapsible: true,
     items: [
       { href: "/panel/stage", labelKey: "nav.dashboard", mark: "stage", icon: Mic2 },
       { href: "/panel/signal", labelKey: "nav.dashboard", mark: "signal", icon: Zap },
@@ -165,11 +169,10 @@ function NavLink({ item, collapsed }: { item: NavItem; collapsed: boolean }) {
         void PREFETCH[item.href]?.();
       }}
       className={cn(
-        "group relative flex min-h-10 items-center gap-2.5 rounded-none px-2.5 py-2.5 text-sm transition-colors duration-150",
+        "group relative flex min-h-10 items-center gap-2.5 rounded-none px-2.5 py-2.5 text-sm transition-colors duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--inner-green)]",
         isActive
           ? [
               "bg-[var(--ink)] text-[var(--bone)]",
-              /* Invite dilinde dark: brand-green tinted glass + green edge */
               "dark:bg-[var(--inner-green)]/[0.12] dark:text-[#F4F1EC] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]",
             ]
           : [
@@ -208,20 +211,49 @@ function NavLink({ item, collapsed }: { item: NavItem; collapsed: boolean }) {
 
 function Section({ section, collapsed }: { section: NavSection; collapsed: boolean }) {
   const t = useT();
+  const [location] = useLocation();
+  const hasActiveChild = section.items.some((item) =>
+    item.href === "/panel" ? location === "/panel" : location.startsWith(item.href),
+  );
+  const [open, setOpen] = useState(hasActiveChild);
+
+  const showItems = !section.collapsible || collapsed || open || hasActiveChild;
+
   return (
     <div className="mb-5 last:mb-0">
       {!collapsed ? (
-        <p className="mb-2 px-2.5 font-mono text-[9px] uppercase tracking-[0.2em] text-[var(--ink-muted)] dark:text-white/40">
-          {t(section.titleKey)}
-        </p>
+        section.collapsible ? (
+          <button
+            type="button"
+            onClick={() => setOpen((v) => !v)}
+            aria-expanded={showItems}
+            className="mb-2 flex w-full items-center justify-between px-2.5 py-1 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--inner-green)]"
+          >
+            <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-[var(--ink-muted)] dark:text-white/40">
+              {t(section.titleKey)}
+            </span>
+            <ChevronDown
+              className={cn(
+                "size-3.5 text-[var(--ink-muted)] transition-transform",
+                showItems && "rotate-180",
+              )}
+            />
+          </button>
+        ) : (
+          <p className="mb-2 px-2.5 font-mono text-[9px] uppercase tracking-[0.2em] text-[var(--ink-muted)] dark:text-white/40">
+            {t(section.titleKey)}
+          </p>
+        )
       ) : (
         <div className="mx-auto mb-2 h-px w-4 bg-[var(--ink)]/15 dark:bg-white/15" aria-hidden />
       )}
-      <div className="flex flex-col gap-0.5">
-        {section.items.map((item) => (
-          <NavLink key={item.href} item={item} collapsed={collapsed} />
-        ))}
-      </div>
+      {showItems && (
+        <div className="flex flex-col gap-0.5">
+          {section.items.map((item) => (
+            <NavLink key={item.href} item={item} collapsed={collapsed} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
