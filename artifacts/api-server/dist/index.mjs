@@ -124139,6 +124139,50 @@ var applications_default = router9;
 var import_express10 = __toESM(require_express2(), 1);
 init_drizzle_orm();
 init_schema2();
+
+// src/lib/directoryMembers.ts
+var TEST_NAME_EXACT = /* @__PURE__ */ new Set([
+  "admin",
+  "member",
+  "member test",
+  "invitee",
+  "onboarding test",
+  "kod testi",
+  "test user",
+  "test",
+  "smoke test"
+]);
+function isTestOrSystemAccount(input) {
+  const email3 = (input.email ?? "").trim().toLowerCase();
+  const name = (input.name ?? "").trim().toLowerCase();
+  if (!email3 && !name) return true;
+  if (email3.endsWith("@test.com") || email3.endsWith("@example.com") || email3.endsWith("@example.org")) {
+    return true;
+  }
+  if (email3 === "admin@inner.digital" || email3 === "member@inner.digital" || email3 === "admin@inner.co" || email3.startsWith("invitee-") || email3.startsWith("onboarding-test-") || email3.startsWith("test-smoke") || email3.startsWith("nox")) {
+    return true;
+  }
+  if (TEST_NAME_EXACT.has(name)) return true;
+  if (/\b(test|smoke|invitee|onboarding)\b/i.test(name) && name.length < 40) return true;
+  return false;
+}
+function isDirectoryMember(input) {
+  if (isTestOrSystemAccount(input)) return false;
+  const bio = (input.bio ?? "").trim();
+  const company = (input.company ?? "").trim();
+  const title = (input.title ?? "").trim();
+  const linkedin = (input.linkedin ?? "").trim();
+  const persona = (input.persona ?? "").trim();
+  if (bio.length >= 20) return true;
+  if (company.length > 1) return true;
+  if (title.length > 1) return true;
+  if (linkedin.length > 0 || Boolean(input.linkedinId)) return true;
+  if (Boolean(input.avatarUrl)) return true;
+  if (persona.length > 0) return true;
+  return false;
+}
+
+// src/routes/community.ts
 var router10 = (0, import_express10.Router)();
 var ensurePerkColumns = once(async () => {
   await db.execute(sql`ALTER TABLE perks ADD COLUMN IF NOT EXISTS category text`);
@@ -124303,8 +124347,21 @@ router10.get("/members", requireAuth, async (_req, res) => {
       role: usersTable.role,
       linkedinId: usersTable.linkedinId
     }).from(usersTable).where(isNull(usersTable.deletedAt)).orderBy(asc(usersTable.name));
+    const listed = rows.filter(
+      (u) => isDirectoryMember({
+        email: u.email,
+        name: u.name,
+        bio: u.bio,
+        company: u.company,
+        title: u.title,
+        linkedin: u.linkedin,
+        linkedinId: u.linkedinId,
+        avatarUrl: u.avatarUrl,
+        persona: u.persona
+      })
+    );
     res.json({
-      members: rows.map((u) => ({
+      members: listed.map((u) => ({
         id: u.id,
         name: u.name,
         initials: initialsFromName(u.name),
@@ -127480,7 +127537,10 @@ async function gatherHits(q, locale) {
     persona: usersTable.persona,
     avatarUrl: usersTable.avatarUrl,
     avatarStyle: usersTable.avatarStyle,
-    email: usersTable.email
+    email: usersTable.email,
+    bio: usersTable.bio,
+    linkedin: usersTable.linkedin,
+    linkedinId: usersTable.linkedinId
   }).from(usersTable).where(
     and(
       isNull(usersTable.deletedAt),
@@ -127493,8 +127553,9 @@ async function gatherHits(q, locale) {
         ilike(usersTable.persona, pattern)
       )
     )
-  ).limit(12);
+  ).limit(24);
   for (const m of members) {
+    if (!isDirectoryMember(m)) continue;
     const s = scoreText(q, m.name, m.company, m.title, m.handle, m.persona, m.skills);
     hits.push({
       id: `member-${m.id}`,

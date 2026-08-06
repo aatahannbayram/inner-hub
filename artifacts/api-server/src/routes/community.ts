@@ -5,6 +5,7 @@ import { perksTable, usersTable } from "@workspace/db/schema";
 import { requireAuth } from "../lib/auth";
 import { resolveAvatarUrl } from "../lib/identity";
 import { ensureUserMembershipColumns, once } from "../lib/ensureSchema";
+import { isDirectoryMember } from "../lib/directoryMembers";
 
 const router = Router();
 
@@ -200,8 +201,22 @@ router.get("/members", requireAuth, async (_req, res) => {
       .where(isNull(usersTable.deletedAt))
       .orderBy(asc(usersTable.name));
 
+    const listed = rows.filter((u) =>
+      isDirectoryMember({
+        email: u.email,
+        name: u.name,
+        bio: u.bio,
+        company: u.company,
+        title: u.title,
+        linkedin: u.linkedin,
+        linkedinId: u.linkedinId,
+        avatarUrl: u.avatarUrl,
+        persona: u.persona,
+      }),
+    );
+
     res.json({
-      members: rows.map((u) => ({
+      members: listed.map((u) => ({
         id: u.id,
         name: u.name,
         initials: initialsFromName(u.name),

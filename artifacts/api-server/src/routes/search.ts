@@ -18,6 +18,7 @@ import {
   ensureStageSchema,
   ensureUserMembershipColumns,
 } from "../lib/ensureSchema";
+import { isDirectoryMember } from "../lib/directoryMembers";
 
 const router = Router();
 
@@ -111,6 +112,9 @@ async function gatherHits(q: string, locale: "tr" | "en"): Promise<SearchHit[]> 
       avatarUrl: usersTable.avatarUrl,
       avatarStyle: usersTable.avatarStyle,
       email: usersTable.email,
+      bio: usersTable.bio,
+      linkedin: usersTable.linkedin,
+      linkedinId: usersTable.linkedinId,
     })
     .from(usersTable)
     .where(
@@ -126,9 +130,10 @@ async function gatherHits(q: string, locale: "tr" | "en"): Promise<SearchHit[]> 
         ),
       ),
     )
-    .limit(12);
+    .limit(24);
 
   for (const m of members) {
+    if (!isDirectoryMember(m)) continue;
     const s = scoreText(q, m.name, m.company, m.title, m.handle, m.persona, m.skills);
     hits.push({
       id: `member-${m.id}`,
