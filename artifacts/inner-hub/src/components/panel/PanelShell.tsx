@@ -396,16 +396,29 @@ function DesktopSidebar({ user, onLogout }: { user: PanelUser; onLogout?: () => 
         collapsed ? "w-[56px]" : "w-[220px] xl:w-[240px]",
       )}
     >
-      {/* Header */}
+      {/* Header — daralt/genişlet butonu artık sidebar sınırları içinde,
+          logonun sağında (S-05: eskiden -right-3 ile sınırın yarısı dışarı
+          taşıyordu) */}
       <div
         className={cn(
           "flex h-[60px] items-center border-b border-[var(--ink)]/[0.08] px-4 dark:border-white/10",
-          collapsed && "justify-center px-0",
+          collapsed ? "justify-center px-0" : "justify-between",
         )}
       >
-        <Link href="/panel">
-          <BrandMark collapsed={collapsed} />
-        </Link>
+        {!collapsed && (
+          <Link href="/panel">
+            <BrandMark collapsed={false} />
+          </Link>
+        )}
+        <button
+          type="button"
+          onClick={toggle}
+          aria-expanded={!collapsed}
+          aria-label={collapsed ? "Sidebar'ı genişlet" : "Sidebar'ı daralt"}
+          className="hit-40 flex size-6 shrink-0 items-center justify-center text-[var(--ink-body)] transition-colors hover:text-[var(--ink)] dark:text-white/55 dark:hover:text-white"
+        >
+          {collapsed ? <ChevronRight className="size-3" /> : <ChevronLeft className="size-3" />}
+        </button>
       </div>
 
       {/* Nav — kaydırılabilir (Ana + Platform), üst/alt kenarda fade ile
@@ -441,16 +454,6 @@ function DesktopSidebar({ user, onLogout }: { user: PanelUser; onLogout?: () => 
       >
         <SidebarFooter user={{ ...user, profileCompletionPct: user.profileCompletionPct ?? 0 }} collapsed={collapsed} onLogout={onLogout} />
       </div>
-
-      {/* Collapse toggle */}
-      <button
-        type="button"
-        onClick={toggle}
-        className="hit-40 panel-glass absolute -right-3 top-[72px] z-10 flex size-6 items-center justify-center text-[var(--ink-body)] transition-colors hover:text-[var(--ink)] dark:border-white/15 dark:text-white/55 dark:hover:text-white"
-        aria-label={collapsed ? "Sidebar'ı genişlet" : "Sidebar'ı daralt"}
-      >
-        {collapsed ? <ChevronRight className="size-3" /> : <ChevronLeft className="size-3" />}
-      </button>
     </aside>
   );
 }
