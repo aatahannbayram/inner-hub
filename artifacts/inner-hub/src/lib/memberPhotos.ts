@@ -4,7 +4,7 @@
 // whole app. Falls back to the colored-initials avatar (avatarColor) for
 // anyone not in this set.
 export const MEMBER_PHOTOS: Record<string, string> = {
-  "Ata Han Bayram": "https://d8j0ntlcm91z4.cloudfront.net/user_3G2cWb2WfKJcjfS1ZYyHr3Mv9Za/hf_20260725_001913_24a27ea8-738e-4846-9002-c136f2bd9bd4.png",
+  // Ata Han: gerçek profil fotoğrafı avatarUrl'den gelir; AI mock burada tutulmaz.
   "Zeynep Arslan": "https://d8j0ntlcm91z4.cloudfront.net/user_3G2cWb2WfKJcjfS1ZYyHr3Mv9Za/hf_20260725_002121_fe6f1b24-7b4f-4184-bf09-7bbdde0df7c5.png",
   "Mert Demir": "https://d8j0ntlcm91z4.cloudfront.net/user_3G2cWb2WfKJcjfS1ZYyHr3Mv9Za/hf_20260725_002123_f7129ba6-25bf-4c37-a156-5abb6427c906.png",
   "Ayşe Kaya": "https://d8j0ntlcm91z4.cloudfront.net/user_3G2cWb2WfKJcjfS1ZYyHr3Mv9Za/hf_20260725_002126_0521cc75-6a97-4324-8904-52a659ffd201.png",

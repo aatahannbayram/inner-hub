@@ -98673,6 +98673,27 @@ var ensureOrgLogoCacheSchema = once(async () => {
     )
   `);
 });
+var ensureKnownMemberProfileFixes = once(async () => {
+  await db.execute(sql`
+    UPDATE users
+    SET title = NULL
+    WHERE title IS NOT NULL
+      AND trim(title) ~ '^[\\s·.\\-_—–―•]+$'
+  `);
+  await db.execute(sql`
+    UPDATE users
+    SET
+      bio = 'Ata Han Bayram, Flexlore Inc.’in kurucu ortağı ve CEO’sudur. Yazılım, tasarım ve operasyonu aynı masada tutarak şirketlerin ürününü ve markasını ölçeklenebilir hale getirir. inner·hub’ı kurucular, yatırımcılar ve builder’lar için kapalı bir daire olarak büyütür.',
+      company = COALESCE(NULLIF(trim(company), ''), 'Flexlore Inc'),
+      title = COALESCE(NULLIF(trim(title), ''), 'Founder')
+    WHERE lower(trim(name)) = 'ata han bayram'
+      AND (
+        bio IS NULL
+        OR length(trim(bio)) < 80
+        OR rtrim(bio) LIKE '%ölçeklenebilir'
+      )
+  `);
+});
 
 // src/lib/orgLogo.ts
 var CONSUMER_DOMAINS = /* @__PURE__ */ new Set([
@@ -124179,6 +124200,13 @@ function isDirectoryMember(input) {
   return false;
 }
 
+// src/lib/displayLabel.ts
+function isDecorativeLabel(text2) {
+  const t = (text2 ?? "").trim();
+  if (!t) return true;
+  return /^[\s·.\-_—–―•]+$/u.test(t);
+}
+
 // src/routes/community.ts
 var router10 = (0, import_express10.Router)();
 var ensurePerkColumns = once(async () => {
@@ -124329,6 +124357,7 @@ router10.get("/perks", requireAuth, async (_req, res) => {
 router10.get("/members", requireAuth, async (_req, res) => {
   try {
     await ensureUserMembershipColumns();
+    await ensureKnownMemberProfileFixes();
     const rows = await db.select({
       id: usersTable.id,
       name: usersTable.name,
@@ -124342,7 +124371,8 @@ router10.get("/members", requireAuth, async (_req, res) => {
       email: usersTable.email,
       persona: usersTable.persona,
       role: usersTable.role,
-      linkedinId: usersTable.linkedinId
+      linkedinId: usersTable.linkedinId,
+      skills: usersTable.skills
     }).from(usersTable).where(isNull(usersTable.deletedAt)).orderBy(asc(usersTable.name));
     const listed = rows.filter(
       (u) => isDirectoryMember({
@@ -124358,20 +124388,36 @@ router10.get("/members", requireAuth, async (_req, res) => {
       })
     );
     res.json({
-      members: listed.map((u) => ({
-        id: u.id,
-        name: u.name,
-        initials: initialsFromName(u.name),
-        title: u.title ?? (u.role === "admin" ? "Admin" : "\xDCye"),
-        company: u.company ?? "\u2014",
-        bio: u.bio ?? "",
-        tags: [u.title, u.company, u.persona].filter((t) => Boolean(t && t.trim())),
-        linkedin: u.linkedin,
-        linkedinConnected: Boolean(u.linkedinId),
-        avatarUrl: resolveAvatarUrl(u),
-        persona: u.persona,
-        isAvailable: false
-      }))
+      members: listed.map((u) => {
+        const title = isDecorativeLabel(u.title) ? null : u.title?.trim() || null;
+        const company = u.company?.trim() || null;
+        let skills = [];
+        if (u.skills) {
+          try {
+            const parsed = JSON.parse(u.skills);
+            if (Array.isArray(parsed)) {
+              skills = parsed.filter((s) => typeof s === "string" && s.trim().length > 0);
+            }
+          } catch {
+            skills = u.skills.split(",").map((s) => s.trim()).filter(Boolean);
+          }
+        }
+        const tags = [...skills, u.persona].filter((t) => Boolean(t && String(t).trim())).map((t) => String(t).trim()).filter((t, i, arr) => arr.findIndex((x) => x.toLowerCase() === t.toLowerCase()) === i).slice(0, 6);
+        return {
+          id: u.id,
+          name: u.name,
+          initials: initialsFromName(u.name),
+          title: title ?? (u.role === "admin" ? "Admin" : ""),
+          company: company ?? "",
+          bio: u.bio ?? "",
+          tags,
+          linkedin: u.linkedin,
+          linkedinConnected: Boolean(u.linkedinId),
+          avatarUrl: resolveAvatarUrl(u),
+          persona: u.persona,
+          isAvailable: false
+        };
+      })
     });
   } catch (err) {
     res.status(500).json({ error: err.message ?? "\xDCyeler y\xFCklenemedi" });
@@ -128030,7 +128076,8 @@ Promise.all([
   ensureStageSchema(),
   ensureOrgLegalCampaignSchema(),
   ensurePasswordResetSchema(),
-  ensureOrgLogoCacheSchema()
+  ensureOrgLogoCacheSchema(),
+  ensureKnownMemberProfileFixes()
 ]).catch((err) => {
   logger.warn({ err }, "Schema ensure failed (will retry on demand)");
 }).finally(() => {

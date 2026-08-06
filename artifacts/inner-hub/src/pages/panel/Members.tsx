@@ -104,11 +104,14 @@ function MemberCard({ member, onSelect }: { member: Member; onSelect: (m: Member
             </CheckCircle2>
           )}
         </p>
-        {(member.title || member.company) && (
-          <p className="mt-1 truncate text-xs text-[var(--ink-muted)]">
-            {[cleanDisplayText(member.title), member.company].filter(Boolean).join(" · ")}
-          </p>
-        )}
+        {(member.title || member.company) && (() => {
+          const title = cleanDisplayText(member.title);
+          const company = member.company && member.company !== "—" ? member.company : "";
+          const line = [title, company].filter(Boolean).join(" · ");
+          return line ? (
+            <p className="mt-1 truncate text-xs text-[var(--ink-muted)]">{line}</p>
+          ) : null;
+        })()}
         {member.bio ? (
           <p className="mt-3 line-clamp-2 flex-1 text-sm leading-relaxed text-[var(--ink-muted)]">{member.bio}</p>
         ) : (
@@ -152,7 +155,12 @@ function MemberDetailPanel({ member, onClose }: { member: Member; onClose: () =>
       <div className="panel-glass-strong fixed inset-y-0 right-0 z-50 flex w-full max-w-md flex-col border-l border-[var(--ink)]/15 shadow-none">
         <div className="flex items-start justify-between border-b border-[var(--ink)]/[0.08] p-5">
           <div className="flex items-start gap-3">
-            <PersonAvatar name={member.name} initials={member.initials} className="size-12 text-sm" />
+            <PersonAvatar
+              name={member.name}
+              initials={member.initials}
+              src={member.avatarUrl}
+              className="size-12 text-sm"
+            />
             <div>
               <p
                 className="font-serif text-lg text-[var(--ink)]"
@@ -160,11 +168,12 @@ function MemberDetailPanel({ member, onClose }: { member: Member; onClose: () =>
               >
                 {member.name}
               </p>
-              {(member.title || member.company) && (
-                <p className="mt-1 text-sm text-[var(--ink-muted)]">
-                  {[cleanDisplayText(member.title), member.company].filter(Boolean).join(" · ")}
-                </p>
-              )}
+              {(() => {
+                const title = cleanDisplayText(member.title);
+                const company = member.company && member.company !== "—" ? member.company : "";
+                const line = [title, company].filter(Boolean).join(" · ");
+                return line ? <p className="mt-1 text-sm text-[var(--ink-muted)]">{line}</p> : null;
+              })()}
             </div>
           </div>
           <button

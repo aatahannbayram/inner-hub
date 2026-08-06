@@ -4,8 +4,9 @@ import { db } from "@workspace/db";
 import { perksTable, usersTable } from "@workspace/db/schema";
 import { requireAuth } from "../lib/auth";
 import { resolveAvatarUrl } from "../lib/identity";
-import { ensureUserMembershipColumns, once } from "../lib/ensureSchema";
+import { ensureUserMembershipColumns, ensureKnownMemberProfileFixes, once } from "../lib/ensureSchema";
 import { isDirectoryMember } from "../lib/directoryMembers";
+import { isDecorativeLabel } from "../lib/displayLabel";
 
 const router = Router();
 
@@ -181,6 +182,7 @@ router.get("/perks", requireAuth, async (_req, res) => {
 router.get("/members", requireAuth, async (_req, res) => {
   try {
     await ensureUserMembershipColumns();
+    await ensureKnownMemberProfileFixes();
     const rows = await db
       .select({
         id: usersTable.id,
@@ -196,6 +198,7 @@ router.get("/members", requireAuth, async (_req, res) => {
         persona: usersTable.persona,
         role: usersTable.role,
         linkedinId: usersTable.linkedinId,
+        skills: usersTable.skills,
       })
       .from(usersTable)
       .where(isNull(usersTable.deletedAt))
@@ -216,20 +219,44 @@ router.get("/members", requireAuth, async (_req, res) => {
     );
 
     res.json({
-      members: listed.map((u) => ({
-        id: u.id,
-        name: u.name,
-        initials: initialsFromName(u.name),
-        title: u.title ?? (u.role === "admin" ? "Admin" : "Üye"),
-        company: u.company ?? "—",
-        bio: u.bio ?? "",
-        tags: [u.title, u.company, u.persona].filter((t): t is string => Boolean(t && t.trim())),
-        linkedin: u.linkedin,
-        linkedinConnected: Boolean(u.linkedinId),
-        avatarUrl: resolveAvatarUrl(u),
-        persona: u.persona,
-        isAvailable: false,
-      })),
+      members: listed.map((u) => {
+        const title = isDecorativeLabel(u.title) ? null : u.title?.trim() || null;
+        const company = u.company?.trim() || null;
+        let skills: string[] = [];
+        if (u.skills) {
+          try {
+            const parsed = JSON.parse(u.skills);
+            if (Array.isArray(parsed)) {
+              skills = parsed.filter((s): s is string => typeof s === "string" && s.trim().length > 0);
+            }
+          } catch {
+            skills = u.skills
+              .split(",")
+              .map((s) => s.trim())
+              .filter(Boolean);
+          }
+        }
+        const tags = [...skills, u.persona]
+          .filter((t): t is string => Boolean(t && String(t).trim()))
+          .map((t) => String(t).trim())
+          .filter((t, i, arr) => arr.findIndex((x) => x.toLowerCase() === t.toLowerCase()) === i)
+          .slice(0, 6);
+
+        return {
+          id: u.id,
+          name: u.name,
+          initials: initialsFromName(u.name),
+          title: title ?? (u.role === "admin" ? "Admin" : ""),
+          company: company ?? "",
+          bio: u.bio ?? "",
+          tags,
+          linkedin: u.linkedin,
+          linkedinConnected: Boolean(u.linkedinId),
+          avatarUrl: resolveAvatarUrl(u),
+          persona: u.persona,
+          isAvailable: false,
+        };
+      }),
     });
   } catch (err: any) {
     res.status(500).json({ error: err.message ?? "Üyeler yüklenemedi" });

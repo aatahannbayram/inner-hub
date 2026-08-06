@@ -422,3 +422,32 @@ export const ensureOrgLogoCacheSchema = once(async () => {
     )
   `);
 });
+
+/**
+ * Üye dizinindeki bilinen bozuk kayıtları düzelt (süs title, kesik bio).
+ * Idempotent: yalnızca bozuk / eksik satırlara dokunur.
+ */
+export const ensureKnownMemberProfileFixes = once(async () => {
+  // "--------" / "········" gibi süs title → NULL
+  await db.execute(sql`
+    UPDATE users
+    SET title = NULL
+    WHERE title IS NOT NULL
+      AND trim(title) ~ '^[\\s·.\\-_—–―•]+$'
+  `);
+
+  // Ata Han — kesik bio'yu tamamla; şirket/ünvan boşsa doldur
+  await db.execute(sql`
+    UPDATE users
+    SET
+      bio = 'Ata Han Bayram, Flexlore Inc.’in kurucu ortağı ve CEO’sudur. Yazılım, tasarım ve operasyonu aynı masada tutarak şirketlerin ürününü ve markasını ölçeklenebilir hale getirir. inner·hub’ı kurucular, yatırımcılar ve builder’lar için kapalı bir daire olarak büyütür.',
+      company = COALESCE(NULLIF(trim(company), ''), 'Flexlore Inc'),
+      title = COALESCE(NULLIF(trim(title), ''), 'Founder')
+    WHERE lower(trim(name)) = 'ata han bayram'
+      AND (
+        bio IS NULL
+        OR length(trim(bio)) < 80
+        OR rtrim(bio) LIKE '%ölçeklenebilir'
+      )
+  `);
+});

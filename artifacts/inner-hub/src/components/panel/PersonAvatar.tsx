@@ -3,22 +3,23 @@ import { avatarColor } from "@/lib/avatarColor";
 import { cn } from "@/lib/utils";
 
 /**
- * Renders a real generated photo for known community members, falling back
- * to the colored-initials treatment for anyone without one (e.g. "Yeni
- * kurucu" placeholders). Keeps the same person looking the same everywhere
- * their name appears - Members, Match, Signal, Capital, Chat, Pulse.
+ * Gerçek foto (src) varsa onu gösterir; yoksa bilinen isimler için MEMBER_PHOTOS;
+ * o da yoksa renkli initials.
  */
 export function PersonAvatar({
   name,
   initials,
   className,
+  src,
 }: {
   name: string;
   initials: string;
-  /** Sizing + text-size classes, e.g. "size-10 text-caption" - shared by both the photo and fallback */
+  /** Sizing + text-size classes, e.g. "size-10 text-caption" */
   className?: string;
+  /** Profil / LinkedIn fotoğrafı — varsa AI mock yerine bunu kullan */
+  src?: string | null;
 }) {
-  const photo = memberPhoto(name);
+  const photo = (src && src.trim()) || memberPhoto(name);
   if (photo) {
     return <img src={photo} alt={name} className={cn("shrink-0 object-cover", className)} />;
   }
