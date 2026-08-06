@@ -124152,6 +124152,7 @@ var TEST_NAME_EXACT = /* @__PURE__ */ new Set([
   "test",
   "smoke test"
 ]);
+var PLACEHOLDER_COMPANY = /* @__PURE__ */ new Set(["\u2014", "-", "n/a", "na", "test", "inner hub", "innerhub"]);
 function isTestOrSystemAccount(input) {
   const email3 = (input.email ?? "").trim().toLowerCase();
   const name = (input.name ?? "").trim().toLowerCase();
@@ -124170,15 +124171,11 @@ function isDirectoryMember(input) {
   if (isTestOrSystemAccount(input)) return false;
   const bio = (input.bio ?? "").trim();
   const company = (input.company ?? "").trim();
-  const title = (input.title ?? "").trim();
   const linkedin = (input.linkedin ?? "").trim();
-  const persona = (input.persona ?? "").trim();
   if (bio.length >= 20) return true;
-  if (company.length > 1) return true;
-  if (title.length > 1) return true;
+  if (company.length > 1 && !PLACEHOLDER_COMPANY.has(company.toLowerCase())) return true;
   if (linkedin.length > 0 || Boolean(input.linkedinId)) return true;
   if (Boolean(input.avatarUrl)) return true;
-  if (persona.length > 0) return true;
   return false;
 }
 

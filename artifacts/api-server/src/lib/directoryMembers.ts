@@ -12,6 +12,8 @@ const TEST_NAME_EXACT = new Set([
   "smoke test",
 ]);
 
+const PLACEHOLDER_COMPANY = new Set(["—", "-", "n/a", "na", "test", "inner hub", "innerhub"]);
+
 export function isTestOrSystemAccount(input: {
   email?: string | null;
   name?: string | null;
@@ -48,7 +50,11 @@ export function isTestOrSystemAccount(input: {
   return false;
 }
 
-/** Dizinde yalnızca kimlik sinyali olan gerçek üyeler. */
+/**
+ * Dizinde yalnızca gerçek üye kartları.
+ * Persona / ünvan tek başına yetmez (davetten gelen boş kabuklar kalmasın).
+ * Bio, şirket, LinkedIn veya yüklenmiş fotoğraf gerekir.
+ */
 export function isDirectoryMember(input: {
   email?: string | null;
   name?: string | null;
@@ -64,16 +70,12 @@ export function isDirectoryMember(input: {
 
   const bio = (input.bio ?? "").trim();
   const company = (input.company ?? "").trim();
-  const title = (input.title ?? "").trim();
   const linkedin = (input.linkedin ?? "").trim();
-  const persona = (input.persona ?? "").trim();
 
   if (bio.length >= 20) return true;
-  if (company.length > 1) return true;
-  if (title.length > 1) return true;
+  if (company.length > 1 && !PLACEHOLDER_COMPANY.has(company.toLowerCase())) return true;
   if (linkedin.length > 0 || Boolean(input.linkedinId)) return true;
   if (Boolean(input.avatarUrl)) return true;
-  if (persona.length > 0) return true;
 
   return false;
 }
