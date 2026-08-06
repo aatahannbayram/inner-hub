@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+
+# Üye paneli ve iç araçlar indekslenmesin
+Disallow: /panel
+Disallow: /panel/
+Disallow: /requests
+Disallow: /requests/
+
+Sitemap: https://inner.digital/sitemap.xml
