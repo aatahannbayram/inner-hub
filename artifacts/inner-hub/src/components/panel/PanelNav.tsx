@@ -128,6 +128,13 @@ const ADMIN_SECTION: NavSection = {
 type PanelNavProps = {
   role?: "member" | "admin";
   collapsed?: boolean;
+  /**
+   * "scroll": Ana + Platform (+ admin varsa) — sidebar'ın kaydırılabilir orta
+   * bölgesine gider. "pinned": Hesap — scroll alanının dışında, footer'ın
+   * hemen üstünde her zaman görünür kalır (S-01: kullanıcı profiline/üyeliğine
+   * her zaman erişebilmeli, scroll etmeye bağlı olmamalı).
+   */
+  variant?: "scroll" | "pinned";
 };
 
 function ProductLabel({ mark, active }: { mark: string; active: boolean }) {
@@ -217,7 +224,10 @@ function Section({ section, collapsed }: { section: NavSection; collapsed: boole
   );
   const [open, setOpen] = useState(hasActiveChild);
 
-  const showItems = !section.collapsible || collapsed || open || hasActiveChild;
+  // hasActiveChild yalnızca başlangıç durumunu belirler (aktif sayfanın grubu
+  // otomatik açık gelsin); sonrasında kullanıcı `open` ile kapatabilmeli —
+  // aksi halde bir platform sayfasındayken grup asla kapanmıyordu (S-01).
+  const showItems = !section.collapsible || collapsed || open;
 
   return (
     <div className="mb-5 last:mb-0">
@@ -258,12 +268,20 @@ function Section({ section, collapsed }: { section: NavSection; collapsed: boole
   );
 }
 
-export function PanelNav({ role = "member", collapsed = false }: PanelNavProps) {
+export function PanelNav({ role = "member", collapsed = false, variant = "scroll" }: PanelNavProps) {
   const t = useT();
-  const sections = role === "admin" ? [...SECTION_DEFS, ADMIN_SECTION] : SECTION_DEFS;
+  const scrollSections =
+    role === "admin"
+      ? [...SECTION_DEFS.filter((s) => s.id !== "account"), ADMIN_SECTION]
+      : SECTION_DEFS.filter((s) => s.id !== "account");
+  const pinnedSections = SECTION_DEFS.filter((s) => s.id === "account");
+  const sections = variant === "pinned" ? pinnedSections : scrollSections;
 
   return (
-    <nav className="flex flex-col" aria-label={t("nav.sectionMain")}>
+    <nav
+      className="flex flex-col"
+      aria-label={t(variant === "pinned" ? "nav.sectionAccount" : "nav.sectionMain")}
+    >
       {sections.map((section) => (
         <Section key={section.id} section={section} collapsed={collapsed} />
       ))}

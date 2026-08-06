@@ -389,9 +389,28 @@ function DesktopSidebar({ user, onLogout }: { user: PanelUser; onLogout?: () => 
         </Link>
       </div>
 
-      {/* Nav */}
-      <div className="flex-1 overflow-y-auto p-2">
-        <PanelNav role={user.role} collapsed={collapsed} />
+      {/* Nav — kaydırılabilir (Ana + Platform), üst/alt kenarda fade ile
+          daha fazla içerik olduğu ipucu veriyor (S-01) */}
+      <div
+        className="min-h-0 flex-1 overflow-y-auto p-2"
+        style={{
+          maskImage:
+            "linear-gradient(to bottom, transparent 0, #000 12px, #000 calc(100% - 12px), transparent 100%)",
+          WebkitMaskImage:
+            "linear-gradient(to bottom, transparent 0, #000 12px, #000 calc(100% - 12px), transparent 100%)",
+        }}
+      >
+        <PanelNav role={user.role} collapsed={collapsed} variant="scroll" />
+      </div>
+
+      {/* Hesap — scroll alanının dışında sabit, her zaman erişilebilir (S-01) */}
+      <div
+        className={cn(
+          "shrink-0 border-t border-[var(--ink)]/[0.08] p-2 dark:border-white/10",
+          collapsed && "px-0",
+        )}
+      >
+        <PanelNav role={user.role} collapsed={collapsed} variant="pinned" />
       </div>
 
       {/* Footer */}
@@ -465,8 +484,20 @@ function MobileDrawer({
                 <X className="size-5" />
               </button>
             </div>
-            <div className="flex-1 overflow-y-auto p-2" onClick={onClose}>
-              <PanelNav role={user.role} collapsed={false} />
+            <div
+              className="min-h-0 flex-1 overflow-y-auto p-2"
+              style={{
+                maskImage:
+                  "linear-gradient(to bottom, transparent 0, #000 12px, #000 calc(100% - 12px), transparent 100%)",
+                WebkitMaskImage:
+                  "linear-gradient(to bottom, transparent 0, #000 12px, #000 calc(100% - 12px), transparent 100%)",
+              }}
+              onClick={onClose}
+            >
+              <PanelNav role={user.role} collapsed={false} variant="scroll" />
+            </div>
+            <div className="shrink-0 border-t border-[var(--ink)]/[0.08] p-2" onClick={onClose}>
+              <PanelNav role={user.role} collapsed={false} variant="pinned" />
             </div>
             <div className="border-t border-[var(--ink)]/[0.08] p-4">
               <SidebarFooter user={{ ...user, profileCompletionPct: user.profileCompletionPct ?? 0 }} collapsed={false} onLogout={onLogout} />
