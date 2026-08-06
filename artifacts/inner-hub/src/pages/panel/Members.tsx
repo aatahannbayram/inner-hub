@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   Search,
@@ -9,18 +9,19 @@ import {
   MessageSquare,
   UserPlus,
   X,
-  Users2,
   Trash2,
+  LayoutGrid,
+  List,
+  Lock,
+  ChevronDown,
 } from "lucide-react";
 import { FadeIn } from "@/components/FadeIn";
-import { AnimatedHeading } from "@/components/AnimatedHeading";
-import { Link } from "wouter";
+import { Link, useLocation, useSearch } from "wouter";
 import { cn } from "@/lib/utils";
 import { PersonAvatar } from "@/components/panel/PersonAvatar";
-import { HeroVideo } from "@/components/HeroVideo";
-import { HeroQuickStat } from "@/components/panel/HeroQuickStat";
-import { toLowerTR } from "@/lib/tr";
+import { compareTR, toUpperTR } from "@/lib/tr";
 import { cleanDisplayText } from "@/lib/displayText";
+import { norm } from "@/lib/text";
 import { useApiQuery } from "@/hooks/useApiQuery";
 import { apiUrl } from "@/lib/api";
 import { LoadingBlock, ErrorState, CourseCardSkeleton } from "@/components/panel/Skeletons";
@@ -35,6 +36,9 @@ import { useT } from "@/i18n";
 import { useJourneyVisit } from "@/hooks/useJourneyVisit";
 
 type Tab = "uyeler" | "talent";
+type PersonaFilter = "all" | "founder" | "investor" | "builder" | "expert";
+type SortMode = "featured" | "verified" | "az";
+type ViewMode = "grid" | "list";
 
 interface Member {
   id: number;
@@ -47,6 +51,8 @@ interface Member {
   linkedin: string | null;
   linkedinConnected?: boolean;
   avatarUrl?: string | null;
+  persona?: string | null;
+  profileCompletionPct?: number;
   isAvailable?: boolean;
 }
 
@@ -64,78 +70,218 @@ interface TalentPost {
   mine?: boolean;
 }
 
-function MemberCard({ member, onSelect }: { member: Member; onSelect: (m: Member) => void }) {
-  const t = useT();
-  return (
-    <div
-      className="group flex flex-col overflow-hidden panel-glass transition-all duration-200 hover:border-white/20 cursor-pointer dark:hover:border-white/20"
-      onClick={() => onSelect(member)}
-    >
-      <div className="relative aspect-square w-full overflow-hidden bg-[var(--ink)]/[0.04]">
-        {member.avatarUrl ? (
-          <img
-            src={member.avatarUrl}
-            alt={member.name}
-            className="size-full object-cover transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.03]"
-          />
-        ) : (
-          <PersonAvatar
-            name={member.name}
-            initials={member.initials}
-            className="size-full text-3xl transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.03]"
-          />
-        )}
-        {member.isAvailable && (
-          <span className="absolute bottom-2.5 right-2.5 size-3 rounded-full border-2 border-[var(--bone)] bg-[var(--inner-green)]" />
-        )}
-      </div>
-      <div className="flex flex-1 flex-col p-4 sm:p-5">
-        <p
-          className="flex items-center gap-1.5 truncate font-serif text-lg text-[var(--ink)] leading-snug"
-          style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
-        >
-          <span className="truncate">{member.name}</span>
-          {member.linkedinConnected && (
-            <CheckCircle2
-              className="size-3.5 shrink-0 text-[var(--success-ink)]"
-              aria-label={t("publicProfile.linkedinVerified")}
-            >
-              <title>{t("publicProfile.linkedinVerified")}</title>
-            </CheckCircle2>
-          )}
-        </p>
-        {(member.title || member.company) && (() => {
-          const title = cleanDisplayText(member.title);
-          const company = member.company && member.company !== "—" ? member.company : "";
-          const line = [title, company].filter(Boolean).join(" · ");
-          return line ? (
-            <p className="mt-1 truncate text-xs text-[var(--ink-muted)]">{line}</p>
-          ) : null;
-        })()}
-        {member.bio ? (
-          <p className="mt-3 line-clamp-2 flex-1 text-sm leading-relaxed text-[var(--ink-muted)]">{member.bio}</p>
-        ) : (
-          <div className="flex-1" />
-        )}
-        {member.tags.length > 0 && (
-          <div className="mt-3 flex flex-wrap gap-1">
-            {member.tags.slice(0, 3).map((tag) => (
-              <span
-                key={tag}
-                className="panel-glass px-1.5 py-0.5 font-mono text-label uppercase tracking-wide text-[var(--ink-body)]"
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
+function memberHaystack(m: Member): string {
+  return norm(
+    [m.name, m.title, m.company, m.bio, m.persona ?? "", ...(m.tags ?? [])].join(" "),
   );
 }
 
-function MemberDetailPanel({ member, onClose }: { member: Member; onClose: () => void }) {
+function isProfileComplete(m: Member): boolean {
+  const bio = (m.bio ?? "").trim();
+  const company = (m.company ?? "").trim();
+  const hasCompany = company.length > 1 && company !== "—";
+  const hasLinkedin = Boolean(m.linkedin?.trim()) || Boolean(m.linkedinConnected);
+  const pct = m.profileCompletionPct ?? 0;
+  if (pct >= 50) return true;
+  if (bio.length >= 20) return true;
+  if (hasCompany && hasLinkedin) return true;
+  return Boolean(bio && hasCompany);
+}
+
+function dedupeTags(tags: string[], exclude: string[] = [], max = 3): { shown: string[]; more: number } {
+  const block = new Set(exclude.map((x) => norm(x)).filter(Boolean));
+  const out: string[] = [];
+  for (const tag of tags) {
+    const t = tag.trim();
+    if (!t) continue;
+    const key = norm(t);
+    if (block.has(key)) continue;
+    if (out.some((x) => norm(x) === key)) continue;
+    out.push(t);
+  }
+  return { shown: out.slice(0, max), more: Math.max(0, out.length - max) };
+}
+
+function roleCompanyLine(member: Member): string {
+  const title = cleanDisplayText(member.title);
+  const company = member.company && member.company !== "—" ? member.company : "";
+  return [title, company].filter(Boolean).join(" · ");
+}
+
+function linkedInHref(raw: string): string {
+  return /^https?:\/\//i.test(raw)
+    ? raw
+    : `https://linkedin.com/in/${raw.replace(/^\/+/, "")}`;
+}
+
+function useDebouncedValue<T>(value: T, ms: number): T {
+  const [debounced, setDebounced] = useState(value);
+  useEffect(() => {
+    const id = window.setTimeout(() => setDebounced(value), ms);
+    return () => window.clearTimeout(id);
+  }, [value, ms]);
+  return debounced;
+}
+
+function MemberCard({
+  member,
+  view,
+  onMessage,
+}: {
+  member: Member;
+  view: ViewMode;
+  onMessage: (e: React.MouseEvent, m: Member) => void;
+}) {
   const t = useT();
+  const line = roleCompanyLine(member);
+  const { shown, more } = dedupeTags(member.tags, [member.title, member.company, member.persona ?? ""]);
+  const href = `/panel/members?uye=${member.id}`;
+
+  if (view === "list") {
+    return (
+      <Link
+        href={href}
+        className="group flex items-center gap-3 panel-glass px-3 py-2.5 transition-colors hover:border-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--inner-green)]"
+      >
+        <PersonAvatar
+          name={member.name}
+          initials={member.initials}
+          src={member.avatarUrl}
+          className="size-10 shrink-0 text-xs"
+        />
+        <div className="min-w-0 flex-1">
+          <p className="flex items-center gap-1.5 truncate font-serif text-base text-[var(--ink)]" style={{ fontWeight: 300 }}>
+            <span className="truncate">{member.name}</span>
+            {member.linkedinConnected && (
+              <CheckCircle2 className="size-3.5 shrink-0 text-[var(--success-ink)]" aria-label={t("publicProfile.linkedinVerified")} />
+            )}
+          </p>
+          {line ? <p className="truncate text-xs text-[var(--ink-muted)]">{line}</p> : null}
+        </div>
+        <div className="hidden items-center gap-1.5 sm:flex">
+          {shown.map((tag) => (
+            <span
+              key={tag}
+              className="max-w-[7rem] truncate panel-glass px-1.5 py-0.5 font-mono text-label tracking-wide text-[var(--ink-body)]"
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
+      </Link>
+    );
+  }
+
+  return (
+    <Link
+      href={href}
+      className="group flex h-full flex-col panel-glass p-3.5 transition-all duration-200 hover:border-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--inner-green)]"
+    >
+      <div className="flex items-start gap-3">
+        <PersonAvatar
+          name={member.name}
+          initials={member.initials}
+          src={member.avatarUrl}
+          className="size-[52px] shrink-0 text-sm"
+        />
+        <div className="min-w-0 flex-1">
+          <p
+            className="flex items-center gap-1.5 truncate font-serif text-base leading-snug text-[var(--ink)]"
+            style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
+          >
+            <span className="truncate">{member.name}</span>
+            {member.linkedinConnected && (
+              <CheckCircle2
+                className="size-3.5 shrink-0 text-[var(--success-ink)]"
+                aria-label={t("publicProfile.linkedinVerified")}
+              />
+            )}
+          </p>
+          {line ? (
+            <p className="mt-0.5 truncate text-xs text-[var(--ink-muted)]">{line}</p>
+          ) : null}
+        </div>
+      </div>
+
+      {member.bio ? (
+        <p className="mt-2.5 line-clamp-2 flex-1 text-sm leading-relaxed text-[var(--ink-muted)]">{member.bio}</p>
+      ) : (
+        <div className="flex-1" />
+      )}
+
+      {(shown.length > 0 || more > 0) && (
+        <div className="mt-2.5 flex flex-wrap gap-1">
+          {shown.map((tag) => (
+            <span
+              key={tag}
+              className="max-w-[9rem] truncate panel-glass px-1.5 py-0.5 font-mono text-label tracking-wide text-[var(--ink-body)]"
+              title={tag}
+            >
+              {tag}
+            </span>
+          ))}
+          {more > 0 && (
+            <span className="panel-glass px-1.5 py-0.5 font-mono text-label text-[var(--ink-muted)]">+{more}</span>
+          )}
+        </div>
+      )}
+
+      <div
+        className={cn(
+          "mt-auto flex gap-2 pt-3 opacity-100 transition-opacity",
+          "[@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:group-focus-within:opacity-100",
+        )}
+      >
+        <button
+          type="button"
+          onClick={(e) => onMessage(e, member)}
+          className="flex flex-1 items-center justify-center gap-1.5 panel-glass py-1.5 font-mono text-label uppercase tracking-widest text-[var(--ink)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--inner-green)]"
+        >
+          <MessageSquare className="size-3" /> {t("members.message")}
+        </button>
+        <span className="flex flex-1 items-center justify-center gap-1.5 panel-glass-ink py-1.5 font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)]">
+          {t("members.profile")}
+        </span>
+      </div>
+    </Link>
+  );
+}
+
+function MemberDetailPanel({
+  member,
+  allMembers,
+  talentPosts,
+  onClose,
+  returnFocusRef,
+}: {
+  member: Member;
+  allMembers: Member[];
+  talentPosts: TalentPost[];
+  onClose: () => void;
+  returnFocusRef: React.RefObject<HTMLElement | null>;
+}) {
+  const t = useT();
+  const panelRef = useRef<HTMLDivElement>(null);
+  const line = roleCompanyLine(member);
+  const { shown } = dedupeTags(member.tags, [member.title, member.company, member.persona ?? ""], 12);
+  const ownPosts = talentPosts.filter((p) => p.postedBy === member.name);
+  const shared = useMemo(() => {
+    const myTags = new Set(shown.map((x) => norm(x)));
+    if (myTags.size === 0) return [] as { tag: string; names: string[] }[];
+    const map = new Map<string, string[]>();
+    for (const other of allMembers) {
+      if (other.id === member.id) continue;
+      for (const tag of other.tags) {
+        const key = norm(tag);
+        if (!myTags.has(key)) continue;
+        const list = map.get(tag) ?? [];
+        if (!list.includes(other.name)) list.push(other.name);
+        map.set(tag, list);
+      }
+    }
+    return [...map.entries()].slice(0, 3).map(([tag, names]) => ({ tag, names }));
+  }, [allMembers, member.id, shown]);
+
   useEffect(() => {
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -143,16 +289,46 @@ function MemberDetailPanel({ member, onClose }: { member: Member; onClose: () =>
       if (e.key === "Escape") onClose();
     };
     window.addEventListener("keydown", onKey);
+    const root = panelRef.current;
+    const focusable = root?.querySelectorAll<HTMLElement>(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+    );
+    focusable?.[0]?.focus();
+
+    const trap = (e: KeyboardEvent) => {
+      if (e.key !== "Tab" || !focusable || focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+    window.addEventListener("keydown", trap);
+
     return () => {
       document.body.style.overflow = prev;
       window.removeEventListener("keydown", onKey);
+      window.removeEventListener("keydown", trap);
+      returnFocusRef.current?.focus();
     };
-  }, [onClose]);
+  }, [onClose, returnFocusRef]);
+
+  const pct = member.profileCompletionPct ?? 0;
 
   return (
     <>
       <div className="fixed inset-0 z-40 bg-[var(--ink-fixed)]/40" onClick={onClose} aria-hidden />
-      <div className="panel-glass-strong fixed inset-y-0 right-0 z-50 flex w-full max-w-md flex-col border-l border-[var(--ink)]/15 shadow-none">
+      <div
+        ref={panelRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="member-drawer-title"
+        className="panel-glass-strong fixed inset-y-0 right-0 z-50 flex w-full max-w-md flex-col border-l border-[var(--ink)]/15 shadow-none"
+      >
         <div className="flex items-start justify-between border-b border-[var(--ink)]/[0.08] p-5">
           <div className="flex items-start gap-3">
             <PersonAvatar
@@ -163,31 +339,57 @@ function MemberDetailPanel({ member, onClose }: { member: Member; onClose: () =>
             />
             <div>
               <p
+                id="member-drawer-title"
                 className="font-serif text-lg text-[var(--ink)]"
                 style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
               >
                 {member.name}
               </p>
-              {(() => {
-                const title = cleanDisplayText(member.title);
-                const company = member.company && member.company !== "—" ? member.company : "";
-                const line = [title, company].filter(Boolean).join(" · ");
-                return line ? <p className="mt-1 text-sm text-[var(--ink-muted)]">{line}</p> : null;
-              })()}
+              {line ? <p className="mt-1 text-sm text-[var(--ink-muted)]">{line}</p> : null}
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="panel-glass p-2 text-[var(--ink-muted)] hover:text-[var(--ink)]"
+            className="panel-glass p-2 text-[var(--ink-muted)] hover:text-[var(--ink)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--inner-green)]"
             aria-label={t("common.close")}
           >
             <X className="size-4" />
           </button>
         </div>
+
         <div className="flex-1 space-y-5 overflow-y-auto p-5">
+          <div className="grid grid-cols-2 gap-2">
+            <div className="panel-glass p-3">
+              <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
+                {t("members.metaVerified")}
+              </p>
+              <p className="mt-1 text-sm text-[var(--ink)]">
+                {member.linkedinConnected ? t("members.metaVerifiedYes") : t("members.metaVerifiedNo")}
+              </p>
+            </div>
+            <div className="panel-glass p-3">
+              <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
+                {t("members.metaCompletion")}
+              </p>
+              <p className="mt-1 text-sm text-[var(--ink)]">%{pct}</p>
+            </div>
+            {member.linkedin && (
+              <a
+                href={linkedInHref(member.linkedin)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="col-span-2 inline-flex items-center gap-2 panel-glass p-3 font-mono text-label uppercase tracking-widest text-[var(--ink-body)] hover:text-[var(--ink)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--inner-green)]"
+              >
+                <Linkedin className="size-3.5" /> LinkedIn
+              </a>
+            )}
+          </div>
+
           <div>
-            <p className="mb-2 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">{t("members.about")}</p>
+            <p className="mb-2 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
+              {t("members.about")}
+            </p>
             {member.bio ? (
               <p className="text-sm leading-relaxed text-[var(--ink-body)]">{member.bio}</p>
             ) : (
@@ -202,14 +404,18 @@ function MemberDetailPanel({ member, onClose }: { member: Member; onClose: () =>
               </div>
             )}
           </div>
-          {member.tags.length > 0 && (
+
+          {shown.length > 0 && (
             <div>
-              <p className="mb-2 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">{t("members.skills")}</p>
+              <p className="mb-2 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
+                {t("members.skills")}
+              </p>
               <div className="flex flex-wrap gap-1.5">
-                {member.tags.map((tag) => (
+                {shown.map((tag) => (
                   <span
                     key={tag}
-                    className="panel-glass px-2 py-1 font-mono text-label uppercase tracking-wide text-[var(--ink-body)]"
+                    className="max-w-full truncate panel-glass px-2 py-1 font-mono text-label tracking-wide text-[var(--ink-body)]"
+                    title={tag}
                   >
                     {tag}
                   </span>
@@ -217,147 +423,55 @@ function MemberDetailPanel({ member, onClose }: { member: Member; onClose: () =>
               </div>
             </div>
           )}
-          {member.linkedin && (
-            <a
-              href={
-                /^https?:\/\//i.test(member.linkedin)
-                  ? member.linkedin
-                  : `https://linkedin.com/in/${member.linkedin.replace(/^\/+/, "")}`
-              }
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 font-mono text-label uppercase tracking-widest text-[var(--ink-body)] underline underline-offset-2"
-            >
-              <Linkedin className="size-3.5" /> LinkedIn
-            </a>
+
+          {ownPosts.length > 0 && (
+            <div>
+              <p className="mb-2 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
+                {t("members.drawerTalent")}
+              </p>
+              <ul className="space-y-2">
+                {ownPosts.map((p) => (
+                  <li key={p.id} className="panel-glass p-3">
+                    <p className="text-sm text-[var(--ink)]">{cleanDisplayText(p.role)}</p>
+                    <p className="mt-1 line-clamp-2 text-xs text-[var(--ink-muted)]">{p.description}</p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {shared.length > 0 && (
+            <div>
+              <p className="mb-2 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
+                {t("members.drawerShared")}
+              </p>
+              <ul className="space-y-1.5">
+                {shared.map(({ tag, names }) => (
+                  <li key={tag} className="text-sm text-[var(--ink-body)]">
+                    {t("members.sharedInterest", { tag, names: names.slice(0, 2).join(", ") })}
+                  </li>
+                ))}
+              </ul>
+            </div>
           )}
         </div>
+
         <div className="flex border-t border-[var(--ink)]/[0.08]">
           <button
             type="button"
-            className="flex flex-1 items-center justify-center gap-1.5 border-r border-[var(--ink)]/[0.08] py-3.5 font-mono text-label uppercase tracking-widest text-[var(--ink)] hover:bg-[var(--ink)]/[0.04]"
+            className="flex flex-1 items-center justify-center gap-1.5 border-r border-[var(--ink)]/[0.08] py-3.5 font-mono text-label uppercase tracking-widest text-[var(--ink)] hover:bg-[var(--ink)]/[0.04] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--inner-green)]"
           >
             <MessageSquare className="size-3.5" /> {t("members.message")}
           </button>
           <button
             type="button"
-            className="flex flex-1 items-center justify-center gap-1.5 py-3.5 font-mono text-label uppercase tracking-widest text-[var(--ink)] hover:bg-[var(--ink)]/[0.04]"
+            className="flex flex-1 items-center justify-center gap-1.5 py-3.5 font-mono text-label uppercase tracking-widest text-[var(--ink)] hover:bg-[var(--ink)]/[0.04] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--inner-green)]"
           >
             <UserPlus className="size-3.5" /> {t("members.connect")}
           </button>
         </div>
       </div>
     </>
-  );
-}
-
-function scrollToId(id: string) {
-  document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
-}
-
-function MembersHero({
-  onTalentClick,
-  memberCount,
-}: {
-  onTalentClick: () => void;
-  memberCount: number;
-}) {
-  const t = useT();
-  return (
-    <div
-      className="relative -mx-4 -mt-6 overflow-hidden sm:-mx-6 lg:-mx-8 lg:-mt-8"
-      style={{ height: "min(70vh, 620px)", minHeight: 440 }}
-    >
-      <HeroVideo
-        src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260406_133058_0504132a-0cf3-4450-a370-8ea3b05c95d4.mp4"
-        className="absolute inset-0 h-full w-full object-cover"
-      />
-      <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-[1] bg-[var(--ink-fixed)]/40" />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-t from-[var(--ink-fixed)]/85 via-[var(--ink-fixed)]/25 to-transparent"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-r from-[var(--ink-fixed)]/60 via-transparent to-transparent"
-      />
-
-      <div className="relative z-10 flex h-full flex-col justify-end px-6 pb-10 md:px-12 md:pb-14">
-        <div className="lg:grid lg:grid-cols-2 lg:items-end lg:gap-10">
-          <div>
-            <p className="mb-3 font-mono text-label uppercase tracking-widest text-white/60 [text-shadow:0_1px_12px_rgba(0,0,0,0.6)]">
-              {t("members.title")}
-            </p>
-            <AnimatedHeading
-              text={"Where builders\nfind each other."}
-              className="mb-4 font-display font-serif italic text-4xl leading-[1.1] text-white [text-shadow:0_2px_24px_rgba(0,0,0,0.55)] md:text-5xl lg:text-6xl"
-              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1" }}
-            />
-            <FadeIn delay={0.8}>
-              <p className="mb-6 max-w-[46ch] text-base text-white/75 [text-shadow:0_1px_12px_rgba(0,0,0,0.6)] md:text-lg">
-                {t("members.heroBody")}
-              </p>
-            </FadeIn>
-            <FadeIn delay={1.2}>
-              <div className="flex flex-wrap gap-3 sm:gap-4">
-                <button
-                  type="button"
-                  onClick={() => scrollToId("members-grid")}
-                  className="group inline-flex min-h-11 items-center gap-2 bg-[var(--bone-fixed)] px-6 py-3 font-mono text-sm uppercase tracking-widest text-[var(--ink-fixed)] transition-opacity hover:opacity-90 sm:px-8"
-                >
-                  {t("members.viewMembers")}
-                  <ArrowRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
-                </button>
-                <button
-                  type="button"
-                  onClick={onTalentClick}
-                  className="liquid-glass group inline-flex min-h-11 items-center gap-2 border border-[var(--bone-fixed)]/25 px-6 py-3 font-mono text-sm uppercase tracking-widest text-[var(--bone-fixed)] transition-colors hover:bg-[var(--bone-fixed)] hover:text-[var(--ink-fixed)] sm:px-8"
-                >
-                  {t("members.talentBoard")}
-                  <ArrowRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
-                </button>
-              </div>
-            </FadeIn>
-          </div>
-
-          <div className="mt-8 flex items-end justify-start lg:mt-0 lg:justify-end">
-            <HeroQuickStat
-              value={memberCount}
-              label={t("members.heroStat")}
-              tagline={t("members.heroTagline")}
-            />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function MembersStat({
-  label,
-  value,
-  sub,
-  icon: Icon,
-}: {
-  label: string;
-  value: string;
-  sub: string;
-  icon: React.ComponentType<{ className?: string }>;
-}) {
-  return (
-    <div className="panel-glass p-4">
-      <div className="mb-2 flex items-center justify-between">
-        <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)] dark:text-white/45">{label}</p>
-        <Icon className="size-3.5 text-[var(--ink-subtle)] dark:text-white/35" />
-      </div>
-      <p
-        className="font-serif text-2xl text-[var(--ink)] dark:text-[#F4F1EC]"
-        style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
-      >
-        {value}
-      </p>
-      <p className="mt-1 font-mono text-label text-[var(--ink-muted)] dark:text-white/40">{sub}</p>
-    </div>
   );
 }
 
@@ -427,7 +541,7 @@ function TalentCard({
         {post.tags.slice(0, 3).map((tag) => (
           <span
             key={tag}
-            className="panel-glass px-1.5 py-0.5 font-mono text-label uppercase tracking-wide text-[var(--ink-body)]"
+            className="max-w-[9rem] truncate panel-glass px-1.5 py-0.5 font-mono text-label tracking-wide text-[var(--ink-body)]"
           >
             {tag}
           </span>
@@ -442,7 +556,7 @@ function TalentCard({
               type="button"
               onClick={() => void remove()}
               disabled={busy}
-              className="panel-glass p-1.5 text-[var(--ink-muted)] hover:text-[var(--error-ink)] disabled:opacity-40"
+              className="panel-glass p-1.5 text-[var(--ink-muted)] hover:text-[var(--error-ink)] disabled:opacity-40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--inner-green)]"
               aria-label={t("members.deletePost")}
             >
               <Trash2 className="size-3" />
@@ -490,7 +604,7 @@ function TalentCompose({
     try {
       const tags = tagsRaw
         .split(",")
-        .map((t) => t.trim())
+        .map((x) => x.trim())
         .filter(Boolean)
         .slice(0, 12);
       const res = await fetch(apiUrl("/api/talent"), {
@@ -506,8 +620,8 @@ function TalentCompose({
       setTagsRaw("");
       onCreated();
       onClose();
-    } catch (e: any) {
-      setError(e.message ?? "İlan oluşturulamadı");
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "İlan oluşturulamadı");
     } finally {
       setBusy(false);
     }
@@ -524,11 +638,9 @@ function TalentCompose({
             className="font-serif text-2xl font-normal text-[var(--ink)]"
             style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
           >
-            İlan Ver
+            {t("members.composeTitle")}
           </DrawerTitle>
-          <DrawerDescription className="text-[var(--ink-body)]">
-            Arıyorsan veya sunuyorsan daireye duyur.
-          </DrawerDescription>
+          <DrawerDescription className="text-[var(--ink-body)]">{t("members.composeSub")}</DrawerDescription>
         </DrawerHeader>
         <div className="space-y-4 px-6 pb-8">
           <div className="flex gap-2">
@@ -537,8 +649,9 @@ function TalentCompose({
                 key={ty}
                 type="button"
                 onClick={() => setType(ty)}
+                aria-pressed={type === ty}
                 className={cn(
-                  "border px-3 py-1.5 font-mono text-label uppercase tracking-widest",
+                  "border px-3 py-1.5 font-mono text-label uppercase tracking-widest focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--inner-green)]",
                   type === ty
                     ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--bone)]"
                     : "border-[var(--ink)]/10 text-[var(--ink-muted)]",
@@ -599,10 +712,19 @@ export default function Members() {
   const t = useT();
   useJourneyVisit("members");
   const queryClient = useQueryClient();
+  const [, setLocation] = useLocation();
+  const searchString = useSearch();
+  const uyeParam = useMemo(() => new URLSearchParams(searchString).get("uye"), [searchString]);
+
   const [tab, setTab] = useState<Tab>("uyeler");
   const [search, setSearch] = useState("");
-  const [selectedMember, setSelectedMember] = useState<Member | null>(null);
+  const debouncedSearch = useDebouncedValue(search, 140);
+  const [persona, setPersona] = useState<PersonaFilter>("all");
+  const [sort, setSort] = useState<SortMode>("featured");
+  const [view, setView] = useState<ViewMode>("grid");
   const [composeOpen, setComposeOpen] = useState(false);
+  const [incompleteOpen, setIncompleteOpen] = useState(false);
+  const returnFocusRef = useRef<HTMLElement | null>(null);
 
   const { data, isLoading, isError, error, refetch } = useApiQuery<{ members: Member[] }>(
     ["members"],
@@ -619,33 +741,160 @@ export default function Members() {
   const members = data?.members ?? [];
   const talentPosts = talentData?.posts ?? [];
 
-  const filteredMembers = members.filter((m) => {
-    const q = toLowerTR(search);
-    return (
-      toLowerTR(m.name).includes(q) ||
-      toLowerTR(m.company).includes(q) ||
-      m.tags.some((t) => toLowerTR(t).includes(q))
-    );
-  });
+  const selectedMember = useMemo(() => {
+    if (!uyeParam) return null;
+    const id = Number(uyeParam);
+    if (!Number.isFinite(id)) return null;
+    return members.find((m) => m.id === id) ?? null;
+  }, [uyeParam, members]);
 
-  const filteredTalent = talentPosts.filter((p) => {
-    const q = toLowerTR(search);
-    return toLowerTR(p.role).includes(q) || p.tags.some((t) => toLowerTR(t).includes(q));
-  });
+  const closeMember = useCallback(() => {
+    if (typeof window !== "undefined" && window.history.length > 1 && uyeParam) {
+      window.history.back();
+      return;
+    }
+    const params = new URLSearchParams(searchString);
+    params.delete("uye");
+    const q = params.toString();
+    setLocation(q ? `/panel/members?${q}` : "/panel/members", { replace: true });
+  }, [searchString, setLocation, uyeParam]);
+
+  const haystacks = useMemo(
+    () => new Map(members.map((m) => [m.id, memberHaystack(m)])),
+    [members],
+  );
+
+  const personaCounts = useMemo(() => {
+    const counts: Record<string, number> = { all: members.length };
+    for (const m of members) {
+      const p = (m.persona ?? "").toLowerCase();
+      if (p) counts[p] = (counts[p] ?? 0) + 1;
+    }
+    return counts;
+  }, [members]);
+
+  const { completeMembers, incompleteMembers } = useMemo(() => {
+    const q = norm(debouncedSearch);
+    let list = members.filter((m) => {
+      if (persona !== "all" && (m.persona ?? "").toLowerCase() !== persona) return false;
+      if (!q) return true;
+      return (haystacks.get(m.id) ?? "").includes(q);
+    });
+
+    const complete = list.filter(isProfileComplete);
+    const incomplete = list.filter((m) => !isProfileComplete(m));
+
+    const rank = (a: Member, b: Member) => {
+      if (sort === "az") return compareTR(a.name, b.name);
+      if (sort === "verified") {
+        const av = a.linkedinConnected ? 1 : 0;
+        const bv = b.linkedinConnected ? 1 : 0;
+        if (bv !== av) return bv - av;
+        return compareTR(a.name, b.name);
+      }
+      const ac = isProfileComplete(a) ? 1 : 0;
+      const bc = isProfileComplete(b) ? 1 : 0;
+      if (bc !== ac) return bc - ac;
+      const av = a.linkedinConnected ? 1 : 0;
+      const bv = b.linkedinConnected ? 1 : 0;
+      if (bv !== av) return bv - av;
+      const ap = a.profileCompletionPct ?? 0;
+      const bp = b.profileCompletionPct ?? 0;
+      if (bp !== ap) return bp - ap;
+      return compareTR(a.name, b.name);
+    };
+
+    complete.sort(rank);
+    incomplete.sort(rank);
+    return { completeMembers: complete, incompleteMembers: incomplete };
+  }, [members, debouncedSearch, haystacks, persona, sort]);
+
+  const filteredTalent = useMemo(() => {
+    const q = norm(debouncedSearch);
+    if (!q) return talentPosts;
+    return talentPosts.filter(
+      (p) =>
+        norm(p.role).includes(q) ||
+        norm(p.description).includes(q) ||
+        norm(p.postedBy).includes(q) ||
+        p.tags.some((tag) => norm(tag).includes(q)),
+    );
+  }, [talentPosts, debouncedSearch]);
+
+  const visibleCount =
+    tab === "uyeler" ? completeMembers.length + incompleteMembers.length : filteredTalent.length;
+
+  const resetFilters = () => {
+    setSearch("");
+    setPersona("all");
+    setSort("featured");
+  };
 
   const invalidateTalent = () => {
     void queryClient.invalidateQueries({ queryKey: ["talent"] });
   };
 
+  const onMessage = (e: React.MouseEvent, m: Member) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setLocation(`/panel/chat?to=${m.id}`);
+  };
+
+  // Deep link: if ?uye= points at incomplete member still open drawer when loaded
+  useEffect(() => {
+    if (!uyeParam || isLoading) return;
+    const id = Number(uyeParam);
+    if (!Number.isFinite(id)) return;
+    if (!members.some((m) => m.id === id)) {
+      /* keep param; member may be filtered as system */
+    }
+  }, [uyeParam, members, isLoading]);
+
+  const filterChips: { id: PersonaFilter; label: string }[] = [
+    { id: "all", label: t("members.filterAll") },
+    { id: "founder", label: t("members.filterFounder") },
+    { id: "investor", label: t("members.filterInvestor") },
+    { id: "builder", label: t("members.filterBuilder") },
+    { id: "expert", label: t("members.filterExpert") },
+  ];
+
   return (
-    <div className="min-w-0 space-y-8 max-w-5xl overflow-x-hidden">
-      <MembersHero
-        memberCount={members.length}
-        onTalentClick={() => {
-          setTab("talent");
-          requestAnimationFrame(() => scrollToId("members-talent"));
-        }}
-      />
+    <div className="min-w-0 space-y-5 max-w-5xl overflow-x-hidden motion-reduce:transition-none">
+      <FadeIn delay={0.02}>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
+              INNER.HUB · {toUpperTR(t("members.title"))}
+            </p>
+            <h1
+              className="mt-1 font-serif text-2xl text-[var(--ink)] sm:text-3xl"
+              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
+            >
+              {t("members.pageHeadline")}
+            </h1>
+            <p className="mt-1.5 max-w-[48ch] text-sm text-[var(--ink-muted)]">{t("members.pageSub")}</p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => setTab("talent")}
+              className="panel-glass px-4 py-2 font-mono text-label uppercase tracking-widest text-[var(--ink)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--inner-green)]"
+            >
+              {t("members.talentBoard")}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setTab("talent");
+                setComposeOpen(true);
+              }}
+              className="panel-glass-ink px-4 py-2 font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--inner-green)]"
+            >
+              {t("members.postCta")}
+            </button>
+          </div>
+        </div>
+      </FadeIn>
 
       {isLoading && tab === "uyeler" ? (
         <LoadingBlock label={t("members.loading")}>
@@ -661,44 +910,49 @@ export default function Members() {
         />
       ) : (
         <>
-          <FadeIn delay={0.02}>
-            <div className="grid grid-cols-2 gap-2 sm:gap-3 sm:grid-cols-4">
-              <MembersStat label={t("members.statTotal")} value={String(members.length)} sub={t("members.statTotalSub")} icon={Users2} />
-              <MembersStat
-                label={t("members.statProfile")}
-                value={String(members.filter((m) => m.bio).length)}
-                sub={t("members.statProfileSub")}
-                icon={Users2}
-              />
-              <MembersStat
-                label={t("members.statTalent")}
-                value={String(talentPosts.length)}
-                sub={t("members.statTalentSub")}
-                icon={Tag}
-              />
-              <MembersStat
-                label={t("members.statAdmin")}
-                value={String(members.filter((m) => m.title === "Admin").length)}
-                sub={t("members.statAdminSub")}
-                icon={CheckCircle2}
-              />
+          <div className="sticky top-0 z-20 -mx-1 space-y-3 bg-[var(--bone)]/90 px-1 py-3 backdrop-blur-md dark:bg-[var(--ink)]/80">
+            <div
+              className="flex flex-wrap gap-1.5"
+              role="group"
+              aria-label={t("members.filterGroup")}
+            >
+              {filterChips.map((chip) => {
+                const count =
+                  chip.id === "all" ? members.length : (personaCounts[chip.id] ?? 0);
+                if (chip.id !== "all" && count === 0) return null;
+                const pressed = persona === chip.id;
+                return (
+                  <button
+                    key={chip.id}
+                    type="button"
+                    aria-pressed={pressed}
+                    onClick={() => setPersona(chip.id)}
+                    className={cn(
+                      "border px-2.5 py-1.5 font-mono text-label tracking-wide transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--inner-green)]",
+                      pressed
+                        ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--bone)] dark:border-white/30 dark:bg-white/[0.14] dark:text-[#F4F1EC]"
+                        : "border-[var(--ink)]/10 text-[var(--ink-body)] hover:border-[var(--ink)]/25",
+                    )}
+                  >
+                    {chip.label} {count}
+                  </button>
+                );
+              })}
             </div>
-          </FadeIn>
 
-          <FadeIn delay={0.03}>
-            <p className="text-sm font-light text-[var(--ink-muted)]">
-              {t("members.subtitle")}
-            </p>
-          </FadeIn>
-
-          <FadeIn delay={0.04}>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex panel-glass overflow-hidden">
+              <div
+                className="flex panel-glass overflow-hidden"
+                role="tablist"
+                aria-label={t("members.tabMembers")}
+              >
                 <button
                   type="button"
+                  role="tab"
+                  aria-selected={tab === "uyeler"}
                   onClick={() => setTab("uyeler")}
                   className={cn(
-                    "px-5 py-2 font-mono text-label uppercase tracking-widest transition-colors",
+                    "px-5 py-2 font-mono text-label uppercase tracking-widest transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--inner-green)]",
                     tab === "uyeler"
                       ? "bg-[var(--ink)] text-[var(--bone)] dark:bg-white/[0.12] dark:text-[#F4F1EC]"
                       : "text-[var(--ink-body)] hover:text-[var(--ink)] dark:text-white/50 dark:hover:text-white",
@@ -708,9 +962,11 @@ export default function Members() {
                 </button>
                 <button
                   type="button"
+                  role="tab"
+                  aria-selected={tab === "talent"}
                   onClick={() => setTab("talent")}
                   className={cn(
-                    "flex items-center gap-1.5 px-5 py-2 font-mono text-label uppercase tracking-widest transition-colors",
+                    "flex items-center gap-1.5 px-5 py-2 font-mono text-label uppercase tracking-widest transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--inner-green)]",
                     tab === "talent"
                       ? "bg-[var(--ink)] text-[var(--bone)] dark:bg-white/[0.12] dark:text-[#F4F1EC]"
                       : "text-[var(--ink-body)] hover:text-[var(--ink)] dark:text-white/50 dark:hover:text-white",
@@ -720,36 +976,176 @@ export default function Members() {
                 </button>
               </div>
 
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-[var(--ink-muted)] dark:text-white/40" />
-                <input
-                  type="text"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder={tab === "uyeler" ? t("members.searchPlaceholder") : t("members.searchTalent")}
-                  className="panel-glass py-2 pl-9 pr-4 font-mono text-caption text-[var(--ink)] placeholder:text-[var(--ink-muted)] focus:border-white/25 focus:outline-none transition-colors dark:text-[#F4F1EC] dark:placeholder:text-white/35"
-                />
+              <div className="flex flex-1 flex-wrap items-center gap-2 sm:justify-end">
+                {tab === "uyeler" && (
+                  <>
+                    <label className="sr-only" htmlFor="members-sort">
+                      {t("members.sortLabel")}
+                    </label>
+                    <select
+                      id="members-sort"
+                      value={sort}
+                      onChange={(e) => setSort(e.target.value as SortMode)}
+                      className="panel-glass bg-transparent px-2 py-2 font-mono text-caption text-[var(--ink)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--inner-green)]"
+                    >
+                      <option value="featured">{t("members.sortFeatured")}</option>
+                      <option value="verified">{t("members.sortVerified")}</option>
+                      <option value="az">{t("members.sortAZ")}</option>
+                    </select>
+                    <div className="flex panel-glass overflow-hidden">
+                      <button
+                        type="button"
+                        aria-label={t("members.viewGrid")}
+                        aria-pressed={view === "grid"}
+                        onClick={() => setView("grid")}
+                        className={cn(
+                          "p-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--inner-green)]",
+                          view === "grid" ? "bg-[var(--ink)] text-[var(--bone)]" : "text-[var(--ink-muted)]",
+                        )}
+                      >
+                        <LayoutGrid className="size-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        aria-label={t("members.viewList")}
+                        aria-pressed={view === "list"}
+                        onClick={() => setView("list")}
+                        className={cn(
+                          "p-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--inner-green)]",
+                          view === "list" ? "bg-[var(--ink)] text-[var(--bone)]" : "text-[var(--ink-muted)]",
+                        )}
+                      >
+                        <List className="size-3.5" />
+                      </button>
+                    </div>
+                  </>
+                )}
+
+                <div className="relative min-w-[min(100%,16rem)] flex-1 sm:max-w-md">
+                  <Search className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-[var(--ink-muted)]" />
+                  <input
+                    type="search"
+                    autoComplete="off"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder={
+                      tab === "uyeler" ? t("members.searchPlaceholder") : t("members.searchTalent")
+                    }
+                    aria-label={t("members.searchPlaceholder")}
+                    className="w-full panel-glass py-2 pl-9 pr-9 font-mono text-caption text-[var(--ink)] placeholder:text-[var(--ink-muted)] focus:border-white/25 focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--inner-green)] dark:text-[#F4F1EC]"
+                  />
+                  {search ? (
+                    <button
+                      type="button"
+                      onClick={() => setSearch("")}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-[var(--ink-muted)] hover:text-[var(--ink)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--inner-green)]"
+                      aria-label={t("members.clearSearch")}
+                    >
+                      <X className="size-3.5" />
+                    </button>
+                  ) : null}
+                </div>
               </div>
             </div>
-          </FadeIn>
+          </div>
 
           <div id={tab === "uyeler" ? "members-grid" : "members-talent"} className="scroll-mt-6">
             {tab === "uyeler" ? (
               <div>
-                <div className="mb-4 flex items-center gap-3">
-                  <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
-                    {t("members.memberCount", { n: filteredMembers.length })}
-                  </span>
-                  <span className="flex items-center gap-1.5 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
-                    <span className="size-1.5 rounded-full bg-[var(--ink-subtle)]" />
-                    {t("members.liveSoon")}
-                  </span>
-                </div>
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                  {filteredMembers.map((member) => (
-                    <MemberCard key={member.id} member={member} onSelect={setSelectedMember} />
-                  ))}
-                </div>
+                <p
+                  className="mb-4 font-mono text-label uppercase tracking-widest text-[var(--ink-body)]"
+                  aria-live="polite"
+                >
+                  {t("members.readyCount", {
+                    ready: completeMembers.length,
+                    incomplete: incompleteMembers.length,
+                  })}
+                </p>
+
+                {visibleCount === 0 ? (
+                  <div className="panel-glass px-5 py-10 text-center">
+                    <p className="font-serif text-xl text-[var(--ink)]" style={{ fontWeight: 300 }}>
+                      {t("members.emptyTitle", { q: debouncedSearch || "…" })}
+                    </p>
+                    <p className="mx-auto mt-2 max-w-[40ch] text-sm text-[var(--ink-muted)]">
+                      {t("members.emptyBody")}
+                    </p>
+                    <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
+                      <button
+                        type="button"
+                        onClick={resetFilters}
+                        className="panel-glass-ink px-4 py-2 font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--inner-green)]"
+                      >
+                        {t("members.resetFilters")}
+                      </button>
+                      <Link
+                        href="/panel/members"
+                        className="panel-glass inline-flex items-center gap-1.5 px-4 py-2 font-mono text-label uppercase tracking-widest text-[var(--ink)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--inner-green)]"
+                      >
+                        <UserPlus className="size-3" /> {t("members.inviteSomeone")}
+                      </Link>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div
+                      className={cn(
+                        view === "grid"
+                          ? "grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3"
+                          : "flex flex-col gap-2",
+                      )}
+                    >
+                      {completeMembers.map((member) => (
+                        <MemberCard
+                          key={member.id}
+                          member={member}
+                          view={view}
+                          onMessage={onMessage}
+                        />
+                      ))}
+                    </div>
+
+                    {incompleteMembers.length > 0 && (
+                      <div className="mt-6 border-t border-[var(--ink)]/[0.08] pt-4">
+                        <button
+                          type="button"
+                          onClick={() => setIncompleteOpen((v) => !v)}
+                          className="flex w-full items-center justify-between gap-2 py-2 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--inner-green)]"
+                          aria-expanded={incompleteOpen}
+                        >
+                          <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
+                            {t("members.incompleteToggle", { n: incompleteMembers.length })}
+                          </span>
+                          <ChevronDown
+                            className={cn(
+                              "size-4 text-[var(--ink-muted)] transition-transform",
+                              incompleteOpen && "rotate-180",
+                            )}
+                          />
+                        </button>
+                        {incompleteOpen && (
+                          <div
+                            className={cn(
+                              "mt-2",
+                              view === "grid"
+                                ? "grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3"
+                                : "flex flex-col gap-2",
+                            )}
+                          >
+                            {incompleteMembers.map((member) => (
+                              <MemberCard
+                                key={member.id}
+                                member={member}
+                                view={view}
+                                onMessage={onMessage}
+                              />
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
             ) : talentLoading ? (
               <LoadingBlock label={t("members.talentLoading")} />
@@ -761,13 +1157,13 @@ export default function Members() {
             ) : (
               <div>
                 <div className="mb-4 flex items-center justify-between">
-                  <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
+                  <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]" aria-live="polite">
                     {t("members.postCount", { n: filteredTalent.length })}
                   </span>
                   <button
                     type="button"
                     onClick={() => setComposeOpen(true)}
-                    className="flex items-center gap-1.5 panel-glass-ink px-4 py-2 font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)] transition-opacity hover:opacity-80"
+                    className="flex items-center gap-1.5 panel-glass-ink px-4 py-2 font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)] transition-opacity hover:opacity-80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--inner-green)]"
                   >
                     <Tag className="size-3" /> {t("members.postCta")}
                   </button>
@@ -793,7 +1189,21 @@ export default function Members() {
           </div>
 
           {selectedMember && (
-            <MemberDetailPanel member={selectedMember} onClose={() => setSelectedMember(null)} />
+            <MemberDetailPanel
+              member={selectedMember}
+              allMembers={members}
+              talentPosts={talentPosts}
+              onClose={closeMember}
+              returnFocusRef={returnFocusRef}
+            />
+          )}
+
+          {uyeParam && !selectedMember && !isLoading && members.length > 0 && (
+            <div className="fixed bottom-4 left-1/2 z-30 -translate-x-1/2 panel-glass px-4 py-2 text-sm text-[var(--ink-muted)]">
+              <span className="inline-flex items-center gap-1.5">
+                <Lock className="size-3" /> {t("members.memberNotFound")}
+              </span>
+            </div>
           )}
         </>
       )}
