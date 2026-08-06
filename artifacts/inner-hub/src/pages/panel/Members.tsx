@@ -127,10 +127,12 @@ function MemberCard({
   member,
   view,
   onMessage,
+  onNavigate,
 }: {
   member: Member;
   view: ViewMode;
   onMessage: (e: React.MouseEvent, m: Member) => void;
+  onNavigate?: () => void;
 }) {
   const t = useT();
   const line = roleCompanyLine(member);
@@ -141,6 +143,7 @@ function MemberCard({
     return (
       <Link
         href={href}
+        onClick={() => onNavigate?.()}
         className="group flex items-center gap-3 panel-glass px-3 py-2.5 transition-colors hover:border-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--inner-green)]"
       >
         <PersonAvatar
@@ -175,6 +178,7 @@ function MemberCard({
   return (
     <Link
       href={href}
+      onClick={() => onNavigate?.()}
       className="group flex h-full flex-col panel-glass p-3.5 transition-all duration-200 hover:border-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--inner-green)]"
     >
       <div className="flex items-start gap-3">
@@ -1101,6 +1105,9 @@ export default function Members() {
                           member={member}
                           view={view}
                           onMessage={onMessage}
+                          onNavigate={() => {
+                            returnFocusRef.current = document.activeElement as HTMLElement | null;
+                          }}
                         />
                       ))}
                     </div>
@@ -1138,6 +1145,9 @@ export default function Members() {
                                 member={member}
                                 view={view}
                                 onMessage={onMessage}
+                                onNavigate={() => {
+                                  returnFocusRef.current = document.activeElement as HTMLElement | null;
+                                }}
                               />
                             ))}
                           </div>
