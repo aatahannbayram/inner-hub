@@ -316,7 +316,14 @@ function SidebarFooter({
           <div className="space-y-0.5">
         <p className="truncate text-sm font-medium text-[var(--ink)] dark:text-[#F4F1EC]">{user.name}</p>
         <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)] dark:text-white/45">
-          {user.role === "admin" ? t("common.admin") : t("common.member")}
+          {user.role === "admin" ? (
+            // "Admin" İngilizce ödünç kelime; html[lang="tr"] mirası CSS
+            // uppercase'i "i" harfini "İ" yapıyordu (S-03). lang="en" ile
+            // dotless-I korunuyor — bkz. ProductLabel'daki aynı desen.
+            <span lang="en">{t("common.admin")}</span>
+          ) : (
+            t("common.member")
+          )}
         </p>
       </div>
       {user.profileCompletionPct < 100 && (
