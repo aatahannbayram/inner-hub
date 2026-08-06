@@ -141,7 +141,10 @@ function ProductLabel({ mark, active }: { mark: string; active: boolean }) {
   return (
     <span
       lang="en"
-      className="inline-flex min-w-0 items-baseline truncate text-[13px] font-medium tracking-tight leading-none"
+      className={cn(
+        "inline-flex min-w-0 items-baseline truncate text-[13px] tracking-tight leading-none",
+        active ? "font-semibold" : "font-medium",
+      )}
     >
       <span
         className={cn(
@@ -207,7 +210,9 @@ function NavLink({ item, collapsed }: { item: NavItem; collapsed: boolean }) {
         (item.mark ? (
           <ProductLabel mark={item.mark} active={isActive} />
         ) : (
-          <span className="truncate text-[13px] font-medium tracking-tight">{label}</span>
+          <span className={cn("truncate text-[13px] tracking-tight", isActive ? "font-semibold" : "font-medium")}>
+            {label}
+          </span>
         ))}
       {!collapsed && item.badge ? (
         <span className="ml-auto font-mono text-[10px] tabular-nums opacity-70">{item.badge}</span>
