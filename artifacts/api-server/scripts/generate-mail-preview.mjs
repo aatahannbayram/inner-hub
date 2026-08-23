@@ -127,6 +127,57 @@ const previews = [
       footerNote: "İç bildirim; yalnızca ekip adresine gider.",
     }),
   },
+  {
+    id: "05-weekly-digest",
+    kind: "weekly.digest",
+    subject: "inner hub · bu hafta · 3 eşleşme",
+    html: layout({
+      preheader: "Bu hafta 3 eşleşme ve çember notları.",
+      eyebrow: "Haftalık not · 18–24 Ağu",
+      title: "Ata, bu hafta.",
+      bodyHtml: `<p style="margin:0 0 8px;">Çemberden seçilmiş, sana özel bir özet. Tek mail, Pazartesi.</p>
+      <p style="margin:28px 0 12px;font-family:ui-monospace,Menlo,monospace;font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:rgba(244,241,236,0.45);">Eşleşmeler</p>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 10px;"><tr><td style="padding:14px 16px;border:1px solid rgba(255,255,255,0.10);background:rgba(255,255,255,0.03);">
+        <p style="margin:0 0 4px;font-family:Georgia,serif;font-size:17px;color:#F4F1EC;">Selin Kaya</p>
+        <p style="margin:0 0 8px;font-family:ui-monospace,Menlo,monospace;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:rgba(244,241,236,0.45);">Yatırımcı · %88 · Atelier Fund</p>
+        <p style="margin:0;font-size:13px;line-height:1.55;color:rgba(244,241,236,0.72);">Odanla tamamlayıcı bir profil. Ortak zemin: AI, climate.</p>
+      </td></tr></table>
+      <p style="margin:28px 0 12px;font-family:ui-monospace,Menlo,monospace;font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:rgba(244,241,236,0.45);">Takvim</p>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="padding:14px 16px;border:1px solid rgba(255,255,255,0.10);background:rgba(255,255,255,0.03);">
+        <p style="margin:0 0 4px;font-family:Georgia,serif;font-size:17px;color:#F4F1EC;">Kurucu kahvaltısı</p>
+        <p style="margin:0 0 8px;font-family:ui-monospace,Menlo,monospace;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:rgba(244,241,236,0.45);">Sal 26 Ağu, 09:30</p>
+        <p style="margin:0;font-size:13px;color:rgba(244,241,236,0.72);">Beyoğlu</p>
+      </td></tr></table>`,
+      cta: { label: "Panele git", href: `${APP}/panel` },
+      footerNote: "Haftalık özet. Abonelikten çıkmak için ayarlar veya maildeki durdur bağlantısı.",
+    }),
+  },
+  {
+    id: "06-match-intro",
+    kind: "match.intro_received",
+    subject: "inner hub · tanışma talebin alındı",
+    html: layout({
+      preheader: "Selin Kaya için talebin ekibe düştü.",
+      eyebrow: "Match · tanışma",
+      title: "Talebin alındı.",
+      bodyHtml: `<p style="margin:0 0 12px;">Merhaba Ata, Selin Kaya için tanışma talebin inner ekibine iletildi.</p><p style="margin:0;">Warm intro sürecini ekip yürütür; senin ekstra bir adımın yok.</p>`,
+      cta: { label: "Match'i aç", href: `${APP}/panel/match` },
+      footerNote: "Bu ileti, yaptığın tanışma talebine yanıt olarak otomatik gönderildi.",
+    }),
+  },
+  {
+    id: "07-event-registered",
+    kind: "event.registered",
+    subject: "inner hub · kaydın alındı · Kurucu kahvaltısı",
+    html: layout({
+      preheader: "Kurucu kahvaltısı kaydın alındı.",
+      eyebrow: "Etkinlik · kayıt",
+      title: "Kurucu kahvaltısı",
+      bodyHtml: `<p style="margin:0 0 12px;">Merhaba Ata, kaydın alındı.</p><p style="margin:0 0 8px;">Tarih: <strong style="color:#F4F1EC;font-weight:500;">Sal 26 Ağu 2026, 09:30</strong></p><p style="margin:0;">Yer: Beyoğlu</p>`,
+      cta: { label: "Etkinlikler", href: `${APP}/panel/events` },
+      footerNote: "Bu ileti, etkinlik kaydına yanıt olarak otomatik gönderildi.",
+    }),
+  },
 ];
 
 mkdirSync(outDir, { recursive: true });

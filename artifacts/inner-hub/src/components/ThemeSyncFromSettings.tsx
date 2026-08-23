@@ -1,20 +1,15 @@
 import { useEffect } from "react";
-import { useApiQuery } from "@/hooks/useApiQuery";
-import { useTheme, type ThemeMode } from "@/hooks/useTheme";
+import { useTheme, PANEL_FORCED_MODE } from "@/hooks/useTheme";
 
-function isThemeMode(v: unknown): v is ThemeMode {
-  return v === "light" || v === "dark" || v === "system";
-}
-
-/** Sunucudaki prefs.theme → panel teması (localStorage ile uyumlu) */
+/**
+ * Panel light tema kapalı (P0-8): sunucu prefs.theme ne olursa olsun dark zorlanır.
+ */
 export function ThemeSyncFromSettings() {
   const { setMode } = useTheme();
-  const { data } = useApiQuery<{ prefs: { theme?: string } }>(["settings"], "/api/settings");
 
   useEffect(() => {
-    const theme = data?.prefs?.theme;
-    if (isThemeMode(theme)) setMode(theme);
-  }, [data?.prefs?.theme, setMode]);
+    setMode(PANEL_FORCED_MODE);
+  }, [setMode]);
 
   return null;
 }

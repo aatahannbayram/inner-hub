@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,SOFT,WONK,wght@0,9..144,0,0,300..900;1,9..144,0,1,300..900&family=Inter+Tight:wght@300;400;500&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,SOFT,WONK,wght@0,9..144,0,0,300..900;1,9..144,0,1,300..900&family=Inter+Tight:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "lenis/dist/lenis.css";
@@ -132,7 +132,7 @@
   --ring: 0 0% 4%;
 
   --app-font-sans: 'Inter Tight', 'Geist', sans-serif;
-  --app-font-serif: 'Fraunces', Georgia, serif;
+  --app-font-serif: 'Inter Tight', 'Geist', sans-serif;
   --app-font-mono: 'JetBrains Mono', monospace;
   --radius: 0rem;
   --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
@@ -153,6 +153,12 @@
   --panel-glass: color-mix(in srgb, var(--bone) 82%, transparent);
   --panel-glass-border: color-mix(in srgb, var(--ink) 10%, transparent);
   --panel-glass-highlight: rgba(255, 255, 255, 0.35);
+
+  /* Ters yüzeyler (highlighted plan kartı vb.) — semantik flip'ten bağımsız */
+  --surface-inverted: #0A0A0A;
+  --on-inverted: #F4F1EC;
+  --on-inverted-muted: #B8B5AF;
+  --on-inverted-success: #18FF85;
 
   /* 4px tabanlı dikey ritim */
   --space-stack-xs: 4px;
@@ -212,6 +218,12 @@
   --panel-glass: rgba(255, 255, 255, 0.045);
   --panel-glass-border: rgba(255, 255, 255, 0.1);
   --panel-glass-highlight: rgba(255, 255, 255, 0.08);
+
+  /* Dark'ta inverted = krem yüzey + koyu metin (çift flip yok) */
+  --surface-inverted: #F4F1EC;
+  --on-inverted: #0A0A0A;
+  --on-inverted-muted: #575654;
+  --on-inverted-success: #0B6B3A;
 }
 
 @layer base {
@@ -532,8 +544,8 @@
 
 .font-display {
   font-optical-sizing: auto;
-  font-variation-settings: 'opsz' 144, 'WONK' 1, 'SOFT' 0;
-  letter-spacing: -0.015em;
+  font-weight: 600;
+  letter-spacing: -0.02em;
 }
 
 .liquid-glass {

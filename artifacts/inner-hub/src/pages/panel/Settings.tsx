@@ -6,22 +6,27 @@ import { apiUrl } from "@/lib/api";
 import { ErrorState, LoadingBlock } from "@/components/panel/Skeletons";
 import { Check, Bell, Shield, Palette, Globe, LogOut, AlertTriangle, MessageCircle } from "lucide-react";
 import { useLocale, useT } from "@/i18n";
-import { useTheme, type ThemeMode } from "@/hooks/useTheme";
 
 function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
   return (
     <button
       type="button"
+      role="switch"
+      aria-checked={checked}
       onClick={() => onChange(!checked)}
       className={[
         "relative h-5 w-9 shrink-0 border transition-colors duration-150",
-        checked ? "border-[var(--ink)] bg-[var(--ink)]" : "border-[var(--ink)]/20 bg-transparent",
+        checked
+          ? "border-[var(--surface-inverted)] bg-[var(--surface-inverted)]"
+          : "border-[var(--ink)]/35 bg-transparent",
       ].join(" ")}
     >
       <span
         className={[
-          "absolute top-0.5 size-3.5 bg-[var(--bone-fixed)] transition-transform duration-150",
-          checked ? "translate-x-[18px]" : "translate-x-0.5",
+          "absolute top-0.5 size-3.5 transition-transform duration-150",
+          checked
+            ? "translate-x-[18px] bg-[var(--on-inverted)]"
+            : "translate-x-0.5 bg-[var(--ink)]",
         ].join(" ")}
       />
     </button>
@@ -168,7 +173,6 @@ function splitName(name: string | undefined) {
 export default function Settings() {
   const t = useT();
   const { setLocale } = useLocale();
-  const { setMode: setThemeMode } = useTheme();
   const { data, isLoading, isError, error, refetch } = useApiQuery<{ prefs: SettingsPrefs }>(
     ["settings"],
     "/api/settings",
@@ -189,7 +193,7 @@ export default function Settings() {
 
   useEffect(() => {
     if (data?.prefs) {
-      setPrefs({ ...DEFAULT_PREFS, ...data.prefs });
+      setPrefs({ ...DEFAULT_PREFS, ...data.prefs, theme: "dark" });
       setHydrated(true);
     }
   }, [data]);
@@ -204,11 +208,6 @@ export default function Settings() {
   const patch = <K extends keyof SettingsPrefs>(key: K, value: SettingsPrefs[K]) => {
     setPrefs((p) => ({ ...p, [key]: value }));
     setSaved(false);
-  };
-
-  const patchTheme = (v: ThemeMode) => {
-    patch("theme", v);
-    setThemeMode(v);
   };
 
   const patchMeWhatsapp = async (nextOptIn: boolean, nextPhone: string) => {
@@ -329,7 +328,7 @@ export default function Settings() {
           </div>
           <h1
             className="font-serif font-display text-4xl text-[var(--ink)] md:text-5xl"
-            style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
+            style={{ fontWeight: 600 }}
           >
             {t("settings.title")}
           </h1>
@@ -407,17 +406,6 @@ export default function Settings() {
 
       <Section icon={Palette} title={t("settings.sectionAppearance")} sub={t("settings.sectionAppearanceSub")}>
         <div className="panel-glass px-4">
-          <SettingRow label={t("settings.theme")} sub={t("settings.themeSub")}>
-            <RadioGroup<Theme>
-              options={[
-                { value: "light", label: t("settings.themeLight") },
-                { value: "dark", label: t("settings.themeDark") },
-                { value: "system", label: t("settings.themeSystem") },
-              ]}
-              value={prefs.theme}
-              onChange={(v) => patchTheme(v)}
-            />
-          </SettingRow>
           <SettingRow label={t("settings.compactMode")} sub={t("settings.compactModeSub")}>
             <Toggle checked={prefs.compactMode} onChange={(v) => patch("compactMode", v)} />
           </SettingRow>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "wouter";
 import {
   LayoutDashboard,
@@ -137,6 +137,17 @@ type PanelNavProps = {
   variant?: "scroll" | "pinned";
 };
 
+/** /panel/members vs /panel/membership gibi prefix çakışmalarını önler. */
+function isNavActive(href: string, location: string): boolean {
+  if (href === "/panel") return location === "/panel";
+  if (location === href) return true;
+  if (!location.startsWith(`${href}/`)) return false;
+  // /panel/courses/admin ve /panel/events/admin kendi nav öğelerine ait
+  if (href === "/panel/courses" && location.startsWith("/panel/courses/admin")) return false;
+  if (href === "/panel/events" && location.startsWith("/panel/events/admin")) return false;
+  return true;
+}
+
 function ProductLabel({ mark, active }: { mark: string; active: boolean }) {
   return (
     <span
@@ -165,12 +176,18 @@ function NavLink({ item, collapsed }: { item: NavItem; collapsed: boolean }) {
   const t = useT();
   const [location] = useLocation();
   const label = t(item.labelKey);
-  const isActive =
-    item.href === "/panel" ? location === "/panel" : location.startsWith(item.href);
+  const isActive = isNavActive(item.href, location);
+  const linkRef = useRef<HTMLAnchorElement>(null);
+
+  useEffect(() => {
+    if (!isActive || !linkRef.current) return;
+    linkRef.current.scrollIntoView({ block: "nearest", inline: "nearest" });
+  }, [isActive, location]);
 
   return (
     <Link
       href={item.href}
+      ref={linkRef}
       aria-current={isActive ? "page" : undefined}
       onMouseEnter={() => {
         void PREFETCH[item.href]?.();
@@ -221,13 +238,15 @@ function NavLink({ item, collapsed }: { item: NavItem; collapsed: boolean }) {
   );
 }
 
+/** İngilizce bölüm başlıkları — CSS uppercase tr bağlamında İ bozar. */
+const EN_SECTION_TITLES = new Set(["nav.sectionAdmin", "nav.sectionPlatform"]);
+
 function Section({ section, collapsed }: { section: NavSection; collapsed: boolean }) {
   const t = useT();
   const [location] = useLocation();
-  const hasActiveChild = section.items.some((item) =>
-    item.href === "/panel" ? location === "/panel" : location.startsWith(item.href),
-  );
+  const hasActiveChild = section.items.some((item) => isNavActive(item.href, location));
   const [open, setOpen] = useState(hasActiveChild);
+  const titleLang = EN_SECTION_TITLES.has(section.titleKey) ? "en" : undefined;
 
   // hasActiveChild yalnızca başlangıç durumunu belirler (aktif sayfanın grubu
   // otomatik açık gelsin); sonrasında kullanıcı `open` ile kapatabilmeli —
@@ -244,7 +263,10 @@ function Section({ section, collapsed }: { section: NavSection; collapsed: boole
             aria-expanded={showItems}
             className="mb-2 flex w-full items-center justify-between px-2.5 py-1 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--inner-green)]"
           >
-            <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-[var(--ink-muted)] dark:text-white/40">
+            <span
+              lang={titleLang}
+              className="font-mono text-[9px] uppercase tracking-[0.2em] text-[var(--ink-muted)] dark:text-white/40"
+            >
               {t(section.titleKey)}
             </span>
             <ChevronDown
@@ -255,7 +277,10 @@ function Section({ section, collapsed }: { section: NavSection; collapsed: boole
             />
           </button>
         ) : (
-          <p className="mb-2 px-2.5 font-mono text-[9px] uppercase tracking-[0.2em] text-[var(--ink-muted)] dark:text-white/40">
+          <p
+            lang={titleLang}
+            className="mb-2 px-2.5 font-mono text-[9px] uppercase tracking-[0.2em] text-[var(--ink-muted)] dark:text-white/40"
+          >
             {t(section.titleKey)}
           </p>
         )

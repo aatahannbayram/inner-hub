@@ -6,12 +6,9 @@
  * harf/rakamları da yer (başlıklar · · · · olur).
  */
 
-const SEP = /[\u2010-\u2015\u2212\uFE58\uFE63\uFF0D-]/; // tire çeşitleri, tek başına
-
 export function isDecorativeLabel(text: string | null | undefined): boolean {
   const t = (text ?? "").trim();
   if (!t) return true;
-  // Salt ayırıcı / nokta süsü
   return /^[\s·.•\u2010-\u2015\u2212\uFE58\uFE63\uFF0D-]+$/u.test(t);
 }
 

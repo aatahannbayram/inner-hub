@@ -366,7 +366,7 @@ function StageStat({ value, label }: { value: string | number; label: string }) 
     <div className="panel-glass px-4 py-3">
       <p
         className="font-display font-serif text-2xl leading-none text-[var(--ink)]"
-        style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 400 }}
+        style={{ fontWeight: 500 }}
       >
         {value}
       </p>
@@ -548,7 +548,7 @@ function ProductCard({
             }}
             className="hit-40 mt-0.5 inline-flex items-center gap-1 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)] transition-colors hover:text-[var(--ink)]"
           >
-            {expanded ? t("stage.showLess") : t("stage.readMore")}
+            {expanded ? t("stage.showLess") : t("stage.showMore")}
             {expanded ? <ChevronDown className="size-3" /> : <ChevronRight className="size-3" />}
           </button>
         )}
@@ -705,7 +705,7 @@ function ProductDetailPanel({
               <div className="flex flex-wrap items-center gap-1.5">
                 <p
                   className="font-serif text-xl text-[var(--ink)]"
-                  style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
+                  style={{ fontWeight: 600 }}
                 >
                   {product.title}
                 </p>
@@ -1174,7 +1174,7 @@ function SubmitDialog({
           </p>
           <DialogTitle
             className="font-serif text-2xl font-normal text-[var(--ink)]"
-            style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
+            style={{ fontWeight: 600 }}
           >
             {t("stage.submit")}
           </DialogTitle>
@@ -1460,7 +1460,7 @@ export default function Stage() {
           </div>
           <h1
             className="font-serif font-display text-4xl text-[var(--ink)] md:text-5xl"
-            style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
+            style={{ fontWeight: 600 }}
           >
             {t("stage.title")}
           </h1>

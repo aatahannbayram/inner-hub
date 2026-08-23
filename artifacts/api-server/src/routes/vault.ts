@@ -63,6 +63,7 @@ function canAccess(
 }
 
 async function ensureVaultSeed(adminUserId: number) {
+  if (process.env.NODE_ENV === "production") return;
   const [row] = await db.select({ id: vaultDocumentsTable.id }).from(vaultDocumentsTable).limit(1);
   if (row) {
     // Mevcut demo başlıklarındaki em dash temizliği
@@ -278,8 +279,34 @@ router.put("/vault/:id/file", requireAuth, async (req, res) => {
   }
 });
 
-// ─── GET /api/vault/:id/file ─────────────────────────────────────────────────
-router.get("/vault/:id/file", requireAuth, async (req, res) => {
+async function loadVaultDoc(id: number) {
+  const [doc] = await db
+    .select()
+    .from(vaultDocumentsTable)
+    .where(eq(vaultDocumentsTable.id, id))
+    .limit(1);
+  return doc ?? null;
+}
+
+function sendVaultBuffer(
+  res: import("express").Response,
+  doc: typeof vaultDocumentsTable.$inferSelect,
+  buffer: Buffer,
+  disposition: "inline" | "attachment",
+) {
+  const downloadName = (doc.fileName || "vault-file").replace(/[\r\n"]/g, "");
+  res.setHeader("Content-Type", doc.mimeType || "application/octet-stream");
+  res.setHeader("Content-Length", String(buffer.length));
+  res.setHeader(
+    "Content-Disposition",
+    `${disposition}; filename*=UTF-8''${encodeURIComponent(downloadName)}`,
+  );
+  res.setHeader("Cache-Control", "private, max-age=60");
+  res.send(buffer);
+}
+
+// ─── GET /api/vault/:id/view ─────────────────────────────────────────────────
+router.get("/vault/:id/view", requireAuth, async (req, res) => {
   try {
     await ensureVaultCapitalSchema();
     const userId = req.user!.id;
@@ -289,13 +316,13 @@ router.get("/vault/:id/file", requireAuth, async (req, res) => {
       return;
     }
 
-    const [doc] = await db
-      .select()
-      .from(vaultDocumentsTable)
-      .where(eq(vaultDocumentsTable.id, id))
-      .limit(1);
-    if (!doc || !canAccess(doc, userId)) {
+    const doc = await loadVaultDoc(id);
+    if (!doc) {
       res.status(404).json({ error: "Belge bulunamadı" });
+      return;
+    }
+    if (!canAccess(doc, userId)) {
+      res.status(403).json({ error: "Bu belgeye erişim yetkiniz yok" });
       return;
     }
     if (!doc.fileKey) {
@@ -309,15 +336,44 @@ router.get("/vault/:id/file", requireAuth, async (req, res) => {
       .set({ views: (doc.views ?? 0) + 1, updatedAt: doc.updatedAt })
       .where(eq(vaultDocumentsTable.id, id));
 
-    const downloadName = (doc.fileName || "vault-file").replace(/[\r\n"]/g, "");
-    res.setHeader("Content-Type", doc.mimeType || "application/octet-stream");
-    res.setHeader("Content-Length", String(buffer.length));
-    res.setHeader(
-      "Content-Disposition",
-      `attachment; filename*=UTF-8''${encodeURIComponent(downloadName)}`,
-    );
-    res.setHeader("Cache-Control", "private, max-age=60");
-    res.send(buffer);
+    sendVaultBuffer(res, doc, buffer, "inline");
+  } catch (err: any) {
+    res.status(500).json({ error: err.message ?? "Belge görüntülenemedi" });
+  }
+});
+
+// ─── GET /api/vault/:id/file ─────────────────────────────────────────────────
+router.get("/vault/:id/file", requireAuth, async (req, res) => {
+  try {
+    await ensureVaultCapitalSchema();
+    const userId = req.user!.id;
+    const id = Number(req.params.id);
+    if (!Number.isFinite(id)) {
+      res.status(400).json({ error: "Geçersiz id" });
+      return;
+    }
+
+    const doc = await loadVaultDoc(id);
+    if (!doc) {
+      res.status(404).json({ error: "Belge bulunamadı" });
+      return;
+    }
+    if (!canAccess(doc, userId)) {
+      res.status(403).json({ error: "Bu belgeye erişim yetkiniz yok" });
+      return;
+    }
+    if (!doc.fileKey) {
+      res.status(404).json({ error: "Bu belgede dosya yok" });
+      return;
+    }
+
+    const buffer = await readVaultFile(doc.fileKey);
+    await db
+      .update(vaultDocumentsTable)
+      .set({ views: (doc.views ?? 0) + 1, updatedAt: doc.updatedAt })
+      .where(eq(vaultDocumentsTable.id, id));
+
+    sendVaultBuffer(res, doc, buffer, "attachment");
   } catch (err: any) {
     res.status(500).json({ error: err.message ?? "Dosya indirilemedi" });
   }

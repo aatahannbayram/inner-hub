@@ -58,6 +58,9 @@ export const ensureLiveSessionColumns = once(async () => {
 
   await db.execute(sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS format text DEFAULT 'in_person'`);
   await db.execute(sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS meet_url text`);
+  await db.execute(sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS external_url text`);
+  await db.execute(sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS organizer text`);
+  await db.execute(sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS cover_url text`);
   await db.execute(sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS audience text DEFAULT 'all'`);
   await db.execute(sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS pass_cost integer DEFAULT 1`);
   await db.execute(sql`UPDATE events SET format = 'in_person' WHERE format IS NULL`);
@@ -233,6 +236,19 @@ export const ensureStageSchema = once(async () => {
     CREATE UNIQUE INDEX IF NOT EXISTS live_notify_log_uidx
       ON live_notify_log (ref_type, ref_id, kind)
   `);
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS mail_send_log (
+      id serial PRIMARY KEY,
+      user_id integer NOT NULL REFERENCES users(id),
+      kind text NOT NULL,
+      period_key text NOT NULL,
+      created_at timestamp NOT NULL DEFAULT now()
+    )
+  `);
+  await db.execute(sql`
+    CREATE UNIQUE INDEX IF NOT EXISTS mail_send_log_uidx
+      ON mail_send_log (user_id, kind, period_key)
+  `);
   await db.execute(sql`ALTER TABLE stage_products ADD COLUMN IF NOT EXISTS featured boolean NOT NULL DEFAULT false`);
   await db.execute(sql`ALTER TABLE stage_products ADD COLUMN IF NOT EXISTS image_url text`);
   await db.execute(sql`ALTER TABLE stage_products ADD COLUMN IF NOT EXISTS product_hunt_url text`);
@@ -314,9 +330,11 @@ export const ensureVaultCapitalSchema = once(async () => {
       created_at timestamp NOT NULL DEFAULT now()
     )
   `);
+  await db.execute(sql`ALTER TABLE capital_spvs ADD COLUMN IF NOT EXISTS closing_date timestamp`);
+  await db.execute(sql`ALTER TABLE capital_spvs ADD COLUMN IF NOT EXISTS status text NOT NULL DEFAULT 'open'`);
 });
 
-/** Talent board ilanları. */
+/** Talent board ilanları + başvurular. */
 export const ensureTalentSchema = once(async () => {
   await db.execute(sql`
     CREATE TABLE IF NOT EXISTS talent_posts (
@@ -328,6 +346,28 @@ export const ensureTalentSchema = once(async () => {
       tags text,
       created_at timestamp NOT NULL DEFAULT now()
     )
+  `);
+  await db.execute(sql`ALTER TABLE talent_posts ADD COLUMN IF NOT EXISTS status text NOT NULL DEFAULT 'open'`);
+  await db.execute(sql`ALTER TABLE talent_posts ADD COLUMN IF NOT EXISTS image_url text`);
+  await db.execute(sql`ALTER TABLE talent_posts ADD COLUMN IF NOT EXISTS company text`);
+  await db.execute(sql`ALTER TABLE talent_posts ADD COLUMN IF NOT EXISTS location text`);
+  await db.execute(sql`ALTER TABLE talent_posts ADD COLUMN IF NOT EXISTS employment_type text`);
+  await db.execute(sql`ALTER TABLE talent_posts ADD COLUMN IF NOT EXISTS link text`);
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS talent_applications (
+      id serial PRIMARY KEY,
+      post_id integer NOT NULL REFERENCES talent_posts(id) ON DELETE CASCADE,
+      user_id integer NOT NULL REFERENCES users(id),
+      message text,
+      status text NOT NULL DEFAULT 'pending',
+      invoice_ref text,
+      created_at timestamp NOT NULL DEFAULT now(),
+      updated_at timestamp NOT NULL DEFAULT now()
+    )
+  `);
+  await db.execute(sql`
+    CREATE UNIQUE INDEX IF NOT EXISTS talent_applications_post_user_uidx
+    ON talent_applications (post_id, user_id)
   `);
 });
 

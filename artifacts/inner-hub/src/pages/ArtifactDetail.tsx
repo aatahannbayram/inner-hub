@@ -122,7 +122,6 @@ export default function ArtifactDetailPage() {
 
         <h1
           className="font-display font-serif italic text-3xl leading-[1.15] sm:text-4xl md:text-5xl"
-          style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1" }}
         >
           {copy.title}
         </h1>

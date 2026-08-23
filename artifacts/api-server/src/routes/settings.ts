@@ -55,10 +55,7 @@ export function parseSettingsPrefs(raw: string | null | undefined): SettingsPref
       showOnline: parsed.showOnline !== false,
       allowMatch: parsed.allowMatch !== false,
       analyticsConsent: parsed.analyticsConsent !== false,
-      theme:
-        parsed.theme === "dark" || parsed.theme === "system" || parsed.theme === "light"
-          ? parsed.theme
-          : "dark",
+      theme: "dark",
       lang: parsed.lang === "en" ? "en" : "tr",
       compactMode: parsed.compactMode === true,
       onboardingCompleted: parsed.onboardingCompleted === true,
@@ -78,6 +75,37 @@ export async function getUserSettingsPrefs(userId: number): Promise<SettingsPref
   return parseSettingsPrefs(user?.settingsPrefs);
 }
 
+export async function patchUserSettingsPrefs(
+  userId: number,
+  patch: Partial<SettingsPrefs>,
+): Promise<SettingsPrefs> {
+  await ensureUserProfileColumns();
+  const [existing] = await db
+    .select({ settingsPrefs: usersTable.settingsPrefs })
+    .from(usersTable)
+    .where(eq(usersTable.id, userId))
+    .limit(1);
+
+  let journeyBlob: unknown;
+  try {
+    const raw = existing?.settingsPrefs ? JSON.parse(existing.settingsPrefs) : {};
+    journeyBlob = raw?.journey;
+  } catch {
+    journeyBlob = undefined;
+  }
+
+  const prefs = { ...parseSettingsPrefs(existing?.settingsPrefs), ...patch };
+  const stored = {
+    ...prefs,
+    ...(journeyBlob !== undefined ? { journey: journeyBlob } : {}),
+  };
+  await db
+    .update(usersTable)
+    .set({ settingsPrefs: JSON.stringify(stored) })
+    .where(eq(usersTable.id, userId));
+  return prefs;
+}
+
 function sanitizeBody(body: any): SettingsPrefs {
   const base = { ...DEFAULT_SETTINGS_PREFS };
   if (!body || typeof body !== "object") return base;
@@ -91,10 +119,7 @@ function sanitizeBody(body: any): SettingsPrefs {
     showOnline: body.showOnline !== false,
     allowMatch: body.allowMatch !== false,
     analyticsConsent: body.analyticsConsent !== false,
-    theme:
-      body.theme === "dark" || body.theme === "system" || body.theme === "light"
-        ? body.theme
-        : "dark",
+    theme: "dark",
     lang: body.lang === "en" ? "en" : "tr",
     compactMode: body.compactMode === true,
     onboardingCompleted: body.onboardingCompleted === true,

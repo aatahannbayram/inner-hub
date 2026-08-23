@@ -1,29 +1,80 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, LayoutDashboard, Users, CalendarDays, BookOpen } from "lucide-react";
+import { Link } from "wouter";
 import { useT } from "@/i18n";
+
+const POPULAR = [
+  { href: "/panel", icon: LayoutDashboard, key: "shell.dashboard" as const, fallback: "Dashboard" },
+  { href: "/panel/members", icon: Users, key: "shell.members" as const, fallback: "Üyeler" },
+  { href: "/panel/events", icon: CalendarDays, key: "shell.events" as const, fallback: "Etkinlikler" },
+  { href: "/panel/courses", icon: BookOpen, key: "shell.courses" as const, fallback: "Kurslar" },
+];
 
 export default function NotFound() {
   const t = useT();
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-gray-50">
-      <Card className="w-full max-w-md mx-4">
-        <CardContent className="pt-6">
-          <div className="flex mb-4 gap-2">
-            <AlertCircle className="h-8 w-8 text-red-500" />
-            <h1 className="text-2xl font-bold text-gray-900">{t("notFound.title")}</h1>
+    <div className="flex min-h-screen w-full items-center justify-center bg-[var(--bone)] px-4 text-[var(--ink)]">
+      <div className="panel-glass w-full max-w-lg p-6 sm:p-8">
+        <div className="mb-4 flex items-start gap-3">
+          <AlertCircle className="mt-0.5 size-8 shrink-0 text-[var(--error-ink)]" />
+          <div>
+            <h1 className="font-sans text-2xl font-medium tracking-[-0.02em] text-[var(--ink)]">
+              {t("notFound.title")}
+            </h1>
+            <p className="mt-2 text-[15px] leading-relaxed text-[var(--ink-body)]">{t("notFound.body")}</p>
           </div>
+        </div>
 
-          <p className="mt-4 text-sm text-gray-600">{t("notFound.body")}</p>
+        <label className="mt-6 block">
+          <span className="mb-1.5 block font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)]">
+            {t("search.open")}
+          </span>
+          <input
+            type="search"
+            placeholder={t("search.placeholder")}
+            className="w-full border border-[var(--ink)]/15 bg-transparent px-3 py-2.5 text-sm text-[var(--ink)] placeholder:text-[var(--ink-muted)] focus:outline focus:outline-2 focus:outline-[var(--inner-green)]"
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                const q = (e.target as HTMLInputElement).value.trim();
+                window.location.href = q ? `/panel?q=${encodeURIComponent(q)}` : "/panel";
+              }
+            }}
+          />
+        </label>
 
-          <a
-            href="/"
-            className="mt-6 inline-block text-sm font-medium text-gray-900 underline underline-offset-2 hover:opacity-70"
-          >
-            {t("notFound.backHome")}
-          </a>
-        </CardContent>
-      </Card>
+        <p className="mt-6 mb-2 font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)]">
+          Popüler
+        </p>
+        <ul className="grid grid-cols-2 gap-2">
+          {POPULAR.map((item) => {
+            const Icon = item.icon;
+            let label = item.fallback;
+            try {
+              label = t(item.key);
+            } catch {
+              /* keep fallback */
+            }
+            return (
+              <li key={item.href}>
+                <Link
+                  href={item.href}
+                  className="flex min-h-11 items-center gap-2 border border-[var(--ink)]/10 px-3 py-2 text-sm text-[var(--ink)] hover:border-[var(--ink)]/25"
+                >
+                  <Icon className="size-3.5 text-[var(--ink-body)]" />
+                  {label}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+
+        <Link
+          href="/"
+          className="mt-6 inline-block font-mono text-[11px] uppercase tracking-widest text-[var(--ink)] underline underline-offset-4 hover:text-[var(--inner-green)]"
+        >
+          {t("notFound.backHome")}
+        </Link>
+      </div>
     </div>
   );
 }

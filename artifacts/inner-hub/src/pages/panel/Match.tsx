@@ -18,10 +18,17 @@ interface Match {
   score: number;
   why: string;
   commonGround: string[];
+  userId?: number;
+  handle?: string | null;
+  avatarUrl?: string | null;
 }
 
 interface MatchData {
   matches: Match[];
+  empty?: boolean;
+  insufficientProfiles?: boolean;
+  minRequired?: number;
+  available?: number;
 }
 
 const TYPE_CONFIG: Record<Match["matchType"], { color: string; bg: string; border: string }> = {
@@ -98,6 +105,7 @@ function MatchCard({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           targetName: match.name,
+          targetUserId: match.userId,
           targetCompany: match.company,
           matchType: match.matchType,
           reason: match.why,
@@ -130,12 +138,13 @@ function MatchCard({
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
             <div>
-              <p
-                className="font-display font-serif text-lg leading-tight text-[var(--ink)]"
-                style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 400 }}
+              <a
+                href={match.userId ? `/panel/members?uye=${match.userId}` : "/panel/members"}
+                className="font-display font-serif text-lg leading-tight text-[var(--ink)] hover:text-[var(--inner-green)]"
+                style={{ fontWeight: 500 }}
               >
                 {cleanDisplayText(match.name)}
-              </p>
+              </a>
               <p className="mt-0.5 text-xs text-[var(--ink-muted)]">
                 {match.company ? cleanDisplayText(match.company) : "·"}
               </p>
@@ -252,7 +261,6 @@ function MatchHero({ matchCount }: { matchCount: number }) {
             <AnimatedHeading
               text={t("match.heroTitle")}
               className="mb-4 font-display font-serif italic text-3xl leading-[1.1] text-white [text-shadow:0_2px_24px_rgba(0,0,0,0.55)] sm:text-4xl md:text-5xl lg:text-6xl"
-              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1" }}
             />
             <FadeIn delay={0.8}>
               <p className="mb-6 max-w-[46ch] text-sm text-white/75 [text-shadow:0_1px_12px_rgba(0,0,0,0.6)] sm:text-base md:text-lg">
@@ -429,13 +437,28 @@ export default function Match() {
         </LoadingBlock>
       ) : error ? (
         <ErrorState message={error} onRetry={fetchMatches} />
-      ) : data?.matches ? (
+      ) : data?.insufficientProfiles || data?.empty ? (
+        <div className="panel-glass space-y-3 p-6">
+          <p className="text-[15px] text-[var(--ink)]">
+            Eşleşme için en az {data.minRequired ?? 3} tamamlanmış profil gerekiyor — profilini tamamla.
+          </p>
+          <p className="text-sm text-[var(--ink-body)]">
+            Şu an {data.available ?? 0} tamamlanmış profil var. Sahte persona gösterilmez.
+          </p>
+          <a
+            href="/panel/profile"
+            className="inline-flex min-h-10 items-center gap-2 bg-[var(--ink)] px-4 py-2 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)]"
+          >
+            Profili tamamla
+          </a>
+        </div>
+      ) : data?.matches && data.matches.length > 0 ? (
         <>
           <div id="match-results" className="scroll-mt-6">
             <div className="mb-4 flex flex-col gap-1 border-t border-[var(--ink)]/[0.08] pt-4 sm:flex-row sm:items-baseline sm:justify-between">
               <h2
                 className="font-display font-serif text-xl text-[var(--ink)]"
-                style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 400 }}
+                style={{ fontWeight: 500 }}
               >
                 {t("match.countLabel", { n: data.matches.length })}
               </h2>
@@ -457,7 +480,7 @@ export default function Match() {
           <div className="panel-glass p-5 sm:p-6 md:p-8">
             <h2
               className="mb-6 font-display font-serif text-lg text-[var(--ink)]"
-              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 400 }}
+              style={{ fontWeight: 500 }}
             >
               {t("match.howItWorks")}
             </h2>
@@ -465,7 +488,7 @@ export default function Match() {
               <div className="sm:pr-6">
                 <span
                   className="mb-1.5 block font-display font-serif text-base text-[var(--ink)]"
-                  style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 400 }}
+                  style={{ fontWeight: 500 }}
                 >
                   {t("match.step1Title")}
                 </span>
@@ -474,7 +497,7 @@ export default function Match() {
               <div className="sm:px-6">
                 <span
                   className="mb-1.5 block font-display font-serif text-base text-[var(--ink)]"
-                  style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 400 }}
+                  style={{ fontWeight: 500 }}
                 >
                   {t("match.step2Title")}
                 </span>
@@ -483,7 +506,7 @@ export default function Match() {
               <div className="sm:pl-6">
                 <span
                   className="mb-1.5 block font-display font-serif text-base text-[var(--ink)]"
-                  style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 400 }}
+                  style={{ fontWeight: 500 }}
                 >
                   {t("match.step3Title")}
                 </span>

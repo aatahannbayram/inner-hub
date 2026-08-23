@@ -14,6 +14,10 @@ import {
   List,
   Lock,
   ChevronDown,
+  Building2,
+  MapPin,
+  Briefcase,
+  ExternalLink,
 } from "lucide-react";
 import { FadeIn } from "@/components/FadeIn";
 import { Link, useLocation, useSearch } from "wouter";
@@ -25,6 +29,7 @@ import { norm } from "@/lib/text";
 import { useApiQuery } from "@/hooks/useApiQuery";
 import { apiUrl } from "@/lib/api";
 import { LoadingBlock, ErrorState, CourseCardSkeleton } from "@/components/panel/Skeletons";
+import { CoverImageField } from "@/components/panel/CoverImageField";
 import {
   Drawer,
   DrawerContent,
@@ -56,6 +61,21 @@ interface Member {
   isAvailable?: boolean;
 }
 
+interface TalentApplicationRow {
+  id: number;
+  status: string;
+  message: string | null;
+  invoiceRef: string | null;
+  createdAt: string;
+  applicant: {
+    id: number;
+    name: string;
+    initials: string;
+    company: string | null;
+    handle: string | null;
+  };
+}
+
 interface TalentPost {
   id: number;
   postedBy: string;
@@ -66,8 +86,22 @@ interface TalentPost {
   role: string;
   description: string;
   tags: string[];
+  imageUrl?: string | null;
+  company?: string | null;
+  location?: string | null;
+  employmentType?: "full_time" | "part_time" | "contract" | "internship" | null;
+  link?: string | null;
   postedAt: string;
+  status?: string;
   mine?: boolean;
+  applicationCount?: number;
+  myApplication?: {
+    id: number;
+    status: string;
+    invoiceRef: string | null;
+    createdAt: string;
+  } | null;
+  applications?: TalentApplicationRow[];
 }
 
 function memberHaystack(m: Member): string {
@@ -191,7 +225,7 @@ function MemberCard({
         <div className="min-w-0 flex-1">
           <p
             className="flex items-center gap-1.5 truncate font-serif text-base leading-snug text-[var(--ink)]"
-            style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
+            style={{ fontWeight: 600 }}
           >
             <span className="truncate">{member.name}</span>
             {member.linkedinConnected && (
@@ -208,7 +242,7 @@ function MemberCard({
       </div>
 
       {member.bio ? (
-        <p className="mt-2.5 line-clamp-2 flex-1 text-sm leading-relaxed text-[var(--ink-muted)]">{member.bio}</p>
+        <p className="mt-2.5 line-clamp-3 flex-1 text-sm leading-relaxed text-[var(--ink-muted)]">{member.bio}</p>
       ) : (
         <div className="flex-1" />
       )}
@@ -345,7 +379,7 @@ function MemberDetailPanel({
               <p
                 id="member-drawer-title"
                 className="font-serif text-lg text-[var(--ink)]"
-                style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
+                style={{ fontWeight: 600 }}
               >
                 {member.name}
               </p>
@@ -385,7 +419,7 @@ function MemberDetailPanel({
                 rel="noopener noreferrer"
                 className="col-span-2 inline-flex items-center gap-2 panel-glass p-3 font-mono text-label uppercase tracking-widest text-[var(--ink-body)] hover:text-[var(--ink)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--inner-green)]"
               >
-                <Linkedin className="size-3.5" /> LinkedIn
+                <Linkedin className="size-3.5" /> <span lang="en">LinkedIn</span>
               </a>
             )}
           </div>
@@ -481,13 +515,20 @@ function MemberDetailPanel({
 
 function TalentCard({
   post,
-  onDeleted,
+  onChanged,
 }: {
   post: TalentPost;
-  onDeleted: () => void;
+  onChanged: () => void;
 }) {
   const t = useT();
   const [busy, setBusy] = useState(false);
+  const [showApps, setShowApps] = useState(false);
+  const [applyMsg, setApplyMsg] = useState("");
+  const [hireInvoice, setHireInvoice] = useState<Record<number, string>>({});
+  const [error, setError] = useState<string | null>(null);
+
+  const myStatus = post.myApplication?.status;
+  const canApply = !post.mine && !post.myApplication && post.status !== "filled" && post.status !== "closed";
 
   const remove = async () => {
     if (!post.mine || busy) return;
@@ -501,7 +542,7 @@ function TalentCard({
         const json = await res.json().catch(() => ({}));
         throw new Error(json.error ?? "Silinemedi");
       }
-      onDeleted();
+      onChanged();
     } catch {
       /* keep card */
     } finally {
@@ -509,48 +550,267 @@ function TalentCard({
     }
   };
 
+  const apply = async () => {
+    if (!canApply || busy) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await fetch(apiUrl(`/api/talent/${post.id}/apply`), {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: applyMsg.trim() || undefined }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json.error ?? t("members.applyFailed"));
+      setApplyMsg("");
+      onChanged();
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : t("members.applyFailed"));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const setAppStatus = async (appId: number, status: "shortlisted" | "hired" | "rejected") => {
+    if (busy) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const body: { status: string; invoiceRef?: string } = { status };
+      if (status === "hired") {
+        const ref = (hireInvoice[appId] ?? "").trim();
+        if (ref) body.invoiceRef = ref;
+      }
+      const res = await fetch(apiUrl(`/api/talent/applications/${appId}`), {
+        method: "PATCH",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json.error ?? "Güncellenemedi");
+      onChanged();
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Güncellenemedi");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const statusLabel = (status: string) => {
+    if (status === "shortlisted") return t("members.applyShortlisted");
+    if (status === "hired") return t("members.applyHired");
+    if (status === "rejected") return t("members.applyRejected");
+    return t("members.applyPending");
+  };
+
+  const employmentLabel = (v: TalentPost["employmentType"]) => {
+    if (v === "full_time") return t("members.employmentFullTime");
+    if (v === "part_time") return t("members.employmentPartTime");
+    if (v === "contract") return t("members.employmentContract");
+    if (v === "internship") return t("members.employmentInternship");
+    return null;
+  };
+
   return (
-    <div className="panel-glass p-4 sm:p-5 transition-all duration-200 hover:border-white/20">
-      <div className="mb-3 flex items-start justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-2.5">
-          <PersonAvatar name={post.postedBy} initials={post.postedByInitials} className="size-8 shrink-0 text-label" />
-          <div className="min-w-0">
-            <p className="truncate text-sm font-medium text-[var(--ink)]">{post.postedBy}</p>
-            {post.postedByCompany ? (
-              <p className="truncate text-sm text-[var(--ink-muted)]">{post.postedByCompany}</p>
-            ) : null}
+    <div className="overflow-hidden panel-glass transition-all duration-200 hover:border-white/20">
+      {post.imageUrl && (
+        <img
+          src={post.imageUrl}
+          alt=""
+          className="aspect-[21/9] w-full object-cover"
+        />
+      )}
+      <div className="p-4 sm:p-5">
+        <div className="mb-3 flex items-start justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-2.5">
+            <PersonAvatar name={post.postedBy} initials={post.postedByInitials} className="size-8 shrink-0 text-label" />
+            <div className="min-w-0">
+              <p className="truncate text-sm font-medium text-[var(--ink)]">{post.postedBy}</p>
+              {post.postedByCompany ? (
+                <p className="truncate text-sm text-[var(--ink-muted)]">{post.postedByCompany}</p>
+              ) : null}
+            </div>
+          </div>
+          <div className="flex shrink-0 flex-col items-end gap-1">
+            <span
+              className={cn(
+                "border px-2 py-0.5 font-mono text-label uppercase tracking-widest",
+                post.type === "arıyor"
+                  ? "border-[var(--ink)]/15 text-[var(--ink-muted)]"
+                  : "border-[var(--inner-green)]/30 bg-[var(--inner-green)]/10 text-[var(--ink-body)]",
+              )}
+            >
+              {post.type === "arıyor" ? t("members.typeSeeking") : t("members.typeOffering")}
+            </span>
+            {post.status === "filled" && (
+              <span className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink-subtle)]">
+                {t("members.statusFilled")}
+              </span>
+            )}
           </div>
         </div>
-        <span
-          className={cn(
-            "shrink-0 border px-2 py-0.5 font-mono text-label uppercase tracking-widest",
-            post.type === "arıyor"
-              ? "border-[var(--ink)]/15 text-[var(--ink-muted)]"
-              : "border-[var(--inner-green)]/30 bg-[var(--inner-green)]/10 text-[var(--ink-body)]",
-          )}
+
+        <p
+          className="mb-1.5 font-serif text-base leading-snug text-[var(--ink)]"
+          style={{ fontWeight: 600 }}
         >
-          {post.type === "arıyor" ? t("members.typeSeeking") : t("members.typeOffering")}
-        </span>
-      </div>
+          {cleanDisplayText(post.role)}
+        </p>
 
-      <p
-        className="mb-1.5 font-serif text-base leading-snug text-[var(--ink)]"
-        style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
-      >
-        {cleanDisplayText(post.role)}
-      </p>
-      <p className="mb-3 text-sm leading-relaxed text-[var(--ink-muted)]">{post.description}</p>
+        {(post.company || post.location || post.employmentType) && (
+          <div className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[var(--ink-muted)]">
+            {post.company && (
+              <span className="inline-flex items-center gap-1">
+                <Building2 className="size-3 shrink-0" />
+                {post.company}
+              </span>
+            )}
+            {post.location && (
+              <span className="inline-flex items-center gap-1">
+                <MapPin className="size-3 shrink-0" />
+                {post.location}
+              </span>
+            )}
+            {post.employmentType && (
+              <span className="inline-flex items-center gap-1">
+                <Briefcase className="size-3 shrink-0" />
+                {employmentLabel(post.employmentType)}
+              </span>
+            )}
+          </div>
+        )}
 
-      <div className="mb-4 flex flex-wrap gap-1">
-        {post.tags.slice(0, 3).map((tag) => (
-          <span
-            key={tag}
-            className="max-w-[9rem] truncate panel-glass px-1.5 py-0.5 font-mono text-label tracking-wide text-[var(--ink-body)]"
+        <p className="mb-3 text-sm leading-relaxed text-[var(--ink-muted)]">{post.description}</p>
+
+        {post.link && (
+          <a
+            href={post.link}
+            target="_blank"
+            rel="noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="mb-3 inline-flex items-center gap-1 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)] transition-colors hover:text-[var(--ink)]"
           >
-            {tag}
-          </span>
-        ))}
-      </div>
+            {t("common.open")} <ExternalLink className="size-3" />
+          </a>
+        )}
+
+        <div className="mb-4 flex flex-wrap gap-1">
+          {post.tags.slice(0, 3).map((tag) => (
+            <span
+              key={tag}
+              className="max-w-[9rem] truncate panel-glass px-1.5 py-0.5 font-mono text-label tracking-wide text-[var(--ink-body)]"
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
+
+      {canApply && (
+        <div className="mb-3 space-y-2">
+          <input
+            type="text"
+            value={applyMsg}
+            onChange={(e) => setApplyMsg(e.target.value)}
+            placeholder={t("members.applyMessagePh")}
+            className="w-full border border-[var(--ink)]/15 bg-transparent px-3 py-2 text-sm text-[var(--ink)] placeholder:text-[var(--ink-subtle)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--inner-green)]"
+          />
+          <button
+            type="button"
+            onClick={() => void apply()}
+            disabled={busy}
+            className="flex w-full items-center justify-center gap-1.5 panel-glass-ink px-3 py-2 font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)] disabled:opacity-40"
+          >
+            {t("members.applyCta")}
+          </button>
+        </div>
+      )}
+
+      {myStatus && (
+        <p className="mb-3 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
+          {t("members.applyDone")} · {statusLabel(myStatus)}
+        </p>
+      )}
+
+      {post.mine && (post.applications?.length ?? 0) > 0 && (
+        <div className="mb-3 border-t border-[var(--ink)]/[0.08] pt-3">
+          <button
+            type="button"
+            onClick={() => setShowApps((v) => !v)}
+            className="flex w-full items-center justify-between gap-2 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]"
+          >
+            <span>{t("members.manageApps")}</span>
+            <span>{t("members.applicationsLabel", { n: post.applicationCount ?? 0 })}</span>
+          </button>
+          {showApps && (
+            <ul className="mt-3 space-y-3">
+              {(post.applications ?? []).map((app) => (
+                <li key={app.id} className="panel-glass p-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <p className="text-sm text-[var(--ink)]">{app.applicant.name}</p>
+                      <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)]">
+                        {statusLabel(app.status)}
+                      </p>
+                      {app.message ? (
+                        <p className="mt-1 text-xs text-[var(--ink-muted)]">{app.message}</p>
+                      ) : null}
+                    </div>
+                  </div>
+                  {app.status !== "hired" && app.status !== "rejected" && (
+                    <div className="mt-2 space-y-2">
+                      <input
+                        type="text"
+                        value={hireInvoice[app.id] ?? ""}
+                        onChange={(e) =>
+                          setHireInvoice((prev) => ({ ...prev, [app.id]: e.target.value }))
+                        }
+                        placeholder={t("members.hireInvoicePh")}
+                        className="w-full border border-[var(--ink)]/10 bg-transparent px-2 py-1.5 text-xs text-[var(--ink)] placeholder:text-[var(--ink-subtle)]"
+                      />
+                      <div className="flex flex-wrap gap-1.5">
+                        {app.status !== "shortlisted" && (
+                          <button
+                            type="button"
+                            disabled={busy}
+                            onClick={() => void setAppStatus(app.id, "shortlisted")}
+                            className="panel-glass px-2 py-1 font-mono text-[9px] uppercase tracking-widest text-[var(--ink)] disabled:opacity-40"
+                          >
+                            {t("members.shortlistCta")}
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          disabled={busy}
+                          onClick={() => void setAppStatus(app.id, "hired")}
+                          className="panel-glass-ink px-2 py-1 font-mono text-[9px] uppercase tracking-widest text-[var(--bone-fixed)] disabled:opacity-40"
+                        >
+                          {t("members.hireCta")}
+                        </button>
+                        <button
+                          type="button"
+                          disabled={busy}
+                          onClick={() => void setAppStatus(app.id, "rejected")}
+                          className="panel-glass px-2 py-1 font-mono text-[9px] uppercase tracking-widest text-[var(--error-ink)] disabled:opacity-40"
+                        >
+                          {t("members.rejectCta")}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+
+      {error && (
+        <p className="mb-2 font-mono text-label text-[var(--error-ink)]" role="alert">
+          {error}
+        </p>
+      )}
 
       <div className="flex items-center justify-between gap-2">
         <span className="font-mono text-label text-[var(--ink-subtle)]">{post.postedAt}</span>
@@ -580,6 +840,7 @@ function TalentCard({
           )}
         </div>
       </div>
+      </div>
     </div>
   );
 }
@@ -598,8 +859,28 @@ function TalentCompose({
   const [role, setRole] = useState("");
   const [description, setDescription] = useState("");
   const [tagsRaw, setTagsRaw] = useState("");
+  const [company, setCompany] = useState("");
+  const [location, setLocation] = useState("");
+  const [employmentType, setEmploymentType] = useState<
+    "full_time" | "part_time" | "contract" | "internship" | null
+  >(null);
+  const [link, setLink] = useState("");
+  const [imagePath, setImagePath] = useState("");
+  const [imageUpload, setImageUpload] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const reset = () => {
+    setRole("");
+    setDescription("");
+    setTagsRaw("");
+    setCompany("");
+    setLocation("");
+    setEmploymentType(null);
+    setLink("");
+    setImagePath("");
+    setImageUpload(null);
+  };
 
   const submit = async () => {
     if (!role.trim() || !description.trim() || busy) return;
@@ -611,17 +892,26 @@ function TalentCompose({
         .map((x) => x.trim())
         .filter(Boolean)
         .slice(0, 12);
+      const imageUrl = imageUpload || (imagePath.trim() ? `https://${imagePath.trim()}` : null);
       const res = await fetch(apiUrl("/api/talent"), {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type, role: role.trim(), description: description.trim(), tags }),
+        body: JSON.stringify({
+          type,
+          role: role.trim(),
+          description: description.trim(),
+          tags,
+          company: company.trim() || null,
+          location: location.trim() || null,
+          employmentType,
+          link: link.trim() || null,
+          imageUrl,
+        }),
       });
       const json = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(json.error ?? "İlan oluşturulamadı");
-      setRole("");
-      setDescription("");
-      setTagsRaw("");
+      reset();
       onCreated();
       onClose();
     } catch (e: unknown) {
@@ -629,6 +919,14 @@ function TalentCompose({
     } finally {
       setBusy(false);
     }
+  };
+
+  const EMPLOYMENT_TYPES = ["full_time", "part_time", "contract", "internship"] as const;
+  const employmentLabel = (v: (typeof EMPLOYMENT_TYPES)[number]) => {
+    if (v === "full_time") return t("members.employmentFullTime");
+    if (v === "part_time") return t("members.employmentPartTime");
+    if (v === "contract") return t("members.employmentContract");
+    return t("members.employmentInternship");
   };
 
   return (
@@ -640,13 +938,13 @@ function TalentCompose({
           </p>
           <DrawerTitle
             className="font-serif text-2xl font-normal text-[var(--ink)]"
-            style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
+            style={{ fontWeight: 600 }}
           >
             {t("members.composeTitle")}
           </DrawerTitle>
           <DrawerDescription className="text-[var(--ink-body)]">{t("members.composeSub")}</DrawerDescription>
         </DrawerHeader>
-        <div className="space-y-4 px-6 pb-8">
+        <div className="max-h-[75vh] space-y-5 overflow-y-auto px-6 pb-8">
           <div className="flex gap-2">
             {(["arıyor", "sunuyor"] as const).map((ty) => (
               <button
@@ -665,31 +963,125 @@ function TalentCompose({
               </button>
             ))}
           </div>
-          <input
-            value={role}
-            onChange={(e) => setRole(e.target.value)}
-            placeholder={t("members.phRole")}
-            className="w-full panel-glass bg-transparent px-3 py-2.5 text-sm outline-none focus:border-[var(--ink)]/30"
+
+          <CoverImageField
+            urlPath={imagePath}
+            onUrlChange={setImagePath}
+            uploadDataUrl={imageUpload}
+            onUploadChange={setImageUpload}
+            label={t("members.coverLabel")}
+            placeholder={t("members.coverPlaceholder")}
           />
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder={t("members.phDesc")}
-            rows={4}
-            className="w-full resize-none panel-glass bg-transparent px-3 py-2.5 text-sm outline-none focus:border-[var(--ink)]/30"
-          />
-          <input
-            value={tagsRaw}
-            onChange={(e) => setTagsRaw(e.target.value)}
-            placeholder={t("members.phTags")}
-            className="w-full panel-glass bg-transparent px-3 py-2.5 text-sm outline-none focus:border-[var(--ink)]/30"
-          />
+
+          <div className="space-y-1.5">
+            <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-muted)]">
+              {t("members.phRole")}
+            </span>
+            <input
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              placeholder={t("members.phRole")}
+              className="w-full panel-glass bg-transparent px-3 py-2.5 text-sm outline-none focus:border-[var(--ink)]/30"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <label className="space-y-1.5">
+              <span className="flex items-center gap-1 font-mono text-[10px] uppercase tracking-widest text-[var(--ink-muted)]">
+                <Building2 className="size-3" />
+                {t("members.phCompany")}
+              </span>
+              <input
+                value={company}
+                onChange={(e) => setCompany(e.target.value)}
+                placeholder={t("members.phCompany")}
+                className="w-full panel-glass bg-transparent px-3 py-2.5 text-sm outline-none focus:border-[var(--ink)]/30"
+              />
+            </label>
+            <label className="space-y-1.5">
+              <span className="flex items-center gap-1 font-mono text-[10px] uppercase tracking-widest text-[var(--ink-muted)]">
+                <MapPin className="size-3" />
+                {t("members.phLocation")}
+              </span>
+              <input
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                placeholder={t("members.phLocation")}
+                className="w-full panel-glass bg-transparent px-3 py-2.5 text-sm outline-none focus:border-[var(--ink)]/30"
+              />
+            </label>
+          </div>
+
+          <div className="space-y-1.5">
+            <span className="flex items-center gap-1 font-mono text-[10px] uppercase tracking-widest text-[var(--ink-muted)]">
+              <Briefcase className="size-3" />
+              {t("members.employmentType")}
+            </span>
+            <div className="flex flex-wrap gap-1.5">
+              {EMPLOYMENT_TYPES.map((et) => (
+                <button
+                  key={et}
+                  type="button"
+                  onClick={() => setEmploymentType((cur) => (cur === et ? null : et))}
+                  aria-pressed={employmentType === et}
+                  className={cn(
+                    "border px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-widest focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--inner-green)]",
+                    employmentType === et
+                      ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--bone)]"
+                      : "border-[var(--ink)]/10 text-[var(--ink-muted)]",
+                  )}
+                >
+                  {employmentLabel(et)}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-muted)]">
+              {t("members.phDesc")}
+            </span>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder={t("members.phDesc")}
+              rows={4}
+              className="w-full resize-none panel-glass bg-transparent px-3 py-2.5 text-sm outline-none focus:border-[var(--ink)]/30"
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-muted)]">
+              {t("members.phTags")}
+            </span>
+            <input
+              value={tagsRaw}
+              onChange={(e) => setTagsRaw(e.target.value)}
+              placeholder={t("members.phTags")}
+              className="w-full panel-glass bg-transparent px-3 py-2.5 text-sm outline-none focus:border-[var(--ink)]/30"
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <span className="flex items-center gap-1 font-mono text-[10px] uppercase tracking-widest text-[var(--ink-muted)]">
+              <ExternalLink className="size-3" />
+              {t("members.phLink")}
+            </span>
+            <input
+              value={link}
+              onChange={(e) => setLink(e.target.value)}
+              placeholder={t("members.phLink")}
+              type="url"
+              className="w-full panel-glass bg-transparent px-3 py-2.5 text-sm outline-none focus:border-[var(--ink)]/30"
+            />
+          </div>
+
           {error && (
             <p className="font-mono text-label text-[var(--error-ink)]" role="alert">
               {error}
             </p>
           )}
-          <div className="flex gap-2">
+          <div className="flex gap-2 pt-1">
             <button
               type="button"
               onClick={onClose}
@@ -740,10 +1132,11 @@ export default function Members() {
     isError: talentError,
     error: talentErr,
     refetch: refetchTalent,
-  } = useApiQuery<{ posts: TalentPost[] }>(["talent"], "/api/talent");
+  } = useApiQuery<{ posts: TalentPost[]; commissionVisible?: boolean }>(["talent"], "/api/talent");
 
   const members = data?.members ?? [];
   const talentPosts = talentData?.posts ?? [];
+  const commissionVisible = Boolean(talentData?.commissionVisible);
 
   const selectedMember = useMemo(() => {
     if (!uyeParam) return null;
@@ -872,7 +1265,7 @@ export default function Members() {
             </p>
             <h1
               className="mt-1 font-serif text-2xl text-[var(--ink)] sm:text-3xl"
-              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
+              style={{ fontWeight: 600 }}
             >
               {t("members.pageHeadline")}
             </h1>
@@ -914,7 +1307,7 @@ export default function Members() {
         />
       ) : (
         <>
-          <div className="sticky top-0 z-20 -mx-1 space-y-3 bg-[var(--bone)]/90 px-1 py-3 backdrop-blur-md dark:bg-[var(--ink)]/80">
+          <div className="sticky top-0 z-20 -mx-1 space-y-3 border-b border-white/[0.08] bg-black/70 px-1 py-3 backdrop-blur-xl">
             <div
               className="flex flex-wrap gap-1.5"
               role="group"
@@ -1185,15 +1578,17 @@ export default function Members() {
                 ) : (
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     {filteredTalent.map((post) => (
-                      <TalentCard key={post.id} post={post} onDeleted={invalidateTalent} />
+                      <TalentCard key={post.id} post={post} onChanged={invalidateTalent} />
                     ))}
                   </div>
                 )}
-                <div className="mt-6 border-t border-[var(--ink)]/[0.08] pt-4">
-                  <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)]">
-                    {t("members.talentFooter")}
-                  </p>
-                </div>
+                {commissionVisible && (
+                  <div className="mt-6 border-t border-[var(--ink)]/[0.08] pt-4">
+                    <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)]">
+                      {t("members.talentFooter")}
+                    </p>
+                  </div>
+                )}
               </div>
             )}
           </div>

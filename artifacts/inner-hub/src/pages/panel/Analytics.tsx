@@ -128,7 +128,7 @@ function StatCard({
       </div>
       <p
         className="mb-1 font-serif text-3xl text-[var(--ink)]"
-        style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
+        style={{ fontWeight: 600 }}
       >
         {value}
       </p>
@@ -276,7 +276,7 @@ export default function Analytics() {
           </div>
           <h1
             className="font-serif font-display text-4xl text-[var(--ink)] md:text-5xl"
-            style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
+            style={{ fontWeight: 600 }}
           >
             {t("analytics.title")}
           </h1>
@@ -334,10 +334,9 @@ export default function Analytics() {
                     Google Analytics
                   </p>
                   <p className="mt-1 truncate text-sm text-[var(--ink)]">
-                    {web.data.measurementId ?? "-"}
                     {web.data.google.connected
-                      ? ` · ${t("analytics.syncedGoogle")}`
-                      : ` · ${t("analytics.sendingGoogle")}`}
+                      ? t("analytics.syncedGoogle")
+                      : t("analytics.sendingGoogle")}
                   </p>
                   {!web.data.google.dataApiReady && (
                     <p className="mt-1 text-xs text-[var(--ink-muted)]">{t("analytics.gaApiHint")}</p>
@@ -402,7 +401,7 @@ export default function Analytics() {
                       : t("analytics.sourceSiteSub")
                   }
                   trend="flat"
-                  delta={web.data.measurementId ?? ""}
+                  delta={web.data.source === "google" ? "GA4" : "live"}
                   icon={Sparkles}
                 />
               </div>
@@ -412,7 +411,7 @@ export default function Analytics() {
                   <div className="mb-4 flex items-baseline gap-3">
                     <span
                       className="font-serif text-4xl text-[var(--ink)]"
-                      style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
+                      style={{ fontWeight: 600 }}
                     >
                       {web.data.visitors}
                     </span>
@@ -640,7 +639,7 @@ export default function Analytics() {
                       <div className="panel-glass p-5">
                         <span
                           className="font-serif text-4xl text-[var(--ink)]"
-                          style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
+                          style={{ fontWeight: 600 }}
                         >
                           {circle.data.applicationsPending}
                         </span>

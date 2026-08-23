@@ -600,6 +600,23 @@ export declare const usersTable: import("drizzle-orm/pg-core").PgTableWithColumn
             identity: undefined;
             generated: undefined;
         }, {}, {}>;
+        isSystem: import("drizzle-orm/pg-core").PgColumn<{
+            name: "is_system";
+            tableName: "users";
+            dataType: "boolean";
+            columnType: "PgBoolean";
+            data: boolean;
+            driverParam: boolean;
+            notNull: true;
+            hasDefault: true;
+            isPrimaryKey: false;
+            isAutoincrement: false;
+            hasRuntimeDefault: false;
+            enumValues: undefined;
+            baseColumn: never;
+            identity: undefined;
+            generated: undefined;
+        }, {}, {}>;
         createdAt: import("drizzle-orm/pg-core").PgColumn<{
             name: "created_at";
             tableName: "users";
@@ -621,13 +638,12 @@ export declare const usersTable: import("drizzle-orm/pg-core").PgTableWithColumn
     dialect: "pg";
 }>;
 export declare const insertUserSchema: z.ZodObject<{
-    name: z.ZodString;
-    email: z.ZodString;
     role: z.ZodOptional<z.ZodEnum<{
         member: "member";
         admin: "admin";
     }>>;
-    linkedin: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    email: z.ZodString;
+    name: z.ZodString;
     avatarUrl: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     avatarStyle: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     persona: z.ZodOptional<z.ZodNullable<z.ZodString>>;
@@ -641,6 +657,7 @@ export declare const insertUserSchema: z.ZodObject<{
     university: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     behance: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     instagram: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    linkedin: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     linkedinLogoUrl: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     phone: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     whatsappOptIn: z.ZodOptional<z.ZodNullable<z.ZodString>>;
@@ -658,6 +675,7 @@ export declare const insertUserSchema: z.ZodObject<{
     googleId: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     linkedinId: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     deletedAt: z.ZodOptional<z.ZodNullable<z.ZodDate>>;
+    isSystem: z.ZodOptional<z.ZodBoolean>;
 }, {
     out: {};
     in: {};
@@ -1250,6 +1268,23 @@ export declare const selectUserSchema: import("drizzle-zod").BuildSchema<"select
         driverParam: string;
         notNull: false;
         hasDefault: false;
+        isPrimaryKey: false;
+        isAutoincrement: false;
+        hasRuntimeDefault: false;
+        enumValues: undefined;
+        baseColumn: never;
+        identity: undefined;
+        generated: undefined;
+    }, {}, {}>;
+    isSystem: import("drizzle-orm/pg-core").PgColumn<{
+        name: "is_system";
+        tableName: "users";
+        dataType: "boolean";
+        columnType: "PgBoolean";
+        data: boolean;
+        driverParam: boolean;
+        notNull: true;
+        hasDefault: true;
         isPrimaryKey: false;
         isAutoincrement: false;
         hasRuntimeDefault: false;

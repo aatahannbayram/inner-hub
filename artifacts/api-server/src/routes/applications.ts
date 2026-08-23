@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { db } from "@workspace/db";
-import { applicationsTable, invitationRequestsTable } from "@workspace/db/schema";
+import { applicationsTable, invitationRequestsTable, usersTable } from "@workspace/db/schema";
 import { requireAdmin } from "../lib/auth";
 import {
   notifyApplicantInvitationApproved,
@@ -10,9 +10,11 @@ import {
 } from "../lib/mail";
 import {
   issueInviteCodeForApproval,
+  normalizeEmail,
   revokeUnusedInviteCodes,
 } from "../lib/inviteCodes";
 import { once } from "../lib/ensureSchema";
+import { provisionMemberFromApplication } from "../lib/provisionMember";
 
 const router = Router();
 
@@ -45,15 +47,35 @@ async function sendDecisionMail(params: {
   };
   if (params.next === "approved") {
     try {
-      const inviteCode = await issueInviteCodeForApproval({
+      const provisioned = await provisionMemberFromApplication({
+        name: params.invite.name,
         email: params.invite.email,
         invitationRequestId: params.invitationRequestId,
         applicationId: params.applicationId,
       });
-      return await notifyApplicantInvitationApproved({ ...applicant, inviteCode });
-    } catch (err: any) {
-      console.error("invite code issue failed", err);
+
+      // Yeni / şifresiz hesap → set-password maili
+      if (provisioned.setPasswordUrl) {
+        return await notifyApplicantInvitationApproved({
+          ...applicant,
+          setPasswordUrl: provisioned.setPasswordUrl,
+        });
+      }
+
+      // Zaten şifreli üye → panel linki (invite kodu gerekmez)
       return await notifyApplicantInvitationApproved(applicant);
+    } catch (err: any) {
+      console.error("approve provision/invite failed", err);
+      try {
+        const inviteCode = await issueInviteCodeForApproval({
+          email: params.invite.email,
+          invitationRequestId: params.invitationRequestId,
+          applicationId: params.applicationId,
+        });
+        return await notifyApplicantInvitationApproved({ ...applicant, inviteCode });
+      } catch {
+        return await notifyApplicantInvitationApproved(applicant);
+      }
     }
   }
   void revokeUnusedInviteCodes(params.invitationRequestId);
@@ -118,6 +140,16 @@ router.get("/applications", requireAdmin, async (_req, res) => {
         .map((r) => [r.invitationRequestId!, r]),
     );
 
+    const emails = [...new Set(requests.map((r) => normalizeEmail(r.email)).filter(Boolean))];
+    const userEmails = new Set<string>();
+    if (emails.length > 0) {
+      const users = await db
+        .select({ email: usersTable.email })
+        .from(usersTable)
+        .where(and(inArray(usersTable.email, emails), isNull(usersTable.deletedAt)));
+      for (const u of users) userEmails.add(normalizeEmail(u.email));
+    }
+
     res.json({
       applications: requests.map((r) => {
         const review = byInvite.get(r.id);
@@ -132,6 +164,7 @@ router.get("/applications", requireAdmin, async (_req, res) => {
                 : roleRaw === "company"
                   ? "Şirket"
                   : roleRaw;
+        const emailNorm = normalizeEmail(r.email);
         return {
           id: r.id,
           name: r.name,
@@ -147,6 +180,7 @@ router.get("/applications", requireAdmin, async (_req, res) => {
           linkedinUrl: r.linkedin ?? "",
           tags: r.role ? [roleLabel] : [],
           reviewNote: review?.reviewNote ?? null,
+          hasUserAccount: userEmails.has(emailNorm),
         };
       }),
     });
@@ -210,7 +244,7 @@ router.patch("/applications/:id", requireAdmin, async (req, res) => {
       applicationId = created?.id;
     }
 
-    // Otomasyon: yalnızca gerçek durum değişiminde başvuran maili
+    // Otomasyon: yalnızca gerçek durum değişiminde başvuran maili (+ provision)
     if (prevStatus !== next && (next === "approved" || next === "rejected")) {
       void sendDecisionMail({ invite, invitationRequestId, applicationId, next });
     }

@@ -12,7 +12,9 @@ import {
 import { requireAdmin, requireAuth } from "../lib/auth";
 import { ensureLiveSessionColumns, ensureStageSchema } from "../lib/ensureSchema";
 import { notifyLiveSession } from "../lib/mail";
+import { wantsEmail } from "../lib/mail/prefs";
 import { createNotification } from "./notifications";
+import { parseSettingsPrefs } from "./settings";
 
 const router = Router();
 
@@ -52,6 +54,7 @@ async function recipientsFor(refType: RefType, refId: number) {
         name: usersTable.name,
         phone: usersTable.phone,
         whatsappOptIn: usersTable.whatsappOptIn,
+        settingsPrefs: usersTable.settingsPrefs,
       })
       .from(enrollmentsTable)
       .innerJoin(usersTable, eq(usersTable.id, enrollmentsTable.userId))
@@ -65,6 +68,7 @@ async function recipientsFor(refType: RefType, refId: number) {
       name: usersTable.name,
       phone: usersTable.phone,
       whatsappOptIn: usersTable.whatsappOptIn,
+      settingsPrefs: usersTable.settingsPrefs,
     })
     .from(eventRegistrationsTable)
     .innerJoin(usersTable, eq(usersTable.id, eventRegistrationsTable.userId))
@@ -114,15 +118,18 @@ async function notifyUsers(opts: {
 
   for (const u of users) {
     if (opts.channel === "email" || opts.channel === "both" || opts.channel === "all") {
-      await notifyLiveSession({
-        name: u.name,
-        email: u.email,
-        sessionTitle: opts.title,
-        startsAt: opts.startsAt,
-        meetUrl: opts.meetUrl,
-        refType: opts.refType,
-        lead: opts.emailLead,
-      });
+      const prefs = parseSettingsPrefs(u.settingsPrefs);
+      if (wantsEmail(prefs, "events")) {
+        await notifyLiveSession({
+          name: u.name,
+          email: u.email,
+          sessionTitle: opts.title,
+          startsAt: opts.startsAt,
+          meetUrl: opts.meetUrl,
+          refType: opts.refType,
+          lead: opts.emailLead,
+        });
+      }
     }
     if (opts.channel === "inapp" || opts.channel === "both" || opts.channel === "all") {
       await createNotification({

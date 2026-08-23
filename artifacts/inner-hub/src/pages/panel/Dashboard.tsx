@@ -127,7 +127,6 @@ function CourseRow({ course }: { course: DashCourse }) {
         <div className="mb-2 flex items-start justify-between gap-3">
           <h3
             className="font-display font-serif text-base leading-snug tracking-[-0.02em] text-[var(--ink)] sm:text-lg"
-            style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1" }}
           >
             {cleanDisplayText(course.title)}
           </h3>
@@ -143,7 +142,8 @@ function CourseRow({ course }: { course: DashCourse }) {
           {status}
           <span className="mx-1.5 text-[var(--ink)]/20">·</span>
           <span className="inline-flex items-center gap-0.5 transition-colors group-hover:text-[var(--ink)]">
-            {t("dashboard.continue")} <ArrowRight className="size-2.5" />
+            {pct === 0 ? t("dashboard.start") : t("dashboard.continue")}{" "}
+            <ArrowRight className="size-2.5" />
           </span>
         </p>
       </div>
@@ -217,7 +217,6 @@ function PerkRow({
 }
 
 type DashCourse = { id: number; title: string; progressPct: number };
-type DashEvent = { id: number; title: string };
 
 // ─── Hero ─────────────────────────────────────────────────────────────────────
 
@@ -324,10 +323,17 @@ export default function Dashboard({
     ["courses"],
     "/api/courses",
   );
-  const { data: eventsData } = useApiQuery<{ events: { id: number; title: string }[] }>(
-    ["events"],
-    "/api/events",
-  );
+  const { data: eventsSummary } = useApiQuery<{
+    upcomingCount: number;
+    featuredEvent: {
+      id: number;
+      title: string;
+      description: string | null;
+      location: string | null;
+      startAt: string;
+      format: string | null;
+    } | null;
+  }>(["events-summary"], "/api/events/summary");
   const { data: perksData } = useApiQuery<{ perks: { id: number; brand: string; title: string; description: string; logoUrl: string | null; badge: string }[] }>(
     ["perks"],
     "/api/perks",
@@ -337,7 +343,8 @@ export default function Dashboard({
     title: c.title,
     progressPct: c.progressPct ?? 0,
   }));
-  const events: DashEvent[] = (eventsData?.events ?? []).map((e) => ({ id: e.id, title: e.title }));
+  const upcomingEventCount = eventsSummary?.upcomingCount ?? 0;
+  const featuredEvent = eventsSummary?.featuredEvent ?? null;
   const perks = perksData?.perks ?? [];
 
   const spotlightCards = [
@@ -349,14 +356,20 @@ export default function Dashboard({
       videoSrc: SIGNAL_CARD_VIDEO,
       videoPoster: "/posters/courses-hero.jpg",
     },
-    {
-      title: "Eylül Gathering",
-      eyebrow: t("dashboard.gatheringEyebrow"),
-      description: t("dashboard.gatheringDesc"),
-      href: "/panel/events",
-      videoSrc: GATHERING_CARD_VIDEO,
-      videoPoster: "/posters/capital-events.jpg",
-    },
+    ...(featuredEvent
+      ? [
+          {
+            title: featuredEvent.title,
+            eyebrow: t("dashboard.gatheringEyebrow"),
+            description:
+              (featuredEvent.description && featuredEvent.description.trim()) ||
+              t("dashboard.gatheringDesc"),
+            href: "/panel/events",
+            videoSrc: GATHERING_CARD_VIDEO,
+            videoPoster: "/posters/capital-events.jpg",
+          },
+        ]
+      : []),
     {
       title: "inner·vault",
       eyebrow: t("dashboard.vaultEyebrow"),
@@ -381,7 +394,7 @@ export default function Dashboard({
               {t("dashboard.featured")}
             </p>
           </div>
-          <div className="grid grid-cols-1 gap-2 sm:gap-3 md:grid-cols-3">
+          <div className={`grid grid-cols-1 gap-2 sm:gap-3 ${spotlightCards.length >= 3 ? "md:grid-cols-3" : "md:grid-cols-2"}`}>
             {spotlightCards.map((card, i) => (
               <EditorialCard key={card.href} {...card} tone="light" cta={t("common.open")} index={i + 1} />
             ))}
@@ -433,13 +446,13 @@ export default function Dashboard({
             label={t("nav.events")}
             icon={CalendarDays}
             href="/panel/events"
-            value={events.length}
+            value={upcomingEventCount}
             sub={t("dashboard.upcoming")}
             emptyLabel={t("dashboard.noUpcomingEvents")}
             emptyActionLabel={t("events.openCalendar")}
             ariaLabel={
-              events.length > 0
-                ? `${t("nav.events")}: ${events.length} ${t("dashboard.upcoming")}`
+              upcomingEventCount > 0
+                ? `${t("nav.events")}: ${upcomingEventCount} ${t("dashboard.upcoming")}`
                 : `${t("nav.events")}: ${t("dashboard.noUpcomingEvents")}`
             }
           />

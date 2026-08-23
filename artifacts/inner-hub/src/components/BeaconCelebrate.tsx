@@ -135,7 +135,7 @@ export function BeaconReceivedMark({ delay = 0 }: { delay?: number }) {
     <motion.p
       lang="en"
       className="mb-5 flex items-baseline gap-[0.08em] font-serif text-sm text-white/55"
-      style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 300 }}
+      style={{ fontWeight: 600 }}
       initial={reduce ? false : { opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4, ease: EASE }}

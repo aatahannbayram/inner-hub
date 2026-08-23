@@ -58,7 +58,7 @@ function PlaceholderPage({ title }: { title: string }) {
       <Lockup suffix="hub" className="text-[var(--ink)]" fontSize="1.15rem" />
       <h1
         className="font-serif font-display text-4xl text-[var(--ink)]"
-        style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
+        style={{ fontWeight: 600 }}
       >
         {title}
       </h1>
@@ -80,6 +80,7 @@ function PanelRoutes({ user, onLogout }: { user: PanelUser; onLogout: () => void
           />
           <Route path="/panel/chat"         component={() => <ChatPage />} />
           <Route path="/panel/courses/admin" component={() => <CoursesAdmin />} />
+          <Route path="/panel/courses/:courseId/:lessonId" component={() => <CoursesPage />} />
           <Route path="/panel/courses"      component={() => <CoursesPage />} />
           <Route path="/panel/events/admin" component={() => <EventsAdmin />} />
           <Route path="/panel/events"       component={() => <Events />} />
@@ -100,6 +101,7 @@ function PanelRoutes({ user, onLogout }: { user: PanelUser; onLogout: () => void
           <Route path="/panel/payment/success" component={() => <PaymentSuccess />} />
           <Route path="/panel/applications" component={() => <ApplicationsPage />} />
           <Route path="/panel/haberler"     component={() => <HaberlerAdmin />} />
+          <Route path="/panel/news"         component={() => <Redirect to="/panel/haberler" />} />
           <Route path="/panel/analytics"    component={() => <Analytics />} />
           <Route path="/panel/settings"     component={() => <Settings />} />
           <Route component={NotFound} />

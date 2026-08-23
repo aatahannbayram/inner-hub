@@ -227,7 +227,7 @@ export default function Pulse() {
             </p>
             <h1
               className="font-serif font-display text-4xl md:text-5xl text-[var(--ink)]"
-              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
+              style={{ fontWeight: 600 }}
             >
               <Lockup suffix="pulse" className="text-[var(--ink)]" />
             </h1>
@@ -279,7 +279,7 @@ export default function Pulse() {
             </p>
             <p
               className="max-w-[26ch] font-serif text-2xl text-[var(--bone-fixed)] md:text-3xl"
-              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 300 }}
+              style={{ fontWeight: 600 }}
             >
               {t("pulse.heroQuote")}
             </p>
@@ -314,7 +314,7 @@ export default function Pulse() {
                 </div>
                 <p
                   className="font-serif text-2xl text-[var(--ink)]"
-                  style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
+                  style={{ fontWeight: 600 }}
                 >
                   {s.value}
                 </p>

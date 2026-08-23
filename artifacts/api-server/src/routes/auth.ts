@@ -704,7 +704,18 @@ router.patch("/me", requireAuth, async (req, res) => {
     const handle = handleRaw.replace(/[^a-z0-9_]/g, "").slice(0, 20);
     const title = typeof body.title === "string" ? body.title.trim().slice(0, 50) : "";
     const company = typeof body.company === "string" ? body.company.trim().slice(0, 50) : "";
-    const bio = typeof body.bio === "string" ? body.bio.trim().slice(0, 160) : "";
+    const bioRaw = typeof body.bio === "string" ? body.bio.trim() : "";
+    if (bioRaw.length > 0) {
+      if (bioRaw.length < 20) {
+        res.status(400).json({ error: "Bio en az 20 karakter olmalı" });
+        return;
+      }
+      if (/^\.+$/.test(bioRaw) || /^\.\.$/.test(bioRaw)) {
+        res.status(400).json({ error: "Geçersiz bio" });
+        return;
+      }
+    }
+    const bio = bioRaw.slice(0, 400);
     const linkedin = typeof body.linkedin === "string" ? body.linkedin.trim().slice(0, 120) : "";
     const linkedinLogoUrlRaw =
       typeof body.linkedinLogoUrl === "string" ? body.linkedinLogoUrl.trim().slice(0, 500) : undefined;

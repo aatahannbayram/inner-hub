@@ -1,5 +1,16 @@
 import { Router } from "express";
 import Anthropic from "@anthropic-ai/sdk";
+import { eq } from "drizzle-orm";
+import { db } from "@workspace/db";
+import { usersTable } from "@workspace/db/schema";
+import { requireAuth } from "../lib/auth";
+import {
+  getPulseSnapshot,
+  listMatchableMembers,
+  MATCH_MIN_COMPLETE_PROFILES,
+  parseSkills,
+  scoreMemberMatch,
+} from "../lib/panelMetrics";
 import {
   buildSignalVisualPrompt,
   getGenerationStatus,
@@ -16,186 +27,204 @@ function getClient(): Anthropic {
   return new Anthropic({ apiKey: key });
 }
 
-// ─── Topluluk mock verisi (gerçek sistemde DB'den gelir) ──────────────────────
-const COMMUNITY_CONTEXT = `
-inner·hub topluluğu — İstanbul merkezli, AI odaklı, özel davet ile katılınan kurucu/yatırımcı topluluğu.
-34 kurucu üye. Sektörler: B2B SaaS, Fintech, HR Tech, AI/ML, E-ticaret.
-
-Bu haftaki kanal aktivitesi:
-- #ai-tools: Claude 4 Opus, Cursor AI, Bolt.new, Runway Gen-3 tartışmaları
-- #girisimler: Hipo 50. müşteri milestone, AWS Activate başvuruları
-- #genel: Eylül Zirvesi hazırlığı, workshop talebi
-- #tavsiyeler: "The Mom Test" kitabı, Acquired podcast
-
-Üyeler:
-- Ata Han Bayram (Founder, inner·hub) — Ürün, AI, topluluk
-- Zeynep Arslan (Co-founder, Hipo) — B2B SaaS, liderlik, satış
-- Mert Demir (AI PM, Insider) — AI, Ürün, Growth
-- Ayşe Kaya (HR Tech Lead, Getir) — HR Tech, dijital dönüşüm
-- Berk Yılmaz (Angel Investor) — Fintech, SaaS, AI yatırım
-- Selin Çelik (CTO, Dopigo) — Teknik liderlik, DevOps
-- Ozan Kırmızı (Growth Lead, Pazarama) — E-ticaret, pazarlama
-- Deniz Alp (Legal, Alp Hukuk) — Startup hukuku, yatırım
-`;
+function topChannelSource(snapshot: Awaited<ReturnType<typeof getPulseSnapshot>>) {
+  const top = snapshot.channels.filter((c) => c.messages7d > 0).slice(0, 3);
+  const channelNames = top.map((c) => `#${c.name}`).join(", ") || "#genel";
+  const dateRange = `${snapshot.weekAgoIso.slice(0, 10)} — ${snapshot.nowIso.slice(0, 10)}`;
+  return {
+    messageCount: snapshot.messages7d,
+    channels: channelNames,
+    dateRange,
+    label: `${snapshot.messages7d} mesaj · ${channelNames} · ${dateRange}`,
+  };
+}
 
 // ─── POST /api/ai/signal ─────────────────────────────────────────────────────
-// Haftanın sinyallerini ve bağlantı önerilerini üretir
-router.post("/signal", async (req, res) => {
+router.post("/signal", requireAuth, async (req, res) => {
   try {
-    const client = getClient();
-    const { userId } = req.body as { userId?: string };
+    const snapshot = await getPulseSnapshot();
+    const source = topChannelSource(snapshot);
 
-    const prompt = `Sen inner·hub topluluğunun AI asistanısın. Aşağıdaki topluluk verisini analiz et ve JSON formatında haftalık sinyal raporu üret.
+    if (!snapshot.sufficient) {
+      return res.json({
+        empty: true,
+        insufficientData: true,
+        source,
+        weeklyThemes: [],
+        connections: [],
+        insight: null,
+        pulse: {
+          messages7d: snapshot.messages7d,
+          activeMembers7d: snapshot.activeMembers7d,
+          minMessages: Number(process.env.PULSE_MIN_MESSAGES_7D ?? 20),
+          minActiveMembers: Number(process.env.PULSE_MIN_ACTIVE_MEMBERS_7D ?? 5),
+        },
+      });
+    }
 
-Topluluk verisi:
-${COMMUNITY_CONTEXT}
+    const userId = req.user!.id;
+    const members = await listMatchableMembers(userId);
+    const [me] = await db.select().from(usersTable).where(eq(usersTable.id, userId)).limit(1);
+    const connections = members
+      .map((m) => ({
+        userId: m.id,
+        name: m.name,
+        handle: m.handle,
+        reason:
+          (m.title || m.company)
+            ? `${[m.title, m.company].filter(Boolean).join(" · ")} — profil ve becerilerinle örtüşüyor.`
+            : "Tamamlanmış profil; tanışma potansiyeli yüksek.",
+        matchScore: scoreMemberMatch(
+          {
+            skills: parseSkills(me?.skills),
+            persona: me?.persona,
+            title: me?.title,
+            company: me?.company,
+          },
+          m,
+        ),
+      }))
+      .sort((a, b) => b.matchScore - a.matchScore)
+      .slice(0, 2);
 
-Hedef kullanıcı ID: ${userId ?? "genel"}
+    let weeklyThemes: { topic: string; momentum: string; summary: string; source?: string }[] = [];
+    let insight: string | null = null;
+
+    try {
+      const client = getClient();
+      const prompt = `Sen inner·hub topluluğunun AI asistanısın. Yalnızca aşağıdaki GERÇEK aktivite özetine dayanarak JSON üret. Uydurma kişi, kanal veya istatistik ekleme.
+
+Aktivite özeti:
+${snapshot.contextText}
 
 Şu JSON yapısında yanıt ver (başka açıklama ekleme):
 {
   "weeklyThemes": [
-    { "topic": "string", "momentum": "yüksek|orta|düşük", "summary": "2 cümle özet" }
+    { "topic": "string", "momentum": "yüksek|orta|düşük", "summary": "2 cümle özet — yalnızca özet verisine dayalı" }
   ],
-  "connections": [
-    { "name": "string", "reason": "string (neden tanışmalılar — 1 cümle)", "matchScore": 85 }
-  ],
-  "insight": "string (bu haftanın en önemli topluluik içgörüsü — 1-2 cümle)"
+  "insight": "string (1-2 cümle)"
 }
 
-weeklyThemes için 3 tema, connections için 2 kişi öneri sun. Türkçe yaz.`;
+weeklyThemes için en fazla 3 tema. Türkçe yaz.`;
 
-    const message = await client.messages.create({
-      model: "claude-haiku-4-5-20251001",
-      max_tokens: 800,
-      messages: [{ role: "user", content: prompt }],
-    });
-
-    const raw = (message.content[0] as { text: string }).text.trim();
-    // JSON bloğunu çıkar
-    const jsonMatch = raw.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error("Geçersiz AI yanıtı");
-
-    const parsed = JSON.parse(jsonMatch[0]);
-    return res.json(parsed);
-  } catch (err: any) {
-    const isConfig = err.message?.includes("API_KEY") || err.message?.includes("ortam");
-    if (isConfig) {
-      // Demo yanıt — API key yokken
-      return res.json({
-        weeklyThemes: [
-          { topic: "Claude 4 & Cursor AI Adoptasyonu", momentum: "yüksek", summary: "Toplulukta Claude 4 Opus ve Cursor kombinasyonu hızla yaygınlaşıyor. Üyeler %40 verim artışı raporluyor." },
-          { topic: "Eylül Zirvesi Hazırlığı", momentum: "orta", summary: "AI & Girişimcilik Zirvesi için pitch deck workshop talebi var. 12+ üye katılım niyetinde." },
-          { topic: "AWS Activate Başvuruları", momentum: "orta", summary: "Birden fazla üye AWS Activate için başvurmuş durumda. Deneyim paylaşımı bu haftanın gündeminde." },
-        ],
-        connections: [
-          { name: "Berk Yılmaz", reason: "AI yatırımcısı olarak ürün vizyonunuzu değerlendirmeye açık ve Zirve'ye katılacak.", matchScore: 91 },
-          { name: "Mert Demir", reason: "AI ürün geliştirme sürecinizde Insider deneyimini paylaşmak istiyor.", matchScore: 87 },
-        ],
-        insight: "Bu hafta toplulukta AI araç adoptasyonu öne çıkıyor. Deneyimleri sistematik paylaşmak için #ai-tools kanalında haftalık 'Aracın Anatomisi' formatı önerilir.",
+      const message = await client.messages.create({
+        model: "claude-haiku-4-5-20251001",
+        max_tokens: 800,
+        messages: [{ role: "user", content: prompt }],
       });
+
+      const raw = (message.content[0] as { text: string }).text.trim();
+      const jsonMatch = raw.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        const parsed = JSON.parse(jsonMatch[0]);
+        weeklyThemes = (parsed.weeklyThemes ?? []).map((t: { topic: string; momentum: string; summary: string }) => ({
+          ...t,
+          source: source.label,
+        }));
+        insight = typeof parsed.insight === "string" ? parsed.insight : null;
+      }
+    } catch {
+      const top = snapshot.channels.find((c) => c.messages7d > 0);
+      weeklyThemes = top
+        ? [
+            {
+              topic: `#${top.name} aktivitesi`,
+              momentum: top.messages7d >= 10 ? "yüksek" : "orta",
+              summary: `Son 7 günde #${top.name} kanalında ${top.messages7d} mesaj var.`,
+              source: source.label,
+            },
+          ]
+        : [];
+      insight = `Son 7 günde ${snapshot.messages7d} mesaj ve ${snapshot.activeMembers7d} aktif üye kaydedildi.`;
     }
-    return res.status(500).json({ error: err.message });
+
+    return res.json({
+      empty: false,
+      insufficientData: false,
+      source,
+      weeklyThemes,
+      connections,
+      insight,
+      insightSource: source.label,
+    });
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message ?? "Signal üretilemedi" });
   }
 });
 
 // ─── POST /api/ai/match ──────────────────────────────────────────────────────
-// Kullanıcıya özel eşleşme önerileri üretir
-router.post("/match", async (req, res) => {
+router.post("/match", requireAuth, async (req, res) => {
   try {
-    const client = getClient();
-    const { userId, preferences } = req.body as {
-      userId?: string;
-      preferences?: string[];
-    };
+    const userId = req.user!.id;
+    const members = await listMatchableMembers(userId);
 
-    const prompt = `Sen inner·hub topluluğunun eşleştirme AI'ısın. Kullanıcı için en uygun topluluk eşleşmelerini bul.
-
-Topluluk verisi:
-${COMMUNITY_CONTEXT}
-
-Kullanıcı tercihleri: ${preferences?.join(", ") ?? "belirtilmemiş"}
-
-Şu JSON yapısında yanıt ver (başka açıklama ekleme):
-{
-  "matches": [
-    {
-      "name": "string",
-      "company": "string",
-      "matchType": "Co-founder|Mentor|Yatırımcı|İş birliği",
-      "score": 85,
-      "why": "string (neden uyumlu — 2 cümle)",
-      "commonGround": ["string", "string"]
-    }
-  ]
-}
-
-4 farklı eşleşme öner, farklı matchType'lardan seç. Türkçe yaz.`;
-
-    const message = await client.messages.create({
-      model: "claude-haiku-4-5-20251001",
-      max_tokens: 1000,
-      messages: [{ role: "user", content: prompt }],
-    });
-
-    const raw = (message.content[0] as { text: string }).text.trim();
-    const jsonMatch = raw.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error("Geçersiz AI yanıtı");
-
-    const parsed = JSON.parse(jsonMatch[0]);
-    return res.json(parsed);
-  } catch (err: any) {
-    const isConfig = err.message?.includes("API_KEY") || err.message?.includes("ortam");
-    if (isConfig) {
+    if (members.length < MATCH_MIN_COMPLETE_PROFILES) {
       return res.json({
-        matches: [
-          {
-            name: "Berk Yılmaz",
-            company: "Bağımsız Yatırımcı",
-            matchType: "Yatırımcı",
-            score: 94,
-            why: "AI ve SaaS odaklı portföyüyle tam örtüşüyor. Pre-seed ve seed aşamasında aktif yatırım yapıyor.",
-            commonGround: ["AI/ML", "B2B SaaS", "İstanbul ekosistemi"],
-          },
-          {
-            name: "Selin Çelik",
-            company: "Dopigo",
-            matchType: "Co-founder",
-            score: 88,
-            why: "Teknik liderlik boşluğunu kapatabilir. Startup ekibi kurma konusunda kanıtlanmış deneyimi var.",
-            commonGround: ["Teknik mimari", "Erken ekip inşası", "DevOps"],
-          },
-          {
-            name: "Zeynep Arslan",
-            company: "Hipo",
-            matchType: "Mentor",
-            score: 85,
-            why: "B2B SaaS'ta 0'dan 50 müşteriye giden yolda öğrendiklerini paylaşmaya açık.",
-            commonGround: ["B2B büyümesi", "Kurucu deneyimi", "İstanbul startup sahnesi"],
-          },
-          {
-            name: "Ozan Kırmızı",
-            company: "Pazarama",
-            matchType: "İş birliği",
-            score: 79,
-            why: "E-ticaret kanallarında ortak proje potansiyeli var. Growth hacking konusunda destek sunabilir.",
-            commonGround: ["Growth", "Kullanıcı edinimi", "Performans pazarlama"],
-          },
-        ],
+        empty: true,
+        insufficientProfiles: true,
+        minRequired: MATCH_MIN_COMPLETE_PROFILES,
+        available: members.length,
+        matches: [],
       });
     }
-    return res.status(500).json({ error: err.message });
+
+    const [me] = await db.select().from(usersTable).where(eq(usersTable.id, userId)).limit(1);
+    const preferences = Array.isArray(req.body?.preferences)
+      ? (req.body.preferences as string[])
+      : [];
+
+    const scored = members
+      .map((m) => {
+        let score = scoreMemberMatch(
+          {
+            skills: parseSkills(me?.skills),
+            persona: me?.persona,
+            title: me?.title,
+            company: me?.company,
+          },
+          m,
+        );
+        for (const pref of preferences) {
+          const p = String(pref).toLowerCase();
+          if (m.skills.some((s) => s.toLowerCase().includes(p))) score += 4;
+          if ((m.title ?? "").toLowerCase().includes(p)) score += 3;
+        }
+        const matchType =
+          m.persona === "investor" || /yatırımcı|investor|angel/i.test(`${m.title} ${m.persona}`)
+            ? "Yatırımcı"
+            : m.persona === "founder" || /founder|kurucu/i.test(`${m.title}`)
+              ? "Co-founder"
+              : m.persona === "mentor" || /mentor/i.test(`${m.title}`)
+                ? "Mentor"
+                : "İş birliği";
+
+        return {
+          userId: m.id,
+          name: m.name,
+          handle: m.handle,
+          company: m.company || "—",
+          matchType,
+          score: Math.min(98, score),
+          why: (m.bio ?? "").trim().slice(0, 180) || `${m.title ?? "Üye"} · ${m.company ?? "inner·hub"}`,
+          commonGround: m.skills.slice(0, 3),
+          avatarUrl: m.avatarUrl,
+        };
+      })
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 4);
+
+    return res.json({ empty: false, matches: scored });
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message ?? "Eşleşme üretilemedi" });
   }
 });
 
 // ─── POST /api/ai/image ──────────────────────────────────────────────────────
-// Higgsfield text-to-image (kredi-tasarruflu: 720p, 1 görsel, cooldown)
-router.post("/image", async (req, res) => {
+router.post("/image", requireAuth, async (req, res) => {
   try {
     if (!isHiggsfieldConfigured()) {
       return res.status(503).json({
-        error: "Higgsfield yapılandırılmadı",
-        hint: "HF_API_KEY ve HF_API_SECRET ekleyin",
+        error: "Görsel üretimi şu an kullanılamıyor",
       });
     }
 
@@ -227,12 +256,9 @@ router.post("/image", async (req, res) => {
 
     return res.json({
       ...result,
-      meta: {
-        model: HF_EFFICIENT.modelId,
-        resolution: HF_EFFICIENT.resolution,
-        aspectRatio: HF_EFFICIENT.aspectRatio,
-        creditMode: "efficient",
-      },
+      ...(process.env.NODE_ENV !== "production"
+        ? { meta: { model: HF_EFFICIENT.modelId, resolution: HF_EFFICIENT.resolution } }
+        : {}),
     });
   } catch (err: any) {
     const isCooldown = String(err.message).includes("Kredi koruması");
@@ -241,13 +267,10 @@ router.post("/image", async (req, res) => {
 });
 
 // ─── GET /api/ai/image/:requestId ────────────────────────────────────────────
-router.get("/image/:requestId", async (req, res) => {
+router.get("/image/:requestId", requireAuth, async (req, res) => {
   try {
     if (!isHiggsfieldConfigured()) {
-      return res.status(503).json({
-        error: "Higgsfield yapılandırılmadı",
-        hint: "HF_API_KEY ve HF_API_SECRET ekleyin",
-      });
+      return res.status(503).json({ error: "Görsel üretimi şu an kullanılamıyor" });
     }
 
     const requestId = req.params.requestId;
@@ -263,7 +286,7 @@ router.get("/image/:requestId", async (req, res) => {
 });
 
 /** POST /api/ai/coach — profil + persona bazlı aksiyon önerileri */
-router.post("/coach", async (req, res) => {
+router.post("/coach", requireAuth, async (req, res) => {
   try {
     const profile = (req.body?.profile ?? {}) as {
       name?: string;

@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
   ArrowRight,
+  Bookmark,
+  BookmarkCheck,
   Check,
   Copy,
   ExternalLink,
@@ -11,6 +13,7 @@ import {
   Sparkles,
   X,
 } from "lucide-react";
+import { Link } from "wouter";
 import { FadeIn } from "@/components/FadeIn";
 import { AnimatedHeading } from "@/components/AnimatedHeading";
 import { AmbientCardBackground } from "@/components/panel/AmbientCardBackground";
@@ -128,7 +131,7 @@ function PerkCard({
       </p>
       <p
         className="mb-2 font-serif text-base leading-snug text-[var(--ink)] group-hover:underline decoration-[var(--ink)]/20 underline-offset-4"
-        style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 400 }}
+        style={{ fontWeight: 500 }}
       >
         {perk.title}
       </p>
@@ -140,15 +143,19 @@ function PerkCard({
         <span className="inline-flex items-center gap-1.5 font-mono text-label uppercase tracking-widest text-[var(--ink-body)] transition-colors group-hover:text-[var(--ink)]">
           {t("perks.review")} <ArrowRight className="size-3 transition-transform group-hover:translate-x-0.5" />
         </span>
-        {saved ? (
-          <span className="font-mono text-label uppercase tracking-widest text-[var(--success-ink)]">
-            {t("common.saved")}
-          </span>
-        ) : perk.code ? (
-          <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
-            {t("perks.hasCode")}
-          </span>
-        ) : null}
+        <span className="inline-flex items-center gap-1.5 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
+          {saved ? (
+            <>
+              <BookmarkCheck className="size-3.5 text-[var(--success-ink)]" aria-hidden />
+              <span className="text-[var(--success-ink)]">{t("common.saved")}</span>
+            </>
+          ) : (
+            <>
+              <Bookmark className="size-3.5" aria-hidden />
+              {perk.code ? t("perks.hasCode") : null}
+            </>
+          )}
+        </span>
       </div>
     </button>
   );
@@ -234,7 +241,7 @@ function PerkDetail({
               <h2
                 id="perk-detail-title"
                 className="mt-1 font-serif text-2xl leading-snug text-[var(--ink)]"
-                style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 300 }}
+                style={{ fontWeight: 600 }}
               >
                 {perk.title}
               </h2>
@@ -339,7 +346,6 @@ function PerksHero({ totalCount }: { totalCount: number }) {
             <AnimatedHeading
               text={"Perks worth\nbeing inside for."}
               className="mb-4 font-display font-serif italic text-4xl leading-[1.1] text-white [text-shadow:0_2px_24px_rgba(0,0,0,0.55)] md:text-5xl lg:text-6xl"
-              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1" }}
             />
             <FadeIn delay={0.8}>
               <p className="mb-6 max-w-[46ch] text-base text-white/75 [text-shadow:0_1px_12px_rgba(0,0,0,0.6)] md:text-lg">
@@ -398,7 +404,7 @@ function PerksStat({
       </div>
       <p
         className="font-serif text-2xl text-[var(--ink)]"
-        style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
+        style={{ fontWeight: 600 }}
       >
         {value}
       </p>
@@ -631,7 +637,7 @@ export default function Perks() {
                     </p>
                     <h2
                       className="max-w-[18ch] font-serif text-2xl leading-snug md:text-3xl"
-                      style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 300 }}
+                      style={{ fontWeight: 600 }}
                     >
                       {perk.title}
                     </h2>
@@ -761,7 +767,13 @@ export default function Perks() {
       <FadeIn delay={0.1}>
         <div className="border-t border-[var(--ink)]/[0.08] pt-4">
           <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)]">
-            {t("perks.footer")}
+            {t("perks.footerPrefix")}{" "}
+            <Link
+              href="/panel/chat"
+              className="text-[var(--ink-muted)] underline-offset-2 hover:text-[var(--ink)] hover:underline"
+            >
+              {t("perks.footerChat")}
+            </Link>
           </p>
         </div>
       </FadeIn>

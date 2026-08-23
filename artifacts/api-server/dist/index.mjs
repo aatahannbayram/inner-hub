@@ -18925,14 +18925,14 @@ var require_etag = __commonJS({
   "../../node_modules/.pnpm/etag@1.8.1/node_modules/etag/index.js"(exports, module) {
     "use strict";
     module.exports = etag;
-    var crypto12 = __require("crypto");
+    var crypto13 = __require("crypto");
     var Stats = __require("fs").Stats;
     var toString = Object.prototype.toString;
     function entitytag(entity) {
       if (entity.length === 0) {
         return '"0-2jmj7l5rSw0yVb/vlWAYkK/YBwk"';
       }
-      var hash = crypto12.createHash("sha1").update(entity, "utf8").digest("base64").substring(0, 27);
+      var hash = crypto13.createHash("sha1").update(entity, "utf8").digest("base64").substring(0, 27);
       var len = typeof entity === "string" ? Buffer.byteLength(entity, "utf8") : entity.length;
       return '"' + len.toString(16) + "-" + hash + '"';
     }
@@ -20025,8 +20025,8 @@ var require_dist2 = __commonJS({
       return str.replace(/[.+*?^${}()[\]|/\\]/g, "\\$&");
     }
     var TokenData = class {
-      constructor(tokens, originalPath) {
-        this.tokens = tokens;
+      constructor(tokens2, originalPath) {
+        this.tokens = tokens2;
         this.originalPath = originalPath;
       }
     };
@@ -20135,8 +20135,8 @@ var require_dist2 = __commonJS({
         return path10;
       };
     }
-    function tokensToFunction(tokens, delimiter2, encode3) {
-      const encoders = tokens.map((token) => tokenToFunction(token, delimiter2, encode3));
+    function tokensToFunction(tokens2, delimiter2, encode3) {
+      const encoders = tokens2.map((token) => tokenToFunction(token, delimiter2, encode3));
       return (data, missing) => {
         let result = "";
         for (const encoder2 of encoders) {
@@ -20232,13 +20232,13 @@ var require_dist2 = __commonJS({
           return;
         }
         const data = typeof path9 === "object" ? path9 : parse5(path9, options);
-        flatten(data.tokens, 0, [], (tokens) => {
+        flatten(data.tokens, 0, [], (tokens2) => {
           if (combinations >= 256) {
             throw new PathError("Too many path combinations", data.originalPath);
           }
           if (combinations > 0)
             source += "|";
-          source += toRegExpSource(tokens, delimiter2, keys, data.originalPath);
+          source += toRegExpSource(tokens2, delimiter2, keys, data.originalPath);
           combinations++;
         });
       }
@@ -20249,12 +20249,12 @@ var require_dist2 = __commonJS({
       pattern += end ? "$" : "(?=" + escape2(delimiter2) + "|$)";
       return { regexp: new RegExp(pattern, sensitive ? "" : "i"), keys };
     }
-    function flatten(tokens, index2, result, callback) {
-      while (index2 < tokens.length) {
-        const token = tokens[index2++];
+    function flatten(tokens2, index2, result, callback) {
+      while (index2 < tokens2.length) {
+        const token = tokens2[index2++];
         if (token.type === "group") {
           const len = result.length;
-          flatten(token.tokens, 0, result, (seq) => flatten(tokens, index2, seq, callback));
+          flatten(token.tokens, 0, result, (seq) => flatten(tokens2, index2, seq, callback));
           result.length = len;
           continue;
         }
@@ -20262,7 +20262,7 @@ var require_dist2 = __commonJS({
       }
       callback(result);
     }
-    function toRegExpSource(tokens, delimiter2, keys, originalPath) {
+    function toRegExpSource(tokens2, delimiter2, keys, originalPath) {
       let result = "";
       let backtrack = "";
       let wildcardBacktrack = "";
@@ -20270,8 +20270,8 @@ var require_dist2 = __commonJS({
       let hasSegmentCapture = 0;
       let index2 = 0;
       function hasInSegment(index3, type2) {
-        while (index3 < tokens.length) {
-          const token = tokens[index3++];
+        while (index3 < tokens2.length) {
+          const token = tokens2[index3++];
           if (token.type === type2)
             return true;
           if (token.type === "text") {
@@ -20283,16 +20283,16 @@ var require_dist2 = __commonJS({
       }
       function peekText(index3) {
         let result2 = "";
-        while (index3 < tokens.length) {
-          const token = tokens[index3++];
+        while (index3 < tokens2.length) {
+          const token = tokens2[index3++];
           if (token.type !== "text")
             break;
           result2 += token.value;
         }
         return result2;
       }
-      while (index2 < tokens.length) {
-        const token = tokens[index2++];
+      while (index2 < tokens2.length) {
+        const token = tokens2[index2++];
         if (token.type === "text") {
           result += escape2(token.value);
           backtrack += token.value;
@@ -20333,10 +20333,10 @@ var require_dist2 = __commonJS({
         return `(?:(?!${escape2(a)})[^${escape2(b)}])`;
       return `[^${escape2(a + b)}]`;
     }
-    function stringifyTokens(tokens, index2) {
+    function stringifyTokens(tokens2, index2) {
       let value = "";
-      while (index2 < tokens.length) {
-        const token = tokens[index2++];
+      while (index2 < tokens2.length) {
+        const token = tokens2[index2++];
         if (token.type === "text") {
           value += escapeText(token.value);
           continue;
@@ -20346,11 +20346,11 @@ var require_dist2 = __commonJS({
           continue;
         }
         if (token.type === "param") {
-          value += ":" + stringifyName(token.name, tokens[index2]);
+          value += ":" + stringifyName(token.name, tokens2[index2]);
           continue;
         }
         if (token.type === "wildcard") {
-          value += "*" + stringifyName(token.name, tokens[index2]);
+          value += "*" + stringifyName(token.name, tokens2[index2]);
           continue;
         }
         throw new TypeError(`Unknown token type: ${token.type}`);
@@ -20655,27 +20655,27 @@ var require_router = __commonJS({
     var slice = Array.prototype.slice;
     var flatten = Array.prototype.flat;
     var methods = METHODS.map((method) => method.toLowerCase());
-    module.exports = Router29;
+    module.exports = Router30;
     module.exports.Route = Route;
-    function Router29(options) {
-      if (!(this instanceof Router29)) {
-        return new Router29(options);
+    function Router30(options) {
+      if (!(this instanceof Router30)) {
+        return new Router30(options);
       }
       const opts = options || {};
-      function router29(req, res, next) {
-        router29.handle(req, res, next);
+      function router30(req, res, next) {
+        router30.handle(req, res, next);
       }
-      Object.setPrototypeOf(router29, this);
-      router29.caseSensitive = opts.caseSensitive;
-      router29.mergeParams = opts.mergeParams;
-      router29.params = {};
-      router29.strict = opts.strict;
-      router29.stack = [];
-      return router29;
+      Object.setPrototypeOf(router30, this);
+      router30.caseSensitive = opts.caseSensitive;
+      router30.mergeParams = opts.mergeParams;
+      router30.params = {};
+      router30.strict = opts.strict;
+      router30.stack = [];
+      return router30;
     }
-    Router29.prototype = function() {
+    Router30.prototype = function() {
     };
-    Router29.prototype.param = function param(name, fn) {
+    Router30.prototype.param = function param(name, fn) {
       if (!name) {
         throw new TypeError("argument name is required");
       }
@@ -20695,7 +20695,7 @@ var require_router = __commonJS({
       params.push(fn);
       return this;
     };
-    Router29.prototype.handle = function handle(req, res, callback) {
+    Router30.prototype.handle = function handle(req, res, callback) {
       if (!callback) {
         throw new TypeError("argument callback is required");
       }
@@ -20822,7 +20822,7 @@ var require_router = __commonJS({
         }
       }
     };
-    Router29.prototype.use = function use(handler) {
+    Router30.prototype.use = function use(handler) {
       let offset = 0;
       let path8 = "/";
       if (typeof handler !== "function") {
@@ -20855,7 +20855,7 @@ var require_router = __commonJS({
       }
       return this;
     };
-    Router29.prototype.route = function route(path8) {
+    Router30.prototype.route = function route(path8) {
       const route2 = new Route(path8);
       const layer = new Layer(path8, {
         sensitive: this.caseSensitive,
@@ -20870,7 +20870,7 @@ var require_router = __commonJS({
       return route2;
     };
     methods.concat("all").forEach(function(method) {
-      Router29.prototype[method] = function(path8) {
+      Router30.prototype[method] = function(path8) {
         const route = this.route(path8);
         route[method].apply(route, slice.call(arguments, 1));
         return this;
@@ -21053,13 +21053,13 @@ var require_application = __commonJS({
     var compileTrust = require_utils3().compileTrust;
     var resolve4 = __require("node:path").resolve;
     var once2 = require_once();
-    var Router29 = require_router();
+    var Router30 = require_router();
     var slice = Array.prototype.slice;
     var flatten = Array.prototype.flat;
     var app2 = exports = module.exports = {};
     var trustProxyDefaultSymbol = "@@symbol:trust_proxy_default";
     app2.init = function init() {
-      var router29 = null;
+      var router30 = null;
       this.cache = /* @__PURE__ */ Object.create(null);
       this.engines = /* @__PURE__ */ Object.create(null);
       this.settings = /* @__PURE__ */ Object.create(null);
@@ -21068,13 +21068,13 @@ var require_application = __commonJS({
         configurable: true,
         enumerable: true,
         get: function getrouter() {
-          if (router29 === null) {
-            router29 = new Router29({
+          if (router30 === null) {
+            router30 = new Router30({
               caseSensitive: this.enabled("case sensitive routing"),
               strict: this.enabled("strict routing")
             });
           }
-          return router29;
+          return router30;
         }
       });
     };
@@ -21145,15 +21145,15 @@ var require_application = __commonJS({
       if (fns.length === 0) {
         throw new TypeError("app.use() requires a middleware function");
       }
-      var router29 = this.router;
+      var router30 = this.router;
       fns.forEach(function(fn2) {
         if (!fn2 || !fn2.handle || !fn2.set) {
-          return router29.use(path8, fn2);
+          return router30.use(path8, fn2);
         }
         debug(".use app under %s", path8);
         fn2.mountpath = path8;
         fn2.parent = this;
-        router29.use(path8, function mounted_app(req, res, next) {
+        router30.use(path8, function mounted_app(req, res, next) {
           var orig = req.app;
           fn2.handle(req, res, function(err) {
             Object.setPrototypeOf(req, orig.request);
@@ -22407,17 +22407,17 @@ var require_content_disposition = __commonJS({
 // ../../node_modules/.pnpm/cookie-signature@1.2.2/node_modules/cookie-signature/index.js
 var require_cookie_signature = __commonJS({
   "../../node_modules/.pnpm/cookie-signature@1.2.2/node_modules/cookie-signature/index.js"(exports) {
-    var crypto12 = __require("crypto");
+    var crypto13 = __require("crypto");
     exports.sign = function(val, secret) {
       if ("string" != typeof val) throw new TypeError("Cookie value must be provided as a string.");
       if (null == secret) throw new TypeError("Secret key must be provided.");
-      return val + "." + crypto12.createHmac("sha256", secret).update(val).digest("base64").replace(/\=+$/, "");
+      return val + "." + crypto13.createHmac("sha256", secret).update(val).digest("base64").replace(/\=+$/, "");
     };
     exports.unsign = function(input, secret) {
       if ("string" != typeof input) throw new TypeError("Signed cookie string must be provided.");
       if (null == secret) throw new TypeError("Secret key must be provided.");
       var tentativeValue = input.slice(0, input.lastIndexOf(".")), expectedInput = exports.sign(tentativeValue, secret), expectedBuffer = Buffer.from(expectedInput), inputBuffer = Buffer.from(input);
-      return expectedBuffer.length === inputBuffer.length && crypto12.timingSafeEqual(expectedBuffer, inputBuffer) ? tentativeValue : false;
+      return expectedBuffer.length === inputBuffer.length && crypto13.timingSafeEqual(expectedBuffer, inputBuffer) ? tentativeValue : false;
     };
   }
 });
@@ -23726,7 +23726,7 @@ var require_express = __commonJS({
     var EventEmitter2 = __require("node:events").EventEmitter;
     var mixin = require_merge_descriptors();
     var proto = require_application();
-    var Router29 = require_router();
+    var Router30 = require_router();
     var req = require_request();
     var res = require_response();
     exports = module.exports = createApplication;
@@ -23748,8 +23748,8 @@ var require_express = __commonJS({
     exports.application = proto;
     exports.request = req;
     exports.response = res;
-    exports.Route = Router29.Route;
-    exports.Router = Router29;
+    exports.Route = Router30.Route;
+    exports.Router = Router30;
     exports.json = bodyParser.json;
     exports.raw = bodyParser.raw;
     exports.static = require_serve_static();
@@ -24047,11 +24047,11 @@ var require_lib3 = __commonJS({
 // ../../node_modules/.pnpm/cookie-signature@1.0.6/node_modules/cookie-signature/index.js
 var require_cookie_signature2 = __commonJS({
   "../../node_modules/.pnpm/cookie-signature@1.0.6/node_modules/cookie-signature/index.js"(exports) {
-    var crypto12 = __require("crypto");
+    var crypto13 = __require("crypto");
     exports.sign = function(val, secret) {
       if ("string" != typeof val) throw new TypeError("Cookie value must be provided as a string.");
       if ("string" != typeof secret) throw new TypeError("Secret string must be provided.");
-      return val + "." + crypto12.createHmac("sha256", secret).update(val).digest("base64").replace(/\=+$/, "");
+      return val + "." + crypto13.createHmac("sha256", secret).update(val).digest("base64").replace(/\=+$/, "");
     };
     exports.unsign = function(val, secret) {
       if ("string" != typeof val) throw new TypeError("Signed cookie string must be provided.");
@@ -24060,7 +24060,7 @@ var require_cookie_signature2 = __commonJS({
       return sha12(mac) == sha12(val) ? str : false;
     };
     function sha12(str) {
-      return crypto12.createHash("sha1").update(str).digest("hex");
+      return crypto13.createHash("sha1").update(str).digest("hex");
     }
   }
 });
@@ -25298,7 +25298,7 @@ var require_atomic_sleep = __commonJS({
   "../../node_modules/.pnpm/atomic-sleep@1.0.0/node_modules/atomic-sleep/index.js"(exports, module) {
     "use strict";
     if (typeof SharedArrayBuffer !== "undefined" && typeof Atomics !== "undefined") {
-      let sleep3 = function(ms) {
+      let sleep4 = function(ms) {
         const valid = ms > 0 && ms < Infinity;
         if (valid === false) {
           if (typeof ms !== "number" && typeof ms !== "bigint") {
@@ -25309,9 +25309,9 @@ var require_atomic_sleep = __commonJS({
         Atomics.wait(nil, 0, 0, Number(ms));
       };
       const nil = new Int32Array(new SharedArrayBuffer(4));
-      module.exports = sleep3;
+      module.exports = sleep4;
     } else {
-      let sleep3 = function(ms) {
+      let sleep4 = function(ms) {
         const valid = ms > 0 && ms < Infinity;
         if (valid === false) {
           if (typeof ms !== "number" && typeof ms !== "bigint") {
@@ -25323,7 +25323,7 @@ var require_atomic_sleep = __commonJS({
         while (target > Date.now()) {
         }
       };
-      module.exports = sleep3;
+      module.exports = sleep4;
     }
   }
 });
@@ -25336,7 +25336,7 @@ var require_sonic_boom = __commonJS({
     var EventEmitter2 = __require("events");
     var inherits = __require("util").inherits;
     var path8 = __require("path");
-    var sleep3 = require_atomic_sleep();
+    var sleep4 = require_atomic_sleep();
     var assert2 = __require("assert");
     var BUSY_WRITE_TIMEOUT = 100;
     var kEmptyBuffer = Buffer.allocUnsafe(0);
@@ -25482,7 +25482,7 @@ var require_sonic_boom = __commonJS({
           if ((err.code === "EAGAIN" || err.code === "EBUSY") && this.retryEAGAIN(err, this._writingBuf.length, this._len - this._writingBuf.length)) {
             if (this.sync) {
               try {
-                sleep3(BUSY_WRITE_TIMEOUT);
+                sleep4(BUSY_WRITE_TIMEOUT);
                 this.release(void 0, 0);
               } catch (err2) {
                 this.release(err2);
@@ -25795,7 +25795,7 @@ var require_sonic_boom = __commonJS({
           if (shouldRetry && !this.retryEAGAIN(err, buf.length, this._len - buf.length)) {
             throw err;
           }
-          sleep3(BUSY_WRITE_TIMEOUT);
+          sleep4(BUSY_WRITE_TIMEOUT);
         }
       }
       try {
@@ -25832,7 +25832,7 @@ var require_sonic_boom = __commonJS({
           if (shouldRetry && !this.retryEAGAIN(err, buf.length, this._len - buf.length)) {
             throw err;
           }
-          sleep3(BUSY_WRITE_TIMEOUT);
+          sleep4(BUSY_WRITE_TIMEOUT);
         }
       }
     }
@@ -26573,7 +26573,7 @@ var require_transport = __commonJS({
     var { createRequire } = __require("module");
     var getCallers = require_caller();
     var { join: join4, isAbsolute: isAbsolute3, sep: sep4 } = __require("node:path");
-    var sleep3 = require_atomic_sleep();
+    var sleep4 = require_atomic_sleep();
     var onExit = require_on_exit_leak_free();
     var ThreadStream = require_thread_stream();
     function setupOnExit(stream) {
@@ -26607,7 +26607,7 @@ var require_transport = __commonJS({
           return;
         }
         stream.flushSync();
-        sleep3(100);
+        sleep4(100);
         stream.end();
       }
       return stream;
@@ -30037,7 +30037,7 @@ var require_cert_signatures = __commonJS({
 var require_sasl = __commonJS({
   "../../node_modules/.pnpm/pg@8.22.0/node_modules/pg/lib/crypto/sasl.js"(exports, module) {
     "use strict";
-    var crypto12 = require_utils5();
+    var crypto13 = require_utils5();
     var { signatureAlgorithmHashFromCertificate } = require_cert_signatures();
     function saslprep(password) {
       const nonAsciiSpace = /[\u00A0\u1680\u2000-\u200B\u202F\u205F\u3000]/g;
@@ -30055,7 +30055,7 @@ var require_sasl = __commonJS({
       if (mechanism === "SCRAM-SHA-256-PLUS" && typeof stream.getPeerCertificate !== "function") {
         throw new Error("SASL: Mechanism SCRAM-SHA-256-PLUS requires a certificate");
       }
-      const clientNonce = crypto12.randomBytes(18).toString("base64");
+      const clientNonce = crypto13.randomBytes(18).toString("base64");
       const gs2Header = mechanism === "SCRAM-SHA-256-PLUS" ? "p=tls-server-end-point" : stream ? "y" : "n";
       return {
         mechanism,
@@ -30097,20 +30097,20 @@ var require_sasl = __commonJS({
         const peerCert = stream.getPeerCertificate().raw;
         let hashName = signatureAlgorithmHashFromCertificate(peerCert);
         if (hashName === "MD5" || hashName === "SHA-1") hashName = "SHA-256";
-        const certHash = await crypto12.hashByName(hashName, peerCert);
+        const certHash = await crypto13.hashByName(hashName, peerCert);
         const bindingData = Buffer.concat([Buffer.from("p=tls-server-end-point,,"), Buffer.from(certHash)]);
         channelBinding = bindingData.toString("base64");
       }
       const clientFinalMessageWithoutProof = "c=" + channelBinding + ",r=" + sv.nonce;
       const authMessage = clientFirstMessageBare + "," + serverFirstMessage + "," + clientFinalMessageWithoutProof;
       const saltBytes = Buffer.from(sv.salt, "base64");
-      const saltedPassword = await crypto12.deriveKey(saslprep(password), saltBytes, sv.iteration);
-      const clientKey = await crypto12.hmacSha256(saltedPassword, "Client Key");
-      const storedKey = await crypto12.sha256(clientKey);
-      const clientSignature = await crypto12.hmacSha256(storedKey, authMessage);
+      const saltedPassword = await crypto13.deriveKey(saslprep(password), saltBytes, sv.iteration);
+      const clientKey = await crypto13.hmacSha256(saltedPassword, "Client Key");
+      const storedKey = await crypto13.sha256(clientKey);
+      const clientSignature = await crypto13.hmacSha256(storedKey, authMessage);
       const clientProof = xorBuffers(Buffer.from(clientKey), Buffer.from(clientSignature)).toString("base64");
-      const serverKey = await crypto12.hmacSha256(saltedPassword, "Server Key");
-      const serverSignatureBytes = await crypto12.hmacSha256(serverKey, authMessage);
+      const serverKey = await crypto13.hmacSha256(saltedPassword, "Server Key");
+      const serverSignatureBytes = await crypto13.hmacSha256(serverKey, authMessage);
       session.message = "SASLResponse";
       session.serverSignature = Buffer.from(serverSignatureBytes).toString("base64");
       session.response = clientFinalMessageWithoutProof + ",p=" + clientProof;
@@ -32340,7 +32340,7 @@ var require_client = __commonJS({
     var Query2 = require_query();
     var defaults4 = require_defaults();
     var Connection2 = require_connection();
-    var crypto12 = require_utils5();
+    var crypto13 = require_utils5();
     var activeQueryDeprecationNotice = nodeUtils.deprecate(
       () => {
       },
@@ -32591,7 +32591,7 @@ var require_client = __commonJS({
       _handleAuthMD5Password(msg) {
         this._getPassword(async () => {
           try {
-            const hashedPassword = await crypto12.postgresMd5PasswordHash(this.user, this.password, msg.salt);
+            const hashedPassword = await crypto13.postgresMd5PasswordHash(this.user, this.password, msg.salt);
             this.connection.password(hashedPassword);
           } catch (e) {
             this.emit("error", e);
@@ -53922,7 +53922,7 @@ var init_users = __esm({
 });
 
 // ../../lib/db/src/schema/hub.ts
-var applicationsTable, insertApplicationSchema, selectApplicationSchema, coursesTable, modulesTable, lessonsTable, enrollmentsTable, progressTable, insertCourseSchema, selectCourseSchema, eventsTable, eventRegistrationsTable, insertEventSchema, selectEventSchema, channelsTable, messagesTable, insertMessageSchema, perksTable, insertPerkSchema, selectPerkSchema, notificationsTable, faqTable, introductionRequestsTable, vaultDocumentsTable, capitalDealsTable, capitalSpvsTable, talentPostsTable, sessionsTable, passwordResetTokensTable, apiKeysTable, passWalletsTable, passLedgerTable, stageProductsTable, stageVotesTable, liveNotifyLogTable, organizationsTable, orgMembershipsTable, legalDocumentsTable, legalAcceptancesTable, campaignsTable;
+var applicationsTable, insertApplicationSchema, selectApplicationSchema, coursesTable, modulesTable, lessonsTable, enrollmentsTable, progressTable, insertCourseSchema, selectCourseSchema, eventsTable, eventRegistrationsTable, insertEventSchema, selectEventSchema, channelsTable, messagesTable, insertMessageSchema, perksTable, insertPerkSchema, selectPerkSchema, notificationsTable, faqTable, introductionRequestsTable, vaultDocumentsTable, capitalDealsTable, capitalSpvsTable, talentPostsTable, talentApplicationsTable, sessionsTable, passwordResetTokensTable, apiKeysTable, passWalletsTable, passLedgerTable, stageProductsTable, stageVotesTable, liveNotifyLogTable, mailSendLogTable, organizationsTable, orgMembershipsTable, legalDocumentsTable, legalAcceptancesTable, campaignsTable;
 var init_hub = __esm({
   "../../lib/db/src/schema/hub.ts"() {
     "use strict";
@@ -54002,6 +54002,12 @@ var init_hub = __esm({
       /** online | in_person | hybrid */
       format: text("format").default("in_person").notNull(),
       meetUrl: text("meet_url"),
+      /** Luma / Eventbrite / harici etkinlik sayfası */
+      externalUrl: text("external_url"),
+      /** Organizatör görünen adı */
+      organizer: text("organizer"),
+      /** Kapak görseli - liste/detayda gösterilir */
+      coverUrl: text("cover_url"),
       audience: text("audience").default("all").notNull(),
       passCost: integer("pass_cost").default(1).notNull(),
       createdAt: timestamp("created_at").defaultNow().notNull()
@@ -54123,6 +54129,10 @@ var init_hub = __esm({
       pct: integer("pct").default(0).notNull(),
       participants: integer("participants").default(0).notNull(),
       closing: text("closing"),
+      /** ISO/parsed kapanış; GET sırasında geçmişse status closed yapılır */
+      closingDate: timestamp("closing_date"),
+      /** open | closed */
+      status: text("status").default("open").notNull(),
       sector: text("sector"),
       createdAt: timestamp("created_at").defaultNow().notNull()
     });
@@ -54134,7 +54144,30 @@ var init_hub = __esm({
       role: text("role").notNull(),
       description: text("description").notNull(),
       tags: text("tags"),
+      /** İlan görseli */
+      imageUrl: text("image_url"),
+      /** İlan sahibinin profilinden bağımsız, ilana özel şirket adı */
+      company: text("company"),
+      location: text("location"),
+      /** full_time | part_time | contract | internship */
+      employmentType: text("employment_type"),
+      /** Başvuru/ilan detay linki */
+      link: text("link"),
+      /** open | closed | filled */
+      status: text("status").default("open").notNull(),
       createdAt: timestamp("created_at").defaultNow().notNull()
+    });
+    talentApplicationsTable = pgTable("talent_applications", {
+      id: serial("id").primaryKey(),
+      postId: integer("post_id").references(() => talentPostsTable.id).notNull(),
+      userId: integer("user_id").references(() => usersTable.id).notNull(),
+      message: text("message"),
+      /** pending | shortlisted | hired | rejected */
+      status: text("status").default("pending").notNull(),
+      /** Hire sonrası fatura kaydı; yoksa komisyon metni gösterilmez */
+      invoiceRef: text("invoice_ref"),
+      createdAt: timestamp("created_at").defaultNow().notNull(),
+      updatedAt: timestamp("updated_at").defaultNow().notNull()
     });
     sessionsTable = pgTable("sessions", {
       id: text("id").primaryKey(),
@@ -54201,6 +54234,13 @@ var init_hub = __esm({
       refType: text("ref_type").notNull(),
       refId: integer("ref_id").notNull(),
       kind: text("kind").notNull(),
+      createdAt: timestamp("created_at").defaultNow().notNull()
+    });
+    mailSendLogTable = pgTable("mail_send_log", {
+      id: serial("id").primaryKey(),
+      userId: integer("user_id").references(() => usersTable.id).notNull(),
+      kind: text("kind").notNull(),
+      periodKey: text("period_key").notNull(),
       createdAt: timestamp("created_at").defaultNow().notNull()
     });
     organizationsTable = pgTable("organizations", {
@@ -54358,6 +54398,7 @@ __export(schema_exports, {
   legalDocumentsTable: () => legalDocumentsTable,
   lessonsTable: () => lessonsTable,
   liveNotifyLogTable: () => liveNotifyLogTable,
+  mailSendLogTable: () => mailSendLogTable,
   messagesTable: () => messagesTable,
   modulesTable: () => modulesTable,
   notificationsTable: () => notificationsTable,
@@ -54380,6 +54421,7 @@ __export(schema_exports, {
   sessionsTable: () => sessionsTable,
   stageProductsTable: () => stageProductsTable,
   stageVotesTable: () => stageVotesTable,
+  talentApplicationsTable: () => talentApplicationsTable,
   talentPostsTable: () => talentPostsTable,
   usersTable: () => usersTable,
   vaultDocumentsTable: () => vaultDocumentsTable
@@ -58685,7 +58727,7 @@ var require_mime_funcs = __commonJS({
 var require_addressparser = __commonJS({
   "../../node_modules/.pnpm/nodemailer@9.0.3/node_modules/nodemailer/lib/addressparser/index.js"(exports, module) {
     "use strict";
-    function _handleAddress(tokens, depth) {
+    function _handleAddress(tokens2, depth) {
       let isGroup = false;
       let state = "text";
       const addresses = [];
@@ -58697,9 +58739,9 @@ var require_addressparser = __commonJS({
         textWasQuoted: []
       };
       let insideQuotes = false;
-      for (let i = 0, len = tokens.length; i < len; i++) {
-        const token = tokens[i];
-        const prevToken = i ? tokens[i - 1] : null;
+      for (let i = 0, len = tokens2.length; i < len; i++) {
+        const token = tokens2[i];
+        const prevToken = i ? tokens2[i - 1] : null;
         if (token.type === "operator") {
           switch (token.value) {
             case "<":
@@ -58923,11 +58965,11 @@ var require_addressparser = __commonJS({
         return [];
       }
       const tokenizer = new Tokenizer(str);
-      const tokens = tokenizer.tokenize();
+      const tokens2 = tokenizer.tokenize();
       const addresses = [];
       let address = [];
       let parsedAddresses = [];
-      tokens.forEach((token) => {
+      tokens2.forEach((token) => {
         if (token.type === "operator" && (token.value === "," || token.value === ";")) {
           if (address.length) {
             addresses.push(address);
@@ -59087,7 +59129,7 @@ var require_le_unix = __commonJS({
 var require_mime_node = __commonJS({
   "../../node_modules/.pnpm/nodemailer@9.0.3/node_modules/nodemailer/lib/mime-node/index.js"(exports, module) {
     "use strict";
-    var crypto12 = __require("crypto");
+    var crypto13 = __require("crypto");
     var fs5 = __require("fs");
     var punycode = require_punycode();
     var { PassThrough } = __require("stream");
@@ -59106,7 +59148,7 @@ var require_mime_node = __commonJS({
       constructor(contentType, options) {
         this.nodeCounter = 0;
         options = options || {};
-        this.baseBoundary = options.baseBoundary || crypto12.randomBytes(8).toString("hex");
+        this.baseBoundary = options.baseBoundary || crypto13.randomBytes(8).toString("hex");
         this.boundaryPrefix = options.boundaryPrefix || "--_NmP";
         this.disableFileAccess = !!options.disableFileAccess;
         this.disableUrlAccess = !!options.disableUrlAccess;
@@ -60065,8 +60107,8 @@ var require_mime_node = __commonJS({
       _generateMessageId() {
         return "<" + [2, 2, 2, 6].reduce(
           // crux to generate UUID-like random strings
-          (prev, len) => prev + "-" + crypto12.randomBytes(len).toString("hex"),
-          crypto12.randomBytes(4).toString("hex")
+          (prev, len) => prev + "-" + crypto13.randomBytes(len).toString("hex"),
+          crypto13.randomBytes(4).toString("hex")
         ) + "@" + // try to use the domain of the FROM address or fallback to server hostname
         (this.getEnvelope().from || this.hostname || "localhost").split("@").pop() + ">";
       }
@@ -60696,14 +60738,14 @@ var require_relaxed_body = __commonJS({
   "../../node_modules/.pnpm/nodemailer@9.0.3/node_modules/nodemailer/lib/dkim/relaxed-body.js"(exports, module) {
     "use strict";
     var { Transform } = __require("stream");
-    var crypto12 = __require("crypto");
+    var crypto13 = __require("crypto");
     var RelaxedBody = class extends Transform {
       constructor(options) {
         super();
         options = options || {};
         this.chunkBuffer = [];
         this.chunkBufferLen = 0;
-        this.bodyHash = crypto12.createHash(options.hashAlgo || "sha256");
+        this.bodyHash = crypto13.createHash(options.hashAlgo || "sha256");
         this.remainder = "";
         this.byteLength = 0;
         this.debug = options.debug;
@@ -60806,7 +60848,7 @@ var require_sign2 = __commonJS({
     "use strict";
     var punycode = require_punycode();
     var mimeFuncs = require_mime_funcs();
-    var crypto12 = __require("crypto");
+    var crypto13 = __require("crypto");
     module.exports = (headers, hashAlgo, bodyHash, options) => {
       options = options || {};
       const defaultFieldNames = "From:Sender:Reply-To:Subject:Date:Message-ID:To:Cc:MIME-Version:Content-Type:Content-Transfer-Encoding:Content-ID:Content-Description:Resent-Date:Resent-From:Resent-Sender:Resent-To:Resent-Cc:Resent-Message-ID:In-Reply-To:References:List-Id:List-Help:List-Unsubscribe:List-Subscribe:List-Post:List-Owner:List-Archive";
@@ -60814,7 +60856,7 @@ var require_sign2 = __commonJS({
       const canonicalizedHeaderData = relaxedHeaders(headers, fieldNames, options.skipFields);
       const dkimHeader = generateDKIMHeader(options.domainName, options.keySelector, canonicalizedHeaderData.fieldNames, hashAlgo, bodyHash);
       canonicalizedHeaderData.headers += "dkim-signature:" + relaxedHeaderLine(dkimHeader);
-      const signer = crypto12.createSign(("rsa-" + hashAlgo).toUpperCase());
+      const signer = crypto13.createSign(("rsa-" + hashAlgo).toUpperCase());
       signer.update(canonicalizedHeaderData.headers);
       let signature;
       try {
@@ -60883,7 +60925,7 @@ var require_dkim = __commonJS({
     var { PassThrough } = __require("stream");
     var fs5 = __require("fs");
     var path8 = __require("path");
-    var crypto12 = __require("crypto");
+    var crypto13 = __require("crypto");
     var DKIM_ALGO = "sha256";
     var MAX_MESSAGE_SIZE = 2 * 1024 * 1024;
     var DKIMSigner = class {
@@ -60896,7 +60938,7 @@ var require_dkim = __commonJS({
         this.chunks = [];
         this.chunklen = 0;
         this.readPos = 0;
-        this.cachePath = this.cacheDir ? path8.join(this.cacheDir, "message." + Date.now() + "-" + crypto12.randomBytes(14).toString("hex")) : false;
+        this.cachePath = this.cacheDir ? path8.join(this.cacheDir, "message." + Date.now() + "-" + crypto13.randomBytes(14).toString("hex")) : false;
         this.cache = false;
         this.headers = false;
         this.bodyHash = false;
@@ -61465,7 +61507,7 @@ var require_mailer = __commonJS({
     var MailMessage = require_mail_message();
     var net2 = __require("net");
     var dns2 = __require("dns");
-    var crypto12 = __require("crypto");
+    var crypto13 = __require("crypto");
     var Mail = class extends EventEmitter2 {
       constructor(transporter2, options, defaults4) {
         super();
@@ -61808,7 +61850,7 @@ var require_mailer = __commonJS({
             html = (html || "").toString().replace(
               /(<img\b[^<>]{0,1024} src\s{0,20}=[\s"']{0,20})(data:([^;]+);[^"'>\s]+)/gi,
               (match, prefix, dataUri, mimeType) => {
-                const cid = crypto12.randomBytes(10).toString("hex") + "@localhost";
+                const cid = crypto13.randomBytes(10).toString("hex") + "@localhost";
                 if (!mail.data.attachments) {
                   mail.data.attachments = [];
                 }
@@ -61935,7 +61977,7 @@ var require_smtp_connection = __commonJS({
     var net2 = __require("net");
     var tls = __require("tls");
     var os2 = __require("os");
-    var crypto12 = __require("crypto");
+    var crypto13 = __require("crypto");
     var DataStream = require_data_stream();
     var { PassThrough } = __require("stream");
     var shared = require_shared();
@@ -61955,7 +61997,7 @@ var require_smtp_connection = __commonJS({
     var SMTPConnection = class extends EventEmitter2 {
       constructor(options) {
         super(options);
-        this.id = crypto12.randomBytes(8).toString("base64").replace(/\W/g, "");
+        this.id = crypto13.randomBytes(8).toString("base64").replace(/\W/g, "");
         this.stage = "init";
         this.options = options || {};
         this.secureConnection = !!this.options.secure;
@@ -63140,7 +63182,7 @@ var require_smtp_connection = __commonJS({
           );
         }
         const base64decoded = Buffer.from(challengeMatch[1], "base64").toString("ascii");
-        const hmacMD5 = crypto12.createHmac("md5", this._auth.credentials.pass);
+        const hmacMD5 = crypto13.createHmac("md5", this._auth.credentials.pass);
         hmacMD5.update(base64decoded);
         const prepended = this._auth.credentials.user + " " + hmacMD5.digest("hex");
         this._responseActions.push((str2) => {
@@ -63433,7 +63475,7 @@ var require_xoauth2 = __commonJS({
     "use strict";
     var { Stream: Stream2 } = __require("stream");
     var nmfetch = require_fetch();
-    var crypto12 = __require("crypto");
+    var crypto13 = __require("crypto");
     var shared = require_shared();
     var errors = require_errors();
     var XOAuth2 = class extends Stream2 {
@@ -63779,7 +63821,7 @@ var require_xoauth2 = __commonJS({
        */
       jwtSignRS256(payload) {
         payload = ['{"alg":"RS256","typ":"JWT"}', JSON.stringify(payload)].map((val) => this.toBase64URL(val)).join(".");
-        const signature = crypto12.createSign("RSA-SHA256").update(payload).sign(this.options.privateKey);
+        const signature = crypto13.createSign("RSA-SHA256").update(payload).sign(this.options.privateKey);
         return payload + "." + this.toBase64URL(signature);
       }
     };
@@ -66244,13 +66286,13 @@ var uuid42;
 var init_uuid2 = __esm({
   "../../node_modules/.pnpm/@anthropic-ai+sdk@0.110.0_zod@3.25.76/node_modules/@anthropic-ai/sdk/internal/utils/uuid.mjs"() {
     uuid42 = function() {
-      const { crypto: crypto12 } = globalThis;
-      if (crypto12?.randomUUID) {
-        uuid42 = crypto12.randomUUID.bind(crypto12);
-        return crypto12.randomUUID();
+      const { crypto: crypto13 } = globalThis;
+      if (crypto13?.randomUUID) {
+        uuid42 = crypto13.randomUUID.bind(crypto13);
+        return crypto13.randomUUID();
       }
       const u8 = new Uint8Array(1);
-      const randomByte = crypto12 ? () => crypto12.getRandomValues(u8)[0] : () => Math.random() * 255 & 255;
+      const randomByte = crypto13 ? () => crypto13.getRandomValues(u8)[0] : () => Math.random() * 255 & 255;
       return "10000000-1000-4000-8000-100000000000".replace(/[018]/g, (c) => (+c ^ randomByte() & 15 >> +c / 4).toString(16));
     };
   }
@@ -67894,11 +67936,11 @@ function resolveCredentialsFromConfig(config2, options) {
   const credentialsPath = config2.authentication.credentials_path ?? null;
   const effectiveBaseURL = (config2.base_url || options.baseURL).replace(/\/+$/, "");
   const provider = buildProvider(config2, credentialsPath, effectiveBaseURL, options);
-  const extraHeaders = {};
+  const extraHeaders2 = {};
   if (config2.workspace_id && config2.authentication.type === "user_oauth") {
-    extraHeaders["anthropic-workspace-id"] = config2.workspace_id;
+    extraHeaders2["anthropic-workspace-id"] = config2.workspace_id;
   }
-  return { provider, extraHeaders, baseURL: config2.base_url || void 0 };
+  return { provider, extraHeaders: extraHeaders2, baseURL: config2.base_url || void 0 };
 }
 async function defaultCredentials(options, profile) {
   const loaded = await loadConfigWithSource(profile);
@@ -68995,12 +69037,12 @@ var init_headers = __esm({
     clearSentinel = /* @__PURE__ */ Symbol("clear");
     APPEND_HEADERS = /* @__PURE__ */ new Set(["x-stainless-helper"]);
     appendHeaderValue = (existing, addition) => {
-      const tokens = existing ? existing.split(",").map((t) => t.trim()).filter(Boolean) : [];
+      const tokens2 = existing ? existing.split(",").map((t) => t.trim()).filter(Boolean) : [];
       for (const tok of addition.split(",").map((t) => t.trim())) {
-        if (tok && !tokens.includes(tok))
-          tokens.push(tok);
+        if (tok && !tokens2.includes(tok))
+          tokens2.push(tok);
       }
-      return tokens.join(", ");
+      return tokens2.join(", ");
     };
     buildHeaders = (newHeaders) => {
       const targetHeaders = new Headers();
@@ -69725,7 +69767,7 @@ var require_timing_safe_equal = __commonJS({
         throw new Error(msg);
       }
     }
-    function timingSafeEqual2(a, b) {
+    function timingSafeEqual3(a, b) {
       if (a.byteLength !== b.byteLength) {
         return false;
       }
@@ -69745,7 +69787,7 @@ var require_timing_safe_equal = __commonJS({
       }
       return out === 0;
     }
-    exports.timingSafeEqual = timingSafeEqual2;
+    exports.timingSafeEqual = timingSafeEqual3;
   }
 });
 
@@ -71682,7 +71724,7 @@ import * as fs3 from "node:fs/promises";
 import * as fssync2 from "node:fs";
 import * as path4 from "node:path";
 import * as cp from "node:child_process";
-import * as crypto4 from "node:crypto";
+import * as crypto5 from "node:crypto";
 import * as readline from "node:readline";
 function resolveMaxBytes(configured) {
   return configured === void 0 ? DEFAULT_MAX_FILE_BYTES : configured;
@@ -72178,7 +72220,7 @@ var init_node = __esm({
         }
         __classPrivateFieldSet(this, _BashSession_buf, "", "f");
         __classPrivateFieldSet(this, _BashSession_truncated, false, "f");
-        const sentinel3 = `__ANT_CMD_${crypto4.randomUUID()}_DONE__`;
+        const sentinel3 = `__ANT_CMD_${crypto5.randomUUID()}_DONE__`;
         const sentinelSplit = `${sentinel3.slice(0, 8)}''${sentinel3.slice(8)}`;
         const wrapped = `{ ${command}
 } </dev/null 2>&1; printf '\\n${sentinelSplit}%d\\n' $?
@@ -73613,7 +73655,7 @@ var init_parser = __esm({
   "../../node_modules/.pnpm/@anthropic-ai+sdk@0.110.0_zod@3.25.76/node_modules/@anthropic-ai/sdk/_vendor/partial-json-parser/parser.mjs"() {
     tokenize = (input) => {
       let current = 0;
-      let tokens = [];
+      let tokens2 = [];
       while (current < input.length) {
         let char2 = input[current];
         if (char2 === "\\") {
@@ -73621,7 +73663,7 @@ var init_parser = __esm({
           continue;
         }
         if (char2 === "{") {
-          tokens.push({
+          tokens2.push({
             type: "brace",
             value: "{"
           });
@@ -73629,7 +73671,7 @@ var init_parser = __esm({
           continue;
         }
         if (char2 === "}") {
-          tokens.push({
+          tokens2.push({
             type: "brace",
             value: "}"
           });
@@ -73637,7 +73679,7 @@ var init_parser = __esm({
           continue;
         }
         if (char2 === "[") {
-          tokens.push({
+          tokens2.push({
             type: "paren",
             value: "["
           });
@@ -73645,7 +73687,7 @@ var init_parser = __esm({
           continue;
         }
         if (char2 === "]") {
-          tokens.push({
+          tokens2.push({
             type: "paren",
             value: "]"
           });
@@ -73653,7 +73695,7 @@ var init_parser = __esm({
           continue;
         }
         if (char2 === ":") {
-          tokens.push({
+          tokens2.push({
             type: "separator",
             value: ":"
           });
@@ -73661,7 +73703,7 @@ var init_parser = __esm({
           continue;
         }
         if (char2 === ",") {
-          tokens.push({
+          tokens2.push({
             type: "delimiter",
             value: ","
           });
@@ -73692,7 +73734,7 @@ var init_parser = __esm({
           }
           char2 = input[++current];
           if (!danglingQuote) {
-            tokens.push({
+            tokens2.push({
               type: "string",
               value
             });
@@ -73717,7 +73759,7 @@ var init_parser = __esm({
             value += char2;
             char2 = input[++current];
           }
-          tokens.push({
+          tokens2.push({
             type: "number",
             value
           });
@@ -73734,7 +73776,7 @@ var init_parser = __esm({
             char2 = input[++current];
           }
           if (value == "true" || value == "false" || value === "null") {
-            tokens.push({
+            tokens2.push({
               type: "name",
               value
             });
@@ -73746,44 +73788,44 @@ var init_parser = __esm({
         }
         current++;
       }
-      return tokens;
+      return tokens2;
     };
-    strip = (tokens) => {
-      if (tokens.length === 0) {
-        return tokens;
+    strip = (tokens2) => {
+      if (tokens2.length === 0) {
+        return tokens2;
       }
-      let lastToken = tokens[tokens.length - 1];
+      let lastToken = tokens2[tokens2.length - 1];
       switch (lastToken.type) {
         case "separator":
-          tokens = tokens.slice(0, tokens.length - 1);
-          return strip(tokens);
+          tokens2 = tokens2.slice(0, tokens2.length - 1);
+          return strip(tokens2);
           break;
         case "number":
           let lastCharacterOfLastToken = lastToken.value[lastToken.value.length - 1];
           if (lastCharacterOfLastToken === "." || lastCharacterOfLastToken === "-" || lastCharacterOfLastToken === "+" || lastCharacterOfLastToken === "e" || lastCharacterOfLastToken === "E") {
-            tokens = tokens.slice(0, tokens.length - 1);
-            return strip(tokens);
+            tokens2 = tokens2.slice(0, tokens2.length - 1);
+            return strip(tokens2);
           }
         case "string":
-          let tokenBeforeTheLastToken = tokens[tokens.length - 2];
+          let tokenBeforeTheLastToken = tokens2[tokens2.length - 2];
           if (tokenBeforeTheLastToken?.type === "delimiter") {
-            tokens = tokens.slice(0, tokens.length - 1);
-            return strip(tokens);
+            tokens2 = tokens2.slice(0, tokens2.length - 1);
+            return strip(tokens2);
           } else if (tokenBeforeTheLastToken?.type === "brace" && tokenBeforeTheLastToken.value === "{") {
-            tokens = tokens.slice(0, tokens.length - 1);
-            return strip(tokens);
+            tokens2 = tokens2.slice(0, tokens2.length - 1);
+            return strip(tokens2);
           }
           break;
         case "delimiter":
-          tokens = tokens.slice(0, tokens.length - 1);
-          return strip(tokens);
+          tokens2 = tokens2.slice(0, tokens2.length - 1);
+          return strip(tokens2);
           break;
       }
-      return tokens;
+      return tokens2;
     };
-    unstrip = (tokens) => {
+    unstrip = (tokens2) => {
       let tail = [];
-      tokens.map((token) => {
+      tokens2.map((token) => {
         if (token.type === "brace") {
           if (token.value === "{") {
             tail.push("}");
@@ -73802,23 +73844,23 @@ var init_parser = __esm({
       if (tail.length > 0) {
         tail.reverse().map((item) => {
           if (item === "}") {
-            tokens.push({
+            tokens2.push({
               type: "brace",
               value: "}"
             });
           } else if (item === "]") {
-            tokens.push({
+            tokens2.push({
               type: "paren",
               value: "]"
             });
           }
         });
       }
-      return tokens;
+      return tokens2;
     };
-    generate = (tokens) => {
+    generate = (tokens2) => {
       let output = "";
-      tokens.map((token) => {
+      tokens2.map((token) => {
         switch (token.type) {
           case "string":
             output += '"' + token.value + '"';
@@ -83342,10 +83384,10 @@ var require_retry = __commonJS({
 });
 
 // ../../node_modules/.pnpm/uuid@9.0.1/node_modules/uuid/dist/esm-node/rng.js
-import crypto5 from "crypto";
+import crypto6 from "crypto";
 function rng() {
   if (poolPtr > rnds8Pool.length - 16) {
-    crypto5.randomFillSync(rnds8Pool);
+    crypto6.randomFillSync(rnds8Pool);
     poolPtr = 0;
   }
   return rnds8Pool.slice(poolPtr, poolPtr += 16);
@@ -83549,14 +83591,14 @@ var init_v35 = __esm({
 });
 
 // ../../node_modules/.pnpm/uuid@9.0.1/node_modules/uuid/dist/esm-node/md5.js
-import crypto6 from "crypto";
+import crypto7 from "crypto";
 function md5(bytes) {
   if (Array.isArray(bytes)) {
     bytes = Buffer.from(bytes);
   } else if (typeof bytes === "string") {
     bytes = Buffer.from(bytes, "utf8");
   }
-  return crypto6.createHash("md5").update(bytes).digest();
+  return crypto7.createHash("md5").update(bytes).digest();
 }
 var md5_default;
 var init_md5 = __esm({
@@ -83577,12 +83619,12 @@ var init_v3 = __esm({
 });
 
 // ../../node_modules/.pnpm/uuid@9.0.1/node_modules/uuid/dist/esm-node/native.js
-import crypto7 from "crypto";
+import crypto8 from "crypto";
 var native_default;
 var init_native = __esm({
   "../../node_modules/.pnpm/uuid@9.0.1/node_modules/uuid/dist/esm-node/native.js"() {
     native_default = {
-      randomUUID: crypto7.randomUUID
+      randomUUID: crypto8.randomUUID
     };
   }
 });
@@ -83616,14 +83658,14 @@ var init_v42 = __esm({
 });
 
 // ../../node_modules/.pnpm/uuid@9.0.1/node_modules/uuid/dist/esm-node/sha1.js
-import crypto8 from "crypto";
+import crypto9 from "crypto";
 function sha1(bytes) {
   if (Array.isArray(bytes)) {
     bytes = Buffer.from(bytes);
   } else if (typeof bytes === "string") {
     bytes = Buffer.from(bytes, "utf8");
   }
-  return crypto8.createHash("sha1").update(bytes).digest();
+  return crypto9.createHash("sha1").update(bytes).digest();
 }
 var sha1_default;
 var init_sha1 = __esm({
@@ -87262,22 +87304,22 @@ var require_crypto2 = __commonJS({
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.NodeCrypto = void 0;
-    var crypto12 = __require("crypto");
+    var crypto13 = __require("crypto");
     var NodeCrypto = class {
       async sha256DigestBase64(str) {
-        return crypto12.createHash("sha256").update(str).digest("base64");
+        return crypto13.createHash("sha256").update(str).digest("base64");
       }
       randomBytesBase64(count2) {
-        return crypto12.randomBytes(count2).toString("base64");
+        return crypto13.randomBytes(count2).toString("base64");
       }
       async verify(pubkey, data, signature) {
-        const verifier = crypto12.createVerify("RSA-SHA256");
+        const verifier = crypto13.createVerify("RSA-SHA256");
         verifier.update(data);
         verifier.end();
         return verifier.verify(pubkey, signature, "base64");
       }
       async sign(privateKey, data) {
-        const signer = crypto12.createSign("RSA-SHA256");
+        const signer = crypto13.createSign("RSA-SHA256");
         signer.update(data);
         signer.end();
         return signer.sign(privateKey, "base64");
@@ -87295,7 +87337,7 @@ var require_crypto2 = __commonJS({
        *   string in hexadecimal encoding.
        */
       async sha256DigestHex(str) {
-        return crypto12.createHash("sha256").update(str).digest("hex");
+        return crypto13.createHash("sha256").update(str).digest("hex");
       }
       /**
        * Computes the HMAC hash of a message using the provided crypto key and the
@@ -87307,7 +87349,7 @@ var require_crypto2 = __commonJS({
        */
       async signWithHmacSha256(key, msg) {
         const cryptoKey = typeof key === "string" ? key : toBuffer(key);
-        return toArrayBuffer(crypto12.createHmac("sha256", cryptoKey).update(msg).digest());
+        return toArrayBuffer(crypto13.createHmac("sha256", cryptoKey).update(msg).digest());
       }
     };
     exports.NodeCrypto = NodeCrypto;
@@ -88085,10 +88127,10 @@ var require_oauth2client = __commonJS({
        * https://github.com/googleapis/google-auth-library-nodejs/blob/main/samples/oauth2-codeVerifier.js
        */
       async generateCodeVerifierAsync() {
-        const crypto12 = (0, crypto_1.createCrypto)();
-        const randomString2 = crypto12.randomBytesBase64(96);
+        const crypto13 = (0, crypto_1.createCrypto)();
+        const randomString2 = crypto13.randomBytesBase64(96);
         const codeVerifier = randomString2.replace(/\+/g, "~").replace(/=/g, "_").replace(/\//g, "-");
-        const unencodedCodeChallenge = await crypto12.sha256DigestBase64(codeVerifier);
+        const unencodedCodeChallenge = await crypto13.sha256DigestBase64(codeVerifier);
         const codeChallenge = unencodedCodeChallenge.split("=")[0].replace(/\+/g, "-").replace(/\//g, "_");
         return { codeVerifier, codeChallenge };
       }
@@ -88126,13 +88168,13 @@ var require_oauth2client = __commonJS({
           data: querystring.stringify(values),
           headers
         });
-        const tokens = res.data;
+        const tokens2 = res.data;
         if (res.data && res.data.expires_in) {
-          tokens.expiry_date = (/* @__PURE__ */ new Date()).getTime() + res.data.expires_in * 1e3;
-          delete tokens.expires_in;
+          tokens2.expiry_date = (/* @__PURE__ */ new Date()).getTime() + res.data.expires_in * 1e3;
+          delete tokens2.expires_in;
         }
-        this.emit("tokens", tokens);
-        return { tokens, res };
+        this.emit("tokens", tokens2);
+        return { tokens: tokens2, res };
       }
       /**
        * Refreshes the access token.
@@ -88183,13 +88225,13 @@ var require_oauth2client = __commonJS({
           }
           throw e;
         }
-        const tokens = res.data;
+        const tokens2 = res.data;
         if (res.data && res.data.expires_in) {
-          tokens.expiry_date = (/* @__PURE__ */ new Date()).getTime() + res.data.expires_in * 1e3;
-          delete tokens.expires_in;
+          tokens2.expiry_date = (/* @__PURE__ */ new Date()).getTime() + res.data.expires_in * 1e3;
+          delete tokens2.expires_in;
         }
-        this.emit("tokens", tokens);
-        return { tokens, res };
+        this.emit("tokens", tokens2);
+        return { tokens: tokens2, res };
       }
       refreshAccessToken(callback) {
         if (callback) {
@@ -88200,9 +88242,9 @@ var require_oauth2client = __commonJS({
       }
       async refreshAccessTokenAsync() {
         const r = await this.refreshToken(this.credentials.refresh_token);
-        const tokens = r.tokens;
-        tokens.refresh_token = this.credentials.refresh_token;
-        this.credentials = tokens;
+        const tokens2 = r.tokens;
+        tokens2.refresh_token = this.credentials.refresh_token;
+        this.credentials = tokens2;
         return { credentials: this.credentials, res: r.res };
       }
       getAccessToken(callback) {
@@ -88274,10 +88316,10 @@ var require_oauth2client = __commonJS({
           return { headers: { "X-Goog-Api-Key": this.apiKey } };
         }
         let r = null;
-        let tokens = null;
+        let tokens2 = null;
         try {
           r = await this.refreshToken(thisCreds.refresh_token);
-          tokens = r.tokens;
+          tokens2 = r.tokens;
         } catch (err) {
           const e = err;
           if (e.response && (e.response.status === 403 || e.response.status === 404)) {
@@ -88287,10 +88329,10 @@ var require_oauth2client = __commonJS({
         }
         const credentials = this.credentials;
         credentials.token_type = credentials.token_type || "Bearer";
-        tokens.refresh_token = credentials.refresh_token;
-        this.credentials = tokens;
+        tokens2.refresh_token = credentials.refresh_token;
+        this.credentials = tokens2;
         const headers = {
-          Authorization: credentials.token_type + " " + tokens.access_token
+          Authorization: credentials.token_type + " " + tokens2.access_token
         };
         return { headers: this.addSharedMetadataHeaders(headers), res: r.res };
       }
@@ -88532,7 +88574,7 @@ var require_oauth2client = __commonJS({
        * @return Returns a promise resolving to LoginTicket on verification.
        */
       async verifySignedJwtWithCertsAsync(jwt2, certs, requiredAudience, issuers, maxExpiry) {
-        const crypto12 = (0, crypto_1.createCrypto)();
+        const crypto13 = (0, crypto_1.createCrypto)();
         if (!maxExpiry) {
           maxExpiry = _OAuth2Client.DEFAULT_MAX_TOKEN_LIFETIME_SECS_;
         }
@@ -88545,7 +88587,7 @@ var require_oauth2client = __commonJS({
         let envelope;
         let payload;
         try {
-          envelope = JSON.parse(crypto12.decodeBase64StringUtf8(segments[0]));
+          envelope = JSON.parse(crypto13.decodeBase64StringUtf8(segments[0]));
         } catch (err) {
           if (err instanceof Error) {
             err.message = `Can't parse token envelope: ${segments[0]}': ${err.message}`;
@@ -88556,7 +88598,7 @@ var require_oauth2client = __commonJS({
           throw new Error("Can't parse token envelope: " + segments[0]);
         }
         try {
-          payload = JSON.parse(crypto12.decodeBase64StringUtf8(segments[1]));
+          payload = JSON.parse(crypto13.decodeBase64StringUtf8(segments[1]));
         } catch (err) {
           if (err instanceof Error) {
             err.message = `Can't parse token payload '${segments[0]}`;
@@ -88573,7 +88615,7 @@ var require_oauth2client = __commonJS({
         if (envelope.alg === "ES256") {
           signature = formatEcdsa.joseToDer(signature, "ES256").toString("base64");
         }
-        const verified = await crypto12.verify(cert, signed, signature);
+        const verified = await crypto13.verify(cert, signed, signature);
         if (!verified) {
           throw new Error("Invalid token signature: " + jwt2);
         }
@@ -88696,13 +88738,13 @@ var require_computeclient = __commonJS({
           }
           throw e;
         }
-        const tokens = data;
+        const tokens2 = data;
         if (data && data.expires_in) {
-          tokens.expiry_date = (/* @__PURE__ */ new Date()).getTime() + data.expires_in * 1e3;
-          delete tokens.expires_in;
+          tokens2.expiry_date = (/* @__PURE__ */ new Date()).getTime() + data.expires_in * 1e3;
+          delete tokens2.expires_in;
         }
-        this.emit("tokens", tokens);
-        return { tokens, res: null };
+        this.emit("tokens", tokens2);
+        return { tokens: tokens2, res: null };
       }
       /**
        * Fetches an ID token.
@@ -88941,14 +88983,14 @@ var require_buffer_equal_constant_time = __commonJS({
 var require_jwa = __commonJS({
   "../../node_modules/.pnpm/jwa@2.0.1/node_modules/jwa/index.js"(exports, module) {
     var Buffer2 = require_safe_buffer().Buffer;
-    var crypto12 = __require("crypto");
+    var crypto13 = __require("crypto");
     var formatEcdsa = require_ecdsa_sig_formatter();
     var util2 = __require("util");
     var MSG_INVALID_ALGORITHM = '"%s" is not a valid algorithm.\n  Supported algorithms are:\n  "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "PS256", "PS384", "PS512", "ES256", "ES384", "ES512" and "none".';
     var MSG_INVALID_SECRET = "secret must be a string or buffer";
     var MSG_INVALID_VERIFIER_KEY = "key must be a string or a buffer";
     var MSG_INVALID_SIGNER_KEY = "key must be a string, a buffer or an object";
-    var supportsKeyObjects = typeof crypto12.createPublicKey === "function";
+    var supportsKeyObjects = typeof crypto13.createPublicKey === "function";
     if (supportsKeyObjects) {
       MSG_INVALID_VERIFIER_KEY += " or a KeyObject";
       MSG_INVALID_SECRET += "or a KeyObject";
@@ -89038,18 +89080,18 @@ var require_jwa = __commonJS({
       return function sign2(thing, secret) {
         checkIsSecretKey(secret);
         thing = normalizeInput(thing);
-        var hmac = crypto12.createHmac("sha" + bits, secret);
+        var hmac = crypto13.createHmac("sha" + bits, secret);
         var sig = (hmac.update(thing), hmac.digest("base64"));
         return fromBase64(sig);
       };
     }
     var bufferEqual;
-    var timingSafeEqual2 = "timingSafeEqual" in crypto12 ? function timingSafeEqual3(a, b) {
+    var timingSafeEqual3 = "timingSafeEqual" in crypto13 ? function timingSafeEqual4(a, b) {
       if (a.byteLength !== b.byteLength) {
         return false;
       }
-      return crypto12.timingSafeEqual(a, b);
-    } : function timingSafeEqual3(a, b) {
+      return crypto13.timingSafeEqual(a, b);
+    } : function timingSafeEqual4(a, b) {
       if (!bufferEqual) {
         bufferEqual = require_buffer_equal_constant_time();
       }
@@ -89058,14 +89100,14 @@ var require_jwa = __commonJS({
     function createHmacVerifier(bits) {
       return function verify(thing, signature, secret) {
         var computedSig = createHmacSigner(bits)(thing, secret);
-        return timingSafeEqual2(Buffer2.from(signature), Buffer2.from(computedSig));
+        return timingSafeEqual3(Buffer2.from(signature), Buffer2.from(computedSig));
       };
     }
     function createKeySigner(bits) {
       return function sign2(thing, privateKey) {
         checkIsPrivateKey(privateKey);
         thing = normalizeInput(thing);
-        var signer = crypto12.createSign("RSA-SHA" + bits);
+        var signer = crypto13.createSign("RSA-SHA" + bits);
         var sig = (signer.update(thing), signer.sign(privateKey, "base64"));
         return fromBase64(sig);
       };
@@ -89075,7 +89117,7 @@ var require_jwa = __commonJS({
         checkIsPublicKey(publicKey);
         thing = normalizeInput(thing);
         signature = toBase642(signature);
-        var verifier = crypto12.createVerify("RSA-SHA" + bits);
+        var verifier = crypto13.createVerify("RSA-SHA" + bits);
         verifier.update(thing);
         return verifier.verify(publicKey, signature, "base64");
       };
@@ -89084,11 +89126,11 @@ var require_jwa = __commonJS({
       return function sign2(thing, privateKey) {
         checkIsPrivateKey(privateKey);
         thing = normalizeInput(thing);
-        var signer = crypto12.createSign("RSA-SHA" + bits);
+        var signer = crypto13.createSign("RSA-SHA" + bits);
         var sig = (signer.update(thing), signer.sign({
           key: privateKey,
-          padding: crypto12.constants.RSA_PKCS1_PSS_PADDING,
-          saltLength: crypto12.constants.RSA_PSS_SALTLEN_DIGEST
+          padding: crypto13.constants.RSA_PKCS1_PSS_PADDING,
+          saltLength: crypto13.constants.RSA_PSS_SALTLEN_DIGEST
         }, "base64"));
         return fromBase64(sig);
       };
@@ -89098,12 +89140,12 @@ var require_jwa = __commonJS({
         checkIsPublicKey(publicKey);
         thing = normalizeInput(thing);
         signature = toBase642(signature);
-        var verifier = crypto12.createVerify("RSA-SHA" + bits);
+        var verifier = crypto13.createVerify("RSA-SHA" + bits);
         verifier.update(thing);
         return verifier.verify({
           key: publicKey,
-          padding: crypto12.constants.RSA_PKCS1_PSS_PADDING,
-          saltLength: crypto12.constants.RSA_PSS_SALTLEN_DIGEST
+          padding: crypto13.constants.RSA_PKCS1_PSS_PADDING,
+          saltLength: crypto13.constants.RSA_PSS_SALTLEN_DIGEST
         }, signature, "base64");
       };
     }
@@ -89873,10 +89915,10 @@ var require_jwtclient = __commonJS({
         }
         if (!this.apiKey && useSelfSignedJWT) {
           if (this.additionalClaims && this.additionalClaims.target_audience) {
-            const { tokens } = await this.refreshToken();
+            const { tokens: tokens2 } = await this.refreshToken();
             return {
               headers: this.addSharedMetadataHeaders({
-                Authorization: `Bearer ${tokens.id_token}`
+                Authorization: `Bearer ${tokens2.id_token}`
               })
             };
           } else {
@@ -89975,14 +90017,14 @@ var require_jwtclient = __commonJS({
         const token = await gtoken.getToken({
           forceRefresh: this.isTokenExpiring()
         });
-        const tokens = {
+        const tokens2 = {
           access_token: token.access_token,
           token_type: "Bearer",
           expiry_date: gtoken.expiresAt,
           id_token: gtoken.idToken
         };
-        this.emit("tokens", tokens);
-        return { res: null, tokens };
+        this.emit("tokens", tokens2);
+        return { res: null, tokens: tokens2 };
       }
       /**
        * Create a gToken if it doesn't already exist.
@@ -91261,14 +91303,14 @@ var require_awsrequestsigner = __commonJS({
       }
     };
     exports.AwsRequestSigner = AwsRequestSigner;
-    async function sign2(crypto12, key, msg) {
-      return await crypto12.signWithHmacSha256(key, msg);
+    async function sign2(crypto13, key, msg) {
+      return await crypto13.signWithHmacSha256(key, msg);
     }
-    async function getSigningKey2(crypto12, key, dateStamp, region, serviceName) {
-      const kDate = await sign2(crypto12, `AWS4${key}`, dateStamp);
-      const kRegion = await sign2(crypto12, kDate, region);
-      const kService = await sign2(crypto12, kRegion, serviceName);
-      const kSigning = await sign2(crypto12, kService, "aws4_request");
+    async function getSigningKey2(crypto13, key, dateStamp, region, serviceName) {
+      const kDate = await sign2(crypto13, `AWS4${key}`, dateStamp);
+      const kRegion = await sign2(crypto13, kDate, region);
+      const kService = await sign2(crypto13, kRegion, serviceName);
+      const kSigning = await sign2(crypto13, kService, "aws4_request");
       return kSigning;
     }
     async function generateAuthenticationHeaderMap(options) {
@@ -92853,24 +92895,24 @@ var require_googleauth = __commonJS({
           const signed = await client.sign(data);
           return signed.signedBlob;
         }
-        const crypto12 = (0, crypto_1.createCrypto)();
+        const crypto13 = (0, crypto_1.createCrypto)();
         if (client instanceof jwtclient_1.JWT && client.key) {
-          const sign2 = await crypto12.sign(client.key, data);
+          const sign2 = await crypto13.sign(client.key, data);
           return sign2;
         }
         const creds = await this.getCredentials();
         if (!creds.client_email) {
           throw new Error("Cannot sign data without `client_email`.");
         }
-        return this.signBlob(crypto12, creds.client_email, data, endpoint);
+        return this.signBlob(crypto13, creds.client_email, data, endpoint);
       }
-      async signBlob(crypto12, emailOrUniqueId, data, endpoint) {
+      async signBlob(crypto13, emailOrUniqueId, data, endpoint) {
         const url2 = new URL(endpoint + `${emailOrUniqueId}:signBlob`);
         const res = await this.request({
           method: "POST",
           url: url2.href,
           data: {
-            payload: crypto12.encodeBase64StringUtf8(data)
+            payload: crypto13.encodeBase64StringUtf8(data)
           },
           retry: true,
           retryConfig: {
@@ -93376,14 +93418,14 @@ var init_whatsapp = __esm({
 });
 
 // src/app.ts
-var import_express29 = __toESM(require_express2(), 1);
+var import_express30 = __toESM(require_express2(), 1);
 var import_cors = __toESM(require_lib3(), 1);
 var import_cookie_parser = __toESM(require_cookie_parser(), 1);
 var import_pino_http = __toESM(require_logger(), 1);
 import path7 from "node:path";
 
 // src/routes/index.ts
-var import_express28 = __toESM(require_express2(), 1);
+var import_express29 = __toESM(require_express2(), 1);
 
 // src/routes/health.ts
 var import_express = __toESM(require_express2(), 1);
@@ -97325,7 +97367,7 @@ router.get("/healthz", (_req, res) => {
 var health_default = router;
 
 // src/routes/invitations.ts
-var import_express2 = __toESM(require_express2(), 1);
+var import_express3 = __toESM(require_express2(), 1);
 
 // ../../node_modules/.pnpm/pg@8.22.0/node_modules/pg/esm/index.mjs
 var import_lib = __toESM(require_lib5(), 1);
@@ -97667,10 +97709,6 @@ var db = drizzle(pool, { schema: schema_exports });
 // src/routes/invitations.ts
 init_drizzle_orm();
 
-// src/lib/mail/transport.ts
-var import_nodemailer = __toESM(require_nodemailer(), 1);
-import { randomBytes } from "node:crypto";
-
 // src/lib/logger.ts
 var import_pino = __toESM(require_pino(), 1);
 var isProduction = process.env.NODE_ENV === "production";
@@ -97690,6 +97728,8 @@ var logger = (0, import_pino.default)({
 });
 
 // src/lib/mail/transport.ts
+var import_nodemailer = __toESM(require_nodemailer(), 1);
+import { randomBytes } from "node:crypto";
 var transporter;
 function getMailTransporter() {
   if (transporter !== void 0) return transporter;
@@ -97752,6 +97792,23 @@ function resendApiKey() {
   const key = process.env.RESEND_API_KEY?.trim();
   return key || void 0;
 }
+function mailPhysicalAddress() {
+  return process.env.MAIL_PHYSICAL_ADDRESS?.trim() || "inner hub, \u0130stanbul";
+}
+function extraHeaders(mail) {
+  const headers = {
+    "Auto-Submitted": "auto-generated",
+    "X-Auto-Response-Suppress": "All",
+    "X-Inner-Mail-Kind": mail.kind ?? "transactional",
+    "X-Inner-Mail-Category": mail.category ?? "transactional"
+  };
+  if (mail.category === "lifecycle" && mail.unsubscribeUrl) {
+    headers["List-Unsubscribe"] = `<${mail.unsubscribeUrl}>`;
+    headers["List-Unsubscribe-Post"] = "List-Unsubscribe=One-Click";
+    headers["List-Id"] = "inner hub weekly <weekly.mail.inner.digital>";
+  }
+  return headers;
+}
 async function sendViaResend(mail, messageId, apiKey) {
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
@@ -97768,9 +97825,7 @@ async function sendViaResend(mail, messageId, apiKey) {
       html: mail.html,
       headers: {
         "Message-ID": messageId,
-        "Auto-Submitted": "auto-generated",
-        "X-Auto-Response-Suppress": "All",
-        "X-Inner-Mail-Kind": mail.kind ?? "transactional"
+        ...extraHeaders(mail)
       },
       tags: mail.kind ? [{ name: "kind", value: mail.kind.replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 40) }] : void 0
     })
@@ -97804,11 +97859,7 @@ async function sendViaSmtp(mail, messageId) {
     text: mail.text,
     html: mail.html,
     messageId,
-    headers: {
-      "Auto-Submitted": "auto-generated",
-      "X-Auto-Response-Suppress": "All",
-      "X-Inner-Mail-Kind": mail.kind ?? "transactional"
-    }
+    headers: extraHeaders(mail)
   });
   logger.info({ kind: mail.kind, to: mail.to, messageId }, "Transactional mail sent via SMTP");
   return { ok: true, provider: "smtp" };
@@ -97844,6 +97895,654 @@ async function sendTransactionalMail(mail) {
   }
 }
 
+// src/routes/settings.ts
+var import_express2 = __toESM(require_express2(), 1);
+init_drizzle_orm();
+init_schema2();
+
+// src/lib/auth.ts
+init_drizzle_orm();
+import crypto2 from "node:crypto";
+init_schema2();
+var SESSION_COOKIE = "inner_sid";
+var SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1e3;
+var sessionCookieOptions = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+  maxAge: SESSION_TTL_MS,
+  path: "/"
+};
+async function createSession(userId) {
+  const id = crypto2.randomBytes(32).toString("hex");
+  const expiresAt = new Date(Date.now() + SESSION_TTL_MS);
+  await db.insert(sessionsTable).values({ id, userId, expiresAt });
+  return id;
+}
+async function destroySession(sessionId) {
+  await db.delete(sessionsTable).where(eq(sessionsTable.id, sessionId));
+}
+async function destroySessionsForUser(userId) {
+  await db.delete(sessionsTable).where(eq(sessionsTable.userId, userId));
+}
+async function getUserBySession(sessionId) {
+  if (!sessionId) return null;
+  const [row] = await db.select({ user: usersTable, expiresAt: sessionsTable.expiresAt }).from(sessionsTable).innerJoin(usersTable, eq(sessionsTable.userId, usersTable.id)).where(and(eq(sessionsTable.id, sessionId), isNull(usersTable.deletedAt))).limit(1);
+  if (!row) return null;
+  if (row.expiresAt.getTime() < Date.now()) {
+    await destroySession(sessionId);
+    return null;
+  }
+  return row.user;
+}
+function publicUser(user) {
+  const { passwordHash: _passwordHash, googleId: _googleId, linkedinId, ...rest } = user;
+  return { ...rest, linkedinConnected: Boolean(linkedinId) };
+}
+async function attachUser(req, _res, next) {
+  const sessionId = req.cookies?.[SESSION_COOKIE];
+  req.user = await getUserBySession(sessionId) ?? void 0;
+  next();
+}
+function requireAuth(req, res, next) {
+  if (!req.user) {
+    res.status(401).json({ error: "Not authenticated" });
+    return;
+  }
+  next();
+}
+function requireAdmin(req, res, next) {
+  if (!req.user) {
+    res.status(401).json({ error: "Not authenticated" });
+    return;
+  }
+  if (req.user.role !== "admin") {
+    res.status(403).json({ error: "Admin access required" });
+    return;
+  }
+  next();
+}
+
+// src/lib/ensureSchema.ts
+init_drizzle_orm();
+function once(fn) {
+  let inFlight = null;
+  return () => {
+    if (!inFlight) {
+      inFlight = fn().catch((err) => {
+        inFlight = null;
+        throw err;
+      });
+    }
+    return inFlight;
+  };
+}
+var ensureUserProfileColumns = once(async () => {
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS handle text`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS github text`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS website text`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS website_logo_url text`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS linkedin_logo_url text`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS github_logo_url text`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS twitter text`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS skills text`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS visibility text`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS settings_prefs text`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS linkedin_id text`);
+  await db.execute(
+    sql`CREATE UNIQUE INDEX IF NOT EXISTS users_linkedin_id_uidx ON users (linkedin_id) WHERE linkedin_id IS NOT NULL`
+  );
+});
+var ensureCourseVideoColumns = once(async () => {
+  await db.execute(sql`ALTER TABLE lessons ADD COLUMN IF NOT EXISTS duration_seconds integer`);
+});
+var ensureLiveSessionColumns = once(async () => {
+  await db.execute(sql`ALTER TABLE courses ADD COLUMN IF NOT EXISTS format text DEFAULT 'vod'`);
+  await db.execute(sql`ALTER TABLE courses ADD COLUMN IF NOT EXISTS starts_at timestamp`);
+  await db.execute(sql`ALTER TABLE courses ADD COLUMN IF NOT EXISTS ends_at timestamp`);
+  await db.execute(sql`ALTER TABLE courses ADD COLUMN IF NOT EXISTS meet_url text`);
+  await db.execute(sql`ALTER TABLE courses ADD COLUMN IF NOT EXISTS audience text DEFAULT 'all'`);
+  await db.execute(sql`ALTER TABLE courses ADD COLUMN IF NOT EXISTS pass_cost integer DEFAULT 0`);
+  await db.execute(sql`UPDATE courses SET format = 'vod' WHERE format IS NULL`);
+  await db.execute(sql`UPDATE courses SET audience = 'all' WHERE audience IS NULL`);
+  await db.execute(sql`UPDATE courses SET pass_cost = 0 WHERE pass_cost IS NULL`);
+  await db.execute(sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS format text DEFAULT 'in_person'`);
+  await db.execute(sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS meet_url text`);
+  await db.execute(sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS external_url text`);
+  await db.execute(sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS organizer text`);
+  await db.execute(sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS cover_url text`);
+  await db.execute(sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS audience text DEFAULT 'all'`);
+  await db.execute(sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS pass_cost integer DEFAULT 1`);
+  await db.execute(sql`UPDATE events SET format = 'in_person' WHERE format IS NULL`);
+  await db.execute(sql`UPDATE events SET audience = 'all' WHERE audience IS NULL`);
+  await db.execute(sql`UPDATE events SET pass_cost = 1 WHERE pass_cost IS NULL`);
+});
+var ensureUserMembershipColumns = once(async () => {
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS persona text`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS membership_plan text`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS membership_status text`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS membership_period_end timestamp`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_style text DEFAULT 'lorelei'`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS primary_org_id integer`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS university text`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS behance text`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS instagram text`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS whatsapp_opt_in text`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS deleted_at timestamp`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS is_system boolean NOT NULL DEFAULT false`);
+  await db.execute(sql`
+    UPDATE users SET is_system = true
+    WHERE is_system = false AND (
+      lower(trim(name)) IN ('admin', 'member', 'member test', 'kod testi', 'invitee', 'onboarding test', 'test', 'test user', 'smoke test')
+      OR lower(email) IN ('admin@inner.digital', 'member@inner.digital', 'admin@inner.co')
+      OR email ILIKE '%@test.com'
+      OR email ILIKE 'invitee-%'
+      OR email ILIKE 'onboarding-test-%'
+      OR email ILIKE 'test-smoke%'
+    )
+  `);
+});
+var ensureOrgLegalCampaignSchema = once(async () => {
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS organizations (
+      id serial PRIMARY KEY,
+      name text NOT NULL,
+      slug text NOT NULL UNIQUE,
+      domain text,
+      logo_url text,
+      type text NOT NULL DEFAULT 'startup',
+      created_by_user_id integer REFERENCES users(id),
+      verified boolean NOT NULL DEFAULT false,
+      created_at timestamp NOT NULL DEFAULT now()
+    )
+  `);
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS org_memberships (
+      id serial PRIMARY KEY,
+      org_id integer NOT NULL REFERENCES organizations(id),
+      user_id integer NOT NULL REFERENCES users(id),
+      role text NOT NULL DEFAULT 'member',
+      title text,
+      created_at timestamp NOT NULL DEFAULT now(),
+      UNIQUE (org_id, user_id)
+    )
+  `);
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS legal_documents (
+      id serial PRIMARY KEY,
+      slug text NOT NULL,
+      version text NOT NULL,
+      locale text NOT NULL DEFAULT 'tr',
+      title text NOT NULL,
+      body_markdown text NOT NULL,
+      published_at timestamp NOT NULL DEFAULT now()
+    )
+  `);
+  await db.execute(sql`
+    CREATE UNIQUE INDEX IF NOT EXISTS legal_documents_slug_ver_locale
+      ON legal_documents (slug, version, locale)
+  `);
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS legal_acceptances (
+      id serial PRIMARY KEY,
+      user_id integer NOT NULL REFERENCES users(id),
+      document_id integer NOT NULL REFERENCES legal_documents(id),
+      version text NOT NULL,
+      accepted_at timestamp NOT NULL DEFAULT now(),
+      ip text,
+      user_agent text
+    )
+  `);
+  await db.execute(sql`
+    CREATE UNIQUE INDEX IF NOT EXISTS legal_acceptances_user_doc
+      ON legal_acceptances (user_id, document_id, version)
+  `);
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS campaigns (
+      id serial PRIMARY KEY,
+      org_id integer NOT NULL REFERENCES organizations(id),
+      created_by_user_id integer NOT NULL REFERENCES users(id),
+      title text NOT NULL,
+      pitch text NOT NULL,
+      cta_url text NOT NULL,
+      code text,
+      category text DEFAULT 'Eğitim',
+      status text NOT NULL DEFAULT 'draft',
+      perk_id integer,
+      starts_at timestamp,
+      ends_at timestamp,
+      created_at timestamp NOT NULL DEFAULT now()
+    )
+  `);
+  await db.execute(sql`ALTER TABLE perks ADD COLUMN IF NOT EXISTS source text DEFAULT 'partner'`);
+  await db.execute(sql`ALTER TABLE perks ADD COLUMN IF NOT EXISTS org_id integer`);
+  await db.execute(sql`ALTER TABLE perks ADD COLUMN IF NOT EXISTS campaign_id integer`);
+  await db.execute(sql`ALTER TABLE courses ADD COLUMN IF NOT EXISTS category text DEFAULT 'business'`);
+  await db.execute(sql`UPDATE courses SET category = 'business' WHERE category IS NULL`);
+});
+var ensurePassSchema = once(async () => {
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS pass_wallets (
+      id serial PRIMARY KEY,
+      user_id integer NOT NULL UNIQUE REFERENCES users(id),
+      balance integer NOT NULL DEFAULT 0,
+      updated_at timestamp NOT NULL DEFAULT now()
+    )
+  `);
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS pass_ledger (
+      id serial PRIMARY KEY,
+      user_id integer NOT NULL REFERENCES users(id),
+      delta integer NOT NULL,
+      reason text NOT NULL,
+      ref_type text,
+      ref_id text,
+      created_at timestamp NOT NULL DEFAULT now()
+    )
+  `);
+  await db.execute(sql`
+    CREATE INDEX IF NOT EXISTS pass_ledger_user_idx ON pass_ledger (user_id)
+  `);
+});
+var ensureStageSchema = once(async () => {
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS stage_products (
+      id serial PRIMARY KEY,
+      user_id integer NOT NULL REFERENCES users(id),
+      title text NOT NULL,
+      url text NOT NULL,
+      pitch text NOT NULL,
+      status text NOT NULL DEFAULT 'published',
+      created_at timestamp NOT NULL DEFAULT now()
+    )
+  `);
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS stage_votes (
+      id serial PRIMARY KEY,
+      product_id integer NOT NULL REFERENCES stage_products(id),
+      user_id integer NOT NULL REFERENCES users(id),
+      created_at timestamp NOT NULL DEFAULT now(),
+      UNIQUE (product_id, user_id)
+    )
+  `);
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS live_notify_log (
+      id serial PRIMARY KEY,
+      ref_type text NOT NULL,
+      ref_id integer NOT NULL,
+      kind text NOT NULL,
+      created_at timestamp NOT NULL DEFAULT now()
+    )
+  `);
+  await db.execute(sql`
+    CREATE UNIQUE INDEX IF NOT EXISTS live_notify_log_uidx
+      ON live_notify_log (ref_type, ref_id, kind)
+  `);
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS mail_send_log (
+      id serial PRIMARY KEY,
+      user_id integer NOT NULL REFERENCES users(id),
+      kind text NOT NULL,
+      period_key text NOT NULL,
+      created_at timestamp NOT NULL DEFAULT now()
+    )
+  `);
+  await db.execute(sql`
+    CREATE UNIQUE INDEX IF NOT EXISTS mail_send_log_uidx
+      ON mail_send_log (user_id, kind, period_key)
+  `);
+  await db.execute(sql`ALTER TABLE stage_products ADD COLUMN IF NOT EXISTS featured boolean NOT NULL DEFAULT false`);
+  await db.execute(sql`ALTER TABLE stage_products ADD COLUMN IF NOT EXISTS image_url text`);
+  await db.execute(sql`ALTER TABLE stage_products ADD COLUMN IF NOT EXISTS product_hunt_url text`);
+  await db.execute(sql`ALTER TABLE stage_products ADD COLUMN IF NOT EXISTS product_hunt_id text`);
+  await db.execute(sql`ALTER TABLE stage_products ADD COLUMN IF NOT EXISTS ph_votes_count integer`);
+  await db.execute(sql`ALTER TABLE stage_products ADD COLUMN IF NOT EXISTS ph_synced_at timestamp`);
+  await db.execute(sql`ALTER TABLE stage_products ADD COLUMN IF NOT EXISTS youtube_url text`);
+});
+var ensureMatchAndFaqSchema = once(async () => {
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS introduction_requests (
+      id serial PRIMARY KEY,
+      from_user_id integer NOT NULL REFERENCES users(id),
+      target_name text NOT NULL,
+      target_company text,
+      match_type text,
+      reason text,
+      score integer,
+      status text NOT NULL DEFAULT 'pending',
+      created_at timestamp NOT NULL DEFAULT now()
+    )
+  `);
+  await db.execute(sql`ALTER TABLE faq ADD COLUMN IF NOT EXISTS category text`);
+  await db.execute(sql`UPDATE faq SET category = 'Genel' WHERE category IS NULL`);
+});
+var ensureVaultCapitalSchema = once(async () => {
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS vault_documents (
+      id serial PRIMARY KEY,
+      user_id integer NOT NULL REFERENCES users(id),
+      title text NOT NULL,
+      doc_type text NOT NULL,
+      access text NOT NULL DEFAULT 'topluluk',
+      excerpt text,
+      tags text,
+      pages integer,
+      views integer NOT NULL DEFAULT 0,
+      created_at timestamp NOT NULL DEFAULT now(),
+      updated_at timestamp NOT NULL DEFAULT now()
+    )
+  `);
+  await db.execute(sql`ALTER TABLE vault_documents ADD COLUMN IF NOT EXISTS file_key text`);
+  await db.execute(sql`ALTER TABLE vault_documents ADD COLUMN IF NOT EXISTS file_name text`);
+  await db.execute(sql`ALTER TABLE vault_documents ADD COLUMN IF NOT EXISTS mime_type text`);
+  await db.execute(sql`ALTER TABLE vault_documents ADD COLUMN IF NOT EXISTS size_bytes integer`);
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS capital_deals (
+      id serial PRIMARY KEY,
+      company text NOT NULL,
+      tagline text,
+      stage text NOT NULL,
+      sector text NOT NULL,
+      raise text,
+      valuation text,
+      founders text,
+      lead_investor text,
+      round text,
+      score integer NOT NULL DEFAULT 0,
+      tags text,
+      has_spv boolean NOT NULL DEFAULT false,
+      updated_at timestamp NOT NULL DEFAULT now(),
+      created_at timestamp NOT NULL DEFAULT now()
+    )
+  `);
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS capital_spvs (
+      id serial PRIMARY KEY,
+      name text NOT NULL,
+      target text NOT NULL,
+      raised text NOT NULL,
+      pct integer NOT NULL DEFAULT 0,
+      participants integer NOT NULL DEFAULT 0,
+      closing text,
+      sector text,
+      created_at timestamp NOT NULL DEFAULT now()
+    )
+  `);
+  await db.execute(sql`ALTER TABLE capital_spvs ADD COLUMN IF NOT EXISTS closing_date timestamp`);
+  await db.execute(sql`ALTER TABLE capital_spvs ADD COLUMN IF NOT EXISTS status text NOT NULL DEFAULT 'open'`);
+});
+var ensureTalentSchema = once(async () => {
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS talent_posts (
+      id serial PRIMARY KEY,
+      user_id integer NOT NULL REFERENCES users(id),
+      post_type text NOT NULL,
+      role text NOT NULL,
+      description text NOT NULL,
+      tags text,
+      created_at timestamp NOT NULL DEFAULT now()
+    )
+  `);
+  await db.execute(sql`ALTER TABLE talent_posts ADD COLUMN IF NOT EXISTS status text NOT NULL DEFAULT 'open'`);
+  await db.execute(sql`ALTER TABLE talent_posts ADD COLUMN IF NOT EXISTS image_url text`);
+  await db.execute(sql`ALTER TABLE talent_posts ADD COLUMN IF NOT EXISTS company text`);
+  await db.execute(sql`ALTER TABLE talent_posts ADD COLUMN IF NOT EXISTS location text`);
+  await db.execute(sql`ALTER TABLE talent_posts ADD COLUMN IF NOT EXISTS employment_type text`);
+  await db.execute(sql`ALTER TABLE talent_posts ADD COLUMN IF NOT EXISTS link text`);
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS talent_applications (
+      id serial PRIMARY KEY,
+      post_id integer NOT NULL REFERENCES talent_posts(id) ON DELETE CASCADE,
+      user_id integer NOT NULL REFERENCES users(id),
+      message text,
+      status text NOT NULL DEFAULT 'pending',
+      invoice_ref text,
+      created_at timestamp NOT NULL DEFAULT now(),
+      updated_at timestamp NOT NULL DEFAULT now()
+    )
+  `);
+  await db.execute(sql`
+    CREATE UNIQUE INDEX IF NOT EXISTS talent_applications_post_user_uidx
+    ON talent_applications (post_id, user_id)
+  `);
+});
+var ensureApiKeysSchema = once(async () => {
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS api_keys (
+      id serial PRIMARY KEY,
+      user_id integer NOT NULL REFERENCES users(id),
+      name text NOT NULL,
+      key_prefix text NOT NULL,
+      key_hash text NOT NULL,
+      created_at timestamp NOT NULL DEFAULT now(),
+      last_used_at timestamp
+    )
+  `);
+});
+var ensureAnalyticsEventsSchema = once(async () => {
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS analytics_events (
+      id serial PRIMARY KEY,
+      event_name text NOT NULL DEFAULT 'page_view',
+      path text NOT NULL,
+      title text,
+      referrer text,
+      session_id text NOT NULL,
+      locale text,
+      device text,
+      user_agent text,
+      created_at timestamp NOT NULL DEFAULT now()
+    )
+  `);
+  await db.execute(sql`
+    CREATE INDEX IF NOT EXISTS analytics_events_created_idx ON analytics_events (created_at)
+  `);
+  await db.execute(sql`
+    CREATE INDEX IF NOT EXISTS analytics_events_path_idx ON analytics_events (path)
+  `);
+  await db.execute(sql`
+    CREATE INDEX IF NOT EXISTS analytics_events_session_idx ON analytics_events (session_id)
+  `);
+});
+var ensurePasswordResetSchema = once(async () => {
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS password_reset_tokens (
+      id serial PRIMARY KEY,
+      user_id integer NOT NULL REFERENCES users(id),
+      token_hash text NOT NULL,
+      expires_at timestamp NOT NULL,
+      used_at timestamp,
+      created_at timestamp NOT NULL DEFAULT now()
+    )
+  `);
+  await db.execute(sql`
+    CREATE UNIQUE INDEX IF NOT EXISTS password_reset_tokens_hash_uidx
+      ON password_reset_tokens (token_hash)
+  `);
+  await db.execute(sql`
+    CREATE INDEX IF NOT EXISTS password_reset_tokens_user_idx
+      ON password_reset_tokens (user_id)
+  `);
+});
+var ensureInviteCodesSchema = once(async () => {
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS invite_codes (
+      id serial PRIMARY KEY,
+      code text NOT NULL,
+      email text NOT NULL,
+      invitation_request_id integer NOT NULL,
+      application_id integer,
+      used_at timestamp,
+      used_by_user_id integer REFERENCES users(id),
+      expires_at timestamp,
+      created_at timestamp NOT NULL DEFAULT now()
+    )
+  `);
+  await db.execute(sql`
+    CREATE UNIQUE INDEX IF NOT EXISTS invite_codes_code_uidx ON invite_codes (code)
+  `);
+  await db.execute(sql`
+    CREATE INDEX IF NOT EXISTS invite_codes_invitation_request_idx
+      ON invite_codes (invitation_request_id)
+  `);
+});
+var ensureOrgLogoCacheSchema = once(async () => {
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS org_logo_cache (
+      domain text PRIMARY KEY,
+      data_url text,
+      fetched_at timestamp NOT NULL DEFAULT now()
+    )
+  `);
+});
+var ensureKnownMemberProfileFixes = once(async () => {
+  await db.execute(sql`
+    UPDATE users
+    SET title = NULL
+    WHERE title IS NOT NULL
+      AND trim(title) ~ '^[\\s·.\\-_—–―•]+$'
+  `);
+  await db.execute(sql`
+    UPDATE users
+    SET
+      bio = 'Ata Han Bayram, Flexlore Inc.’in kurucu ortağı ve CEO’sudur. Yazılım, tasarım ve operasyonu aynı masada tutarak şirketlerin ürününü ve markasını ölçeklenebilir hale getirir. inner·hub’ı kurucular, yatırımcılar ve builder’lar için kapalı bir daire olarak büyütür.',
+      company = COALESCE(NULLIF(trim(company), ''), 'Flexlore Inc'),
+      title = COALESCE(NULLIF(trim(title), ''), 'Founder')
+    WHERE lower(trim(name)) = 'ata han bayram'
+      AND (
+        bio IS NULL
+        OR length(trim(bio)) < 80
+        OR rtrim(bio) LIKE '%ölçeklenebilir'
+      )
+  `);
+});
+
+// src/routes/settings.ts
+var router2 = (0, import_express2.Router)();
+var DEFAULT_SETTINGS_PREFS = {
+  notifMatch: true,
+  notifEvents: true,
+  notifMessages: true,
+  notifCapital: false,
+  notifDigest: true,
+  notifEmail: true,
+  showOnline: true,
+  allowMatch: true,
+  analyticsConsent: true,
+  theme: "dark",
+  lang: "tr",
+  compactMode: false,
+  onboardingCompleted: false
+};
+function parseSettingsPrefs(raw) {
+  if (!raw) return { ...DEFAULT_SETTINGS_PREFS };
+  try {
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object") return { ...DEFAULT_SETTINGS_PREFS };
+    return {
+      notifMatch: parsed.notifMatch !== false,
+      notifEvents: parsed.notifEvents !== false,
+      notifMessages: parsed.notifMessages !== false,
+      notifCapital: parsed.notifCapital === true,
+      notifDigest: parsed.notifDigest !== false,
+      notifEmail: parsed.notifEmail !== false,
+      showOnline: parsed.showOnline !== false,
+      allowMatch: parsed.allowMatch !== false,
+      analyticsConsent: parsed.analyticsConsent !== false,
+      theme: "dark",
+      lang: parsed.lang === "en" ? "en" : "tr",
+      compactMode: parsed.compactMode === true,
+      onboardingCompleted: parsed.onboardingCompleted === true
+    };
+  } catch {
+    return { ...DEFAULT_SETTINGS_PREFS };
+  }
+}
+async function getUserSettingsPrefs(userId) {
+  await ensureUserProfileColumns();
+  const [user] = await db.select({ settingsPrefs: usersTable.settingsPrefs }).from(usersTable).where(eq(usersTable.id, userId)).limit(1);
+  return parseSettingsPrefs(user?.settingsPrefs);
+}
+async function patchUserSettingsPrefs(userId, patch) {
+  await ensureUserProfileColumns();
+  const [existing] = await db.select({ settingsPrefs: usersTable.settingsPrefs }).from(usersTable).where(eq(usersTable.id, userId)).limit(1);
+  let journeyBlob;
+  try {
+    const raw = existing?.settingsPrefs ? JSON.parse(existing.settingsPrefs) : {};
+    journeyBlob = raw?.journey;
+  } catch {
+    journeyBlob = void 0;
+  }
+  const prefs = { ...parseSettingsPrefs(existing?.settingsPrefs), ...patch };
+  const stored = {
+    ...prefs,
+    ...journeyBlob !== void 0 ? { journey: journeyBlob } : {}
+  };
+  await db.update(usersTable).set({ settingsPrefs: JSON.stringify(stored) }).where(eq(usersTable.id, userId));
+  return prefs;
+}
+function sanitizeBody(body) {
+  const base = { ...DEFAULT_SETTINGS_PREFS };
+  if (!body || typeof body !== "object") return base;
+  return {
+    notifMatch: body.notifMatch !== false,
+    notifEvents: body.notifEvents !== false,
+    notifMessages: body.notifMessages !== false,
+    notifCapital: body.notifCapital === true,
+    notifDigest: body.notifDigest !== false,
+    notifEmail: body.notifEmail !== false,
+    showOnline: body.showOnline !== false,
+    allowMatch: body.allowMatch !== false,
+    analyticsConsent: body.analyticsConsent !== false,
+    theme: "dark",
+    lang: body.lang === "en" ? "en" : "tr",
+    compactMode: body.compactMode === true,
+    onboardingCompleted: body.onboardingCompleted === true
+  };
+}
+router2.get("/settings", requireAuth, async (req, res) => {
+  try {
+    const prefs = await getUserSettingsPrefs(req.user.id);
+    res.json({ prefs });
+  } catch (err) {
+    res.status(500).json({ error: err.message ?? "Ayarlar y\xFCklenemedi" });
+  }
+});
+router2.put("/settings", requireAuth, async (req, res) => {
+  try {
+    await ensureUserProfileColumns();
+    const userId = req.user.id;
+    const [existing] = await db.select({ settingsPrefs: usersTable.settingsPrefs }).from(usersTable).where(eq(usersTable.id, userId)).limit(1);
+    let journeyBlob;
+    try {
+      const raw = existing?.settingsPrefs ? JSON.parse(existing.settingsPrefs) : {};
+      journeyBlob = raw?.journey;
+    } catch {
+      journeyBlob = void 0;
+    }
+    const prefs = sanitizeBody(req.body?.prefs ?? req.body);
+    const stored = {
+      ...prefs,
+      ...journeyBlob !== void 0 ? { journey: journeyBlob } : {}
+    };
+    await db.update(usersTable).set({ settingsPrefs: JSON.stringify(stored) }).where(eq(usersTable.id, userId));
+    res.json({ prefs });
+  } catch (err) {
+    res.status(500).json({ error: err.message ?? "Ayarlar kaydedilemedi" });
+  }
+});
+var settings_default = router2;
+
+// src/lib/mail/prefs.ts
+function wantsEmail(prefs, channel) {
+  if (!prefs.notifEmail) return false;
+  if (channel === "digest") return prefs.notifDigest;
+  if (channel === "match") return prefs.notifMatch;
+  if (channel === "events") return prefs.notifEvents;
+  if (channel === "capital") return prefs.notifCapital;
+  return true;
+}
+
 // src/lib/mail/layout.ts
 var INK = "#0A0A0A";
 var INK_DEEP = "#050505";
@@ -97873,7 +98572,9 @@ function renderInnerEmailLayout(input) {
     cta,
     footerNote = "Bu ileti inner\xB7hub ba\u015Fvuru s\xFCrecinle ilgili otomatik bir bilgilendirmedir.",
     appUrl: appUrl3,
-    bannerUrl
+    bannerUrl,
+    unsubscribeUrl,
+    physicalAddress
   } = input;
   const imageSrc = bannerUrl === null ? null : escapeHtml(bannerUrl ?? `${appUrl3.replace(/\/$/, "")}${MAIL_BANNER_PATH}`);
   const bannerBlock = imageSrc ? `
@@ -97969,6 +98670,11 @@ function renderInnerEmailLayout(input) {
                       &nbsp;\xB7&nbsp;
                       <a href="mailto:support@inner.digital" style="color:${MUTED};text-decoration:none;text-transform:none;">support@inner.digital</a>
                     </p>
+                    ${unsubscribeUrl ? `<p style="margin:12px 0 0;font-family:Inter,Helvetica,Arial,sans-serif;font-size:11px;line-height:1.5;color:${FAINT};">
+                      Haftal\u0131k \xF6zetlerden \xE7\u0131kmak i\xE7in
+                      <a href="${escapeHtml(unsubscribeUrl)}" style="color:${BONE};text-decoration:underline;">aboneli\u011Fi durdur</a>.
+                      ${physicalAddress ? `<br/>${escapeHtml(physicalAddress)}` : ""}
+                    </p>` : physicalAddress ? `<p style="margin:12px 0 0;font-family:Inter,Helvetica,Arial,sans-serif;font-size:11px;line-height:1.45;color:${FAINT};">${escapeHtml(physicalAddress)}</p>` : ""}
                   </td>
                 </tr>
               </table>
@@ -98047,10 +98753,47 @@ function invitationReceivedMail(ctx) {
 }
 function invitationApprovedMail(ctx) {
   const appUrl3 = appBaseUrl();
+  const setPasswordUrl = ctx.setPasswordUrl?.trim() || "";
   const inviteCode = ctx.inviteCode?.trim() || "";
-  const panelUrl = inviteCode ? `${appUrl3}/panel?invite=${encodeURIComponent(inviteCode)}&email=${encodeURIComponent(ctx.email)}` : `${appUrl3}/panel`;
+  const panelUrl = setPasswordUrl ? setPasswordUrl : inviteCode ? `${appUrl3}/panel?invite=${encodeURIComponent(inviteCode)}&email=${encodeURIComponent(ctx.email)}` : `${appUrl3}/panel`;
   const name = firstName(ctx.name);
-  const subject = "inner hub \xB7 davetin onayland\u0131 \xB7 panele gir";
+  const subject = setPasswordUrl ? "inner hub \xB7 hesab\u0131n haz\u0131r \xB7 \u015Fifreni belirle" : "inner hub \xB7 davetin onayland\u0131 \xB7 panele gir";
+  if (setPasswordUrl) {
+    const text3 = [
+      `Merhaba ${name},`,
+      "",
+      "Davet talebin onayland\u0131. Hesab\u0131n haz\u0131r.",
+      "",
+      "\u015Eifreni belirlemek i\xE7in bu ba\u011Flant\u0131y\u0131 a\xE7 (7 g\xFCn ge\xE7erli):",
+      setPasswordUrl,
+      "",
+      "\u015Eifreyi belirledikten sonra e-posta + \u015Fifre ile panele girersin.",
+      "Sorun: support@inner.digital",
+      "",
+      "inner hub",
+      appUrl3
+    ].join("\n");
+    const html2 = renderInnerEmailLayout({
+      appUrl: appUrl3,
+      preheader: "Hesab\u0131n haz\u0131r. \u015Eifreni belirle ve panele gir.",
+      eyebrow: "Davetiye \xB7 hesap haz\u0131r",
+      title: "Hesab\u0131n haz\u0131r.",
+      bodyHtml: `
+        <p style="margin:0 0 18px;">Merhaba ${escapeHtml(name)}, ba\u015Fvurun onayland\u0131. \xDCye hesab\u0131n olu\u015Fturuldu \u2014 \u015Fimdi \u015Fifreni belirlemen yeterli.</p>
+        <p style="margin:0 0 8px;font-size:14px;color:rgba(244,241,236,0.72);">Sonraki ad\u0131mlar:</p>
+        <ol style="margin:0 0 16px;padding-left:18px;color:rgba(244,241,236,0.72);line-height:1.55;">
+          <li style="margin:0 0 8px;">A\u015Fa\u011F\u0131daki <strong style="color:#F4F1EC;font-weight:500;">\u015Eifreyi belirle</strong> butonuna bas</li>
+          <li style="margin:0 0 8px;">Yeni \u015Fifreni yaz (en az 8 karakter)</li>
+          <li style="margin:0;">Panele gir \u2014 e-posta + \u015Fifre yeter</li>
+        </ol>
+        <p style="margin:0;font-size:13px;color:rgba(244,241,236,0.45);">Ba\u011Flant\u0131 7 g\xFCn ge\xE7erlidir. Sorun: <a href="mailto:support@inner.digital" style="color:#F4F1EC;">support@inner.digital</a>.</p>
+        ${roleLine(ctx.roleLabel)}
+      `,
+      cta: { label: "\u015Eifreyi belirle", href: setPasswordUrl },
+      footerNote: "Bu ileti, davet talebinin onaylanmas\u0131 \xFCzerine otomatik g\xF6nderildi."
+    });
+    return { subject, text: text3, html: html2, kind: "invite.approved" };
+  }
   const text2 = [
     `Merhaba ${name},`,
     "",
@@ -98246,8 +98989,205 @@ function liveSessionReminderMail(ctx) {
   });
   return { subject, text: text2, html, kind: "live.session_reminder" };
 }
+function sectionLabel(label) {
+  return `<p style="margin:28px 0 12px;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:rgba(244,241,236,0.45);">${escapeHtml(label)}</p>`;
+}
+function itemCard(title, meta, body) {
+  return `
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 10px;border-collapse:separate;">
+      <tr>
+        <td style="padding:14px 16px;border:1px solid rgba(255,255,255,0.10);background:rgba(255,255,255,0.03);">
+          <p style="margin:0 0 4px;font-family:Georgia,'Times New Roman',serif;font-size:17px;line-height:1.3;color:#F4F1EC;">${escapeHtml(title)}</p>
+          <p style="margin:0 0 8px;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:rgba(244,241,236,0.45);">${escapeHtml(meta)}</p>
+          <p style="margin:0;font-size:13px;line-height:1.55;color:rgba(244,241,236,0.72);">${escapeHtml(body)}</p>
+        </td>
+      </tr>
+    </table>`;
+}
+function weeklyDigestMail(ctx) {
+  const appUrl3 = appBaseUrl();
+  const name = firstName(ctx.name);
+  const matchCount = ctx.matches.length;
+  const subject = matchCount > 0 ? `inner hub \xB7 bu hafta \xB7 ${matchCount} e\u015Fle\u015Fme` : "inner hub \xB7 bu hafta";
+  const matchHtml = ctx.matches.length ? sectionLabel("E\u015Fle\u015Fmeler") + ctx.matches.map(
+    (m) => itemCard(
+      m.name,
+      `${m.matchType} \xB7 %${m.score}${m.company ? ` \xB7 ${m.company}` : ""}`,
+      m.why
+    )
+  ).join("") : "";
+  const eventHtml = ctx.events.length ? sectionLabel("Takvim") + ctx.events.map((e) => itemCard(e.title, e.when, e.location?.trim() || "inner hub")).join("") : "";
+  const dealHtml = ctx.deals.length ? sectionLabel("Capital") + ctx.deals.map((d) => itemCard(d.company, d.stage, d.note)).join("") : "";
+  const textLines = [
+    `Merhaba ${name},`,
+    "",
+    `inner hub \xB7 ${ctx.weekLabel}`,
+    "",
+    ctx.matches.length ? [
+      "E\u015Fle\u015Fmeler",
+      ...ctx.matches.map(
+        (m) => `\xB7 ${m.name}${m.company ? ` (${m.company})` : ""} \u2014 ${m.matchType} \xB7 %${m.score}
+  ${m.why}`
+      ),
+      ""
+    ].join("\n") : "",
+    ctx.events.length ? ["Takvim", ...ctx.events.map((e) => `\xB7 ${e.title} \u2014 ${e.when}${e.location ? ` \xB7 ${e.location}` : ""}`), ""].join(
+      "\n"
+    ) : "",
+    ctx.deals.length ? ["Capital", ...ctx.deals.map((d) => `\xB7 ${d.company} \u2014 ${d.stage}
+  ${d.note}`), ""].join("\n") : "",
+    `Panel: ${appUrl3}/panel`,
+    `Abonelikten \xE7\u0131k: ${ctx.unsubscribeUrl}`,
+    "",
+    "inner hub"
+  ].filter(Boolean);
+  const html = renderInnerEmailLayout({
+    appUrl: appUrl3,
+    preheader: matchCount > 0 ? `Bu hafta ${matchCount} e\u015Fle\u015Fme ve \xE7ember notlar\u0131.` : "Bu haftan\u0131n \xE7ember notlar\u0131.",
+    eyebrow: `Haftal\u0131k not \xB7 ${ctx.weekLabel}`,
+    title: `${name}, bu hafta.`,
+    bodyHtml: `
+      <p style="margin:0 0 8px;">\xC7emberden se\xE7ilmi\u015F, sana \xF6zel bir \xF6zet. Tek mail, Pazartesi.</p>
+      ${matchHtml}${eventHtml}${dealHtml}
+    `,
+    cta: { label: "Panele git", href: `${appUrl3}/panel` },
+    footerNote: "Bu ileti, a\xE7\u0131k olan haftal\u0131k digest tercihine g\xF6re g\xF6nderildi.",
+    unsubscribeUrl: ctx.unsubscribeUrl,
+    physicalAddress: mailPhysicalAddress()
+  });
+  return {
+    subject,
+    text: textLines.join("\n"),
+    html,
+    kind: "weekly.digest",
+    category: "lifecycle",
+    unsubscribeUrl: ctx.unsubscribeUrl
+  };
+}
+function matchIntroReceivedMail(ctx) {
+  const appUrl3 = appBaseUrl();
+  const name = firstName(ctx.name);
+  const subject = "inner hub \xB7 tan\u0131\u015Fma talebin al\u0131nd\u0131";
+  const typeLine = ctx.matchType ? `T\xFCr: ${ctx.matchType}` : null;
+  const text2 = [
+    `Merhaba ${name},`,
+    "",
+    `${ctx.targetName} i\xE7in tan\u0131\u015Fma talebin inner ekibine iletildi.`,
+    typeLine,
+    "",
+    "K\u0131sa s\xFCrede d\xF6n\xFC\u015F yap\u0131l\u0131r. Durumu paneldeki Match sayfas\u0131ndan takip edebilirsin.",
+    `${appUrl3}/panel/match`,
+    "",
+    "inner hub"
+  ].filter(Boolean).join("\n");
+  const html = renderInnerEmailLayout({
+    appUrl: appUrl3,
+    preheader: `${ctx.targetName} i\xE7in talebin ekibe d\xFC\u015Ft\xFC.`,
+    eyebrow: "Match \xB7 tan\u0131\u015Fma",
+    title: "Talebin al\u0131nd\u0131.",
+    bodyHtml: `
+      <p style="margin:0 0 12px;">Merhaba ${escapeHtml(name)}, ${escapeHtml(ctx.targetName)} i\xE7in tan\u0131\u015Fma talebin inner ekibine iletildi.</p>
+      <p style="margin:0;">Warm intro s\xFCrecini ekip y\xFCr\xFCt\xFCr; senin ekstra bir ad\u0131m\u0131n yok. Durum
+      <a href="${escapeHtml(`${appUrl3}/panel/match`)}" style="color:#F4F1EC;">Match</a> sayfas\u0131nda g\xF6r\xFCn\xFCr.</p>
+    `,
+    cta: { label: "Match'i a\xE7", href: `${appUrl3}/panel/match` },
+    footerNote: "Bu ileti, yapt\u0131\u011F\u0131n tan\u0131\u015Fma talebine yan\u0131t olarak otomatik g\xF6nderildi."
+  });
+  return { subject, text: text2, html, kind: "match.intro_received" };
+}
+function matchIntroAdminMail(ctx) {
+  const appUrl3 = appBaseUrl();
+  const subject = `inner hub \xB7 tan\u0131\u015Fma talebi: ${ctx.fromName} \u2192 ${ctx.targetName}`;
+  const text2 = [
+    `G\xF6nderen: ${ctx.fromName} <${ctx.fromEmail}>`,
+    `Hedef: ${ctx.targetName}${ctx.targetCompany ? ` \xB7 ${ctx.targetCompany}` : ""}`,
+    ctx.matchType ? `T\xFCr: ${ctx.matchType}` : null,
+    ctx.score != null ? `Skor: ${ctx.score}` : null,
+    ctx.reason ? `Gerek\xE7e: ${ctx.reason}` : null,
+    "",
+    `${appUrl3}/panel/applications`
+  ].filter(Boolean).join("\n");
+  const html = renderInnerEmailLayout({
+    appUrl: appUrl3,
+    preheader: `${ctx.fromName} \u2192 ${ctx.targetName}`,
+    eyebrow: "Admin \xB7 tan\u0131\u015Fma talebi",
+    title: ctx.targetName,
+    bodyHtml: `
+      <p style="margin:0 0 8px;"><strong style="color:#F4F1EC;">${escapeHtml(ctx.fromName)}</strong> \xB7 ${escapeHtml(ctx.fromEmail)}</p>
+      <p style="margin:0 0 12px;">${escapeHtml(ctx.targetName)}${ctx.targetCompany ? ` \xB7 ${escapeHtml(ctx.targetCompany)}` : ""}${ctx.matchType ? ` \xB7 ${escapeHtml(ctx.matchType)}` : ""}</p>
+      ${ctx.reason ? `<p style="margin:0;white-space:pre-wrap;">${escapeHtml(ctx.reason)}</p>` : ""}
+    `,
+    cta: { label: "Ba\u015Fvurular\u0131 a\xE7", href: `${appUrl3}/panel/applications` },
+    footerNote: "\u0130\xE7 bildirim; yaln\u0131zca ekip adresine gider."
+  });
+  return { subject, text: text2, html, kind: "match.intro_admin" };
+}
+function eventRegisteredMail(ctx) {
+  const appUrl3 = appBaseUrl();
+  const name = firstName(ctx.name);
+  const when = ctx.startsAt ? ctx.startsAt.toLocaleString("tr-TR", { timeZone: "Europe/Istanbul" }) : null;
+  const subject = `inner hub \xB7 kayd\u0131n al\u0131nd\u0131 \xB7 ${ctx.title}`;
+  const text2 = [
+    `Merhaba ${name},`,
+    "",
+    `${ctx.title} kayd\u0131n al\u0131nd\u0131.`,
+    when ? `Tarih: ${when}` : null,
+    ctx.location ? `Yer: ${ctx.location}` : null,
+    ctx.meetUrl ? `Kat\u0131l\u0131m: ${ctx.meetUrl}` : `Panel: ${appUrl3}/panel/events`,
+    "",
+    "inner hub"
+  ].filter(Boolean).join("\n");
+  const html = renderInnerEmailLayout({
+    appUrl: appUrl3,
+    preheader: `${ctx.title} kayd\u0131n al\u0131nd\u0131.`,
+    eyebrow: "Etkinlik \xB7 kay\u0131t",
+    title: ctx.title,
+    bodyHtml: `
+      <p style="margin:0 0 12px;">Merhaba ${escapeHtml(name)}, kayd\u0131n al\u0131nd\u0131.</p>
+      ${when ? `<p style="margin:0 0 8px;">Tarih: <strong style="color:#F4F1EC;font-weight:500;">${escapeHtml(when)}</strong></p>` : ""}
+      ${ctx.location ? `<p style="margin:0;">Yer: ${escapeHtml(ctx.location)}</p>` : ""}
+    `,
+    cta: {
+      label: ctx.meetUrl ? "Kat\u0131l\u0131m linki" : "Etkinlikler",
+      href: ctx.meetUrl || `${appUrl3}/panel/events`
+    },
+    footerNote: "Bu ileti, etkinlik kayd\u0131na yan\u0131t olarak otomatik g\xF6nderildi."
+  });
+  return { subject, text: text2, html, kind: "event.registered" };
+}
+function courseEnrolledMail(ctx) {
+  const appUrl3 = appBaseUrl();
+  const name = firstName(ctx.name);
+  const when = ctx.startsAt ? ctx.startsAt.toLocaleString("tr-TR", { timeZone: "Europe/Istanbul" }) : null;
+  const subject = `inner hub \xB7 kurs kayd\u0131n al\u0131nd\u0131 \xB7 ${ctx.title}`;
+  const text2 = [
+    `Merhaba ${name},`,
+    "",
+    `${ctx.title} kursuna kayd\u0131n tamamland\u0131.`,
+    when ? `Canl\u0131 oturum: ${when}` : null,
+    `${appUrl3}/panel/courses`,
+    "",
+    "inner hub"
+  ].filter(Boolean).join("\n");
+  const html = renderInnerEmailLayout({
+    appUrl: appUrl3,
+    preheader: `${ctx.title} kayd\u0131n tamamland\u0131.`,
+    eyebrow: "Kurs \xB7 kay\u0131t",
+    title: ctx.title,
+    bodyHtml: `
+      <p style="margin:0 0 12px;">Merhaba ${escapeHtml(name)}, ${escapeHtml(ctx.title)} kursuna kayd\u0131n tamamland\u0131.</p>
+      ${when ? `<p style="margin:0;">Canl\u0131 oturum: <strong style="color:#F4F1EC;font-weight:500;">${escapeHtml(when)}</strong></p>` : `<p style="margin:0;">\u0130\xE7erik panele d\xFC\u015Ft\xFC; diledi\u011Fin zaman a\xE7abilirsin.</p>`}
+    `,
+    cta: { label: "Kursa git", href: `${appUrl3}/panel/courses` },
+    footerNote: "Bu ileti, kurs kayd\u0131na yan\u0131t olarak otomatik g\xF6nderildi."
+  });
+  return { subject, text: text2, html, kind: "course.enrolled" };
+}
 
 // src/lib/mail/index.ts
+function queueMail(task) {
+  void task.catch((err) => logger.error({ err }, "mail send failed"));
+}
 var ROLE_LABELS = {
   builder: "Builder",
   operator: "Builder",
@@ -98291,425 +99231,42 @@ async function notifyLiveSession(ctx) {
   const mail = liveSessionReminderMail(ctx);
   return sendTransactionalMail({ ...mail, to: ctx.email });
 }
-
-// src/lib/orgLogo.ts
-init_drizzle_orm();
-
-// src/lib/ensureSchema.ts
-init_drizzle_orm();
-function once(fn) {
-  let inFlight = null;
-  return () => {
-    if (!inFlight) {
-      inFlight = fn().catch((err) => {
-        inFlight = null;
-        throw err;
-      });
-    }
-    return inFlight;
-  };
+async function notifyMatchIntroReceived(ctx) {
+  const prefs = await getUserSettingsPrefs(ctx.userId);
+  if (!wantsEmail(prefs, "match")) return { ok: true, skipped: true };
+  const mail = matchIntroReceivedMail(ctx);
+  return sendTransactionalMail({ ...mail, to: ctx.email });
 }
-var ensureUserProfileColumns = once(async () => {
-  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS handle text`);
-  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS github text`);
-  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS website text`);
-  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS website_logo_url text`);
-  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS linkedin_logo_url text`);
-  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS github_logo_url text`);
-  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS twitter text`);
-  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS skills text`);
-  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS visibility text`);
-  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS settings_prefs text`);
-  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS linkedin_id text`);
-  await db.execute(
-    sql`CREATE UNIQUE INDEX IF NOT EXISTS users_linkedin_id_uidx ON users (linkedin_id) WHERE linkedin_id IS NOT NULL`
-  );
-});
-var ensureCourseVideoColumns = once(async () => {
-  await db.execute(sql`ALTER TABLE lessons ADD COLUMN IF NOT EXISTS duration_seconds integer`);
-});
-var ensureLiveSessionColumns = once(async () => {
-  await db.execute(sql`ALTER TABLE courses ADD COLUMN IF NOT EXISTS format text DEFAULT 'vod'`);
-  await db.execute(sql`ALTER TABLE courses ADD COLUMN IF NOT EXISTS starts_at timestamp`);
-  await db.execute(sql`ALTER TABLE courses ADD COLUMN IF NOT EXISTS ends_at timestamp`);
-  await db.execute(sql`ALTER TABLE courses ADD COLUMN IF NOT EXISTS meet_url text`);
-  await db.execute(sql`ALTER TABLE courses ADD COLUMN IF NOT EXISTS audience text DEFAULT 'all'`);
-  await db.execute(sql`ALTER TABLE courses ADD COLUMN IF NOT EXISTS pass_cost integer DEFAULT 0`);
-  await db.execute(sql`UPDATE courses SET format = 'vod' WHERE format IS NULL`);
-  await db.execute(sql`UPDATE courses SET audience = 'all' WHERE audience IS NULL`);
-  await db.execute(sql`UPDATE courses SET pass_cost = 0 WHERE pass_cost IS NULL`);
-  await db.execute(sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS format text DEFAULT 'in_person'`);
-  await db.execute(sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS meet_url text`);
-  await db.execute(sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS audience text DEFAULT 'all'`);
-  await db.execute(sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS pass_cost integer DEFAULT 1`);
-  await db.execute(sql`UPDATE events SET format = 'in_person' WHERE format IS NULL`);
-  await db.execute(sql`UPDATE events SET audience = 'all' WHERE audience IS NULL`);
-  await db.execute(sql`UPDATE events SET pass_cost = 1 WHERE pass_cost IS NULL`);
-});
-var ensureUserMembershipColumns = once(async () => {
-  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS persona text`);
-  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS membership_plan text`);
-  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS membership_status text`);
-  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS membership_period_end timestamp`);
-  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_style text DEFAULT 'lorelei'`);
-  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS primary_org_id integer`);
-  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS university text`);
-  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS behance text`);
-  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS instagram text`);
-  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS whatsapp_opt_in text`);
-  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS deleted_at timestamp`);
-  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS is_system boolean NOT NULL DEFAULT false`);
-  await db.execute(sql`
-    UPDATE users SET is_system = true
-    WHERE is_system = false AND (
-      lower(trim(name)) IN ('admin', 'member', 'member test', 'kod testi', 'invitee', 'onboarding test', 'test', 'test user', 'smoke test')
-      OR lower(email) IN ('admin@inner.digital', 'member@inner.digital', 'admin@inner.co')
-      OR email ILIKE '%@test.com'
-      OR email ILIKE 'invitee-%'
-      OR email ILIKE 'onboarding-test-%'
-      OR email ILIKE 'test-smoke%'
-    )
-  `);
-});
-var ensureOrgLegalCampaignSchema = once(async () => {
-  await db.execute(sql`
-    CREATE TABLE IF NOT EXISTS organizations (
-      id serial PRIMARY KEY,
-      name text NOT NULL,
-      slug text NOT NULL UNIQUE,
-      domain text,
-      logo_url text,
-      type text NOT NULL DEFAULT 'startup',
-      created_by_user_id integer REFERENCES users(id),
-      verified boolean NOT NULL DEFAULT false,
-      created_at timestamp NOT NULL DEFAULT now()
-    )
-  `);
-  await db.execute(sql`
-    CREATE TABLE IF NOT EXISTS org_memberships (
-      id serial PRIMARY KEY,
-      org_id integer NOT NULL REFERENCES organizations(id),
-      user_id integer NOT NULL REFERENCES users(id),
-      role text NOT NULL DEFAULT 'member',
-      title text,
-      created_at timestamp NOT NULL DEFAULT now(),
-      UNIQUE (org_id, user_id)
-    )
-  `);
-  await db.execute(sql`
-    CREATE TABLE IF NOT EXISTS legal_documents (
-      id serial PRIMARY KEY,
-      slug text NOT NULL,
-      version text NOT NULL,
-      locale text NOT NULL DEFAULT 'tr',
-      title text NOT NULL,
-      body_markdown text NOT NULL,
-      published_at timestamp NOT NULL DEFAULT now()
-    )
-  `);
-  await db.execute(sql`
-    CREATE UNIQUE INDEX IF NOT EXISTS legal_documents_slug_ver_locale
-      ON legal_documents (slug, version, locale)
-  `);
-  await db.execute(sql`
-    CREATE TABLE IF NOT EXISTS legal_acceptances (
-      id serial PRIMARY KEY,
-      user_id integer NOT NULL REFERENCES users(id),
-      document_id integer NOT NULL REFERENCES legal_documents(id),
-      version text NOT NULL,
-      accepted_at timestamp NOT NULL DEFAULT now(),
-      ip text,
-      user_agent text
-    )
-  `);
-  await db.execute(sql`
-    CREATE UNIQUE INDEX IF NOT EXISTS legal_acceptances_user_doc
-      ON legal_acceptances (user_id, document_id, version)
-  `);
-  await db.execute(sql`
-    CREATE TABLE IF NOT EXISTS campaigns (
-      id serial PRIMARY KEY,
-      org_id integer NOT NULL REFERENCES organizations(id),
-      created_by_user_id integer NOT NULL REFERENCES users(id),
-      title text NOT NULL,
-      pitch text NOT NULL,
-      cta_url text NOT NULL,
-      code text,
-      category text DEFAULT 'Eğitim',
-      status text NOT NULL DEFAULT 'draft',
-      perk_id integer,
-      starts_at timestamp,
-      ends_at timestamp,
-      created_at timestamp NOT NULL DEFAULT now()
-    )
-  `);
-  await db.execute(sql`ALTER TABLE perks ADD COLUMN IF NOT EXISTS source text DEFAULT 'partner'`);
-  await db.execute(sql`ALTER TABLE perks ADD COLUMN IF NOT EXISTS org_id integer`);
-  await db.execute(sql`ALTER TABLE perks ADD COLUMN IF NOT EXISTS campaign_id integer`);
-  await db.execute(sql`ALTER TABLE courses ADD COLUMN IF NOT EXISTS category text DEFAULT 'business'`);
-  await db.execute(sql`UPDATE courses SET category = 'business' WHERE category IS NULL`);
-});
-var ensurePassSchema = once(async () => {
-  await db.execute(sql`
-    CREATE TABLE IF NOT EXISTS pass_wallets (
-      id serial PRIMARY KEY,
-      user_id integer NOT NULL UNIQUE REFERENCES users(id),
-      balance integer NOT NULL DEFAULT 0,
-      updated_at timestamp NOT NULL DEFAULT now()
-    )
-  `);
-  await db.execute(sql`
-    CREATE TABLE IF NOT EXISTS pass_ledger (
-      id serial PRIMARY KEY,
-      user_id integer NOT NULL REFERENCES users(id),
-      delta integer NOT NULL,
-      reason text NOT NULL,
-      ref_type text,
-      ref_id text,
-      created_at timestamp NOT NULL DEFAULT now()
-    )
-  `);
-  await db.execute(sql`
-    CREATE INDEX IF NOT EXISTS pass_ledger_user_idx ON pass_ledger (user_id)
-  `);
-});
-var ensureStageSchema = once(async () => {
-  await db.execute(sql`
-    CREATE TABLE IF NOT EXISTS stage_products (
-      id serial PRIMARY KEY,
-      user_id integer NOT NULL REFERENCES users(id),
-      title text NOT NULL,
-      url text NOT NULL,
-      pitch text NOT NULL,
-      status text NOT NULL DEFAULT 'published',
-      created_at timestamp NOT NULL DEFAULT now()
-    )
-  `);
-  await db.execute(sql`
-    CREATE TABLE IF NOT EXISTS stage_votes (
-      id serial PRIMARY KEY,
-      product_id integer NOT NULL REFERENCES stage_products(id),
-      user_id integer NOT NULL REFERENCES users(id),
-      created_at timestamp NOT NULL DEFAULT now(),
-      UNIQUE (product_id, user_id)
-    )
-  `);
-  await db.execute(sql`
-    CREATE TABLE IF NOT EXISTS live_notify_log (
-      id serial PRIMARY KEY,
-      ref_type text NOT NULL,
-      ref_id integer NOT NULL,
-      kind text NOT NULL,
-      created_at timestamp NOT NULL DEFAULT now()
-    )
-  `);
-  await db.execute(sql`
-    CREATE UNIQUE INDEX IF NOT EXISTS live_notify_log_uidx
-      ON live_notify_log (ref_type, ref_id, kind)
-  `);
-  await db.execute(sql`ALTER TABLE stage_products ADD COLUMN IF NOT EXISTS featured boolean NOT NULL DEFAULT false`);
-  await db.execute(sql`ALTER TABLE stage_products ADD COLUMN IF NOT EXISTS image_url text`);
-  await db.execute(sql`ALTER TABLE stage_products ADD COLUMN IF NOT EXISTS product_hunt_url text`);
-  await db.execute(sql`ALTER TABLE stage_products ADD COLUMN IF NOT EXISTS product_hunt_id text`);
-  await db.execute(sql`ALTER TABLE stage_products ADD COLUMN IF NOT EXISTS ph_votes_count integer`);
-  await db.execute(sql`ALTER TABLE stage_products ADD COLUMN IF NOT EXISTS ph_synced_at timestamp`);
-  await db.execute(sql`ALTER TABLE stage_products ADD COLUMN IF NOT EXISTS youtube_url text`);
-});
-var ensureMatchAndFaqSchema = once(async () => {
-  await db.execute(sql`
-    CREATE TABLE IF NOT EXISTS introduction_requests (
-      id serial PRIMARY KEY,
-      from_user_id integer NOT NULL REFERENCES users(id),
-      target_name text NOT NULL,
-      target_company text,
-      match_type text,
-      reason text,
-      score integer,
-      status text NOT NULL DEFAULT 'pending',
-      created_at timestamp NOT NULL DEFAULT now()
-    )
-  `);
-  await db.execute(sql`ALTER TABLE faq ADD COLUMN IF NOT EXISTS category text`);
-  await db.execute(sql`UPDATE faq SET category = 'Genel' WHERE category IS NULL`);
-});
-var ensureVaultCapitalSchema = once(async () => {
-  await db.execute(sql`
-    CREATE TABLE IF NOT EXISTS vault_documents (
-      id serial PRIMARY KEY,
-      user_id integer NOT NULL REFERENCES users(id),
-      title text NOT NULL,
-      doc_type text NOT NULL,
-      access text NOT NULL DEFAULT 'topluluk',
-      excerpt text,
-      tags text,
-      pages integer,
-      views integer NOT NULL DEFAULT 0,
-      created_at timestamp NOT NULL DEFAULT now(),
-      updated_at timestamp NOT NULL DEFAULT now()
-    )
-  `);
-  await db.execute(sql`ALTER TABLE vault_documents ADD COLUMN IF NOT EXISTS file_key text`);
-  await db.execute(sql`ALTER TABLE vault_documents ADD COLUMN IF NOT EXISTS file_name text`);
-  await db.execute(sql`ALTER TABLE vault_documents ADD COLUMN IF NOT EXISTS mime_type text`);
-  await db.execute(sql`ALTER TABLE vault_documents ADD COLUMN IF NOT EXISTS size_bytes integer`);
-  await db.execute(sql`
-    CREATE TABLE IF NOT EXISTS capital_deals (
-      id serial PRIMARY KEY,
-      company text NOT NULL,
-      tagline text,
-      stage text NOT NULL,
-      sector text NOT NULL,
-      raise text,
-      valuation text,
-      founders text,
-      lead_investor text,
-      round text,
-      score integer NOT NULL DEFAULT 0,
-      tags text,
-      has_spv boolean NOT NULL DEFAULT false,
-      updated_at timestamp NOT NULL DEFAULT now(),
-      created_at timestamp NOT NULL DEFAULT now()
-    )
-  `);
-  await db.execute(sql`
-    CREATE TABLE IF NOT EXISTS capital_spvs (
-      id serial PRIMARY KEY,
-      name text NOT NULL,
-      target text NOT NULL,
-      raised text NOT NULL,
-      pct integer NOT NULL DEFAULT 0,
-      participants integer NOT NULL DEFAULT 0,
-      closing text,
-      sector text,
-      created_at timestamp NOT NULL DEFAULT now()
-    )
-  `);
-});
-var ensureTalentSchema = once(async () => {
-  await db.execute(sql`
-    CREATE TABLE IF NOT EXISTS talent_posts (
-      id serial PRIMARY KEY,
-      user_id integer NOT NULL REFERENCES users(id),
-      post_type text NOT NULL,
-      role text NOT NULL,
-      description text NOT NULL,
-      tags text,
-      created_at timestamp NOT NULL DEFAULT now()
-    )
-  `);
-});
-var ensureApiKeysSchema = once(async () => {
-  await db.execute(sql`
-    CREATE TABLE IF NOT EXISTS api_keys (
-      id serial PRIMARY KEY,
-      user_id integer NOT NULL REFERENCES users(id),
-      name text NOT NULL,
-      key_prefix text NOT NULL,
-      key_hash text NOT NULL,
-      created_at timestamp NOT NULL DEFAULT now(),
-      last_used_at timestamp
-    )
-  `);
-});
-var ensureAnalyticsEventsSchema = once(async () => {
-  await db.execute(sql`
-    CREATE TABLE IF NOT EXISTS analytics_events (
-      id serial PRIMARY KEY,
-      event_name text NOT NULL DEFAULT 'page_view',
-      path text NOT NULL,
-      title text,
-      referrer text,
-      session_id text NOT NULL,
-      locale text,
-      device text,
-      user_agent text,
-      created_at timestamp NOT NULL DEFAULT now()
-    )
-  `);
-  await db.execute(sql`
-    CREATE INDEX IF NOT EXISTS analytics_events_created_idx ON analytics_events (created_at)
-  `);
-  await db.execute(sql`
-    CREATE INDEX IF NOT EXISTS analytics_events_path_idx ON analytics_events (path)
-  `);
-  await db.execute(sql`
-    CREATE INDEX IF NOT EXISTS analytics_events_session_idx ON analytics_events (session_id)
-  `);
-});
-var ensurePasswordResetSchema = once(async () => {
-  await db.execute(sql`
-    CREATE TABLE IF NOT EXISTS password_reset_tokens (
-      id serial PRIMARY KEY,
-      user_id integer NOT NULL REFERENCES users(id),
-      token_hash text NOT NULL,
-      expires_at timestamp NOT NULL,
-      used_at timestamp,
-      created_at timestamp NOT NULL DEFAULT now()
-    )
-  `);
-  await db.execute(sql`
-    CREATE UNIQUE INDEX IF NOT EXISTS password_reset_tokens_hash_uidx
-      ON password_reset_tokens (token_hash)
-  `);
-  await db.execute(sql`
-    CREATE INDEX IF NOT EXISTS password_reset_tokens_user_idx
-      ON password_reset_tokens (user_id)
-  `);
-});
-var ensureInviteCodesSchema = once(async () => {
-  await db.execute(sql`
-    CREATE TABLE IF NOT EXISTS invite_codes (
-      id serial PRIMARY KEY,
-      code text NOT NULL,
-      email text NOT NULL,
-      invitation_request_id integer NOT NULL,
-      application_id integer,
-      used_at timestamp,
-      used_by_user_id integer REFERENCES users(id),
-      expires_at timestamp,
-      created_at timestamp NOT NULL DEFAULT now()
-    )
-  `);
-  await db.execute(sql`
-    CREATE UNIQUE INDEX IF NOT EXISTS invite_codes_code_uidx ON invite_codes (code)
-  `);
-  await db.execute(sql`
-    CREATE INDEX IF NOT EXISTS invite_codes_invitation_request_idx
-      ON invite_codes (invitation_request_id)
-  `);
-});
-var ensureOrgLogoCacheSchema = once(async () => {
-  await db.execute(sql`
-    CREATE TABLE IF NOT EXISTS org_logo_cache (
-      domain text PRIMARY KEY,
-      data_url text,
-      fetched_at timestamp NOT NULL DEFAULT now()
-    )
-  `);
-});
-var ensureKnownMemberProfileFixes = once(async () => {
-  await db.execute(sql`
-    UPDATE users
-    SET title = NULL
-    WHERE title IS NOT NULL
-      AND trim(title) ~ '^[\\s·.\\-_—–―•]+$'
-  `);
-  await db.execute(sql`
-    UPDATE users
-    SET
-      bio = 'Ata Han Bayram, Flexlore Inc.’in kurucu ortağı ve CEO’sudur. Yazılım, tasarım ve operasyonu aynı masada tutarak şirketlerin ürününü ve markasını ölçeklenebilir hale getirir. inner·hub’ı kurucular, yatırımcılar ve builder’lar için kapalı bir daire olarak büyütür.',
-      company = COALESCE(NULLIF(trim(company), ''), 'Flexlore Inc'),
-      title = COALESCE(NULLIF(trim(title), ''), 'Founder')
-    WHERE lower(trim(name)) = 'ata han bayram'
-      AND (
-        bio IS NULL
-        OR length(trim(bio)) < 80
-        OR rtrim(bio) LIKE '%ölçeklenebilir'
-      )
-  `);
-});
+async function notifyMatchIntroAdmin(ctx) {
+  const mail = matchIntroAdminMail(ctx);
+  const to = process.env.NOTIFY_EMAIL || process.env.SMTP_USER;
+  if (!to) return { ok: false, error: "NOTIFY_EMAIL/SMTP_USER yok" };
+  return sendTransactionalMail({ ...mail, to });
+}
+async function notifyEventRegistered(ctx) {
+  const prefs = await getUserSettingsPrefs(ctx.userId);
+  if (!prefs.notifEmail) return { ok: true, skipped: true };
+  const mail = eventRegisteredMail(ctx);
+  return sendTransactionalMail({ ...mail, to: ctx.email });
+}
+async function notifyCourseEnrolled(ctx) {
+  const prefs = await getUserSettingsPrefs(ctx.userId);
+  if (!prefs.notifEmail) return { ok: true, skipped: true };
+  const mail = courseEnrolledMail(ctx);
+  return sendTransactionalMail({ ...mail, to: ctx.email });
+}
+async function notifyWeeklyDigest(ctx) {
+  const mail = weeklyDigestMail(ctx);
+  return sendTransactionalMail({
+    ...mail,
+    to: ctx.email,
+    category: "lifecycle",
+    unsubscribeUrl: ctx.unsubscribeUrl
+  });
+}
 
 // src/lib/orgLogo.ts
+init_drizzle_orm();
 var CONSUMER_DOMAINS = /* @__PURE__ */ new Set([
   "gmail.com",
   "googlemail.com",
@@ -98934,7 +99491,7 @@ async function fetchLinkPreview(rawUrl) {
 }
 
 // src/routes/invitations.ts
-var router2 = (0, import_express2.Router)();
+var router3 = (0, import_express3.Router)();
 var rateLimitMap = /* @__PURE__ */ new Map();
 var RATE_LIMIT_WINDOW_MS = 60 * 60 * 1e3;
 var RATE_LIMIT_MAX = 5;
@@ -98960,7 +99517,7 @@ var ensureOrgColumns = once(async () => {
   await db.execute(sql`ALTER TABLE invitation_requests ADD COLUMN IF NOT EXISTS organization_logo text`);
   await db.execute(sql`ALTER TABLE invitation_requests ADD COLUMN IF NOT EXISTS organization_description text`);
 });
-router2.get("/org-logo", async (req, res) => {
+router3.get("/org-logo", async (req, res) => {
   const domain2 = normalizeDomain(String(req.query.domain ?? ""));
   if (!domain2) {
     res.status(400).json({ error: "domain required" });
@@ -98987,7 +99544,7 @@ router2.get("/org-logo", async (req, res) => {
   }
   res.json({ domain: domain2, name, description, logoUrl });
 });
-router2.post("/request", async (req, res) => {
+router3.post("/request", async (req, res) => {
   const parsed = SubmitRequestBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: "Invalid request data." });
@@ -99073,7 +99630,7 @@ router2.post("/request", async (req, res) => {
   });
   res.status(201).json({ message: "Received." });
 });
-router2.get("/requests", async (req, res) => {
+router3.get("/requests", async (req, res) => {
   const parsed = ListRequestsQueryParams.safeParse(req.query);
   if (!parsed.success) {
     res.status(401).json({ error: "Unauthorized." });
@@ -99088,10 +99645,10 @@ router2.get("/requests", async (req, res) => {
   const requests = await db.select().from(invitationRequestsTable).orderBy(desc(invitationRequestsTable.createdAt));
   res.json(requests);
 });
-var invitations_default = router2;
+var invitations_default = router3;
 
 // src/routes/payments.ts
-var import_express3 = __toESM(require_express2(), 1);
+var import_express4 = __toESM(require_express2(), 1);
 
 // ../../node_modules/.pnpm/stripe@22.3.0_@types+node@25.9.4/node_modules/stripe/esm/Error.js
 var Error_exports = {};
@@ -101205,12 +101762,12 @@ var StripeContext = class _StripeContext {
 };
 
 // ../../node_modules/.pnpm/stripe@22.3.0_@types+node@25.9.4/node_modules/stripe/esm/platform/NodePlatformFunctions.js
-import * as crypto3 from "crypto";
+import * as crypto4 from "crypto";
 import * as os from "os";
 import { EventEmitter } from "events";
 
 // ../../node_modules/.pnpm/stripe@22.3.0_@types+node@25.9.4/node_modules/stripe/esm/crypto/NodeCryptoProvider.js
-import * as crypto2 from "crypto";
+import * as crypto3 from "crypto";
 
 // ../../node_modules/.pnpm/stripe@22.3.0_@types+node@25.9.4/node_modules/stripe/esm/crypto/CryptoProvider.js
 var CryptoProvider = class {
@@ -101253,7 +101810,7 @@ var CryptoProviderOnlySupportsAsyncError = class extends Error {
 var NodeCryptoProvider = class extends CryptoProvider {
   /** @override */
   computeHMACSignature(payload, secret) {
-    return crypto2.createHmac("sha256", secret).update(payload, "utf8").digest("hex");
+    return crypto3.createHmac("sha256", secret).update(payload, "utf8").digest("hex");
   }
   /** @override */
   async computeHMACSignatureAsync(payload, secret) {
@@ -101262,7 +101819,7 @@ var NodeCryptoProvider = class extends CryptoProvider {
   }
   /** @override */
   async computeSHA256Async(data) {
-    return new Uint8Array(await crypto2.createHash("sha256").update(data).digest());
+    return new Uint8Array(await crypto3.createHash("sha256").update(data).digest());
   }
 };
 
@@ -101622,8 +102179,8 @@ var StreamProcessingError = class extends StripeError {
 var NodePlatformFunctions = class extends PlatformFunctions {
   /** @override */
   uuid4() {
-    if (crypto3.randomUUID) {
-      return crypto3.randomUUID();
+    if (crypto4.randomUUID) {
+      return crypto4.randomUUID();
     }
     return super.uuid4();
   }
@@ -101666,7 +102223,7 @@ var NodePlatformFunctions = class extends PlatformFunctions {
   getSourceHash() {
     try {
       const uname = this.getUname();
-      return uname ? crypto3.createHash("md5").update(uname).digest("hex") : null;
+      return uname ? crypto4.createHash("md5").update(uname).digest("hex") : null;
     } catch {
       return null;
     }
@@ -101682,11 +102239,11 @@ var NodePlatformFunctions = class extends PlatformFunctions {
     if (a.length !== b.length) {
       return false;
     }
-    if (crypto3.timingSafeEqual) {
+    if (crypto4.timingSafeEqual) {
       const textEncoder = new TextEncoder();
       const aEncoded = textEncoder.encode(a);
       const bEncoded = textEncoder.encode(b);
-      return crypto3.timingSafeEqual(aEncoded, bEncoded);
+      return crypto4.timingSafeEqual(aEncoded, bEncoded);
     }
     return super.secureCompare(a, b);
   }
@@ -116566,6 +117123,46 @@ init_schema2();
 // src/lib/passes.ts
 init_drizzle_orm();
 init_schema2();
+var MONTHLY_PASS_GRANT = 3;
+function monthlyRefId(userId, yearMonth) {
+  const ym = yearMonth ?? `${(/* @__PURE__ */ new Date()).getUTCFullYear()}-${String((/* @__PURE__ */ new Date()).getUTCMonth() + 1).padStart(2, "0")}`;
+  return `monthly:${userId}:${ym}`;
+}
+async function monthlyPassGrant(userId, yearMonth) {
+  await ensurePassSchema();
+  const [user] = await db.select({
+    id: usersTable.id,
+    membershipStatus: usersTable.membershipStatus
+  }).from(usersTable).where(eq(usersTable.id, userId)).limit(1);
+  if (!user) return { granted: false, balance: 0, skipped: "user_not_found" };
+  if (user.membershipStatus !== "active") {
+    return { granted: false, balance: await getPassBalance(userId), skipped: "not_active" };
+  }
+  const refId = monthlyRefId(userId, yearMonth);
+  const [existing] = await db.select({ id: passLedgerTable.id }).from(passLedgerTable).where(and(eq(passLedgerTable.userId, userId), eq(passLedgerTable.refId, refId))).limit(1);
+  if (existing) {
+    return { granted: false, balance: await getPassBalance(userId), skipped: "already_granted" };
+  }
+  const balance = await creditPasses({
+    userId,
+    amount: MONTHLY_PASS_GRANT,
+    reason: "monthly_grant",
+    refType: "membership",
+    refId
+  });
+  return { granted: true, balance };
+}
+async function monthlyPassGrantAll(yearMonth) {
+  const active = await db.select({ id: usersTable.id }).from(usersTable).where(eq(usersTable.membershipStatus, "active"));
+  let granted = 0;
+  let skipped = 0;
+  for (const row of active) {
+    const result = await monthlyPassGrant(row.id, yearMonth);
+    if (result.granted) granted += 1;
+    else skipped += 1;
+  }
+  return { eligible: active.length, granted, skipped };
+}
 async function getOrCreateWallet(userId) {
   await ensurePassSchema();
   const [existing] = await db.select().from(passWalletsTable).where(eq(passWalletsTable.userId, userId)).limit(1);
@@ -116627,7 +117224,7 @@ async function spendPasses(input) {
 }
 
 // src/routes/payments.ts
-var router3 = (0, import_express3.Router)();
+var router4 = (0, import_express4.Router)();
 function getStripe() {
   const key = process.env.STRIPE_SECRET_KEY;
   if (!key) throw new Error("STRIPE_SECRET_KEY ortam de\u011Fi\u015Fkeni tan\u0131ml\u0131 de\u011Fil");
@@ -116649,8 +117246,7 @@ var PLANS = {
     priceId: process.env.STRIPE_PRICE_FOUNDER
   }
 };
-var PASS_AMOUNT_TRY = 29900;
-var MEMBERSHIP_PASS_GRANT = 3;
+var PASS_AMOUNT_TRY = 14900;
 async function alreadyCredited(userId, refId) {
   const [row] = await db.select({ id: passLedgerTable.id }).from(passLedgerTable).where(and(eq(passLedgerTable.userId, userId), eq(passLedgerTable.refId, refId))).limit(1);
   return Boolean(row);
@@ -116659,7 +117255,7 @@ async function grantMembershipPasses(userId, refId, reason) {
   if (await alreadyCredited(userId, refId)) return;
   await creditPasses({
     userId,
-    amount: MEMBERSHIP_PASS_GRANT,
+    amount: MONTHLY_PASS_GRANT,
     reason,
     refType: "stripe",
     refId
@@ -116672,7 +117268,7 @@ function periodEndFromSubscription(sub) {
   }
   return null;
 }
-router3.post("/checkout-session", async (req, res) => {
+router4.post("/checkout-session", async (req, res) => {
   try {
     const stripe = getStripe();
     const { type: type2, planId, successUrl, cancelUrl } = req.body;
@@ -116735,9 +117331,9 @@ router3.post("/checkout-session", async (req, res) => {
     return res.status(status).json({ error: err.message });
   }
 });
-router3.post(
+router4.post(
   "/webhook",
-  import_express3.default.raw({ type: "application/json" }),
+  import_express4.default.raw({ type: "application/json" }),
   async (req, res) => {
     const sig = req.headers["stripe-signature"];
     const secret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -116807,7 +117403,7 @@ router3.post(
           }
           const uid = Number(userId);
           if (Number.isFinite(uid) && uid > 0) {
-            await grantMembershipPasses(uid, invoice.id, "membership_grant");
+            await monthlyPassGrant(uid);
           }
           break;
         }
@@ -116830,7 +117426,7 @@ router3.post(
     return res.json({ received: true });
   }
 );
-router3.get("/session/:id", async (req, res) => {
+router4.get("/session/:id", async (req, res) => {
   try {
     const stripe = getStripe();
     const session = await stripe.checkout.sessions.retrieve(req.params.id);
@@ -116843,11 +117439,185 @@ router3.get("/session/:id", async (req, res) => {
     return res.status(404).json({ error: "Oturum bulunamad\u0131" });
   }
 });
-var payments_default = router3;
+var payments_default = router4;
 
 // src/routes/ai.ts
-var import_express4 = __toESM(require_express2(), 1);
+var import_express5 = __toESM(require_express2(), 1);
 init_sdk();
+init_drizzle_orm();
+init_schema2();
+
+// src/lib/panelMetrics.ts
+init_drizzle_orm();
+init_schema2();
+
+// src/lib/directoryMembers.ts
+var TEST_NAME_EXACT = /* @__PURE__ */ new Set([
+  "admin",
+  "member",
+  "member test",
+  "invitee",
+  "onboarding test",
+  "kod testi",
+  "test user",
+  "test",
+  "smoke test"
+]);
+function isTestOrSystemAccount(input) {
+  if (input.isSystem) return true;
+  const email3 = (input.email ?? "").trim().toLowerCase();
+  const name = (input.name ?? "").trim().toLowerCase();
+  if (!email3 && !name) return true;
+  if (email3.endsWith("@test.com") || email3.endsWith("@example.com") || email3.endsWith("@example.org")) {
+    return true;
+  }
+  if (email3 === "admin@inner.digital" || email3 === "member@inner.digital" || email3 === "admin@inner.co" || email3.startsWith("invitee-") || email3.startsWith("onboarding-test-") || email3.startsWith("test-smoke") || email3.startsWith("nox")) {
+    return true;
+  }
+  if (TEST_NAME_EXACT.has(name)) return true;
+  if (/\b(test|smoke|invitee|onboarding)\b/i.test(name) && name.length < 40) return true;
+  return false;
+}
+function isDirectoryMember(input) {
+  if (isTestOrSystemAccount(input)) return false;
+  const name = (input.name ?? "").trim();
+  return name.length > 0;
+}
+
+// src/lib/panelMetrics.ts
+var PULSE_MIN_MESSAGES_7D = Number(process.env.PULSE_MIN_MESSAGES_7D ?? 20);
+var PULSE_MIN_ACTIVE_MEMBERS_7D = Number(process.env.PULSE_MIN_ACTIVE_MEMBERS_7D ?? 5);
+var MATCH_MIN_COMPLETE_PROFILES = Number(process.env.MATCH_MIN_COMPLETE_PROFILES ?? 3);
+function parseSkills(raw) {
+  if (Array.isArray(raw)) return raw.map(String).filter(Boolean);
+  if (typeof raw !== "string" || !raw.trim()) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) return parsed.map(String).filter(Boolean);
+  } catch {
+  }
+  return raw.split(/[,;|]/).map((s) => s.trim()).filter(Boolean);
+}
+function isCompleteProfile(u) {
+  const bio = (u.bio ?? "").trim();
+  const title = (u.title ?? "").trim();
+  const company = (u.company ?? "").trim();
+  const skills = parseSkills(u.skills);
+  return bio.length >= 20 && (title.length > 0 || company.length > 0 || skills.length > 0);
+}
+async function getPulseSnapshot() {
+  const now = Date.now();
+  const weekAgo = new Date(now - 7 * 864e5);
+  const channels = await db.select().from(channelsTable);
+  const channelStats = [];
+  for (const ch of channels) {
+    const [{ n: messages7d2 }] = await db.select({ n: count() }).from(messagesTable).where(and(eq(messagesTable.channelId, ch.id), gte(messagesTable.createdAt, weekAgo)));
+    const active = await db.selectDistinct({ userId: messagesTable.userId }).from(messagesTable).where(and(eq(messagesTable.channelId, ch.id), gte(messagesTable.createdAt, weekAgo)));
+    const samples = await db.select({ body: messagesTable.body }).from(messagesTable).where(and(eq(messagesTable.channelId, ch.id), gte(messagesTable.createdAt, weekAgo))).orderBy(desc(messagesTable.createdAt)).limit(3);
+    channelStats.push({
+      id: ch.id,
+      name: ch.name,
+      messages7d: Number(messages7d2),
+      activeMembers7d: active.length,
+      sample: samples[0]?.body?.slice(0, 120) ?? null
+    });
+  }
+  channelStats.sort((a, b) => b.messages7d - a.messages7d);
+  const [{ n: messages7d }] = await db.select({ n: count() }).from(messagesTable).where(gte(messagesTable.createdAt, weekAgo));
+  const activeRows = await db.selectDistinct({ userId: messagesTable.userId }).from(messagesTable).where(gte(messagesTable.createdAt, weekAgo));
+  const [{ n: totalMembers }] = await db.select({ n: count() }).from(usersTable).where(isNull(usersTable.deletedAt));
+  const messagesCount = Number(messages7d);
+  const activeMembers7d = activeRows.length;
+  const sufficient = messagesCount >= PULSE_MIN_MESSAGES_7D && activeMembers7d >= PULSE_MIN_ACTIVE_MEMBERS_7D;
+  const topChannels = channelStats.filter((c) => c.messages7d > 0).slice(0, 6);
+  const contextLines = [
+    `Tarih aral\u0131\u011F\u0131: ${weekAgo.toISOString().slice(0, 10)} \u2014 ${new Date(now).toISOString().slice(0, 10)}`,
+    `Son 7 g\xFCn: ${messagesCount} mesaj, ${activeMembers7d} aktif \xFCye, ${Number(totalMembers)} toplam \xFCye.`,
+    ...topChannels.map(
+      (c) => `#${c.name}: ${c.messages7d} mesaj, ${c.activeMembers7d} aktif` + (c.sample ? ` \xB7 \xF6rnek: "${c.sample.replace(/\s+/g, " ").slice(0, 80)}"` : "")
+    )
+  ];
+  return {
+    weekAgoIso: weekAgo.toISOString(),
+    nowIso: new Date(now).toISOString(),
+    messages7d: messagesCount,
+    activeMembers7d,
+    totalMembers: Number(totalMembers),
+    channels: channelStats,
+    sufficient,
+    contextText: contextLines.join("\n")
+  };
+}
+async function listMatchableMembers(excludeUserId) {
+  const rows = await db.select({
+    id: usersTable.id,
+    name: usersTable.name,
+    email: usersTable.email,
+    handle: usersTable.handle,
+    title: usersTable.title,
+    company: usersTable.company,
+    bio: usersTable.bio,
+    skills: usersTable.skills,
+    persona: usersTable.persona,
+    avatarUrl: usersTable.avatarUrl,
+    isSystem: usersTable.isSystem,
+    linkedin: usersTable.linkedin,
+    linkedinId: usersTable.linkedinId
+  }).from(usersTable).where(isNull(usersTable.deletedAt));
+  return rows.filter((u) => excludeUserId == null ? true : u.id !== excludeUserId).filter(
+    (u) => isDirectoryMember({
+      email: u.email,
+      name: u.name,
+      bio: u.bio,
+      company: u.company,
+      title: u.title,
+      linkedin: u.linkedin,
+      linkedinId: u.linkedinId,
+      avatarUrl: u.avatarUrl,
+      persona: u.persona,
+      isSystem: u.isSystem
+    })
+  ).filter(isCompleteProfile).map((u) => ({
+    id: u.id,
+    name: u.name,
+    handle: u.handle,
+    title: u.title,
+    company: u.company,
+    bio: u.bio,
+    skills: parseSkills(u.skills),
+    persona: u.persona,
+    avatarUrl: u.avatarUrl
+  }));
+}
+function scoreMemberMatch(me, other) {
+  const mySkills = new Set((me.skills ?? []).map((s) => s.toLowerCase()));
+  let overlap = 0;
+  for (const s of other.skills) if (mySkills.has(s.toLowerCase())) overlap += 1;
+  let score = 55 + Math.min(30, overlap * 8);
+  if (me.persona && other.persona && me.persona !== other.persona) score += 5;
+  if (me.company && other.company && me.company !== other.company) score += 3;
+  if (other.title) score += 2;
+  if (other.bio && other.bio.length > 80) score += 3;
+  return Math.min(98, Math.max(50, score));
+}
+async function getEventsSummary() {
+  const now = /* @__PURE__ */ new Date();
+  const upcoming = await db.select().from(eventsTable).where(and(eq(eventsTable.isPublished, true), gte(eventsTable.startAt, now))).orderBy(eventsTable.startAt).limit(20);
+  const featured = upcoming[0] ?? null;
+  return {
+    upcomingCount: upcoming.length,
+    featuredEvent: featured ? {
+      id: featured.id,
+      title: featured.title,
+      description: featured.description,
+      location: featured.location,
+      startAt: featured.startAt instanceof Date ? featured.startAt.toISOString() : featured.startAt,
+      endAt: featured.endAt instanceof Date ? featured.endAt.toISOString() : featured.endAt,
+      passCost: featured.passCost,
+      format: featured.format
+    } : null
+  };
+}
 
 // src/lib/higgsfield.ts
 var HF_BASE = "https://platform.higgsfield.ai";
@@ -116935,169 +117705,172 @@ function isHiggsfieldConfigured() {
 }
 
 // src/routes/ai.ts
-var router4 = (0, import_express4.Router)();
+var router5 = (0, import_express5.Router)();
 function getClient() {
   const key = process.env.ANTHROPIC_API_KEY;
   if (!key) throw new Error("ANTHROPIC_API_KEY ortam de\u011Fi\u015Fkeni tan\u0131ml\u0131 de\u011Fil");
   return new Anthropic({ apiKey: key });
 }
-var COMMUNITY_CONTEXT = `
-inner\xB7hub toplulu\u011Fu \u2014 \u0130stanbul merkezli, AI odakl\u0131, \xF6zel davet ile kat\u0131l\u0131nan kurucu/yat\u0131r\u0131mc\u0131 toplulu\u011Fu.
-34 kurucu \xFCye. Sekt\xF6rler: B2B SaaS, Fintech, HR Tech, AI/ML, E-ticaret.
-
-Bu haftaki kanal aktivitesi:
-- #ai-tools: Claude 4 Opus, Cursor AI, Bolt.new, Runway Gen-3 tart\u0131\u015Fmalar\u0131
-- #girisimler: Hipo 50. m\xFC\u015Fteri milestone, AWS Activate ba\u015Fvurular\u0131
-- #genel: Eyl\xFCl Zirvesi haz\u0131rl\u0131\u011F\u0131, workshop talebi
-- #tavsiyeler: "The Mom Test" kitab\u0131, Acquired podcast
-
-\xDCyeler:
-- Ata Han Bayram (Founder, inner\xB7hub) \u2014 \xDCr\xFCn, AI, topluluk
-- Zeynep Arslan (Co-founder, Hipo) \u2014 B2B SaaS, liderlik, sat\u0131\u015F
-- Mert Demir (AI PM, Insider) \u2014 AI, \xDCr\xFCn, Growth
-- Ay\u015Fe Kaya (HR Tech Lead, Getir) \u2014 HR Tech, dijital d\xF6n\xFC\u015F\xFCm
-- Berk Y\u0131lmaz (Angel Investor) \u2014 Fintech, SaaS, AI yat\u0131r\u0131m
-- Selin \xC7elik (CTO, Dopigo) \u2014 Teknik liderlik, DevOps
-- Ozan K\u0131rm\u0131z\u0131 (Growth Lead, Pazarama) \u2014 E-ticaret, pazarlama
-- Deniz Alp (Legal, Alp Hukuk) \u2014 Startup hukuku, yat\u0131r\u0131m
-`;
-router4.post("/signal", async (req, res) => {
+function topChannelSource(snapshot) {
+  const top = snapshot.channels.filter((c) => c.messages7d > 0).slice(0, 3);
+  const channelNames = top.map((c) => `#${c.name}`).join(", ") || "#genel";
+  const dateRange = `${snapshot.weekAgoIso.slice(0, 10)} \u2014 ${snapshot.nowIso.slice(0, 10)}`;
+  return {
+    messageCount: snapshot.messages7d,
+    channels: channelNames,
+    dateRange,
+    label: `${snapshot.messages7d} mesaj \xB7 ${channelNames} \xB7 ${dateRange}`
+  };
+}
+router5.post("/signal", requireAuth, async (req, res) => {
   try {
-    const client = getClient();
-    const { userId } = req.body;
-    const prompt = `Sen inner\xB7hub toplulu\u011Funun AI asistan\u0131s\u0131n. A\u015Fa\u011F\u0131daki topluluk verisini analiz et ve JSON format\u0131nda haftal\u0131k sinyal raporu \xFCret.
+    const snapshot = await getPulseSnapshot();
+    const source = topChannelSource(snapshot);
+    if (!snapshot.sufficient) {
+      return res.json({
+        empty: true,
+        insufficientData: true,
+        source,
+        weeklyThemes: [],
+        connections: [],
+        insight: null,
+        pulse: {
+          messages7d: snapshot.messages7d,
+          activeMembers7d: snapshot.activeMembers7d,
+          minMessages: Number(process.env.PULSE_MIN_MESSAGES_7D ?? 20),
+          minActiveMembers: Number(process.env.PULSE_MIN_ACTIVE_MEMBERS_7D ?? 5)
+        }
+      });
+    }
+    const userId = req.user.id;
+    const members = await listMatchableMembers(userId);
+    const [me] = await db.select().from(usersTable).where(eq(usersTable.id, userId)).limit(1);
+    const connections = members.map((m) => ({
+      userId: m.id,
+      name: m.name,
+      handle: m.handle,
+      reason: m.title || m.company ? `${[m.title, m.company].filter(Boolean).join(" \xB7 ")} \u2014 profil ve becerilerinle \xF6rt\xFC\u015F\xFCyor.` : "Tamamlanm\u0131\u015F profil; tan\u0131\u015Fma potansiyeli y\xFCksek.",
+      matchScore: scoreMemberMatch(
+        {
+          skills: parseSkills(me?.skills),
+          persona: me?.persona,
+          title: me?.title,
+          company: me?.company
+        },
+        m
+      )
+    })).sort((a, b) => b.matchScore - a.matchScore).slice(0, 2);
+    let weeklyThemes = [];
+    let insight = null;
+    try {
+      const client = getClient();
+      const prompt = `Sen inner\xB7hub toplulu\u011Funun AI asistan\u0131s\u0131n. Yaln\u0131zca a\u015Fa\u011F\u0131daki GER\xC7EK aktivite \xF6zetine dayanarak JSON \xFCret. Uydurma ki\u015Fi, kanal veya istatistik ekleme.
 
-Topluluk verisi:
-${COMMUNITY_CONTEXT}
-
-Hedef kullan\u0131c\u0131 ID: ${userId ?? "genel"}
+Aktivite \xF6zeti:
+${snapshot.contextText}
 
 \u015Eu JSON yap\u0131s\u0131nda yan\u0131t ver (ba\u015Fka a\xE7\u0131klama ekleme):
 {
   "weeklyThemes": [
-    { "topic": "string", "momentum": "y\xFCksek|orta|d\xFC\u015F\xFCk", "summary": "2 c\xFCmle \xF6zet" }
+    { "topic": "string", "momentum": "y\xFCksek|orta|d\xFC\u015F\xFCk", "summary": "2 c\xFCmle \xF6zet \u2014 yaln\u0131zca \xF6zet verisine dayal\u0131" }
   ],
-  "connections": [
-    { "name": "string", "reason": "string (neden tan\u0131\u015Fmal\u0131lar \u2014 1 c\xFCmle)", "matchScore": 85 }
-  ],
-  "insight": "string (bu haftan\u0131n en \xF6nemli topluluik i\xE7g\xF6r\xFCs\xFC \u2014 1-2 c\xFCmle)"
+  "insight": "string (1-2 c\xFCmle)"
 }
 
-weeklyThemes i\xE7in 3 tema, connections i\xE7in 2 ki\u015Fi \xF6neri sun. T\xFCrk\xE7e yaz.`;
-    const message = await client.messages.create({
-      model: "claude-haiku-4-5-20251001",
-      max_tokens: 800,
-      messages: [{ role: "user", content: prompt }]
-    });
-    const raw = message.content[0].text.trim();
-    const jsonMatch = raw.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error("Ge\xE7ersiz AI yan\u0131t\u0131");
-    const parsed = JSON.parse(jsonMatch[0]);
-    return res.json(parsed);
-  } catch (err) {
-    const isConfig2 = err.message?.includes("API_KEY") || err.message?.includes("ortam");
-    if (isConfig2) {
-      return res.json({
-        weeklyThemes: [
-          { topic: "Claude 4 & Cursor AI Adoptasyonu", momentum: "y\xFCksek", summary: "Toplulukta Claude 4 Opus ve Cursor kombinasyonu h\u0131zla yayg\u0131nla\u015F\u0131yor. \xDCyeler %40 verim art\u0131\u015F\u0131 raporluyor." },
-          { topic: "Eyl\xFCl Zirvesi Haz\u0131rl\u0131\u011F\u0131", momentum: "orta", summary: "AI & Giri\u015Fimcilik Zirvesi i\xE7in pitch deck workshop talebi var. 12+ \xFCye kat\u0131l\u0131m niyetinde." },
-          { topic: "AWS Activate Ba\u015Fvurular\u0131", momentum: "orta", summary: "Birden fazla \xFCye AWS Activate i\xE7in ba\u015Fvurmu\u015F durumda. Deneyim payla\u015F\u0131m\u0131 bu haftan\u0131n g\xFCndeminde." }
-        ],
-        connections: [
-          { name: "Berk Y\u0131lmaz", reason: "AI yat\u0131r\u0131mc\u0131s\u0131 olarak \xFCr\xFCn vizyonunuzu de\u011Ferlendirmeye a\xE7\u0131k ve Zirve'ye kat\u0131lacak.", matchScore: 91 },
-          { name: "Mert Demir", reason: "AI \xFCr\xFCn geli\u015Ftirme s\xFCrecinizde Insider deneyimini payla\u015Fmak istiyor.", matchScore: 87 }
-        ],
-        insight: "Bu hafta toplulukta AI ara\xE7 adoptasyonu \xF6ne \xE7\u0131k\u0131yor. Deneyimleri sistematik payla\u015Fmak i\xE7in #ai-tools kanal\u0131nda haftal\u0131k 'Arac\u0131n Anatomisi' format\u0131 \xF6nerilir."
+weeklyThemes i\xE7in en fazla 3 tema. T\xFCrk\xE7e yaz.`;
+      const message = await client.messages.create({
+        model: "claude-haiku-4-5-20251001",
+        max_tokens: 800,
+        messages: [{ role: "user", content: prompt }]
       });
+      const raw = message.content[0].text.trim();
+      const jsonMatch = raw.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        const parsed = JSON.parse(jsonMatch[0]);
+        weeklyThemes = (parsed.weeklyThemes ?? []).map((t) => ({
+          ...t,
+          source: source.label
+        }));
+        insight = typeof parsed.insight === "string" ? parsed.insight : null;
+      }
+    } catch {
+      const top = snapshot.channels.find((c) => c.messages7d > 0);
+      weeklyThemes = top ? [
+        {
+          topic: `#${top.name} aktivitesi`,
+          momentum: top.messages7d >= 10 ? "y\xFCksek" : "orta",
+          summary: `Son 7 g\xFCnde #${top.name} kanal\u0131nda ${top.messages7d} mesaj var.`,
+          source: source.label
+        }
+      ] : [];
+      insight = `Son 7 g\xFCnde ${snapshot.messages7d} mesaj ve ${snapshot.activeMembers7d} aktif \xFCye kaydedildi.`;
     }
-    return res.status(500).json({ error: err.message });
+    return res.json({
+      empty: false,
+      insufficientData: false,
+      source,
+      weeklyThemes,
+      connections,
+      insight,
+      insightSource: source.label
+    });
+  } catch (err) {
+    return res.status(500).json({ error: err.message ?? "Signal \xFCretilemedi" });
   }
 });
-router4.post("/match", async (req, res) => {
+router5.post("/match", requireAuth, async (req, res) => {
   try {
-    const client = getClient();
-    const { userId, preferences } = req.body;
-    const prompt = `Sen inner\xB7hub toplulu\u011Funun e\u015Fle\u015Ftirme AI'\u0131s\u0131n. Kullan\u0131c\u0131 i\xE7in en uygun topluluk e\u015Fle\u015Fmelerini bul.
-
-Topluluk verisi:
-${COMMUNITY_CONTEXT}
-
-Kullan\u0131c\u0131 tercihleri: ${preferences?.join(", ") ?? "belirtilmemi\u015F"}
-
-\u015Eu JSON yap\u0131s\u0131nda yan\u0131t ver (ba\u015Fka a\xE7\u0131klama ekleme):
-{
-  "matches": [
-    {
-      "name": "string",
-      "company": "string",
-      "matchType": "Co-founder|Mentor|Yat\u0131r\u0131mc\u0131|\u0130\u015F birli\u011Fi",
-      "score": 85,
-      "why": "string (neden uyumlu \u2014 2 c\xFCmle)",
-      "commonGround": ["string", "string"]
-    }
-  ]
-}
-
-4 farkl\u0131 e\u015Fle\u015Fme \xF6ner, farkl\u0131 matchType'lardan se\xE7. T\xFCrk\xE7e yaz.`;
-    const message = await client.messages.create({
-      model: "claude-haiku-4-5-20251001",
-      max_tokens: 1e3,
-      messages: [{ role: "user", content: prompt }]
-    });
-    const raw = message.content[0].text.trim();
-    const jsonMatch = raw.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error("Ge\xE7ersiz AI yan\u0131t\u0131");
-    const parsed = JSON.parse(jsonMatch[0]);
-    return res.json(parsed);
-  } catch (err) {
-    const isConfig2 = err.message?.includes("API_KEY") || err.message?.includes("ortam");
-    if (isConfig2) {
+    const userId = req.user.id;
+    const members = await listMatchableMembers(userId);
+    if (members.length < MATCH_MIN_COMPLETE_PROFILES) {
       return res.json({
-        matches: [
-          {
-            name: "Berk Y\u0131lmaz",
-            company: "Ba\u011F\u0131ms\u0131z Yat\u0131r\u0131mc\u0131",
-            matchType: "Yat\u0131r\u0131mc\u0131",
-            score: 94,
-            why: "AI ve SaaS odakl\u0131 portf\xF6y\xFCyle tam \xF6rt\xFC\u015F\xFCyor. Pre-seed ve seed a\u015Famas\u0131nda aktif yat\u0131r\u0131m yap\u0131yor.",
-            commonGround: ["AI/ML", "B2B SaaS", "\u0130stanbul ekosistemi"]
-          },
-          {
-            name: "Selin \xC7elik",
-            company: "Dopigo",
-            matchType: "Co-founder",
-            score: 88,
-            why: "Teknik liderlik bo\u015Flu\u011Funu kapatabilir. Startup ekibi kurma konusunda kan\u0131tlanm\u0131\u015F deneyimi var.",
-            commonGround: ["Teknik mimari", "Erken ekip in\u015Fas\u0131", "DevOps"]
-          },
-          {
-            name: "Zeynep Arslan",
-            company: "Hipo",
-            matchType: "Mentor",
-            score: 85,
-            why: "B2B SaaS'ta 0'dan 50 m\xFC\u015Fteriye giden yolda \xF6\u011Frendiklerini payla\u015Fmaya a\xE7\u0131k.",
-            commonGround: ["B2B b\xFCy\xFCmesi", "Kurucu deneyimi", "\u0130stanbul startup sahnesi"]
-          },
-          {
-            name: "Ozan K\u0131rm\u0131z\u0131",
-            company: "Pazarama",
-            matchType: "\u0130\u015F birli\u011Fi",
-            score: 79,
-            why: "E-ticaret kanallar\u0131nda ortak proje potansiyeli var. Growth hacking konusunda destek sunabilir.",
-            commonGround: ["Growth", "Kullan\u0131c\u0131 edinimi", "Performans pazarlama"]
-          }
-        ]
+        empty: true,
+        insufficientProfiles: true,
+        minRequired: MATCH_MIN_COMPLETE_PROFILES,
+        available: members.length,
+        matches: []
       });
     }
-    return res.status(500).json({ error: err.message });
+    const [me] = await db.select().from(usersTable).where(eq(usersTable.id, userId)).limit(1);
+    const preferences = Array.isArray(req.body?.preferences) ? req.body.preferences : [];
+    const scored = members.map((m) => {
+      let score = scoreMemberMatch(
+        {
+          skills: parseSkills(me?.skills),
+          persona: me?.persona,
+          title: me?.title,
+          company: me?.company
+        },
+        m
+      );
+      for (const pref of preferences) {
+        const p = String(pref).toLowerCase();
+        if (m.skills.some((s) => s.toLowerCase().includes(p))) score += 4;
+        if ((m.title ?? "").toLowerCase().includes(p)) score += 3;
+      }
+      const matchType = m.persona === "investor" || /yatırımcı|investor|angel/i.test(`${m.title} ${m.persona}`) ? "Yat\u0131r\u0131mc\u0131" : m.persona === "founder" || /founder|kurucu/i.test(`${m.title}`) ? "Co-founder" : m.persona === "mentor" || /mentor/i.test(`${m.title}`) ? "Mentor" : "\u0130\u015F birli\u011Fi";
+      return {
+        userId: m.id,
+        name: m.name,
+        handle: m.handle,
+        company: m.company || "\u2014",
+        matchType,
+        score: Math.min(98, score),
+        why: (m.bio ?? "").trim().slice(0, 180) || `${m.title ?? "\xDCye"} \xB7 ${m.company ?? "inner\xB7hub"}`,
+        commonGround: m.skills.slice(0, 3),
+        avatarUrl: m.avatarUrl
+      };
+    }).sort((a, b) => b.score - a.score).slice(0, 4);
+    return res.json({ empty: false, matches: scored });
+  } catch (err) {
+    return res.status(500).json({ error: err.message ?? "E\u015Fle\u015Fme \xFCretilemedi" });
   }
 });
-router4.post("/image", async (req, res) => {
+router5.post("/image", requireAuth, async (req, res) => {
   try {
     if (!isHiggsfieldConfigured()) {
       return res.status(503).json({
-        error: "Higgsfield yap\u0131land\u0131r\u0131lmad\u0131",
-        hint: "HF_API_KEY ve HF_API_SECRET ekleyin"
+        error: "G\xF6rsel \xFCretimi \u015Fu an kullan\u0131lam\u0131yor"
       });
     }
     const { prompt, insight, force, cacheKey } = req.body;
@@ -117116,25 +117889,17 @@ router4.post("/image", async (req, res) => {
     });
     return res.json({
       ...result,
-      meta: {
-        model: HF_EFFICIENT.modelId,
-        resolution: HF_EFFICIENT.resolution,
-        aspectRatio: HF_EFFICIENT.aspectRatio,
-        creditMode: "efficient"
-      }
+      ...process.env.NODE_ENV !== "production" ? { meta: { model: HF_EFFICIENT.modelId, resolution: HF_EFFICIENT.resolution } } : {}
     });
   } catch (err) {
     const isCooldown = String(err.message).includes("Kredi korumas\u0131");
     return res.status(isCooldown ? 429 : 500).json({ error: err.message });
   }
 });
-router4.get("/image/:requestId", async (req, res) => {
+router5.get("/image/:requestId", requireAuth, async (req, res) => {
   try {
     if (!isHiggsfieldConfigured()) {
-      return res.status(503).json({
-        error: "Higgsfield yap\u0131land\u0131r\u0131lmad\u0131",
-        hint: "HF_API_KEY ve HF_API_SECRET ekleyin"
-      });
+      return res.status(503).json({ error: "G\xF6rsel \xFCretimi \u015Fu an kullan\u0131lam\u0131yor" });
     }
     const requestId = req.params.requestId;
     if (!requestId) {
@@ -117146,7 +117911,7 @@ router4.get("/image/:requestId", async (req, res) => {
     return res.status(500).json({ error: err.message });
   }
 });
-router4.post("/coach", async (req, res) => {
+router5.post("/coach", requireAuth, async (req, res) => {
   try {
     const profile = req.body?.profile ?? {};
     const missing = Array.isArray(profile.missing) ? profile.missing : [];
@@ -117215,10 +117980,10 @@ En fazla 3 aksiyon. T\xFCrk\xE7e. Profil: ${JSON.stringify(profile)}`
     return res.status(500).json({ error: err.message ?? "Coach ba\u015Far\u0131s\u0131z" });
   }
 });
-var ai_default = router4;
+var ai_default = router5;
 
 // src/routes/auth.ts
-var import_express5 = __toESM(require_express2(), 1);
+var import_express6 = __toESM(require_express2(), 1);
 var import_bcryptjs = __toESM(require_bcryptjs(), 1);
 init_drizzle_orm();
 var import_google_auth_library = __toESM(require_src6(), 1);
@@ -117285,69 +118050,6 @@ async function fetchLinkedinProfile(code) {
     email: info.email ?? null,
     picture: info.picture ?? null
   };
-}
-
-// src/lib/auth.ts
-init_drizzle_orm();
-import crypto9 from "node:crypto";
-init_schema2();
-var SESSION_COOKIE = "inner_sid";
-var SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1e3;
-var sessionCookieOptions = {
-  httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
-  sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-  maxAge: SESSION_TTL_MS,
-  path: "/"
-};
-async function createSession(userId) {
-  const id = crypto9.randomBytes(32).toString("hex");
-  const expiresAt = new Date(Date.now() + SESSION_TTL_MS);
-  await db.insert(sessionsTable).values({ id, userId, expiresAt });
-  return id;
-}
-async function destroySession(sessionId) {
-  await db.delete(sessionsTable).where(eq(sessionsTable.id, sessionId));
-}
-async function destroySessionsForUser(userId) {
-  await db.delete(sessionsTable).where(eq(sessionsTable.userId, userId));
-}
-async function getUserBySession(sessionId) {
-  if (!sessionId) return null;
-  const [row] = await db.select({ user: usersTable, expiresAt: sessionsTable.expiresAt }).from(sessionsTable).innerJoin(usersTable, eq(sessionsTable.userId, usersTable.id)).where(and(eq(sessionsTable.id, sessionId), isNull(usersTable.deletedAt))).limit(1);
-  if (!row) return null;
-  if (row.expiresAt.getTime() < Date.now()) {
-    await destroySession(sessionId);
-    return null;
-  }
-  return row.user;
-}
-function publicUser(user) {
-  const { passwordHash: _passwordHash, googleId: _googleId, linkedinId, ...rest } = user;
-  return { ...rest, linkedinConnected: Boolean(linkedinId) };
-}
-async function attachUser(req, _res, next) {
-  const sessionId = req.cookies?.[SESSION_COOKIE];
-  req.user = await getUserBySession(sessionId) ?? void 0;
-  next();
-}
-function requireAuth(req, res, next) {
-  if (!req.user) {
-    res.status(401).json({ error: "Not authenticated" });
-    return;
-  }
-  next();
-}
-function requireAdmin(req, res, next) {
-  if (!req.user) {
-    res.status(401).json({ error: "Not authenticated" });
-    return;
-  }
-  if (req.user.role !== "admin") {
-    res.status(403).json({ error: "Admin access required" });
-    return;
-  }
-  next();
 }
 
 // src/lib/inviteCodes.ts
@@ -117675,7 +118377,7 @@ async function userHasAcceptedLatestLegal(userId, locale = "tr") {
 }
 
 // src/routes/auth.ts
-var router5 = (0, import_express5.Router)();
+var router6 = (0, import_express6.Router)();
 var googleClientId = process.env.GOOGLE_CLIENT_ID;
 var googleClient = googleClientId ? new import_google_auth_library.OAuth2Client(googleClientId) : null;
 var PASSWORD_RESET_TTL_MS = 60 * 60 * 1e3;
@@ -117711,7 +118413,7 @@ function calcCompletion(input) {
   ];
   return Math.round(checks.filter(Boolean).length / checks.length * 100);
 }
-function parseSkills(raw) {
+function parseSkills2(raw) {
   if (!raw) return [];
   try {
     const parsed = JSON.parse(raw);
@@ -117722,14 +118424,14 @@ function parseSkills(raw) {
   }
   return raw.split(",").map((s) => s.trim()).filter(Boolean).slice(0, 10);
 }
-router5.get("/config", (_req, res) => {
+router6.get("/config", (_req, res) => {
   res.json({
     googleClientId: googleClientId ?? null,
     linkedinEnabled,
     mail: mailProviderStatus()
   });
 });
-router5.post("/mail-test", async (req, res) => {
+router6.post("/mail-test", async (req, res) => {
   const expected = process.env.ADMIN_PASSCODE?.trim();
   const got = (typeof req.headers["x-admin-passcode"] === "string" ? req.headers["x-admin-passcode"] : "") || (typeof req.body?.passcode === "string" ? req.body.passcode : "");
   if (!expected || got !== expected) {
@@ -117755,7 +118457,7 @@ SMTP: ${status.smtpConfigured}
   });
   res.status(result.ok ? 200 : 502).json({ ok: result.ok, to, status, result });
 });
-router5.post("/admin/user-lookup", async (req, res) => {
+router6.post("/admin/user-lookup", async (req, res) => {
   const expected = process.env.ADMIN_PASSCODE?.trim();
   const got = (typeof req.headers["x-admin-passcode"] === "string" ? req.headers["x-admin-passcode"] : "") || (typeof req.body?.passcode === "string" ? req.body.passcode : "");
   if (!expected || got !== expected) {
@@ -117785,7 +118487,7 @@ router5.post("/admin/user-lookup", async (req, res) => {
   });
 });
 var LINKEDIN_STATE_COOKIE = "li_oauth_state";
-router5.get("/linkedin/start", requireAuth, (req, res) => {
+router6.get("/linkedin/start", requireAuth, (req, res) => {
   if (!linkedinEnabled) {
     res.status(503).json({ error: "LinkedIn hen\xFCz yap\u0131land\u0131r\u0131lmad\u0131" });
     return;
@@ -117800,7 +118502,7 @@ router5.get("/linkedin/start", requireAuth, (req, res) => {
   });
   res.redirect(linkedinAuthorizeUrl(state));
 });
-router5.get("/linkedin/callback", async (req, res) => {
+router6.get("/linkedin/callback", async (req, res) => {
   const profileUrl = `${(process.env.APP_URL ?? "https://inner.digital").replace(/\/$/, "")}/panel/profile`;
   const fail = (reason) => res.redirect(`${profileUrl}?linkedin=error&reason=${encodeURIComponent(reason)}`);
   try {
@@ -117835,11 +118537,11 @@ router5.get("/linkedin/callback", async (req, res) => {
     fail(err.message ?? "unknown");
   }
 });
-router5.post("/linkedin/disconnect", requireAuth, async (req, res) => {
+router6.post("/linkedin/disconnect", requireAuth, async (req, res) => {
   await db.update(usersTable).set({ linkedinId: null }).where(eq(usersTable.id, req.user.id));
   res.json({ ok: true });
 });
-router5.post("/register", async (req, res) => {
+router6.post("/register", async (req, res) => {
   try {
     const { email: email3, password, name, inviteCode } = req.body;
     if (!email3 || !password || !name) {
@@ -117899,7 +118601,7 @@ router5.post("/register", async (req, res) => {
     res.status(500).json({ error: err.message ?? "Kay\u0131t s\u0131ras\u0131nda hata olu\u015Ftu" });
   }
 });
-router5.post("/login", async (req, res) => {
+router6.post("/login", async (req, res) => {
   try {
     const { email: email3, password } = req.body;
     if (!email3 || !password) {
@@ -117924,7 +118626,7 @@ router5.post("/login", async (req, res) => {
     res.status(500).json({ error: err.message ?? "Giri\u015F s\u0131ras\u0131nda hata olu\u015Ftu" });
   }
 });
-router5.post("/forgot-password", async (req, res) => {
+router6.post("/forgot-password", async (req, res) => {
   const genericOk = {
     ok: true,
     message: "E-posta kay\u0131tl\u0131ysa \u015Fifre s\u0131f\u0131rlama ba\u011Flant\u0131s\u0131 g\xF6nderildi. Gelen kutunu ve spam klas\xF6r\xFCn\xFC kontrol et."
@@ -117986,7 +118688,7 @@ router5.post("/forgot-password", async (req, res) => {
     res.status(500).json({ error: err.message ?? "\u015Eifre s\u0131f\u0131rlama iste\u011Fi ba\u015Far\u0131s\u0131z" });
   }
 });
-router5.post("/reset-password", async (req, res) => {
+router6.post("/reset-password", async (req, res) => {
   try {
     const token = typeof req.body?.token === "string" ? req.body.token.trim() : "";
     const password = typeof req.body?.password === "string" ? req.body.password : "";
@@ -118026,7 +118728,7 @@ router5.post("/reset-password", async (req, res) => {
     res.status(500).json({ error: err.message ?? "\u015Eifre s\u0131f\u0131rlanamad\u0131" });
   }
 });
-router5.post("/google", async (req, res) => {
+router6.post("/google", async (req, res) => {
   try {
     if (!googleClient || !googleClientId) {
       res.status(503).json({ error: "Google ile giri\u015F hen\xFCz yap\u0131land\u0131r\u0131lmad\u0131" });
@@ -118097,13 +118799,13 @@ router5.post("/google", async (req, res) => {
     res.status(401).json({ error: "Google ile giri\u015F do\u011Frulanamad\u0131" });
   }
 });
-router5.post("/logout", async (req, res) => {
+router6.post("/logout", async (req, res) => {
   const sessionId = req.cookies?.[SESSION_COOKIE];
   if (sessionId) await destroySession(sessionId);
   res.clearCookie(SESSION_COOKIE, { path: "/" });
   res.json({ ok: true });
 });
-router5.get("/me", async (req, res) => {
+router6.get("/me", async (req, res) => {
   if (!req.user) {
     res.status(401).json({ error: "Not authenticated" });
     return;
@@ -118122,7 +118824,7 @@ router5.get("/me", async (req, res) => {
     res.json({
       user: {
         ...publicUser(user),
-        skills: parseSkills(user.skills),
+        skills: parseSkills2(user.skills),
         resolvedAvatarUrl: resolveAvatarUrl(user),
         org: org ? {
           id: org.id,
@@ -118137,7 +118839,7 @@ router5.get("/me", async (req, res) => {
     res.status(500).json({ error: err.message ?? "Profil y\xFCklenemedi" });
   }
 });
-router5.patch("/me", requireAuth, async (req, res) => {
+router6.patch("/me", requireAuth, async (req, res) => {
   try {
     await ensureUserProfileColumns();
     await ensureUserMembershipColumns();
@@ -118150,7 +118852,18 @@ router5.patch("/me", requireAuth, async (req, res) => {
     const handle = handleRaw.replace(/[^a-z0-9_]/g, "").slice(0, 20);
     const title = typeof body.title === "string" ? body.title.trim().slice(0, 50) : "";
     const company = typeof body.company === "string" ? body.company.trim().slice(0, 50) : "";
-    const bio = typeof body.bio === "string" ? body.bio.trim().slice(0, 160) : "";
+    const bioRaw = typeof body.bio === "string" ? body.bio.trim() : "";
+    if (bioRaw.length > 0) {
+      if (bioRaw.length < 20) {
+        res.status(400).json({ error: "Bio en az 20 karakter olmal\u0131" });
+        return;
+      }
+      if (/^\.+$/.test(bioRaw) || /^\.\.$/.test(bioRaw)) {
+        res.status(400).json({ error: "Ge\xE7ersiz bio" });
+        return;
+      }
+    }
+    const bio = bioRaw.slice(0, 400);
     const linkedin = typeof body.linkedin === "string" ? body.linkedin.trim().slice(0, 120) : "";
     const linkedinLogoUrlRaw = typeof body.linkedinLogoUrl === "string" ? body.linkedinLogoUrl.trim().slice(0, 500) : void 0;
     const linkedinLogoUrl = linkedinLogoUrlRaw === void 0 ? void 0 : linkedinLogoUrlRaw.length > 0 && (linkedinLogoUrlRaw.startsWith("http://") || linkedinLogoUrlRaw.startsWith("https://")) ? linkedinLogoUrlRaw : null;
@@ -118219,7 +118932,7 @@ router5.patch("/me", requireAuth, async (req, res) => {
     res.json({
       user: {
         ...publicUser(updated),
-        skills: parseSkills(updated.skills),
+        skills: parseSkills2(updated.skills),
         resolvedAvatarUrl: resolveAvatarUrl(updated),
         org: org ? { id: org.id, name: org.name, slug: org.slug, logoUrl: org.logoUrl, type: org.type } : null
       }
@@ -118228,7 +118941,7 @@ router5.patch("/me", requireAuth, async (req, res) => {
     res.status(500).json({ error: err.message ?? "Profil kaydedilemedi" });
   }
 });
-router5.post("/me/avatar", requireAuth, async (req, res) => {
+router6.post("/me/avatar", requireAuth, async (req, res) => {
   try {
     await ensureUserMembershipColumns();
     const userId = req.user.id;
@@ -118239,7 +118952,7 @@ router5.post("/me/avatar", requireAuth, async (req, res) => {
       res.json({
         user: {
           ...publicUser(updated2),
-          skills: parseSkills(updated2.skills),
+          skills: parseSkills2(updated2.skills),
           resolvedAvatarUrl: resolveAvatarUrl(updated2)
         }
       });
@@ -118257,7 +118970,7 @@ router5.post("/me/avatar", requireAuth, async (req, res) => {
     res.json({
       user: {
         ...publicUser(updated),
-        skills: parseSkills(updated.skills),
+        skills: parseSkills2(updated.skills),
         resolvedAvatarUrl: resolveAvatarUrl(updated)
       }
     });
@@ -118265,7 +118978,7 @@ router5.post("/me/avatar", requireAuth, async (req, res) => {
     res.status(500).json({ error: err.message ?? "Avatar g\xFCncellenemedi" });
   }
 });
-var auth_default = router5;
+var auth_default = router6;
 
 // src/routes/catalog.ts
 var import_express8 = __toESM(require_express2(), 1);
@@ -118291,13 +119004,13 @@ function __classPrivateFieldGet2(receiver, state, kind, f) {
 
 // ../../node_modules/.pnpm/@mux+mux-node@14.1.1/node_modules/@mux/mux-node/internal/utils/uuid.mjs
 var uuid43 = function() {
-  const { crypto: crypto12 } = globalThis;
-  if (crypto12?.randomUUID) {
-    uuid43 = crypto12.randomUUID.bind(crypto12);
-    return crypto12.randomUUID();
+  const { crypto: crypto13 } = globalThis;
+  if (crypto13?.randomUUID) {
+    uuid43 = crypto13.randomUUID.bind(crypto13);
+    return crypto13.randomUUID();
   }
   const u8 = new Uint8Array(1);
-  const randomByte = crypto12 ? () => crypto12.getRandomValues(u8)[0] : () => Math.random() * 255 & 255;
+  const randomByte = crypto13 ? () => crypto13.getRandomValues(u8)[0] : () => Math.random() * 255 & 255;
   return "10000000-1000-4000-8000-100000000000".replace(/[018]/g, (c) => (+c ^ randomByte() & 15 >> +c / 4).toString(16));
 };
 
@@ -120686,7 +121399,7 @@ var Jwt = class extends APIResource2 {
     return sign(config2.params ?? {}, await getPrivateKey(this._client, config2), tokenOptions);
   }
   async signPlaybackIdMultipleTypes(playbackId, config2) {
-    const tokens = {};
+    const tokens2 = {};
     for (const typeOption of config2.type) {
       let type2;
       let params;
@@ -120707,10 +121420,10 @@ var Jwt = class extends APIResource2 {
       const token = await this.signPlaybackIdSingleType(playbackId, singleConfig);
       const tokenKey = TypeToken[type2];
       if (tokenKey) {
-        tokens[tokenKey] = token;
+        tokens2[tokenKey] = token;
       }
     }
-    return tokens;
+    return tokens2;
   }
   /**
    * Creates a new token for a license for playing back DRM'd video content
@@ -122773,107 +123486,6 @@ Mux.Webhooks = Webhooks2;
 // src/routes/catalog.ts
 init_schema2();
 
-// src/routes/settings.ts
-var import_express6 = __toESM(require_express2(), 1);
-init_drizzle_orm();
-init_schema2();
-var router6 = (0, import_express6.Router)();
-var DEFAULT_SETTINGS_PREFS = {
-  notifMatch: true,
-  notifEvents: true,
-  notifMessages: true,
-  notifCapital: false,
-  notifDigest: true,
-  notifEmail: true,
-  showOnline: true,
-  allowMatch: true,
-  analyticsConsent: true,
-  theme: "dark",
-  lang: "tr",
-  compactMode: false,
-  onboardingCompleted: false
-};
-function parseSettingsPrefs(raw) {
-  if (!raw) return { ...DEFAULT_SETTINGS_PREFS };
-  try {
-    const parsed = JSON.parse(raw);
-    if (!parsed || typeof parsed !== "object") return { ...DEFAULT_SETTINGS_PREFS };
-    return {
-      notifMatch: parsed.notifMatch !== false,
-      notifEvents: parsed.notifEvents !== false,
-      notifMessages: parsed.notifMessages !== false,
-      notifCapital: parsed.notifCapital === true,
-      notifDigest: parsed.notifDigest !== false,
-      notifEmail: parsed.notifEmail !== false,
-      showOnline: parsed.showOnline !== false,
-      allowMatch: parsed.allowMatch !== false,
-      analyticsConsent: parsed.analyticsConsent !== false,
-      theme: parsed.theme === "dark" || parsed.theme === "system" || parsed.theme === "light" ? parsed.theme : "dark",
-      lang: parsed.lang === "en" ? "en" : "tr",
-      compactMode: parsed.compactMode === true,
-      onboardingCompleted: parsed.onboardingCompleted === true
-    };
-  } catch {
-    return { ...DEFAULT_SETTINGS_PREFS };
-  }
-}
-async function getUserSettingsPrefs(userId) {
-  await ensureUserProfileColumns();
-  const [user] = await db.select({ settingsPrefs: usersTable.settingsPrefs }).from(usersTable).where(eq(usersTable.id, userId)).limit(1);
-  return parseSettingsPrefs(user?.settingsPrefs);
-}
-function sanitizeBody(body) {
-  const base = { ...DEFAULT_SETTINGS_PREFS };
-  if (!body || typeof body !== "object") return base;
-  return {
-    notifMatch: body.notifMatch !== false,
-    notifEvents: body.notifEvents !== false,
-    notifMessages: body.notifMessages !== false,
-    notifCapital: body.notifCapital === true,
-    notifDigest: body.notifDigest !== false,
-    notifEmail: body.notifEmail !== false,
-    showOnline: body.showOnline !== false,
-    allowMatch: body.allowMatch !== false,
-    analyticsConsent: body.analyticsConsent !== false,
-    theme: body.theme === "dark" || body.theme === "system" || body.theme === "light" ? body.theme : "dark",
-    lang: body.lang === "en" ? "en" : "tr",
-    compactMode: body.compactMode === true,
-    onboardingCompleted: body.onboardingCompleted === true
-  };
-}
-router6.get("/settings", requireAuth, async (req, res) => {
-  try {
-    const prefs = await getUserSettingsPrefs(req.user.id);
-    res.json({ prefs });
-  } catch (err) {
-    res.status(500).json({ error: err.message ?? "Ayarlar y\xFCklenemedi" });
-  }
-});
-router6.put("/settings", requireAuth, async (req, res) => {
-  try {
-    await ensureUserProfileColumns();
-    const userId = req.user.id;
-    const [existing] = await db.select({ settingsPrefs: usersTable.settingsPrefs }).from(usersTable).where(eq(usersTable.id, userId)).limit(1);
-    let journeyBlob;
-    try {
-      const raw = existing?.settingsPrefs ? JSON.parse(existing.settingsPrefs) : {};
-      journeyBlob = raw?.journey;
-    } catch {
-      journeyBlob = void 0;
-    }
-    const prefs = sanitizeBody(req.body?.prefs ?? req.body);
-    const stored = {
-      ...prefs,
-      ...journeyBlob !== void 0 ? { journey: journeyBlob } : {}
-    };
-    await db.update(usersTable).set({ settingsPrefs: JSON.stringify(stored) }).where(eq(usersTable.id, userId));
-    res.json({ prefs });
-  } catch (err) {
-    res.status(500).json({ error: err.message ?? "Ayarlar kaydedilemedi" });
-  }
-});
-var settings_default = router6;
-
 // src/routes/notifications.ts
 var import_express7 = __toESM(require_express2(), 1);
 init_drizzle_orm();
@@ -123002,6 +123614,100 @@ router7.patch("/notifications/:id/read", requireAuth, async (req, res) => {
   }
 });
 var notifications_default = router7;
+
+// src/lib/luma.ts
+var LUMA_BASE = "https://public-api.luma.com";
+function isLumaConfigured() {
+  return Boolean(process.env.LUMA_API_KEY?.trim());
+}
+async function lumaFetch(path8, init) {
+  const key = process.env.LUMA_API_KEY?.trim();
+  if (!key) return null;
+  const res = await fetch(`${LUMA_BASE}${path8}`, {
+    ...init,
+    headers: {
+      Accept: "application/json",
+      "x-luma-api-key": key,
+      ...init?.headers ?? {}
+    },
+    signal: AbortSignal.timeout(12e3)
+  });
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    console.warn(`[luma] ${path8} \u2192 ${res.status}`, body.slice(0, 200));
+    return null;
+  }
+  return await res.json();
+}
+async function listLumaCalendarEvents(opts) {
+  if (!isLumaConfigured()) return [];
+  const limit3 = Math.min(opts?.limit ?? 50, 100);
+  const params = new URLSearchParams();
+  params.set("pagination_limit", String(limit3));
+  params.set("sort_column", "start_at");
+  params.set("sort_direction", opts?.period === "past" ? "desc" : "asc");
+  params.append("access", "manage");
+  params.append("access", "view");
+  const data = await lumaFetch(`/v1/calendars/events/list?${params}`);
+  const entries = data?.entries ?? [];
+  const now = Date.now();
+  if (opts?.period === "upcoming") {
+    return entries.filter((e) => new Date(e.end_at || e.start_at).getTime() >= now);
+  }
+  if (opts?.period === "past") {
+    return entries.filter((e) => new Date(e.end_at || e.start_at).getTime() < now);
+  }
+  return entries;
+}
+function lumaLocationLabel(entry) {
+  const geo = entry.geo_address_json?.full_address || entry.geo_address_json?.address || entry.geo_address_json?.city_state || entry.geo_address_json?.city;
+  if (geo) return geo;
+  switch (entry.location_type) {
+    case "zoom":
+      return "Zoom";
+    case "meet":
+      return "Google Meet";
+    case "discord":
+      return "Discord";
+    case "youtube":
+      return "YouTube";
+    case "twitch":
+      return "Twitch";
+    case "twitter":
+      return "X / Twitter";
+    case "offline":
+      return "Y\xFCz y\xFCze";
+    default:
+      return entry.location_type && entry.location_type !== "missing" && entry.location_type !== "unknown" ? entry.location_type : "Konum yak\u0131nda";
+  }
+}
+function mapLumaToHubEvent(entry) {
+  const end = entry.end_at || entry.start_at;
+  const now = Date.now();
+  const isPast = new Date(end).getTime() < now;
+  const isOnline = entry.location_type != null && entry.location_type !== "offline" && entry.location_type !== "missing" && entry.location_type !== "unknown";
+  return {
+    id: `luma:${entry.id}`,
+    source: "luma",
+    title: entry.name,
+    description: "",
+    location: lumaLocationLabel(entry),
+    startAt: entry.start_at,
+    endAt: end,
+    isPast,
+    isPublished: true,
+    format: isOnline ? "online" : "in_person",
+    audience: "all",
+    meetUrl: entry.meeting_url ?? null,
+    passCost: 0,
+    capacity: 0,
+    registered: entry.guest_count ?? 0,
+    isRegistered: false,
+    lumaUrl: entry.url ?? null,
+    coverUrl: entry.cover_url ?? null,
+    hosts: (entry.hosts ?? []).filter((h) => h?.name).map((h) => ({ name: h.name, avatarUrl: h.avatar_url ?? null }))
+  };
+}
 
 // src/routes/catalog.ts
 var router8 = (0, import_express8.Router)();
@@ -123178,6 +123884,15 @@ function progressPctFromModules(modules) {
   const done = allLessons.filter((l) => l.isCompleted).length;
   return Math.round(done / allLessons.length * 100);
 }
+router8.get("/events/summary", requireAuth, async (_req, res) => {
+  try {
+    await ensureLiveSessionColumns();
+    const summary = await getEventsSummary();
+    res.json(summary);
+  } catch (err) {
+    res.status(500).json({ error: err.message ?? "Etkinlik \xF6zeti y\xFCklenemedi" });
+  }
+});
 router8.get("/events", requireAuth, async (req, res) => {
   try {
     await ensureLiveSessionColumns();
@@ -123201,27 +123916,47 @@ router8.get("/events", requireAuth, async (req, res) => {
     }).from(eventRegistrationsTable).groupBy(eventRegistrationsTable.eventId);
     const countMap = new Map(counts.map((c) => [c.eventId, Number(c.n)]));
     const now = Date.now();
+    const localEvents = visible.map((e) => {
+      const isRegistered = mySet.has(e.id);
+      const externalUrl = e.externalUrl ?? null;
+      const organizer = e.organizer ?? null;
+      return {
+        id: e.id,
+        source: externalUrl ? "external" : "inner",
+        title: e.title,
+        description: e.description ?? "",
+        location: e.location ?? "",
+        startAt: e.startAt.toISOString(),
+        endAt: e.endAt?.toISOString() ?? e.startAt.toISOString(),
+        isPast: e.startAt.getTime() < now,
+        isPublished: e.isPublished,
+        format: e.format ?? "in_person",
+        audience: e.audience ?? "all",
+        meetUrl: isRegistered ? e.meetUrl ?? null : null,
+        passCost: e.passCost ?? 1,
+        capacity: 0,
+        registered: countMap.get(e.id) ?? 0,
+        isRegistered,
+        lumaUrl: externalUrl,
+        coverUrl: e.coverUrl ?? null,
+        hosts: organizer ? [{ name: organizer, avatarUrl: null }] : []
+      };
+    });
+    let lumaEvents = [];
+    if (isLumaConfigured()) {
+      try {
+        const entries = await listLumaCalendarEvents({ period: "all", limit: 80 });
+        lumaEvents = entries.map(mapLumaToHubEvent);
+      } catch (err) {
+        console.warn("[luma] list failed", err);
+      }
+    }
+    const merged = [...localEvents, ...lumaEvents].sort(
+      (a, b) => new Date(a.startAt).getTime() - new Date(b.startAt).getTime()
+    );
     res.json({
-      events: visible.map((e) => {
-        const isRegistered = mySet.has(e.id);
-        return {
-          id: e.id,
-          title: e.title,
-          description: e.description ?? "",
-          location: e.location ?? "",
-          startAt: e.startAt.toISOString(),
-          endAt: e.endAt?.toISOString() ?? e.startAt.toISOString(),
-          isPast: e.startAt.getTime() < now,
-          isPublished: e.isPublished,
-          format: e.format ?? "in_person",
-          audience: e.audience ?? "all",
-          meetUrl: isRegistered ? e.meetUrl ?? null : null,
-          passCost: e.passCost ?? 1,
-          capacity: 0,
-          registered: countMap.get(e.id) ?? 0,
-          isRegistered
-        };
-      })
+      events: merged,
+      luma: { configured: isLumaConfigured(), count: lumaEvents.length }
     });
   } catch (err) {
     res.status(500).json({ error: err.message ?? "Etkinlikler y\xFCklenemedi" });
@@ -123275,6 +124010,17 @@ router8.post("/events/:id/register", requireAuth, async (req, res) => {
         kind: "event",
         href: "/panel/events"
       });
+      queueMail(
+        notifyEventRegistered({
+          userId,
+          name: req.user.name,
+          email: req.user.email,
+          title: event.title,
+          startsAt: event.startAt,
+          location: event.location,
+          meetUrl: event.meetUrl
+        })
+      );
     }
     res.json({
       eventId,
@@ -123333,6 +124079,9 @@ router8.get("/admin/events", requireAuth, requireAdmin, async (_req, res) => {
         format: e.format ?? "in_person",
         audience: e.audience ?? "all",
         meetUrl: e.meetUrl ?? null,
+        externalUrl: e.externalUrl ?? null,
+        organizer: e.organizer ?? null,
+        coverUrl: e.coverUrl ?? null,
         passCost: e.passCost ?? 1,
         registered: countMap.get(e.id) ?? 0
       }))
@@ -123352,6 +124101,9 @@ router8.post("/events", requireAuth, requireAdmin, async (req, res) => {
       endAt,
       format,
       meetUrl,
+      externalUrl,
+      organizer,
+      coverUrl,
       audience,
       passCost,
       isPublished
@@ -123379,6 +124131,9 @@ router8.post("/events", requireAuth, requireAdmin, async (req, res) => {
       endAt: end,
       format: resolvedFormat,
       meetUrl: typeof meetUrl === "string" ? meetUrl : null,
+      externalUrl: typeof externalUrl === "string" && externalUrl.trim() ? externalUrl.trim() : null,
+      organizer: typeof organizer === "string" && organizer.trim() ? organizer.trim() : null,
+      coverUrl: typeof coverUrl === "string" && coverUrl.trim() ? coverUrl.trim() : null,
       audience: typeof audience === "string" && audience ? audience : "all",
       passCost: resolveEventPassCost(passCost, passCost !== void 0 && passCost !== null),
       isPublished: isPublished === true
@@ -123404,6 +124159,9 @@ router8.patch("/events/:id", requireAuth, requireAdmin, async (req, res) => {
       endAt,
       format,
       meetUrl,
+      externalUrl,
+      organizer,
+      coverUrl,
       audience,
       passCost,
       isPublished
@@ -123412,6 +124170,13 @@ router8.patch("/events/:id", requireAuth, requireAdmin, async (req, res) => {
     if (typeof title === "string") patch.title = title;
     if (typeof description === "string") patch.description = description;
     if (typeof location === "string") patch.location = location;
+    if (typeof meetUrl === "string") patch.meetUrl = meetUrl;
+    if (typeof externalUrl === "string") patch.externalUrl = externalUrl.trim() || null;
+    if (externalUrl === null) patch.externalUrl = null;
+    if (typeof organizer === "string") patch.organizer = organizer.trim() || null;
+    if (organizer === null) patch.organizer = null;
+    if (typeof coverUrl === "string") patch.coverUrl = coverUrl.trim() || null;
+    if (coverUrl === null) patch.coverUrl = null;
     if (startAt !== void 0) {
       const start = new Date(startAt);
       if (Number.isNaN(start.getTime())) {
@@ -123487,14 +124252,14 @@ router8.post("/admin/events/:id/notify", requireAuth, requireAdmin, async (req, 
       if (sendEmail) {
         const prefs = await getUserSettingsPrefs(r.userId);
         if (prefs.notifEmail && prefs.notifEvents) {
-          const ok = await sendTransactionalMail({
+          const result = await sendTransactionalMail({
             to: r.email,
-            subject: `inner\xB7hub: ${event.title}`,
+            subject: `inner hub: ${event.title}`,
             text: customBody,
             html: `<p>${customBody.replace(/</g, "&lt;")}</p>`,
             kind: "event_live"
           });
-          if (ok) emailed += 1;
+          if (result.ok) emailed += 1;
         }
       }
     }
@@ -123592,6 +124357,16 @@ router8.post("/courses/:id/enroll", requireAuth, async (req, res) => {
         kind: "course",
         href: "/panel/courses"
       });
+      queueMail(
+        notifyCourseEnrolled({
+          userId,
+          name: req.user.name,
+          email: req.user.email,
+          title: course.title,
+          startsAt: course.startsAt,
+          meetUrl: course.meetUrl
+        })
+      );
     }
     res.json({
       courseId,
@@ -123735,7 +124510,21 @@ router8.patch("/courses/:id", requireAuth, requireAdmin, async (req, res) => {
     if (typeof description === "string") patch.description = description;
     if (Number.isFinite(term)) patch.term = term;
     if (Number.isFinite(order)) patch.order = order;
-    if (typeof isPublished === "boolean") patch.isPublished = isPublished;
+    if (typeof isPublished === "boolean") {
+      if (isPublished === true) {
+        const moduleIds = (await db.select({ id: modulesTable.id }).from(modulesTable).where(eq(modulesTable.courseId, courseId))).map((m) => m.id);
+        let lessonCount = 0;
+        if (moduleIds.length > 0) {
+          const [row] = await db.select({ n: count() }).from(lessonsTable).where(inArray(lessonsTable.moduleId, moduleIds));
+          lessonCount = Number(row?.n ?? 0);
+        }
+        if (lessonCount === 0) {
+          res.status(400).json({ error: "Yay\u0131nlamak i\xE7in en az bir ders ekleyin" });
+          return;
+        }
+      }
+      patch.isPublished = isPublished;
+    }
     if (format !== void 0) patch.format = resolveCourseFormat(format, existing.format);
     if (startsAt !== void 0) {
       if (startsAt === null) {
@@ -123996,6 +124785,114 @@ var catalog_default = router8;
 var import_express9 = __toESM(require_express2(), 1);
 init_drizzle_orm();
 init_schema2();
+
+// src/lib/provisionMember.ts
+init_drizzle_orm();
+import crypto11 from "node:crypto";
+init_schema2();
+var SET_PASSWORD_TTL_MS = 7 * 24 * 60 * 60 * 1e3;
+var WELCOME_PASS_GRANT = 3;
+function hashResetToken2(token) {
+  return crypto11.createHash("sha256").update(token).digest("hex");
+}
+async function provisionMemberFromApplication(input) {
+  await ensureUserMembershipColumns();
+  await ensurePasswordResetSchema();
+  const email3 = normalizeEmail(input.email);
+  const [existing] = await db.select({
+    id: usersTable.id,
+    passwordHash: usersTable.passwordHash,
+    membershipStatus: usersTable.membershipStatus,
+    deletedAt: usersTable.deletedAt
+  }).from(usersTable).where(eq(usersTable.email, email3)).limit(1);
+  let userId;
+  let created = false;
+  let needsPasswordSetup = false;
+  if (existing && !existing.deletedAt) {
+    userId = existing.id;
+    needsPasswordSetup = !existing.passwordHash;
+    if (!existing.membershipStatus || existing.membershipStatus !== "active") {
+      await db.update(usersTable).set({
+        membershipStatus: "active",
+        membershipPlan: "member"
+      }).where(eq(usersTable.id, userId));
+    }
+  } else if (existing?.deletedAt) {
+    const persona = await personaFromInviteRequest(input.invitationRequestId);
+    const seed = await profileSeedFromInviteRequest(input.invitationRequestId);
+    await db.update(usersTable).set({
+      deletedAt: null,
+      name: input.name.trim() || email3.split("@")[0] || "\xDCye",
+      persona: persona ?? void 0,
+      bio: seed.bio,
+      company: seed.company,
+      linkedin: seed.linkedin,
+      website: seed.website,
+      title: seed.title,
+      membershipPlan: "member",
+      membershipStatus: "active"
+    }).where(eq(usersTable.id, existing.id));
+    userId = existing.id;
+    created = true;
+    needsPasswordSetup = !existing.passwordHash;
+  } else {
+    const persona = await personaFromInviteRequest(input.invitationRequestId);
+    const seed = await profileSeedFromInviteRequest(input.invitationRequestId);
+    const [user] = await db.insert(usersTable).values({
+      email: email3,
+      name: input.name.trim() || email3.split("@")[0] || "\xDCye",
+      passwordHash: null,
+      persona: persona ?? void 0,
+      bio: seed.bio,
+      company: seed.company,
+      linkedin: seed.linkedin,
+      website: seed.website,
+      title: seed.title,
+      membershipPlan: "member",
+      membershipStatus: "active",
+      profileCompletionPct: 0
+    }).returning({ id: usersTable.id });
+    userId = user.id;
+    created = true;
+    needsPasswordSetup = true;
+  }
+  const refId = input.applicationId != null ? `application:${input.applicationId}` : `invitation:${input.invitationRequestId}`;
+  try {
+    const [already] = await db.select({ id: passLedgerTable.id }).from(passLedgerTable).where(and(eq(passLedgerTable.userId, userId), eq(passLedgerTable.refId, refId))).limit(1);
+    if (!already) {
+      await creditPasses({
+        userId,
+        amount: WELCOME_PASS_GRANT,
+        reason: "membership_welcome",
+        refType: "application",
+        refId
+      });
+    }
+  } catch (err) {
+    console.warn("[provisionMember] pass grant skipped", err);
+  }
+  let setPasswordUrl = null;
+  if (needsPasswordSetup) {
+    const rawToken = crypto11.randomBytes(32).toString("hex");
+    const tokenHash = hashResetToken2(rawToken);
+    const expiresAt = new Date(Date.now() + SET_PASSWORD_TTL_MS);
+    await db.update(passwordResetTokensTable).set({ usedAt: /* @__PURE__ */ new Date() }).where(
+      and(
+        eq(passwordResetTokensTable.userId, userId),
+        isNull(passwordResetTokensTable.usedAt)
+      )
+    );
+    await db.insert(passwordResetTokensTable).values({
+      userId,
+      tokenHash,
+      expiresAt
+    });
+    setPasswordUrl = `${appBaseUrl()}/panel?reset=${encodeURIComponent(rawToken)}`;
+  }
+  return { userId, created, setPasswordUrl };
+}
+
+// src/routes/applications.ts
 var router9 = (0, import_express9.Router)();
 function toUiStatus(status) {
   if (status === "approved") return "onayland\u0131";
@@ -124016,15 +124913,31 @@ async function sendDecisionMail(params) {
   };
   if (params.next === "approved") {
     try {
-      const inviteCode = await issueInviteCodeForApproval({
+      const provisioned = await provisionMemberFromApplication({
+        name: params.invite.name,
         email: params.invite.email,
         invitationRequestId: params.invitationRequestId,
         applicationId: params.applicationId
       });
-      return await notifyApplicantInvitationApproved({ ...applicant, inviteCode });
-    } catch (err) {
-      console.error("invite code issue failed", err);
+      if (provisioned.setPasswordUrl) {
+        return await notifyApplicantInvitationApproved({
+          ...applicant,
+          setPasswordUrl: provisioned.setPasswordUrl
+        });
+      }
       return await notifyApplicantInvitationApproved(applicant);
+    } catch (err) {
+      console.error("approve provision/invite failed", err);
+      try {
+        const inviteCode = await issueInviteCodeForApproval({
+          email: params.invite.email,
+          invitationRequestId: params.invitationRequestId,
+          applicationId: params.applicationId
+        });
+        return await notifyApplicantInvitationApproved({ ...applicant, inviteCode });
+      } catch {
+        return await notifyApplicantInvitationApproved(applicant);
+      }
     }
   }
   void revokeUnusedInviteCodes(params.invitationRequestId);
@@ -124073,11 +124986,18 @@ router9.get("/applications", requireAdmin, async (_req, res) => {
     const byInvite = new Map(
       reviews.filter((r) => r.invitationRequestId != null).map((r) => [r.invitationRequestId, r])
     );
+    const emails = [...new Set(requests.map((r) => normalizeEmail(r.email)).filter(Boolean))];
+    const userEmails = /* @__PURE__ */ new Set();
+    if (emails.length > 0) {
+      const users = await db.select({ email: usersTable.email }).from(usersTable).where(and(inArray(usersTable.email, emails), isNull(usersTable.deletedAt)));
+      for (const u of users) userEmails.add(normalizeEmail(u.email));
+    }
     res.json({
       applications: requests.map((r) => {
         const review = byInvite.get(r.id);
         const roleRaw = r.role ?? "\u2014";
         const roleLabel = roleRaw === "operator" || roleRaw === "builder" ? "Builder" : roleRaw === "investor" ? "Yat\u0131r\u0131mc\u0131" : roleRaw === "founder" ? "Giri\u015Fimci" : roleRaw === "company" ? "\u015Eirket" : roleRaw;
+        const emailNorm = normalizeEmail(r.email);
         return {
           id: r.id,
           name: r.name,
@@ -124092,7 +125012,8 @@ router9.get("/applications", requireAdmin, async (_req, res) => {
           status: toUiStatus(review?.status ?? "pending"),
           linkedinUrl: r.linkedin ?? "",
           tags: r.role ? [roleLabel] : [],
-          reviewNote: review?.reviewNote ?? null
+          reviewNote: review?.reviewNote ?? null,
+          hasUserAccount: userEmails.has(emailNorm)
         };
       })
     });
@@ -124174,39 +125095,6 @@ var applications_default = router9;
 var import_express10 = __toESM(require_express2(), 1);
 init_drizzle_orm();
 init_schema2();
-
-// src/lib/directoryMembers.ts
-var TEST_NAME_EXACT = /* @__PURE__ */ new Set([
-  "admin",
-  "member",
-  "member test",
-  "invitee",
-  "onboarding test",
-  "kod testi",
-  "test user",
-  "test",
-  "smoke test"
-]);
-function isTestOrSystemAccount(input) {
-  if (input.isSystem) return true;
-  const email3 = (input.email ?? "").trim().toLowerCase();
-  const name = (input.name ?? "").trim().toLowerCase();
-  if (!email3 && !name) return true;
-  if (email3.endsWith("@test.com") || email3.endsWith("@example.com") || email3.endsWith("@example.org")) {
-    return true;
-  }
-  if (email3 === "admin@inner.digital" || email3 === "member@inner.digital" || email3 === "admin@inner.co" || email3.startsWith("invitee-") || email3.startsWith("onboarding-test-") || email3.startsWith("test-smoke") || email3.startsWith("nox")) {
-    return true;
-  }
-  if (TEST_NAME_EXACT.has(name)) return true;
-  if (/\b(test|smoke|invitee|onboarding)\b/i.test(name) && name.length < 40) return true;
-  return false;
-}
-function isDirectoryMember(input) {
-  if (isTestOrSystemAccount(input)) return false;
-  const name = (input.name ?? "").trim();
-  return name.length > 0;
-}
 
 // src/lib/displayLabel.ts
 function isDecorativeLabel(text2) {
@@ -124742,6 +125630,26 @@ router12.post("/match/introduce", requireAuth, async (req, res) => {
         })
       )
     );
+    queueMail(
+      notifyMatchIntroReceived({
+        userId,
+        name: req.user.name,
+        email: req.user.email,
+        targetName,
+        matchType: matchType || null
+      })
+    );
+    queueMail(
+      notifyMatchIntroAdmin({
+        fromName,
+        fromEmail: req.user.email,
+        targetName,
+        targetCompany: targetCompany || null,
+        matchType: matchType || null,
+        reason: reason || null,
+        score
+      })
+    );
     res.status(201).json({
       request: {
         id: inserted.id,
@@ -124885,6 +125793,7 @@ function canAccess(doc, userId) {
   return true;
 }
 async function ensureVaultSeed(adminUserId) {
+  if (process.env.NODE_ENV === "production") return;
   const [row] = await db.select({ id: vaultDocumentsTable.id }).from(vaultDocumentsTable).limit(1);
   if (row) {
     await db.update(vaultDocumentsTable).set({ title: "Pre-seed Yat\u0131r\u0131mc\u0131 Pitch Deck" }).where(eq(vaultDocumentsTable.title, "Pre-seed Yat\u0131r\u0131mc\u0131 Pitch Deck \u2014 inner\xB7hub"));
@@ -125042,6 +125951,50 @@ router13.put("/vault/:id/file", requireAuth, async (req, res) => {
     res.status(500).json({ error: err.message ?? "Dosya y\xFCklenemedi" });
   }
 });
+async function loadVaultDoc(id) {
+  const [doc] = await db.select().from(vaultDocumentsTable).where(eq(vaultDocumentsTable.id, id)).limit(1);
+  return doc ?? null;
+}
+function sendVaultBuffer(res, doc, buffer, disposition) {
+  const downloadName = (doc.fileName || "vault-file").replace(/[\r\n"]/g, "");
+  res.setHeader("Content-Type", doc.mimeType || "application/octet-stream");
+  res.setHeader("Content-Length", String(buffer.length));
+  res.setHeader(
+    "Content-Disposition",
+    `${disposition}; filename*=UTF-8''${encodeURIComponent(downloadName)}`
+  );
+  res.setHeader("Cache-Control", "private, max-age=60");
+  res.send(buffer);
+}
+router13.get("/vault/:id/view", requireAuth, async (req, res) => {
+  try {
+    await ensureVaultCapitalSchema();
+    const userId = req.user.id;
+    const id = Number(req.params.id);
+    if (!Number.isFinite(id)) {
+      res.status(400).json({ error: "Ge\xE7ersiz id" });
+      return;
+    }
+    const doc = await loadVaultDoc(id);
+    if (!doc) {
+      res.status(404).json({ error: "Belge bulunamad\u0131" });
+      return;
+    }
+    if (!canAccess(doc, userId)) {
+      res.status(403).json({ error: "Bu belgeye eri\u015Fim yetkiniz yok" });
+      return;
+    }
+    if (!doc.fileKey) {
+      res.status(404).json({ error: "Bu belgede dosya yok" });
+      return;
+    }
+    const buffer = await readVaultFile(doc.fileKey);
+    await db.update(vaultDocumentsTable).set({ views: (doc.views ?? 0) + 1, updatedAt: doc.updatedAt }).where(eq(vaultDocumentsTable.id, id));
+    sendVaultBuffer(res, doc, buffer, "inline");
+  } catch (err) {
+    res.status(500).json({ error: err.message ?? "Belge g\xF6r\xFCnt\xFClenemedi" });
+  }
+});
 router13.get("/vault/:id/file", requireAuth, async (req, res) => {
   try {
     await ensureVaultCapitalSchema();
@@ -125051,9 +126004,13 @@ router13.get("/vault/:id/file", requireAuth, async (req, res) => {
       res.status(400).json({ error: "Ge\xE7ersiz id" });
       return;
     }
-    const [doc] = await db.select().from(vaultDocumentsTable).where(eq(vaultDocumentsTable.id, id)).limit(1);
-    if (!doc || !canAccess(doc, userId)) {
+    const doc = await loadVaultDoc(id);
+    if (!doc) {
       res.status(404).json({ error: "Belge bulunamad\u0131" });
+      return;
+    }
+    if (!canAccess(doc, userId)) {
+      res.status(403).json({ error: "Bu belgeye eri\u015Fim yetkiniz yok" });
       return;
     }
     if (!doc.fileKey) {
@@ -125062,15 +126019,7 @@ router13.get("/vault/:id/file", requireAuth, async (req, res) => {
     }
     const buffer = await readVaultFile(doc.fileKey);
     await db.update(vaultDocumentsTable).set({ views: (doc.views ?? 0) + 1, updatedAt: doc.updatedAt }).where(eq(vaultDocumentsTable.id, id));
-    const downloadName = (doc.fileName || "vault-file").replace(/[\r\n"]/g, "");
-    res.setHeader("Content-Type", doc.mimeType || "application/octet-stream");
-    res.setHeader("Content-Length", String(buffer.length));
-    res.setHeader(
-      "Content-Disposition",
-      `attachment; filename*=UTF-8''${encodeURIComponent(downloadName)}`
-    );
-    res.setHeader("Cache-Control", "private, max-age=60");
-    res.send(buffer);
+    sendVaultBuffer(res, doc, buffer, "attachment");
   } catch (err) {
     res.status(500).json({ error: err.message ?? "Dosya indirilemedi" });
   }
@@ -125084,6 +126033,91 @@ init_schema2();
 var router14 = (0, import_express14.Router)();
 var STAGES = /* @__PURE__ */ new Set(["Pitch", "Due Diligence", "Term Sheet", "Kapand\u0131"]);
 var SECTORS = /* @__PURE__ */ new Set(["AI/ML", "B2B SaaS", "Fintech", "HR Tech", "E-ticaret", "DeepTech"]);
+var TR_MONTHS = {
+  oca: 0,
+  ocak: 0,
+  sub: 1,
+  \u015Fub: 1,
+  subat: 1,
+  \u015Fubat: 1,
+  mar: 2,
+  mart: 2,
+  nis: 3,
+  nisan: 3,
+  may: 4,
+  mayis: 4,
+  may\u0131s: 4,
+  haz: 5,
+  haziran: 5,
+  tem: 6,
+  temmuz: 6,
+  agu: 7,
+  a\u011Fu: 7,
+  agustos: 7,
+  a\u011Fustos: 7,
+  eyl: 8,
+  eylul: 8,
+  eyl\u00FCl: 8,
+  eki: 9,
+  ekim: 9,
+  kas: 10,
+  kasim: 10,
+  kas\u0131m: 10,
+  ara: 11,
+  aralik: 11,
+  aral\u0131k: 11
+};
+function parseSpvClosing(raw, closingDate) {
+  if (closingDate instanceof Date && !Number.isNaN(closingDate.getTime())) return closingDate;
+  if (!raw?.trim()) return null;
+  const s = raw.trim();
+  const iso = Date.parse(s);
+  if (!Number.isNaN(iso)) {
+    const d = new Date(iso);
+    d.setHours(23, 59, 59, 999);
+    return d;
+  }
+  const m = s.match(/^(\d{1,2})\s+([A-Za-zÇĞİÖŞÜçğıöşü.]+)\s+(\d{4})$/u);
+  if (m) {
+    const day = Number(m[1]);
+    const monthKey = m[2].replace(/\./g, "").toLocaleLowerCase("tr-TR");
+    const year = Number(m[3]);
+    const month = TR_MONTHS[monthKey];
+    if (month != null && day >= 1 && day <= 31) {
+      return new Date(year, month, day, 23, 59, 59, 999);
+    }
+  }
+  return null;
+}
+function mapSpv(s) {
+  const status = s.status === "closed" ? "closed" : "open";
+  return {
+    id: s.id,
+    name: s.name,
+    target: s.target,
+    raised: s.raised,
+    pct: s.pct,
+    participants: s.participants,
+    closing: s.closing ?? "",
+    closingDate: s.closingDate ? s.closingDate.toISOString() : null,
+    status,
+    sector: s.sector ?? ""
+  };
+}
+async function autoCloseExpiredSpvs() {
+  const all = await db.select().from(capitalSpvsTable);
+  const now = Date.now();
+  for (const s of all) {
+    const end = parseSpvClosing(s.closing, s.closingDate);
+    if (!end) continue;
+    const patch = {};
+    if (!s.closingDate) patch.closingDate = end;
+    if (end.getTime() < now && s.status !== "closed") patch.status = "closed";
+    if (Object.keys(patch).length > 0) {
+      await db.update(capitalSpvsTable).set(patch).where(eq(capitalSpvsTable.id, s.id));
+    }
+  }
+}
 function parseList(raw) {
   if (!raw) return [];
   try {
@@ -125144,6 +126178,7 @@ function normalizeDealBody(body) {
   };
 }
 async function ensureCapitalSeed() {
+  if (process.env.NODE_ENV === "production") return;
   const [deal] = await db.select({ id: capitalDealsTable.id }).from(capitalDealsTable).limit(1);
   if (!deal) {
     await db.insert(capitalDealsTable).values([
@@ -125154,8 +126189,8 @@ async function ensureCapitalSeed() {
         sector: "B2B SaaS",
         raise: "$500K",
         valuation: "$3.2M",
-        founders: JSON.stringify(["Zeynep Arslan", "Mert Demir"]),
-        leadInvestor: "Berk Y\u0131lmaz",
+        founders: JSON.stringify(["Kurucu A", "Kurucu B"]),
+        leadInvestor: "Lead angel",
         round: "Pre-seed",
         score: 91,
         tags: JSON.stringify(["revenue", "10+ m\xFC\u015Fteri"]),
@@ -125168,7 +126203,7 @@ async function ensureCapitalSeed() {
         sector: "DeepTech",
         raise: "$1.2M",
         valuation: "$6M",
-        founders: JSON.stringify(["Selin \xC7elik"]),
+        founders: JSON.stringify(["Kurucu ekibi"]),
         round: "Seed",
         score: 84,
         tags: JSON.stringify(["teknik", "a\xE7\u0131k kaynak"])
@@ -125180,7 +126215,7 @@ async function ensureCapitalSeed() {
         sector: "AI/ML",
         raise: "$300K",
         valuation: "$1.8M",
-        founders: JSON.stringify(["Ozan K\u0131rm\u0131z\u0131"]),
+        founders: JSON.stringify(["Kurucu C"]),
         round: "Pre-seed",
         score: 76,
         tags: JSON.stringify(["traction", "MVP haz\u0131r"])
@@ -125192,7 +126227,7 @@ async function ensureCapitalSeed() {
         sector: "Fintech",
         raise: "$800K",
         valuation: "$4.5M",
-        founders: JSON.stringify(["Deniz Alp", "Ay\u015Fe Kaya"]),
+        founders: JSON.stringify(["Kurucu D", "Kurucu E"]),
         round: "Seed",
         score: 88,
         tags: JSON.stringify(["lisansl\u0131", "B2B"])
@@ -125204,8 +126239,8 @@ async function ensureCapitalSeed() {
         sector: "HR Tech",
         raise: "$250K",
         valuation: "$1.5M",
-        founders: JSON.stringify(["Ay\u015Fe Kaya"]),
-        leadInvestor: "Berk Y\u0131lmaz",
+        founders: JSON.stringify(["Kurucu E"]),
+        leadInvestor: "Lead angel",
         round: "Pre-seed",
         score: 95,
         tags: JSON.stringify(["kapal\u0131", "inner portf\xF6y"]),
@@ -125235,6 +126270,8 @@ async function ensureCapitalSeed() {
         pct: 91,
         participants: 8,
         closing: "15 Tem 2026",
+        closingDate: new Date(2026, 6, 15, 23, 59, 59, 999),
+        status: "open",
         sector: "HR Tech"
       },
       {
@@ -125244,6 +126281,8 @@ async function ensureCapitalSeed() {
         pct: 28,
         participants: 4,
         closing: "30 A\u011Fu 2026",
+        closingDate: new Date(2026, 7, 30, 23, 59, 59, 999),
+        status: "open",
         sector: "B2B SaaS"
       }
     ]);
@@ -125253,20 +126292,18 @@ router14.get("/capital", requireAuth, async (_req, res) => {
   try {
     await ensureVaultCapitalSchema();
     await ensureCapitalSeed();
+    await autoCloseExpiredSpvs();
     const deals = await db.select().from(capitalDealsTable).orderBy(desc(capitalDealsTable.score));
     const spvs = await db.select().from(capitalSpvsTable).orderBy(desc(capitalSpvsTable.pct));
+    const mapped = spvs.map(mapSpv);
+    const openSpvs = mapped.filter((s) => s.status === "open");
+    const closedSpvs = mapped.filter((s) => s.status === "closed");
     res.json({
       deals: deals.map(mapDeal),
-      spvs: spvs.map((s) => ({
-        id: s.id,
-        name: s.name,
-        target: s.target,
-        raised: s.raised,
-        pct: s.pct,
-        participants: s.participants,
-        closing: s.closing ?? "",
-        sector: s.sector ?? ""
-      }))
+      /** Açık SPV'ler — süresi geçmiş olanlar dahil edilmez */
+      spvs: openSpvs,
+      closedSpvs,
+      currencyNote: "Deal hedefleri USD ($); SPV tutarlar\u0131 TRY (\u20BA). Kur tarihi bilgilendirme ama\xE7l\u0131d\u0131r."
     });
   } catch (err) {
     res.status(500).json({ error: err.message ?? "Capital y\xFCklenemedi" });
@@ -125455,7 +126492,7 @@ var import_express16 = __toESM(require_express2(), 1);
 init_drizzle_orm();
 init_schema2();
 var router16 = (0, import_express16.Router)();
-function parseSkills2(raw) {
+function parseSkills3(raw) {
   if (!raw) return [];
   try {
     const parsed = JSON.parse(raw);
@@ -125485,7 +126522,7 @@ function publicPayload(user) {
     title: user.title,
     company: user.company,
     bio: user.bio,
-    skills: parseSkills2(user.skills),
+    skills: parseSkills3(user.skills),
     linkedin: user.linkedin,
     linkedinLogoUrl: user.linkedinLogoUrl ?? null,
     github: user.github,
@@ -126002,6 +127039,7 @@ var import_express18 = __toESM(require_express2(), 1);
 init_drizzle_orm();
 init_schema2();
 var router18 = (0, import_express18.Router)();
+var APP_STATUSES = /* @__PURE__ */ new Set(["pending", "shortlisted", "hired", "rejected"]);
 function parseTags2(raw) {
   if (!raw) return [];
   try {
@@ -126029,7 +127067,7 @@ function relativeTr(d) {
   if (months <= 1) return "1 ay \xF6nce";
   return `${months} ay \xF6nce`;
 }
-function mapPost(post, user, mine) {
+function mapPost(post, user, mine, extras) {
   return {
     id: post.id,
     postedBy: user.name,
@@ -126040,9 +127078,18 @@ function mapPost(post, user, mine) {
     role: post.role,
     description: post.description,
     tags: parseTags2(post.tags),
+    imageUrl: post.imageUrl ?? null,
+    company: post.company ?? null,
+    location: post.location ?? null,
+    employmentType: post.employmentType ?? null,
+    link: post.link ?? null,
+    status: post.status ?? "open",
     postedAt: relativeTr(post.createdAt),
     createdAt: post.createdAt.toISOString(),
-    mine
+    mine,
+    applicationCount: extras?.applicationCount ?? 0,
+    myApplication: extras?.myApplication ?? null,
+    applications: extras?.applications
   };
 }
 async function ensureTalentSeed(fallbackUserId) {
@@ -126061,43 +127108,59 @@ async function ensureTalentSeed(fallbackUserId) {
       postType: "ar\u0131yor",
       role: "Fullstack Developer (React + Node.js)",
       description: "\xDCr\xFCn\xFC \u015Fekillendirmeye katk\u0131 sa\u011Flayacak fullstack developer ar\u0131yoruz. Remote, equity var.",
-      tags: JSON.stringify(["React", "Node.js", "Remote", "Equity"])
+      tags: JSON.stringify(["React", "Node.js", "Remote", "Equity"]),
+      status: "open"
     },
     {
       userId: owner,
       postType: "ar\u0131yor",
       role: "AI/ML Engineer (Part-time)",
       description: "Yan proje i\xE7in haftal\u0131k 10-15 saat \xE7al\u0131\u015Fabilecek ML m\xFChendisi. LLM fine-tuning deneyimi \u015Fart.",
-      tags: JSON.stringify(["AI", "LLM", "Part-time"])
+      tags: JSON.stringify(["AI", "LLM", "Part-time"]),
+      status: "open"
     },
     {
       userId: owner,
       postType: "sunuyor",
       role: "CTO Dan\u0131\u015Fmanl\u0131\u011F\u0131 \u2014 Erken A\u015Fama Startuplar",
       description: "Pre-seed ve seed a\u015Famas\u0131ndaki giri\u015Fimlere teknik liderlik ve m\xFChendislik ekibi kurulumu konusunda destek.",
-      tags: JSON.stringify(["CTO", "Dan\u0131\u015Fmanl\u0131k", "Teknik"])
+      tags: JSON.stringify(["CTO", "Dan\u0131\u015Fmanl\u0131k", "Teknik"]),
+      status: "open"
     },
     {
       userId: owner,
       postType: "sunuyor",
       role: "Startup Hukuk Dan\u0131\u015Fmanl\u0131\u011F\u0131",
       description: "Kurulu\u015F s\xF6zle\u015Fmeleri, SAFE/KISS notlar\u0131, yat\u0131r\u0131mc\u0131 s\xFCre\xE7lerinde inner\xB7hub \xFCyelerine %20 indirim.",
-      tags: JSON.stringify(["Hukuk", "SAFE", "Yat\u0131r\u0131m"])
+      tags: JSON.stringify(["Hukuk", "SAFE", "Yat\u0131r\u0131m"]),
+      status: "open"
     },
     {
       userId: owner,
       postType: "ar\u0131yor",
       role: "Co-founder (Sales & Marketing)",
       description: "Yan proje i\xE7in sat\u0131\u015F ve pazarlamaya odaklanacak co-founder ar\u0131yoruz. B2B SaaS deneyimi art\u0131.",
-      tags: JSON.stringify(["Co-founder", "B2B", "Sat\u0131\u015F"])
+      tags: JSON.stringify(["Co-founder", "B2B", "Sat\u0131\u015F"]),
+      status: "open"
     }
   ]);
+}
+async function hasAnyHiredInvoice() {
+  const [row] = await db.select({ id: talentApplicationsTable.id }).from(talentApplicationsTable).where(
+    and(
+      eq(talentApplicationsTable.status, "hired"),
+      isNotNull(talentApplicationsTable.invoiceRef),
+      sql`${talentApplicationsTable.invoiceRef} <> ''`
+    )
+  ).limit(1);
+  return Boolean(row);
 }
 router18.get("/talent", requireAuth, async (req, res) => {
   try {
     await ensureTalentSchema();
     await ensureUserMembershipColumns();
     const userId = req.user.id;
+    const isAdmin = req.user.role === "admin";
     const [admin] = await db.select({ id: usersTable.id }).from(usersTable).where(eq(usersTable.role, "admin")).limit(1);
     await ensureTalentSeed(admin?.id ?? userId);
     const rows = await db.select({
@@ -126111,10 +127174,54 @@ router18.get("/talent", requireAuth, async (req, res) => {
     const visible = rows.filter(
       ({ email: email3, name, isSystem }) => !isTestOrSystemAccount({ email: email3, name, isSystem })
     );
+    const postIds = visible.map(({ post }) => post.id);
+    const apps = postIds.length === 0 ? [] : await db.select({
+      app: talentApplicationsTable,
+      applicantName: usersTable.name,
+      applicantCompany: usersTable.company,
+      applicantHandle: usersTable.handle
+    }).from(talentApplicationsTable).innerJoin(usersTable, eq(talentApplicationsTable.userId, usersTable.id)).where(inArray(talentApplicationsTable.postId, postIds)).orderBy(desc(talentApplicationsTable.createdAt));
+    const byPost = /* @__PURE__ */ new Map();
+    for (const row of apps) {
+      const list = byPost.get(row.app.postId) ?? [];
+      list.push(row);
+      byPost.set(row.app.postId, list);
+    }
+    const posts = visible.map(({ post, name, company, handle }) => {
+      const mine = post.userId === userId;
+      const list = byPost.get(post.id) ?? [];
+      const myApp = list.find((a) => a.app.userId === userId);
+      const extras = {
+        applicationCount: list.length,
+        myApplication: myApp ? {
+          id: myApp.app.id,
+          status: myApp.app.status,
+          invoiceRef: myApp.app.invoiceRef,
+          createdAt: myApp.app.createdAt.toISOString()
+        } : null
+      };
+      if (mine || isAdmin) {
+        extras.applications = list.map(({ app: app2, applicantName, applicantCompany, applicantHandle }) => ({
+          id: app2.id,
+          status: app2.status,
+          message: app2.message,
+          invoiceRef: app2.invoiceRef,
+          createdAt: app2.createdAt.toISOString(),
+          applicant: {
+            id: app2.userId,
+            name: applicantName,
+            initials: initialsOf(applicantName),
+            company: applicantCompany,
+            handle: applicantHandle
+          }
+        }));
+      }
+      return mapPost(post, { name, company, handle }, mine, extras);
+    });
     res.json({
-      posts: visible.map(
-        ({ post, name, company, handle }) => mapPost(post, { name, company, handle }, post.userId === userId)
-      )
+      posts,
+      /** Komisyon metni yalnızca hire + fatura kaydı varsa */
+      commissionVisible: await hasAnyHiredInvoice()
     });
   } catch (err) {
     res.status(500).json({ error: err.message ?? "Talent board y\xFCklenemedi" });
@@ -126128,6 +127235,11 @@ router18.post("/talent", requireAuth, async (req, res) => {
     const role = typeof req.body?.role === "string" ? req.body.role.trim().slice(0, 160) : "";
     const description = typeof req.body?.description === "string" ? req.body.description.trim().slice(0, 1200) : "";
     const tags = Array.isArray(req.body?.tags) ? req.body.tags.filter((t) => typeof t === "string").slice(0, 12) : [];
+    const imageUrl = typeof req.body?.imageUrl === "string" && req.body.imageUrl.trim() ? req.body.imageUrl.trim() : null;
+    const company = typeof req.body?.company === "string" && req.body.company.trim() ? req.body.company.trim().slice(0, 120) : null;
+    const location = typeof req.body?.location === "string" && req.body.location.trim() ? req.body.location.trim().slice(0, 120) : null;
+    const employmentType = typeof req.body?.employmentType === "string" && ["full_time", "part_time", "contract", "internship"].includes(req.body.employmentType) ? req.body.employmentType : null;
+    const link = typeof req.body?.link === "string" && req.body.link.trim() ? req.body.link.trim().slice(0, 500) : null;
     if (!postType) {
       res.status(400).json({ error: "T\xFCr ar\u0131yor veya sunuyor olmal\u0131" });
       return;
@@ -126141,7 +127253,13 @@ router18.post("/talent", requireAuth, async (req, res) => {
       postType,
       role,
       description,
-      tags: JSON.stringify(tags)
+      tags: JSON.stringify(tags),
+      imageUrl,
+      company,
+      location,
+      employmentType,
+      link,
+      status: "open"
     }).returning();
     const [user] = await db.select({ name: usersTable.name, company: usersTable.company, handle: usersTable.handle }).from(usersTable).where(eq(usersTable.id, userId)).limit(1);
     res.status(201).json({
@@ -126152,11 +127270,122 @@ router18.post("/talent", requireAuth, async (req, res) => {
           company: user?.company ?? null,
           handle: user?.handle ?? null
         },
-        true
+        true,
+        { applicationCount: 0, myApplication: null, applications: [] }
       )
     });
   } catch (err) {
     res.status(500).json({ error: err.message ?? "\u0130lan olu\u015Fturulamad\u0131" });
+  }
+});
+router18.post("/talent/:id/apply", requireAuth, async (req, res) => {
+  try {
+    await ensureTalentSchema();
+    const postId = Number(req.params.id);
+    if (!Number.isFinite(postId)) {
+      res.status(400).json({ error: "Ge\xE7ersiz id" });
+      return;
+    }
+    const [post] = await db.select().from(talentPostsTable).where(eq(talentPostsTable.id, postId)).limit(1);
+    if (!post) {
+      res.status(404).json({ error: "\u0130lan bulunamad\u0131" });
+      return;
+    }
+    if (post.userId === req.user.id) {
+      res.status(400).json({ error: "Kendi ilan\u0131n\u0131za ba\u015Fvuramazs\u0131n\u0131z" });
+      return;
+    }
+    if (post.status && post.status !== "open") {
+      res.status(400).json({ error: "Bu ilan ba\u015Fvuruya kapal\u0131" });
+      return;
+    }
+    const message = typeof req.body?.message === "string" ? req.body.message.trim().slice(0, 800) : null;
+    const [existing] = await db.select({ id: talentApplicationsTable.id }).from(talentApplicationsTable).where(
+      and(
+        eq(talentApplicationsTable.postId, postId),
+        eq(talentApplicationsTable.userId, req.user.id)
+      )
+    ).limit(1);
+    if (existing) {
+      res.status(409).json({ error: "Bu ilana zaten ba\u015Fvurdunuz" });
+      return;
+    }
+    const [inserted] = await db.insert(talentApplicationsTable).values({
+      postId,
+      userId: req.user.id,
+      message: message || null,
+      status: "pending"
+    }).returning();
+    res.status(201).json({
+      application: {
+        id: inserted.id,
+        status: inserted.status,
+        message: inserted.message,
+        invoiceRef: inserted.invoiceRef,
+        createdAt: inserted.createdAt.toISOString()
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message ?? "Ba\u015Fvuru kaydedilemedi" });
+  }
+});
+router18.patch("/talent/applications/:id", requireAuth, async (req, res) => {
+  try {
+    await ensureTalentSchema();
+    const id = Number(req.params.id);
+    if (!Number.isFinite(id)) {
+      res.status(400).json({ error: "Ge\xE7ersiz id" });
+      return;
+    }
+    const statusRaw = typeof req.body?.status === "string" ? req.body.status.trim() : "";
+    if (!APP_STATUSES.has(statusRaw) || statusRaw === "pending") {
+      res.status(400).json({ error: "status shortlisted, hired veya rejected olmal\u0131" });
+      return;
+    }
+    const [app2] = await db.select().from(talentApplicationsTable).where(eq(talentApplicationsTable.id, id)).limit(1);
+    if (!app2) {
+      res.status(404).json({ error: "Ba\u015Fvuru bulunamad\u0131" });
+      return;
+    }
+    const [post] = await db.select().from(talentPostsTable).where(eq(talentPostsTable.id, app2.postId)).limit(1);
+    if (!post) {
+      res.status(404).json({ error: "\u0130lan bulunamad\u0131" });
+      return;
+    }
+    const isAuthor = post.userId === req.user.id;
+    const isAdmin = req.user.role === "admin";
+    if (!isAuthor && !isAdmin) {
+      res.status(403).json({ error: "Bu ba\u015Fvuruyu g\xFCncelleyemezsiniz" });
+      return;
+    }
+    const invoiceRef = typeof req.body?.invoiceRef === "string" ? req.body.invoiceRef.trim().slice(0, 120) || null : void 0;
+    const patch = {
+      status: statusRaw,
+      updatedAt: /* @__PURE__ */ new Date()
+    };
+    if (statusRaw === "hired" && invoiceRef !== void 0) {
+      patch.invoiceRef = invoiceRef;
+    }
+    if (statusRaw !== "hired") {
+      patch.invoiceRef = null;
+    }
+    const [updated] = await db.update(talentApplicationsTable).set(patch).where(eq(talentApplicationsTable.id, id)).returning();
+    if (statusRaw === "hired") {
+      await db.update(talentPostsTable).set({ status: "filled" }).where(eq(talentPostsTable.id, post.id));
+    }
+    res.json({
+      application: {
+        id: updated.id,
+        status: updated.status,
+        message: updated.message,
+        invoiceRef: updated.invoiceRef,
+        createdAt: updated.createdAt.toISOString(),
+        updatedAt: updated.updatedAt.toISOString()
+      },
+      commissionVisible: await hasAnyHiredInvoice()
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message ?? "Ba\u015Fvuru g\xFCncellenemedi" });
   }
 });
 router18.delete("/talent/:id", requireAuth, async (req, res) => {
@@ -126176,6 +127405,7 @@ router18.delete("/talent/:id", requireAuth, async (req, res) => {
       res.status(403).json({ error: "Bu ilan\u0131 silemezsiniz" });
       return;
     }
+    await db.delete(talentApplicationsTable).where(eq(talentApplicationsTable.postId, id));
     await db.delete(talentPostsTable).where(eq(talentPostsTable.id, id));
     res.json({ ok: true });
   } catch (err) {
@@ -126187,14 +127417,14 @@ var talent_default = router18;
 // src/routes/apiKeys.ts
 var import_express19 = __toESM(require_express2(), 1);
 init_drizzle_orm();
-import crypto11 from "node:crypto";
+import crypto12 from "node:crypto";
 init_schema2();
 var router19 = (0, import_express19.Router)();
 function generateKey() {
-  const raw = crypto11.randomBytes(24).toString("base64url");
+  const raw = crypto12.randomBytes(24).toString("base64url");
   const plaintext = `ih_live_${raw}`;
   const prefix = plaintext.slice(0, 15);
-  const hash = crypto11.createHash("sha256").update(plaintext).digest("hex");
+  const hash = crypto12.createHash("sha256").update(plaintext).digest("hex");
   return { plaintext, prefix, hash };
 }
 router19.get("/api-keys", requireAuth, async (req, res) => {
@@ -126268,19 +127498,36 @@ var apiKeys_default = router19;
 
 // src/routes/passes.ts
 var import_express20 = __toESM(require_express2(), 1);
+init_drizzle_orm();
+init_schema2();
 var router20 = (0, import_express20.Router)();
-var MONTHLY_GRANT = 3;
-var PASS_PRICE_TRY = 299;
+var PASS_PRICE_TRY = 149;
 router20.get("/passes/me", requireAuth, async (req, res) => {
   try {
+    await ensureUserMembershipColumns();
     const balance = await getPassBalance(req.user.id);
+    const [user] = await db.select({
+      membershipPlan: usersTable.membershipPlan,
+      membershipStatus: usersTable.membershipStatus
+    }).from(usersTable).where(eq(usersTable.id, req.user.id)).limit(1);
     res.json({
       balance,
-      monthlyGrant: MONTHLY_GRANT,
-      passPriceTry: PASS_PRICE_TRY
+      monthlyGrant: MONTHLY_PASS_GRANT,
+      passPriceTry: PASS_PRICE_TRY,
+      membershipPlan: user?.membershipPlan ?? null,
+      membershipStatus: user?.membershipStatus ?? null
     });
   } catch (err) {
     res.status(500).json({ error: err.message ?? "Pass bakiyesi al\u0131namad\u0131" });
+  }
+});
+router20.post("/admin/passes/monthly-grant", requireAuth, requireAdmin, async (_req, res) => {
+  try {
+    await ensureUserMembershipColumns();
+    const result = await monthlyPassGrantAll();
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: err.message ?? "Ayl\u0131k pass grant ba\u015Far\u0131s\u0131z" });
   }
 });
 var passes_default = router20;
@@ -126821,7 +128068,8 @@ async function recipientsFor(refType, refId) {
       email: usersTable.email,
       name: usersTable.name,
       phone: usersTable.phone,
-      whatsappOptIn: usersTable.whatsappOptIn
+      whatsappOptIn: usersTable.whatsappOptIn,
+      settingsPrefs: usersTable.settingsPrefs
     }).from(enrollmentsTable).innerJoin(usersTable, eq(usersTable.id, enrollmentsTable.userId)).where(eq(enrollmentsTable.courseId, refId));
     return rows2;
   }
@@ -126830,7 +128078,8 @@ async function recipientsFor(refType, refId) {
     email: usersTable.email,
     name: usersTable.name,
     phone: usersTable.phone,
-    whatsappOptIn: usersTable.whatsappOptIn
+    whatsappOptIn: usersTable.whatsappOptIn,
+    settingsPrefs: usersTable.settingsPrefs
   }).from(eventRegistrationsTable).innerJoin(usersTable, eq(usersTable.id, eventRegistrationsTable.userId)).where(eq(eventRegistrationsTable.eventId, refId));
   return rows;
 }
@@ -126863,15 +128112,18 @@ async function notifyUsers(opts) {
   const { sendWhatsAppTemplate: sendWhatsAppTemplate2 } = await Promise.resolve().then(() => (init_whatsapp(), whatsapp_exports));
   for (const u of users) {
     if (opts.channel === "email" || opts.channel === "both" || opts.channel === "all") {
-      await notifyLiveSession({
-        name: u.name,
-        email: u.email,
-        sessionTitle: opts.title,
-        startsAt: opts.startsAt,
-        meetUrl: opts.meetUrl,
-        refType: opts.refType,
-        lead: opts.emailLead
-      });
+      const prefs = parseSettingsPrefs(u.settingsPrefs);
+      if (wantsEmail(prefs, "events")) {
+        await notifyLiveSession({
+          name: u.name,
+          email: u.email,
+          sessionTitle: opts.title,
+          startsAt: opts.startsAt,
+          meetUrl: opts.meetUrl,
+          refType: opts.refType,
+          lead: opts.emailLead
+        });
+      }
     }
     if (opts.channel === "inapp" || opts.channel === "both" || opts.channel === "all") {
       await createNotification({
@@ -127047,11 +128299,381 @@ router22.post("/jobs/live-reminders", async (req, res) => {
 });
 var liveJobs_default = router22;
 
-// src/routes/orgs.ts
+// src/routes/mailJobs.ts
 var import_express23 = __toESM(require_express2(), 1);
 init_drizzle_orm();
 init_schema2();
+
+// src/lib/jobAuth.ts
+function jobAuthorized2(req) {
+  const secret = process.env.CRON_SECRET;
+  const header = req.headers["x-job-secret"];
+  if (secret && typeof header === "string" && header === secret) return true;
+  if (req.user?.role === "admin") return true;
+  return false;
+}
+
+// src/lib/mail/matchSuggest.ts
+var COMPLEMENT = {
+  founder: ["investor", "builder", "company"],
+  investor: ["founder", "company"],
+  builder: ["founder", "company", "builder"],
+  company: ["founder", "builder", "investor"]
+};
+var TYPE_LABEL = {
+  investor: "Yat\u0131r\u0131mc\u0131",
+  founder: "Co-founder",
+  builder: "\u0130\u015F birli\u011Fi",
+  company: "\u0130\u015F birli\u011Fi"
+};
+function tokens(raw) {
+  return new Set(
+    (raw ?? "").toLowerCase().split(/[,;/|]+/).map((s) => s.trim()).filter((s) => s.length > 1)
+  );
+}
+function suggestMatches(self2, pool2, limit3 = 3) {
+  if (!self2.allowMatch) return [];
+  const selfSkills = tokens(self2.skills);
+  const selfPersona = (self2.persona ?? "").toLowerCase();
+  const scored = [];
+  for (const other of pool2) {
+    if (other.id === self2.id || !other.allowMatch) continue;
+    const persona = (other.persona ?? "").toLowerCase();
+    const otherSkills = tokens(other.skills);
+    const overlap = [...selfSkills].filter((s) => otherSkills.has(s)).slice(0, 3);
+    const complementary = selfPersona ? (COMPLEMENT[selfPersona] ?? []).includes(persona) : false;
+    let score = 62;
+    if (complementary) score += 18;
+    else if (persona && persona === selfPersona) score += 8;
+    score += Math.min(12, overlap.length * 4);
+    if (other.bio && other.bio.length > 40) score += 4;
+    score = Math.min(96, score);
+    if (score < 68 && overlap.length === 0 && !complementary) continue;
+    const whyParts = [];
+    if (complementary) whyParts.push("Odanla tamamlay\u0131c\u0131 bir profil.");
+    else if (persona && persona === selfPersona) whyParts.push("Ayn\u0131 odadan; ortak zemin kurmak kolay.");
+    if (overlap.length) whyParts.push(`Ortak zemin: ${overlap.join(", ")}.`);
+    if (!whyParts.length) whyParts.push("\xC7ember i\xE7inde g\xF6r\xFCn\xFCr bir kesi\u015Fim var.");
+    scored.push({
+      name: other.name,
+      company: other.company?.trim() || other.title?.trim() || "",
+      matchType: TYPE_LABEL[persona] || "\u0130\u015F birli\u011Fi",
+      score,
+      why: whyParts.join(" ")
+    });
+  }
+  scored.sort((a, b) => b.score - a.score);
+  const uniq = [];
+  for (const row of scored) {
+    if (uniq.some((u) => u.name === row.name)) continue;
+    uniq.push(row);
+    if (uniq.length >= limit3) break;
+  }
+  return uniq;
+}
+
+// src/lib/mail/unsub.ts
+import { createHmac as createHmac2, timingSafeEqual as timingSafeEqual2 } from "node:crypto";
+function unsubSecret() {
+  return process.env.MAIL_UNSUB_SECRET?.trim() || process.env.RESEND_API_KEY?.trim() || process.env.CRON_SECRET?.trim() || "dev-unsub-inner";
+}
+function b64url(input) {
+  return Buffer.from(input).toString("base64url");
+}
+function createUnsubToken(userId, email3, scope = "weekly") {
+  const payload = b64url(
+    JSON.stringify({
+      u: userId,
+      e: email3.trim().toLowerCase(),
+      s: scope,
+      iat: Date.now()
+    })
+  );
+  const sig = createHmac2("sha256", unsubSecret()).update(payload).digest("base64url");
+  return `${payload}.${sig}`;
+}
+function unsubUrl(userId, email3, scope = "weekly") {
+  const token = createUnsubToken(userId, email3, scope);
+  return `${appBaseUrl()}/api/mail/unsubscribe?token=${encodeURIComponent(token)}`;
+}
+function verifyUnsubToken(token) {
+  const trimmed = token.trim();
+  const dot = trimmed.lastIndexOf(".");
+  if (dot <= 0) return null;
+  const payload = trimmed.slice(0, dot);
+  const sig = trimmed.slice(dot + 1);
+  const expected = createHmac2("sha256", unsubSecret()).update(payload).digest("base64url");
+  const a = Buffer.from(sig);
+  const b = Buffer.from(expected);
+  if (a.length !== b.length || !timingSafeEqual2(a, b)) return null;
+  try {
+    const data = JSON.parse(Buffer.from(payload, "base64url").toString("utf8"));
+    if (!data.u || !data.e) return null;
+    if (data.iat && Date.now() - data.iat > 400 * 24 * 60 * 60 * 1e3) return null;
+    const scope = data.s === "all" ? "all" : "weekly";
+    return { userId: data.u, email: data.e, scope };
+  } catch {
+    return null;
+  }
+}
+function unsubResultHtml(opts) {
+  const title = opts.ok ? "Abonelik durdu." : "Ba\u011Flant\u0131 ge\xE7ersiz.";
+  const body = opts.ok ? opts.scope === "all" ? "inner hub e-postalar\u0131n\u0131 bu adrese art\u0131k g\xF6ndermeyece\u011Fiz. \u0130\u015Flemsel iletiler (\u015Fifre, davet) hari\xE7." : "Haftal\u0131k \xF6zeti kapatt\u0131k. Ayarlardan tekrar a\xE7abilirsin." : opts.error ?? "Token okunamad\u0131 veya s\xFCresi doldu.";
+  const app2 = appBaseUrl();
+  return `<!DOCTYPE html>
+<html lang="tr"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>inner hub \xB7 ${title}</title></head>
+<body style="margin:0;background:#050505;color:#F4F1EC;font-family:Georgia,serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+    <td align="center" style="padding:64px 20px;">
+      <p style="margin:0 0 12px;font-family:ui-monospace,Menlo,monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:rgba(244,241,236,0.4);">inner hub</p>
+      <h1 style="margin:0 0 16px;font-size:32px;font-weight:400;font-style:italic;">${title}</h1>
+      <p style="margin:0 0 28px;max-width:420px;font-family:Inter,Helvetica,sans-serif;font-size:15px;line-height:1.6;color:rgba(244,241,236,0.6);">${body}</p>
+      <a href="${app2}/panel/settings" style="display:inline-block;background:#F4F1EC;color:#0A0A0A;font-family:ui-monospace,Menlo,monospace;font-size:11px;letter-spacing:0.08em;text-decoration:none;padding:14px 22px;">AYARLAR&nbsp;&nbsp;\u2197</a>
+    </td>
+  </tr></table>
+</body></html>`;
+}
+
+// src/routes/mailJobs.ts
 var router23 = (0, import_express23.Router)();
+function sleep3(ms) {
+  return new Promise((r) => setTimeout(r, ms));
+}
+function istanbulParts(d = /* @__PURE__ */ new Date()) {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Istanbul",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).formatToParts(d);
+  return {
+    y: Number(parts.find((p) => p.type === "year")?.value),
+    m: Number(parts.find((p) => p.type === "month")?.value),
+    d: Number(parts.find((p) => p.type === "day")?.value)
+  };
+}
+function isoWeekKey(now = /* @__PURE__ */ new Date()) {
+  const { y, m, d } = istanbulParts(now);
+  const date6 = new Date(Date.UTC(y, m - 1, d));
+  const dayNum = date6.getUTCDay() || 7;
+  date6.setUTCDate(date6.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(date6.getUTCFullYear(), 0, 1));
+  const week = Math.ceil(((date6.getTime() - yearStart.getTime()) / 864e5 + 1) / 7);
+  return `${date6.getUTCFullYear()}-W${String(week).padStart(2, "0")}`;
+}
+function weekLabel(now = /* @__PURE__ */ new Date()) {
+  const { y, m, d } = istanbulParts(now);
+  const start = new Date(Date.UTC(y, m - 1, d));
+  const dayNum = start.getUTCDay() || 7;
+  start.setUTCDate(start.getUTCDate() - (dayNum - 1));
+  const end = new Date(start);
+  end.setUTCDate(end.getUTCDate() + 6);
+  const fmt = new Intl.DateTimeFormat("tr-TR", { day: "numeric", month: "short" });
+  return `${fmt.format(start)} \u2013 ${fmt.format(end)}`;
+}
+function formatWhen(at) {
+  return at.toLocaleString("tr-TR", {
+    timeZone: "Europe/Istanbul",
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+}
+async function handleUnsubscribe(req, res) {
+  const token = typeof req.query.token === "string" && req.query.token || (typeof req.body?.token === "string" ? req.body.token : "");
+  const parsed = token ? verifyUnsubToken(token) : null;
+  if (!parsed) {
+    res.status(400).type("html").send(unsubResultHtml({ ok: false, error: "Ge\xE7ersiz veya s\xFCresi dolmu\u015F ba\u011Flant\u0131." }));
+    return;
+  }
+  const [user] = await db.select({ id: usersTable.id, email: usersTable.email }).from(usersTable).where(eq(usersTable.id, parsed.userId)).limit(1);
+  if (!user || user.email.trim().toLowerCase() !== parsed.email) {
+    res.status(400).type("html").send(unsubResultHtml({ ok: false, error: "Adres e\u015Fle\u015Fmedi." }));
+    return;
+  }
+  if (parsed.scope === "all") {
+    await patchUserSettingsPrefs(user.id, { notifEmail: false, notifDigest: false });
+  } else {
+    await patchUserSettingsPrefs(user.id, { notifDigest: false });
+  }
+  res.type("html").send(unsubResultHtml({ ok: true, scope: parsed.scope }));
+}
+router23.get("/mail/unsubscribe", async (req, res) => {
+  try {
+    await handleUnsubscribe(req, res);
+  } catch (err) {
+    logger.error({ err }, "mail unsubscribe failed");
+    res.status(500).type("html").send(unsubResultHtml({ ok: false, error: "\u0130\u015Flem tamamlanamad\u0131." }));
+  }
+});
+router23.post("/mail/unsubscribe", async (req, res) => {
+  try {
+    await handleUnsubscribe(req, res);
+  } catch (err) {
+    logger.error({ err }, "mail unsubscribe post failed");
+    res.status(500).json({ ok: false });
+  }
+});
+router23.post("/jobs/weekly-digest", async (req, res) => {
+  try {
+    if (!jobAuthorized2(req)) {
+      res.status(401).json({ error: "Unauthorized" });
+      return;
+    }
+    await ensureStageSchema();
+    const dryRun = req.body?.dryRun === true || req.query.dryRun === "1";
+    const limitRaw = Number(req.body?.limit ?? req.query.limit);
+    const limit3 = Number.isFinite(limitRaw) && limitRaw > 0 ? Math.min(500, limitRaw) : 500;
+    const onlyUserId = Number(req.body?.userId ?? req.query.userId);
+    const periodKey = isoWeekKey();
+    const label = weekLabel();
+    const now = /* @__PURE__ */ new Date();
+    const horizon = new Date(now.getTime() + 21 * 24 * 60 * 60 * 1e3);
+    const upcomingEvents = await db.select({
+      title: eventsTable.title,
+      startAt: eventsTable.startAt,
+      location: eventsTable.location
+    }).from(eventsTable).where(
+      and(eq(eventsTable.isPublished, true), gte(eventsTable.startAt, now), lte(eventsTable.startAt, horizon))
+    ).orderBy(eventsTable.startAt).limit(3);
+    const deals = await db.select({
+      company: capitalDealsTable.company,
+      tagline: capitalDealsTable.tagline,
+      stage: capitalDealsTable.stage,
+      sector: capitalDealsTable.sector,
+      raise: capitalDealsTable.raise,
+      score: capitalDealsTable.score
+    }).from(capitalDealsTable).orderBy(desc(capitalDealsTable.score), desc(capitalDealsTable.id)).limit(2);
+    const members = await db.select({
+      id: usersTable.id,
+      email: usersTable.email,
+      name: usersTable.name,
+      persona: usersTable.persona,
+      title: usersTable.title,
+      company: usersTable.company,
+      skills: usersTable.skills,
+      bio: usersTable.bio,
+      settingsPrefs: usersTable.settingsPrefs,
+      isSystem: usersTable.isSystem
+    }).from(usersTable).where(and(isNull(usersTable.deletedAt), eq(usersTable.isSystem, false)));
+    const pool2 = members.filter((m) => !isTestOrSystemAccount({ email: m.email, name: m.name, isSystem: m.isSystem })).map((m) => {
+      const prefs = parseSettingsPrefs(m.settingsPrefs);
+      return { ...m, prefs, allowMatch: prefs.allowMatch !== false };
+    });
+    let sent = 0;
+    let skipped = 0;
+    let failed = 0;
+    const sample = [];
+    for (const member of pool2) {
+      if (Number.isFinite(onlyUserId) && onlyUserId > 0 && member.id !== onlyUserId) continue;
+      if (!wantsEmail(member.prefs, "digest")) {
+        skipped += 1;
+        continue;
+      }
+      const [already] = await db.select({ id: mailSendLogTable.id }).from(mailSendLogTable).where(
+        and(
+          eq(mailSendLogTable.userId, member.id),
+          eq(mailSendLogTable.kind, "weekly.digest"),
+          eq(mailSendLogTable.periodKey, periodKey)
+        )
+      ).limit(1);
+      if (already) {
+        skipped += 1;
+        continue;
+      }
+      const matches = wantsEmail(member.prefs, "match") ? suggestMatches(
+        {
+          id: member.id,
+          name: member.name,
+          company: member.company,
+          title: member.title,
+          persona: member.persona,
+          skills: member.skills,
+          bio: member.bio,
+          allowMatch: member.allowMatch
+        },
+        pool2,
+        3
+      ) : [];
+      const eventItems = upcomingEvents.map((e) => ({
+        title: e.title,
+        when: formatWhen(e.startAt),
+        location: e.location
+      }));
+      const dealItems = wantsEmail(member.prefs, "capital") ? deals.map((d) => ({
+        company: d.company,
+        stage: d.stage,
+        note: d.tagline?.trim() || [d.sector, d.raise].filter(Boolean).join(" \xB7 ")
+      })) : [];
+      if (matches.length === 0 && eventItems.length === 0 && dealItems.length === 0) {
+        skipped += 1;
+        continue;
+      }
+      if (sample.length < 8) {
+        sample.push({
+          email: member.email,
+          matches: matches.length,
+          events: eventItems.length,
+          deals: dealItems.length
+        });
+      }
+      if (dryRun) {
+        sent += 1;
+        if (sent >= limit3) break;
+        continue;
+      }
+      const result = await notifyWeeklyDigest({
+        email: member.email,
+        name: member.name,
+        matches,
+        events: eventItems,
+        deals: dealItems,
+        unsubscribeUrl: unsubUrl(member.id, member.email, "weekly"),
+        weekLabel: label
+      });
+      if (!result.ok) {
+        failed += 1;
+        logger.warn({ email: member.email, error: result.error }, "weekly digest send failed");
+        continue;
+      }
+      try {
+        await db.insert(mailSendLogTable).values({
+          userId: member.id,
+          kind: "weekly.digest",
+          periodKey
+        });
+      } catch {
+      }
+      sent += 1;
+      if (sent >= limit3) break;
+      await sleep3(180);
+    }
+    res.json({
+      ok: true,
+      dryRun,
+      periodKey,
+      weekLabel: label,
+      sent,
+      skipped,
+      failed,
+      events: upcomingEvents.length,
+      sample
+    });
+  } catch (err) {
+    logger.error({ err }, "weekly digest job failed");
+    res.status(500).json({ error: err.message ?? "Job ba\u015Far\u0131s\u0131z" });
+  }
+});
+var mailJobs_default = router23;
+
+// src/routes/orgs.ts
+var import_express24 = __toESM(require_express2(), 1);
+init_drizzle_orm();
+init_schema2();
+var router24 = (0, import_express24.Router)();
 function mapOrg(o) {
   return {
     id: o.id,
@@ -127064,7 +128686,7 @@ function mapOrg(o) {
     createdAt: o.createdAt.toISOString()
   };
 }
-router23.get("/orgs/mine", requireAuth, async (req, res) => {
+router24.get("/orgs/mine", requireAuth, async (req, res) => {
   try {
     await ensureOrgLegalCampaignSchema();
     await ensureUserMembershipColumns();
@@ -127086,7 +128708,7 @@ router23.get("/orgs/mine", requireAuth, async (req, res) => {
     res.status(500).json({ error: err.message ?? "Organizasyonlar y\xFCklenemedi" });
   }
 });
-router23.post("/orgs", requireAuth, async (req, res) => {
+router24.post("/orgs", requireAuth, async (req, res) => {
   try {
     await ensureOrgLegalCampaignSchema();
     await ensureUserMembershipColumns();
@@ -127119,7 +128741,7 @@ router23.post("/orgs", requireAuth, async (req, res) => {
     res.status(500).json({ error: err.message ?? "Organizasyon olu\u015Fturulamad\u0131" });
   }
 });
-router23.patch("/orgs/:id", requireAuth, async (req, res) => {
+router24.patch("/orgs/:id", requireAuth, async (req, res) => {
   try {
     await ensureOrgLegalCampaignSchema();
     const orgId = Number(req.params.id);
@@ -127153,7 +128775,7 @@ router23.patch("/orgs/:id", requireAuth, async (req, res) => {
     res.status(500).json({ error: err.message ?? "G\xFCncellenemedi" });
   }
 });
-router23.post("/orgs/:id/join", requireAuth, async (req, res) => {
+router24.post("/orgs/:id/join", requireAuth, async (req, res) => {
   try {
     await ensureOrgLegalCampaignSchema();
     await ensureUserMembershipColumns();
@@ -127180,7 +128802,7 @@ router23.post("/orgs/:id/join", requireAuth, async (req, res) => {
     res.status(500).json({ error: err.message ?? "Kat\u0131l\u0131m ba\u015Far\u0131s\u0131z" });
   }
 });
-router23.get("/orgs/:id/members", requireAuth, async (req, res) => {
+router24.get("/orgs/:id/members", requireAuth, async (req, res) => {
   try {
     await ensureOrgLegalCampaignSchema();
     const orgId = Number(req.params.id);
@@ -127218,7 +128840,7 @@ router23.get("/orgs/:id/members", requireAuth, async (req, res) => {
     res.status(500).json({ error: err.message ?? "\xDCyeler y\xFCklenemedi" });
   }
 });
-router23.get("/orgs/search", requireAuth, async (req, res) => {
+router24.get("/orgs/search", requireAuth, async (req, res) => {
   try {
     await ensureOrgLegalCampaignSchema();
     const q = String(req.query.q ?? "").trim().toLowerCase();
@@ -127232,14 +128854,14 @@ router23.get("/orgs/search", requireAuth, async (req, res) => {
     res.status(500).json({ error: err.message ?? "Arama ba\u015Far\u0131s\u0131z" });
   }
 });
-var orgs_default = router23;
+var orgs_default = router24;
 
 // src/routes/legal.ts
-var import_express24 = __toESM(require_express2(), 1);
+var import_express25 = __toESM(require_express2(), 1);
 init_drizzle_orm();
 init_schema2();
-var router24 = (0, import_express24.Router)();
-router24.get("/legal/pending", requireAuth, async (req, res) => {
+var router25 = (0, import_express25.Router)();
+router25.get("/legal/pending", requireAuth, async (req, res) => {
   try {
     const locale = req.query.locale === "en" ? "en" : "tr";
     await ensureLegalDocumentsSeeded();
@@ -127277,7 +128899,7 @@ router24.get("/legal/pending", requireAuth, async (req, res) => {
     res.status(500).json({ error: err.message ?? "Hukuki belgeler y\xFCklenemedi" });
   }
 });
-router24.post("/legal/accept", requireAuth, async (req, res) => {
+router25.post("/legal/accept", requireAuth, async (req, res) => {
   try {
     await ensureLegalDocumentsSeeded();
     const userId = req.user.id;
@@ -127318,7 +128940,7 @@ router24.post("/legal/accept", requireAuth, async (req, res) => {
     res.status(500).json({ error: err.message ?? "Onay kaydedilemedi" });
   }
 });
-router24.delete("/account", requireAuth, async (req, res) => {
+router25.delete("/account", requireAuth, async (req, res) => {
   try {
     await ensureUserMembershipColumns();
     await ensureOrgLegalCampaignSchema();
@@ -127355,19 +128977,19 @@ router24.delete("/account", requireAuth, async (req, res) => {
     res.status(500).json({ error: err.message ?? "Hesap silinemedi" });
   }
 });
-var legal_default = router24;
+var legal_default = router25;
 
 // src/routes/campaigns.ts
-var import_express25 = __toESM(require_express2(), 1);
+var import_express26 = __toESM(require_express2(), 1);
 init_drizzle_orm();
 init_schema2();
-var router25 = (0, import_express25.Router)();
+var router26 = (0, import_express26.Router)();
 async function requireOrgAdmin(userId, orgId) {
   const [mem] = await db.select().from(orgMembershipsTable).where(and(eq(orgMembershipsTable.orgId, orgId), eq(orgMembershipsTable.userId, userId))).limit(1);
   if (!mem || mem.role !== "owner" && mem.role !== "admin") return null;
   return mem;
 }
-router25.get("/campaigns/mine", requireAuth, async (req, res) => {
+router26.get("/campaigns/mine", requireAuth, async (req, res) => {
   try {
     await ensureOrgLegalCampaignSchema();
     const userId = req.user.id;
@@ -127402,7 +129024,7 @@ router25.get("/campaigns/mine", requireAuth, async (req, res) => {
     res.status(500).json({ error: err.message ?? "Kampanyalar y\xFCklenemedi" });
   }
 });
-router25.post("/campaigns", requireAuth, async (req, res) => {
+router26.post("/campaigns", requireAuth, async (req, res) => {
   try {
     await ensureOrgLegalCampaignSchema();
     const userId = req.user.id;
@@ -127489,7 +129111,7 @@ router25.post("/campaigns", requireAuth, async (req, res) => {
     res.status(500).json({ error: err.message ?? "Kampanya olu\u015Fturulamad\u0131" });
   }
 });
-router25.post("/admin/campaigns/:id/approve", requireAuth, requireAdmin, async (req, res) => {
+router26.post("/admin/campaigns/:id/approve", requireAuth, requireAdmin, async (req, res) => {
   try {
     await ensureOrgLegalCampaignSchema();
     const id = Number(req.params.id);
@@ -127529,14 +129151,14 @@ router25.post("/admin/campaigns/:id/approve", requireAuth, requireAdmin, async (
     res.status(500).json({ error: err.message ?? "Onay ba\u015Far\u0131s\u0131z" });
   }
 });
-var campaigns_default = router25;
+var campaigns_default = router26;
 
 // src/routes/search.ts
-var import_express26 = __toESM(require_express2(), 1);
+var import_express27 = __toESM(require_express2(), 1);
 init_drizzle_orm();
 init_sdk();
 init_schema2();
-var router26 = (0, import_express26.Router)();
+var router27 = (0, import_express27.Router)();
 var NAV_SHORTCUTS = [
   { id: "nav-dash", kind: "page", title: "Dashboard", subtitle: "Ana panel", href: "/panel", score: 0 },
   { id: "nav-chat", kind: "page", title: "Topluluk / Chat", subtitle: "Sohbet", href: "/panel/chat", score: 0 },
@@ -127741,7 +129363,7 @@ async function gatherHits(q, locale) {
   hits.sort((a, b) => b.score - a.score);
   return hits.filter((h) => h.score > 0).slice(0, 40);
 }
-router26.get("/search", requireAuth, async (req, res) => {
+router27.get("/search", requireAuth, async (req, res) => {
   try {
     const q = String(req.query.q ?? "").trim();
     const locale = req.query.locale === "en" ? "en" : "tr";
@@ -127763,7 +129385,7 @@ router26.get("/search", requireAuth, async (req, res) => {
     res.status(500).json({ error: err.message ?? "Arama ba\u015Far\u0131s\u0131z" });
   }
 });
-router26.post("/search/ai", requireAuth, async (req, res) => {
+router27.post("/search/ai", requireAuth, async (req, res) => {
   try {
     const q = String(req.body?.q ?? "").trim();
     const locale = req.body?.locale === "en" ? "en" : "tr";
@@ -127833,16 +129455,16 @@ En fazla 5 suggestion; href'ler adaylardan gelsin. ${locale === "en" ? "English"
     res.status(500).json({ error: err.message ?? "AI arama ba\u015Far\u0131s\u0131z" });
   }
 });
-var search_default = router26;
+var search_default = router27;
 
 // src/routes/journey.ts
-var import_express27 = __toESM(require_express2(), 1);
+var import_express28 = __toESM(require_express2(), 1);
 init_drizzle_orm();
 init_schema2();
 
 // src/lib/journey.ts
 var LEVEL_LABELS = ["journey.level1", "journey.level2", "journey.level3", "journey.level4", "journey.level5"];
-function parseSkills3(raw) {
+function parseSkills4(raw) {
   if (!raw) return [];
   try {
     const parsed = JSON.parse(raw);
@@ -127881,7 +129503,7 @@ function mergeJourneyIntoSettingsPrefs(settingsPrefs, journey) {
   return JSON.stringify(base);
 }
 function buildJourneySnapshot(user, journeyPrefs) {
-  const skills = parseSkills3(user.skills);
+  const skills = parseSkills4(user.skills);
   const visited = journeyPrefs.visited ?? {};
   const bioDone = (user.bio ?? "").trim().length > 20;
   const avatarDone = Boolean(user.avatarUrl);
@@ -127932,9 +129554,9 @@ function buildJourneySnapshot(user, journeyPrefs) {
 }
 
 // src/routes/journey.ts
-var router27 = (0, import_express27.Router)();
+var router28 = (0, import_express28.Router)();
 var VISITS = /* @__PURE__ */ new Set(["members", "signal", "stage", "profile"]);
-router27.get("/journey", requireAuth, async (req, res) => {
+router28.get("/journey", requireAuth, async (req, res) => {
   try {
     await ensureUserProfileColumns();
     let user = req.user;
@@ -127949,7 +129571,7 @@ router27.get("/journey", requireAuth, async (req, res) => {
     res.status(500).json({ error: err.message ?? "Yolculuk y\xFCklenemedi" });
   }
 });
-router27.post("/journey/visit", requireAuth, async (req, res) => {
+router28.post("/journey/visit", requireAuth, async (req, res) => {
   try {
     await ensureUserProfileColumns();
     const place = typeof req.body?.place === "string" ? req.body.place.trim() : "";
@@ -127969,7 +129591,7 @@ router27.post("/journey/visit", requireAuth, async (req, res) => {
     res.status(500).json({ error: err.message ?? "Ziyaret kaydedilemedi" });
   }
 });
-router27.post("/journey/dismiss", requireAuth, async (req, res) => {
+router28.post("/journey/dismiss", requireAuth, async (req, res) => {
   try {
     await ensureUserProfileColumns();
     const userId = req.user.id;
@@ -127983,41 +129605,42 @@ router27.post("/journey/dismiss", requireAuth, async (req, res) => {
     res.status(500).json({ error: err.message ?? "Kaydedilemedi" });
   }
 });
-var journey_default = router27;
+var journey_default = router28;
 
 // src/routes/index.ts
-var router28 = (0, import_express28.Router)();
-router28.use(health_default);
-router28.use(invitations_default);
-router28.use("/payments", payments_default);
-router28.use("/ai", ai_default);
-router28.use("/auth", auth_default);
-router28.use(journey_default);
-router28.use(catalog_default);
-router28.use(applications_default);
-router28.use(community_default);
-router28.use(chat_default);
-router28.use(notifications_default);
-router28.use(match_default);
-router28.use(vault_default);
-router28.use(capital_default);
-router28.use(pulse_default);
-router28.use(publicId_default);
-router28.use(analytics_default);
-router28.use(talent_default);
-router28.use(apiKeys_default);
-router28.use(settings_default);
-router28.use(passes_default);
-router28.use(stage_default);
-router28.use(liveJobs_default);
-router28.use(orgs_default);
-router28.use(legal_default);
-router28.use(campaigns_default);
-router28.use(search_default);
-var routes_default = router28;
+var router29 = (0, import_express29.Router)();
+router29.use(health_default);
+router29.use(invitations_default);
+router29.use("/payments", payments_default);
+router29.use("/ai", ai_default);
+router29.use("/auth", auth_default);
+router29.use(journey_default);
+router29.use(catalog_default);
+router29.use(applications_default);
+router29.use(community_default);
+router29.use(chat_default);
+router29.use(notifications_default);
+router29.use(match_default);
+router29.use(vault_default);
+router29.use(capital_default);
+router29.use(pulse_default);
+router29.use(publicId_default);
+router29.use(analytics_default);
+router29.use(talent_default);
+router29.use(apiKeys_default);
+router29.use(settings_default);
+router29.use(passes_default);
+router29.use(stage_default);
+router29.use(liveJobs_default);
+router29.use(mailJobs_default);
+router29.use(orgs_default);
+router29.use(legal_default);
+router29.use(campaigns_default);
+router29.use(search_default);
+var routes_default = router29;
 
 // src/app.ts
-var app = (0, import_express29.default)();
+var app = (0, import_express30.default)();
 app.use(
   (0, import_pino_http.default)({
     logger,
@@ -128066,18 +129689,18 @@ app.use(
 );
 app.use((req, res, next) => {
   if (req.method === "PUT" && /^\/api\/vault\/\d+\/file$/.test(req.path)) {
-    return import_express29.default.raw({ type: () => true, limit: "12mb" })(req, res, next);
+    return import_express30.default.raw({ type: () => true, limit: "12mb" })(req, res, next);
   }
   next();
 });
-app.use(import_express29.default.json());
-app.use(import_express29.default.text({ type: "text/plain", limit: "16kb" }));
-app.use(import_express29.default.urlencoded({ extended: true }));
+app.use(import_express30.default.json());
+app.use(import_express30.default.text({ type: "text/plain", limit: "16kb" }));
+app.use(import_express30.default.urlencoded({ extended: true }));
 app.use((0, import_cookie_parser.default)());
 app.use(attachUser);
 app.use("/api", routes_default);
 var frontendDist = path7.join(__dirname, "..", "..", "inner-hub", "dist");
-app.use(import_express29.default.static(frontendDist));
+app.use(import_express30.default.static(frontendDist));
 app.get(/^(?!\/api).*/, (_req, res) => {
   res.sendFile(path7.join(frontendDist, "index.html"));
 });

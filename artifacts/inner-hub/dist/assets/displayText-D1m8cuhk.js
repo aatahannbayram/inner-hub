@@ -1,1 +1,0 @@
-function e(u){const r=(u??"").trim();return r?/^[\s·.•\u2010-\u2015\u2212\uFE58\uFE63\uFF0D-]+$/u.test(r):!0}function t(u,r){return u&&(e(u)?"":u.replace(/\s+[\u2010-\u2015\u2212\uFE58\uFE63\uFF0D-]\s+/gu," · ").trim())}export{t as c};

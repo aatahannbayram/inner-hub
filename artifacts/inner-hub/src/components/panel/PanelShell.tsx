@@ -16,7 +16,6 @@ import { apiUrl } from "@/lib/api";
 import { Lockup } from "@/components/Lockup";
 import { LocaleSyncFromSettings, useLocale, useT } from "@/i18n";
 import { ThemeSyncFromSettings } from "@/components/ThemeSyncFromSettings";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import { PanelAmbient } from "@/components/panel/PanelAmbient";
 import { createPortal } from "react-dom";
 
@@ -672,7 +671,6 @@ function ShellInner({ user, children, onLogout }: PanelShellProps) {
             <HeaderIconButton label={t("search.open")} onClick={openSearch} className="lg:hidden">
               <Search className="size-4" />
             </HeaderIconButton>
-            <ThemeToggle />
             <div className="relative">
               <HeaderIconButton
                 label={t("shell.notifications")}

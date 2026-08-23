@@ -21,7 +21,7 @@ export function HeroQuickStat({
         <div className="px-6 py-4">
           <p
             className="font-serif text-3xl leading-none text-white md:text-4xl"
-            style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
+            style={{ fontWeight: 600 }}
           >
             {value}
           </p>

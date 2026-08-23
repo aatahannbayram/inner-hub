@@ -62,7 +62,7 @@ function emptyForm(): Omit<Draft, "id" | "updatedAt"> {
   };
 }
 
-/** Admin: Haberler / blog yapısı - Flexlore bağlanana kadar draft + export */
+/** Admin: Haberler / blog yapısı — draft + JSON export */
 export default function HaberlerAdmin() {
   const t = useT();
   const published = listArtifacts();
@@ -136,7 +136,7 @@ export default function HaberlerAdmin() {
             <Lockup suffix="hub" className="text-[var(--ink)]" fontSize="1.05rem" />
             <h1
               className="mt-2 font-display font-serif text-4xl text-[var(--ink)]"
-              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 300 }}
+              style={{ fontWeight: 600 }}
             >
               {t("haberlerAdmin.title")}
             </h1>

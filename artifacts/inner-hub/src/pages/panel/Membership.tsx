@@ -20,8 +20,20 @@ interface Plan {
   highlighted?: boolean;
 }
 
-type PassMe = { balance: number; monthlyGrant: number; passPriceTry: number };
-type AuthMe = { user: { id: number } };
+type PassMe = {
+  balance: number;
+  monthlyGrant: number;
+  passPriceTry: number;
+  membershipPlan?: string | null;
+  membershipStatus?: string | null;
+};
+type AuthMe = {
+  user: {
+    id: number;
+    membershipPlan?: string | null;
+    membershipStatus?: string | null;
+  };
+};
 
 async function createCheckoutSession(
   type: "membership" | "pass",
@@ -49,13 +61,21 @@ async function createCheckoutSession(
   if (url) window.location.href = url;
 }
 
-function PlanCard({ plan }: { plan: Plan }) {
+function PlanCard({
+  plan,
+  isCurrent,
+}: {
+  plan: Plan;
+  isCurrent: boolean;
+}) {
   const t = useT();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const Icon = plan.icon;
+  const badge = isCurrent ? t("membership.current") : plan.badge;
 
   const handleBuy = async () => {
+    if (isCurrent) return;
     setLoading(true);
     setError("");
     try {
@@ -72,21 +92,25 @@ function PlanCard({ plan }: { plan: Plan }) {
       className={[
         "relative flex flex-col overflow-hidden border p-6 transition-all duration-200",
         plan.highlighted
-          ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--bone)]"
+          ? "border-[var(--surface-inverted)] bg-[var(--surface-inverted)] text-[var(--on-inverted)]"
           : "border-[var(--ink)]/[0.08] hover:border-[var(--ink)]/20",
       ].join(" ")}
     >
       {plan.highlighted && <AmbientCardBackground />}
-      {plan.badge && (
+      {badge && (
         <span
           className={[
             "absolute right-4 top-4 border px-2 py-0.5 font-mono text-label uppercase tracking-widest",
-            plan.highlighted
-              ? "border-[var(--inner-green)]/50 bg-[var(--inner-green)]/20 text-[var(--success-ink)]"
-              : "border-[var(--ink)]/15 text-[var(--ink-body)]",
+            isCurrent
+              ? plan.highlighted
+                ? "border-[var(--on-inverted-success)]/40 bg-[var(--on-inverted-success)]/15 text-[var(--on-inverted-success)]"
+                : "border-[var(--success-ink)]/30 bg-[var(--success-ink)]/10 text-[var(--success-ink)]"
+              : plan.highlighted
+                ? "border-[var(--on-inverted-success)]/40 bg-[var(--on-inverted-success)]/15 text-[var(--on-inverted-success)]"
+                : "border-[var(--ink)]/15 text-[var(--ink-body)]",
           ].join(" ")}
         >
-          {plan.badge}
+          {badge}
         </span>
       )}
 
@@ -95,20 +119,20 @@ function PlanCard({ plan }: { plan: Plan }) {
           <div
             className={[
               "mb-3 flex size-9 items-center justify-center border",
-              plan.highlighted ? "border-[var(--bone)]/20" : "border-[var(--ink)]/10",
+              plan.highlighted ? "border-[var(--on-inverted)]/20" : "border-[var(--ink)]/10",
             ].join(" ")}
           >
             <Icon
               className={[
                 "size-4",
-                plan.highlighted ? "text-[var(--bone)]/70" : "text-[var(--ink-body)]",
+                plan.highlighted ? "text-[var(--on-inverted-muted)]" : "text-[var(--ink-body)]",
               ].join(" ")}
             />
           </div>
           <p
             className={[
               "font-mono text-label uppercase tracking-widest",
-              plan.highlighted ? "text-[var(--bone)]/50" : "text-[var(--ink-body)]",
+              plan.highlighted ? "text-[var(--on-inverted-muted)]" : "text-[var(--ink-body)]",
             ].join(" ")}
           >
             {plan.name}
@@ -117,16 +141,16 @@ function PlanCard({ plan }: { plan: Plan }) {
             <span
               className={[
                 "font-serif text-4xl",
-                plan.highlighted ? "text-[var(--bone)]" : "text-[var(--ink)]",
+                plan.highlighted ? "text-[var(--on-inverted)]" : "text-[var(--ink)]",
               ].join(" ")}
-              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
+              style={{ fontWeight: 600 }}
             >
               <CurrencyValue value={plan.price} />
             </span>
             <span
               className={[
                 "font-mono text-caption",
-                plan.highlighted ? "text-[var(--bone)]/57" : "text-[var(--ink-muted)]",
+                plan.highlighted ? "text-[var(--on-inverted-muted)]" : "text-[var(--ink-muted)]",
               ].join(" ")}
             >
               {plan.period}
@@ -135,7 +159,7 @@ function PlanCard({ plan }: { plan: Plan }) {
           <p
             className={[
               "mt-2 text-sm leading-relaxed",
-              plan.highlighted ? "text-[var(--bone)]/60" : "text-[var(--ink-muted)]",
+              plan.highlighted ? "text-[var(--on-inverted-muted)]" : "text-[var(--ink-muted)]",
             ].join(" ")}
           >
             {plan.description}
@@ -148,13 +172,13 @@ function PlanCard({ plan }: { plan: Plan }) {
               <Check
                 className={[
                   "mt-0.5 size-3.5 shrink-0",
-                  plan.highlighted ? "text-[var(--success-ink)]" : "text-[var(--ink-body)]",
+                  plan.highlighted ? "text-[var(--on-inverted-success)]" : "text-[var(--ink-body)]",
                 ].join(" ")}
               />
               <span
                 className={[
                   "text-sm",
-                  plan.highlighted ? "text-[var(--bone)]/70" : "text-[var(--ink-body)]",
+                  plan.highlighted ? "text-[var(--on-inverted)]" : "text-[var(--ink-body)]",
                 ].join(" ")}
               >
                 {f}
@@ -170,16 +194,28 @@ function PlanCard({ plan }: { plan: Plan }) {
         )}
 
         <button
+          type="button"
           onClick={handleBuy}
           disabled={loading}
+          aria-current={isCurrent ? "true" : undefined}
           className={[
             "flex w-full items-center justify-between border px-5 py-3 font-mono text-caption uppercase tracking-widest transition-opacity disabled:opacity-40 hover:opacity-80",
-            plan.highlighted
-              ? "border-[var(--bone-fixed)]/20 bg-[var(--bone-fixed)] text-[var(--ink-fixed)]"
-              : "border-[var(--ink)] bg-[var(--ink)] text-[var(--bone)]",
+            isCurrent
+              ? plan.highlighted
+                ? "border-[var(--on-inverted)]/35 bg-transparent text-[var(--on-inverted)]"
+                : "border-[var(--ink)]/25 bg-transparent text-[var(--ink)]"
+              : plan.highlighted
+                ? "border-[var(--on-inverted)]/20 bg-[var(--on-inverted)] text-[var(--surface-inverted)]"
+                : "border-[var(--ink)] bg-[var(--ink)] text-[var(--bone)]",
           ].join(" ")}
         >
-          <span>{loading ? t("membership.redirecting") : t("membership.buy")}</span>
+          <span>
+            {loading
+              ? t("membership.redirecting")
+              : isCurrent
+                ? t("membership.manage")
+                : t("membership.buy")}
+          </span>
           <ArrowRight className="size-3.5" />
         </button>
       </div>
@@ -196,7 +232,7 @@ function CirclePassCard() {
 
   const balance = passData?.balance ?? 0;
   const monthlyGrant = passData?.monthlyGrant ?? 3;
-  const price = passData?.passPriceTry ?? 299;
+  const price = passData?.passPriceTry ?? 149;
 
   const buyPass = async () => {
     setLoading(true);
@@ -242,7 +278,7 @@ function CirclePassCard() {
           >
             {loading
               ? t("membership.redirecting")
-              : t("membership.buyPass", { price })}
+              : t("membership.buyPass", { price: `₺${price}` })}
             <ArrowRight className="size-3" />
           </button>
         </div>
@@ -258,6 +294,14 @@ function CirclePassCard() {
 
 export default function Membership() {
   const t = useT();
+  const { data: passData } = useApiQuery<PassMe>(["passes-me"], "/api/passes/me");
+  const { data: meData } = useApiQuery<AuthMe>(["auth-me"], "/api/auth/me");
+
+  const membershipPlan =
+    passData?.membershipPlan ?? meData?.user?.membershipPlan ?? null;
+  const membershipStatus =
+    passData?.membershipStatus ?? meData?.user?.membershipStatus ?? null;
+  const hasActivePlan = membershipStatus === "active" && Boolean(membershipPlan);
 
   const PLANS: Plan[] = useMemo(
     () => [
@@ -312,7 +356,7 @@ export default function Membership() {
           </div>
           <h1
             className="font-serif font-display text-4xl text-[var(--ink)] md:text-5xl"
-            style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
+            style={{ fontWeight: 600 }}
           >
             {t("membership.title")}
           </h1>
@@ -323,14 +367,21 @@ export default function Membership() {
       <div>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {PLANS.map((plan) => (
-            <PlanCard key={plan.id} plan={plan} />
+            <PlanCard
+              key={plan.id}
+              plan={plan}
+              isCurrent={hasActivePlan && membershipPlan === plan.id}
+            />
           ))}
         </div>
       </div>
 
       <CirclePassCard />
 
-      <div className="border-t border-[var(--ink)]/[0.08] pt-4">
+      <div className="border-t border-[var(--ink)]/[0.08] pt-4 space-y-1">
+        <p className="text-center font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)]">
+          {t("membership.vatNote")}
+        </p>
         <p className="text-center font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)]">
           {t("membership.trust")}
         </p>

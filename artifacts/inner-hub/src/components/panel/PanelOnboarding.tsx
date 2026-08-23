@@ -349,7 +349,6 @@ export function PanelOnboarding({ userName }: { userName: string }) {
                   <h2
                     id="onboarding-title"
                     className="mb-3 font-serif text-3xl leading-[1.1] text-[var(--ink)] sm:text-4xl"
-                    style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1" }}
                   >
                     {step === 0 ? (
                       <>
@@ -509,7 +508,7 @@ function CoachOverlay({
             <X className="size-3.5" />
           </button>
         </div>
-        <p className="mb-1 font-serif text-lg italic text-[var(--ink)]" style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1" }}>
+        <p className="mb-1 font-serif text-lg italic text-[var(--ink)]">
           {tip.title}
         </p>
         <p className="mb-4 text-xs leading-relaxed text-[var(--ink-body)]">{tip.body}</p>

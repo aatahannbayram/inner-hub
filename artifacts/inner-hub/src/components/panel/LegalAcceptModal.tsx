@@ -88,7 +88,7 @@ export function LegalAcceptModal() {
           <h2
             id="legal-accept-title"
             className="mt-2 font-serif text-2xl text-[var(--ink)] sm:text-3xl"
-            style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 300 }}
+            style={{ fontWeight: 600 }}
           >
             {t("legal.title")}
           </h2>

@@ -6,6 +6,7 @@ import { Lockup } from "@/components/Lockup";
 import { useApiQuery } from "@/hooks/useApiQuery";
 import { apiUrl } from "@/lib/api";
 import { LoadingBlock, ErrorState, CourseCardSkeleton } from "@/components/panel/Skeletons";
+import { CoverImageField } from "@/components/panel/CoverImageField";
 import { useT } from "@/i18n";
 
 type EventFormat = "online" | "in_person" | "hybrid";
@@ -20,6 +21,7 @@ type AdminEvent = {
   endAt: string;
   format: EventFormat;
   meetUrl: string | null;
+  coverUrl?: string | null;
   audience: Audience;
   passCost: number;
   isPublished: boolean;
@@ -66,7 +68,15 @@ function EventAdminCard({ event, onChanged }: { event: AdminEvent; onChanged: ()
   return (
     <div className="panel-glass p-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="min-w-0">
+        <div className="flex min-w-0 items-start gap-3">
+          {event.coverUrl && (
+            <img
+              src={event.coverUrl}
+              alt=""
+              className="size-14 shrink-0 object-cover"
+            />
+          )}
+          <div className="min-w-0">
           <p className="font-serif text-lg text-[var(--ink)]">{event.title}</p>
           <p className="mt-0.5 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
             {event.format} · {event.audience} · {event.passCost} pass
@@ -88,6 +98,7 @@ function EventAdminCard({ event, onChanged }: { event: AdminEvent; onChanged: ()
               {event.meetUrl}
             </a>
           ) : null}
+          </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <button
@@ -127,6 +138,8 @@ function AddEventForm({ onAdded }: { onAdded: () => void }) {
   const [audience, setAudience] = useState<Audience>("all");
   const [passCost, setPassCost] = useState(1);
   const [isPublished, setIsPublished] = useState(false);
+  const [coverPath, setCoverPath] = useState("");
+  const [coverUpload, setCoverUpload] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -135,6 +148,7 @@ function AddEventForm({ onAdded }: { onAdded: () => void }) {
     setBusy(true);
     setError(null);
     try {
+      const coverUrl = coverUpload || (coverPath.trim() ? `https://${coverPath.trim()}` : null);
       const res = await fetch(apiUrl("/api/events"), {
         method: "POST",
         credentials: "include",
@@ -147,6 +161,7 @@ function AddEventForm({ onAdded }: { onAdded: () => void }) {
           endAt: fromDatetimeLocal(endAt),
           format,
           meetUrl: meetUrl.trim() || null,
+          coverUrl,
           audience,
           passCost,
           isPublished,
@@ -164,6 +179,8 @@ function AddEventForm({ onAdded }: { onAdded: () => void }) {
       setAudience("all");
       setPassCost(1);
       setIsPublished(false);
+      setCoverPath("");
+      setCoverUpload(null);
       onAdded();
     } catch (e: any) {
       setError(e.message ?? t("eventsAdmin.saveFailed"));
@@ -195,6 +212,14 @@ function AddEventForm({ onAdded }: { onAdded: () => void }) {
         onChange={(e) => setLocation(e.target.value)}
         placeholder={t("eventsAdmin.locationPlaceholder")}
         className="w-full border border-[var(--ink)]/15 bg-transparent px-3 py-2 text-sm text-[var(--ink)] outline-none focus:border-[var(--ink)]/40"
+      />
+      <CoverImageField
+        urlPath={coverPath}
+        onUrlChange={setCoverPath}
+        uploadDataUrl={coverUpload}
+        onUploadChange={setCoverUpload}
+        label={t("events.externalCover")}
+        placeholder="gorsel-linki.com/kapak.jpg"
       />
       <div className="grid gap-3 sm:grid-cols-2">
         <label className="block space-y-1">
@@ -326,7 +351,7 @@ export default function EventsAdmin() {
           </div>
           <h1
             className="font-serif font-display text-4xl text-[var(--ink)] md:text-5xl"
-            style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
+            style={{ fontWeight: 600 }}
           >
             {t("eventsAdmin.title")}
           </h1>

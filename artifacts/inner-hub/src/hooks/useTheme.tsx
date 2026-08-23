@@ -12,12 +12,11 @@ export type ThemeMode = "light" | "dark" | "system";
 
 const STORAGE_KEY = "inner-hub-theme";
 
-function resolveIsDark(mode: ThemeMode): boolean {
-  if (typeof window === "undefined") return false;
-  if (mode === "system") {
-    return window.matchMedia("(prefers-color-scheme: dark)").matches;
-  }
-  return mode === "dark";
+/** Panel her zaman dark; light/system geçici olarak kapatıldı (P0-8). */
+const PANEL_FORCED_MODE: ThemeMode = "dark";
+
+function resolveIsDark(_mode: ThemeMode): boolean {
+  return true;
 }
 
 /** Dark tema yalnızca panelde - ana site / invitation marka light+cinematic kalır */
@@ -27,70 +26,65 @@ export function isPanelPath(pathname?: string): boolean {
   return /(?:^|\/)panel(?:\/|$)/.test(path);
 }
 
-export function applyTheme(mode: ThemeMode, pathname?: string) {
+export function applyTheme(_mode: ThemeMode, pathname?: string) {
   if (typeof document === "undefined") return;
-  const dark = isPanelPath(pathname) && resolveIsDark(mode);
+  const dark = isPanelPath(pathname);
   document.documentElement.classList.toggle("dark", dark);
   document.documentElement.style.colorScheme = dark ? "dark" : "light";
 }
 
 function readStoredMode(): ThemeMode {
-  if (typeof window === "undefined") return "light";
-  try {
-    const stored = window.localStorage.getItem(STORAGE_KEY);
-    return stored === "light" || stored === "dark" || stored === "system" ? stored : "dark";
-  } catch {
-    return "light";
-  }
+  return PANEL_FORCED_MODE;
 }
 
 type ThemeContextValue = {
   mode: ThemeMode;
   setMode: (mode: ThemeMode) => void;
   isDark: boolean;
+  /** Panel light tema kapalı; UI toggle gösterme. */
+  themeToggleEnabled: boolean;
 };
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 /**
- * Panel light/dark/system. Ana siteye `.dark` basılmaz -
- * public sayfalar ink/bone marka dilinde kalır.
+ * Panel her zaman dark. Light/system seçenekleri P0-8 kapsamında kapatıldı.
  */
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [mode, setModeState] = useState<ThemeMode>(readStoredMode);
-  const [isDark, setIsDark] = useState(() => {
-    const m = readStoredMode();
-    return isPanelPath() && resolveIsDark(m);
-  });
+  const [mode, setModeState] = useState<ThemeMode>(PANEL_FORCED_MODE);
+  const [isDark, setIsDark] = useState(() => isPanelPath());
 
-  const sync = useCallback((next: ThemeMode, pathname?: string) => {
-    applyTheme(next, pathname);
-    setIsDark(isPanelPath(pathname) && resolveIsDark(next));
+  const sync = useCallback((_next: ThemeMode, pathname?: string) => {
+    applyTheme(PANEL_FORCED_MODE, pathname);
+    setIsDark(isPanelPath(pathname));
   }, []);
 
   useEffect(() => {
-    sync(mode);
-    if (mode !== "system") return;
-    const mq = window.matchMedia("(prefers-color-scheme: dark)");
-    const onChange = () => sync("system");
-    mq.addEventListener("change", onChange);
-    return () => mq.removeEventListener("change", onChange);
-  }, [mode, sync]);
+    sync(PANEL_FORCED_MODE);
+    try {
+      window.localStorage.setItem(STORAGE_KEY, PANEL_FORCED_MODE);
+    } catch {
+      /* ignore */
+    }
+  }, [sync]);
 
   const setMode = useCallback(
-    (next: ThemeMode) => {
-      setModeState(next);
+    (_next: ThemeMode) => {
+      setModeState(PANEL_FORCED_MODE);
       try {
-        window.localStorage.setItem(STORAGE_KEY, next);
+        window.localStorage.setItem(STORAGE_KEY, PANEL_FORCED_MODE);
       } catch {
         /* ignore */
       }
-      sync(next);
+      sync(PANEL_FORCED_MODE);
     },
     [sync],
   );
 
-  const value = useMemo(() => ({ mode, setMode, isDark }), [mode, setMode, isDark]);
+  const value = useMemo(
+    () => ({ mode, setMode, isDark, themeToggleEnabled: false }),
+    [mode, setMode, isDark],
+  );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }
@@ -99,7 +93,6 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
  * Wouter Router içinde mount edilmeli - panel ↔ public geçişinde `.dark` kapsamı.
  */
 export function ThemeRouteSync() {
-  // lazy import pattern avoided - caller passes location via hook in App
   return null;
 }
 
@@ -107,7 +100,7 @@ export function useThemeRouteSync(locationPath: string) {
   const ctx = useContext(ThemeContext);
   useEffect(() => {
     if (!ctx) return;
-    applyTheme(ctx.mode, locationPath);
+    applyTheme(PANEL_FORCED_MODE, locationPath);
   }, [locationPath, ctx]);
 }
 
@@ -123,4 +116,4 @@ export function useThemeOptional(): ThemeContextValue | null {
   return useContext(ThemeContext);
 }
 
-export { STORAGE_KEY as THEME_STORAGE_KEY };
+export { STORAGE_KEY as THEME_STORAGE_KEY, PANEL_FORCED_MODE };

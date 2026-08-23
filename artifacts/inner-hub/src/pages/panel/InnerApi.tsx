@@ -247,7 +247,7 @@ export default function InnerApi() {
               </p>
               <h1
                 className="font-serif font-display text-3xl text-[var(--bone-fixed)] sm:text-4xl md:text-5xl"
-                style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
+                style={{ fontWeight: 600 }}
               >
                 <Lockup suffix="api" className="text-[var(--bone-fixed)]" />
               </h1>
@@ -395,7 +395,7 @@ export default function InnerApi() {
                 <div className="mb-3 flex items-baseline gap-1">
                   <span
                     className={`font-serif text-2xl ${plan.recommended ? "text-[var(--bone)]" : "text-[var(--ink)]"}`}
-                    style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
+                    style={{ fontWeight: 600 }}
                   >
                     <CurrencyValue value={plan.price} />
                   </span>

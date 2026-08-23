@@ -128,7 +128,7 @@ export function EditorialCard({
           )}
           <h3
             className="font-serif text-2xl italic leading-snug"
-            style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 300 }}
+            style={{ fontWeight: 600 }}
           >
             {title}
           </h3>

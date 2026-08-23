@@ -92,6 +92,12 @@ export const eventsTable = pgTable("events", {
   /** online | in_person | hybrid */
   format: text("format").default("in_person").notNull(),
   meetUrl: text("meet_url"),
+  /** Luma / Eventbrite / harici etkinlik sayfası */
+  externalUrl: text("external_url"),
+  /** Organizatör görünen adı */
+  organizer: text("organizer"),
+  /** Kapak görseli - liste/detayda gösterilir */
+  coverUrl: text("cover_url"),
   audience: text("audience").default("all").notNull(),
   passCost: integer("pass_cost").default(1).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -244,6 +250,10 @@ export const capitalSpvsTable = pgTable("capital_spvs", {
   pct: integer("pct").default(0).notNull(),
   participants: integer("participants").default(0).notNull(),
   closing: text("closing"),
+  /** ISO/parsed kapanış; GET sırasında geçmişse status closed yapılır */
+  closingDate: timestamp("closing_date"),
+  /** open | closed */
+  status: text("status").default("open").notNull(),
   sector: text("sector"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
@@ -252,6 +262,7 @@ export type CapitalDeal = typeof capitalDealsTable.$inferSelect;
 export type CapitalSpv = typeof capitalSpvsTable.$inferSelect;
 
 // ─── TALENT BOARD ─────────────────────────────────────────────────────────────
+/** İlanlar (listings) — mevcut talent_posts tablosu. */
 export const talentPostsTable = pgTable("talent_posts", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").references(() => usersTable.id).notNull(),
@@ -259,10 +270,41 @@ export const talentPostsTable = pgTable("talent_posts", {
   role: text("role").notNull(),
   description: text("description").notNull(),
   tags: text("tags"),
+  /** İlan görseli */
+  imageUrl: text("image_url"),
+  /** İlan sahibinin profilinden bağımsız, ilana özel şirket adı */
+  company: text("company"),
+  location: text("location"),
+  /** full_time | part_time | contract | internship */
+  employmentType: text("employment_type"),
+  /** Başvuru/ilan detay linki */
+  link: text("link"),
+  /** open | closed | filled */
+  status: text("status").default("open").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 export type TalentPost = typeof talentPostsTable.$inferSelect;
+
+/** Başvurular — listing → apply → shortlist / hire / reject. */
+export const talentApplicationsTable = pgTable("talent_applications", {
+  id: serial("id").primaryKey(),
+  postId: integer("post_id")
+    .references(() => talentPostsTable.id)
+    .notNull(),
+  userId: integer("user_id")
+    .references(() => usersTable.id)
+    .notNull(),
+  message: text("message"),
+  /** pending | shortlisted | hired | rejected */
+  status: text("status").default("pending").notNull(),
+  /** Hire sonrası fatura kaydı; yoksa komisyon metni gösterilmez */
+  invoiceRef: text("invoice_ref"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export type TalentApplication = typeof talentApplicationsTable.$inferSelect;
 
 // ─── SESSIONS (auth) ──────────────────────────────────────────────────────────
 export const sessionsTable = pgTable("sessions", {
@@ -356,6 +398,15 @@ export const liveNotifyLogTable = pgTable("live_notify_log", {
   refType: text("ref_type").notNull(),
   refId: integer("ref_id").notNull(),
   kind: text("kind").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+/** Digest / lifecycle gönderim dedupe (user + kind + ISO week) */
+export const mailSendLogTable = pgTable("mail_send_log", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => usersTable.id).notNull(),
+  kind: text("kind").notNull(),
+  periodKey: text("period_key").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

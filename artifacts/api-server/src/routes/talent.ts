@@ -1,12 +1,18 @@
 import { Router } from "express";
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq, inArray, isNotNull, sql } from "drizzle-orm";
 import { db } from "@workspace/db";
-import { talentPostsTable, usersTable } from "@workspace/db/schema";
+import {
+  talentApplicationsTable,
+  talentPostsTable,
+  usersTable,
+} from "@workspace/db/schema";
 import { requireAuth } from "../lib/auth";
 import { ensureTalentSchema, ensureUserMembershipColumns } from "../lib/ensureSchema";
 import { isTestOrSystemAccount } from "../lib/directoryMembers";
 
 const router = Router();
+
+const APP_STATUSES = new Set(["pending", "shortlisted", "hired", "rejected"]);
 
 function parseTags(raw: string | null | undefined): string[] {
   if (!raw) return [];
@@ -47,6 +53,23 @@ function mapPost(
   post: typeof talentPostsTable.$inferSelect,
   user: { name: string; company: string | null; handle: string | null },
   mine: boolean,
+  extras?: {
+    applicationCount?: number;
+    myApplication?: {
+      id: number;
+      status: string;
+      invoiceRef: string | null;
+      createdAt: string;
+    } | null;
+    applications?: Array<{
+      id: number;
+      status: string;
+      message: string | null;
+      invoiceRef: string | null;
+      createdAt: string;
+      applicant: { id: number; name: string; initials: string; company: string | null; handle: string | null };
+    }>;
+  },
 ) {
   return {
     id: post.id,
@@ -58,9 +81,18 @@ function mapPost(
     role: post.role,
     description: post.description,
     tags: parseTags(post.tags),
+    imageUrl: post.imageUrl ?? null,
+    company: post.company ?? null,
+    location: post.location ?? null,
+    employmentType: post.employmentType ?? null,
+    link: post.link ?? null,
+    status: post.status ?? "open",
     postedAt: relativeTr(post.createdAt),
     createdAt: post.createdAt.toISOString(),
     mine,
+    applicationCount: extras?.applicationCount ?? 0,
+    myApplication: extras?.myApplication ?? null,
+    applications: extras?.applications,
   };
 }
 
@@ -88,6 +120,7 @@ async function ensureTalentSeed(fallbackUserId: number) {
       description:
         "Ürünü şekillendirmeye katkı sağlayacak fullstack developer arıyoruz. Remote, equity var.",
       tags: JSON.stringify(["React", "Node.js", "Remote", "Equity"]),
+      status: "open",
     },
     {
       userId: owner,
@@ -96,6 +129,7 @@ async function ensureTalentSeed(fallbackUserId: number) {
       description:
         "Yan proje için haftalık 10-15 saat çalışabilecek ML mühendisi. LLM fine-tuning deneyimi şart.",
       tags: JSON.stringify(["AI", "LLM", "Part-time"]),
+      status: "open",
     },
     {
       userId: owner,
@@ -104,6 +138,7 @@ async function ensureTalentSeed(fallbackUserId: number) {
       description:
         "Pre-seed ve seed aşamasındaki girişimlere teknik liderlik ve mühendislik ekibi kurulumu konusunda destek.",
       tags: JSON.stringify(["CTO", "Danışmanlık", "Teknik"]),
+      status: "open",
     },
     {
       userId: owner,
@@ -112,6 +147,7 @@ async function ensureTalentSeed(fallbackUserId: number) {
       description:
         "Kuruluş sözleşmeleri, SAFE/KISS notları, yatırımcı süreçlerinde inner·hub üyelerine %20 indirim.",
       tags: JSON.stringify(["Hukuk", "SAFE", "Yatırım"]),
+      status: "open",
     },
     {
       userId: owner,
@@ -120,8 +156,24 @@ async function ensureTalentSeed(fallbackUserId: number) {
       description:
         "Yan proje için satış ve pazarlamaya odaklanacak co-founder arıyoruz. B2B SaaS deneyimi artı.",
       tags: JSON.stringify(["Co-founder", "B2B", "Satış"]),
+      status: "open",
     },
   ]);
+}
+
+async function hasAnyHiredInvoice(): Promise<boolean> {
+  const [row] = await db
+    .select({ id: talentApplicationsTable.id })
+    .from(talentApplicationsTable)
+    .where(
+      and(
+        eq(talentApplicationsTable.status, "hired"),
+        isNotNull(talentApplicationsTable.invoiceRef),
+        sql`${talentApplicationsTable.invoiceRef} <> ''`,
+      ),
+    )
+    .limit(1);
+  return Boolean(row);
 }
 
 // ─── GET /api/talent ─────────────────────────────────────────────────────────
@@ -130,6 +182,7 @@ router.get("/talent", requireAuth, async (req, res) => {
     await ensureTalentSchema();
     await ensureUserMembershipColumns();
     const userId = req.user!.id;
+    const isAdmin = req.user!.role === "admin";
     const [admin] = await db
       .select({ id: usersTable.id })
       .from(usersTable)
@@ -155,10 +208,67 @@ router.get("/talent", requireAuth, async (req, res) => {
         !isTestOrSystemAccount({ email, name, isSystem }),
     );
 
+    const postIds = visible.map(({ post }) => post.id);
+    const apps =
+      postIds.length === 0
+        ? []
+        : await db
+            .select({
+              app: talentApplicationsTable,
+              applicantName: usersTable.name,
+              applicantCompany: usersTable.company,
+              applicantHandle: usersTable.handle,
+            })
+            .from(talentApplicationsTable)
+            .innerJoin(usersTable, eq(talentApplicationsTable.userId, usersTable.id))
+            .where(inArray(talentApplicationsTable.postId, postIds))
+            .orderBy(desc(talentApplicationsTable.createdAt));
+
+    const byPost = new Map<number, typeof apps>();
+    for (const row of apps) {
+      const list = byPost.get(row.app.postId) ?? [];
+      list.push(row);
+      byPost.set(row.app.postId, list);
+    }
+
+    const posts = visible.map(({ post, name, company, handle }) => {
+      const mine = post.userId === userId;
+      const list = byPost.get(post.id) ?? [];
+      const myApp = list.find((a) => a.app.userId === userId);
+      const extras: Parameters<typeof mapPost>[3] = {
+        applicationCount: list.length,
+        myApplication: myApp
+          ? {
+              id: myApp.app.id,
+              status: myApp.app.status,
+              invoiceRef: myApp.app.invoiceRef,
+              createdAt: myApp.app.createdAt.toISOString(),
+            }
+          : null,
+      };
+      if (mine || isAdmin) {
+        extras.applications = list.map(({ app, applicantName, applicantCompany, applicantHandle }) => ({
+          id: app.id,
+          status: app.status,
+          message: app.message,
+          invoiceRef: app.invoiceRef,
+          createdAt: app.createdAt.toISOString(),
+          applicant: {
+            id: app.userId,
+            name: applicantName,
+            initials: initialsOf(applicantName),
+            company: applicantCompany,
+            handle: applicantHandle,
+          },
+        }));
+      }
+      return mapPost(post, { name, company, handle }, mine, extras);
+    });
+
     res.json({
-      posts: visible.map(({ post, name, company, handle }) =>
-        mapPost(post, { name, company, handle }, post.userId === userId),
-      ),
+      posts,
+      /** Komisyon metni yalnızca hire + fatura kaydı varsa */
+      commissionVisible: await hasAnyHiredInvoice(),
     });
   } catch (err: any) {
     res.status(500).json({ error: err.message ?? "Talent board yüklenemedi" });
@@ -178,6 +288,27 @@ router.post("/talent", requireAuth, async (req, res) => {
     const tags = Array.isArray(req.body?.tags)
       ? req.body.tags.filter((t: unknown) => typeof t === "string").slice(0, 12)
       : [];
+    const imageUrl =
+      typeof req.body?.imageUrl === "string" && req.body.imageUrl.trim()
+        ? req.body.imageUrl.trim()
+        : null;
+    const company =
+      typeof req.body?.company === "string" && req.body.company.trim()
+        ? req.body.company.trim().slice(0, 120)
+        : null;
+    const location =
+      typeof req.body?.location === "string" && req.body.location.trim()
+        ? req.body.location.trim().slice(0, 120)
+        : null;
+    const employmentType =
+      typeof req.body?.employmentType === "string" &&
+      ["full_time", "part_time", "contract", "internship"].includes(req.body.employmentType)
+        ? req.body.employmentType
+        : null;
+    const link =
+      typeof req.body?.link === "string" && req.body.link.trim()
+        ? req.body.link.trim().slice(0, 500)
+        : null;
 
     if (!postType) {
       res.status(400).json({ error: "Tür arıyor veya sunuyor olmalı" });
@@ -196,6 +327,12 @@ router.post("/talent", requireAuth, async (req, res) => {
         role,
         description,
         tags: JSON.stringify(tags),
+        imageUrl,
+        company,
+        location,
+        employmentType,
+        link,
+        status: "open",
       })
       .returning();
 
@@ -214,10 +351,169 @@ router.post("/talent", requireAuth, async (req, res) => {
           handle: user?.handle ?? null,
         },
         true,
+        { applicationCount: 0, myApplication: null, applications: [] },
       ),
     });
   } catch (err: any) {
     res.status(500).json({ error: err.message ?? "İlan oluşturulamadı" });
+  }
+});
+
+// ─── POST /api/talent/:id/apply ──────────────────────────────────────────────
+router.post("/talent/:id/apply", requireAuth, async (req, res) => {
+  try {
+    await ensureTalentSchema();
+    const postId = Number(req.params.id);
+    if (!Number.isFinite(postId)) {
+      res.status(400).json({ error: "Geçersiz id" });
+      return;
+    }
+
+    const [post] = await db
+      .select()
+      .from(talentPostsTable)
+      .where(eq(talentPostsTable.id, postId))
+      .limit(1);
+    if (!post) {
+      res.status(404).json({ error: "İlan bulunamadı" });
+      return;
+    }
+    if (post.userId === req.user!.id) {
+      res.status(400).json({ error: "Kendi ilanınıza başvuramazsınız" });
+      return;
+    }
+    if (post.status && post.status !== "open") {
+      res.status(400).json({ error: "Bu ilan başvuruya kapalı" });
+      return;
+    }
+
+    const message =
+      typeof req.body?.message === "string" ? req.body.message.trim().slice(0, 800) : null;
+
+    const [existing] = await db
+      .select({ id: talentApplicationsTable.id })
+      .from(talentApplicationsTable)
+      .where(
+        and(
+          eq(talentApplicationsTable.postId, postId),
+          eq(talentApplicationsTable.userId, req.user!.id),
+        ),
+      )
+      .limit(1);
+    if (existing) {
+      res.status(409).json({ error: "Bu ilana zaten başvurdunuz" });
+      return;
+    }
+
+    const [inserted] = await db
+      .insert(talentApplicationsTable)
+      .values({
+        postId,
+        userId: req.user!.id,
+        message: message || null,
+        status: "pending",
+      })
+      .returning();
+
+    res.status(201).json({
+      application: {
+        id: inserted.id,
+        status: inserted.status,
+        message: inserted.message,
+        invoiceRef: inserted.invoiceRef,
+        createdAt: inserted.createdAt.toISOString(),
+      },
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message ?? "Başvuru kaydedilemedi" });
+  }
+});
+
+// ─── PATCH /api/talent/applications/:id ──────────────────────────────────────
+router.patch("/talent/applications/:id", requireAuth, async (req, res) => {
+  try {
+    await ensureTalentSchema();
+    const id = Number(req.params.id);
+    if (!Number.isFinite(id)) {
+      res.status(400).json({ error: "Geçersiz id" });
+      return;
+    }
+
+    const statusRaw = typeof req.body?.status === "string" ? req.body.status.trim() : "";
+    if (!APP_STATUSES.has(statusRaw) || statusRaw === "pending") {
+      res.status(400).json({ error: "status shortlisted, hired veya rejected olmalı" });
+      return;
+    }
+
+    const [app] = await db
+      .select()
+      .from(talentApplicationsTable)
+      .where(eq(talentApplicationsTable.id, id))
+      .limit(1);
+    if (!app) {
+      res.status(404).json({ error: "Başvuru bulunamadı" });
+      return;
+    }
+
+    const [post] = await db
+      .select()
+      .from(talentPostsTable)
+      .where(eq(talentPostsTable.id, app.postId))
+      .limit(1);
+    if (!post) {
+      res.status(404).json({ error: "İlan bulunamadı" });
+      return;
+    }
+
+    const isAuthor = post.userId === req.user!.id;
+    const isAdmin = req.user!.role === "admin";
+    if (!isAuthor && !isAdmin) {
+      res.status(403).json({ error: "Bu başvuruyu güncelleyemezsiniz" });
+      return;
+    }
+
+    const invoiceRef =
+      typeof req.body?.invoiceRef === "string"
+        ? req.body.invoiceRef.trim().slice(0, 120) || null
+        : undefined;
+
+    const patch: Partial<typeof talentApplicationsTable.$inferInsert> = {
+      status: statusRaw,
+      updatedAt: new Date(),
+    };
+    if (statusRaw === "hired" && invoiceRef !== undefined) {
+      patch.invoiceRef = invoiceRef;
+    }
+    if (statusRaw !== "hired") {
+      patch.invoiceRef = null;
+    }
+
+    const [updated] = await db
+      .update(talentApplicationsTable)
+      .set(patch)
+      .where(eq(talentApplicationsTable.id, id))
+      .returning();
+
+    if (statusRaw === "hired") {
+      await db
+        .update(talentPostsTable)
+        .set({ status: "filled" })
+        .where(eq(talentPostsTable.id, post.id));
+    }
+
+    res.json({
+      application: {
+        id: updated.id,
+        status: updated.status,
+        message: updated.message,
+        invoiceRef: updated.invoiceRef,
+        createdAt: updated.createdAt.toISOString(),
+        updatedAt: updated.updatedAt.toISOString(),
+      },
+      commissionVisible: await hasAnyHiredInvoice(),
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message ?? "Başvuru güncellenemedi" });
   }
 });
 
@@ -245,6 +541,7 @@ router.delete("/talent/:id", requireAuth, async (req, res) => {
       return;
     }
 
+    await db.delete(talentApplicationsTable).where(eq(talentApplicationsTable.postId, id));
     await db.delete(talentPostsTable).where(eq(talentPostsTable.id, id));
     res.json({ ok: true });
   } catch (err: any) {

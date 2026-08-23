@@ -22,6 +22,22 @@ DNS: alan adı GoDaddy’de olsa bile **NS Hostinger’daysa** kayıtlar Hosting
 | Admin red | Başvuran | `invite.rejected` |
 | Şifre sıfırlama | Kullanıcı | `auth.password_reset` |
 | Canlı oturum hatırlatması | Kayıtlı üye | `live.session_reminder` |
+| Tanışma talebi | Üye | `match.intro_received` |
+| Tanışma talebi | `NOTIFY_EMAIL` | `match.intro_admin` |
+| Etkinlik kaydı | Üye | `event.registered` |
+| Kurs kaydı | Üye | `course.enrolled` |
+| Haftalık digest (Pazartesi) | `notifDigest` açık üyeler | `weekly.digest` |
+
+Lifecycle (digest) maillerinde `List-Unsubscribe` + One-Click vardır. Transactional (davet, şifre, kayıt) mailinde yoktur.
+
+Cron:
+
+```
+# Her Pazartesi 08:00 Europe/Istanbul
+0 8 * * 1 curl -sS -X POST "$APP_URL/api/jobs/weekly-digest" -H "X-Job-Secret: $CRON_SECRET" -H "Content-Type: application/json"
+# Canlı hatırlatma — her 15 dk
+*/15 * * * * curl -sS -X POST "$APP_URL/api/jobs/live-reminders" -H "X-Job-Secret: $CRON_SECRET"
+```
 
 ## Env
 
@@ -35,6 +51,9 @@ MAIL_FROM_NAME=inner hub
 MAIL_REPLY_TO=support@inner.digital
 NOTIFY_EMAIL=hey@inner.digital
 APP_URL=https://inner.digital
+CRON_SECRET=
+MAIL_UNSUB_SECRET=
+MAIL_PHYSICAL_ADDRESS=inner hub, İstanbul
 
 # Fallback (RESEND_API_KEY yoksa) — Hostinger apex SMTP
 SMTP_HOST=smtp.hostinger.com

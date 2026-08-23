@@ -1,7 +1,77 @@
 import { and, eq, sql } from "drizzle-orm";
 import { db } from "@workspace/db";
-import { passLedgerTable, passWalletsTable } from "@workspace/db/schema";
+import { passLedgerTable, passWalletsTable, usersTable } from "@workspace/db/schema";
 import { ensurePassSchema } from "./ensureSchema";
+
+export const MONTHLY_PASS_GRANT = 3;
+
+function monthlyRefId(userId: number, yearMonth?: string): string {
+  const ym =
+    yearMonth ??
+    `${new Date().getUTCFullYear()}-${String(new Date().getUTCMonth() + 1).padStart(2, "0")}`;
+  return `monthly:${userId}:${ym}`;
+}
+
+/** Aktif üyelere ayda 3 pass; refId `monthly:{userId}:{YYYY-MM}` ile idempotent. */
+export async function monthlyPassGrant(
+  userId: number,
+  yearMonth?: string,
+): Promise<{ granted: boolean; balance: number; skipped?: string }> {
+  await ensurePassSchema();
+  const [user] = await db
+    .select({
+      id: usersTable.id,
+      membershipStatus: usersTable.membershipStatus,
+    })
+    .from(usersTable)
+    .where(eq(usersTable.id, userId))
+    .limit(1);
+
+  if (!user) return { granted: false, balance: 0, skipped: "user_not_found" };
+  if (user.membershipStatus !== "active") {
+    return { granted: false, balance: await getPassBalance(userId), skipped: "not_active" };
+  }
+
+  const refId = monthlyRefId(userId, yearMonth);
+  const [existing] = await db
+    .select({ id: passLedgerTable.id })
+    .from(passLedgerTable)
+    .where(and(eq(passLedgerTable.userId, userId), eq(passLedgerTable.refId, refId)))
+    .limit(1);
+  if (existing) {
+    return { granted: false, balance: await getPassBalance(userId), skipped: "already_granted" };
+  }
+
+  const balance = await creditPasses({
+    userId,
+    amount: MONTHLY_PASS_GRANT,
+    reason: "monthly_grant",
+    refType: "membership",
+    refId,
+  });
+  return { granted: true, balance };
+}
+
+/** Tüm aktif üyelere bu ayın monthly grant'ını uygular. */
+export async function monthlyPassGrantAll(yearMonth?: string): Promise<{
+  eligible: number;
+  granted: number;
+  skipped: number;
+}> {
+  const active = await db
+    .select({ id: usersTable.id })
+    .from(usersTable)
+    .where(eq(usersTable.membershipStatus, "active"));
+
+  let granted = 0;
+  let skipped = 0;
+  for (const row of active) {
+    const result = await monthlyPassGrant(row.id, yearMonth);
+    if (result.granted) granted += 1;
+    else skipped += 1;
+  }
+  return { eligible: active.length, granted, skipped };
+}
 
 export async function getOrCreateWallet(userId: number) {
   await ensurePassSchema();

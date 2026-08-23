@@ -167,7 +167,7 @@ export default function PublicProfilePage() {
                 <div className="mb-1 flex flex-wrap items-center gap-2">
                   <h1
                     className="font-serif font-display text-4xl text-[var(--ink)] md:text-5xl"
-                    style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
+                    style={{ fontWeight: 600 }}
                   >
                     {profile.name}
                   </h1>

@@ -1,8 +1,11 @@
+import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { FadeIn } from "@/components/FadeIn";
 import { Lockup } from "@/components/Lockup";
 import { MemberAvatar } from "@/components/panel/MemberAvatar";
 import { ErrorState, LoadingBlock } from "@/components/panel/Skeletons";
 import { useApiQuery } from "@/hooks/useApiQuery";
+import { apiUrl } from "@/lib/api";
 import { useT } from "@/i18n";
 import { Link } from "wouter";
 
@@ -26,8 +29,93 @@ type OrgMember = {
   seed: string;
 };
 
+const ORG_TYPES = ["startup", "company", "fund", "studio"] as const;
+
+function CreateOrgForm({ onCreated }: { onCreated: () => void }) {
+  const t = useT();
+  const [name, setName] = useState("");
+  const [logoUrl, setLogoUrl] = useState("");
+  const [type, setType] = useState<(typeof ORG_TYPES)[number]>("startup");
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState<string | null>(null);
+
+  const create = async () => {
+    if (!name.trim() || busy) return;
+    setBusy(true);
+    setMsg(null);
+    try {
+      const res = await fetch(apiUrl("/api/orgs"), {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: name.trim(),
+          logoUrl: logoUrl.trim() || undefined,
+          type,
+        }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json.error ?? t("profile.orgCreateError"));
+      setName("");
+      setLogoUrl("");
+      onCreated();
+    } catch (e: unknown) {
+      setMsg(e instanceof Error ? e.message : t("profile.orgCreateError"));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="mt-6 space-y-3 text-left">
+      <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-strong)]">
+        {t("profile.createOrg")}
+      </p>
+      <input
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        placeholder={t("profile.orgNamePlaceholder")}
+        maxLength={80}
+        className="min-h-11 w-full panel-glass bg-transparent px-3 py-2.5 text-sm text-[var(--ink)] outline-none"
+      />
+      <input
+        value={logoUrl}
+        onChange={(e) => setLogoUrl(e.target.value)}
+        placeholder="https://…"
+        className="min-h-11 w-full panel-glass bg-transparent px-3 py-2.5 font-mono text-sm text-[var(--ink)] outline-none"
+      />
+      <select
+        value={type}
+        onChange={(e) => setType(e.target.value as (typeof ORG_TYPES)[number])}
+        className="min-h-11 w-full panel-glass bg-transparent px-3 py-2.5 text-sm text-[var(--ink)] outline-none"
+      >
+        {ORG_TYPES.map((ot) => (
+          <option key={ot} value={ot}>
+            {t(`profile.orgType_${ot}`)}
+          </option>
+        ))}
+      </select>
+      <button
+        type="button"
+        disabled={busy || name.trim().length < 2}
+        onClick={() => void create()}
+        className="min-h-11 w-full border border-[var(--ink)] bg-[var(--ink)] px-4 py-2.5 font-mono text-label uppercase tracking-widest text-[var(--bone)] disabled:opacity-30"
+      >
+        {t("profile.createOrg")}
+      </button>
+      {msg ? <p className="font-mono text-label text-[var(--error-ink)]">{msg}</p> : null}
+      <p className="text-center text-xs text-[var(--ink-muted)]">
+        <Link href="/panel/profile" className="underline-offset-2 hover:underline">
+          {t("org.goProfile")}
+        </Link>
+      </p>
+    </div>
+  );
+}
+
 export default function OrgPage() {
   const t = useT();
+  const qc = useQueryClient();
   const { data, isLoading, isError, error, refetch } = useApiQuery<{
     primaryOrgId: number | null;
     orgs: OrgRow[];
@@ -64,7 +152,7 @@ export default function OrgPage() {
           </div>
           <h1
             className="font-serif font-display text-4xl text-[var(--ink)] md:text-5xl"
-            style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
+            style={{ fontWeight: 600 }}
           >
             {t("org.title")}
           </h1>
@@ -78,12 +166,12 @@ export default function OrgPage() {
             {t("org.empty")}
           </p>
           <p className="mt-2 text-sm text-[var(--ink-muted)]">{t("org.emptyHint")}</p>
-          <Link
-            href="/panel/profile"
-            className="mt-5 inline-flex border border-[var(--ink)] px-4 py-2.5 font-mono text-label uppercase tracking-widest text-[var(--ink)]"
-          >
-            {t("org.goProfile")}
-          </Link>
+          <CreateOrgForm
+            onCreated={() => {
+              void refetch();
+              void qc.invalidateQueries({ queryKey: ["auth-me"] });
+            }}
+          />
         </div>
       ) : (
         <>

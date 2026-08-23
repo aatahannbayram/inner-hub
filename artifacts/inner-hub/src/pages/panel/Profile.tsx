@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Lockup } from "@/components/Lockup";
 import { FadeIn } from "@/components/FadeIn";
 import { Check, Plus, X, AlertCircle, Upload, Building2, Search, Linkedin, Unlink } from "lucide-react";
@@ -209,7 +209,7 @@ function Field({
   type = "text",
   hint,
 }: {
-  label: string;
+  label: ReactNode;
   value: string;
   onChange: (v: string) => void;
   placeholder?: string;
@@ -287,9 +287,6 @@ function SkillEditor({ skills, onChange }: { skills: string[]; onChange: (s: str
 
   return (
     <div>
-      <label className="mb-1.5 block font-mono text-label font-semibold uppercase tracking-widest text-[var(--ink-strong)]">
-        {t("profile.skills")}
-      </label>
       <div className="mb-2 flex flex-wrap gap-1.5">
         {skills.map((s) => (
           <span
@@ -345,33 +342,39 @@ function VisibilitySelector({
   ];
 
   return (
-    <div className="flex flex-col gap-1.5">
-      {options.map((opt) => (
-        <button
-          key={opt.value}
-          type="button"
-          onClick={() => onChange(opt.value)}
-          className={[
-            "flex min-h-11 items-center gap-3 border px-4 py-3 text-left transition-colors",
-            value === opt.value
-              ? "border-[var(--ink)]/30 bg-[var(--ink)]/[0.04]"
-              : "border-[var(--ink)]/[0.08] hover:border-[var(--ink)]/15",
-          ].join(" ")}
-        >
-          <div
+    <div className="flex flex-col gap-1.5" role="radiogroup" aria-label={t("profile.visibility")}>
+      {options.map((opt) => {
+        const selected = value === opt.value;
+        return (
+          <button
+            key={opt.value}
+            type="button"
+            role="radio"
+            aria-checked={selected}
+            onClick={() => onChange(opt.value)}
             className={[
-              "flex size-4 shrink-0 items-center justify-center border",
-              value === opt.value ? "border-[var(--ink)] bg-[var(--ink)]" : "border-[var(--ink)]/20",
+              "flex min-h-11 items-center gap-3 border px-4 py-3 text-left transition-colors",
+              selected
+                ? "border-[var(--ink)]/30 bg-[var(--ink)]/[0.04]"
+                : "border-[var(--ink)]/[0.08] hover:border-[var(--ink)]/15",
             ].join(" ")}
           >
-            {value === opt.value && <Check className="size-2.5 text-[var(--bone)]" />}
-          </div>
-          <div>
-            <p className="text-sm text-[var(--ink)]">{opt.label}</p>
-            <p className="font-mono text-label font-medium text-[var(--ink-muted)]">{opt.desc}</p>
-          </div>
-        </button>
-      ))}
+            <span
+              className={[
+                "flex size-4 shrink-0 items-center justify-center rounded-full border",
+                selected ? "border-[var(--ink)]" : "border-[var(--ink)]/20",
+              ].join(" ")}
+              aria-hidden
+            >
+              {selected ? <span className="size-2 rounded-full bg-[var(--ink)]" /> : null}
+            </span>
+            <div>
+              <p className="text-sm text-[var(--ink)]">{opt.label}</p>
+              <p className="font-mono text-label font-medium text-[var(--ink-muted)]">{opt.desc}</p>
+            </div>
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -583,6 +586,7 @@ export default function ProfilePage() {
   const t = useT();
   useJourneyVisit("profile");
   const fileRef = useRef<HTMLInputElement>(null);
+  const profileHydratedRef = useRef(false);
   const queryClient = useQueryClient();
   const { data, isLoading, isError, error, refetch } = useApiQuery<{ user: ApiUser }>(
     ["auth-me"],
@@ -605,7 +609,14 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (!data?.user) return;
-    setProfile(mapUserToProfile(data.user));
+    // Sadece ilk yüklemede formu doldur. Sonraki auth-me refetch'leri (ör.
+    // org oluşturma/katılma, LinkedIn bağlama başka bir yerde invalidate
+    // ediyor) kullanıcının henüz kaydetmediği yazdığı alanları silmesin —
+    // kaydetme zaten applyUser() ile taze veriyi doğrudan uyguluyor.
+    if (!profileHydratedRef.current) {
+      setProfile(mapUserToProfile(data.user));
+      profileHydratedRef.current = true;
+    }
     setCustomAvatar(data.user.avatarUrl ?? null);
     setOrg(data.user.org ?? null);
     setSeed(data.user.handle || data.user.email || data.user.name || "inner");
@@ -812,7 +823,7 @@ export default function ProfilePage() {
           <div className="mb-2 font-mono text-label uppercase tracking-widest text-[var(--ink-body)]"><Lockup suffix="hub" className="text-[var(--ink)]" fontSize="1.15rem" /></div>
           <h1
             className="font-serif font-display text-4xl text-[var(--ink)] md:text-5xl"
-            style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
+            style={{ fontWeight: 600 }}
           >
             {t("profile.title")}
           </h1>
@@ -933,7 +944,7 @@ export default function ProfilePage() {
             onChange={(v) => set("bio", v)}
             placeholder={t("profile.placeholderBio")}
             textarea
-            maxLength={160}
+            maxLength={400}
           />
         </div>
       </Section>
@@ -988,8 +999,8 @@ export default function ProfilePage() {
               <AlertCircle className="size-3.5" /> {t("profile.linkedinErrorToast")}
             </p>
           )}
-          <Field label="LinkedIn" value={profile.linkedin} onChange={(v) => set("linkedin", v)} prefix="linkedin.com/in/" placeholder={t("profile.placeholderLinkedin")} mono />
-          <Field label="GitHub" value={profile.github} onChange={(v) => set("github", v)} prefix="github.com/" placeholder={t("profile.placeholderGithub")} mono />
+          <Field label={<span lang="en">LinkedIn</span>} value={profile.linkedin} onChange={(v) => set("linkedin", v)} prefix="linkedin.com/in/" placeholder={t("profile.placeholderLinkedin")} mono />
+          <Field label={<span lang="en">GitHub</span>} value={profile.github} onChange={(v) => set("github", v)} prefix="github.com/" placeholder={t("profile.placeholderGithub")} mono />
           <Field label={t("profile.behance")} value={profile.behance} onChange={(v) => set("behance", v)} prefix="behance.net/" placeholder={t("profile.placeholderBehance")} mono />
           <Field label={t("profile.instagram")} value={profile.instagram} onChange={(v) => set("instagram", v)} prefix="instagram.com/" placeholder={t("profile.placeholderInstagram")} mono />
           <Field label={t("profile.personalSite")} value={profile.website} onChange={(v) => set("website", v)} prefix="https://" placeholder={t("profile.placeholderWebsite")} mono />
@@ -1003,7 +1014,7 @@ export default function ProfilePage() {
         <VisibilitySelector value={profile.visibility} onChange={(v) => set("visibility", v)} />
       </Section>
 
-      <div className="flex flex-wrap items-center gap-4 border-t border-[var(--ink)]/[0.08] pt-6">
+      <div className="sticky bottom-0 z-20 -mx-1 mt-2 flex flex-wrap items-center gap-4 border-t border-[var(--ink)]/[0.08] bg-[var(--bone)]/95 px-1 py-4 backdrop-blur-md sm:-mx-0">
         <button
           type="button"
           onClick={() => void save()}

@@ -97,7 +97,7 @@ function SuccessView({
       </div>
       <h1
         className="mb-4 font-serif font-display text-4xl text-[var(--ink)]"
-        style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 300 }}
+        style={{ fontWeight: 600 }}
       >
         {t("membership.paymentSuccessTitle")}
       </h1>

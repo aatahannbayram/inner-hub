@@ -3,7 +3,7 @@ import Stripe from "stripe";
 import { and, eq } from "drizzle-orm";
 import { db } from "@workspace/db";
 import { passLedgerTable, usersTable } from "@workspace/db/schema";
-import { creditPasses } from "../lib/passes";
+import { creditPasses, monthlyPassGrant, MONTHLY_PASS_GRANT } from "../lib/passes";
 import { ensureUserMembershipColumns } from "../lib/ensureSchema";
 
 const router = Router();
@@ -31,8 +31,7 @@ const PLANS = {
   },
 };
 
-const PASS_AMOUNT_TRY = 29900;
-const MEMBERSHIP_PASS_GRANT = 3;
+const PASS_AMOUNT_TRY = 14900;
 
 async function alreadyCredited(userId: number, refId: string): Promise<boolean> {
   const [row] = await db
@@ -47,12 +46,15 @@ async function grantMembershipPasses(userId: number, refId: string, reason: stri
   if (await alreadyCredited(userId, refId)) return;
   await creditPasses({
     userId,
-    amount: MEMBERSHIP_PASS_GRANT,
+    amount: MONTHLY_PASS_GRANT,
     reason,
     refType: "stripe",
     refId,
   });
 }
+
+/** Yenileme / aylık hak: idempotent `monthly:{userId}:{YYYY-MM}`. */
+export { monthlyPassGrant };
 
 function periodEndFromSubscription(sub: Stripe.Subscription): Date | null {
   const end = (sub as { current_period_end?: number }).current_period_end;
@@ -247,7 +249,7 @@ router.post(
 
           const uid = Number(userId);
           if (Number.isFinite(uid) && uid > 0) {
-            await grantMembershipPasses(uid, invoice.id, "membership_grant");
+            await monthlyPassGrant(uid);
           }
           break;
         }

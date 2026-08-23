@@ -51,7 +51,6 @@ export default function ArtifactsPage() {
         </p>
         <h1
           className="max-w-2xl font-display font-serif italic text-4xl leading-[1.1] sm:text-5xl md:text-6xl"
-          style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1" }}
         >
           {t("artifacts.title")}
         </h1>

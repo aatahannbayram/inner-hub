@@ -1,10 +1,11 @@
+import { useState } from "react";
 import { memberPhoto } from "@/lib/memberPhotos";
 import { avatarColor } from "@/lib/avatarColor";
 import { cn } from "@/lib/utils";
 
 /**
  * Gerçek foto (src) varsa onu gösterir; yoksa bilinen isimler için MEMBER_PHOTOS;
- * o da yoksa renkli initials.
+ * o da yoksa (veya yükleme hata verirse) renkli initials.
  */
 export function PersonAvatar({
   name,
@@ -20,8 +21,17 @@ export function PersonAvatar({
   src?: string | null;
 }) {
   const photo = (src && src.trim()) || memberPhoto(name);
-  if (photo) {
-    return <img src={photo} alt={name} className={cn("shrink-0 object-cover", className)} />;
+  const [failed, setFailed] = useState(false);
+
+  if (photo && !failed) {
+    return (
+      <img
+        src={photo}
+        alt={name}
+        className={cn("shrink-0 object-cover", className)}
+        onError={() => setFailed(true)}
+      />
+    );
   }
   return (
     <div

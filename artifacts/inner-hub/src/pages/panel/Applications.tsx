@@ -27,6 +27,7 @@ type Application = {
   status: AppStatus;
   linkedinUrl: string;
   tags: string[];
+  hasUserAccount?: boolean;
 };
 
 const STATUS_STYLE: Record<AppStatus, { color: string; bg: string; labelKey: string }> = {
@@ -46,6 +47,22 @@ function StatusBadge({ status }: { status: AppStatus }) {
       {status === "onaylandı" && <Check className="size-2.5" />}
       {status === "reddedildi" && <X className="size-2.5" />}
       {t(cfg.labelKey)}
+    </span>
+  );
+}
+
+function MemberAccountBadge({ hasUserAccount }: { hasUserAccount?: boolean }) {
+  const has = Boolean(hasUserAccount);
+  return (
+    <span
+      className={[
+        "inline-flex items-center px-2 py-0.5 font-mono text-label uppercase tracking-widest",
+        has
+          ? "bg-[var(--inner-green)]/10 text-[var(--success-ink)]"
+          : "bg-[var(--ink)]/[0.06] text-[var(--ink-muted)]",
+      ].join(" ")}
+    >
+      Üye kaydı: {has ? "var" : "yok"}
     </span>
   );
 }
@@ -107,14 +124,17 @@ function DetailPanel({
                 <div className="min-w-0">
                   <p
                     className="font-serif text-xl text-[var(--ink)]"
-                    style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 300 }}
+                    style={{ fontWeight: 600 }}
                   >
                     {app.name}
                   </p>
                   <p className="font-mono text-label text-[var(--ink-body)]">{app.email}</p>
                 </div>
               </div>
-              <StatusBadge status={app.status} />
+              <div className="flex shrink-0 flex-col items-end gap-1">
+                <StatusBadge status={app.status} />
+                <MemberAccountBadge hasUserAccount={app.hasUserAccount} />
+              </div>
             </div>
             <p className="mt-1 font-mono text-label text-[var(--ink-body)]">
               {app.role}
@@ -238,6 +258,11 @@ export default function ApplicationsPage() {
     reddedildi: apps.filter((a) => a.status === "reddedildi").length,
   };
 
+  const provisionedCount = apps.filter((a) => a.hasUserAccount).length;
+  const pendingInviteCount = apps.filter(
+    (a) => a.status === "onaylandı" && !a.hasUserAccount,
+  ).length;
+
   const filtered = apps.filter((a) => {
     const matchFilter = filter === "all" || a.status === filter;
     const q = toLowerTR(search);
@@ -299,7 +324,7 @@ export default function ApplicationsPage() {
           </div>
           <h1
             className="font-serif font-display text-4xl text-[var(--ink)] md:text-5xl"
-            style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
+            style={{ fontWeight: 600 }}
           >
             {t("applications.title")}
           </h1>
@@ -331,13 +356,17 @@ export default function ApplicationsPage() {
                 <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">{t(s.labelKey)}</p>
                 <p
                   className={`mt-1 font-serif text-2xl ${s.color}`}
-                  style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
+                  style={{ fontWeight: 600 }}
                 >
                   {s.val}
                 </p>
               </div>
             ))}
           </div>
+
+          <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
+            {counts.onaylandı} onaylı · {provisionedCount} hesaplı · {pendingInviteCount} davet bekliyor
+          </p>
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <div className="-mx-px flex overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:overflow-visible">
@@ -440,6 +469,7 @@ export default function ApplicationsPage() {
 
                   <div className="flex shrink-0 flex-col items-end gap-1">
                     <StatusBadge status={app.status} />
+                    <MemberAccountBadge hasUserAccount={app.hasUserAccount} />
                     <span className="font-mono text-label text-[var(--ink-subtle)]">{app.appliedAt}</span>
                   </div>
 

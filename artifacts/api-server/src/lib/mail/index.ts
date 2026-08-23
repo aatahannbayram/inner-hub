@@ -1,13 +1,28 @@
+import { logger } from "../logger";
 import { sendTransactionalMail } from "./transport";
+import { getUserSettingsPrefs } from "../../routes/settings";
+import { wantsEmail } from "./prefs";
 import {
   adminNewRequestMail,
+  courseEnrolledMail,
+  eventRegisteredMail,
   invitationApprovedMail,
   invitationReceivedMail,
   invitationRejectedMail,
   liveSessionReminderMail,
+  matchIntroAdminMail,
+  matchIntroReceivedMail,
   passwordResetMail,
+  weeklyDigestMail,
   type ApplicantMailContext,
+  type DigestDealItem,
+  type DigestEventItem,
+  type DigestMatchItem,
 } from "./templates";
+
+export function queueMail(task: Promise<unknown>): void {
+  void task.catch((err) => logger.error({ err }, "mail send failed"));
+}
 
 const ROLE_LABELS: Record<string, string> = {
   builder: "Builder",
@@ -90,4 +105,79 @@ export async function notifyLiveSession(ctx: {
   return sendTransactionalMail({ ...mail, to: ctx.email });
 }
 
-export type { ApplicantMailContext };
+export async function notifyMatchIntroReceived(ctx: {
+  userId: number;
+  name: string;
+  email: string;
+  targetName: string;
+  matchType?: string | null;
+}) {
+  const prefs = await getUserSettingsPrefs(ctx.userId);
+  if (!wantsEmail(prefs, "match")) return { ok: true, skipped: true as const };
+  const mail = matchIntroReceivedMail(ctx);
+  return sendTransactionalMail({ ...mail, to: ctx.email });
+}
+
+export async function notifyMatchIntroAdmin(ctx: {
+  fromName: string;
+  fromEmail: string;
+  targetName: string;
+  targetCompany?: string | null;
+  matchType?: string | null;
+  reason?: string | null;
+  score?: number | null;
+}) {
+  const mail = matchIntroAdminMail(ctx);
+  const to = process.env.NOTIFY_EMAIL || process.env.SMTP_USER;
+  if (!to) return { ok: false, error: "NOTIFY_EMAIL/SMTP_USER yok" };
+  return sendTransactionalMail({ ...mail, to });
+}
+
+export async function notifyEventRegistered(ctx: {
+  userId: number;
+  name: string;
+  email: string;
+  title: string;
+  startsAt?: Date | null;
+  location?: string | null;
+  meetUrl?: string | null;
+}) {
+  const prefs = await getUserSettingsPrefs(ctx.userId);
+  if (!prefs.notifEmail) return { ok: true, skipped: true as const };
+  const mail = eventRegisteredMail(ctx);
+  return sendTransactionalMail({ ...mail, to: ctx.email });
+}
+
+export async function notifyCourseEnrolled(ctx: {
+  userId: number;
+  name: string;
+  email: string;
+  title: string;
+  startsAt?: Date | null;
+  meetUrl?: string | null;
+}) {
+  const prefs = await getUserSettingsPrefs(ctx.userId);
+  if (!prefs.notifEmail) return { ok: true, skipped: true as const };
+  const mail = courseEnrolledMail(ctx);
+  return sendTransactionalMail({ ...mail, to: ctx.email });
+}
+
+export async function notifyWeeklyDigest(ctx: {
+  email: string;
+  name: string;
+  matches: DigestMatchItem[];
+  events: DigestEventItem[];
+  deals: DigestDealItem[];
+  unsubscribeUrl: string;
+  weekLabel: string;
+}) {
+  const mail = weeklyDigestMail(ctx);
+  return sendTransactionalMail({
+    ...mail,
+    to: ctx.email,
+    category: "lifecycle",
+    unsubscribeUrl: ctx.unsubscribeUrl,
+  });
+}
+
+export type { ApplicantMailContext, DigestDealItem, DigestEventItem, DigestMatchItem };

@@ -9,6 +9,7 @@ import {
 import { requireAuth } from "../lib/auth";
 import { createNotification } from "./notifications";
 import { ensureMatchAndFaqSchema } from "../lib/ensureSchema";
+import { notifyMatchIntroAdmin, notifyMatchIntroReceived, queueMail } from "../lib/mail";
 
 const router = Router();
 
@@ -223,6 +224,27 @@ router.post("/match/introduce", requireAuth, async (req, res) => {
           href: "/panel/applications",
         }),
       ),
+    );
+
+    queueMail(
+      notifyMatchIntroReceived({
+        userId,
+        name: req.user!.name,
+        email: req.user!.email,
+        targetName,
+        matchType: matchType || null,
+      }),
+    );
+    queueMail(
+      notifyMatchIntroAdmin({
+        fromName,
+        fromEmail: req.user!.email,
+        targetName,
+        targetCompany: targetCompany || null,
+        matchType: matchType || null,
+        reason: reason || null,
+        score,
+      }),
     );
 
     res.status(201).json({

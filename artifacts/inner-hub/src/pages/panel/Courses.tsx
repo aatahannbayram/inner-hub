@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { ChevronDown, ChevronRight, BookOpen, CheckCircle2, Lock, Play, GraduationCap, TrendingUp, ExternalLink } from "lucide-react";
-import { Link } from "wouter";
+import { Link, useLocation, useParams } from "wouter";
 import { FadeIn } from "@/components/FadeIn";
 import { AnimatedHeading } from "@/components/AnimatedHeading";
 import { HeroVideo } from "@/components/HeroVideo";
@@ -96,6 +96,34 @@ function formatLessonDuration(sec: number | null): string {
   return `${m}:${String(s).padStart(2, "0")}`;
 }
 
+function getTargetLesson(course: Course): Lesson | null {
+  for (const mod of course.modules) {
+    for (const lesson of mod.lessons) {
+      if (!lesson.isCompleted && !lesson.isLocked) return lesson;
+    }
+  }
+  for (const mod of course.modules) {
+    for (const lesson of mod.lessons) {
+      if (!lesson.isLocked) return lesson;
+    }
+  }
+  return null;
+}
+
+function lessonPath(courseId: number, lessonId: number) {
+  return `/panel/courses/${courseId}/${lessonId}`;
+}
+
+function findLessonInCourses(courses: Course[], courseId: number, lessonId: number): Lesson | null {
+  const course = courses.find((c) => c.id === courseId);
+  if (!course) return null;
+  for (const mod of course.modules) {
+    const lesson = mod.lessons.find((l) => l.id === lessonId);
+    if (lesson) return lesson;
+  }
+  return null;
+}
+
 function mapApiCourse(row: RawCourse, t: ReturnType<typeof useT>): Course {
   const modules: Module[] = (row.modules ?? []).map((m) => ({
     id: m.id,
@@ -134,38 +162,41 @@ function mapApiCourse(row: RawCourse, t: ReturnType<typeof useT>): Course {
   };
 }
 
-function LessonRow({ lesson, onOpen }: { lesson: Lesson; onOpen?: (lesson: Lesson) => void }) {
+function LessonRow({ courseId, lesson }: { courseId: number; lesson: Lesson }) {
+  if (lesson.isLocked) {
+    return (
+      <div className="flex w-full items-center gap-3 px-4 py-2.5 text-left opacity-40 cursor-not-allowed">
+        <Lock className="size-3.5 shrink-0 text-[var(--ink-muted)]" />
+        <span className="flex-1 text-xs text-[var(--ink-strong)]">{lesson.title}</span>
+        <span className="font-mono text-label text-[var(--ink-muted)]">{lesson.duration}</span>
+      </div>
+    );
+  }
+
   return (
-    <button
-      type="button"
-      disabled={lesson.isLocked}
-      onClick={() => onOpen?.(lesson)}
-      className={[
-        "flex w-full items-center gap-3 px-4 py-2.5 text-left transition-colors",
-        lesson.isLocked ? "opacity-40 cursor-not-allowed" : "hover:bg-[var(--ink)]/[0.03] cursor-pointer",
-      ].join(" ")}
+    <Link
+      href={lessonPath(courseId, lesson.id)}
+      className="flex w-full items-center gap-3 px-4 py-2.5 text-left transition-colors hover:bg-[var(--ink)]/[0.03] cursor-pointer"
     >
       {lesson.isCompleted ? (
         <CheckCircle2 className="size-3.5 shrink-0 text-[var(--success-ink)]" />
-      ) : lesson.isLocked ? (
-        <Lock className="size-3.5 shrink-0 text-[var(--ink-muted)]" />
       ) : (
         <Play className="size-3.5 shrink-0 text-[var(--ink-body)]" />
       )}
       <span className="flex-1 text-xs text-[var(--ink-strong)]">{lesson.title}</span>
       <span className="font-mono text-label text-[var(--ink-muted)]">{lesson.duration}</span>
-    </button>
+    </Link>
   );
 }
 
 function ModuleAccordion({
+  courseId,
   module,
   defaultOpen = false,
-  onOpenLesson,
 }: {
+  courseId: number;
   module: Module;
   defaultOpen?: boolean;
-  onOpenLesson?: (lesson: Lesson) => void;
 }) {
   const [open, setOpen] = useState(defaultOpen);
   const completed = module.lessons.filter((l) => l.isCompleted).length;
@@ -189,7 +220,7 @@ function ModuleAccordion({
       {open && (
         <div className="border-t border-[var(--ink)]/[0.06] bg-[var(--ink)]/[0.015]">
           {module.lessons.map((lesson) => (
-            <LessonRow key={lesson.id} lesson={lesson} onOpen={onOpenLesson} />
+            <LessonRow key={lesson.id} courseId={courseId} lesson={lesson} />
           ))}
         </div>
       )}
@@ -200,16 +231,16 @@ function ModuleAccordion({
 function CourseCard({
   course,
   busy,
-  onEnroll,
-  onOpenLesson,
+  onEnrollAndStart,
 }: {
   course: Course;
   busy?: boolean;
-  onEnroll?: (id: number) => void;
-  onOpenLesson?: (lesson: Lesson) => void;
+  onEnrollAndStart?: (course: Course) => void;
 }) {
   const t = useT();
   const [expanded, setExpanded] = useState(false);
+  const targetLesson = getTargetLesson(course);
+  const startHref = targetLesson ? lessonPath(course.id, targetLesson.id) : null;
 
   return (
     <div className="group relative overflow-hidden panel-glass transition-all duration-200 hover:border-[var(--ink)]/15">
@@ -222,10 +253,10 @@ function CourseCard({
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
           <div className="min-w-0 flex-1">
             <div className="mb-2 flex flex-wrap items-center gap-2">
-              <span className="panel-glass px-1.5 py-0.5 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
+              <span lang="en" className="panel-glass px-1.5 py-0.5 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
                 {course.tag}
               </span>
-              <span className="panel-glass px-1.5 py-0.5 font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
+              <span lang="en" className="panel-glass px-1.5 py-0.5 font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
                 {course.format}
               </span>
               {!course.isEnrolled && (
@@ -241,7 +272,7 @@ function CourseCard({
             </div>
             <h3
               className="font-serif text-xl text-[var(--ink)] leading-snug sm:text-2xl"
-              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
+              style={{ fontWeight: 600 }}
             >
               {cleanDisplayText(course.title)}
             </h3>
@@ -310,22 +341,22 @@ function CourseCard({
               <ExternalLink className="size-3" />
             </a>
           ) : null}
-          {course.isEnrolled ? (
-            <button
-              onClick={() => setExpanded((v) => !v)}
+          {course.isEnrolled && startHref ? (
+            <Link
+              href={startHref}
               className="flex items-center gap-2 panel-glass-ink px-4 py-2 font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)] transition-opacity hover:opacity-80"
             >
               {course.progressPct > 0 ? t("courses.continue") : t("courses.start")}
               <ChevronRight className="size-3" />
-            </button>
-          ) : (
+            </Link>
+          ) : course.isEnrolled ? null : (
             <button
               type="button"
-              disabled={busy}
-              onClick={() => onEnroll?.(course.id)}
+              disabled={busy || !targetLesson}
+              onClick={() => onEnrollAndStart?.(course)}
               className="flex items-center gap-2 panel-glass-ink px-4 py-2 font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)] transition-opacity hover:opacity-80 disabled:opacity-40"
             >
-              {t("courses.enroll")}
+              {targetLesson ? t("courses.start") : t("courses.enroll")}
               <ChevronRight className="size-3" />
             </button>
           )}
@@ -352,7 +383,7 @@ function CourseCard({
             </p>
           ) : (
             course.modules.map((mod, i) => (
-              <ModuleAccordion key={mod.id} module={mod} defaultOpen={i === 0} onOpenLesson={onOpenLesson} />
+              <ModuleAccordion key={mod.id} courseId={course.id} module={mod} defaultOpen={i === 0} />
             ))
           )}
         </div>
@@ -411,7 +442,6 @@ function CoursesHero({
             <AnimatedHeading
               text={t("courses.heroHeadline")}
               className="mb-4 font-display font-serif italic text-4xl leading-[1.1] text-white [text-shadow:0_2px_24px_rgba(0,0,0,0.55)] md:text-5xl lg:text-6xl"
-              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1" }}
             />
             <FadeIn delay={0.8}>
               <p className="mb-6 max-w-[46ch] text-base text-white/75 [text-shadow:0_1px_12px_rgba(0,0,0,0.6)] md:text-lg">
@@ -476,7 +506,7 @@ function CoursesStat({
       </div>
       <p
         className="font-serif text-2xl text-[var(--ink)]"
-        style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
+        style={{ fontWeight: 600 }}
       >
         {value}
       </p>
@@ -489,10 +519,13 @@ function CoursesStat({
 export default function CoursesPage() {
   const t = useT();
   const queryClient = useQueryClient();
+  const [, setLocation] = useLocation();
+  const params = useParams<{ courseId?: string; lessonId?: string }>();
+  const routeCourseId = params.courseId ? Number(params.courseId) : null;
+  const routeLessonId = params.lessonId ? Number(params.lessonId) : null;
   const [busyId, setBusyId] = useState<number | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [passRequired, setPassRequired] = useState(false);
-  const [activeLesson, setActiveLesson] = useState<Lesson | null>(null);
   const [room, setRoom] = useState<RoomFilter>(() => {
     const p = new URLSearchParams(window.location.search).get("room");
     return p === "all" ? "all" : "mine";
@@ -524,7 +557,7 @@ export default function CoursesPage() {
       ? Math.round(enrolled.reduce((sum, c) => sum + c.progressPct, 0) / enrolled.length)
       : null;
 
-  const enroll = async (id: number) => {
+  const enroll = async (id: number): Promise<boolean> => {
     setBusyId(id);
     setActionError(null);
     setPassRequired(false);
@@ -537,16 +570,38 @@ export default function CoursesPage() {
       if (res.status === 402) {
         setPassRequired(true);
         setActionError(t("courses.passRequired"));
-        return;
+        return false;
       }
       if (!res.ok) throw new Error(json.error ?? t("courses.enrollFailed"));
       await queryClient.invalidateQueries({ queryKey: ["courses"] });
+      return true;
     } catch (e: any) {
       setActionError(e.message ?? t("courses.enrollFailed"));
+      return false;
     } finally {
       setBusyId(null);
     }
   };
+
+  const enrollAndStart = async (course: Course) => {
+    const target = getTargetLesson(course);
+    if (!target) {
+      await enroll(course.id);
+      return;
+    }
+    if (!course.isEnrolled) {
+      const ok = await enroll(course.id);
+      if (!ok) return;
+    }
+    setLocation(lessonPath(course.id, target.id));
+  };
+
+  const activeLesson =
+    routeCourseId && routeLessonId && Number.isFinite(routeCourseId) && Number.isFinite(routeLessonId)
+      ? findLessonInCourses(courses, routeCourseId, routeLessonId)
+      : null;
+
+  const closeLesson = () => setLocation("/panel/courses");
 
   return (
     <div className="min-w-0 space-y-8 max-w-4xl overflow-x-hidden">
@@ -590,7 +645,11 @@ export default function CoursesPage() {
                       : "border-[var(--ink)]/15 text-[var(--ink-muted)] hover:text-[var(--ink)]",
                   ].join(" ")}
                 >
-                  {c === "all" ? t("common.all") : t(`courses.category.${c}`)}
+                  {c === "all" ? (
+                    t("common.all")
+                  ) : (
+                    <span lang="en">{t(`courses.category.${c}`)}</span>
+                  )}
                 </button>
               ))}
             </div>
@@ -660,7 +719,7 @@ export default function CoursesPage() {
             </div>
             <div className="space-y-3">
               {enrolled.map((course) => (
-                <CourseCard key={course.id} course={course} onOpenLesson={setActiveLesson} />
+                <CourseCard key={course.id} course={course} />
               ))}
             </div>
           </section>
@@ -681,7 +740,7 @@ export default function CoursesPage() {
                   key={course.id}
                   course={course}
                   busy={busyId === course.id}
-                  onEnroll={enroll}
+                  onEnrollAndStart={enrollAndStart}
                 />
               ))}
             </div>
@@ -689,10 +748,10 @@ export default function CoursesPage() {
         </FadeIn>
       )}
 
-      {activeLesson && (
+      {activeLesson && routeCourseId && routeLessonId && (
         <LessonPlayerModal
           lesson={activeLesson}
-          onClose={() => setActiveLesson(null)}
+          onClose={closeLesson}
           onCompleted={() => void queryClient.invalidateQueries({ queryKey: ["courses"] })}
         />
       )}

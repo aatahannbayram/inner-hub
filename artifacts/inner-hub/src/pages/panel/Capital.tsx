@@ -60,10 +60,16 @@ interface SPV {
   pct: number;
   participants: number;
   closing: string;
+  status?: "open" | "closed";
   sector: Sector;
 }
 
-type CapitalResponse = { deals: Deal[]; spvs: SPV[] };
+type CapitalResponse = {
+  deals: Deal[];
+  spvs: SPV[];
+  closedSpvs?: SPV[];
+  currencyNote?: string;
+};
 
 function parseRaiseUsd(raise: string): number | null {
   const m = raise.replace(/,/g, "").trim().match(/^\$?\s*([\d.]+)\s*([KkMm])?/);
@@ -93,6 +99,21 @@ const STAGES: Stage[] = ["Pitch", "Due Diligence", "Term Sheet", "Kapandı"];
 function stageDisplayLabel(stage: Stage, t: ReturnType<typeof useT>): string {
   if (stage === "Kapandı") return t("capital.stageClosed");
   return stage;
+}
+
+function StageLabel({
+  stage,
+  className,
+}: {
+  stage: Stage;
+  className?: string;
+}) {
+  const t = useT();
+  return (
+    <span lang={stage === "Kapandı" ? undefined : "en"} className={className}>
+      {stageDisplayLabel(stage, t)}
+    </span>
+  );
 }
 
 const STAGE_CONFIG: Record<Stage, { dot: string; border: string; accent: string }> = {
@@ -139,7 +160,7 @@ function StatCard({
       </div>
       <p
         className="font-display font-serif text-2xl leading-none text-[var(--ink)] sm:text-3xl"
-        style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 400 }}
+        style={{ fontWeight: 500 }}
       >
         {value}
       </p>
@@ -181,7 +202,6 @@ function DealCard({
           </p>
           <h3
             className="mt-1 font-display font-serif text-lg leading-tight tracking-[-0.02em] text-[var(--ink)]"
-            style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1" }}
           >
             {deal.company}
           </h3>
@@ -193,7 +213,7 @@ function DealCard({
           <span className={`mt-0.5 inline-flex shrink-0 items-center gap-1.5 border px-2 py-0.5 ${cfg.border}`}>
             <span className={`size-1.5 ${cfg.dot}`} />
             <span className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)]">
-              {stageDisplayLabel(deal.stage, t)}
+              <StageLabel stage={deal.stage} />
             </span>
           </span>
         ) : (
@@ -206,11 +226,21 @@ function DealCard({
       <div className="mb-3 grid grid-cols-2 gap-px panel-glass bg-[var(--ink)]/[0.08] pl-1 sm:grid-cols-3">
         <div className="bg-white/[0.04] px-2.5 py-2 dark:bg-white/[0.04]">
           <p className="font-mono text-[8px] uppercase tracking-[0.14em] text-[var(--ink-muted)]">{t("capital.target")}</p>
-          <p className="mt-0.5 truncate font-mono text-xs font-medium text-[var(--ink)]">{deal.raise || "·"}</p>
+          <p
+            className="mt-0.5 font-mono text-xs font-medium tabular-nums text-[var(--ink)] break-all"
+            title={deal.raise || undefined}
+          >
+            {deal.raise || "·"}
+          </p>
         </div>
         <div className="bg-white/[0.04] px-2.5 py-2 dark:bg-white/[0.04]">
           <p className="font-mono text-[8px] uppercase tracking-[0.14em] text-[var(--ink-muted)]">{t("capital.valuation")}</p>
-          <p className="mt-0.5 truncate font-mono text-xs font-medium text-[var(--ink)]">{deal.valuation || "·"}</p>
+          <p
+            className="mt-0.5 font-mono text-xs font-medium tabular-nums text-[var(--ink)] break-all"
+            title={deal.valuation || undefined}
+          >
+            {deal.valuation || "·"}
+          </p>
         </div>
         <div className="col-span-2 bg-white/[0.04] px-2.5 py-2 dark:bg-white/[0.04] sm:col-span-1">
           <p className="font-mono text-[8px] uppercase tracking-[0.14em] text-[var(--ink-muted)]">{t("capital.score")}</p>
@@ -324,12 +354,11 @@ function DealDetail({
 
         <div className="mb-1 flex items-center gap-2">
           <div className={`size-2 rounded-full ${cfg.dot}`} />
-          <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">{stageDisplayLabel(deal.stage, t)}</span>
+          <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
+            <StageLabel stage={deal.stage} />
+          </span>
         </div>
-        <h2
-          className="font-serif text-3xl text-[var(--ink)] mb-1"
-          style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
-        >
+        <h2 className="font-sans text-2xl font-semibold leading-tight tracking-tight text-[var(--ink)] mb-1">
           {deal.company}
         </h2>
         <p className="text-sm text-[var(--ink-muted)] mb-6">{deal.tagline}</p>
@@ -436,7 +465,9 @@ function DealDetail({
 
         {isAdmin && (
           <div className="mt-8 space-y-3 border-t border-[var(--ink)]/[0.08] pt-5">
-            <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">{t("capital.admin")}</p>
+            <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
+              <span lang="en">{t("capital.admin")}</span>
+            </p>
             <div className="flex flex-wrap gap-1.5">
               {STAGES.map((s) => (
                 <button
@@ -451,7 +482,7 @@ function DealDetail({
                       : "border-[var(--ink)]/10 text-[var(--ink-muted)] hover:border-[var(--ink)]/30",
                   ].join(" ")}
                 >
-                  {stageDisplayLabel(s, t)}
+                  <StageLabel stage={s} />
                 </button>
               ))}
             </div>
@@ -479,16 +510,12 @@ function DealDetail({
 
 function SpvCard({ spv }: { spv: SPV }) {
   const t = useT();
+  const closed = spv.status === "closed";
   return (
-    <div className="panel-glass p-5">
+    <div className={`panel-glass p-5 ${closed ? "opacity-70" : ""}`}>
       <div className="mb-4 flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <h3
-            className="font-display font-serif text-lg text-[var(--ink)]"
-            style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1" }}
-          >
-            {spv.name}
-          </h3>
+          <h3 className="font-display font-serif text-lg text-[var(--ink)]">{spv.name}</h3>
           <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.12em] text-[var(--ink-muted)]">
             {spv.sector}
             <span className="mx-1.5 text-[var(--ink)]/20">·</span>
@@ -497,14 +524,22 @@ function SpvCard({ spv }: { spv: SPV }) {
             {t("capital.closing", { date: spv.closing })}
           </p>
         </div>
+        {closed && (
+          <span className="shrink-0 border border-[var(--ink)]/20 px-2 py-0.5 font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)]">
+            {t("capital.spvClosedBadge")}
+          </span>
+        )}
       </div>
       <div className="mb-4">
         <div className="mb-1.5 flex justify-between gap-3">
-          <span className="font-mono text-xs text-[var(--ink)]">
+          <span
+            className="font-mono text-xs tabular-nums text-[var(--ink)]"
+            title={`${spv.raised} / ${spv.target}`}
+          >
             {spv.raised}
             <span className="text-[var(--ink-muted)]"> / {spv.target}</span>
           </span>
-          <span className="font-mono text-xs text-[var(--ink-muted)]">%{spv.pct}</span>
+          <span className="font-mono text-xs tabular-nums text-[var(--ink-muted)]">%{spv.pct}</span>
         </div>
         <div className="h-1.5 bg-[var(--ink)]/[0.08]">
           <div
@@ -519,9 +554,11 @@ function SpvCard({ spv }: { spv: SPV }) {
       </div>
       <button
         type="button"
-        className="inline-flex min-h-11 items-center gap-1.5 bg-[var(--ink)] px-4 py-2 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-85"
+        disabled={closed}
+        className="inline-flex min-h-11 items-center gap-1.5 bg-[var(--ink)] px-4 py-2 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-85 disabled:cursor-not-allowed disabled:opacity-40"
       >
-        {t("capital.joinSpv")} <ExternalLink className="size-3" />
+        {closed ? t("capital.joinSpvClosed") : t("capital.joinSpv")}{" "}
+        {!closed && <ExternalLink className="size-3" />}
       </button>
     </div>
   );
@@ -554,7 +591,6 @@ function CapitalHero({ dealCount }: { dealCount: number }) {
             <AnimatedHeading
               text={t("capital.heroHeadline")}
               className="mb-4 font-display font-serif italic text-3xl leading-[1.1] text-white [text-shadow:0_2px_24px_rgba(0,0,0,0.55)] sm:text-4xl md:text-5xl lg:text-6xl"
-              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1" }}
             />
             <FadeIn delay={0.8}>
               <p className="mb-6 max-w-[46ch] text-sm text-white/75 [text-shadow:0_1px_12px_rgba(0,0,0,0.6)] sm:text-base md:text-lg">
@@ -567,13 +603,13 @@ function CapitalHero({ dealCount }: { dealCount: number }) {
                   onClick={() => scrollToId("deal-pipeline")}
                   className="inline-flex min-h-11 items-center bg-white px-6 py-3 font-mono text-xs uppercase tracking-widest text-black transition-colors hover:bg-white/90 sm:px-8"
                 >
-                  <span lang="en">{t("capital.viewPipeline")}</span>
+                  {t("capital.viewPipeline")}
                 </button>
                 <button
                   onClick={() => scrollToId("open-spvs")}
                   className="liquid-glass inline-flex min-h-11 items-center border border-white/20 px-6 py-3 font-mono text-xs uppercase tracking-widest text-white transition-colors hover:bg-white hover:text-black sm:px-8"
                 >
-                  <span lang="en">{t("capital.viewSpvs")}</span>
+                  {t("capital.viewSpvs")}
                 </button>
               </div>
             </FadeIn>
@@ -662,7 +698,7 @@ function DealCompose({
           </p>
           <DrawerTitle
             className="font-serif text-2xl font-normal text-[var(--ink)]"
-            style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
+            style={{ fontWeight: 600 }}
           >
             {t("capital.composeTitle")}
           </DrawerTitle>
@@ -696,7 +732,7 @@ function DealCompose({
                     : "border-[var(--ink)]/10 text-[var(--ink-muted)]",
                 ].join(" ")}
               >
-                {stageDisplayLabel(s, t)}
+                <StageLabel stage={s} />
               </button>
             ))}
           </div>
@@ -713,7 +749,7 @@ function DealCompose({
                     : "border-[var(--ink)]/10 text-[var(--ink-muted)]",
                 ].join(" ")}
               >
-                {s}
+                <span lang={s === "E-ticaret" ? undefined : "en"}>{s}</span>
               </button>
             ))}
           </div>
@@ -924,7 +960,7 @@ export default function Capital() {
                     <div className="flex items-center gap-2">
                       <span className={`size-2 ${cfg.dot}`} />
                       <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--ink)]">
-                        {stageDisplayLabel(stage, t)}
+                        <StageLabel stage={stage} />
                       </span>
                     </div>
                     <span className="flex size-5 items-center justify-center bg-[var(--ink)] font-mono text-[10px] text-[var(--bone)]">
@@ -985,12 +1021,19 @@ export default function Capital() {
                   <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)]">
                     {deal.sector}
                   </span>
-                  <span className="font-mono text-xs text-[var(--ink)]">{deal.raise || "·"}</span>
-                  <span className="font-mono text-xs text-[var(--ink-muted)]">{deal.valuation || "·"}</span>
+                  <span className="font-mono text-xs tabular-nums text-[var(--ink)]" title={deal.raise || undefined}>
+                    {deal.raise || "·"}
+                  </span>
+                  <span
+                    className="font-mono text-xs tabular-nums text-[var(--ink-muted)]"
+                    title={deal.valuation || undefined}
+                  >
+                    {deal.valuation || "·"}
+                  </span>
                   <div className={`inline-flex w-fit items-center gap-1.5 border px-2 py-0.5 ${cfg.border}`}>
                     <span className={`size-1.5 ${cfg.dot}`} />
                     <span className="font-mono text-[9px] uppercase tracking-widest text-[var(--ink-body)]">
-                      {stageDisplayLabel(deal.stage, t)}
+                      <StageLabel stage={deal.stage} />
                     </span>
                   </div>
                 </button>
@@ -1009,12 +1052,21 @@ export default function Capital() {
           <p className="mt-1 text-sm text-[var(--ink-muted)]">
             {t("capital.openSpvsSub")}
           </p>
+          <p className="mt-2 font-mono text-[10px] uppercase tracking-widest text-[var(--ink-subtle)]">
+            {data?.currencyNote ?? t("capital.currencyNote")}
+          </p>
         </div>
-        <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
-          {spvs.map((spv) => (
-            <SpvCard key={spv.id} spv={spv} />
-          ))}
-        </div>
+        {spvs.length === 0 ? (
+          <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
+            {t("capital.openSpvsEmpty")}
+          </p>
+        ) : (
+          <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
+            {spvs.map((spv) => (
+              <SpvCard key={spv.id} spv={spv} />
+            ))}
+          </div>
+        )}
       </section>
 
       {/* Disclaimer */}

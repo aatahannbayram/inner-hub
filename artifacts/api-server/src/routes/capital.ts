@@ -10,6 +10,99 @@ const router = Router();
 const STAGES = new Set(["Pitch", "Due Diligence", "Term Sheet", "Kapandı"]);
 const SECTORS = new Set(["AI/ML", "B2B SaaS", "Fintech", "HR Tech", "E-ticaret", "DeepTech"]);
 
+const TR_MONTHS: Record<string, number> = {
+  oca: 0,
+  ocak: 0,
+  sub: 1,
+  şub: 1,
+  subat: 1,
+  şubat: 1,
+  mar: 2,
+  mart: 2,
+  nis: 3,
+  nisan: 3,
+  may: 4,
+  mayis: 4,
+  mayıs: 4,
+  haz: 5,
+  haziran: 5,
+  tem: 6,
+  temmuz: 6,
+  agu: 7,
+  ağu: 7,
+  agustos: 7,
+  ağustos: 7,
+  eyl: 8,
+  eylul: 8,
+  eylül: 8,
+  eki: 9,
+  ekim: 9,
+  kas: 10,
+  kasim: 10,
+  kasım: 10,
+  ara: 11,
+  aralik: 11,
+  aralık: 11,
+};
+
+/** closing / closingDate metnini Date'e çevir (TR kısa ay veya ISO). */
+export function parseSpvClosing(raw: string | null | undefined, closingDate?: Date | null): Date | null {
+  if (closingDate instanceof Date && !Number.isNaN(closingDate.getTime())) return closingDate;
+  if (!raw?.trim()) return null;
+  const s = raw.trim();
+
+  const iso = Date.parse(s);
+  if (!Number.isNaN(iso)) {
+    const d = new Date(iso);
+    d.setHours(23, 59, 59, 999);
+    return d;
+  }
+
+  const m = s.match(/^(\d{1,2})\s+([A-Za-zÇĞİÖŞÜçğıöşü.]+)\s+(\d{4})$/u);
+  if (m) {
+    const day = Number(m[1]);
+    const monthKey = m[2].replace(/\./g, "").toLocaleLowerCase("tr-TR");
+    const year = Number(m[3]);
+    const month = TR_MONTHS[monthKey];
+    if (month != null && day >= 1 && day <= 31) {
+      return new Date(year, month, day, 23, 59, 59, 999);
+    }
+  }
+  return null;
+}
+
+function mapSpv(s: typeof capitalSpvsTable.$inferSelect) {
+  const status = s.status === "closed" ? "closed" : "open";
+  return {
+    id: s.id,
+    name: s.name,
+    target: s.target,
+    raised: s.raised,
+    pct: s.pct,
+    participants: s.participants,
+    closing: s.closing ?? "",
+    closingDate: s.closingDate ? s.closingDate.toISOString() : null,
+    status,
+    sector: s.sector ?? "",
+  };
+}
+
+/** Kapanış tarihi geçmiş SPV'leri closed yap. */
+async function autoCloseExpiredSpvs() {
+  const all = await db.select().from(capitalSpvsTable);
+  const now = Date.now();
+  for (const s of all) {
+    const end = parseSpvClosing(s.closing, s.closingDate);
+    if (!end) continue;
+    const patch: Partial<typeof capitalSpvsTable.$inferInsert> = {};
+    if (!s.closingDate) patch.closingDate = end;
+    if (end.getTime() < now && s.status !== "closed") patch.status = "closed";
+    if (Object.keys(patch).length > 0) {
+      await db.update(capitalSpvsTable).set(patch).where(eq(capitalSpvsTable.id, s.id));
+    }
+  }
+}
+
 function parseList(raw: string | null | undefined): string[] {
   if (!raw) return [];
   try {
@@ -97,6 +190,7 @@ function normalizeDealBody(body: any) {
 }
 
 async function ensureCapitalSeed() {
+  if (process.env.NODE_ENV === "production") return;
   const [deal] = await db.select({ id: capitalDealsTable.id }).from(capitalDealsTable).limit(1);
   if (!deal) {
     await db.insert(capitalDealsTable).values([
@@ -107,8 +201,8 @@ async function ensureCapitalSeed() {
         sector: "B2B SaaS",
         raise: "$500K",
         valuation: "$3.2M",
-        founders: JSON.stringify(["Zeynep Arslan", "Mert Demir"]),
-        leadInvestor: "Berk Yılmaz",
+        founders: JSON.stringify(["Kurucu A", "Kurucu B"]),
+        leadInvestor: "Lead angel",
         round: "Pre-seed",
         score: 91,
         tags: JSON.stringify(["revenue", "10+ müşteri"]),
@@ -121,7 +215,7 @@ async function ensureCapitalSeed() {
         sector: "DeepTech",
         raise: "$1.2M",
         valuation: "$6M",
-        founders: JSON.stringify(["Selin Çelik"]),
+        founders: JSON.stringify(["Kurucu ekibi"]),
         round: "Seed",
         score: 84,
         tags: JSON.stringify(["teknik", "açık kaynak"]),
@@ -133,7 +227,7 @@ async function ensureCapitalSeed() {
         sector: "AI/ML",
         raise: "$300K",
         valuation: "$1.8M",
-        founders: JSON.stringify(["Ozan Kırmızı"]),
+        founders: JSON.stringify(["Kurucu C"]),
         round: "Pre-seed",
         score: 76,
         tags: JSON.stringify(["traction", "MVP hazır"]),
@@ -145,7 +239,7 @@ async function ensureCapitalSeed() {
         sector: "Fintech",
         raise: "$800K",
         valuation: "$4.5M",
-        founders: JSON.stringify(["Deniz Alp", "Ayşe Kaya"]),
+        founders: JSON.stringify(["Kurucu D", "Kurucu E"]),
         round: "Seed",
         score: 88,
         tags: JSON.stringify(["lisanslı", "B2B"]),
@@ -157,8 +251,8 @@ async function ensureCapitalSeed() {
         sector: "HR Tech",
         raise: "$250K",
         valuation: "$1.5M",
-        founders: JSON.stringify(["Ayşe Kaya"]),
-        leadInvestor: "Berk Yılmaz",
+        founders: JSON.stringify(["Kurucu E"]),
+        leadInvestor: "Lead angel",
         round: "Pre-seed",
         score: 95,
         tags: JSON.stringify(["kapalı", "inner portföy"]),
@@ -189,6 +283,8 @@ async function ensureCapitalSeed() {
         pct: 91,
         participants: 8,
         closing: "15 Tem 2026",
+        closingDate: new Date(2026, 6, 15, 23, 59, 59, 999),
+        status: "open",
         sector: "HR Tech",
       },
       {
@@ -198,6 +294,8 @@ async function ensureCapitalSeed() {
         pct: 28,
         participants: 4,
         closing: "30 Ağu 2026",
+        closingDate: new Date(2026, 7, 30, 23, 59, 59, 999),
+        status: "open",
         sector: "B2B SaaS",
       },
     ]);
@@ -209,22 +307,20 @@ router.get("/capital", requireAuth, async (_req, res) => {
   try {
     await ensureVaultCapitalSchema();
     await ensureCapitalSeed();
+    await autoCloseExpiredSpvs();
 
     const deals = await db.select().from(capitalDealsTable).orderBy(desc(capitalDealsTable.score));
     const spvs = await db.select().from(capitalSpvsTable).orderBy(desc(capitalSpvsTable.pct));
+    const mapped = spvs.map(mapSpv);
+    const openSpvs = mapped.filter((s) => s.status === "open");
+    const closedSpvs = mapped.filter((s) => s.status === "closed");
 
     res.json({
       deals: deals.map(mapDeal),
-      spvs: spvs.map((s) => ({
-        id: s.id,
-        name: s.name,
-        target: s.target,
-        raised: s.raised,
-        pct: s.pct,
-        participants: s.participants,
-        closing: s.closing ?? "",
-        sector: s.sector ?? "",
-      })),
+      /** Açık SPV'ler — süresi geçmiş olanlar dahil edilmez */
+      spvs: openSpvs,
+      closedSpvs,
+      currencyNote: "Deal hedefleri USD ($); SPV tutarları TRY (₺). Kur tarihi bilgilendirme amaçlıdır.",
     });
   } catch (err: any) {
     res.status(500).json({ error: err.message ?? "Capital yüklenemedi" });

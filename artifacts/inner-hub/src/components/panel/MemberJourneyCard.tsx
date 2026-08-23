@@ -112,7 +112,6 @@ export function MemberJourneyCard() {
           </p>
           <h2
             className="font-display font-serif text-xl leading-snug tracking-[-0.02em] text-[var(--ink)] sm:text-2xl"
-            style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1" }}
           >
             {t(journey.levelLabelKey as "journey.level1")}
             <span className="ml-2 font-mono text-sm not-italic tracking-widest text-[var(--ink-muted)]">

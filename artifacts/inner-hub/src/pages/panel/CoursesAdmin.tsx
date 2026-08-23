@@ -335,17 +335,24 @@ function CourseAdminCard({ course, onChanged }: { course: AdminCourse; onChanged
   const [savingLive, setSavingLive] = useState(false);
   const [notifying, setNotifying] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [publishError, setPublishError] = useState<string | null>(null);
   const format = course.format ?? "vod";
   const audience = course.audience ?? "all";
   const isLiveLike = format === "live" || format === "hybrid";
 
   const togglePublish = async () => {
-    await fetch(apiUrl(`/api/courses/${course.id}`), {
+    setPublishError(null);
+    const res = await fetch(apiUrl(`/api/courses/${course.id}`), {
       method: "PATCH",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ isPublished: !course.isPublished }),
     });
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      setPublishError(json.error ?? t("courses.saveFailed"));
+      return;
+    }
     onChanged();
   };
 
@@ -437,6 +444,11 @@ function CourseAdminCard({ course, onChanged }: { course: AdminCourse; onChanged
           </button>
         </div>
       </div>
+      {publishError && (
+        <p className="px-4 pb-2 font-mono text-label text-[var(--error-ink)]" role="alert">
+          {publishError}
+        </p>
+      )}
       {isLiveLike && (
         <div className="space-y-2 border-t border-[var(--ink)]/[0.06] px-4 py-3">
           <label className="block space-y-1">
@@ -687,7 +699,7 @@ export default function CoursesAdmin() {
           </div>
           <h1
             className="font-serif font-display text-4xl text-[var(--ink)] md:text-5xl"
-            style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
+            style={{ fontWeight: 600 }}
           >
             {t("courses.adminTitle")}
           </h1>

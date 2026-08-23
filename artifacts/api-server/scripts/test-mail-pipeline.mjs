@@ -55,6 +55,9 @@ const samples = [
   { file: "02-approved.html", subject: "inner hub · davetin onaylandı", kind: "invite.approved" },
   { file: "03-rejected.html", subject: "inner hub · davet talebi hakkında", kind: "invite.rejected" },
   { file: "04-admin-new.html", subject: "inner hub · yeni üyelik talebi: Ata Han", kind: "admin.new_request" },
+  { file: "05-weekly-digest.html", subject: "inner hub · bu hafta · 3 eşleşme", kind: "weekly.digest" },
+  { file: "06-match-intro.html", subject: "inner hub · tanışma talebin alındı", kind: "match.intro_received" },
+  { file: "07-event-registered.html", subject: "inner hub · kaydın alındı · Kurucu kahvaltısı", kind: "event.registered" },
 ];
 
 async function sendResend({ subject, text, html, kind, messageId }) {

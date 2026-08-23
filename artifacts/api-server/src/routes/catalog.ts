@@ -19,9 +19,12 @@ import {
   ensureUserMembershipColumns,
 } from "../lib/ensureSchema";
 import { spendPasses } from "../lib/passes";
+import { notifyCourseEnrolled, notifyEventRegistered, queueMail } from "../lib/mail";
 import { sendTransactionalMail } from "../lib/mail/transport";
 import { getUserSettingsPrefs } from "./settings";
 import { createNotification } from "./notifications";
+import { isLumaConfigured, listLumaCalendarEvents, mapLumaToHubEvent } from "../lib/luma";
+import { getEventsSummary } from "../lib/panelMetrics";
 
 const router = Router();
 
@@ -268,6 +271,17 @@ function progressPctFromModules(modules: { lessons: LessonWithState[] }[]): numb
   return Math.round((done / allLessons.length) * 100);
 }
 
+// ─── GET /api/events/summary ─────────────────────────────────────────────────
+router.get("/events/summary", requireAuth, async (_req, res) => {
+  try {
+    await ensureLiveSessionColumns();
+    const summary = await getEventsSummary();
+    res.json(summary);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message ?? "Etkinlik özeti yüklenemedi" });
+  }
+});
+
 // ─── GET /api/events ─────────────────────────────────────────────────────────
 router.get("/events", requireAuth, async (req, res) => {
   try {
@@ -309,27 +323,52 @@ router.get("/events", requireAuth, async (req, res) => {
     const countMap = new Map(counts.map((c) => [c.eventId, Number(c.n)]));
 
     const now = Date.now();
+    const localEvents = visible.map((e) => {
+      const isRegistered = mySet.has(e.id);
+      const externalUrl = e.externalUrl ?? null;
+      const organizer = e.organizer ?? null;
+      return {
+        id: e.id,
+        source: (externalUrl ? "external" : "inner") as "inner" | "external",
+        title: e.title,
+        description: e.description ?? "",
+        location: e.location ?? "",
+        startAt: e.startAt.toISOString(),
+        endAt: e.endAt?.toISOString() ?? e.startAt.toISOString(),
+        isPast: e.startAt.getTime() < now,
+        isPublished: e.isPublished,
+        format: e.format ?? "in_person",
+        audience: e.audience ?? "all",
+        meetUrl: isRegistered ? (e.meetUrl ?? null) : null,
+        passCost: e.passCost ?? 1,
+        capacity: 0,
+        registered: countMap.get(e.id) ?? 0,
+        isRegistered,
+        lumaUrl: externalUrl,
+        coverUrl: e.coverUrl ?? null,
+        hosts: organizer
+          ? [{ name: organizer, avatarUrl: null as string | null }]
+          : ([] as { name: string; avatarUrl: string | null }[]),
+      };
+    });
+
+    let lumaEvents: ReturnType<typeof mapLumaToHubEvent>[] = [];
+    if (isLumaConfigured()) {
+      try {
+        const entries = await listLumaCalendarEvents({ period: "all", limit: 80 });
+        lumaEvents = entries.map(mapLumaToHubEvent);
+      } catch (err) {
+        console.warn("[luma] list failed", err);
+      }
+    }
+
+    const merged = [...localEvents, ...lumaEvents].sort(
+      (a, b) => new Date(a.startAt).getTime() - new Date(b.startAt).getTime(),
+    );
+
     res.json({
-      events: visible.map((e) => {
-        const isRegistered = mySet.has(e.id);
-        return {
-          id: e.id,
-          title: e.title,
-          description: e.description ?? "",
-          location: e.location ?? "",
-          startAt: e.startAt.toISOString(),
-          endAt: e.endAt?.toISOString() ?? e.startAt.toISOString(),
-          isPast: e.startAt.getTime() < now,
-          isPublished: e.isPublished,
-          format: e.format ?? "in_person",
-          audience: e.audience ?? "all",
-          meetUrl: isRegistered ? (e.meetUrl ?? null) : null,
-          passCost: e.passCost ?? 1,
-          capacity: 0,
-          registered: countMap.get(e.id) ?? 0,
-          isRegistered,
-        };
-      }),
+      events: merged,
+      luma: { configured: isLumaConfigured(), count: lumaEvents.length },
     });
   } catch (err: any) {
     res.status(500).json({ error: err.message ?? "Etkinlikler yüklenemedi" });
@@ -397,6 +436,17 @@ router.post("/events/:id/register", requireAuth, async (req, res) => {
         kind: "event",
         href: "/panel/events",
       });
+      queueMail(
+        notifyEventRegistered({
+          userId,
+          name: req.user!.name,
+          email: req.user!.email,
+          title: event.title,
+          startsAt: event.startAt,
+          location: event.location,
+          meetUrl: event.meetUrl,
+        }),
+      );
     }
 
     res.json({
@@ -470,6 +520,9 @@ router.get("/admin/events", requireAuth, requireAdmin, async (_req, res) => {
         format: e.format ?? "in_person",
         audience: e.audience ?? "all",
         meetUrl: e.meetUrl ?? null,
+        externalUrl: e.externalUrl ?? null,
+        organizer: e.organizer ?? null,
+        coverUrl: e.coverUrl ?? null,
         passCost: e.passCost ?? 1,
         registered: countMap.get(e.id) ?? 0,
       })),
@@ -491,6 +544,9 @@ router.post("/events", requireAuth, requireAdmin, async (req, res) => {
       endAt,
       format,
       meetUrl,
+      externalUrl,
+      organizer,
+      coverUrl,
       audience,
       passCost,
       isPublished,
@@ -522,6 +578,9 @@ router.post("/events", requireAuth, requireAdmin, async (req, res) => {
         endAt: end,
         format: resolvedFormat,
         meetUrl: typeof meetUrl === "string" ? meetUrl : null,
+        externalUrl: typeof externalUrl === "string" && externalUrl.trim() ? externalUrl.trim() : null,
+        organizer: typeof organizer === "string" && organizer.trim() ? organizer.trim() : null,
+        coverUrl: typeof coverUrl === "string" && coverUrl.trim() ? coverUrl.trim() : null,
         audience: typeof audience === "string" && audience ? audience : "all",
         passCost: resolveEventPassCost(passCost, passCost !== undefined && passCost !== null),
         isPublished: isPublished === true,
@@ -552,6 +611,9 @@ router.patch("/events/:id", requireAuth, requireAdmin, async (req, res) => {
       endAt,
       format,
       meetUrl,
+      externalUrl,
+      organizer,
+      coverUrl,
       audience,
       passCost,
       isPublished,
@@ -561,6 +623,13 @@ router.patch("/events/:id", requireAuth, requireAdmin, async (req, res) => {
     if (typeof title === "string") patch.title = title;
     if (typeof description === "string") patch.description = description;
     if (typeof location === "string") patch.location = location;
+    if (typeof meetUrl === "string") patch.meetUrl = meetUrl;
+    if (typeof externalUrl === "string") patch.externalUrl = externalUrl.trim() || null;
+    if (externalUrl === null) patch.externalUrl = null;
+    if (typeof organizer === "string") patch.organizer = organizer.trim() || null;
+    if (organizer === null) patch.organizer = null;
+    if (typeof coverUrl === "string") patch.coverUrl = coverUrl.trim() || null;
+    if (coverUrl === null) patch.coverUrl = null;
     if (startAt !== undefined) {
       const start = new Date(startAt);
       if (Number.isNaN(start.getTime())) {
@@ -660,14 +729,14 @@ router.post("/admin/events/:id/notify", requireAuth, requireAdmin, async (req, r
       if (sendEmail) {
         const prefs = await getUserSettingsPrefs(r.userId);
         if (prefs.notifEmail && prefs.notifEvents) {
-          const ok = await sendTransactionalMail({
+          const result = await sendTransactionalMail({
             to: r.email,
-            subject: `inner·hub: ${event.title}`,
+            subject: `inner hub: ${event.title}`,
             text: customBody,
             html: `<p>${customBody.replace(/</g, "&lt;")}</p>`,
             kind: "event_live",
           });
-          if (ok) emailed += 1;
+          if (result.ok) emailed += 1;
         }
       }
     }
@@ -794,6 +863,16 @@ router.post("/courses/:id/enroll", requireAuth, async (req, res) => {
         kind: "course",
         href: "/panel/courses",
       });
+      queueMail(
+        notifyCourseEnrolled({
+          userId,
+          name: req.user!.name,
+          email: req.user!.email,
+          title: course.title,
+          startsAt: course.startsAt,
+          meetUrl: course.meetUrl,
+        }),
+      );
     }
 
     res.json({
@@ -965,7 +1044,26 @@ router.patch("/courses/:id", requireAuth, requireAdmin, async (req, res) => {
     if (typeof description === "string") patch.description = description;
     if (Number.isFinite(term)) patch.term = term;
     if (Number.isFinite(order)) patch.order = order;
-    if (typeof isPublished === "boolean") patch.isPublished = isPublished;
+    if (typeof isPublished === "boolean") {
+      if (isPublished === true) {
+        const moduleIds = (
+          await db.select({ id: modulesTable.id }).from(modulesTable).where(eq(modulesTable.courseId, courseId))
+        ).map((m) => m.id);
+        let lessonCount = 0;
+        if (moduleIds.length > 0) {
+          const [row] = await db
+            .select({ n: count() })
+            .from(lessonsTable)
+            .where(inArray(lessonsTable.moduleId, moduleIds));
+          lessonCount = Number(row?.n ?? 0);
+        }
+        if (lessonCount === 0) {
+          res.status(400).json({ error: "Yayınlamak için en az bir ders ekleyin" });
+          return;
+        }
+      }
+      patch.isPublished = isPublished;
+    }
     if (format !== undefined) patch.format = resolveCourseFormat(format, existing.format);
     if (startsAt !== undefined) {
       if (startsAt === null) {

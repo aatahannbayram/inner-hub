@@ -37,6 +37,9 @@ type LayoutInput = {
   appUrl: string;
   /** Optional override; default `${appUrl}/mail/banner.jpg`. Pass null to hide. */
   bannerUrl?: string | null;
+  /** Lifecycle maillerinde List-Unsubscribe ile aynı URL */
+  unsubscribeUrl?: string;
+  physicalAddress?: string;
 };
 
 /**
@@ -55,6 +58,8 @@ export function renderInnerEmailLayout(input: LayoutInput): string {
     footerNote = "Bu ileti inner·hub başvuru sürecinle ilgili otomatik bir bilgilendirmedir.",
     appUrl,
     bannerUrl,
+    unsubscribeUrl,
+    physicalAddress,
   } = input;
 
   const imageSrc =
@@ -161,6 +166,17 @@ export function renderInnerEmailLayout(input: LayoutInput): string {
                       &nbsp;·&nbsp;
                       <a href="mailto:support@inner.digital" style="color:${MUTED};text-decoration:none;text-transform:none;">support@inner.digital</a>
                     </p>
+                    ${
+                      unsubscribeUrl
+                        ? `<p style="margin:12px 0 0;font-family:Inter,Helvetica,Arial,sans-serif;font-size:11px;line-height:1.5;color:${FAINT};">
+                      Haftalık özetlerden çıkmak için
+                      <a href="${escapeHtml(unsubscribeUrl)}" style="color:${BONE};text-decoration:underline;">aboneliği durdur</a>.
+                      ${physicalAddress ? `<br/>${escapeHtml(physicalAddress)}` : ""}
+                    </p>`
+                        : physicalAddress
+                          ? `<p style="margin:12px 0 0;font-family:Inter,Helvetica,Arial,sans-serif;font-size:11px;line-height:1.45;color:${FAINT};">${escapeHtml(physicalAddress)}</p>`
+                          : ""
+                    }
                   </td>
                 </tr>
               </table>

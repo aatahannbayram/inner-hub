@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Lockup } from "@/components/Lockup";
 import { useQueryClient } from "@tanstack/react-query";
 import { FadeIn } from "@/components/FadeIn";
@@ -38,6 +38,7 @@ import {
   DrawerDescription,
 } from "@/components/ui/drawer";
 import { motion } from "framer-motion";
+import { useLocation } from "wouter";
 import { cleanDisplayText } from "@/lib/displayText";
 import { useT } from "@/i18n";
 
@@ -81,6 +82,7 @@ interface VaultDoc {
   mine?: boolean;
   hasFile?: boolean;
   fileName?: string | null;
+  mimeType?: string | null;
   sizeBytes?: number | null;
 }
 
@@ -129,8 +131,6 @@ const ACCESS_STYLE: Record<AccessLevel, { icon: React.ComponentType<{ className?
 
 const DOC_TYPES: (DocType | "Tümü")[] = ["Tümü", "Pitch Deck", "Araştırma", "Not", "Şablon", "Kod", "Rapor"];
 
-// ─── Doc card ─────────────────────────────────────────────────────────────────
-
 function docTypeLabel(type: DocType, t: (k: string) => string) {
   const map: Record<DocType, string> = {
     "Pitch Deck": t("vault.typePitch"),
@@ -143,7 +143,140 @@ function docTypeLabel(type: DocType, t: (k: string) => string) {
   return map[type] ?? type;
 }
 
-function DocCard({ doc }: { doc: VaultDoc }) {
+function isPdfDoc(doc: VaultDoc): boolean {
+  if (doc.mimeType?.includes("pdf")) return true;
+  return Boolean(doc.fileName?.toLowerCase().endsWith(".pdf"));
+}
+
+function isImageDoc(doc: VaultDoc): boolean {
+  if (doc.mimeType?.startsWith("image/")) return true;
+  return Boolean(doc.fileName?.match(/\.(png|jpe?g|gif|webp)$/i));
+}
+
+function DocDetailDrawer({
+  doc,
+  open,
+  onClose,
+  onViewed,
+}: {
+  doc: VaultDoc | null;
+  open: boolean;
+  onClose: () => void;
+  onViewed: () => void;
+}) {
+  const t = useT();
+  const [viewError, setViewError] = useState<string | null>(null);
+  const [dlBusy, setDlBusy] = useState(false);
+
+  useEffect(() => {
+    if (!open || !doc?.hasFile) return;
+    setViewError(null);
+    const previewable = isPdfDoc(doc) || isImageDoc(doc);
+    if (!previewable) {
+      void fetch(apiUrl(`/api/vault/${doc.id}/view`), { credentials: "include" })
+        .then((res) => {
+          if (res.status === 403) throw new Error(t("vault.accessDenied"));
+          if (!res.ok) throw new Error(t("vault.viewFailed"));
+          onViewed();
+        })
+        .catch((err: Error) => setViewError(err.message ?? t("vault.viewFailed")));
+      return;
+    }
+    const timer = window.setTimeout(() => onViewed(), 800);
+    return () => window.clearTimeout(timer);
+  }, [open, doc, onViewed, t]);
+
+  if (!doc) return null;
+
+  const TypeIcon = TYPE_ICONS[doc.type] ?? FileText;
+  const acc = ACCESS_STYLE[doc.access] ?? ACCESS_STYLE.topluluk;
+  const AccIcon = acc.icon;
+  const title = cleanDisplayText(doc.title);
+  const previewable = doc.hasFile && (isPdfDoc(doc) || isImageDoc(doc));
+
+  const onDownload = async () => {
+    if (!doc.hasFile || dlBusy) return;
+    setDlBusy(true);
+    try {
+      await downloadVaultFile(doc);
+      onViewed();
+    } catch (err: any) {
+      setViewError(err.message ?? t("vault.downloadFailed"));
+    } finally {
+      setDlBusy(false);
+    }
+  };
+
+  return (
+    <Drawer open={open} onOpenChange={(v) => !v && onClose()} shouldScaleBackground={false}>
+      <DrawerContent className="max-h-[92vh] rounded-none panel-glass-strong border-white/10">
+        <DrawerHeader className="px-6 pt-2 text-left">
+          <div className="mb-2 flex flex-wrap items-center gap-2">
+            <TypeIcon className="size-3.5 text-[var(--ink-muted)]" />
+            <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
+              {docTypeLabel(doc.type, t)}
+            </span>
+            <span className={`inline-flex items-center gap-1 ${acc.color}`}>
+              <AccIcon className="size-3" />
+              <span className="font-mono text-[9px] uppercase tracking-widest">{t(acc.labelKey)}</span>
+            </span>
+          </div>
+          <DrawerTitle className="font-serif text-2xl font-normal text-[var(--ink)]" style={{ fontWeight: 600 }}>
+            {title}
+          </DrawerTitle>
+          <DrawerDescription className="text-[var(--ink-body)]">
+            {doc.author}
+            {doc.excerpt ? ` · ${doc.excerpt}` : ""}
+          </DrawerDescription>
+        </DrawerHeader>
+
+        <div className="space-y-4 overflow-y-auto px-6 pb-8">
+          {previewable ? (
+            isPdfDoc(doc) ? (
+              <iframe
+                title={title}
+                src={apiUrl(`/api/vault/${doc.id}/view`)}
+                className="h-[min(60vh,520px)] w-full border border-[var(--ink)]/10 bg-white"
+              />
+            ) : (
+              <img
+                src={apiUrl(`/api/vault/${doc.id}/view`)}
+                alt={title}
+                className="max-h-[min(60vh,520px)] w-full border border-[var(--ink)]/10 object-contain"
+              />
+            )
+          ) : doc.hasFile ? (
+            <p className="font-mono text-label text-[var(--ink-muted)]">{t("vault.noPreview")}</p>
+          ) : (
+            <p className="font-mono text-label text-[var(--ink-muted)]">{t("vault.noFile")}</p>
+          )}
+
+          {viewError && (
+            <p className="font-mono text-label text-[var(--error-ink)]" role="alert">
+              {viewError}
+            </p>
+          )}
+
+          {doc.hasFile && (
+            <button
+              type="button"
+              onClick={() => void onDownload()}
+              disabled={dlBusy}
+              className="inline-flex min-h-10 items-center gap-2 bg-[var(--ink)] px-4 py-2 font-mono text-label uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-85 disabled:opacity-40"
+            >
+              <Download className="size-3.5" />
+              {dlBusy ? "…" : t("vault.download")}
+            </button>
+          )}
+        </div>
+      </DrawerContent>
+    </Drawer>
+  );
+}
+
+// ─── Doc card ─────────────────────────────────────────────────────────────────
+
+function DocCard({ doc, onOpen }: { doc: VaultDoc; onOpen: (doc: VaultDoc) => void }) {
   const t = useT();
   const TypeIcon = TYPE_ICONS[doc.type] ?? FileText;
   const acc = ACCESS_STYLE[doc.access] ?? ACCESS_STYLE.topluluk;
@@ -169,7 +302,18 @@ function DocCard({ doc }: { doc: VaultDoc }) {
   };
 
   return (
-    <article className="group relative flex h-full flex-col overflow-hidden panel-glass p-4 transition-colors hover:border-[var(--ink)]/28 sm:p-5">
+    <article
+      role="button"
+      tabIndex={0}
+      onClick={() => onOpen(doc)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onOpen(doc);
+        }
+      }}
+      className="group relative flex h-full cursor-pointer flex-col overflow-hidden panel-glass p-4 transition-colors hover:border-[var(--ink)]/28 sm:p-5"
+    >
       <span aria-hidden className="absolute inset-y-0 left-0 w-[3px] bg-[var(--ink)]/15 transition-colors group-hover:bg-[var(--inner-green)]" />
 
       <div className="mb-3 flex items-start justify-between gap-3 pl-1">
@@ -185,7 +329,6 @@ function DocCard({ doc }: { doc: VaultDoc }) {
             </p>
             <h3
               className="mt-1 font-display font-serif text-lg leading-snug tracking-[-0.02em] text-[var(--ink)]"
-              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1" }}
             >
               {title}
             </h3>
@@ -335,7 +478,7 @@ function UploadPrompt({
           <p className="mb-1 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]"><span lang="en">inner·vault</span></p>
           <DrawerTitle
             className="font-serif text-2xl font-normal text-[var(--ink)]"
-            style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1, 'SOFT' 0", fontWeight: 300 }}
+            style={{ fontWeight: 600 }}
           >
             {t("vault.uploadTitle")}
           </DrawerTitle>
@@ -446,14 +589,42 @@ function UploadPrompt({
 export default function Vault() {
   const t = useT();
   const queryClient = useQueryClient();
+  const [location, setLocation] = useLocation();
   const [query, setQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState<DocType | "Tümü">("Tümü");
   const [showUpload, setShowUpload] = useState(false);
+  const [selectedId, setSelectedId] = useState<number | null>(() => {
+    const p = new URLSearchParams(window.location.search).get("belge");
+    const n = p ? Number(p) : NaN;
+    return Number.isFinite(n) ? n : null;
+  });
   const { data, isLoading, isError, error, refetch } = useApiQuery<{ documents: VaultDoc[] }>(
     ["vault"],
     "/api/vault",
   );
   const docs = data?.documents ?? [];
+  const selectedDoc = selectedId ? docs.find((d) => d.id === selectedId) ?? null : null;
+
+  const openDoc = (doc: VaultDoc) => {
+    setSelectedId(doc.id);
+    const url = new URL(window.location.href);
+    url.searchParams.set("belge", String(doc.id));
+    setLocation(`${url.pathname}${url.search}`);
+  };
+
+  const closeDoc = () => {
+    setSelectedId(null);
+    const url = new URL(window.location.href);
+    url.searchParams.delete("belge");
+    const qs = url.searchParams.toString();
+    setLocation(qs ? `${url.pathname}?${qs}` : url.pathname);
+  };
+
+  useEffect(() => {
+    const p = new URLSearchParams(window.location.search).get("belge");
+    const n = p ? Number(p) : NaN;
+    setSelectedId(Number.isFinite(n) ? n : null);
+  }, [location]);
 
   const filtered = docs.filter((d) => {
     const matchType = typeFilter === "Tümü" || d.type === typeFilter;
@@ -461,7 +632,8 @@ export default function Vault() {
     const matchQuery =
       !query ||
       toLowerTR(d.title).includes(q) ||
-      d.tags.some((t) => toLowerTR(t).includes(q)) ||
+      toLowerTR(d.excerpt).includes(q) ||
+      d.tags.some((tag) => toLowerTR(tag).includes(q)) ||
       toLowerTR(d.author).includes(q);
     return matchType && matchQuery;
   });
@@ -481,7 +653,7 @@ export default function Vault() {
             </p>
             <h1
               className="font-display font-serif text-3xl text-[var(--ink)] sm:text-4xl md:text-5xl"
-              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 300 }}
+              style={{ fontWeight: 600 }}
             >
               <Lockup suffix="vault" className="text-[var(--ink)]" />
             </h1>
@@ -520,7 +692,7 @@ export default function Vault() {
             <p className="mb-1 font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
               {t("vault.heroLabel")}
             </p>
-            <p className="max-w-[26ch] font-serif text-xl text-[var(--ink)] sm:text-2xl md:text-3xl" style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 300 }}>
+            <p className="max-w-[26ch] font-serif text-xl text-[var(--ink)] sm:text-2xl md:text-3xl" style={{ fontWeight: 600 }}>
               {t("vault.heroQuote")}
             </p>
           </div>
@@ -540,7 +712,7 @@ export default function Vault() {
             </p>
             <p
               className="mt-1 font-display font-serif text-xl text-[var(--ink)] sm:text-2xl"
-              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 400 }}
+              style={{ fontWeight: 500 }}
             >
               {s.value}
             </p>
@@ -561,11 +733,13 @@ export default function Vault() {
                 const Icon = TYPE_ICONS[doc.type] ?? FileText;
                 return (
                   <CarouselItem key={doc.id} className="basis-[78%] pl-3 sm:basis-[45%] md:basis-[38%]">
-                    <motion.div
+                    <motion.button
+                      type="button"
+                      onClick={() => openDoc(doc)}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: i * 0.05, duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-                      className="group relative h-40 overflow-hidden border border-white/10 bg-[var(--ink-fixed)]"
+                      className="group relative h-40 w-full overflow-hidden border border-white/10 bg-[var(--ink-fixed)] text-left"
                     >
                       <div
                         className="absolute inset-0 opacity-90 transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.03]"
@@ -585,7 +759,7 @@ export default function Vault() {
                         </div>
                         <div>
                           <p className="line-clamp-2 font-serif text-lg leading-snug text-white"
-                            style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 300 }}
+                            style={{ fontWeight: 600 }}
                           >
                             {cleanDisplayText(doc.title)}
                           </p>
@@ -594,7 +768,7 @@ export default function Vault() {
                           </p>
                         </div>
                       </div>
-                    </motion.div>
+                    </motion.button>
                   </CarouselItem>
                 );
               })}
@@ -639,7 +813,7 @@ export default function Vault() {
 
       <div className="grid gap-3 sm:grid-cols-2">
         {filtered.map((doc) => (
-          <DocCard key={doc.id} doc={doc} />
+          <DocCard key={doc.id} doc={doc} onOpen={openDoc} />
         ))}
       </div>
       {!isLoading && !isError && filtered.length === 0 && (
@@ -654,6 +828,13 @@ export default function Vault() {
         onCreated={() => {
           void queryClient.invalidateQueries({ queryKey: ["vault"] });
         }}
+      />
+
+      <DocDetailDrawer
+        doc={selectedDoc}
+        open={selectedDoc !== null}
+        onClose={closeDoc}
+        onViewed={() => void queryClient.invalidateQueries({ queryKey: ["vault"] })}
       />
 
       <div className="flex flex-wrap items-center gap-4 border-t border-[var(--ink)]/[0.08] pt-4">

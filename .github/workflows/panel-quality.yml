@@ -1,0 +1,38 @@
+name: Panel quality checks
+on:
+  push:
+    branches: [main]
+  pull_request:
+jobs:
+  contrast:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Contrast tokens
+        run: node scripts/contrast-check.mjs
+      - name: Unit smoke (panel metrics thresholds)
+        run: node scripts/panel-metrics-smoke.mjs
+      - name: Visual route checklist
+        run: node scripts/panel-visual-routes.mjs
+  prod-data-guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Block forbidden mock/test strings in source
+        run: |
+          set -euo pipefail
+          if grep -RInE 'Berk Yılmaz|Selin Çelik|COMMUNITY_CONTEXT|TEST Dogrulama' \
+            artifacts/api-server/src artifacts/inner-hub/src \
+            --include='*.ts' --include='*.tsx' ; then
+            echo "Found forbidden mock/test strings in source"
+            exit 1
+          fi
+          if grep -RInE 'claude-haiku-4-5' artifacts/inner-hub/src --include='*.ts' --include='*.tsx' \
+            | grep -v 'routes/ai.ts' | grep -v 'api-server' ; then
+            echo "Found model ID in user-facing frontend"
+            exit 1
+          fi
+          echo "Prod data guard passed"

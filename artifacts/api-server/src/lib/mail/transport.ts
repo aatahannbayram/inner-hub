@@ -82,6 +82,8 @@ export function resendApiKey(): string | undefined {
   return key || undefined;
 }
 
+export type MailCategory = "transactional" | "lifecycle";
+
 export type OutboundMail = {
   to: string;
   subject: string;
@@ -89,15 +91,39 @@ export type OutboundMail = {
   html: string;
   /** Optional headers / tags for logs */
   kind?: string;
+  /**
+   * transactional: davet, şifre, kayıt onayı, canlı hatırlatma (List-Unsubscribe yok)
+   * lifecycle: haftalık digest — Gmail/Yahoo bulk sender: List-Unsubscribe + One-Click
+   */
+  category?: MailCategory;
+  unsubscribeUrl?: string;
 };
+
+export function mailPhysicalAddress(): string {
+  return process.env.MAIL_PHYSICAL_ADDRESS?.trim() || "inner hub, İstanbul";
+}
+
+function extraHeaders(mail: OutboundMail): Record<string, string> {
+  const headers: Record<string, string> = {
+    "Auto-Submitted": "auto-generated",
+    "X-Auto-Response-Suppress": "All",
+    "X-Inner-Mail-Kind": mail.kind ?? "transactional",
+    "X-Inner-Mail-Category": mail.category ?? "transactional",
+  };
+  if (mail.category === "lifecycle" && mail.unsubscribeUrl) {
+    headers["List-Unsubscribe"] = `<${mail.unsubscribeUrl}>`;
+    headers["List-Unsubscribe-Post"] = "List-Unsubscribe=One-Click";
+    headers["List-Id"] = "inner hub weekly <weekly.mail.inner.digital>";
+  }
+  return headers;
+}
 
 /**
  * Deliverability-conscious send:
  * - Resend API öncelikli (yüksek itibarlı transactional)
  * - Yoksa Hostinger SMTP fallback
  * - multipart text + html, stable From / Reply-To
- *
- * Not: List-Unsubscribe / One-Click eklemiyoruz (transactional abonelik değildir).
+ * - Lifecycle (digest) için RFC 8058 List-Unsubscribe
  */
 export type MailResult = { ok: boolean; error?: string; provider?: "resend" | "smtp" };
 
@@ -121,9 +147,7 @@ async function sendViaResend(
       html: mail.html,
       headers: {
         "Message-ID": messageId,
-        "Auto-Submitted": "auto-generated",
-        "X-Auto-Response-Suppress": "All",
-        "X-Inner-Mail-Kind": mail.kind ?? "transactional",
+        ...extraHeaders(mail),
       },
       tags: mail.kind
         ? [{ name: "kind", value: mail.kind.replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 40) }]
@@ -168,11 +192,7 @@ async function sendViaSmtp(mail: OutboundMail, messageId: string): Promise<MailR
     text: mail.text,
     html: mail.html,
     messageId,
-    headers: {
-      "Auto-Submitted": "auto-generated",
-      "X-Auto-Response-Suppress": "All",
-      "X-Inner-Mail-Kind": mail.kind ?? "transactional",
-    },
+    headers: extraHeaders(mail),
   });
   logger.info({ kind: mail.kind, to: mail.to, messageId }, "Transactional mail sent via SMTP");
   return { ok: true, provider: "smtp" };

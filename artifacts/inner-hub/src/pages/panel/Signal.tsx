@@ -37,21 +37,19 @@ interface Connection {
   name: string;
   reason: string;
   matchScore: number;
+  userId?: number;
+  handle?: string | null;
 }
 
 interface SignalData {
   weeklyThemes: Theme[];
   connections: Connection[];
-  insight: string;
+  insight: string | null;
+  empty?: boolean;
+  insufficientData?: boolean;
+  source?: { label?: string; messageCount?: number; channels?: string; dateRange?: string };
+  insightSource?: string;
 }
-
-const ACTIVITY_DATA = [
-  [2, 5, 3, 7, 4, 1, 0],
-  [3, 8, 6, 9, 5, 2, 1],
-  [1, 4, 7, 11, 6, 3, 0],
-  [4, 6, 5, 8, 9, 2, 1],
-  [2, 3, 8, 12, 7, 4, 2],
-];
 
 const MOMENTUM_CONFIG = {
   yüksek: {
@@ -76,81 +74,19 @@ const MOMENTUM_CONFIG = {
 
 type SectionId = "insight" | "themes" | "people" | "activity";
 
-function ActivityHeatmap() {
+function ActivityHeatmap({ messageCount }: { messageCount: number }) {
   const t = useT();
-  const maxVal = Math.max(...ACTIVITY_DATA.flat());
-  const days = [
-    t("signal.dayMon"),
-    t("signal.dayTue"),
-    t("signal.dayWed"),
-    t("signal.dayThu"),
-    t("signal.dayFri"),
-    t("signal.daySat"),
-    t("signal.daySun"),
-  ];
-  const weeks = [
-    t("signal.week4"),
-    t("signal.week3"),
-    t("signal.week2"),
-    t("signal.week1"),
-    t("signal.weekThis"),
-  ];
-
+  if (messageCount < 1) {
+    return (
+      <p className="text-sm text-[var(--ink-body)]">
+        Bu hafta kanallarda henüz yeterli mesaj yok.
+      </p>
+    );
+  }
   return (
-    <div>
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-        <div>
-          <p
-            className="font-display font-serif text-lg text-[var(--ink)]"
-            style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 400 }}
-          >
-            {t("signal.activityMap")}
-          </p>
-          <p className="mt-0.5 text-xs text-[var(--ink-muted)]">
-            {t("signal.activityMapSub")}
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="font-mono text-label text-[var(--ink-subtle)]">{t("signal.low")}</span>
-          {[0.18, 0.4, 0.6, 0.8, 1].map((o, i) => (
-            <span key={i} className="size-2.5 bg-[var(--inner-green)]" style={{ opacity: o }} />
-          ))}
-          <span className="font-mono text-label text-[var(--ink-subtle)]">{t("signal.high")}</span>
-        </div>
-      </div>
-      <div className="flex gap-1">
-        <div className="flex flex-col justify-between py-0.5 pr-2">
-          {weeks.map((w) => (
-            <span key={w} className="font-mono text-label leading-none text-[var(--ink-subtle)]">
-              {w}
-            </span>
-          ))}
-        </div>
-        <div className="flex-1">
-          <div className="mb-1 grid grid-cols-7 gap-1">
-            {days.map((d) => (
-              <span key={d} className="text-center font-mono text-label text-[var(--ink-subtle)]">
-                {d}
-              </span>
-            ))}
-          </div>
-          <div className="space-y-1">
-            {ACTIVITY_DATA.map((week, wi) => (
-              <div key={wi} className="grid grid-cols-7 gap-1">
-                {week.map((val, di) => (
-                  <div
-                    key={di}
-                    className="h-5 bg-[var(--inner-green)] transition-opacity"
-                    style={{ opacity: val === 0 ? 0.06 : (val / maxVal) * 0.8 + 0.2 }}
-                    title={t("signal.interactions", { n: val })}
-                  />
-                ))}
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
+    <p className="text-sm text-[var(--ink-body)]">
+      Son 7 günde {messageCount} mesaj. Aktivite haritası gerçek kanal verisinden türetilir.
+    </p>
   );
 }
 
@@ -209,7 +145,7 @@ function SignalStat({
       </div>
       <p
         className="pl-1 font-display font-serif text-2xl leading-none text-[var(--ink)]"
-        style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 400 }}
+        style={{ fontWeight: 500 }}
       >
         {value}
       </p>
@@ -257,7 +193,6 @@ function ThemeCard({ theme, index }: { theme: Theme; index: number }) {
           </div>
           <h3
             className="font-display font-serif text-lg leading-snug tracking-[-0.02em] text-[var(--ink)] sm:text-xl"
-            style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1" }}
           >
             {cleanDisplayText(theme.topic)}
           </h3>
@@ -302,7 +237,6 @@ function ConnectionCard({ conn }: { conn: Connection }) {
           <div className="flex items-start justify-between gap-2">
             <h3
               className="font-display font-serif text-lg leading-tight text-[var(--ink)]"
-              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1" }}
             >
               {cleanDisplayText(conn.name)}
             </h3>
@@ -319,7 +253,13 @@ function ConnectionCard({ conn }: { conn: Connection }) {
       </p>
 
       <Link
-        href="/panel/match"
+        href={
+          conn.userId
+            ? `/panel/members?uye=${conn.userId}`
+            : conn.handle
+              ? `/panel/members?uye=${encodeURIComponent(conn.handle)}`
+              : "/panel/members"
+        }
         className="mt-auto inline-flex min-h-11 w-full items-center justify-center gap-1.5 bg-[var(--ink)] px-4 py-2.5 font-mono text-[10px] uppercase tracking-widest text-[var(--bone)] transition-opacity hover:opacity-85"
       >
         {t("signal.requestIntro")}
@@ -400,7 +340,7 @@ export default function Signal() {
       if (json.error) throw new Error(json.error);
       setData(json);
       setUpdatedAt(new Date());
-      const cached = readCachedVisual(json.insight);
+      const cached = json.insight ? readCachedVisual(json.insight) : null;
       if (cached) {
         setImageUrl(cached);
         setFromCache(true);
@@ -546,7 +486,7 @@ export default function Signal() {
             </p>
             <h1
               className="font-display font-serif text-3xl text-[var(--ink)] sm:text-4xl md:text-5xl"
-              style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 300 }}
+              style={{ fontWeight: 600 }}
             >
               <Lockup suffix="signal" className="text-[var(--ink)]" />
             </h1>
@@ -626,6 +566,23 @@ export default function Signal() {
         </LoadingBlock>
       ) : error ? (
         <ErrorState message={error} onRetry={fetchSignal} />
+      ) : data?.insufficientData || data?.empty ? (
+        <div className="panel-glass space-y-3 p-6">
+          <p className="text-[15px] text-[var(--ink)]">Bu hafta kanallarda henüz yeterli mesaj yok.</p>
+          <p className="text-sm text-[var(--ink-body)]">
+            İçgörü üretmek için son 7 günde en az {data.source?.messageCount != null ? "daha fazla" : ""}{" "}
+            mesaj ve aktif üye gerekir. Pulse ile aynı veri kaynağı kullanılır.
+          </p>
+          {data.source?.label ? (
+            <p className="font-mono text-[11px] text-[var(--ink-muted)]">{data.source.label}</p>
+          ) : null}
+          <Link
+            href="/panel/chat"
+            className="inline-flex min-h-10 items-center gap-2 border border-[var(--ink)]/20 px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-[var(--ink)]"
+          >
+            <MessageSquare className="size-3" /> {t("signal.openInChat")}
+          </Link>
+        </div>
       ) : data ? (
         <>
           {/* Insight hero */}
@@ -650,10 +607,15 @@ export default function Signal() {
                   </div>
                   <p
                     className="max-w-[38ch] font-serif text-xl leading-snug sm:text-2xl md:text-3xl"
-                    style={{ fontVariationSettings: "'opsz' 144, 'WONK' 1", fontWeight: 300 }}
+                    style={{ fontWeight: 600 }}
                   >
                     {data.insight}
                   </p>
+                  {(data.insightSource || data.source?.label) && (
+                    <p className="mt-3 font-mono text-[11px] text-[var(--bone-fixed)]/70">
+                      {data.insightSource || data.source?.label}
+                    </p>
+                  )}
 
                   <div className="mt-6 flex flex-wrap gap-2">
                     <button
@@ -834,7 +796,7 @@ export default function Signal() {
               id="signal-activity"
               className="scroll-mt-4 overflow-x-auto panel-glass p-4 sm:p-5"
             >
-              <ActivityHeatmap />
+              <ActivityHeatmap messageCount={data.source?.messageCount ?? 0} />
             </section>
           </FadeIn>
         </>
