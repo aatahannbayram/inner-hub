@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useLocation, useSearch } from "wouter";
 import { useQueryClient } from "@tanstack/react-query";
 import {
-  ChevronDown,
-  ChevronRight,
   ExternalLink,
   Globe,
   Loader2,
@@ -20,6 +19,7 @@ import { Lockup } from "@/components/Lockup";
 import { useApiQuery } from "@/hooks/useApiQuery";
 import { apiUrl } from "@/lib/api";
 import { LoadingBlock, ErrorState, CourseCardSkeleton } from "@/components/panel/Skeletons";
+import { StageProductOverlay } from "@/components/panel/StageProductOverlay";
 import {
   Dialog,
   DialogContent,
@@ -27,7 +27,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useT, useLocale } from "@/i18n";
+import { useT } from "@/i18n";
 import { useJourneyVisit } from "@/hooks/useJourneyVisit";
 
 const STAGE_FIELD =
@@ -71,7 +71,6 @@ type LinkPreviewData = {
 };
 
 const PERIODS: StagePeriod[] = ["week", "month", "year", "all"];
-/** Bu uzunluğu aşan pitch'ler kartta kırpılır, "Devamını oku" ile açılır. */
 const PITCH_CLAMP_CHARS = 140;
 
 function ProductHuntMark({ className }: { className?: string }) {
@@ -399,12 +398,10 @@ function ProductCard({
   onOpenDetail: (product: StageProduct) => void;
 }) {
   const t = useT();
-  const [expanded, setExpanded] = useState(false);
   const [imgFailed, setImgFailed] = useState(false);
   const isPitchLong = product.pitch.length > PITCH_CLAMP_CHARS;
-  // Görsel 404/bozuksa banner'ı tamamen düşür - başlık/etiket/yazar artık
-  // banner içinde render olduğu için, aksi halde bunlar da kaybolurdu.
-  const banner = product.imageUrl && !imgFailed ? product.imageUrl : null;
+  const banner =
+    (product.imageUrl && !imgFailed ? product.imageUrl : null) || product.youtubeThumbnail;
 
   const badges = (
     <>
@@ -451,34 +448,34 @@ function ProductCard({
   );
 
   return (
-    <article className="panel-glass overflow-hidden">
+    <article
+      className="group panel-glass cursor-pointer overflow-hidden transition-colors hover:border-[var(--ink)]/20"
+      role="button"
+      tabIndex={0}
+      onClick={() => onOpenDetail(product)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onOpenDetail(product);
+        }
+      }}
+    >
       {banner && (
-        /* Kapak görseli her renkte olabilir (kullanıcı yüklüyor) - metnin
-           her koşulda okunur kalması için alt kısımda sabit koyu bir
-           gradyan var; metin rengi görsele göre değil, bu gradyana göre
-           seçiliyor (her zaman beyaz + hafif gölge). */
         <div className="relative aspect-[21/9] w-full overflow-hidden bg-[var(--ink)]/[0.04]">
-          <a
-            href={product.youtubeUrl || product.url}
-            target="_blank"
-            rel="noreferrer"
-            className="group/banner absolute inset-0 block"
-          >
-            <img
-              src={banner}
-              alt=""
-              className="size-full object-cover transition-transform duration-300 group-hover/banner:scale-[1.02]"
-              loading="lazy"
-              onError={() => setImgFailed(true)}
-            />
-            {product.youtubeUrl && (
-              <span className="absolute inset-0 flex items-center justify-center bg-black/10 transition-colors group-hover/banner:bg-black/25">
-                <span className="flex size-11 items-center justify-center rounded-full bg-black/55 text-white backdrop-blur-sm">
-                  <Play className="size-4 translate-x-0.5 fill-current" />
-                </span>
+          <img
+            src={banner}
+            alt=""
+            className="size-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+            loading="lazy"
+            onError={() => setImgFailed(true)}
+          />
+          {product.youtubeUrl && (
+            <span className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/10">
+              <span className="flex size-11 items-center justify-center rounded-full bg-black/55 text-white backdrop-blur-sm">
+                <Play className="size-4 translate-x-0.5 fill-current" />
               </span>
-            )}
-          </a>
+            </span>
+          )}
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/85 via-black/15 to-transparent" />
           {rank !== undefined && (
             <span className="pointer-events-none absolute left-3 top-3">
@@ -504,10 +501,7 @@ function ProductCard({
           </div>
         </div>
       )}
-      <div
-        className="cursor-pointer p-4 transition-colors hover:bg-[var(--ink)]/[0.015]"
-        onClick={() => onOpenDetail(product)}
-      >
+      <div className="p-4">
         {!banner && (
           <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
             <div className="flex min-w-0 flex-1 items-start gap-3">
@@ -534,24 +528,11 @@ function ProductCard({
         <p
           className={[
             "whitespace-pre-line text-sm leading-relaxed text-[var(--ink-body)]",
-            isPitchLong && !expanded ? "line-clamp-3" : "",
+            isPitchLong ? "line-clamp-3" : "",
           ].join(" ")}
         >
           {product.pitch}
         </p>
-        {isPitchLong && (
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              setExpanded((v) => !v);
-            }}
-            className="hit-40 mt-0.5 inline-flex items-center gap-1 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)] transition-colors hover:text-[var(--ink)]"
-          >
-            {expanded ? t("stage.showLess") : t("stage.showMore")}
-            {expanded ? <ChevronDown className="size-3" /> : <ChevronRight className="size-3" />}
-          </button>
-        )}
         <div className="mt-2 flex flex-wrap items-center gap-3">
           <a
             href={product.url}
@@ -624,224 +605,6 @@ function ProductCard({
         )}
       </div>
     </article>
-  );
-}
-
-/** Kart tıklanınca açılan tam detay paneli - üstteki kırpılmış pitch/
- *  banner yerine ürünün tüm bilgilerini (tam pitch, tüm linkler, yazar,
- *  gönderim tarihi) tek yerde gösterir. */
-function ProductDetailPanel({
-  product,
-  onClose,
-  busy,
-  onVote,
-  isAdmin,
-  adminBusy,
-  onToggleFeatured,
-  onRemove,
-}: {
-  product: StageProduct;
-  onClose: () => void;
-  busy?: boolean;
-  onVote: (id: number) => void;
-  isAdmin?: boolean;
-  adminBusy?: boolean;
-  onToggleFeatured?: (id: number, next: boolean) => void;
-  onRemove?: (id: number) => void;
-}) {
-  const t = useT();
-  const { locale } = useLocale();
-  const [imgFailed, setImgFailed] = useState(false);
-  const banner = product.imageUrl && !imgFailed ? product.imageUrl : null;
-
-  useEffect(() => {
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => {
-      document.body.style.overflow = prev;
-      window.removeEventListener("keydown", onKey);
-    };
-  }, [onClose]);
-
-  const submittedAt = new Date(product.createdAt).toLocaleDateString(
-    locale === "tr" ? "tr-TR" : "en-US",
-    { day: "numeric", month: "long", year: "numeric" },
-  );
-
-  return (
-    <>
-      <div className="fixed inset-0 z-40 bg-[var(--ink-fixed)]/40" onClick={onClose} aria-hidden />
-      <div className="panel-glass-strong fixed inset-y-0 right-0 z-50 flex w-full max-w-md flex-col border-l border-[var(--ink)]/15 shadow-none">
-        <div className="flex-1 overflow-y-auto">
-          {banner && (
-            <div className="relative aspect-[21/9] w-full overflow-hidden bg-[var(--ink)]/[0.04]">
-              <img
-                src={banner}
-                alt=""
-                className="size-full object-cover"
-                onError={() => setImgFailed(true)}
-              />
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-              {product.youtubeUrl && (
-                <a
-                  href={product.youtubeUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="absolute inset-0 flex items-center justify-center bg-black/10 transition-colors hover:bg-black/25"
-                >
-                  <span className="flex size-12 items-center justify-center rounded-full bg-black/55 text-white backdrop-blur-sm">
-                    <Play className="size-5 translate-x-0.5 fill-current" />
-                  </span>
-                </a>
-              )}
-            </div>
-          )}
-          <div className="flex items-start justify-between gap-3 border-b border-[var(--ink)]/[0.08] p-5">
-            <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-1.5">
-                <p
-                  className="font-serif text-xl text-[var(--ink)]"
-                  style={{ fontWeight: 600 }}
-                >
-                  {product.title}
-                </p>
-                {product.featured && (
-                  <span className="inline-flex items-center gap-1 border border-[var(--inner-green)]/35 bg-[var(--inner-green)]/10 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-widest text-[var(--success-ink)]">
-                    <Star className="size-2.5 fill-current" />
-                    {t("stage.featuredBadge")}
-                  </span>
-                )}
-              </div>
-              <p className="mt-1 text-xs text-[var(--ink-muted)]">
-                {product.authorHandle ? (
-                  <a
-                    href={`/u/${product.authorHandle}`}
-                    className="underline decoration-[var(--ink)]/20 underline-offset-2 hover:text-[var(--ink)]"
-                  >
-                    @{product.authorHandle}
-                  </a>
-                ) : (
-                  product.authorName
-                )}
-                {" · "}
-                {t("stage.submittedOn", { date: submittedAt })}
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={onClose}
-              className="panel-glass shrink-0 p-2 text-[var(--ink-muted)] hover:text-[var(--ink)]"
-              aria-label={t("common.close")}
-            >
-              <X className="size-4" />
-            </button>
-          </div>
-
-          <div className="space-y-5 p-5">
-            <p className="whitespace-pre-line text-sm leading-relaxed text-[var(--ink-body)]">
-              {product.pitch}
-            </p>
-
-            <div className="space-y-2">
-              <a
-                href={product.url}
-                target="_blank"
-                rel="noreferrer"
-                className="flex items-center justify-between panel-glass px-4 py-3 font-mono text-label uppercase tracking-widest text-[var(--ink)] transition-colors hover:border-[var(--ink)]/30"
-              >
-                {t("stage.openLink")}
-                <ExternalLink className="size-3.5" />
-              </a>
-              {product.productHuntUrl && (
-                <a
-                  href={product.productHuntUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center justify-between border border-[#DA552F]/30 bg-[#DA552F]/5 px-4 py-3 font-mono text-label uppercase tracking-widest text-[#DA552F] transition-colors hover:border-[#DA552F]/50"
-                >
-                  <span className="inline-flex items-center gap-1.5">
-                    <ProductHuntMark className="size-3.5 shrink-0" />
-                    {product.phVotesCount != null
-                      ? t("stage.phVotes", { n: product.phVotesCount })
-                      : t("stage.phBadge")}
-                  </span>
-                  <ExternalLink className="size-3.5" />
-                </a>
-              )}
-              {product.youtubeUrl && (
-                <a
-                  href={product.youtubeUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center justify-between panel-glass px-4 py-3 font-mono text-label uppercase tracking-widest text-[var(--ink)] transition-colors hover:border-[var(--ink)]/30"
-                >
-                  <span className="inline-flex items-center gap-1.5">
-                    <Play className="size-3.5" />
-                    {t("stage.watchVideo")}
-                  </span>
-                  <ExternalLink className="size-3.5" />
-                </a>
-              )}
-            </div>
-
-            {isAdmin && (
-              <div className="space-y-2 border-t border-[var(--ink)]/[0.08] pt-5">
-                <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
-                  {t("stage.adminSection")}
-                </p>
-                <div className="flex flex-wrap items-center gap-1.5">
-                  <button
-                    type="button"
-                    disabled={adminBusy}
-                    onClick={() => onToggleFeatured?.(product.id, !product.featured)}
-                    className={[
-                      "inline-flex items-center gap-1.5 border px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-widest transition-colors disabled:opacity-40",
-                      product.featured
-                        ? "border-[var(--inner-green)]/35 bg-[var(--inner-green)]/10 text-[var(--success-ink)]"
-                        : "border-[var(--ink)]/10 text-[var(--ink-muted)] hover:border-[var(--ink)]/30",
-                    ].join(" ")}
-                  >
-                    <Star className={product.featured ? "size-3 fill-current" : "size-3"} />
-                    {product.featured ? t("stage.adminUnfeature") : t("stage.adminFeature")}
-                  </button>
-                  <button
-                    type="button"
-                    disabled={adminBusy}
-                    onClick={() => {
-                      onRemove?.(product.id);
-                      onClose();
-                    }}
-                    className="inline-flex items-center gap-1.5 border border-[var(--error-ink)]/25 px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-widest text-[var(--error-ink)] transition-colors hover:bg-[var(--error-ink)]/5 disabled:opacity-40"
-                  >
-                    <Trash2 className="size-3" />
-                    {t("stage.adminRemove")}
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <button
-          type="button"
-          disabled={busy}
-          onClick={() => onVote(product.id)}
-          className={[
-            "flex items-center justify-center gap-1.5 border-t py-3.5 font-mono text-label uppercase tracking-widest transition-colors disabled:opacity-40",
-            product.myVote
-              ? "border-[var(--inner-green)]/35 bg-[var(--inner-green)]/10 text-[var(--success-ink)]"
-              : "border-[var(--ink)]/[0.08] text-[var(--ink)] hover:bg-[var(--ink)]/[0.04]",
-          ].join(" ")}
-        >
-          <ThumbsUp className="size-3.5" />
-          {product.myVote ? t("stage.voted", { n: product.votes }) : t("stage.voteCta", { n: product.votes })}
-        </button>
-      </div>
-    </>
   );
 }
 
@@ -1343,12 +1106,23 @@ export default function Stage() {
   const t = useT();
   useJourneyVisit("stage");
   const queryClient = useQueryClient();
+  const [, setLocation] = useLocation();
+  const searchString = useSearch();
   const [busyId, setBusyId] = useState<number | null>(null);
   const [adminBusyId, setAdminBusyId] = useState<number | null>(null);
   const [composeOpen, setComposeOpen] = useState(false);
   const [sortMode, setSortMode] = useState<"votes" | "newest">("votes");
   const [period, setPeriod] = useState<StagePeriod>("week");
-  const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
+
+  const selectedProductId = useMemo(() => {
+    const n = Number(new URLSearchParams(searchString).get("urun"));
+    return Number.isFinite(n) && n > 0 ? n : null;
+  }, [searchString]);
+
+  const openDetail = (product: StageProduct) => {
+    setLocation(`/panel/stage?urun=${product.id}`);
+  };
+  const closeDetail = () => setLocation("/panel/stage");
 
   const showcase = useApiQuery<StageListResponse>(
     ["stage-showcase", period],
@@ -1367,6 +1141,7 @@ export default function Stage() {
   const refresh = () => {
     void queryClient.invalidateQueries({ queryKey: ["stage-showcase"] });
     void queryClient.invalidateQueries({ queryKey: ["stage-products"] });
+    void queryClient.invalidateQueries({ queryKey: ["stage-product"] });
   };
 
   const vote = async (id: number) => {
@@ -1424,10 +1199,16 @@ export default function Stage() {
 
   // Panel açıkken oy/featured değişse bile güncel kalsın diye, her render'da
   // seçili ürünü mevcut listelerden yeniden buluyoruz (statik bir kopya değil).
-  const selectedProduct =
+  const selectedFromLists =
     selectedProductId != null
       ? [...productList, ...showcaseList].find((p) => p.id === selectedProductId) ?? null
       : null;
+  const selectedFetch = useApiQuery<{ product: StageProduct }>(
+    ["stage-product", selectedProductId],
+    `/api/stage/products/${selectedProductId}`,
+    { enabled: selectedProductId != null && !selectedFromLists },
+  );
+  const selectedProduct = selectedFromLists ?? selectedFetch.data?.product ?? null;
 
   const statsProducts = products.data?.stats?.products ?? productList.length;
   const statsVotes = products.data?.stats?.votes ?? productList.reduce((s, p) => s + p.votes, 0);
@@ -1534,7 +1315,7 @@ export default function Stage() {
                       adminBusy={adminBusyId === p.id}
                       onToggleFeatured={toggleFeatured}
                       onRemove={removeProduct}
-                      onOpenDetail={(prod) => setSelectedProductId(prod.id)}
+                      onOpenDetail={openDetail}
                     />
                   ))}
                 </div>
@@ -1614,7 +1395,7 @@ export default function Stage() {
                       adminBusy={adminBusyId === p.id}
                       onToggleFeatured={toggleFeatured}
                       onRemove={removeProduct}
-                      onOpenDetail={(prod) => setSelectedProductId(prod.id)}
+                      onOpenDetail={openDetail}
                     />
                   ))
                 )}
@@ -1626,18 +1407,19 @@ export default function Stage() {
 
       <SubmitDialog open={composeOpen} onClose={() => setComposeOpen(false)} onAdded={refresh} />
 
-      {selectedProduct && (
-        <ProductDetailPanel
-          product={selectedProduct}
-          onClose={() => setSelectedProductId(null)}
-          busy={busyId === selectedProduct.id}
-          onVote={vote}
-          isAdmin={isAdmin}
-          adminBusy={adminBusyId === selectedProduct.id}
-          onToggleFeatured={toggleFeatured}
-          onRemove={removeProduct}
-        />
-      )}
+      <StageProductOverlay
+        product={selectedProduct}
+        onClose={closeDetail}
+        busy={selectedProduct != null && busyId === selectedProduct.id}
+        onVote={vote}
+        isAdmin={isAdmin}
+        adminBusy={selectedProduct != null && adminBusyId === selectedProduct.id}
+        onToggleFeatured={toggleFeatured}
+        onRemove={(id) => {
+          void removeProduct(id);
+          closeDetail();
+        }}
+      />
     </div>
   );
 }

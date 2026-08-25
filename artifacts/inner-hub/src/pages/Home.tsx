@@ -16,7 +16,7 @@ import { WordsPullUp } from "@/components/WordsPullUp";
 import { ScrollTextReveal } from "@/components/ScrollTextReveal";
 import { Lockup } from "@/components/Lockup";
 import { SiteFooter } from "@/components/SiteFooter";
-import { useLocale, useT } from "@/i18n";
+import { useLocale, useT, localizedPath } from "@/i18n";
 import { Grain } from "@/components/Grain";
 import { IndexRail } from "@/components/IndexRail";
 import { DiagramCircle } from "@/components/DiagramCircle";
@@ -26,26 +26,46 @@ import { HeroVideo } from "@/components/HeroVideo";
 import { WhatsNextCinematic } from "@/components/WhatsNextCinematic";
 import { HomeOpening } from "@/components/HomeOpening";
 import { useLenis } from "@/hooks/useLenis";
+import { useSeo, organizationJsonLd, websiteJsonLd } from "@/lib/seo";
 
 // ─── Animated counter ─────────────────────────────────────────────────────────
 function Counter({ to, suffix = "" }: { to: number; suffix?: string }) {
   const ref = useRef<HTMLSpanElement>(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
-  const [val, setVal] = useState(0);
+  // Always start at target so Lenis/inView failures never flash "0".
+  const [val, setVal] = useState(to);
+  const [played, setPlayed] = useState(false);
 
   useEffect(() => {
-    if (!inView) return;
+    setVal(to);
+    setPlayed(false);
+  }, [to]);
+
+  useEffect(() => {
+    if (!inView || played) return;
+    if (typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setVal(to);
+      setPlayed(true);
+      return;
+    }
+    setPlayed(true);
     let start = 0;
-    const step = Math.ceil(to / 48);
+    setVal(0);
+    const step = Math.max(1, Math.ceil(to / 48));
     const id = setInterval(() => {
       start = Math.min(start + step, to);
       setVal(start);
       if (start >= to) clearInterval(id);
     }, 20);
     return () => clearInterval(id);
-  }, [inView, to]);
+  }, [inView, to, played]);
 
-  return <span ref={ref}>{val}{suffix}</span>;
+  return (
+    <span ref={ref}>
+      {val}
+      {suffix}
+    </span>
+  );
 }
 
 // ─── Platform module media (copy comes from i18n) ─────────────────────────────
@@ -64,6 +84,7 @@ type HomeModule = {
   desc: string;
   icon: typeof Zap;
   tag: string;
+  phase: "live" | "september" | "roadmap";
 };
 
 function buildHomeModules(t: (key: string) => string): HomeModule[] {
@@ -74,6 +95,7 @@ function buildHomeModules(t: (key: string) => string): HomeModule[] {
       desc: t("home.modSignalDesc"),
       icon: Zap,
       tag: t("home.modSignalTag"),
+      phase: "live",
     },
     {
       id: "match",
@@ -81,6 +103,7 @@ function buildHomeModules(t: (key: string) => string): HomeModule[] {
       desc: t("home.modMatchDesc"),
       icon: Users,
       tag: t("home.modMatchTag"),
+      phase: "live",
     },
     {
       id: "capital",
@@ -88,13 +111,7 @@ function buildHomeModules(t: (key: string) => string): HomeModule[] {
       desc: t("home.modCapitalDesc"),
       icon: TrendingUp,
       tag: t("home.modCapitalTag"),
-    },
-    {
-      id: "vault",
-      name: "inner·vault",
-      desc: t("home.modVaultDesc"),
-      icon: BookOpen,
-      tag: t("home.modVaultTag"),
+      phase: "live",
     },
     {
       id: "pulse",
@@ -102,6 +119,15 @@ function buildHomeModules(t: (key: string) => string): HomeModule[] {
       desc: t("home.modPulseDesc"),
       icon: Radio,
       tag: t("home.modPulseTag"),
+      phase: "september",
+    },
+    {
+      id: "vault",
+      name: "inner·vault",
+      desc: t("home.modVaultDesc"),
+      icon: BookOpen,
+      tag: t("home.modVaultTag"),
+      phase: "roadmap",
     },
     {
       id: "id",
@@ -109,6 +135,7 @@ function buildHomeModules(t: (key: string) => string): HomeModule[] {
       desc: t("home.modIdDesc"),
       icon: Fingerprint,
       tag: t("home.modIdTag"),
+      phase: "roadmap",
     },
     {
       id: "api",
@@ -116,6 +143,7 @@ function buildHomeModules(t: (key: string) => string): HomeModule[] {
       desc: t("home.modApiDesc"),
       icon: Code2,
       tag: t("home.modApiTag"),
+      phase: "roadmap",
     },
     {
       id: "bounty",
@@ -123,21 +151,24 @@ function buildHomeModules(t: (key: string) => string): HomeModule[] {
       desc: t("home.modBountyDesc"),
       icon: Target,
       tag: t("home.modBountyTag"),
+      phase: "roadmap",
     },
   ];
 }
 
 function buildPlatformFeatures(modules: HomeModule[]): PlatformFeature[] {
-  return modules.slice(0, 3).map((m) => ({
-    id: m.id,
-    name: m.name,
-    tag: m.tag,
-    desc: m.desc,
-    media: {
-      type: "video" as const,
-      src: FEATURE_MEDIA[m.id as keyof typeof FEATURE_MEDIA],
-    },
-  }));
+  return modules
+    .filter((m) => m.phase === "live")
+    .map((m) => ({
+      id: m.id,
+      name: m.name,
+      tag: m.tag,
+      desc: m.desc,
+      media: {
+        type: "video" as const,
+        src: FEATURE_MEDIA[m.id as keyof typeof FEATURE_MEDIA],
+      },
+    }));
 }
 
 // ─── Marquee strip ────────────────────────────────────────────────────────────
@@ -177,8 +208,11 @@ function MarqueeStrip({ modules }: { modules: HomeModule[] }) {
                   />
                 </span>
                 <span className="flex flex-col gap-0.5">
-                  <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--bone-fixed)] sm:text-[11px]">
-                    {item.name}
+                  <span
+                    lang="en"
+                    className="font-mono text-[10px] tracking-[0.16em] text-[var(--bone-fixed)] sm:text-[11px]"
+                  >
+                    {item.name.toUpperCase()}
                   </span>
                   <span className="hidden font-mono text-[8px] uppercase tracking-[0.14em] text-[var(--bone-fixed)]/40 sm:block">
                     {item.tag}
@@ -227,6 +261,17 @@ export default function Home() {
   const { locale } = useLocale();
   const modules = buildHomeModules(t);
   const platformFeatures = buildPlatformFeatures(modules);
+  const liveCount = modules.filter((m) => m.phase === "live").length;
+  const septemberModules = modules.filter((m) => m.phase === "september");
+  const roadmapModules = modules.filter((m) => m.phase === "roadmap");
+
+  useSeo({
+    title: t("home.metaTitle"),
+    description: t("home.metaDescription"),
+    canonicalPath: localizedPath("/", locale),
+    type: "website",
+    jsonLd: [organizationJsonLd(), websiteJsonLd(locale, t("home.metaDescription"))],
+  });
 
   useEffect(() => {
     if (window.location.hash) {
@@ -252,11 +297,15 @@ export default function Home() {
         <HomeOpening />
 
         {/* ── Marquee ── */}
-        <MarqueeStrip modules={modules} />
+        <MarqueeStrip modules={modules.filter((m) => m.phase === "live")} />
 
         {/* ── 03 · The platform ── */}
         <section id="section-03">
-          <PlatformFeatures features={platformFeatures} restModules={modules.slice(3)} />
+          <PlatformFeatures
+            features={platformFeatures}
+            septemberModules={septemberModules}
+            roadmapModules={roadmapModules}
+          />
         </section>
 
         {/* ── 04-05 · What this is → Entry (one continuous dark, video-anchored span) ── */}
@@ -341,7 +390,7 @@ export default function Home() {
             <div className="grid min-w-0 grid-cols-3 gap-3 sm:gap-6 md:gap-10 lg:flex-1">
               <StatItem n={34} label={t("home.people")} />
               <StatItem n={2} label={t("home.days")} />
-              <StatItem n={8} label={t("home.modules")} />
+              <StatItem n={liveCount} label={t("home.modules")} />
             </div>
             <FadeIn delay={0.2} className="flex-shrink-0">
               <DiagramCircle />

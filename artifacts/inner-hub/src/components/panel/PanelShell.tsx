@@ -563,7 +563,9 @@ function MobileDrawer({
                 WebkitMaskImage:
                   "linear-gradient(to bottom, transparent 0, #000 12px, #000 calc(100% - 12px), transparent 100%)",
               }}
-              onClick={onClose}
+              onClick={(e) => {
+                if ((e.target as HTMLElement).closest("a[href]")) onClose();
+              }}
             >
               <PanelNav role={user.role} collapsed={false} variant="scroll" />
             </div>

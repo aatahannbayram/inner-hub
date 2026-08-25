@@ -10,6 +10,31 @@ import { isDecorativeLabel } from "../lib/displayLabel";
 
 const router = Router();
 
+function looksLikeUrl(value: string): boolean {
+  const v = value.trim().toLowerCase();
+  if (!v) return false;
+  if (/^https?:\/\//i.test(v)) return true;
+  if (v.startsWith("www.")) return true;
+  // bare domain: flexlore.com / app.inner.digital
+  return /^[a-z0-9][a-z0-9.-]*\.[a-z]{2,}(\/.*)?$/i.test(v);
+}
+
+function normalizeWebsiteUrl(raw: string): string {
+  const trimmed = raw.trim();
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  return `https://${trimmed.replace(/^\/+/, "")}`;
+}
+
+function normalizeSkillTag(raw: string): string {
+  const t = raw.trim();
+  if (!t) return "";
+  const key = t.toLowerCase().replace(/[\s_]+/g, "-");
+  if (key === "b-b" || key === "b2b" || key === "b-to-b") return "B2B";
+  if (key === "b-c" || key === "b2c") return "B2C";
+  if (key === "ai" || key === "a-i") return "AI";
+  return t;
+}
+
 /** Eski DB'lerde eksik perk kolonlarını ekle (idempotent). */
 const ensurePerkColumns = once(async () => {
   await db.execute(sql`ALTER TABLE perks ADD COLUMN IF NOT EXISTS category text`);
@@ -225,10 +250,15 @@ router.get("/members", requireAuth, async (_req, res) => {
       members: listed.map((u) => {
         const title = isDecorativeLabel(u.title) ? null : u.title?.trim() || null;
         const companyRaw = u.company?.trim() || null;
-        const company =
+        let company: string | null =
           companyRaw && !["—", "-", "n/a", "na"].includes(companyRaw.toLowerCase())
             ? companyRaw
             : null;
+        let website: string | null = null;
+        if (company && looksLikeUrl(company)) {
+          website = normalizeWebsiteUrl(company);
+          company = null;
+        }
         let skills: string[] = [];
         if (u.skills) {
           try {
@@ -243,6 +273,7 @@ router.get("/members", requireAuth, async (_req, res) => {
               .filter(Boolean);
           }
         }
+        skills = skills.map(normalizeSkillTag).filter(Boolean);
         const block = new Set(
           [title, company, u.persona]
             .filter((x): x is string => Boolean(x && String(x).trim()))
@@ -261,6 +292,7 @@ router.get("/members", requireAuth, async (_req, res) => {
           initials: initialsFromName(u.name),
           title: title ?? (u.role === "admin" ? "Admin" : ""),
           company: company ?? "",
+          website,
           bio: u.bio ?? "",
           tags,
           linkedin: u.linkedin,

@@ -1,16 +1,17 @@
 import { AlertCircle, LayoutDashboard, Users, CalendarDays, BookOpen } from "lucide-react";
 import { Link } from "wouter";
-import { useT } from "@/i18n";
+import { useLocalizedHref, useT } from "@/i18n";
 
 const POPULAR = [
-  { href: "/panel", icon: LayoutDashboard, key: "shell.dashboard" as const, fallback: "Dashboard" },
-  { href: "/panel/members", icon: Users, key: "shell.members" as const, fallback: "Üyeler" },
-  { href: "/panel/events", icon: CalendarDays, key: "shell.events" as const, fallback: "Etkinlikler" },
-  { href: "/panel/courses", icon: BookOpen, key: "shell.courses" as const, fallback: "Kurslar" },
+  { href: "/panel", icon: LayoutDashboard, key: "nav.dashboard" as const },
+  { href: "/panel/members", icon: Users, key: "nav.members" as const },
+  { href: "/panel/events", icon: CalendarDays, key: "nav.events" as const },
+  { href: "/panel/courses", icon: BookOpen, key: "nav.courses" as const },
 ];
 
 export default function NotFound() {
   const t = useT();
+  const homeHref = useLocalizedHref("/");
 
   return (
     <div className="flex min-h-screen w-full items-center justify-center bg-[var(--bone)] px-4 text-[var(--ink)]">
@@ -43,17 +44,11 @@ export default function NotFound() {
         </label>
 
         <p className="mt-6 mb-2 font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)]">
-          Popüler
+          {t("notFound.popular")}
         </p>
         <ul className="grid grid-cols-2 gap-2">
           {POPULAR.map((item) => {
             const Icon = item.icon;
-            let label = item.fallback;
-            try {
-              label = t(item.key);
-            } catch {
-              /* keep fallback */
-            }
             return (
               <li key={item.href}>
                 <Link
@@ -61,7 +56,7 @@ export default function NotFound() {
                   className="flex min-h-11 items-center gap-2 border border-[var(--ink)]/10 px-3 py-2 text-sm text-[var(--ink)] hover:border-[var(--ink)]/25"
                 >
                   <Icon className="size-3.5 text-[var(--ink-body)]" />
-                  {label}
+                  {t(item.key)}
                 </Link>
               </li>
             );
@@ -69,7 +64,7 @@ export default function NotFound() {
         </ul>
 
         <Link
-          href="/"
+          href={homeHref}
           className="mt-6 inline-block font-mono text-[11px] uppercase tracking-widest text-[var(--ink)] underline underline-offset-4 hover:text-[var(--inner-green)]"
         >
           {t("notFound.backHome")}

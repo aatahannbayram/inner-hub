@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
-import { useT } from "@/i18n";
+import { useLocalizedHref, useT } from "@/i18n";
 
 const NEXT_VIDEO =
   "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260510_060007_60275ce7-030c-4668-a160-8f364ec537d3.mp4";
@@ -12,6 +12,7 @@ const NEXT_VIDEO =
  */
 export function WhatsNextCinematic() {
   const t = useT();
+  const inviteHref = useLocalizedHref("/invitation");
   const videoWrapRef = useRef<HTMLDivElement>(null);
   const [ready, setReady] = useState(false);
   const reduceMotion = useRef(false);
@@ -122,7 +123,7 @@ export function WhatsNextCinematic() {
             {t("homeWhatsNext.accessShort")}
           </p>
           <a
-            href="/invitation"
+            href={inviteHref}
             className="shrink-0 whitespace-nowrap bg-white px-5 py-3 text-center font-mono text-xs uppercase tracking-widest text-black transition-colors hover:bg-white/90 sm:py-2.5"
           >
             {t("homeWhatsNext.cta")}

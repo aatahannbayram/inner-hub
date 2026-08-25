@@ -1,3 +1,4 @@
+import fs from "node:fs";
 import path from "node:path";
 import express, { type Express } from "express";
 import cors from "cors";
@@ -77,9 +78,47 @@ app.use("/api", router);
 
 // Tek süreç hem API'yi hem de önceden derlenmiş inner-hub SPA'sını sunar
 // (Hostinger'da ayrı bir statik site hosting'i yok, tek Node app var).
-const frontendDist = path.join(__dirname, "..", "..", "inner-hub", "dist");
-app.use(express.static(frontendDist));
-app.get(/^(?!\/api).*/, (_req, res) => {
+const frontendDist = path.resolve(
+  path.join(__dirname, "..", "..", "inner-hub", "dist"),
+);
+
+function prerenderIndex(pathname: string): string | null {
+  let decoded = pathname;
+  try {
+    decoded = decodeURIComponent(pathname);
+  } catch {
+    /* keep raw */
+  }
+  const segments = decoded.split("/").filter(Boolean);
+  if (
+    segments.length === 0 ||
+    !segments.every((s) => s !== ".." && !s.includes("\0"))
+  ) {
+    return null;
+  }
+  const file = path.resolve(frontendDist, ...segments, "index.html");
+  if (!file.startsWith(frontendDist + path.sep) || !fs.existsSync(file)) {
+    return null;
+  }
+  return file;
+}
+
+// Slash’lı dizin URL → slash’sız (sitemap/canonical ile aynı)
+app.use((req, res, next) => {
+  if (req.method !== "GET" && req.method !== "HEAD") return next();
+  if (req.path.length <= 1 || !req.path.endsWith("/")) return next();
+  const bare = req.path.replace(/\/+$/, "") || "/";
+  if (!prerenderIndex(bare)) return next();
+  const qs = req.url.includes("?") ? req.url.slice(req.url.indexOf("?")) : "";
+  return res.redirect(301, bare + qs);
+});
+
+// redirect:false — /haberler → /haberler/ 301 yapma (botları kuyrukta bırakıyordu)
+app.use(express.static(frontendDist, { redirect: false }));
+
+app.get(/^(?!\/api).*/, (req, res) => {
+  const prerendered = prerenderIndex(req.path);
+  if (prerendered) return res.sendFile(prerendered);
   res.sendFile(path.join(frontendDist, "index.html"));
 });
 

@@ -41,7 +41,7 @@ import { useT } from "@/i18n";
 import { useJourneyVisit } from "@/hooks/useJourneyVisit";
 
 type Tab = "uyeler" | "talent";
-type PersonaFilter = "all" | "founder" | "investor" | "builder" | "expert";
+type PersonaFilter = "all" | "founder" | "investor" | "builder" | "company";
 type SortMode = "featured" | "verified" | "az";
 type ViewMode = "grid" | "list";
 
@@ -51,6 +51,7 @@ interface Member {
   initials: string;
   title: string;
   company: string;
+  website?: string | null;
   bio: string;
   tags: string[];
   linkedin: string | null;
@@ -110,16 +111,30 @@ function memberHaystack(m: Member): string {
   );
 }
 
+function isPlaceholderBio(bio: string): boolean {
+  const b = bio.trim();
+  if (!b) return true;
+  if (/^\.{2,}$/.test(b) || /^…+$/.test(b) || /^[.\s]+$/.test(b)) return true;
+  if (/^(todo|tbd|n\/a|na|placeholder|lorem)/i.test(b)) return true;
+  return false;
+}
+
 function isProfileComplete(m: Member): boolean {
   const bio = (m.bio ?? "").trim();
-  const company = (m.company ?? "").trim();
-  const hasCompany = company.length > 1 && company !== "—";
-  const hasLinkedin = Boolean(m.linkedin?.trim()) || Boolean(m.linkedinConnected);
-  const pct = m.profileCompletionPct ?? 0;
-  if (pct >= 50) return true;
+  if (isPlaceholderBio(bio)) return false;
+  // Public directory bar: meaningful bio (≥20) or company persona with clear company name.
   if (bio.length >= 20) return true;
-  if (hasCompany && hasLinkedin) return true;
-  return Boolean(bio && hasCompany);
+  const company = (m.company ?? "").trim();
+  const hasCompany = company.length > 1 && company !== "—" && !looksLikeUrlClient(company);
+  if ((m.persona ?? "").toLowerCase() === "company" && hasCompany && bio.length >= 12) return true;
+  return false;
+}
+
+function looksLikeUrlClient(value: string): boolean {
+  const v = value.trim().toLowerCase();
+  if (!v) return false;
+  if (/^https?:\/\//i.test(v) || v.startsWith("www.")) return true;
+  return /^[a-z0-9][a-z0-9.-]*\.[a-z]{2,}(\/.*)?$/i.test(v);
 }
 
 function dedupeTags(tags: string[], exclude: string[] = [], max = 3): { shown: string[]; more: number } {
@@ -213,7 +228,10 @@ function MemberCard({
     <Link
       href={href}
       onClick={() => onNavigate?.()}
-      className="group flex h-full flex-col panel-glass p-3.5 transition-all duration-200 hover:border-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--inner-green)]"
+      className={cn(
+        "group flex h-full flex-col panel-glass p-3.5 transition-all duration-200 hover:border-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--inner-green)]",
+        (member.persona ?? "").toLowerCase() === "company" && "border-[var(--ink)]/20 bg-[var(--ink)]/[0.03]",
+      )}
     >
       <div className="flex items-start gap-3">
         <PersonAvatar
@@ -242,7 +260,7 @@ function MemberCard({
       </div>
 
       {member.bio ? (
-        <p className="mt-2.5 line-clamp-3 flex-1 text-sm leading-relaxed text-[var(--ink-muted)]">{member.bio}</p>
+        <p className="mt-2.5 line-clamp-2 flex-1 text-sm leading-relaxed text-[var(--ink-muted)]">{member.bio}</p>
       ) : (
         <div className="flex-1" />
       )}
@@ -422,6 +440,20 @@ function MemberDetailPanel({
                 <Linkedin className="size-3.5" /> <span lang="en">LinkedIn</span>
               </a>
             )}
+            {member.website ? (
+              <a
+                href={
+                  /^https?:\/\//i.test(member.website)
+                    ? member.website
+                    : `https://${member.website.replace(/^\/+/, "")}`
+                }
+                target="_blank"
+                rel="noopener noreferrer"
+                className="col-span-2 inline-flex items-center gap-2 panel-glass p-3 font-mono text-label uppercase tracking-widest text-[var(--ink-body)] hover:text-[var(--ink)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--inner-green)]"
+              >
+                <ExternalLink className="size-3.5" /> <span lang="en">Website</span>
+              </a>
+            ) : null}
           </div>
 
           <div>
@@ -1162,8 +1194,10 @@ export default function Members() {
   );
 
   const personaCounts = useMemo(() => {
-    const counts: Record<string, number> = { all: members.length };
-    for (const m of members) {
+    // Counts SSoT: only complete (listed) members so Tümü === sum(chips).
+    const listed = members.filter(isProfileComplete);
+    const counts: Record<string, number> = { all: listed.length };
+    for (const m of listed) {
       const p = (m.persona ?? "").toLowerCase();
       if (p) counts[p] = (counts[p] ?? 0) + 1;
     }
@@ -1252,7 +1286,7 @@ export default function Members() {
     { id: "founder", label: t("members.filterFounder") },
     { id: "investor", label: t("members.filterInvestor") },
     { id: "builder", label: t("members.filterBuilder") },
-    { id: "expert", label: t("members.filterExpert") },
+    { id: "company", label: t("members.filterCompany") },
   ];
 
   return (
@@ -1314,8 +1348,7 @@ export default function Members() {
               aria-label={t("members.filterGroup")}
             >
               {filterChips.map((chip) => {
-                const count =
-                  chip.id === "all" ? members.length : (personaCounts[chip.id] ?? 0);
+                const count = personaCounts[chip.id] ?? 0;
                 if (chip.id !== "all" && count === 0) return null;
                 const pressed = persona === chip.id;
                 return (

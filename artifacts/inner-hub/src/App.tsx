@@ -11,12 +11,14 @@ import PublicProfile from "@/pages/PublicProfile";
 import ArtifactsPage from "@/pages/Artifacts";
 import ArtifactDetailPage from "@/pages/ArtifactDetail";
 import PrivacyPage from "@/pages/Privacy";
+import StageKunyePage from "@/pages/StageKunye";
+import PublicFaqPage from "@/pages/PublicFaq";
 import { PanelShell, type PanelUser } from "@/components/panel/PanelShell";
 import { PanelPageSkeleton } from "@/components/panel/Skeletons";
 import { apiUrl } from "@/lib/api";
 import { PanelLogin } from "@/components/panel/PanelLogin";
 import { Lockup } from "@/components/Lockup";
-import { I18nProvider, useT } from "@/i18n";
+import { I18nProvider, LocalePathSync, useT } from "@/i18n";
 import { useThemeRouteSync } from "@/hooks/useTheme";
 import { useLocation } from "wouter";
 import { GoogleAnalytics } from "@/components/GoogleAnalytics";
@@ -192,22 +194,37 @@ function RedirectArtifactsSlug() {
   return <Redirect to={params.slug ? `/haberler/${params.slug}` : "/haberler"} />;
 }
 
+/** Public marketing routes — nested under `/en` for English shareable URLs. */
+function PublicRoutes() {
+  return (
+    <Switch>
+      <Route path="/" component={Home} />
+      <Route path="/invitation" component={Invitation} />
+      <Route path="/haberler" component={ArtifactsPage} />
+      <Route path="/haberler/:slug" component={ArtifactDetailPage} />
+      <Route path="/artifacts/:slug" component={RedirectArtifactsSlug} />
+      <Route path="/artifacts" component={RedirectArtifactsIndex} />
+      <Route path="/requests" component={Requests} />
+      <Route path="/privacy" component={PrivacyPage} />
+      <Route path="/sss" component={PublicFaqPage} />
+      <Route path="/u/:handle" component={PublicProfile} />
+      <Route path="/s/:id" component={StageKunyePage} />
+      <Route component={NotFound} />
+    </Switch>
+  );
+}
+
 function Router() {
   return (
     <ThemeRouteGate>
+      <LocalePathSync />
       <Switch>
-        <Route path="/"           component={Home} />
-        <Route path="/invitation" component={Invitation} />
-        <Route path="/haberler"  component={ArtifactsPage} />
-        <Route path="/haberler/:slug" component={ArtifactDetailPage} />
-        <Route path="/artifacts/:slug" component={RedirectArtifactsSlug} />
-        <Route path="/artifacts" component={RedirectArtifactsIndex} />
-        <Route path="/requests"   component={Requests} />
-        <Route path="/privacy"    component={PrivacyPage} />
-        <Route path="/u/:handle"  component={PublicProfile} />
         <Route path="/panel" component={PanelApp} />
         <Route path="/panel/*" component={PanelApp} />
-        <Route component={NotFound} />
+        <Route path="/en" nest>
+          <PublicRoutes />
+        </Route>
+        <PublicRoutes />
       </Switch>
     </ThemeRouteGate>
   );

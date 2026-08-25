@@ -6,7 +6,7 @@ import { ScrollTextReveal } from "@/components/ScrollTextReveal";
 import { FloatingNavbar } from "@/components/FloatingNavbar";
 import { HeroVideo } from "@/components/HeroVideo";
 import { Lockup } from "@/components/Lockup";
-import { useT } from "@/i18n";
+import { useLocalizedHref, useT } from "@/i18n";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 const CARD_EASE = [0.22, 1, 0.36, 1] as const;
@@ -37,6 +37,7 @@ export function HomeOpening() {
 
 function HeroInset() {
   const t = useT();
+  const inviteHref = useLocalizedHref("/invitation");
   return (
     <section
       className="relative h-[100svh] p-2 sm:p-3 md:p-5 lg:p-6"
@@ -79,14 +80,16 @@ function HeroInset() {
           <div className="grid grid-cols-1 items-end gap-4 sm:gap-5 md:grid-cols-12 md:gap-10">
             <div className="min-w-0 md:col-span-8">
               <h1 className="text-[var(--bone-fixed)]">
-                <Lockup
-                  suffix="hub"
-                  className="text-[var(--bone-fixed)]"
-                  fontSize="clamp(2.75rem, 14vw, 9.5rem)"
-                  pulse
-                />
+                <span className="sr-only">{t("home.seoH1")}</span>
+                <span aria-hidden="true">
+                  <Lockup
+                    suffix="hub"
+                    className="text-[var(--bone-fixed)]"
+                    fontSize="clamp(2.75rem, 14vw, 9.5rem)"
+                    pulse
+                  />
+                </span>
               </h1>
-              <p className="sr-only">{t("common.privateCircle")}</p>
             </div>
 
             <div className="flex flex-col gap-3.5 sm:gap-5 md:col-span-4 md:pb-3">
@@ -100,7 +103,7 @@ function HeroInset() {
               </motion.p>
 
               <motion.a
-                href="/invitation"
+                href={inviteHref}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.7, ease: EASE }}
@@ -170,6 +173,7 @@ function AboutIdea() {
 
 function FoundingSeats() {
   const t = useT();
+  const inviteHref = useLocalizedHref("/invitation");
   const ref = useRef<HTMLElement>(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
 
@@ -266,7 +270,7 @@ function FoundingSeats() {
                 ))}
               </ul>
               <a
-                href="/invitation"
+                href={inviteHref}
                 className="mt-5 inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-[var(--bone-fixed)]/70 transition-colors hover:text-[var(--bone-fixed)]"
               >
                 {t("home.learnMore")}

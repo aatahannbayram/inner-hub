@@ -1,13 +1,13 @@
 import { jsx, jsxs, Fragment as Fragment$1 } from "react/jsx-runtime";
 import { renderToString } from "react-dom/server";
-import { Link, useParams, Router, Switch, Route } from "wouter";
+import { useLocation, Link, useParams, Router, Switch, Route } from "wouter";
 import { useMutation, QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import * as React from "react";
 import { createContext, useState, useCallback, useEffect, useMemo, useContext, useRef, Fragment } from "react";
 import * as TooltipPrimitive from "@radix-ui/react-tooltip";
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { Mail, Linkedin, Instagram, ArrowRight, ArrowUpRight, Check, Zap, Users, TrendingUp, BookOpen, Radio, Fingerprint, Code2, Target, Rocket, Wrench, Building2, ArrowLeft, Play, Pause, VolumeX, Volume2, AlertCircle, LayoutDashboard, CalendarDays } from "lucide-react";
+import { Mail, ArrowRight, ArrowUpRight, Check, Zap, Users, TrendingUp, Radio, BookOpen, Fingerprint, Code2, Target, Rocket, Wrench, Building2, ArrowLeft, Play, Pause, VolumeX, Volume2, AlertCircle, LayoutDashboard, CalendarDays } from "lucide-react";
 import { useReducedMotion, motion, useInView, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import Lenis from "lenis";
 function cn(...inputs) {
@@ -281,14 +281,14 @@ const tr = {
     nav: "Haberler",
     eyebrow: "08 · Haberler",
     title: "Sinyal, not, video.",
-    subtitle: "Blog, post ve caption - çemberden erken sinyal. Flexlore ile üretilir; SEO ve cevap motorları için net özetlerle yayınlanır.",
+    subtitle: "Blog, post ve caption - erken sinyal, net özet. SEO ve cevap motorları için yazılır.",
     metaTitle: "Haberler · inner.hub",
-    metaDescription: "inner.hub haberler: davetiye, gathering ve çember üzerine yazılar ile video haberler.",
+    metaDescription: "inner.hub haberler: davetiye, gathering ve üyelik üzerine yazılar ile video haberler.",
     article: "Yazı",
     video: "Video",
     back: "Tüm haberler",
     ctaHint: "Erişim davetiye ile. Her zaman.",
-    empty: "Yakında - Flexlore Content Creator Flow ile yazılar buraya akacak.",
+    empty: "Yeni yazılar yakında burada.",
     faqTitle: "Sık sorulanlar"
   },
   haberlerAdmin: {
@@ -311,20 +311,22 @@ const tr = {
     delete: "Sil"
   },
   home: {
+    metaTitle: "inner.hub · İstanbul’da kurucu koltuklar",
+    metaDescription: "Davetli üyelik: 34 koltuk hedefi, Eylül 2026 İstanbul gathering. Kurucular, builder’lar ve yatırımcılar için erken sinyal.",
     heroTag: "İstanbul → Global · Est. 2026",
-    heroBody: "Kurucular, builder’lar ve yatırımcılardan oluşan özel bir çember. Yer veya statüyle değil; erken buluşup sonraki adımı inşa etme açlığıyla bağlı.",
+    heroBody: "Kurucular, builder’lar ve yatırımcılar için davetli üyelik. Statüyle değil; Eylül 2026’daki İstanbul gathering’e doğru erken buluşma açlığıyla.",
     requestInvitation: "Davetiye talep et",
     ideaEyebrow: "01 · Fikir",
-    ideaTitle: "Özel bir çember.",
-    ideaBody: "inner·hub, davetle girilen bir ağdır. Kurucular, builder’lar ve yatırımcılar buraya erken sinyal, derin bağlantı ve birlikte inşa etmek için gelir.",
+    ideaTitle: "Özel bir ağ.",
+    ideaBody: "inner·hub davetle girilir. Kurucular, builder’lar ve yatırımcılar buraya erken sinyal, derin bağlantı ve birlikte inşa etmek için gelir.",
     ideaLine1: "AI merkezdir.",
     ideaLine2: "Etrafında: kurucular, builder’lar, yatırımcılar.",
     ideaLine3: "inner.hub onları erken bir araya getirir.",
-    ideaReveal: "İstanbul’da başlar. Tek tek seçilen otuz dört kişi kurucu çemberi oluşturur: bir platformun üyeleri değil, sıradakini mümkün kılan insanlar.",
+    ideaReveal: "İstanbul’da başlar. Tek tek seçilen otuz dört koltuk kurucu grubu oluşturur: bir platformun üyeleri değil, sıradakini mümkün kılan insanlar.",
     seatsEyebrow: "02 · İlk otuz dört",
     seatsTitle: "Kimler için.",
     seatsLine1: "Erken buluşanlar için kurucu koltuklar.",
-    seatsLine2: "Bilet değil. Katman değil. Çember.",
+    seatsLine2: "Bilet değil. Katman değil. Seçilmiş bir grup.",
     seatFounders: "Kurucular.",
     seatFounders1: "AI ve ötesinde girişim kuranlar",
     seatFounders2: "Gürültü gelmeden shipping edenler",
@@ -333,45 +335,48 @@ const tr = {
     seatBuilders: "Builder’lar.",
     seatBuilders1: "Ciddi AI alanında mühendis ve araştırmacılar",
     seatBuilders2: "Demo değil derinlik. Bileşik zanaat",
-    seatBuilders3: "Sinyal önce çember içinde paylaşılır",
+    seatBuilders3: "Sinyal önce içeride paylaşılır",
     seatInvestors: "Yatırımcılar.",
     seatInvestors1: "Melekler ve venture operatörleri",
     seatInvestors2: "Erken inanç, sabırlı sermaye",
     seatInvestors3: "Erişim biletle değil güvenle şekillenir",
-    circleStartsHere: "Çemberin burada başlar.",
+    circleStartsHere: "Çember burada başlar.",
     learnMore: "Daha fazla",
-    seatsFooter: "Bu otuz dört kişi sadece üye değil. inner·hub’ın kurucu üyeleri.",
+    seatsFooter: "Bu otuz dört koltuk sadece üyelik değil. inner·hub’ın kurucu kadrosu.",
     platformEyebrow: "03 · Platform",
-    platformTitle: "Kapalı bir çemberin temposuna göre inşa edildi.",
+    platformTitle: "Kapalı bir grubun temposuna göre inşa edildi.",
     platformAccess: "Erişim davetiye ile. Her zaman.",
     moreTools: "+{n} araç daha",
-    modSignalTag: "AI katmanı",
-    modSignalDesc: "Yapay zeka destekli fırsat ve anlaşma akışı. Herkesten önce doğru sinyaller.",
-    modMatchTag: "Eşleştirme",
-    modMatchDesc: "Kapalı çemberde kurucu, mentor ve yatırımcı eşleşmesi. Güvene dayalı bağlantılar.",
-    modCapitalTag: "Yatırımlar",
-    modCapitalDesc: "Özel deal flow ve yatırım hattı. SPV’ler, demo day’ler ve ortak yatırım fırsatları.",
-    modVaultTag: "Bilgi",
-    modVaultDesc: "Ortak bilgi tabanı. Pitch deck’ler, pazar araştırması ve belgeler. Yetkilendirilmiş ve aranabilir.",
-    modPulseTag: "Zeka",
-    modPulseDesc: "Canlı ekosistem sinyal panosu. Ne hareket ediyor, ne trend, ne önemli. Yalnızca içeride.",
-    modIdTag: "Kimlik",
-    modIdDesc: "Taşınabilir, doğrulanmış üyelik kimliği. inner.hub üyeliğin platformun ötesinde ağırlık taşır.",
-    modApiTag: "Platform",
-    modApiDesc: "Entegrasyonlar ve ortaklar için platform API’si. inner.hub altyapısının üstüne inşa et.",
-    modBountyTag: "Pazar yeri",
-    modBountyDesc: "Topluluk görev sistemi. Şirketler challenge açar, üyeler çözer, platform kolaylaştırır.",
+    modulesLiveEyebrow: "Canlı",
+    modulesSeptemberEyebrow: "Eylül’de",
+    modulesRoadmapEyebrow: "Yol haritası",
+    modSignalTag: "Canlı",
+    modSignalDesc: "Fırsat ve deal sinyalleri. Panelde bugün kullanılan AI katmanı.",
+    modMatchTag: "Canlı",
+    modMatchDesc: "Üyeler arası eşleştirme. Gerçek profillere dayalı bağlantı önerileri.",
+    modCapitalTag: "Canlı",
+    modCapitalDesc: "Özel deal flow hattı. SPV ve ortak yatırım yüzeyleri panelde.",
+    modVaultTag: "Yol haritası",
+    modVaultDesc: "Paylaşılan bilgi tabanı: deck’ler, notlar, yetkilendirilmiş arama.",
+    modPulseTag: "Eylül’de",
+    modPulseDesc: "Ekosistem nabzı panosu. Gathering dönemine doğru canlı sinyaller.",
+    modIdTag: "Yol haritası",
+    modIdDesc: "Taşınabilir, doğrulanmış üyelik kimliği. Platform dışında da ağırlık.",
+    modApiTag: "Yol haritası",
+    modApiDesc: "Ortaklar ve entegrasyonlar için platform API’si.",
+    modBountyTag: "Yol haritası",
+    modBountyDesc: "Topluluk görevleri: şirket challenge açar, üyeler çözer.",
     whatThisIs: "Bu nedir",
     whatThisIsEyebrow: "04 · Bu nedir",
     thePoint: "Öz",
     bigThings: "Büyük işler burada başlar.",
-    whatThisIsBody: "Yeni fikirler burada konuşulur, burada test edilir ve onları gerçekten kurup fonlayabilecek insanlar tarafından burada desteklenir.",
+    whatThisIsBody: "Yeni fikirler burada konuşulur, test edilir ve onları kurup fonlayabilecek insanlar tarafından desteklenir. İlk yüz yüze buluşma: Eylül 2026, İstanbul.",
     byInvitation: "Davetiye ile",
     entryEyebrow: "05 · Giriş",
     entryTitle: "Giriş davetiye iledir. Her zaman.",
-    entryBody: "Bilet yok, katman yok, açık liste yok. Üyeler çemberin içinden önerilir, özenle değerlendirilir ve kişisel olarak davet edilir.",
+    entryBody: "Bilet yok, katman yok, açık liste yok. Üyeler içeriden önerilir, özenle değerlendirilir ve kişisel olarak davet edilir.",
     entryStepName: "Adın",
-    entryStepNameLine: "Çemberin içinden biri adını öne sürer.",
+    entryStepNameLine: "İçeriden biri adını öne sürer.",
     entryStepConsider: "Değerlendirme",
     entryStepConsiderLine: "Acele etmeyiz. Uyum, şöhretten önce gelir.",
     entryStepInvite: "Davetiye",
@@ -380,13 +385,13 @@ const tr = {
     gatheringEyebrow: "06 · Buluşma",
     gatheringDate: "Eyl 2026 · İstanbul",
     gatheringTitle: "İlk inner.hub buluşması. İstanbul, Eylül 2026.",
-    gatheringLine: "Otuz dört kişi. İki gün. Bir çember. Birçoklarının ilki.",
-    oneCircle: "34 · Bir çember",
-    oneCircleSr: "Otuz dört kare, bir çember.",
+    gatheringLine: "Otuz dört koltuk hedefi. İki gün. Birçoklarının ilki.",
+    oneCircle: "34 · Bir arada",
+    oneCircleSr: "Otuz dört kare, bir arada.",
     whatsNext: "Sırada ne var",
-    people: "Kişi",
+    people: "Koltuk hedefi",
     days: "Gün",
-    modules: "Modül",
+    modules: "Canlı modül",
     footerTagline: "Davetli üyelik. Erken sinyal. Birlikte inşa.",
     footerNavigate: "Gezin",
     footerConnect: "Bağlan",
@@ -397,7 +402,7 @@ const tr = {
   },
   invite: {
     preparing: "Davetiye hazırlanıyor",
-    access: "inner · erişim",
+    access: "INNER · erişim",
     homeLink: "Ana sayfa",
     memberLogin: "Üye girişi",
     requestTitle: "Davetiye talep et",
@@ -1398,7 +1403,17 @@ const tr = {
     applyPreview: "Önizlemeyi alanlara yaz",
     draftSaved: "Taslak saklandı · kaldığın yerden devam",
     clearDraft: "Taslağı temizle",
-    prefilledFromProfile: "Profilindeki site linki hazır"
+    prefilledFromProfile: "Profilindeki site linki hazır",
+    kunye: "inner·stage künye",
+    copyLink: "Künyeyi kopyala",
+    linkCopied: "Kopyalandı",
+    expand: "Tam ekran",
+    collapse: "Küçült",
+    kunyeHint: "Çemberden bir ürün · paylaşılabilir künye",
+    kunyeNotFound: "Bu ürün bulunamadı veya yayından kalktı.",
+    kunyeLoading: "Künye yükleniyor",
+    openInStage: "Stage'de aç",
+    visitProduct: "Ürünü aç"
   },
   members: {
     title: "Katılımcılar",
@@ -1488,7 +1503,8 @@ const tr = {
     filterFounder: "Kurucu",
     filterInvestor: "Yatırımcı",
     filterBuilder: "Builder",
-    filterExpert: "Uzman",
+    filterExpert: "Şirket",
+    filterCompany: "Şirket",
     sortLabel: "Sıralama",
     sortFeatured: "Öne çıkan",
     sortVerified: "Doğrulanmış",
@@ -1765,7 +1781,8 @@ const tr = {
   notFound: {
     title: "404 Sayfa bulunamadı",
     body: "Aradığın sayfa taşınmış veya hiç var olmamış olabilir.",
-    backHome: "Ana sayfaya dön"
+    backHome: "Ana sayfaya dön",
+    popular: "Popüler"
   }
 };
 const en = {
@@ -1987,14 +2004,14 @@ const en = {
     nav: "News",
     eyebrow: "08 · News",
     title: "Signal, notes, video.",
-    subtitle: "Blog, posts, and captions - early signal from the circle. Produced via Flexlore; published with clear answers for search and AEO.",
+    subtitle: "Blog, posts, and captions - early signal with clear answers for search and AEO.",
     metaTitle: "News · inner.hub",
-    metaDescription: "inner.hub news: writing and video briefs on invitations, gatherings, and the circle.",
+    metaDescription: "inner.hub news: writing and video briefs on invitations, gatherings, and membership.",
     article: "Article",
     video: "Video",
     back: "All news",
     ctaHint: "Access is by invitation. Always.",
-    empty: "Coming soon - posts will flow here via Flexlore Content Creator Flow.",
+    empty: "New posts will appear here soon.",
     faqTitle: "FAQ"
   },
   haberlerAdmin: {
@@ -2017,20 +2034,22 @@ const en = {
     delete: "Delete"
   },
   home: {
+    metaTitle: "inner.hub · Founding seats in İstanbul",
+    metaDescription: "Invite-only membership: 34-seat target, İstanbul gathering September 2026. Early signal for founders, builders, and investors.",
     heroTag: "Istanbul → Global · Est. 2026",
-    heroBody: "A private circle of founders, builders, and investors. Bound not by place or status, but by hunger to meet early and build what comes next.",
+    heroBody: "Invite-only membership for founders, builders, and investors. Bound by hunger to meet early — toward the İstanbul gathering in September 2026.",
     requestInvitation: "Request an invitation",
     ideaEyebrow: "01 · The idea",
-    ideaTitle: "A private circle.",
-    ideaBody: "inner·hub is an invite-only network. Founders, builders, and investors come here for early signal, deep connection, and building together.",
+    ideaTitle: "A private network.",
+    ideaBody: "inner·hub is invite-only. Founders, builders, and investors come here for early signal, deep connection, and building together.",
     ideaLine1: "AI is the center.",
     ideaLine2: "Around it: founders, builders, investors.",
     ideaLine3: "inner.hub brings them together early.",
-    ideaReveal: "It starts in İstanbul. Thirty-four people, chosen one by one, form the founding circle: not members of a platform, but the people who make what comes next possible.",
+    ideaReveal: "It starts in İstanbul. Thirty-four seats, chosen one by one, form the founding group: not platform subscribers, but the people who make what comes next possible.",
     seatsEyebrow: "02 · The first thirty-four",
     seatsTitle: "Who it's for.",
     seatsLine1: "Founding seats for people who meet early.",
-    seatsLine2: "Not tickets. Not tiers. The circle.",
+    seatsLine2: "Not tickets. Not tiers. A chosen group.",
     seatFounders: "Founders.",
     seatFounders1: "Building startups in AI and beyond",
     seatFounders2: "Shipping before the noise arrives",
@@ -2039,45 +2058,48 @@ const en = {
     seatBuilders: "Builders.",
     seatBuilders1: "Engineers and researchers in serious AI",
     seatBuilders2: "Depth over demos. Craft that compounds",
-    seatBuilders3: "Signal shared inside the circle first",
+    seatBuilders3: "Signal shared inside first",
     seatInvestors: "Investors.",
     seatInvestors1: "Angels and venture operators",
     seatInvestors2: "Early conviction, patient capital",
     seatInvestors3: "Access shaped by trust, not tickets",
     circleStartsHere: "Your circle starts here.",
     learnMore: "Learn more",
-    seatsFooter: "These thirty-four are not just members. They are the founding members of inner.hub.",
+    seatsFooter: "These thirty-four seats are not just membership. They are the founding cohort of inner.hub.",
     platformEyebrow: "03 · The platform",
-    platformTitle: "Built for the pace of a closed circle.",
+    platformTitle: "Built for the pace of a closed group.",
     platformAccess: "Access is by invitation. Always.",
     moreTools: "+{n} more tools",
-    modSignalTag: "AI Layer",
-    modSignalDesc: "AI-powered deal and opportunity feed. The right signals, before anyone else sees them.",
-    modMatchTag: "Matching",
-    modMatchDesc: "Co-founder, mentor, and investor matching inside a closed circle. Trust-based connections.",
-    modCapitalTag: "Investments",
-    modCapitalDesc: "Private deal flow and investment pipeline. SPVs, demo days, and co-investment opportunities.",
-    modVaultTag: "Knowledge",
-    modVaultDesc: "Shared knowledge base. Pitch decks, market research, and documents. Permissioned and searchable.",
-    modPulseTag: "Intelligence",
-    modPulseDesc: "Live ecosystem signal dashboard. What's moving, what's trending, what matters. Inside only.",
-    modIdTag: "Identity",
-    modIdDesc: "Portable verified membership identity. Your inner.hub membership carries weight beyond the platform.",
-    modApiTag: "Platform",
-    modApiDesc: "Platform API for integrations and partners. Build on top of the inner.hub infrastructure.",
-    modBountyTag: "Marketplace",
-    modBountyDesc: "Community task system. Companies post challenges, members solve them, platform facilitates.",
+    modulesLiveEyebrow: "Live",
+    modulesSeptemberEyebrow: "This September",
+    modulesRoadmapEyebrow: "Roadmap",
+    modSignalTag: "Live",
+    modSignalDesc: "Opportunity and deal signals. The AI layer members use in the panel today.",
+    modMatchTag: "Live",
+    modMatchDesc: "Member matching on real profiles — introductions grounded in trust.",
+    modCapitalTag: "Live",
+    modCapitalDesc: "Private deal flow. SPV and co-investment surfaces in the panel.",
+    modVaultTag: "Roadmap",
+    modVaultDesc: "Shared knowledge base: decks, notes, permissioned search.",
+    modPulseTag: "This September",
+    modPulseDesc: "Ecosystem pulse board. Live signals as gathering season approaches.",
+    modIdTag: "Roadmap",
+    modIdDesc: "Portable verified membership identity that carries weight beyond the platform.",
+    modApiTag: "Roadmap",
+    modApiDesc: "Platform API for partners and integrations.",
+    modBountyTag: "Roadmap",
+    modBountyDesc: "Community tasks: companies post challenges, members solve them.",
     whatThisIs: "What this is",
     whatThisIsEyebrow: "04 · What this is",
     thePoint: "The point",
     bigThings: "Big things start here.",
-    whatThisIsBody: "New ideas are discussed here, tested here, and supported here by people who can actually build them and fund them.",
+    whatThisIsBody: "New ideas are discussed, tested, and backed by people who can build and fund them. First in-person gathering: September 2026, İstanbul.",
     byInvitation: "By invitation",
     entryEyebrow: "05 · Entry",
     entryTitle: "Entry is by invitation. Always.",
-    entryBody: "There are no tickets, no tiers, and no public list. Members are put forward from inside the circle, considered with care, and invited personally.",
+    entryBody: "There are no tickets, no tiers, and no public list. Members are put forward from inside, considered with care, and invited personally.",
     entryStepName: "Your name",
-    entryStepNameLine: "Someone inside the circle puts your name forward.",
+    entryStepNameLine: "Someone inside puts your name forward.",
     entryStepConsider: "Consideration",
     entryStepConsiderLine: "We take our time. Fit beats fame.",
     entryStepInvite: "Invitation",
@@ -2086,13 +2108,13 @@ const en = {
     gatheringEyebrow: "06 · The gathering",
     gatheringDate: "Sep 2026 · İstanbul",
     gatheringTitle: "The first inner.hub gathering. İstanbul, September 2026.",
-    gatheringLine: "Thirty-four people. Two days. One circle. The first of many.",
-    oneCircle: "34 · One circle",
-    oneCircleSr: "Thirty-four squares forming one circle.",
+    gatheringLine: "Thirty-four seats as the target. Two days. The first of many.",
+    oneCircle: "34 · Together",
+    oneCircleSr: "Thirty-four squares forming one gathering.",
     whatsNext: "What's next",
-    people: "People",
+    people: "Seat target",
     days: "Days",
-    modules: "Modules",
+    modules: "Live modules",
     footerTagline: "Invite-only. Early signal. Build together.",
     footerNavigate: "Navigate",
     footerConnect: "Connect",
@@ -2103,7 +2125,7 @@ const en = {
   },
   invite: {
     preparing: "Preparing invitation",
-    access: "inner · access",
+    access: "INNER · access",
     homeLink: "Home",
     memberLogin: "Member login",
     requestTitle: "Request an invitation",
@@ -3104,7 +3126,17 @@ const en = {
     applyPreview: "Apply preview to fields",
     draftSaved: "Draft saved · pick up where you left off",
     clearDraft: "Clear draft",
-    prefilledFromProfile: "Your profile website is ready"
+    prefilledFromProfile: "Your profile website is ready",
+    kunye: "inner·stage card",
+    copyLink: "Copy card link",
+    linkCopied: "Copied",
+    expand: "Full screen",
+    collapse: "Dock",
+    kunyeHint: "A product from the circle · shareable card",
+    kunyeNotFound: "This product was not found or is no longer published.",
+    kunyeLoading: "Loading card",
+    openInStage: "Open in Stage",
+    visitProduct: "Visit product"
   },
   members: {
     title: "Members",
@@ -3194,7 +3226,8 @@ const en = {
     filterFounder: "Founder",
     filterInvestor: "Investor",
     filterBuilder: "Builder",
-    filterExpert: "Expert",
+    filterExpert: "Company",
+    filterCompany: "Company",
     sortLabel: "Sort",
     sortFeatured: "Featured",
     sortVerified: "Verified",
@@ -3471,17 +3504,58 @@ const en = {
   notFound: {
     title: "404 Page not found",
     body: "The page you’re looking for may have moved or never existed.",
-    backHome: "Back to home"
+    backHome: "Back to home",
+    popular: "Popular"
   }
 };
 const dictionaries = { tr, en };
+function isLocaleAgnosticPath(pathname) {
+  return pathname === "/panel" || pathname.startsWith("/panel/") || pathname.startsWith("/u/") || pathname.startsWith("/s/");
+}
+function localeFromPath(pathname) {
+  if (pathname === "/en" || pathname.startsWith("/en/")) return "en";
+  return "tr";
+}
+function stripLocalePrefix(pathname) {
+  if (pathname === "/en") return "/";
+  if (pathname.startsWith("/en/")) {
+    const rest = pathname.slice(3);
+    return rest.startsWith("/") ? rest : `/${rest}`;
+  }
+  return pathname || "/";
+}
+function localizedPath(path, locale) {
+  if (!path || path.startsWith("http") || path.startsWith("#") || path.startsWith("mailto:")) {
+    return path;
+  }
+  const u = new URL(path, "https://inner.digital");
+  const pathname = u.pathname || "/";
+  if (isLocaleAgnosticPath(pathname)) {
+    return `${pathname}${u.search}${u.hash}`;
+  }
+  const bare = stripLocalePrefix(pathname);
+  const next = locale === "en" ? bare === "/" ? "/en" : `/en${bare}` : bare;
+  return `${next}${u.search}${u.hash}`;
+}
+function swapLocalePath(pathname, next) {
+  if (isLocaleAgnosticPath(pathname)) return pathname;
+  return localizedPath(stripLocalePrefix(pathname), next);
+}
 const I18nContext = createContext(null);
-function resolveInitialLocale() {
+function resolveInitialLocale(initialLocale) {
+  if (initialLocale && isLocale(initialLocale)) return initialLocale;
   if (typeof window === "undefined") return DEFAULT_LOCALE;
+  const fromPath = localeFromPath(window.location.pathname);
+  if (window.location.pathname === "/en" || window.location.pathname.startsWith("/en/")) {
+    return fromPath;
+  }
   return readStoredLocale() ?? DEFAULT_LOCALE;
 }
-function I18nProvider({ children }) {
-  const [locale, setLocaleState] = useState(resolveInitialLocale);
+function I18nProvider({
+  children,
+  initialLocale
+}) {
+  const [locale, setLocaleState] = useState(() => resolveInitialLocale(initialLocale));
   const setLocale = useCallback((next) => {
     if (!isLocale(next)) return;
     setLocaleState(next);
@@ -3521,6 +3595,13 @@ function LocaleToggle({
   tone = "dark"
 }) {
   const { locale, setLocale } = useLocale();
+  const [loc, setLocation] = useLocation();
+  const switchTo = (code) => {
+    setLocale(code);
+    if (isLocaleAgnosticPath(loc)) return;
+    const next = swapLocalePath(loc, code);
+    if (next !== loc) setLocation(next);
+  };
   const btn = (code, label) => {
     const active = locale === code;
     const base = tone === "dark" ? active ? "bg-[var(--bone)] text-black" : "text-[var(--bone)]/55 hover:text-[var(--bone)]" : active ? "bg-[var(--ink)] text-[var(--bone)]" : "text-[var(--ink-muted)] hover:text-[var(--ink)]";
@@ -3529,7 +3610,7 @@ function LocaleToggle({
       {
         type: "button",
         lang: code,
-        onClick: () => setLocale(code),
+        onClick: () => switchTo(code),
         "aria-pressed": active,
         className: `px-2 py-1 font-mono text-[10px] uppercase tracking-widest transition-colors ${base}`,
         children: label
@@ -3549,6 +3630,10 @@ function LocaleToggle({
       ]
     }
   );
+}
+function useLocalizedHref(path) {
+  const { locale } = useLocale();
+  return localizedPath(path, locale);
 }
 const ease = [0.16, 1, 0.3, 1];
 function FadeIn({
@@ -3583,7 +3668,7 @@ function WordsPullUp({
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
   const reduce = useReducedMotion();
-  const words = text.split(" ");
+  const words = text.split(" ").filter((w) => w.length > 0);
   const Comp = Tag;
   if (reduce) {
     return /* @__PURE__ */ jsxs(Comp, { className, children: [
@@ -3591,13 +3676,12 @@ function WordsPullUp({
       showAsterisk ? /* @__PURE__ */ jsx(Asterisk, {}) : null
     ] });
   }
-  return /* @__PURE__ */ jsx(Comp, { ref, className, children: words.map((word, i) => {
-    const isLast = i === words.length - 1;
-    return /* @__PURE__ */ jsx(
-      "span",
-      {
-        className: "relative mr-[0.2em] inline-block overflow-hidden pb-1 pr-1 align-top last:mr-0",
-        children: /* @__PURE__ */ jsxs(
+  return /* @__PURE__ */ jsxs(Comp, { ref, className, children: [
+    /* @__PURE__ */ jsx("span", { className: "sr-only", children: text }),
+    /* @__PURE__ */ jsx("span", { "aria-hidden": "true", children: words.map((word, i) => {
+      const isLast = i === words.length - 1;
+      return /* @__PURE__ */ jsxs(Fragment, { children: [
+        /* @__PURE__ */ jsx("span", { className: "relative inline-block overflow-hidden pb-1 pr-1 align-top", children: /* @__PURE__ */ jsxs(
           motion.span,
           {
             className: "inline-block",
@@ -3609,11 +3693,11 @@ function WordsPullUp({
               showAsterisk && isLast ? /* @__PURE__ */ jsx(Asterisk, {}) : null
             ]
           }
-        )
-      },
-      `${word}-${i}`
-    );
-  }) });
+        ) }),
+        !isLast ? " " : null
+      ] }, `${word}-${i}`);
+    }) })
+  ] });
 }
 function Asterisk() {
   return /* @__PURE__ */ jsx(
@@ -3632,8 +3716,9 @@ function WordsPullUpMultiStyle({
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
   const reduce = useReducedMotion();
+  const fullText = segments.map((s) => s.text).join(" ");
   const words = segments.flatMap(
-    (seg, si) => seg.text.split(" ").map((word, wi) => ({
+    (seg, si) => seg.text.split(" ").filter((w) => w.length > 0).map((word, wi) => ({
       word,
       className: seg.className,
       key: `${si}-${wi}-${word}`
@@ -3645,16 +3730,22 @@ function WordsPullUpMultiStyle({
       i < segments.length - 1 ? " " : ""
     ] }, i)) });
   }
-  return /* @__PURE__ */ jsx("h2", { ref, className: `inline-flex flex-wrap gap-x-[0.28em] ${className ?? ""}`, children: words.map((item, i) => /* @__PURE__ */ jsx("span", { className: "inline-block overflow-hidden pb-1 align-top", children: /* @__PURE__ */ jsx(
-    motion.span,
-    {
-      className: `inline-block ${item.className ?? ""}`,
-      initial: { y: 20, opacity: 0 },
-      animate: inView ? { y: 0, opacity: 1 } : { y: 20, opacity: 0 },
-      transition: { duration: 0.55, ease: EASE$3, delay: delay + i * 0.08 },
-      children: item.word
-    }
-  ) }, item.key)) });
+  return /* @__PURE__ */ jsxs("h2", { ref, className, children: [
+    /* @__PURE__ */ jsx("span", { className: "sr-only", children: fullText }),
+    /* @__PURE__ */ jsx("span", { "aria-hidden": "true", className: "inline-flex flex-wrap", children: words.map((item, i) => /* @__PURE__ */ jsxs(Fragment, { children: [
+      /* @__PURE__ */ jsx("span", { className: "inline-block overflow-hidden pb-1 align-top", children: /* @__PURE__ */ jsx(
+        motion.span,
+        {
+          className: `inline-block ${item.className ?? ""}`,
+          initial: { y: 20, opacity: 0 },
+          animate: inView ? { y: 0, opacity: 1 } : { y: 20, opacity: 0 },
+          transition: { duration: 0.55, ease: EASE$3, delay: delay + i * 0.08 },
+          children: item.word
+        }
+      ) }),
+      i < words.length - 1 ? " " : null
+    ] }, item.key)) })
+  ] });
 }
 function RevealChar({
   char,
@@ -3749,6 +3840,17 @@ function Lockup({
 }
 function SiteFooter() {
   const t = useT();
+  const privacyHref = useLocalizedHref("/privacy");
+  const platformHref = useLocalizedHref("/#section-03");
+  const gatheringHref = useLocalizedHref("/#section-06");
+  const haberlerHref = useLocalizedHref("/haberler");
+  const inviteHref = useLocalizedHref("/invitation");
+  const navLinks = [
+    { label: t("publicNav.platform"), href: platformHref },
+    { label: t("publicNav.gathering"), href: gatheringHref },
+    { label: t("publicNav.artifacts"), href: haberlerHref },
+    { label: t("publicNav.invitation"), href: inviteHref }
+  ];
   return /* @__PURE__ */ jsxs(
     "footer",
     {
@@ -3774,12 +3876,7 @@ function SiteFooter() {
           ] }),
           /* @__PURE__ */ jsxs("div", { children: [
             /* @__PURE__ */ jsx("p", { className: "mb-4 font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)]/40", children: t("home.footerNavigate") }),
-            /* @__PURE__ */ jsx("ul", { className: "space-y-2.5", children: [
-              { label: t("publicNav.platform"), href: "/#section-03" },
-              { label: t("publicNav.gathering"), href: "/#section-06" },
-              { label: t("publicNav.artifacts"), href: "/haberler" },
-              { label: t("publicNav.invitation"), href: "/invitation" }
-            ].map((l) => /* @__PURE__ */ jsx("li", { children: /* @__PURE__ */ jsx(
+            /* @__PURE__ */ jsx("ul", { className: "space-y-2.5", children: navLinks.map((l) => /* @__PURE__ */ jsx("li", { children: /* @__PURE__ */ jsx(
               "a",
               {
                 href: l.href,
@@ -3790,30 +3887,14 @@ function SiteFooter() {
           ] }),
           /* @__PURE__ */ jsxs("div", { children: [
             /* @__PURE__ */ jsx("p", { className: "mb-4 font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)]/40", children: t("home.footerConnect") }),
-            /* @__PURE__ */ jsxs("div", { className: "mb-6 flex items-center gap-4", children: [
-              /* @__PURE__ */ jsx(
-                "a",
-                {
-                  href: "https://www.linkedin.com",
-                  target: "_blank",
-                  rel: "noopener noreferrer",
-                  "aria-label": "inner on LinkedIn",
-                  className: "border border-white/15 p-2.5 text-[var(--bone-fixed)]/60 transition-colors hover:border-white/35 hover:text-[var(--bone-fixed)]",
-                  children: /* @__PURE__ */ jsx(Linkedin, { size: 18, strokeWidth: 1.5 })
-                }
-              ),
-              /* @__PURE__ */ jsx(
-                "a",
-                {
-                  href: "https://www.instagram.com",
-                  target: "_blank",
-                  rel: "noopener noreferrer",
-                  "aria-label": "inner on Instagram",
-                  className: "border border-white/15 p-2.5 text-[var(--bone-fixed)]/60 transition-colors hover:border-white/35 hover:text-[var(--bone-fixed)]",
-                  children: /* @__PURE__ */ jsx(Instagram, { size: 18, strokeWidth: 1.5 })
-                }
-              )
-            ] }),
+            /* @__PURE__ */ jsx("p", { className: "mb-6 font-mono text-sm text-[var(--bone-fixed)]/55", children: /* @__PURE__ */ jsx(
+              "a",
+              {
+                href: "mailto:support@inner.digital",
+                className: "underline decoration-white/20 underline-offset-2 transition-colors hover:text-[var(--bone-fixed)]",
+                children: "support@inner.digital"
+              }
+            ) }),
             /* @__PURE__ */ jsx("p", { className: "font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)]/35", children: "İstanbul → Global" })
           ] })
         ] }),
@@ -3823,7 +3904,7 @@ function SiteFooter() {
             /* @__PURE__ */ jsx(
               "a",
               {
-                href: "/privacy",
+                href: privacyHref,
                 className: "font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)]/35 underline decoration-white/20 underline-offset-2 transition-colors hover:text-[var(--bone-fixed)]/70",
                 children: t("home.footerPrivacy")
               }
@@ -4044,7 +4125,7 @@ function FeatureCard$1({
   setRef
 }) {
   const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-15% 0px -15% 0px" });
+  const inView = useInView(ref, { once: true, amount: 0.15, margin: "0px 0px -8% 0px" });
   return /* @__PURE__ */ jsxs(
     "div",
     {
@@ -4053,11 +4134,11 @@ function FeatureCard$1({
         setRef(el);
       },
       "data-feature-index": index,
-      className: `border border-white/10 p-6 transition-all duration-700 ease-out md:p-8 ${inView ? "translate-x-0 opacity-100" : "translate-x-16 opacity-0"}`,
+      className: `border border-white/10 p-6 opacity-100 md:p-8 lg:transition-all lg:duration-700 lg:ease-out ${inView ? "lg:translate-x-0 lg:opacity-100" : "lg:translate-x-16 lg:opacity-0"}`,
       style: { backgroundColor: CARD_BG },
       children: [
         /* @__PURE__ */ jsx("p", { className: "mb-4 font-mono text-label uppercase tracking-widest text-white/45", children: feature.tag }),
-        /* @__PURE__ */ jsx("h3", { className: "mb-6 font-serif text-xl italic text-[var(--bone-fixed)] md:text-2xl", children: feature.name }),
+        /* @__PURE__ */ jsx("h3", { lang: "en", className: "mb-6 font-serif text-xl italic text-[var(--bone-fixed)] md:text-2xl", children: feature.name }),
         /* @__PURE__ */ jsx("div", { className: "mb-6 aspect-video overflow-hidden bg-black/40", children: feature.media.type === "video" ? /* @__PURE__ */ jsx(
           HeroVideo,
           {
@@ -4081,12 +4162,39 @@ function FeatureCard$1({
 }
 function PlatformFeatures({
   features,
-  restModules
+  septemberModules = [],
+  roadmapModules = []
 }) {
   const t = useT();
+  const inviteHref = useLocalizedHref("/invitation");
   const [activeIndex, setActiveIndex] = useState(0);
   const cardRefs = useRef(/* @__PURE__ */ new Map());
   const ratiosRef = useRef(/* @__PURE__ */ new Map());
+  const renderModuleGrid = (mods, eyebrow) => {
+    if (mods.length === 0) return null;
+    return /* @__PURE__ */ jsxs("div", { className: "mt-6 border-t border-white/10 pt-10", children: [
+      /* @__PURE__ */ jsx("p", { className: "mb-6 font-mono text-label uppercase tracking-widest text-white/45", children: eyebrow }),
+      /* @__PURE__ */ jsx("div", { className: "grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-1", children: mods.map((mod) => {
+        const Icon = mod.icon;
+        return /* @__PURE__ */ jsxs(
+          "div",
+          {
+            className: "flex flex-col gap-3 border border-white/10 p-5 sm:p-6",
+            style: { backgroundColor: CARD_BG },
+            children: [
+              /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between", children: [
+                /* @__PURE__ */ jsx(Icon, { className: "size-4 text-white/45", strokeWidth: 1.5 }),
+                /* @__PURE__ */ jsx("span", { className: "font-mono text-label uppercase tracking-widest text-white/40", children: mod.tag })
+              ] }),
+              /* @__PURE__ */ jsx("h4", { lang: "en", className: "font-serif italic text-lg text-[var(--bone-fixed)]", children: mod.name }),
+              /* @__PURE__ */ jsx("p", { className: "text-sm leading-relaxed text-white/50", children: mod.desc })
+            ]
+          },
+          mod.id
+        );
+      }) })
+    ] });
+  };
   useEffect(() => {
     const ratios = ratiosRef.current;
     ratios.clear();
@@ -4135,15 +4243,40 @@ function PlatformFeatures({
           /* @__PURE__ */ jsxs("div", { className: "lg:sticky lg:top-0 lg:flex lg:h-[100svh] lg:flex-col lg:justify-between lg:self-start lg:py-28", children: [
             /* @__PURE__ */ jsxs("div", { children: [
               /* @__PURE__ */ jsx("p", { className: "mb-4 font-mono text-xs uppercase tracking-widest text-white/45", children: t("home.platformEyebrow") }),
-              /* @__PURE__ */ jsx("h2", { className: "font-display font-serif italic text-2xl leading-[1.2] text-[var(--bone-fixed)] sm:text-3xl lg:text-[46px]", children: t("home.platformTitle") })
+              /* @__PURE__ */ jsx("h2", { className: "font-display font-serif italic text-2xl leading-[1.2] text-[var(--bone-fixed)] sm:text-3xl lg:text-[46px]", children: t("home.platformTitle") }),
+              /* @__PURE__ */ jsx("div", { className: "mt-8 flex flex-wrap gap-2 lg:hidden", children: features.map((f, i) => /* @__PURE__ */ jsx(
+                "button",
+                {
+                  type: "button",
+                  onClick: () => scrollToCard(i),
+                  className: `border px-3 py-2 font-mono text-[10px] tracking-widest transition-colors ${activeIndex === i ? "border-white/15 bg-white/[0.08] text-[var(--bone-fixed)]" : "border-white/10 text-white/45"}`,
+                  children: /* @__PURE__ */ jsx("span", { lang: "en", children: f.name })
+                },
+                f.id
+              )) }),
+              /* @__PURE__ */ jsxs("div", { className: "mt-8 lg:hidden", children: [
+                /* @__PURE__ */ jsx("p", { className: "mb-4 text-sm text-white/55", children: t("home.platformAccess") }),
+                /* @__PURE__ */ jsxs(
+                  "a",
+                  {
+                    href: inviteHref,
+                    className: "inline-flex items-center gap-2 border border-white/25 px-5 py-2.5 font-mono text-xs uppercase tracking-widest text-[var(--bone-fixed)] transition-colors hover:border-white/50 hover:bg-[var(--bone-fixed)] hover:text-[var(--ink-fixed)]",
+                    children: [
+                      t("home.requestInvitation"),
+                      " ",
+                      /* @__PURE__ */ jsx(ArrowRight, { className: "size-3" })
+                    ]
+                  }
+                )
+              ] })
             ] }),
             /* @__PURE__ */ jsx("div", { className: "mt-12 hidden flex-col gap-2 lg:flex", children: features.map((f, i) => /* @__PURE__ */ jsx(
               "button",
               {
                 type: "button",
                 onClick: () => scrollToCard(i),
-                className: `border px-4 py-3 text-left font-mono text-xs uppercase tracking-widest transition-colors ${activeIndex === i ? "border-white/15 bg-white/[0.08] text-[var(--bone-fixed)]" : "border-transparent text-white/45 hover:text-white/70"}`,
-                children: f.name
+                className: `border px-4 py-3 text-left font-mono text-xs tracking-widest transition-colors ${activeIndex === i ? "border-white/15 bg-white/[0.08] text-[var(--bone-fixed)]" : "border-transparent text-white/45 hover:text-white/70"}`,
+                children: /* @__PURE__ */ jsx("span", { lang: "en", children: f.name })
               },
               f.id
             )) }),
@@ -4152,7 +4285,7 @@ function PlatformFeatures({
               /* @__PURE__ */ jsxs(
                 "a",
                 {
-                  href: "/invitation",
+                  href: inviteHref,
                   className: "inline-flex items-center gap-2 border border-white/25 px-5 py-2.5 font-mono text-xs uppercase tracking-widest text-[var(--bone-fixed)] transition-colors hover:border-white/50 hover:bg-[var(--bone-fixed)] hover:text-[var(--ink-fixed)]",
                   children: [
                     t("home.requestInvitation"),
@@ -4176,28 +4309,8 @@ function PlatformFeatures({
               },
               f.id
             )),
-            restModules.length > 0 && /* @__PURE__ */ jsxs("div", { className: "mt-6 border-t border-white/10 pt-10", children: [
-              /* @__PURE__ */ jsx("p", { className: "mb-6 font-mono text-label uppercase tracking-widest text-white/45", children: t("home.moreTools", { n: restModules.length }) }),
-              /* @__PURE__ */ jsx("div", { className: "grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-1", children: restModules.map((mod) => {
-                const Icon = mod.icon;
-                return /* @__PURE__ */ jsxs(
-                  "div",
-                  {
-                    className: "flex flex-col gap-3 border border-white/10 p-5 sm:p-6",
-                    style: { backgroundColor: CARD_BG },
-                    children: [
-                      /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between", children: [
-                        /* @__PURE__ */ jsx(Icon, { className: "size-4 text-white/45", strokeWidth: 1.5 }),
-                        /* @__PURE__ */ jsx("span", { className: "font-mono text-label uppercase tracking-widest text-white/40", children: mod.tag })
-                      ] }),
-                      /* @__PURE__ */ jsx("h4", { className: "font-serif italic text-lg text-[var(--bone-fixed)]", children: mod.name }),
-                      /* @__PURE__ */ jsx("p", { className: "text-sm leading-relaxed text-white/50", children: mod.desc })
-                    ]
-                  },
-                  mod.id
-                );
-              }) })
-            ] })
+            renderModuleGrid(septemberModules, t("home.modulesSeptemberEyebrow")),
+            renderModuleGrid(roadmapModules, t("home.modulesRoadmapEyebrow"))
           ] })
         ] })
       ]
@@ -8210,6 +8323,7 @@ gsapWithCSS.core.Tween;
 const NEXT_VIDEO = "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260510_060007_60275ce7-030c-4668-a160-8f364ec537d3.mp4";
 function WhatsNextCinematic() {
   const t = useT();
+  const inviteHref = useLocalizedHref("/invitation");
   const videoWrapRef = useRef(null);
   const [ready, setReady] = useState(false);
   const reduceMotion = useRef(false);
@@ -8315,7 +8429,7 @@ function WhatsNextCinematic() {
                     /* @__PURE__ */ jsx(
                       "a",
                       {
-                        href: "/invitation",
+                        href: inviteHref,
                         className: "shrink-0 whitespace-nowrap bg-white px-5 py-3 text-center font-mono text-xs uppercase tracking-widest text-black transition-colors hover:bg-white/90 sm:py-2.5",
                         children: t("homeWhatsNext.cta")
                       }
@@ -8343,8 +8457,22 @@ const HERO_CHROME = "#0A0A0A";
 function FloatingNavbar({ placement = "overlay" }) {
   const t = useT();
   const [open, setOpen] = useState(false);
+  const homeHref = useLocalizedHref("/");
+  const inviteHref = useLocalizedHref("/invitation");
+  const ideaHref = useLocalizedHref("/#section-01");
+  const circleHref = useLocalizedHref("/#section-02");
+  const platformHref = useLocalizedHref("/#section-03");
+  const gatheringHref = useLocalizedHref("/#section-06");
+  const artifactsHref = useLocalizedHref("/haberler");
+  const localizedByKey = {
+    idea: ideaHref,
+    circle: circleHref,
+    platform: platformHref,
+    gathering: gatheringHref,
+    artifacts: artifactsHref
+  };
   const links = LINK_KEYS.map((link) => ({
-    href: link.href,
+    href: localizedByKey[link.key],
     label: t(`publicNav.${link.key}`)
   }));
   return /* @__PURE__ */ jsxs(
@@ -8357,7 +8485,7 @@ function FloatingNavbar({ placement = "overlay" }) {
       style: { backgroundColor: HERO_CHROME },
       children: [
         /* @__PURE__ */ jsxs("div", { className: "flex h-[56px] items-center justify-between gap-3 px-3 py-2.5 sm:h-auto sm:gap-4 sm:px-5 sm:py-3.5 md:px-6", children: [
-          /* @__PURE__ */ jsx("a", { href: "/", "aria-label": "inner hub home", className: "inline-flex shrink-0", children: /* @__PURE__ */ jsx(Lockup, { className: "text-[var(--bone-fixed)]", fontSize: "clamp(22px, 5.2vw, 32px)", pulse: true }) }),
+          /* @__PURE__ */ jsx("a", { href: homeHref, "aria-label": "inner hub home", className: "inline-flex shrink-0", children: /* @__PURE__ */ jsx(Lockup, { className: "text-[var(--bone-fixed)]", fontSize: "clamp(22px, 5.2vw, 32px)", pulse: true }) }),
           /* @__PURE__ */ jsx(
             "nav",
             {
@@ -8388,7 +8516,7 @@ function FloatingNavbar({ placement = "overlay" }) {
             /* @__PURE__ */ jsxs(
               "a",
               {
-                href: "/invitation",
+                href: inviteHref,
                 className: "hidden items-center gap-2.5 bg-[var(--bone-fixed)] px-4 py-2 font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--ink-fixed)] transition-colors hover:bg-white sm:inline-flex lg:px-5 lg:text-[11px]",
                 children: [
                   t("publicNav.invitation"),
@@ -8460,7 +8588,7 @@ function FloatingNavbar({ placement = "overlay" }) {
               /* @__PURE__ */ jsxs(
                 "a",
                 {
-                  href: "/invitation",
+                  href: inviteHref,
                   onClick: () => setOpen(false),
                   className: "flex items-center justify-between bg-[var(--bone-fixed)] px-4 py-3.5 font-mono text-xs uppercase tracking-widest text-[var(--ink-fixed)]",
                   children: [
@@ -8490,6 +8618,7 @@ function HomeOpening() {
 }
 function HeroInset() {
   const t = useT();
+  const inviteHref = useLocalizedHref("/invitation");
   return /* @__PURE__ */ jsx(
     "section",
     {
@@ -8571,7 +8700,7 @@ function HeroInset() {
                   /* @__PURE__ */ jsxs(
                     motion.a,
                     {
-                      href: "/invitation",
+                      href: inviteHref,
                       initial: { opacity: 0, y: 20 },
                       animate: { opacity: 1, y: 0 },
                       transition: { duration: 0.8, delay: 0.7, ease: EASE$1 },
@@ -8644,6 +8773,7 @@ function AboutIdea() {
 }
 function FoundingSeats() {
   const t = useT();
+  const inviteHref = useLocalizedHref("/invitation");
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
   const seatCards = useMemo(
@@ -8737,7 +8867,7 @@ function FoundingSeats() {
                   /* @__PURE__ */ jsxs(
                     "a",
                     {
-                      href: "/invitation",
+                      href: inviteHref,
                       className: "mt-5 inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-[var(--bone-fixed)]/70 transition-colors hover:text-[var(--bone-fixed)]",
                       children: [
                         t("home.learnMore"),
@@ -8795,21 +8925,132 @@ function useLenis(enabled = true) {
     };
   }, [enabled]);
 }
+const SITE = "https://inner.digital";
+function upsertMeta(attr, key, content) {
+  let el = document.head.querySelector(`meta[${attr}="${key}"]`);
+  if (!el) {
+    el = document.createElement("meta");
+    el.setAttribute(attr, key);
+    document.head.appendChild(el);
+  }
+  el.content = content;
+}
+function upsertLink(rel, href) {
+  let el = document.head.querySelector(`link[rel="${rel}"]`);
+  if (!el) {
+    el = document.createElement("link");
+    el.rel = rel;
+    document.head.appendChild(el);
+  }
+  el.href = href;
+}
+function upsertHreflang(hreflang, href) {
+  let el = document.head.querySelector(
+    `link[rel="alternate"][hreflang="${hreflang}"]`
+  );
+  if (!el) {
+    el = document.createElement("link");
+    el.rel = "alternate";
+    el.setAttribute("hreflang", hreflang);
+    document.head.appendChild(el);
+  }
+  el.href = href;
+}
+function upsertJsonLd(id, data) {
+  let el = document.getElementById(id);
+  if (!el) {
+    el = document.createElement("script");
+    el.id = id;
+    el.type = "application/ld+json";
+    document.head.appendChild(el);
+  }
+  el.textContent = JSON.stringify(data);
+}
+function toAbsolute(pathOrUrl) {
+  if (pathOrUrl.startsWith("http")) return pathOrUrl;
+  return `${SITE}${pathOrUrl.startsWith("/") ? pathOrUrl : `/${pathOrUrl}`}`;
+}
+function useSeo({
+  title,
+  description,
+  canonicalPath,
+  ogImage = "https://inner.digital/inner-og.png",
+  type = "website",
+  jsonLd,
+  noIndex = false
+}) {
+  const json = jsonLd ? JSON.stringify(jsonLd) : "";
+  useEffect(() => {
+    const fullTitle = title.includes("inner") ? title : `${title} · inner.hub`;
+    const canonical = toAbsolute(canonicalPath);
+    const bare = stripLocalePrefix(
+      canonicalPath.startsWith("http") ? new URL(canonicalPath).pathname : canonicalPath.startsWith("/") ? canonicalPath : `/${canonicalPath}`
+    );
+    const trUrl = toAbsolute(localizedPath(bare, "tr"));
+    const enUrl = toAbsolute(localizedPath(bare, "en"));
+    document.title = fullTitle;
+    upsertMeta("name", "description", description);
+    upsertMeta("name", "robots", noIndex ? "noindex, nofollow" : "index, follow");
+    upsertLink("canonical", canonical);
+    upsertHreflang("tr", trUrl);
+    upsertHreflang("en", enUrl);
+    upsertHreflang("x-default", trUrl);
+    upsertMeta("property", "og:title", fullTitle);
+    upsertMeta("property", "og:description", description);
+    upsertMeta(
+      "property",
+      "og:type",
+      type === "article" ? "article" : type === "video.other" ? "video.other" : "website"
+    );
+    upsertMeta("property", "og:url", canonical);
+    upsertMeta("property", "og:image", ogImage);
+    upsertMeta("property", "og:locale", canonical.includes("/en") ? "en_US" : "tr_TR");
+    upsertMeta("name", "twitter:card", "summary_large_image");
+    upsertMeta("name", "twitter:title", fullTitle);
+    upsertMeta("name", "twitter:description", description);
+    upsertMeta("name", "twitter:image", ogImage);
+    if (json) upsertJsonLd("ih-jsonld", JSON.parse(json));
+  }, [title, description, canonicalPath, ogImage, type, json, noIndex]);
+}
+function breadcrumbJsonLd(items) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: items.map((item, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: item.name,
+      item: item.path.startsWith("http") ? item.path : `${SITE}${item.path}`
+    }))
+  };
+}
 function Counter({ to, suffix = "" }) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
-  const [val, setVal] = useState(0);
+  const [val, setVal] = useState(to);
+  const [played, setPlayed] = useState(false);
   useEffect(() => {
-    if (!inView) return;
+    setVal(to);
+    setPlayed(false);
+  }, [to]);
+  useEffect(() => {
+    if (!inView || played) return;
+    if (typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setVal(to);
+      setPlayed(true);
+      return;
+    }
+    setPlayed(true);
     let start = 0;
-    const step = Math.ceil(to / 48);
+    setVal(0);
+    const step = Math.max(1, Math.ceil(to / 48));
     const id = setInterval(() => {
       start = Math.min(start + step, to);
       setVal(start);
       if (start >= to) clearInterval(id);
     }, 20);
     return () => clearInterval(id);
-  }, [inView, to]);
+  }, [inView, to, played]);
   return /* @__PURE__ */ jsxs("span", { ref, children: [
     val,
     suffix
@@ -8827,61 +9068,69 @@ function buildHomeModules(t) {
       name: "inner·signal",
       desc: t("home.modSignalDesc"),
       icon: Zap,
-      tag: t("home.modSignalTag")
+      tag: t("home.modSignalTag"),
+      phase: "live"
     },
     {
       id: "match",
       name: "inner·match",
       desc: t("home.modMatchDesc"),
       icon: Users,
-      tag: t("home.modMatchTag")
+      tag: t("home.modMatchTag"),
+      phase: "live"
     },
     {
       id: "capital",
       name: "inner·capital",
       desc: t("home.modCapitalDesc"),
       icon: TrendingUp,
-      tag: t("home.modCapitalTag")
-    },
-    {
-      id: "vault",
-      name: "inner·vault",
-      desc: t("home.modVaultDesc"),
-      icon: BookOpen,
-      tag: t("home.modVaultTag")
+      tag: t("home.modCapitalTag"),
+      phase: "live"
     },
     {
       id: "pulse",
       name: "inner·pulse",
       desc: t("home.modPulseDesc"),
       icon: Radio,
-      tag: t("home.modPulseTag")
+      tag: t("home.modPulseTag"),
+      phase: "september"
+    },
+    {
+      id: "vault",
+      name: "inner·vault",
+      desc: t("home.modVaultDesc"),
+      icon: BookOpen,
+      tag: t("home.modVaultTag"),
+      phase: "roadmap"
     },
     {
       id: "id",
       name: "inner·id",
       desc: t("home.modIdDesc"),
       icon: Fingerprint,
-      tag: t("home.modIdTag")
+      tag: t("home.modIdTag"),
+      phase: "roadmap"
     },
     {
       id: "api",
       name: "inner·api",
       desc: t("home.modApiDesc"),
       icon: Code2,
-      tag: t("home.modApiTag")
+      tag: t("home.modApiTag"),
+      phase: "roadmap"
     },
     {
       id: "bounty",
       name: "inner·bounty",
       desc: t("home.modBountyDesc"),
       icon: Target,
-      tag: t("home.modBountyTag")
+      tag: t("home.modBountyTag"),
+      phase: "roadmap"
     }
   ];
 }
 function buildPlatformFeatures(modules) {
-  return modules.slice(0, 3).map((m) => ({
+  return modules.filter((m) => m.phase === "live").map((m) => ({
     id: m.id,
     name: m.name,
     tag: m.tag,
@@ -8931,7 +9180,14 @@ function MarqueeStrip({ modules }) {
                   }
                 ) }),
                 /* @__PURE__ */ jsxs("span", { className: "flex flex-col gap-0.5", children: [
-                  /* @__PURE__ */ jsx("span", { className: "font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--bone-fixed)] sm:text-[11px]", children: item.name }),
+                  /* @__PURE__ */ jsx(
+                    "span",
+                    {
+                      lang: "en",
+                      className: "font-mono text-[10px] tracking-[0.16em] text-[var(--bone-fixed)] sm:text-[11px]",
+                      children: item.name.toUpperCase()
+                    }
+                  ),
                   /* @__PURE__ */ jsx("span", { className: "hidden font-mono text-[8px] uppercase tracking-[0.14em] text-[var(--bone-fixed)]/40 sm:block", children: item.tag })
                 ] }),
                 /* @__PURE__ */ jsx(
@@ -8972,6 +9228,15 @@ function Home() {
   const { locale } = useLocale();
   const modules = buildHomeModules(t);
   const platformFeatures = buildPlatformFeatures(modules);
+  const liveCount = modules.filter((m) => m.phase === "live").length;
+  const septemberModules = modules.filter((m) => m.phase === "september");
+  const roadmapModules = modules.filter((m) => m.phase === "roadmap");
+  useSeo({
+    title: t("home.metaTitle"),
+    description: t("home.metaDescription"),
+    canonicalPath: localizedPath("/", locale),
+    type: "website"
+  });
   useEffect(() => {
     if (window.location.hash) {
       const el = document.getElementById(window.location.hash.slice(1));
@@ -8986,8 +9251,15 @@ function Home() {
     /* @__PURE__ */ jsx(IndexRail, {}),
     /* @__PURE__ */ jsxs("main", { id: "main-content", className: "flex-grow", children: [
       /* @__PURE__ */ jsx(HomeOpening, {}),
-      /* @__PURE__ */ jsx(MarqueeStrip, { modules }),
-      /* @__PURE__ */ jsx("section", { id: "section-03", children: /* @__PURE__ */ jsx(PlatformFeatures, { features: platformFeatures, restModules: modules.slice(3) }) }),
+      /* @__PURE__ */ jsx(MarqueeStrip, { modules: modules.filter((m) => m.phase === "live") }),
+      /* @__PURE__ */ jsx("section", { id: "section-03", children: /* @__PURE__ */ jsx(
+        PlatformFeatures,
+        {
+          features: platformFeatures,
+          septemberModules,
+          roadmapModules
+        }
+      ) }),
       /* @__PURE__ */ jsxs("div", { className: "relative overflow-hidden bg-[var(--ink-fixed)] border-t border-border/15", children: [
         /* @__PURE__ */ jsxs("div", { className: "absolute inset-x-0 top-0 h-[85vh] md:h-[95vh] z-0", "aria-hidden": "true", children: [
           /* @__PURE__ */ jsx(
@@ -9066,7 +9338,7 @@ function Home() {
               /* @__PURE__ */ jsxs("div", { className: "grid min-w-0 grid-cols-3 gap-3 sm:gap-6 md:gap-10 lg:flex-1", children: [
                 /* @__PURE__ */ jsx(StatItem, { n: 34, label: t("home.people") }),
                 /* @__PURE__ */ jsx(StatItem, { n: 2, label: t("home.days") }),
-                /* @__PURE__ */ jsx(StatItem, { n: 8, label: t("home.modules") })
+                /* @__PURE__ */ jsx(StatItem, { n: liveCount, label: t("home.modules") })
               ] }),
               /* @__PURE__ */ jsx(FadeIn, { delay: 0.2, className: "flex-shrink-0", children: /* @__PURE__ */ jsx(DiagramCircle, {}) })
             ] }),
@@ -9354,6 +9626,7 @@ const fieldClass = "w-full border-0 border-b border-white/20 bg-transparent px-0
 function Invitation() {
   const t = useT();
   const { locale } = useLocale();
+  useLocalizedHref("/");
   const { mutate: submitRequest2, isSuccess, isError, isPending } = useSubmitRequest();
   const roles = useMemo(
     () => ROLE_DEFS.map((r) => ({
@@ -9404,9 +9677,22 @@ function Invitation() {
     trackEvent("invite_request_submitted", { role: role ?? "unknown" });
   }, [isSuccess, role]);
   useEffect(() => {
+    if (typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setBootProgress(100);
+      setBooting(false);
+      return;
+    }
     let raf = 0;
+    let finishTimer = null;
+    let finished = false;
     const start = performance.now();
     const duration = 1100;
+    const finish = () => {
+      if (finished) return;
+      finished = true;
+      setBootProgress(100);
+      finishTimer = setTimeout(() => setBooting(false), 120);
+    };
     const tick = (now) => {
       const t2 = Math.min(1, (now - start) / duration);
       const p = 1 - Math.pow(1 - t2, 3);
@@ -9414,11 +9700,16 @@ function Invitation() {
       if (t2 < 1) {
         raf = requestAnimationFrame(tick);
       } else {
-        setTimeout(() => setBooting(false), 180);
+        finish();
       }
     };
     raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
+    const failsafe = setTimeout(finish, 2500);
+    return () => {
+      cancelAnimationFrame(raf);
+      clearTimeout(failsafe);
+      if (finishTimer) clearTimeout(finishTimer);
+    };
   }, []);
   useEffect(() => {
     if (organizationDomain.trim()) return;
@@ -9566,341 +9857,341 @@ function Invitation() {
         )
       ] })
     ] }),
-    /* @__PURE__ */ jsx("main", { className: "relative z-10 flex flex-1 items-center justify-center px-4 py-10 sm:px-6 md:px-10 md:py-14", children: /* @__PURE__ */ jsx(AnimatePresence, { mode: "wait", children: booting ? /* @__PURE__ */ jsxs(
-      motion.div,
-      {
-        initial: { opacity: 0 },
-        animate: { opacity: 1 },
-        exit: { opacity: 0, y: -8 },
-        transition: { duration: 0.35 },
-        className: "w-full max-w-md",
-        children: [
-          /* @__PURE__ */ jsx("p", { className: "mb-4 font-mono text-[10px] uppercase tracking-[0.18em] text-white/50", children: t("invite.preparing") }),
-          /* @__PURE__ */ jsx("div", { className: "mb-3 h-[2px] w-full overflow-hidden bg-white/15", children: /* @__PURE__ */ jsx(
-            motion.div,
-            {
-              className: "h-full bg-[var(--inner-green)]",
-              style: { width: `${bootProgress}%` }
-            }
-          ) }),
-          /* @__PURE__ */ jsxs("div", { className: "flex items-baseline justify-between font-mono text-[11px] uppercase tracking-widest text-white/45", children: [
-            /* @__PURE__ */ jsx("span", { children: t("invite.access") }),
-            /* @__PURE__ */ jsxs("span", { children: [
-              bootProgress,
-              "%"
+    /* @__PURE__ */ jsxs("main", { className: "relative z-10 flex flex-1 items-center justify-center px-4 py-10 sm:px-6 md:px-10 md:py-14", children: [
+      /* @__PURE__ */ jsx(AnimatePresence, { children: booting && /* @__PURE__ */ jsx(
+        motion.div,
+        {
+          initial: { opacity: 0 },
+          animate: { opacity: 1 },
+          exit: { opacity: 0 },
+          transition: { duration: 0.35 },
+          className: "absolute inset-0 z-30 flex items-center justify-center bg-[var(--ink-fixed)]/92 px-4 backdrop-blur-sm",
+          "aria-live": "polite",
+          "aria-busy": "true",
+          children: /* @__PURE__ */ jsxs("div", { className: "w-full max-w-md", children: [
+            /* @__PURE__ */ jsx("p", { className: "mb-4 font-mono text-[10px] uppercase tracking-[0.18em] text-white/50", children: t("invite.preparing") }),
+            /* @__PURE__ */ jsx("div", { className: "mb-3 h-[2px] w-full overflow-hidden bg-white/15", children: /* @__PURE__ */ jsx("div", { className: "h-full bg-[var(--inner-green)]", style: { width: `${bootProgress}%` } }) }),
+            /* @__PURE__ */ jsxs("div", { className: "flex items-baseline justify-between font-mono text-[11px] tracking-widest text-white/45", children: [
+              /* @__PURE__ */ jsx("span", { lang: "en", children: t("invite.access") }),
+              /* @__PURE__ */ jsxs("span", { children: [
+                bootProgress,
+                "%"
+              ] })
             ] })
           ] })
-        ]
-      },
-      "boot"
-    ) : isSuccess ? /* @__PURE__ */ jsxs(
-      motion.div,
-      {
-        initial: { opacity: 0, y: 18 },
-        animate: { opacity: 1, y: 0 },
-        transition: { duration: 0.55, ease: EASE },
-        className: "w-full max-w-lg panel-glass-ink px-6 py-10 sm:px-8 sm:py-12",
-        children: [
-          /* @__PURE__ */ jsxs("div", { className: "mb-6 flex items-center gap-3", children: [
-            /* @__PURE__ */ jsx("span", { className: "flex size-7 items-center justify-center bg-[var(--inner-green)]", children: /* @__PURE__ */ jsx(Check, { className: "size-3.5 text-black", strokeWidth: 2.5 }) }),
-            /* @__PURE__ */ jsx("span", { className: "font-mono text-xs uppercase tracking-widest text-white/60", children: t("invite.received") })
-          ] }),
-          /* @__PURE__ */ jsx("h1", { className: "mb-4 font-display font-serif italic text-4xl leading-[1.1] text-balance text-[var(--bone-fixed)] md:text-5xl", children: t("invite.successTitle") }),
-          /* @__PURE__ */ jsx("p", { className: "max-w-[42ch] text-sm leading-relaxed text-white/60 md:text-base", children: t("invite.successBody") }),
-          /* @__PURE__ */ jsxs("div", { className: "mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-6", children: [
-            /* @__PURE__ */ jsxs(
-              "a",
-              {
-                href: "/",
-                className: "inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-[var(--bone-fixed)]/70 transition-colors hover:text-[var(--bone-fixed)]",
-                children: [
-                  t("invite.backHome"),
-                  /* @__PURE__ */ jsx(ArrowUpRight, { className: "size-3.5" })
-                ]
-              }
-            ),
-            /* @__PURE__ */ jsxs(
-              "a",
-              {
-                href: "/panel",
-                className: "inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-white/40 transition-colors hover:text-white/75",
-                children: [
-                  t("invite.successPanelHint"),
-                  /* @__PURE__ */ jsx(ArrowUpRight, { className: "size-3.5" })
-                ]
-              }
-            )
-          ] })
-        ]
-      },
-      "success"
-    ) : /* @__PURE__ */ jsxs(
-      motion.div,
-      {
-        initial: { opacity: 0, y: 16 },
-        animate: { opacity: 1, y: 0 },
-        transition: { duration: 0.5, ease: EASE },
-        className: "w-full max-w-xl panel-glass-ink",
-        onKeyDown,
-        children: [
-          /* @__PURE__ */ jsxs("div", { className: "border-b border-white/10 px-5 pt-5 sm:px-7", children: [
-            /* @__PURE__ */ jsxs("div", { className: "mb-3 flex items-center justify-between gap-4", children: [
-              /* @__PURE__ */ jsx("p", { className: "font-mono text-[10px] uppercase tracking-[0.16em] text-white/50", children: t("invite.requestTitle") }),
-              /* @__PURE__ */ jsxs("p", { className: "font-mono text-[10px] uppercase tracking-widest text-white/40", children: [
-                String(step + 1).padStart(2, "0"),
-                " / ",
-                String(steps.length).padStart(2, "0")
-              ] })
+        },
+        "boot"
+      ) }),
+      /* @__PURE__ */ jsx(AnimatePresence, { mode: "wait", children: isSuccess ? /* @__PURE__ */ jsxs(
+        motion.div,
+        {
+          initial: { opacity: 0, y: 18 },
+          animate: { opacity: 1, y: 0 },
+          transition: { duration: 0.55, ease: EASE },
+          className: "w-full max-w-lg panel-glass-ink px-6 py-10 sm:px-8 sm:py-12",
+          children: [
+            /* @__PURE__ */ jsxs("div", { className: "mb-6 flex items-center gap-3", children: [
+              /* @__PURE__ */ jsx("span", { className: "flex size-7 items-center justify-center bg-[var(--inner-green)]", children: /* @__PURE__ */ jsx(Check, { className: "size-3.5 text-black", strokeWidth: 2.5 }) }),
+              /* @__PURE__ */ jsx("span", { className: "font-mono text-xs uppercase tracking-widest text-white/60", children: t("invite.received") })
             ] }),
-            /* @__PURE__ */ jsx("div", { className: "h-[2px] w-full overflow-hidden bg-white/10", children: /* @__PURE__ */ jsx(
+            /* @__PURE__ */ jsx("h1", { className: "mb-4 font-display font-serif italic text-4xl leading-[1.1] text-balance text-[var(--bone-fixed)] md:text-5xl", children: t("invite.successTitle") }),
+            /* @__PURE__ */ jsx("p", { className: "max-w-[42ch] text-sm leading-relaxed text-white/60 md:text-base", children: t("invite.successBody") }),
+            /* @__PURE__ */ jsxs("div", { className: "mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-6", children: [
+              /* @__PURE__ */ jsxs(
+                "a",
+                {
+                  href: "/",
+                  className: "inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-[var(--bone-fixed)]/70 transition-colors hover:text-[var(--bone-fixed)]",
+                  children: [
+                    t("invite.backHome"),
+                    /* @__PURE__ */ jsx(ArrowUpRight, { className: "size-3.5" })
+                  ]
+                }
+              ),
+              /* @__PURE__ */ jsxs(
+                "a",
+                {
+                  href: "/panel",
+                  className: "inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-white/40 transition-colors hover:text-white/75",
+                  children: [
+                    t("invite.successPanelHint"),
+                    /* @__PURE__ */ jsx(ArrowUpRight, { className: "size-3.5" })
+                  ]
+                }
+              )
+            ] })
+          ]
+        },
+        "success"
+      ) : /* @__PURE__ */ jsxs(
+        motion.div,
+        {
+          initial: false,
+          animate: { opacity: booting ? 0.35 : 1, y: 0 },
+          transition: { duration: 0.5, ease: EASE },
+          className: "w-full max-w-xl panel-glass-ink",
+          onKeyDown,
+          "aria-hidden": booting,
+          children: [
+            /* @__PURE__ */ jsxs("div", { className: "border-b border-white/10 px-5 pt-5 sm:px-7", children: [
+              /* @__PURE__ */ jsxs("div", { className: "mb-3 flex items-center justify-between gap-4", children: [
+                /* @__PURE__ */ jsx("p", { className: "font-mono text-[10px] uppercase tracking-[0.16em] text-white/50", children: t("invite.requestTitle") }),
+                /* @__PURE__ */ jsxs("p", { className: "font-mono text-[10px] uppercase tracking-widest text-white/40", children: [
+                  String(step + 1).padStart(2, "0"),
+                  " / ",
+                  String(steps.length).padStart(2, "0")
+                ] })
+              ] }),
+              /* @__PURE__ */ jsx("div", { className: "h-[2px] w-full overflow-hidden bg-white/10", children: /* @__PURE__ */ jsx(
+                motion.div,
+                {
+                  className: "h-full bg-[var(--inner-green)]",
+                  animate: { width: `${progress}%` },
+                  transition: { duration: 0.45, ease: EASE }
+                }
+              ) }),
+              /* @__PURE__ */ jsx("div", { className: "mt-4 flex gap-1.5 overflow-x-auto pb-4", children: steps.map((s, i) => /* @__PURE__ */ jsx(
+                "button",
+                {
+                  type: "button",
+                  onClick: () => {
+                    if (i < step) setStep(i);
+                  },
+                  className: `shrink-0 border-b px-2 py-1 font-mono text-[9px] uppercase tracking-widest transition-colors sm:text-[10px] ${i === step ? "border-[var(--inner-green)] text-[var(--bone-fixed)]" : i < step ? "border-transparent text-[var(--inner-green)]/80 hover:text-[var(--inner-green)]" : "border-transparent text-white/25"}`,
+                  children: s.id
+                },
+                s.id
+              )) })
+            ] }),
+            /* @__PURE__ */ jsx("div", { className: "px-5 py-7 sm:px-7 sm:py-8", children: /* @__PURE__ */ jsx(AnimatePresence, { mode: "wait", children: /* @__PURE__ */ jsxs(
               motion.div,
               {
-                className: "h-full bg-[var(--inner-green)]",
-                animate: { width: `${progress}%` },
-                transition: { duration: 0.45, ease: EASE }
-              }
-            ) }),
-            /* @__PURE__ */ jsx("div", { className: "mt-4 flex gap-1.5 overflow-x-auto pb-4", children: steps.map((s, i) => /* @__PURE__ */ jsx(
-              "button",
-              {
-                type: "button",
-                onClick: () => {
-                  if (i < step) setStep(i);
-                },
-                className: `shrink-0 border-b px-2 py-1 font-mono text-[9px] uppercase tracking-widest transition-colors sm:text-[10px] ${i === step ? "border-[var(--inner-green)] text-[var(--bone-fixed)]" : i < step ? "border-transparent text-[var(--inner-green)]/80 hover:text-[var(--inner-green)]" : "border-transparent text-white/25"}`,
-                children: s.id
-              },
-              s.id
-            )) })
-          ] }),
-          /* @__PURE__ */ jsx("div", { className: "px-5 py-7 sm:px-7 sm:py-8", children: /* @__PURE__ */ jsx(AnimatePresence, { mode: "wait", children: /* @__PURE__ */ jsxs(
-            motion.div,
-            {
-              initial: { opacity: 0, x: 18 },
-              animate: { opacity: 1, x: 0 },
-              exit: { opacity: 0, x: -14 },
-              transition: { duration: 0.35, ease: EASE },
-              children: [
-                /* @__PURE__ */ jsx("h1", { className: "mb-2 font-display font-serif italic text-3xl leading-[1.1] text-balance text-[var(--bone-fixed)] sm:text-4xl", children: steps[step].title }),
-                /* @__PURE__ */ jsx("p", { className: "mb-8 max-w-[46ch] text-sm leading-relaxed text-white/55", children: stepCopy(step, role) }),
-                step === 0 && /* @__PURE__ */ jsx("div", { className: "grid grid-cols-1 gap-2 sm:grid-cols-2", children: roles.map((r) => {
-                  const Icon = r.icon;
-                  const active = role === r.value;
-                  return /* @__PURE__ */ jsxs(
-                    "button",
-                    {
-                      type: "button",
-                      onClick: () => setRole(r.value),
-                      className: `group flex flex-col items-start gap-3 border px-4 py-4 text-left transition-all duration-300 ${active ? "border-[var(--inner-green)]/70 bg-[var(--inner-green)]/[0.12] shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]" : "border-white/12 bg-white/[0.03] backdrop-blur-sm hover:border-white/30 hover:bg-white/[0.06]"}`,
-                      children: [
-                        /* @__PURE__ */ jsxs("div", { className: "flex w-full items-center justify-between", children: [
-                          /* @__PURE__ */ jsx(
-                            Icon,
-                            {
-                              className: `size-4 ${active ? "text-[var(--inner-green)]" : "text-white/50"}`,
-                              strokeWidth: 1.6
-                            }
-                          ),
-                          active ? /* @__PURE__ */ jsx(Check, { className: "size-3.5 text-[var(--inner-green)]", strokeWidth: 2.5 }) : null
-                        ] }),
-                        /* @__PURE__ */ jsxs("div", { children: [
-                          /* @__PURE__ */ jsx("p", { className: "font-mono text-[11px] uppercase tracking-widest text-[var(--bone-fixed)]", children: r.label }),
-                          /* @__PURE__ */ jsx("p", { className: "mt-1 text-xs leading-snug text-white/45", children: r.hint })
-                        ] })
-                      ]
-                    },
-                    r.value
-                  );
-                }) }),
-                step === 1 && /* @__PURE__ */ jsxs("div", { className: "space-y-6", children: [
-                  /* @__PURE__ */ jsx(Field, { label: t("invite.fullName"), required: true, children: /* @__PURE__ */ jsx(
-                    "input",
-                    {
-                      type: "text",
-                      value: name,
-                      onChange: (e) => setName(e.target.value),
-                      placeholder: t("invite.phName"),
-                      className: fieldClass,
-                      autoComplete: "name",
-                      autoFocus: true
-                    }
-                  ) }),
-                  /* @__PURE__ */ jsx(Field, { label: t("invite.email"), required: true, children: /* @__PURE__ */ jsx(
-                    "input",
-                    {
-                      type: "email",
-                      value: email,
-                      onChange: (e) => setEmail(e.target.value),
-                      placeholder: t("invite.phEmail"),
-                      className: fieldClass,
-                      autoComplete: "email"
-                    }
-                  ) })
-                ] }),
-                step === 2 && /* @__PURE__ */ jsxs("div", { className: "space-y-6", children: [
-                  /* @__PURE__ */ jsxs("div", { className: "flex items-start gap-4 border border-white/10 bg-white/[0.03] p-4", children: [
-                    /* @__PURE__ */ jsx("div", { className: "flex size-14 shrink-0 items-center justify-center border border-white/15 bg-black/40", children: logoLoading ? /* @__PURE__ */ jsx("span", { className: "font-mono text-[9px] uppercase tracking-widest text-white/40", children: "…" }) : organizationLogo ? /* @__PURE__ */ jsx(
-                      "img",
+                initial: { opacity: 0, x: 18 },
+                animate: { opacity: 1, x: 0 },
+                exit: { opacity: 0, x: -14 },
+                transition: { duration: 0.35, ease: EASE },
+                children: [
+                  /* @__PURE__ */ jsx("h1", { className: "mb-2 font-display font-serif italic text-3xl leading-[1.1] text-balance text-[var(--bone-fixed)] sm:text-4xl", children: steps[step].title }),
+                  /* @__PURE__ */ jsx("p", { className: "mb-8 max-w-[46ch] text-sm leading-relaxed text-white/55", children: stepCopy(step, role) }),
+                  step === 0 && /* @__PURE__ */ jsx("div", { className: "grid grid-cols-1 gap-2 sm:grid-cols-2", children: roles.map((r) => {
+                    const Icon = r.icon;
+                    const active = role === r.value;
+                    return /* @__PURE__ */ jsxs(
+                      "button",
                       {
-                        src: organizationLogo,
-                        alt: "",
-                        className: "size-10 object-contain"
+                        type: "button",
+                        onClick: () => setRole(r.value),
+                        className: `group flex flex-col items-start gap-3 border px-4 py-4 text-left transition-all duration-300 ${active ? "border-[var(--inner-green)]/70 bg-[var(--inner-green)]/[0.12] shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]" : "border-white/12 bg-white/[0.03] backdrop-blur-sm hover:border-white/30 hover:bg-white/[0.06]"}`,
+                        children: [
+                          /* @__PURE__ */ jsxs("div", { className: "flex w-full items-center justify-between", children: [
+                            /* @__PURE__ */ jsx(
+                              Icon,
+                              {
+                                className: `size-4 ${active ? "text-[var(--inner-green)]" : "text-white/50"}`,
+                                strokeWidth: 1.6
+                              }
+                            ),
+                            active ? /* @__PURE__ */ jsx(Check, { className: "size-3.5 text-[var(--inner-green)]", strokeWidth: 2.5 }) : null
+                          ] }),
+                          /* @__PURE__ */ jsxs("div", { children: [
+                            /* @__PURE__ */ jsx("p", { className: "font-mono text-[11px] uppercase tracking-widest text-[var(--bone-fixed)]", children: r.label }),
+                            /* @__PURE__ */ jsx("p", { className: "mt-1 text-xs leading-snug text-white/45", children: r.hint })
+                          ] })
+                        ]
+                      },
+                      r.value
+                    );
+                  }) }),
+                  step === 1 && /* @__PURE__ */ jsxs("div", { className: "space-y-6", children: [
+                    /* @__PURE__ */ jsx(Field, { label: t("invite.fullName"), required: true, children: /* @__PURE__ */ jsx(
+                      "input",
+                      {
+                        type: "text",
+                        value: name,
+                        onChange: (e) => setName(e.target.value),
+                        placeholder: t("invite.phName"),
+                        className: fieldClass,
+                        autoComplete: "name",
+                        autoFocus: true
                       }
-                    ) : /* @__PURE__ */ jsx(Building2, { className: "size-5 text-white/35", strokeWidth: 1.5 }) }),
-                    /* @__PURE__ */ jsxs("div", { className: "min-w-0 flex-1", children: [
-                      /* @__PURE__ */ jsx("p", { className: "font-mono text-[10px] uppercase tracking-widest text-white/45", children: organizationLogo ? t("invite.logoFound") : t("invite.logoAuto") }),
-                      /* @__PURE__ */ jsx("p", { className: "mt-1 text-xs leading-snug text-white/50", children: t("invite.logoHint") })
-                    ] })
+                    ) }),
+                    /* @__PURE__ */ jsx(Field, { label: t("invite.email"), required: true, children: /* @__PURE__ */ jsx(
+                      "input",
+                      {
+                        type: "email",
+                        value: email,
+                        onChange: (e) => setEmail(e.target.value),
+                        placeholder: t("invite.phEmail"),
+                        className: fieldClass,
+                        autoComplete: "email"
+                      }
+                    ) })
                   ] }),
-                  /* @__PURE__ */ jsx(
-                    Field,
-                    {
-                      label: t("invite.orgLabel"),
-                      hint: orgRequired ? t("invite.required") : t("invite.optional"),
-                      required: orgRequired,
-                      children: /* @__PURE__ */ jsx(
-                        "input",
-                        {
-                          type: "text",
-                          value: organization,
-                          onChange: (e) => setOrganization(e.target.value),
-                          placeholder: t("invite.phOrg"),
-                          className: fieldClass,
-                          autoComplete: "organization",
-                          autoFocus: true
-                        }
-                      )
-                    }
-                  ),
-                  /* @__PURE__ */ jsx(Field, { label: t("invite.orgDomain"), hint: t("invite.forLogo"), children: /* @__PURE__ */ jsx(
-                    "input",
-                    {
-                      type: "text",
-                      value: organizationDomain,
-                      onChange: (e) => setOrganizationDomain(e.target.value),
-                      placeholder: t("invite.phDomain"),
-                      className: fieldClass,
-                      autoComplete: "off"
-                    }
-                  ) }),
-                  /* @__PURE__ */ jsx(Field, { label: t("invite.linkedin"), hint: t("invite.optional"), children: /* @__PURE__ */ jsx(
-                    "input",
-                    {
-                      type: "url",
-                      value: linkedin,
-                      onChange: (e) => setLinkedin(e.target.value),
-                      placeholder: "https://linkedin.com/in/...",
-                      className: fieldClass,
-                      autoComplete: "off"
-                    }
-                  ) })
-                ] }),
-                step === 3 && /* @__PURE__ */ jsx(Field, { label: t("invite.storyLabel"), required: true, children: /* @__PURE__ */ jsx(
-                  "textarea",
-                  {
-                    value: whoYouAre,
-                    onChange: (e) => setWhoYouAre(e.target.value),
-                    placeholder: t("invite.phStory"),
-                    className: `${fieldClass} min-h-[140px] resize-none py-3 leading-relaxed`,
-                    autoFocus: true
-                  }
-                ) }),
-                step === 4 && /* @__PURE__ */ jsxs("div", { className: "space-y-6", children: [
-                  /* @__PURE__ */ jsx(Field, { label: t("invite.introLabel"), hint: t("invite.optional"), children: /* @__PURE__ */ jsx(
-                    "input",
-                    {
-                      type: "text",
-                      value: whoIntroduced,
-                      onChange: (e) => setWhoIntroduced(e.target.value),
-                      placeholder: t("invite.phIntro"),
-                      className: fieldClass,
-                      autoComplete: "off",
-                      autoFocus: true
-                    }
-                  ) }),
-                  /* @__PURE__ */ jsxs("div", { className: "border border-white/12 bg-white/[0.04] px-4 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-md", children: [
-                    /* @__PURE__ */ jsx("p", { className: "mb-3 font-mono text-[10px] uppercase tracking-widest text-white/40", children: t("invite.intro") }),
-                    /* @__PURE__ */ jsxs("div", { className: "mb-3 flex items-center gap-3", children: [
-                      organizationLogo ? /* @__PURE__ */ jsx(
+                  step === 2 && /* @__PURE__ */ jsxs("div", { className: "space-y-6", children: [
+                    /* @__PURE__ */ jsxs("div", { className: "flex items-start gap-4 border border-white/10 bg-white/[0.03] p-4", children: [
+                      /* @__PURE__ */ jsx("div", { className: "flex size-14 shrink-0 items-center justify-center border border-white/15 bg-black/40", children: logoLoading ? /* @__PURE__ */ jsx("span", { className: "font-mono text-[9px] uppercase tracking-widest text-white/40", children: "…" }) : organizationLogo ? /* @__PURE__ */ jsx(
                         "img",
                         {
                           src: organizationLogo,
                           alt: "",
-                          className: "size-9 border border-white/10 bg-white object-contain p-1"
+                          className: "size-10 object-contain"
                         }
-                      ) : null,
-                      /* @__PURE__ */ jsxs("div", { className: "min-w-0", children: [
-                        /* @__PURE__ */ jsx("p", { className: "truncate text-sm text-[var(--bone-fixed)]", children: organization || "Kurum belirtilmedi" }),
-                        organizationDomain ? /* @__PURE__ */ jsx("p", { className: "font-mono text-[10px] text-white/40", children: organizationDomain }) : null
+                      ) : /* @__PURE__ */ jsx(Building2, { className: "size-5 text-white/35", strokeWidth: 1.5 }) }),
+                      /* @__PURE__ */ jsxs("div", { className: "min-w-0 flex-1", children: [
+                        /* @__PURE__ */ jsx("p", { className: "font-mono text-[10px] uppercase tracking-widest text-white/45", children: organizationLogo ? t("invite.logoFound") : t("invite.logoAuto") }),
+                        /* @__PURE__ */ jsx("p", { className: "mt-1 text-xs leading-snug text-white/50", children: t("invite.logoHint") })
                       ] })
                     ] }),
-                    /* @__PURE__ */ jsxs("dl", { className: "space-y-2 text-sm", children: [
-                      /* @__PURE__ */ jsx(SummaryRow, { label: t("invite.howEnter"), value: roles.find((r) => r.value === role)?.label ?? "·" }),
-                      /* @__PURE__ */ jsx(SummaryRow, { label: "İsim", value: name || "·" }),
-                      /* @__PURE__ */ jsx(SummaryRow, { label: "Email", value: email || "·" }),
-                      linkedin ? /* @__PURE__ */ jsx(SummaryRow, { label: "LinkedIn", value: linkedin }) : null
-                    ] })
+                    /* @__PURE__ */ jsx(
+                      Field,
+                      {
+                        label: t("invite.orgLabel"),
+                        hint: orgRequired ? t("invite.required") : t("invite.optional"),
+                        required: orgRequired,
+                        children: /* @__PURE__ */ jsx(
+                          "input",
+                          {
+                            type: "text",
+                            value: organization,
+                            onChange: (e) => setOrganization(e.target.value),
+                            placeholder: t("invite.phOrg"),
+                            className: fieldClass,
+                            autoComplete: "organization",
+                            autoFocus: true
+                          }
+                        )
+                      }
+                    ),
+                    /* @__PURE__ */ jsx(Field, { label: t("invite.orgDomain"), hint: t("invite.forLogo"), children: /* @__PURE__ */ jsx(
+                      "input",
+                      {
+                        type: "text",
+                        value: organizationDomain,
+                        onChange: (e) => setOrganizationDomain(e.target.value),
+                        placeholder: t("invite.phDomain"),
+                        className: fieldClass,
+                        autoComplete: "off"
+                      }
+                    ) }),
+                    /* @__PURE__ */ jsx(Field, { label: t("invite.linkedin"), hint: t("invite.optional"), children: /* @__PURE__ */ jsx(
+                      "input",
+                      {
+                        type: "url",
+                        value: linkedin,
+                        onChange: (e) => setLinkedin(e.target.value),
+                        placeholder: "https://linkedin.com/in/...",
+                        className: fieldClass,
+                        autoComplete: "off"
+                      }
+                    ) })
                   ] }),
-                  /* @__PURE__ */ jsx("div", { className: "sr-only", "aria-hidden": true, children: /* @__PURE__ */ jsx(
-                    "input",
+                  step === 3 && /* @__PURE__ */ jsx(Field, { label: t("invite.storyLabel"), required: true, children: /* @__PURE__ */ jsx(
+                    "textarea",
                     {
-                      type: "text",
-                      tabIndex: -1,
-                      autoComplete: "off",
-                      value: fax,
-                      onChange: (e) => setFax(e.target.value)
+                      value: whoYouAre,
+                      onChange: (e) => setWhoYouAre(e.target.value),
+                      placeholder: t("invite.phStory"),
+                      className: `${fieldClass} min-h-[140px] resize-none py-3 leading-relaxed`,
+                      autoFocus: true
                     }
                   ) }),
-                  isError ? /* @__PURE__ */ jsx("p", { className: "font-mono text-[11px] uppercase tracking-widest text-[var(--error)]", children: "Bir şeyler ters gitti. Tekrar dene." }) : null
-                ] })
-              ]
-            },
-            step
-          ) }) }),
-          /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between gap-3 border-t border-white/10 px-5 py-4 sm:px-7", children: [
-            /* @__PURE__ */ jsxs(
-              "button",
-              {
-                type: "button",
-                onClick: goBack,
-                disabled: step === 0,
-                className: "inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-white/50 transition-colors hover:text-white disabled:invisible",
-                children: [
-                  /* @__PURE__ */ jsx(ArrowLeft, { className: "size-3.5" }),
-                  t("common.back")
+                  step === 4 && /* @__PURE__ */ jsxs("div", { className: "space-y-6", children: [
+                    /* @__PURE__ */ jsx(Field, { label: t("invite.introLabel"), hint: t("invite.optional"), children: /* @__PURE__ */ jsx(
+                      "input",
+                      {
+                        type: "text",
+                        value: whoIntroduced,
+                        onChange: (e) => setWhoIntroduced(e.target.value),
+                        placeholder: t("invite.phIntro"),
+                        className: fieldClass,
+                        autoComplete: "off",
+                        autoFocus: true
+                      }
+                    ) }),
+                    /* @__PURE__ */ jsxs("div", { className: "border border-white/12 bg-white/[0.04] px-4 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-md", children: [
+                      /* @__PURE__ */ jsx("p", { className: "mb-3 font-mono text-[10px] uppercase tracking-widest text-white/40", children: t("invite.intro") }),
+                      /* @__PURE__ */ jsxs("div", { className: "mb-3 flex items-center gap-3", children: [
+                        organizationLogo ? /* @__PURE__ */ jsx(
+                          "img",
+                          {
+                            src: organizationLogo,
+                            alt: "",
+                            className: "size-9 border border-white/10 bg-white object-contain p-1"
+                          }
+                        ) : null,
+                        /* @__PURE__ */ jsxs("div", { className: "min-w-0", children: [
+                          /* @__PURE__ */ jsx("p", { className: "truncate text-sm text-[var(--bone-fixed)]", children: organization || "Kurum belirtilmedi" }),
+                          organizationDomain ? /* @__PURE__ */ jsx("p", { className: "font-mono text-[10px] text-white/40", children: organizationDomain }) : null
+                        ] })
+                      ] }),
+                      /* @__PURE__ */ jsxs("dl", { className: "space-y-2 text-sm", children: [
+                        /* @__PURE__ */ jsx(SummaryRow, { label: t("invite.howEnter"), value: roles.find((r) => r.value === role)?.label ?? "·" }),
+                        /* @__PURE__ */ jsx(SummaryRow, { label: "İsim", value: name || "·" }),
+                        /* @__PURE__ */ jsx(SummaryRow, { label: "Email", value: email || "·" }),
+                        linkedin ? /* @__PURE__ */ jsx(SummaryRow, { label: "LinkedIn", value: linkedin }) : null
+                      ] })
+                    ] }),
+                    /* @__PURE__ */ jsx("div", { className: "sr-only", "aria-hidden": true, children: /* @__PURE__ */ jsx(
+                      "input",
+                      {
+                        type: "text",
+                        tabIndex: -1,
+                        autoComplete: "off",
+                        value: fax,
+                        onChange: (e) => setFax(e.target.value)
+                      }
+                    ) }),
+                    isError ? /* @__PURE__ */ jsx("p", { className: "font-mono text-[11px] uppercase tracking-widest text-[var(--error)]", children: "Bir şeyler ters gitti. Tekrar dene." }) : null
+                  ] })
                 ]
-              }
-            ),
-            step < steps.length - 1 ? /* @__PURE__ */ jsxs(
-              "button",
-              {
-                type: "button",
-                onClick: goNext,
-                disabled: !canNext,
-                className: "inline-flex items-center gap-2 bg-[var(--bone-fixed)] px-5 py-2.5 font-mono text-[11px] uppercase tracking-widest text-[var(--ink-fixed)] transition-opacity hover:opacity-90 disabled:opacity-35",
-                children: [
-                  t("invite.continue"),
-                  /* @__PURE__ */ jsx(ArrowUpRight, { className: "size-3.5" })
-                ]
-              }
-            ) : /* @__PURE__ */ jsxs(
-              "button",
-              {
-                type: "button",
-                onClick: handleSubmit,
-                disabled: isPending || !role,
-                className: "inline-flex items-center gap-2 bg-[var(--bone-fixed)] px-5 py-2.5 font-mono text-[11px] uppercase tracking-widest text-[var(--ink-fixed)] transition-opacity hover:opacity-90 disabled:opacity-35",
-                children: [
-                  isPending ? t("invite.submitting") : t("invite.submit"),
-                  !isPending ? /* @__PURE__ */ jsx(ArrowUpRight, { className: "size-3.5" }) : null
-                ]
-              }
-            )
-          ] })
-        ]
-      },
-      "wizard"
-    ) }) })
+              },
+              step
+            ) }) }),
+            /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between gap-3 border-t border-white/10 px-5 py-4 sm:px-7", children: [
+              /* @__PURE__ */ jsxs(
+                "button",
+                {
+                  type: "button",
+                  onClick: goBack,
+                  disabled: step === 0,
+                  className: "inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-white/50 transition-colors hover:text-white disabled:invisible",
+                  children: [
+                    /* @__PURE__ */ jsx(ArrowLeft, { className: "size-3.5" }),
+                    t("common.back")
+                  ]
+                }
+              ),
+              step < steps.length - 1 ? /* @__PURE__ */ jsxs(
+                "button",
+                {
+                  type: "button",
+                  onClick: goNext,
+                  disabled: !canNext,
+                  className: "inline-flex items-center gap-2 bg-[var(--bone-fixed)] px-5 py-2.5 font-mono text-[11px] uppercase tracking-widest text-[var(--ink-fixed)] transition-opacity hover:opacity-90 disabled:opacity-35",
+                  children: [
+                    t("invite.continue"),
+                    /* @__PURE__ */ jsx(ArrowUpRight, { className: "size-3.5" })
+                  ]
+                }
+              ) : /* @__PURE__ */ jsxs(
+                "button",
+                {
+                  type: "button",
+                  onClick: handleSubmit,
+                  disabled: isPending || !role,
+                  className: "inline-flex items-center gap-2 bg-[var(--bone-fixed)] px-5 py-2.5 font-mono text-[11px] uppercase tracking-widest text-[var(--ink-fixed)] transition-opacity hover:opacity-90 disabled:opacity-35",
+                  children: [
+                    isPending ? t("invite.submitting") : t("invite.submit"),
+                    !isPending ? /* @__PURE__ */ jsx(ArrowUpRight, { className: "size-3.5" }) : null
+                  ]
+                }
+              )
+            ] })
+          ]
+        },
+        "wizard"
+      ) })
+    ] })
   ] });
 }
 function Field({
@@ -9932,80 +10223,6 @@ function SitePublicShell({ children }) {
     /* @__PURE__ */ jsx("div", { className: "flex-1", children }),
     /* @__PURE__ */ jsx(SiteFooter, {})
   ] });
-}
-const SITE = "https://inner.digital";
-function upsertMeta(attr, key, content) {
-  let el = document.head.querySelector(`meta[${attr}="${key}"]`);
-  if (!el) {
-    el = document.createElement("meta");
-    el.setAttribute(attr, key);
-    document.head.appendChild(el);
-  }
-  el.content = content;
-}
-function upsertLink(rel, href) {
-  let el = document.head.querySelector(`link[rel="${rel}"]`);
-  if (!el) {
-    el = document.createElement("link");
-    el.rel = rel;
-    document.head.appendChild(el);
-  }
-  el.href = href;
-}
-function upsertJsonLd(id, data) {
-  let el = document.getElementById(id);
-  if (!el) {
-    el = document.createElement("script");
-    el.id = id;
-    el.type = "application/ld+json";
-    document.head.appendChild(el);
-  }
-  el.textContent = JSON.stringify(data);
-}
-function useSeo({
-  title,
-  description,
-  canonicalPath,
-  ogImage = "https://inner.digital/inner-og.png",
-  type = "website",
-  jsonLd,
-  noIndex = false
-}) {
-  const json = jsonLd ? JSON.stringify(jsonLd) : "";
-  useEffect(() => {
-    const fullTitle = title.includes("inner") ? title : `${title} · inner.hub`;
-    const canonical = canonicalPath.startsWith("http") ? canonicalPath : `${SITE}${canonicalPath.startsWith("/") ? canonicalPath : `/${canonicalPath}`}`;
-    document.title = fullTitle;
-    upsertMeta("name", "description", description);
-    upsertMeta("name", "robots", noIndex ? "noindex, nofollow" : "index, follow");
-    upsertLink("canonical", canonical);
-    upsertMeta("property", "og:title", fullTitle);
-    upsertMeta("property", "og:description", description);
-    upsertMeta(
-      "property",
-      "og:type",
-      type === "article" ? "article" : type === "video.other" ? "video.other" : "website"
-    );
-    upsertMeta("property", "og:url", canonical);
-    upsertMeta("property", "og:image", ogImage);
-    upsertMeta("name", "twitter:card", "summary_large_image");
-    upsertMeta("name", "twitter:title", fullTitle);
-    upsertMeta("name", "twitter:description", description);
-    upsertMeta("name", "twitter:image", ogImage);
-    if (json) upsertJsonLd("ih-jsonld", JSON.parse(json));
-  }, [title, description, canonicalPath, ogImage, type, json, noIndex]);
-}
-function breadcrumbJsonLd(items) {
-  return {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: items.map((item, i) => ({
-      "@type": "ListItem",
-      position: i + 1,
-      name: item.name,
-      item: item.path.startsWith("http") ? item.path : `${SITE}${item.path}`
-    }))
-  };
 }
 const SEO_POSTS = [
   {
@@ -10568,13 +10785,14 @@ function AutoplayVideo({ src, poster, label, className }) {
   );
 }
 const POPULAR = [
-  { href: "/panel", icon: LayoutDashboard, key: "shell.dashboard", fallback: "Dashboard" },
-  { href: "/panel/members", icon: Users, key: "shell.members", fallback: "Üyeler" },
-  { href: "/panel/events", icon: CalendarDays, key: "shell.events", fallback: "Etkinlikler" },
-  { href: "/panel/courses", icon: BookOpen, key: "shell.courses", fallback: "Kurslar" }
+  { href: "/panel", icon: LayoutDashboard, key: "nav.dashboard" },
+  { href: "/panel/members", icon: Users, key: "nav.members" },
+  { href: "/panel/events", icon: CalendarDays, key: "nav.events" },
+  { href: "/panel/courses", icon: BookOpen, key: "nav.courses" }
 ];
 function NotFound() {
   const t = useT();
+  const homeHref = useLocalizedHref("/");
   return /* @__PURE__ */ jsx("div", { className: "flex min-h-screen w-full items-center justify-center bg-[var(--bone)] px-4 text-[var(--ink)]", children: /* @__PURE__ */ jsxs("div", { className: "panel-glass w-full max-w-lg p-6 sm:p-8", children: [
     /* @__PURE__ */ jsxs("div", { className: "mb-4 flex items-start gap-3", children: [
       /* @__PURE__ */ jsx(AlertCircle, { className: "mt-0.5 size-8 shrink-0 text-[var(--error-ink)]" }),
@@ -10600,14 +10818,9 @@ function NotFound() {
         }
       )
     ] }),
-    /* @__PURE__ */ jsx("p", { className: "mt-6 mb-2 font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)]", children: "Popüler" }),
+    /* @__PURE__ */ jsx("p", { className: "mt-6 mb-2 font-mono text-[10px] uppercase tracking-widest text-[var(--ink-body)]", children: t("notFound.popular") }),
     /* @__PURE__ */ jsx("ul", { className: "grid grid-cols-2 gap-2", children: POPULAR.map((item) => {
       const Icon = item.icon;
-      let label = item.fallback;
-      try {
-        label = t(item.key);
-      } catch {
-      }
       return /* @__PURE__ */ jsx("li", { children: /* @__PURE__ */ jsxs(
         Link,
         {
@@ -10615,7 +10828,7 @@ function NotFound() {
           className: "flex min-h-11 items-center gap-2 border border-[var(--ink)]/10 px-3 py-2 text-sm text-[var(--ink)] hover:border-[var(--ink)]/25",
           children: [
             /* @__PURE__ */ jsx(Icon, { className: "size-3.5 text-[var(--ink-body)]" }),
-            label
+            t(item.key)
           ]
         }
       ) }, item.href);
@@ -10623,7 +10836,7 @@ function NotFound() {
     /* @__PURE__ */ jsx(
       Link,
       {
-        href: "/",
+        href: homeHref,
         className: "mt-6 inline-block font-mono text-[11px] uppercase tracking-widest text-[var(--ink)] underline underline-offset-4 hover:text-[var(--inner-green)]",
         children: t("notFound.backHome")
       }
@@ -10633,6 +10846,7 @@ function NotFound() {
 function ArtifactDetailPage() {
   const t = useT();
   const { locale } = useLocale();
+  const inviteHref = useLocalizedHref("/invitation");
   const params = useParams();
   const artifact = params.slug ? getArtifact(params.slug) : void 0;
   const copy = artifact ? locale === "en" ? artifact.en : artifact.tr : null;
@@ -10777,7 +10991,7 @@ function ArtifactDetailPage() {
       /* @__PURE__ */ jsxs(
         "a",
         {
-          href: "/invitation",
+          href: inviteHref,
           className: "inline-flex items-center justify-center gap-2 bg-[var(--bone-fixed)] px-4 py-2.5 font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--ink-fixed)]",
           children: [
             t("publicNav.requestInvitation"),
@@ -10947,18 +11161,19 @@ const EN = {
 function PrivacyPage() {
   const t = useT();
   const { locale } = useLocale();
+  const homeHref = useLocalizedHref("/");
   const copy = locale === "en" ? EN : TR;
   useSeo({
     title: copy.title,
     description: locale === "en" ? "How inner.hub collects, uses, and protects your personal data." : "inner.hub kişisel verilerinizi nasıl topluyor, kullanıyor ve koruyor.",
-    canonicalPath: "/privacy",
+    canonicalPath: localizedPath("/privacy", locale),
     type: "website"
   });
   return /* @__PURE__ */ jsx(SitePublicShell, { children: /* @__PURE__ */ jsxs("article", { className: "mx-auto max-w-3xl px-4 py-12 sm:px-6 md:py-16 lg:px-0", children: [
     /* @__PURE__ */ jsxs(
       Link,
       {
-        href: "/",
+        href: homeHref,
         className: "mb-10 inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-white/45 transition-colors hover:text-[var(--bone-fixed)]",
         children: [
           /* @__PURE__ */ jsx(ArrowLeft, { className: "size-3" }),
@@ -11001,10 +11216,17 @@ function PublicRoutes() {
     /* @__PURE__ */ jsx(Route, { component: NotFound })
   ] });
 }
+function SsrRoutes() {
+  return /* @__PURE__ */ jsxs(Switch, { children: [
+    /* @__PURE__ */ jsx(Route, { path: "/en", nest: true, children: /* @__PURE__ */ jsx(PublicRoutes, {}) }),
+    /* @__PURE__ */ jsx(PublicRoutes, {})
+  ] });
+}
 function render3(url = "/") {
   const queryClient = new QueryClient();
+  const locale = localeFromPath(url);
   return renderToString(
-    /* @__PURE__ */ jsx(QueryClientProvider, { client: queryClient, children: /* @__PURE__ */ jsx(I18nProvider, { children: /* @__PURE__ */ jsx(TooltipProvider, { children: /* @__PURE__ */ jsx(Router, { ssrPath: url, children: /* @__PURE__ */ jsx(PublicRoutes, {}) }) }) }) })
+    /* @__PURE__ */ jsx(QueryClientProvider, { client: queryClient, children: /* @__PURE__ */ jsx(I18nProvider, { initialLocale: locale, children: /* @__PURE__ */ jsx(TooltipProvider, { children: /* @__PURE__ */ jsx(Router, { ssrPath: url, children: /* @__PURE__ */ jsx(SsrRoutes, {}) }) }) }) })
   );
 }
 export {

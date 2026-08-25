@@ -243,14 +243,11 @@ const EN_SECTION_TITLES = new Set(["nav.sectionAdmin", "nav.sectionPlatform"]);
 
 function Section({ section, collapsed }: { section: NavSection; collapsed: boolean }) {
   const t = useT();
-  const [location] = useLocation();
-  const hasActiveChild = section.items.some((item) => isNavActive(item.href, location));
-  const [open, setOpen] = useState(hasActiveChild);
+  const [open, setOpen] = useState(true);
   const titleLang = EN_SECTION_TITLES.has(section.titleKey) ? "en" : undefined;
 
-  // hasActiveChild yalnızca başlangıç durumunu belirler (aktif sayfanın grubu
-  // otomatik açık gelsin); sonrasında kullanıcı `open` ile kapatabilmeli —
-  // aksi halde bir platform sayfasındayken grup asla kapanmıyordu (S-01).
+  // Platform grubu mobilde varsayılan açık: accordion kapalı + drawer'ın
+  // her tıklamada kapanması birlikte inner.stage / match vb. gizleniyordu.
   const showItems = !section.collapsible || collapsed || open;
 
   return (
@@ -259,7 +256,10 @@ function Section({ section, collapsed }: { section: NavSection; collapsed: boole
         section.collapsible ? (
           <button
             type="button"
-            onClick={() => setOpen((v) => !v)}
+            onClick={(e) => {
+              e.stopPropagation();
+              setOpen((v) => !v);
+            }}
             aria-expanded={showItems}
             className="mb-2 flex w-full items-center justify-between px-2.5 py-1 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--inner-green)]"
           >

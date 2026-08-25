@@ -1,4 +1,6 @@
+import { useLocation } from "wouter";
 import { useLocale } from "./I18nProvider";
+import { isLocaleAgnosticPath, swapLocalePath } from "./localePath";
 import type { Locale } from "./types";
 
 export function LocaleToggle({
@@ -10,6 +12,14 @@ export function LocaleToggle({
   tone?: "dark" | "light";
 }) {
   const { locale, setLocale } = useLocale();
+  const [loc, setLocation] = useLocation();
+
+  const switchTo = (code: Locale) => {
+    setLocale(code);
+    if (isLocaleAgnosticPath(loc)) return;
+    const next = swapLocalePath(loc, code);
+    if (next !== loc) setLocation(next);
+  };
 
   const btn = (code: Locale, label: string) => {
     const active = locale === code;
@@ -26,7 +36,7 @@ export function LocaleToggle({
         key={code}
         type="button"
         lang={code}
-        onClick={() => setLocale(code)}
+        onClick={() => switchTo(code)}
         aria-pressed={active}
         className={`px-2 py-1 font-mono text-[10px] uppercase tracking-widest transition-colors ${base}`}
       >

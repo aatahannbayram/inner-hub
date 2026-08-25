@@ -1,10 +1,12 @@
 import { Link } from "wouter";
 import { Lockup } from "@/components/Lockup";
+import { useLocalizedHref } from "@/i18n";
 
 export function SignatureMark() {
+  const homeHref = useLocalizedHref("/");
   return (
     <Link
-      href="/"
+      href={homeHref}
       className="inline-flex group focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-2"
     >
       <Lockup

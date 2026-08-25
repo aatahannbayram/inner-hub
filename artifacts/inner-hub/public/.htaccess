@@ -1,10 +1,11 @@
 Options -MultiViews
 DirectoryIndex index.html
+# Dizinlerde otomatik trailing-slash 301 kapalı (sitemap/canonical slash’sız)
+DirectorySlash Off
 RewriteEngine On
 
-# /artifacts → /artifacts/index.html (prerendered SEO shells)
+# /haberler → haberler/index.html (prerender SEO kabuğu, 301 yok)
 RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{DOCUMENT_ROOT}/$1/index.html -f
 RewriteRule ^(.+?)/?$ $1/index.html [L]
 

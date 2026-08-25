@@ -1,4 +1,4 @@
-import { useRef, type ElementType } from "react";
+import { useRef, type ElementType, Fragment } from "react";
 import { motion, useInView, useReducedMotion } from "framer-motion";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
@@ -20,7 +20,7 @@ export function WordsPullUp({
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
   const reduce = useReducedMotion();
-  const words = text.split(" ");
+  const words = text.split(" ").filter((w) => w.length > 0);
   const Comp = Tag as ElementType;
 
   if (reduce) {
@@ -34,25 +34,28 @@ export function WordsPullUp({
 
   return (
     <Comp ref={ref} className={className}>
-      {words.map((word, i) => {
-        const isLast = i === words.length - 1;
-        return (
-          <span
-            key={`${word}-${i}`}
-            className="relative mr-[0.2em] inline-block overflow-hidden pb-1 pr-1 align-top last:mr-0"
-          >
-            <motion.span
-              className="inline-block"
-              initial={{ y: 20, opacity: 0 }}
-              animate={inView ? { y: 0, opacity: 1 } : { y: 20, opacity: 0 }}
-              transition={{ duration: 0.6, ease: EASE, delay: delay + i * 0.08 }}
-            >
-              {word}
-              {showAsterisk && isLast ? <Asterisk /> : null}
-            </motion.span>
-          </span>
-        );
-      })}
+      <span className="sr-only">{text}</span>
+      <span aria-hidden="true">
+        {words.map((word, i) => {
+          const isLast = i === words.length - 1;
+          return (
+            <Fragment key={`${word}-${i}`}>
+              <span className="relative inline-block overflow-hidden pb-1 pr-1 align-top">
+                <motion.span
+                  className="inline-block"
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={inView ? { y: 0, opacity: 1 } : { y: 20, opacity: 0 }}
+                  transition={{ duration: 0.6, ease: EASE, delay: delay + i * 0.08 }}
+                >
+                  {word}
+                  {showAsterisk && isLast ? <Asterisk /> : null}
+                </motion.span>
+              </span>
+              {!isLast ? " " : null}
+            </Fragment>
+          );
+        })}
+      </span>
     </Comp>
   );
 }
@@ -81,13 +84,17 @@ export function WordsPullUpMultiStyle({
   const ref = useRef<HTMLHeadingElement>(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
   const reduce = useReducedMotion();
+  const fullText = segments.map((s) => s.text).join(" ");
 
   const words = segments.flatMap((seg, si) =>
-    seg.text.split(" ").map((word, wi) => ({
-      word,
-      className: seg.className,
-      key: `${si}-${wi}-${word}`,
-    })),
+    seg.text
+      .split(" ")
+      .filter((w) => w.length > 0)
+      .map((word, wi) => ({
+        word,
+        className: seg.className,
+        key: `${si}-${wi}-${word}`,
+      })),
   );
 
   if (reduce) {
@@ -104,19 +111,25 @@ export function WordsPullUpMultiStyle({
   }
 
   return (
-    <h2 ref={ref} className={`inline-flex flex-wrap gap-x-[0.28em] ${className ?? ""}`}>
-      {words.map((item, i) => (
-        <span key={item.key} className="inline-block overflow-hidden pb-1 align-top">
-          <motion.span
-            className={`inline-block ${item.className ?? ""}`}
-            initial={{ y: 20, opacity: 0 }}
-            animate={inView ? { y: 0, opacity: 1 } : { y: 20, opacity: 0 }}
-            transition={{ duration: 0.55, ease: EASE, delay: delay + i * 0.08 }}
-          >
-            {item.word}
-          </motion.span>
-        </span>
-      ))}
+    <h2 ref={ref} className={className}>
+      <span className="sr-only">{fullText}</span>
+      <span aria-hidden="true" className="inline-flex flex-wrap">
+        {words.map((item, i) => (
+          <Fragment key={item.key}>
+            <span className="inline-block overflow-hidden pb-1 align-top">
+              <motion.span
+                className={`inline-block ${item.className ?? ""}`}
+                initial={{ y: 20, opacity: 0 }}
+                animate={inView ? { y: 0, opacity: 1 } : { y: 20, opacity: 0 }}
+                transition={{ duration: 0.55, ease: EASE, delay: delay + i * 0.08 }}
+              >
+                {item.word}
+              </motion.span>
+            </span>
+            {i < words.length - 1 ? " " : null}
+          </Fragment>
+        ))}
+      </span>
     </h2>
   );
 }

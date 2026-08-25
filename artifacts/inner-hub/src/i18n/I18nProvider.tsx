@@ -8,6 +8,7 @@ import {
   type ReactNode,
 } from "react";
 import { dictionaries, type Messages } from "./messages";
+import { localeFromPath } from "./localePath";
 import {
   DEFAULT_LOCALE,
   getByPath,
@@ -28,14 +29,25 @@ type I18nContextValue = {
 
 const I18nContext = createContext<I18nContextValue | null>(null);
 
-function resolveInitialLocale(): Locale {
-  // SSR + ilk ziyaret: her zaman TR. Kullanıcı dil seçince localStorage yazar.
+function resolveInitialLocale(initialLocale?: Locale): Locale {
+  if (initialLocale && isLocale(initialLocale)) return initialLocale;
   if (typeof window === "undefined") return DEFAULT_LOCALE;
+  // Shareable URL wins over localStorage so /en/* always boots in English.
+  const fromPath = localeFromPath(window.location.pathname);
+  if (window.location.pathname === "/en" || window.location.pathname.startsWith("/en/")) {
+    return fromPath;
+  }
   return readStoredLocale() ?? DEFAULT_LOCALE;
 }
 
-export function I18nProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>(resolveInitialLocale);
+export function I18nProvider({
+  children,
+  initialLocale,
+}: {
+  children: ReactNode;
+  initialLocale?: Locale;
+}) {
+  const [locale, setLocaleState] = useState<Locale>(() => resolveInitialLocale(initialLocale));
 
   const setLocale = useCallback((next: Locale) => {
     if (!isLocale(next)) return;

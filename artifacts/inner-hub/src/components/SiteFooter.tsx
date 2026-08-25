@@ -1,10 +1,24 @@
-import { Mail, Linkedin, Instagram } from "lucide-react";
+import { Mail } from "lucide-react";
 import { Lockup } from "@/components/Lockup";
-import { useT } from "@/i18n";
+import { useLocalizedHref, useT } from "@/i18n";
 
 /** Public site footer - Home + Haberler paylaşır */
 export function SiteFooter() {
   const t = useT();
+  const privacyHref = useLocalizedHref("/privacy");
+  const haberlerHref = useLocalizedHref("/haberler");
+  const inviteHref = useLocalizedHref("/invitation");
+  const faqHref = useLocalizedHref("/sss");
+  const gatheringHref = useLocalizedHref("/haberler/istanbul-gathering-2026");
+  const whyInviteHref = useLocalizedHref("/haberler/inner-hub-neden-davetiye");
+
+  const navLinks = [
+    { label: t("publicNav.invitation"), href: inviteHref },
+    { label: t("publicNav.artifacts"), href: haberlerHref },
+    { label: t("sss.nav"), href: faqHref },
+    { label: t("publicNav.gathering"), href: gatheringHref },
+    { label: t("publicNav.whyInvite"), href: whyInviteHref },
+  ];
 
   return (
     <footer
@@ -33,12 +47,7 @@ export function SiteFooter() {
             {t("home.footerNavigate")}
           </p>
           <ul className="space-y-2.5">
-            {[
-              { label: t("publicNav.platform"), href: "/#section-03" },
-              { label: t("publicNav.gathering"), href: "/#section-06" },
-              { label: t("publicNav.artifacts"), href: "/haberler" },
-              { label: t("publicNav.invitation"), href: "/invitation" },
-            ].map((l) => (
+            {navLinks.map((l) => (
               <li key={l.href}>
                 <a
                   href={l.href}
@@ -55,26 +64,15 @@ export function SiteFooter() {
           <p className="mb-4 font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)]/40">
             {t("home.footerConnect")}
           </p>
-          <div className="mb-6 flex items-center gap-4">
+          {/* No public social profiles yet — bare linkedin.com / instagram.com removed. */}
+          <p className="mb-6 font-mono text-sm text-[var(--bone-fixed)]/55">
             <a
-              href="https://www.linkedin.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="inner on LinkedIn"
-              className="border border-white/15 p-2.5 text-[var(--bone-fixed)]/60 transition-colors hover:border-white/35 hover:text-[var(--bone-fixed)]"
+              href="mailto:support@inner.digital"
+              className="underline decoration-white/20 underline-offset-2 transition-colors hover:text-[var(--bone-fixed)]"
             >
-              <Linkedin size={18} strokeWidth={1.5} />
+              support@inner.digital
             </a>
-            <a
-              href="https://www.instagram.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="inner on Instagram"
-              className="border border-white/15 p-2.5 text-[var(--bone-fixed)]/60 transition-colors hover:border-white/35 hover:text-[var(--bone-fixed)]"
-            >
-              <Instagram size={18} strokeWidth={1.5} />
-            </a>
-          </div>
+          </p>
           <p className="font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)]/35">
             İstanbul → Global
           </p>
@@ -87,7 +85,7 @@ export function SiteFooter() {
             {t("home.footerRights")}
           </p>
           <a
-            href="/privacy"
+            href={privacyHref}
             className="font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)]/35 underline decoration-white/20 underline-offset-2 transition-colors hover:text-[var(--bone-fixed)]/70"
           >
             {t("home.footerPrivacy")}

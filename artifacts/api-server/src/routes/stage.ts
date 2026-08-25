@@ -212,6 +212,81 @@ router.get("/social-preview", requireAuth, async (req, res) => {
   }
 });
 
+async function loadPublishedProduct(productId: number, userId: number | null) {
+  await ensureStageSchema();
+  const [row] = await db
+    .select({
+      product: stageProductsTable,
+      authorName: usersTable.name,
+      authorHandle: usersTable.handle,
+    })
+    .from(stageProductsTable)
+    .leftJoin(usersTable, eq(usersTable.id, stageProductsTable.userId))
+    .where(and(eq(stageProductsTable.id, productId), eq(stageProductsTable.status, "published")))
+    .limit(1);
+  if (!row) return null;
+
+  const [voteRow] = await db
+    .select({ n: sql<number>`coalesce(count(${stageVotesTable.id}), 0)::int` })
+    .from(stageVotesTable)
+    .where(eq(stageVotesTable.productId, productId));
+  const votes = Number(voteRow?.n) || 0;
+
+  let myVote = false;
+  if (userId != null) {
+    const [mine] = await db
+      .select({ id: stageVotesTable.id })
+      .from(stageVotesTable)
+      .where(and(eq(stageVotesTable.productId, productId), eq(stageVotesTable.userId, userId)))
+      .limit(1);
+    myVote = Boolean(mine);
+  }
+
+  return mapProduct(row.product, votes, myVote, {
+    name: row.authorName ?? "",
+    handle: row.authorHandle,
+  });
+}
+
+/** GET /api/stage/products/:id — tek ürün (overlay / derin link) */
+router.get("/stage/products/:id", requireAuth, async (req, res) => {
+  try {
+    const productId = Number(req.params.id);
+    if (!Number.isFinite(productId)) {
+      res.status(400).json({ error: "Geçersiz ürün" });
+      return;
+    }
+    const product = await loadPublishedProduct(productId, req.user!.id);
+    if (!product) {
+      res.status(404).json({ error: "Ürün bulunamadı" });
+      return;
+    }
+    res.json({ product });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message ?? "Ürün alınamadı" });
+  }
+});
+
+/** GET /api/public/stage/:id — paylaşılabilir künye (üyelik gerektirmez) */
+router.get("/public/stage/:id", async (req, res) => {
+  try {
+    const productId = Number(req.params.id);
+    if (!Number.isFinite(productId)) {
+      res.status(400).json({ error: "Geçersiz ürün" });
+      return;
+    }
+    const product = await loadPublishedProduct(productId, null);
+    if (!product) {
+      res.status(404).json({ error: "Ürün bulunamadı" });
+      return;
+    }
+    const { myVote: _myVote, userId: _userId, status: _status, ...kunye } = product;
+    res.json({ product: kunye });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message ?? "Künye alınamadı" });
+  }
+});
+
 /** GET /api/stage/products?period=week|month|year|all */
 router.get("/stage/products", requireAuth, async (req, res) => {
   try {

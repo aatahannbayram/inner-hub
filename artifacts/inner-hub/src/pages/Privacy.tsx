@@ -2,8 +2,9 @@ import { Link } from "wouter";
 import { ArrowLeft } from "lucide-react";
 import { SitePublicShell } from "@/components/SitePublicShell";
 import { FadeIn } from "@/components/FadeIn";
-import { useLocale, useT } from "@/i18n";
+import { useLocale, useLocalizedHref, useT } from "@/i18n";
 import { useSeo } from "@/lib/seo";
+import { localizedPath } from "@/i18n/localePath";
 
 type Section = { heading: string; body: string[] };
 
@@ -168,6 +169,7 @@ const EN: typeof TR = {
 export default function PrivacyPage() {
   const t = useT();
   const { locale } = useLocale();
+  const homeHref = useLocalizedHref("/");
   const copy = locale === "en" ? EN : TR;
 
   useSeo({
@@ -176,7 +178,7 @@ export default function PrivacyPage() {
       locale === "en"
         ? "How inner.hub collects, uses, and protects your personal data."
         : "inner.hub kişisel verilerinizi nasıl topluyor, kullanıyor ve koruyor.",
-    canonicalPath: "/privacy",
+    canonicalPath: localizedPath("/privacy", locale),
     type: "website",
   });
 
@@ -184,7 +186,7 @@ export default function PrivacyPage() {
     <SitePublicShell>
       <article className="mx-auto max-w-3xl px-4 py-12 sm:px-6 md:py-16 lg:px-0">
         <Link
-          href="/"
+          href={homeHref}
           className="mb-10 inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-white/45 transition-colors hover:text-[var(--bone-fixed)]"
         >
           <ArrowLeft className="size-3" />

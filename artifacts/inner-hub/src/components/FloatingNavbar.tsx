@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Lockup } from "@/components/Lockup";
-import { LocaleToggle, useT } from "@/i18n";
+import { LocaleToggle, useLocalizedHref, useT } from "@/i18n";
 
 const LINK_KEYS = [
   { key: "idea", href: "/#section-01" },
@@ -23,8 +23,22 @@ export const HERO_CHROME = "#0A0A0A";
 export function FloatingNavbar({ placement = "overlay" }: { placement?: "overlay" | "static" }) {
   const t = useT();
   const [open, setOpen] = useState(false);
+  const homeHref = useLocalizedHref("/");
+  const inviteHref = useLocalizedHref("/invitation");
+  const ideaHref = useLocalizedHref("/#section-01");
+  const circleHref = useLocalizedHref("/#section-02");
+  const platformHref = useLocalizedHref("/#section-03");
+  const gatheringHref = useLocalizedHref("/#section-06");
+  const artifactsHref = useLocalizedHref("/haberler");
+  const localizedByKey = {
+    idea: ideaHref,
+    circle: circleHref,
+    platform: platformHref,
+    gathering: gatheringHref,
+    artifacts: artifactsHref,
+  } as const;
   const links = LINK_KEYS.map((link) => ({
-    href: link.href,
+    href: localizedByKey[link.key],
     label: t(`publicNav.${link.key}`),
   }));
 
@@ -41,7 +55,7 @@ export function FloatingNavbar({ placement = "overlay" }: { placement?: "overlay
       style={{ backgroundColor: HERO_CHROME }}
     >
       <div className="flex h-[56px] items-center justify-between gap-3 px-3 py-2.5 sm:h-auto sm:gap-4 sm:px-5 sm:py-3.5 md:px-6">
-        <a href="/" aria-label="inner hub home" className="inline-flex shrink-0">
+        <a href={homeHref} aria-label="inner hub home" className="inline-flex shrink-0">
           <Lockup className="text-[var(--bone-fixed)]" fontSize="clamp(22px, 5.2vw, 32px)" pulse />
         </a>
 
@@ -67,7 +81,7 @@ export function FloatingNavbar({ placement = "overlay" }: { placement?: "overlay
         <div className="flex items-center gap-2">
           <LocaleToggle tone="dark" className="hidden sm:inline-flex" />
           <a
-            href="/invitation"
+            href={inviteHref}
             className="hidden items-center gap-2.5 bg-[var(--bone-fixed)] px-4 py-2 font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--ink-fixed)] transition-colors hover:bg-white sm:inline-flex lg:px-5 lg:text-[11px]"
           >
             {t("publicNav.invitation")}
@@ -131,7 +145,7 @@ export function FloatingNavbar({ placement = "overlay" }: { placement?: "overlay
               </a>
             ))}
             <a
-              href="/invitation"
+              href={inviteHref}
               onClick={() => setOpen(false)}
               className="flex items-center justify-between bg-[var(--bone-fixed)] px-4 py-3.5 font-mono text-xs uppercase tracking-widest text-[var(--ink-fixed)]"
             >

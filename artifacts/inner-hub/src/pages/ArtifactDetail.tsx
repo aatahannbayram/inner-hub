@@ -3,7 +3,7 @@ import { Link, useParams } from "wouter";
 import { ArrowLeft } from "lucide-react";
 import { AutoplayVideo } from "@/components/AutoplayVideo";
 import { SitePublicShell } from "@/components/SitePublicShell";
-import { useLocale, useT } from "@/i18n";
+import { useLocale, useLocalizedHref, useT } from "@/i18n";
 import { useSeo, breadcrumbJsonLd } from "@/lib/seo";
 import { getArtifact } from "@/content/artifacts";
 import { artifactAbsoluteUrl, artifactPath, artifactsIndexPath } from "@/content/artifacts/types";
@@ -12,6 +12,7 @@ import NotFound from "@/pages/not-found";
 export default function ArtifactDetailPage() {
   const t = useT();
   const { locale } = useLocale();
+  const inviteHref = useLocalizedHref("/invitation");
   const params = useParams<{ slug?: string }>();
   const artifact = params.slug ? getArtifact(params.slug) : undefined;
   const copy = artifact ? (locale === "en" ? artifact.en : artifact.tr) : null;
@@ -182,7 +183,7 @@ export default function ArtifactDetailPage() {
         <div className="mt-14 flex flex-col gap-3 border border-white/10 p-5 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm text-white/55">{t("artifacts.ctaHint")}</p>
           <a
-            href="/invitation"
+            href={inviteHref}
             className="inline-flex items-center justify-center gap-2 bg-[var(--bone-fixed)] px-4 py-2.5 font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--ink-fixed)]"
           >
             {t("publicNav.requestInvitation")}

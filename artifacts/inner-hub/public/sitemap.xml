@@ -1,64 +1,203 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml"
         xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
   <url>
     <loc>https://inner.digital/</loc>
+    <lastmod>2026-08-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://inner.digital/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://inner.digital/en"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://inner.digital/"/>
+  </url>
+  <url>
+    <loc>https://inner.digital/en</loc>
+    <lastmod>2026-08-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://inner.digital/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://inner.digital/en"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://inner.digital/"/>
   </url>
   <url>
     <loc>https://inner.digital/invitation</loc>
+    <lastmod>2026-08-25</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.95</priority>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://inner.digital/invitation"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://inner.digital/en/invitation"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://inner.digital/invitation"/>
+  </url>
+  <url>
+    <loc>https://inner.digital/en/invitation</loc>
+    <lastmod>2026-08-25</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.95</priority>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://inner.digital/invitation"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://inner.digital/en/invitation"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://inner.digital/invitation"/>
+  </url>
+  <url>
+    <loc>https://inner.digital/sss</loc>
+    <lastmod>2026-08-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://inner.digital/sss"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://inner.digital/en/sss"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://inner.digital/sss"/>
+  </url>
+  <url>
+    <loc>https://inner.digital/en/sss</loc>
+    <lastmod>2026-08-25</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://inner.digital/sss"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://inner.digital/en/sss"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://inner.digital/sss"/>
   </url>
   <url>
     <loc>https://inner.digital/haberler</loc>
+    <lastmod>2026-08-25</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.85</priority>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://inner.digital/haberler"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://inner.digital/en/haberler"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://inner.digital/haberler"/>
   </url>
   <url>
-    <loc>https://inner.digital/haberler/istanbul-gathering-2026</loc>
-    <lastmod>2026-07-22</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-    <video:video>
-      <video:thumbnail_loc>https://inner.digital/posters/gathering.jpg</video:thumbnail_loc>
-      <video:title>İstanbul gathering · Eylül 2026</video:title>
-      <video:description>İlk inner.hub buluşması: otuz dört kişi, iki gün, bir çember. İstanbul, Eylül 2026 kısa video özeti.</video:description>
-      <video:content_loc>https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260406_133058_0504132a-0cf3-4450-a370-8ea3b05c95d4.mp4</video:content_loc>
-      <video:duration>18</video:duration>
-      <video:publication_date>2026-07-22</video:publication_date>
-      <video:family_friendly>yes</video:family_friendly>
-    </video:video>
+    <loc>https://inner.digital/en/haberler</loc>
+    <lastmod>2026-08-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://inner.digital/haberler"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://inner.digital/en/haberler"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://inner.digital/haberler"/>
+  </url>
+  <url>
+    <loc>https://inner.digital/privacy</loc>
+    <lastmod>2026-08-25</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://inner.digital/privacy"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://inner.digital/en/privacy"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://inner.digital/privacy"/>
+  </url>
+  <url>
+    <loc>https://inner.digital/en/privacy</loc>
+    <lastmod>2026-08-25</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://inner.digital/privacy"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://inner.digital/en/privacy"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://inner.digital/privacy"/>
   </url>
   <url>
     <loc>https://inner.digital/haberler/inner-hub-neden-davetiye</loc>
-    <lastmod>2026-07-20</lastmod>
+    <lastmod>2026-08-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://inner.digital/haberler/inner-hub-neden-davetiye"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://inner.digital/en/haberler/inner-hub-neden-davetiye"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://inner.digital/haberler/inner-hub-neden-davetiye"/>
+  </url>
+  <url>
+    <loc>https://inner.digital/en/haberler/inner-hub-neden-davetiye</loc>
+    <lastmod>2026-08-25</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://inner.digital/haberler/inner-hub-neden-davetiye"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://inner.digital/en/haberler/inner-hub-neden-davetiye"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://inner.digital/haberler/inner-hub-neden-davetiye"/>
+  </url>
+  <url>
+    <loc>https://inner.digital/haberler/istanbul-gathering-2026</loc>
+    <lastmod>2026-08-25</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://inner.digital/haberler/istanbul-gathering-2026"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://inner.digital/en/haberler/istanbul-gathering-2026"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://inner.digital/haberler/istanbul-gathering-2026"/>
+  </url>
+  <url>
+    <loc>https://inner.digital/en/haberler/istanbul-gathering-2026</loc>
+    <lastmod>2026-08-25</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://inner.digital/haberler/istanbul-gathering-2026"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://inner.digital/en/haberler/istanbul-gathering-2026"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://inner.digital/haberler/istanbul-gathering-2026"/>
   </url>
   <url>
     <loc>https://inner.digital/haberler/kapali-cember-deal-flow</loc>
-    <lastmod>2026-07-18</lastmod>
+    <lastmod>2026-08-25</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.75</priority>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://inner.digital/haberler/kapali-cember-deal-flow"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://inner.digital/en/haberler/kapali-cember-deal-flow"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://inner.digital/haberler/kapali-cember-deal-flow"/>
+  </url>
+  <url>
+    <loc>https://inner.digital/en/haberler/kapali-cember-deal-flow</loc>
+    <lastmod>2026-08-25</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://inner.digital/haberler/kapali-cember-deal-flow"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://inner.digital/en/haberler/kapali-cember-deal-flow"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://inner.digital/haberler/kapali-cember-deal-flow"/>
   </url>
   <url>
     <loc>https://inner.digital/haberler/istanbul-ai-kurucu-agi</loc>
-    <lastmod>2026-07-16</lastmod>
+    <lastmod>2026-08-25</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.75</priority>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://inner.digital/haberler/istanbul-ai-kurucu-agi"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://inner.digital/en/haberler/istanbul-ai-kurucu-agi"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://inner.digital/haberler/istanbul-ai-kurucu-agi"/>
+  </url>
+  <url>
+    <loc>https://inner.digital/en/haberler/istanbul-ai-kurucu-agi</loc>
+    <lastmod>2026-08-25</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://inner.digital/haberler/istanbul-ai-kurucu-agi"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://inner.digital/en/haberler/istanbul-ai-kurucu-agi"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://inner.digital/haberler/istanbul-ai-kurucu-agi"/>
   </url>
   <url>
     <loc>https://inner.digital/haberler/gathering-vs-konferans</loc>
-    <lastmod>2026-07-14</lastmod>
+    <lastmod>2026-08-25</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.75</priority>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://inner.digital/haberler/gathering-vs-konferans"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://inner.digital/en/haberler/gathering-vs-konferans"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://inner.digital/haberler/gathering-vs-konferans"/>
+  </url>
+  <url>
+    <loc>https://inner.digital/en/haberler/gathering-vs-konferans</loc>
+    <lastmod>2026-08-25</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://inner.digital/haberler/gathering-vs-konferans"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://inner.digital/en/haberler/gathering-vs-konferans"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://inner.digital/haberler/gathering-vs-konferans"/>
   </url>
   <url>
     <loc>https://inner.digital/haberler/aeo-icin-net-cevaplar</loc>
-    <lastmod>2026-07-12</lastmod>
+    <lastmod>2026-08-25</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.75</priority>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://inner.digital/haberler/aeo-icin-net-cevaplar"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://inner.digital/en/haberler/aeo-icin-net-cevaplar"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://inner.digital/haberler/aeo-icin-net-cevaplar"/>
+  </url>
+  <url>
+    <loc>https://inner.digital/en/haberler/aeo-icin-net-cevaplar</loc>
+    <lastmod>2026-08-25</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://inner.digital/haberler/aeo-icin-net-cevaplar"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://inner.digital/en/haberler/aeo-icin-net-cevaplar"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://inner.digital/haberler/aeo-icin-net-cevaplar"/>
   </url>
 </urlset>

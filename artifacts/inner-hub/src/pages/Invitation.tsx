@@ -5,7 +5,9 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, ArrowUpRight, Building2, Check, Rocket, TrendingUp, Wrench } from "lucide-react";
 import { HeroVideo } from "@/components/HeroVideo";
 import { Lockup } from "@/components/Lockup";
-import { LocaleToggle, useLocale, useT } from "@/i18n";
+import { LocaleToggle, useLocale, useLocalizedHref, useT } from "@/i18n";
+import { localizedPath } from "@/i18n/localePath";
+import { useSeo } from "@/lib/seo";
 import { useSubmitRequest } from "@workspace/api-client-react";
 import { trackEvent } from "@/lib/analytics";
 
@@ -41,7 +43,14 @@ const fieldClass =
 export default function Invitation() {
   const t = useT();
   const { locale } = useLocale();
+  const homeHref = useLocalizedHref("/");
   const { mutate: submitRequest, isSuccess, isError, isPending } = useSubmitRequest();
+
+  useSeo({
+    title: t("invite.metaTitle"),
+    description: t("invite.metaDescription"),
+    canonicalPath: localizedPath("/invitation", locale),
+  });
 
   const roles = useMemo(
     () =>
@@ -113,9 +122,25 @@ export default function Invitation() {
   }, [isSuccess, role]);
 
   useEffect(() => {
+    if (typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setBootProgress(100);
+      setBooting(false);
+      return;
+    }
+
     let raf = 0;
+    let finishTimer: ReturnType<typeof setTimeout> | null = null;
+    let finished = false;
     const start = performance.now();
     const duration = 1100;
+
+    const finish = () => {
+      if (finished) return;
+      finished = true;
+      setBootProgress(100);
+      finishTimer = setTimeout(() => setBooting(false), 120);
+    };
+
     const tick = (now: number) => {
       const t = Math.min(1, (now - start) / duration);
       const p = 1 - Math.pow(1 - t, 3);
@@ -123,11 +148,17 @@ export default function Invitation() {
       if (t < 1) {
         raf = requestAnimationFrame(tick);
       } else {
-        setTimeout(() => setBooting(false), 180);
+        finish();
       }
     };
     raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
+    const failsafe = setTimeout(finish, 2500);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      clearTimeout(failsafe);
+      if (finishTimer) clearTimeout(finishTimer);
+    };
   }, []);
 
   // Auto-suggest domain from corporate email once identity is filled
@@ -282,31 +313,37 @@ export default function Invitation() {
       </header>
 
       <main className="relative z-10 flex flex-1 items-center justify-center px-4 py-10 sm:px-6 md:px-10 md:py-14">
-        <AnimatePresence mode="wait">
-          {booting ? (
+        {/* Boot overlay — form stays mounted underneath so JS/boot failure never hides CTA */}
+        <AnimatePresence>
+          {booting && (
             <motion.div
               key="boot"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              exit={{ opacity: 0, y: -8 }}
+              exit={{ opacity: 0 }}
               transition={{ duration: 0.35 }}
-              className="w-full max-w-md"
+              className="absolute inset-0 z-30 flex items-center justify-center bg-[var(--ink-fixed)]/92 px-4 backdrop-blur-sm"
+              aria-live="polite"
+              aria-busy="true"
             >
-              <p className="mb-4 font-mono text-[10px] uppercase tracking-[0.18em] text-white/50">
-                {t("invite.preparing")}
-              </p>
-              <div className="mb-3 h-[2px] w-full overflow-hidden bg-white/15">
-                <motion.div
-                  className="h-full bg-[var(--inner-green)]"
-                  style={{ width: `${bootProgress}%` }}
-                />
-              </div>
-              <div className="flex items-baseline justify-between font-mono text-[11px] uppercase tracking-widest text-white/45">
-                <span>{t("invite.access")}</span>
-                <span>{bootProgress}%</span>
+              <div className="w-full max-w-md">
+                <p className="mb-4 font-mono text-[10px] uppercase tracking-[0.18em] text-white/50">
+                  {t("invite.preparing")}
+                </p>
+                <div className="mb-3 h-[2px] w-full overflow-hidden bg-white/15">
+                  <div className="h-full bg-[var(--inner-green)]" style={{ width: `${bootProgress}%` }} />
+                </div>
+                <div className="flex items-baseline justify-between font-mono text-[11px] tracking-widest text-white/45">
+                  <span lang="en">{t("invite.access")}</span>
+                  <span>{bootProgress}%</span>
+                </div>
               </div>
             </motion.div>
-          ) : isSuccess ? (
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence mode="wait">
+          {isSuccess ? (
             <motion.div
               key="success"
               initial={{ opacity: 0, y: 18 }}
@@ -348,11 +385,12 @@ export default function Invitation() {
           ) : (
             <motion.div
               key="wizard"
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial={false}
+              animate={{ opacity: booting ? 0.35 : 1, y: 0 }}
               transition={{ duration: 0.5, ease: EASE }}
               className="w-full max-w-xl panel-glass-ink"
               onKeyDown={onKeyDown}
+              aria-hidden={booting}
             >
               {/* Progress */}
               <div className="border-b border-white/10 px-5 pt-5 sm:px-7">

@@ -18728,7 +18728,7 @@ var require_view = __commonJS({
     "use strict";
     var debug = require_src()("express:view");
     var path8 = __require("node:path");
-    var fs5 = __require("node:fs");
+    var fs6 = __require("node:fs");
     var dirname4 = path8.dirname;
     var basename3 = path8.basename;
     var extname = path8.extname;
@@ -18808,7 +18808,7 @@ var require_view = __commonJS({
     function tryStat(path9) {
       debug('stat "%s"', path9);
       try {
-        return fs5.statSync(path9);
+        return fs6.statSync(path9);
       } catch (e) {
         return void 0;
       }
@@ -22598,7 +22598,7 @@ var require_send = __commonJS({
     var escapeHtml2 = require_escape_html();
     var etag = require_etag();
     var fresh = require_fresh();
-    var fs5 = __require("fs");
+    var fs6 = __require("fs");
     var mime = require_mime_types();
     var ms = require_ms();
     var onFinished = require_on_finished();
@@ -22880,7 +22880,7 @@ var require_send = __commonJS({
       var i = 0;
       var self2 = this;
       debug('stat "%s"', path9);
-      fs5.stat(path9, function onstat(err, stat2) {
+      fs6.stat(path9, function onstat(err, stat2) {
         var pathEndsWithSep = path9[path9.length - 1] === sep4;
         if (err && err.code === "ENOENT" && !extname(path9) && !pathEndsWithSep) {
           return next(err);
@@ -22897,7 +22897,7 @@ var require_send = __commonJS({
         }
         var p = path9 + "." + self2._extensions[i++];
         debug('stat "%s"', p);
-        fs5.stat(p, function(err2, stat2) {
+        fs6.stat(p, function(err2, stat2) {
           if (err2) return next(err2);
           if (stat2.isDirectory()) return next();
           self2.emit("file", p, stat2);
@@ -22915,7 +22915,7 @@ var require_send = __commonJS({
         }
         var p = join4(path9, self2._index[i]);
         debug('stat "%s"', p);
-        fs5.stat(p, function(err2, stat2) {
+        fs6.stat(p, function(err2, stat2) {
           if (err2) return next(err2);
           if (stat2.isDirectory()) return next();
           self2.emit("file", p, stat2);
@@ -22927,7 +22927,7 @@ var require_send = __commonJS({
     SendStream.prototype.stream = function stream(path9, options) {
       var self2 = this;
       var res = this.res;
-      var stream2 = fs5.createReadStream(path9, options);
+      var stream2 = fs6.createReadStream(path9, options);
       this.emit("stream", stream2);
       stream2.pipe(res);
       function cleanup() {
@@ -25332,7 +25332,7 @@ var require_atomic_sleep = __commonJS({
 var require_sonic_boom = __commonJS({
   "../../node_modules/.pnpm/sonic-boom@4.2.1/node_modules/sonic-boom/index.js"(exports, module) {
     "use strict";
-    var fs5 = __require("fs");
+    var fs6 = __require("fs");
     var EventEmitter2 = __require("events");
     var inherits = __require("util").inherits;
     var path8 = __require("path");
@@ -25389,20 +25389,20 @@ var require_sonic_boom = __commonJS({
       const mode = sonic.mode;
       if (sonic.sync) {
         try {
-          if (sonic.mkdir) fs5.mkdirSync(path8.dirname(file2), { recursive: true });
-          const fd = fs5.openSync(file2, flags, mode);
+          if (sonic.mkdir) fs6.mkdirSync(path8.dirname(file2), { recursive: true });
+          const fd = fs6.openSync(file2, flags, mode);
           fileOpened(null, fd);
         } catch (err) {
           fileOpened(err);
           throw err;
         }
       } else if (sonic.mkdir) {
-        fs5.mkdir(path8.dirname(file2), { recursive: true }, (err) => {
+        fs6.mkdir(path8.dirname(file2), { recursive: true }, (err) => {
           if (err) return fileOpened(err);
-          fs5.open(file2, flags, mode, fileOpened);
+          fs6.open(file2, flags, mode, fileOpened);
         });
       } else {
-        fs5.open(file2, flags, mode, fileOpened);
+        fs6.open(file2, flags, mode, fileOpened);
       }
     }
     function SonicBoom(opts) {
@@ -25443,8 +25443,8 @@ var require_sonic_boom = __commonJS({
         this.flush = flushBuffer;
         this.flushSync = flushBufferSync;
         this._actualWrite = actualWriteBuffer;
-        fsWriteSync = () => fs5.writeSync(this.fd, this._writingBuf);
-        fsWrite = () => fs5.write(this.fd, this._writingBuf, this.release);
+        fsWriteSync = () => fs6.writeSync(this.fd, this._writingBuf);
+        fsWrite = () => fs6.write(this.fd, this._writingBuf, this.release);
       } else if (contentMode === void 0 || contentMode === kContentModeUtf8) {
         this._writingBuf = "";
         this.write = write;
@@ -25453,15 +25453,15 @@ var require_sonic_boom = __commonJS({
         this._actualWrite = actualWrite;
         fsWriteSync = () => {
           if (Buffer.isBuffer(this._writingBuf)) {
-            return fs5.writeSync(this.fd, this._writingBuf);
+            return fs6.writeSync(this.fd, this._writingBuf);
           }
-          return fs5.writeSync(this.fd, this._writingBuf, "utf8");
+          return fs6.writeSync(this.fd, this._writingBuf, "utf8");
         };
         fsWrite = () => {
           if (Buffer.isBuffer(this._writingBuf)) {
-            return fs5.write(this.fd, this._writingBuf, this.release);
+            return fs6.write(this.fd, this._writingBuf, this.release);
           }
-          return fs5.write(this.fd, this._writingBuf, "utf8", this.release);
+          return fs6.write(this.fd, this._writingBuf, "utf8", this.release);
         };
       } else {
         throw new Error(`SonicBoom supports "${kContentModeUtf8}" and "${kContentModeBuffer}", but passed ${contentMode}`);
@@ -25518,7 +25518,7 @@ var require_sonic_boom = __commonJS({
           }
         }
         if (this._fsync) {
-          fs5.fsyncSync(this.fd);
+          fs6.fsyncSync(this.fd);
         }
         const len = this._len;
         if (this._reopening) {
@@ -25632,7 +25632,7 @@ var require_sonic_boom = __commonJS({
       const onDrain = () => {
         if (!this._fsync) {
           try {
-            fs5.fsync(this.fd, (err) => {
+            fs6.fsync(this.fd, (err) => {
               this._flushPending = false;
               cb(err);
             });
@@ -25734,7 +25734,7 @@ var require_sonic_boom = __commonJS({
       const fd = this.fd;
       this.once("ready", () => {
         if (fd !== this.fd) {
-          fs5.close(fd, (err) => {
+          fs6.close(fd, (err) => {
             if (err) {
               return this.emit("error", err);
             }
@@ -25783,7 +25783,7 @@ var require_sonic_boom = __commonJS({
           buf = this._bufs[0];
         }
         try {
-          const n = Buffer.isBuffer(buf) ? fs5.writeSync(this.fd, buf) : fs5.writeSync(this.fd, buf, "utf8");
+          const n = Buffer.isBuffer(buf) ? fs6.writeSync(this.fd, buf) : fs6.writeSync(this.fd, buf, "utf8");
           const releasedBufObj = releaseWritingBuf(buf, this._len, n);
           buf = releasedBufObj.writingBuf;
           this._len = releasedBufObj.len;
@@ -25799,7 +25799,7 @@ var require_sonic_boom = __commonJS({
         }
       }
       try {
-        fs5.fsyncSync(this.fd);
+        fs6.fsyncSync(this.fd);
       } catch {
       }
     }
@@ -25820,7 +25820,7 @@ var require_sonic_boom = __commonJS({
           buf = mergeBuf(this._bufs[0], this._lens[0]);
         }
         try {
-          const n = fs5.writeSync(this.fd, buf);
+          const n = fs6.writeSync(this.fd, buf);
           buf = buf.subarray(n);
           this._len = Math.max(this._len - n, 0);
           if (buf.length <= 0) {
@@ -25848,13 +25848,13 @@ var require_sonic_boom = __commonJS({
       this._writingBuf = this._writingBuf.length ? this._writingBuf : this._bufs.shift() || "";
       if (this.sync) {
         try {
-          const written = Buffer.isBuffer(this._writingBuf) ? fs5.writeSync(this.fd, this._writingBuf) : fs5.writeSync(this.fd, this._writingBuf, "utf8");
+          const written = Buffer.isBuffer(this._writingBuf) ? fs6.writeSync(this.fd, this._writingBuf) : fs6.writeSync(this.fd, this._writingBuf, "utf8");
           release2(null, written);
         } catch (err) {
           release2(err);
         }
       } else {
-        fs5.write(this.fd, this._writingBuf, release2);
+        fs6.write(this.fd, this._writingBuf, release2);
       }
     }
     function actualWriteBuffer() {
@@ -25863,7 +25863,7 @@ var require_sonic_boom = __commonJS({
       this._writingBuf = this._writingBuf.length ? this._writingBuf : mergeBuf(this._bufs.shift(), this._lens.shift());
       if (this.sync) {
         try {
-          const written = fs5.writeSync(this.fd, this._writingBuf);
+          const written = fs6.writeSync(this.fd, this._writingBuf);
           release2(null, written);
         } catch (err) {
           release2(err);
@@ -25872,7 +25872,7 @@ var require_sonic_boom = __commonJS({
         if (kCopyBuffer) {
           this._writingBuf = Buffer.from(this._writingBuf);
         }
-        fs5.write(this.fd, this._writingBuf, release2);
+        fs6.write(this.fd, this._writingBuf, release2);
       }
     }
     function actualClose(sonic) {
@@ -25888,12 +25888,12 @@ var require_sonic_boom = __commonJS({
       sonic._lens = [];
       assert2(typeof sonic.fd === "number", `sonic.fd must be a number, got ${typeof sonic.fd}`);
       try {
-        fs5.fsync(sonic.fd, closeWrapped);
+        fs6.fsync(sonic.fd, closeWrapped);
       } catch {
       }
       function closeWrapped() {
         if (sonic.fd !== 1 && sonic.fd !== 2) {
-          fs5.close(sonic.fd, done);
+          fs6.close(sonic.fd, done);
         } else {
           done();
         }
@@ -30313,15 +30313,15 @@ var require_pg_connection_string = __commonJS({
       if (config2.sslnegotiation === "direct" && config2.ssl === void 0) {
         config2.ssl = true;
       }
-      const fs5 = config2.sslcert || config2.sslkey || config2.sslrootcert ? __require("fs") : null;
+      const fs6 = config2.sslcert || config2.sslkey || config2.sslrootcert ? __require("fs") : null;
       if (config2.sslcert) {
-        config2.ssl.cert = fs5.readFileSync(config2.sslcert).toString();
+        config2.ssl.cert = fs6.readFileSync(config2.sslcert).toString();
       }
       if (config2.sslkey) {
-        config2.ssl.key = fs5.readFileSync(config2.sslkey).toString();
+        config2.ssl.key = fs6.readFileSync(config2.sslkey).toString();
       }
       if (config2.sslrootcert) {
-        config2.ssl.ca = fs5.readFileSync(config2.sslrootcert).toString();
+        config2.ssl.ca = fs6.readFileSync(config2.sslrootcert).toString();
       }
       if (options.useLibpqCompat && config2.uselibpqcompat) {
         throw new Error("Both useLibpqCompat and uselibpqcompat are set. Please use only one of them.");
@@ -32312,15 +32312,15 @@ var require_lib4 = __commonJS({
   "../../node_modules/.pnpm/pgpass@1.0.5/node_modules/pgpass/lib/index.js"(exports, module) {
     "use strict";
     var path8 = __require("path");
-    var fs5 = __require("fs");
+    var fs6 = __require("fs");
     var helper = require_helper();
     module.exports = function(connInfo, cb) {
       var file2 = helper.getFileName();
-      fs5.stat(file2, function(err, stat2) {
+      fs6.stat(file2, function(err, stat2) {
         if (err || !helper.usePgPass(stat2, file2)) {
           return cb(void 0);
         }
-        var st = fs5.createReadStream(file2);
+        var st = fs6.createReadStream(file2);
         helper.getPassword(connInfo, st, cb);
       });
     };
@@ -55328,7 +55328,7 @@ var require_shared = __commonJS({
     "use strict";
     var urllib = require_url();
     var util2 = __require("util");
-    var fs5 = __require("fs");
+    var fs6 = __require("fs");
     var nmfetch = require_fetch();
     var errors = require_errors();
     var dns2 = __require("dns");
@@ -55756,7 +55756,7 @@ var require_shared = __commonJS({
               callback(err);
             });
           }
-          return resolveStream(fs5.createReadStream(content.path), callback);
+          return resolveStream(fs6.createReadStream(content.path), callback);
         }
       }
       if (typeof data[key].content === "string" && !["utf8", "usascii", "ascii"].includes(encoding)) {
@@ -59130,7 +59130,7 @@ var require_mime_node = __commonJS({
   "../../node_modules/.pnpm/nodemailer@9.0.3/node_modules/nodemailer/lib/mime-node/index.js"(exports, module) {
     "use strict";
     var crypto13 = __require("crypto");
-    var fs5 = __require("fs");
+    var fs6 = __require("fs");
     var punycode = require_punycode();
     var { PassThrough } = __require("stream");
     var shared = require_shared();
@@ -59852,7 +59852,7 @@ var require_mime_node = __commonJS({
             });
             return contentStream;
           }
-          return fs5.createReadStream(content.path);
+          return fs6.createReadStream(content.path);
         }
         if (content && typeof content.href === "string") {
           if (this.disableUrlAccess) {
@@ -60923,7 +60923,7 @@ var require_dkim = __commonJS({
     var RelaxedBody = require_relaxed_body();
     var sign2 = require_sign2();
     var { PassThrough } = __require("stream");
-    var fs5 = __require("fs");
+    var fs6 = __require("fs");
     var path8 = __require("path");
     var crypto13 = __require("crypto");
     var DKIM_ALGO = "sha256";
@@ -60958,10 +60958,10 @@ var require_dkim = __commonJS({
         if (!this.cache || !this.cachePath) {
           return;
         }
-        fs5.unlink(this.cachePath, () => false);
+        fs6.unlink(this.cachePath, () => false);
       }
       createReadCache() {
-        this.cache = fs5.createReadStream(this.cachePath);
+        this.cache = fs6.createReadStream(this.cachePath);
         this.cache.once("error", (err) => {
           this.cleanup();
           this.output.emit("error", err);
@@ -61017,7 +61017,7 @@ var require_dkim = __commonJS({
       }
       createWriteCache() {
         this.output.usingCache = true;
-        this.cache = fs5.createWriteStream(this.cachePath);
+        this.cache = fs6.createWriteStream(this.cachePath);
         this.cache.once("error", (err) => {
           this.cleanup();
           this.relaxedBody.unpipe(this.cache);
@@ -67199,12 +67199,12 @@ function redactSensitive(body) {
 async function checkCredentialsFileSafety(path8, onWarn = (m) => console.warn(`anthropic-sdk: ${m}`)) {
   if (typeof process === "undefined" || process.platform === "win32")
     return;
-  const fs5 = await import("node:fs");
+  const fs6 = await import("node:fs");
   let resolved = path8;
   let st;
   try {
-    resolved = await fs5.promises.realpath(path8);
-    st = await fs5.promises.stat(resolved);
+    resolved = await fs6.promises.realpath(path8);
+    st = await fs6.promises.stat(resolved);
   } catch {
     return;
   }
@@ -67220,27 +67220,27 @@ async function checkCredentialsFileSafety(path8, onWarn = (m) => console.warn(`a
   }
 }
 async function writeCredentialsFileAtomic(targetPath, data) {
-  const fs5 = await import("node:fs");
+  const fs6 = await import("node:fs");
   const path8 = await import("node:path");
   const dir = path8.dirname(targetPath);
-  await fs5.promises.mkdir(dir, { recursive: true, mode: 448 });
+  await fs6.promises.mkdir(dir, { recursive: true, mode: 448 });
   const tmpPath = `${targetPath}.${process.pid}.${Math.random().toString(36).slice(2)}.tmp`;
   try {
-    const fh = await fs5.promises.open(tmpPath, "w", 384);
+    const fh = await fs6.promises.open(tmpPath, "w", 384);
     try {
       await fh.writeFile(JSON.stringify(data, null, 2));
       await fh.sync();
     } finally {
       await fh.close();
     }
-    await fs5.promises.rename(tmpPath, targetPath);
+    await fs6.promises.rename(tmpPath, targetPath);
   } catch (err) {
-    await fs5.promises.unlink(tmpPath).catch(() => {
+    await fs6.promises.unlink(tmpPath).catch(() => {
     });
     throw err;
   }
   try {
-    const dirFh = await fs5.promises.open(dir, "r");
+    const dirFh = await fs6.promises.open(dir, "r");
     try {
       await dirFh.sync();
     } finally {
@@ -67604,12 +67604,12 @@ var init_credentials = __esm({
         return null;
       }
       validateProfileName(profileName);
-      const fs5 = await import("node:fs");
+      const fs6 = await import("node:fs");
       const path8 = await import("node:path");
       const configPath = path8.join(rootConfigPath, "configs", `${profileName}.json`);
       let configRaw;
       try {
-        configRaw = await fs5.promises.readFile(configPath, "utf-8");
+        configRaw = await fs6.promises.readFile(configPath, "utf-8");
       } catch (err) {
         if (err?.code !== "ENOENT") {
           throw new Error(`failed to read config file ${configPath}: ${err}`);
@@ -67737,11 +67737,11 @@ var init_credentials = __esm({
       if (profileName) {
         return profileName;
       }
-      const fs5 = await import("node:fs");
+      const fs6 = await import("node:fs");
       const path8 = await import("node:path");
       const filePath = path8.join(rootConfigPath, "active_config");
       try {
-        return (await fs5.promises.readFile(filePath, "utf-8")).trim() || "default";
+        return (await fs6.promises.readFile(filePath, "utf-8")).trim() || "default";
       } catch (err) {
         if (err?.code !== "ENOENT") {
           throw new Error(`failed to read ${filePath}: ${err}`);
@@ -67758,10 +67758,10 @@ function identityTokenFromFile(path8) {
     throw new AnthropicError("Identity token file path is empty");
   }
   return async () => {
-    const fs5 = await import("node:fs");
+    const fs6 = await import("node:fs");
     let content;
     try {
-      content = await fs5.promises.readFile(path8, "utf-8");
+      content = await fs6.promises.readFile(path8, "utf-8");
     } catch (err) {
       throw new AnthropicError(`Failed to read identity token file at ${path8}: ${err}`);
     }
@@ -67852,11 +67852,11 @@ var init_oidc_federation = __esm({
 // ../../node_modules/.pnpm/@anthropic-ai+sdk@0.110.0_zod@3.25.76/node_modules/@anthropic-ai/sdk/lib/credentials/user-oauth.mjs
 function userOAuthProvider(config2) {
   return async (opts) => {
-    const fs5 = await import("node:fs");
+    const fs6 = await import("node:fs");
     await checkCredentialsFileSafety(config2.credentialsPath, config2.onSafetyWarning);
     let raw;
     try {
-      raw = await fs5.promises.readFile(config2.credentialsPath, "utf-8");
+      raw = await fs6.promises.readFile(config2.credentialsPath, "utf-8");
     } catch (err) {
       throw new WorkloadIdentityError(`Credentials file not found at ${config2.credentialsPath}: ${err}`);
     }
@@ -68028,11 +68028,11 @@ function resolveIdentityTokenProvider(auth) {
 }
 function cachedExchangeProvider(exchange, credentialsPath, onCacheWriteError, onSafetyWarning) {
   return async (opts) => {
-    const fs5 = await import("node:fs");
+    const fs6 = await import("node:fs");
     await checkCredentialsFileSafety(credentialsPath, onSafetyWarning);
     let existing;
     try {
-      const raw = await fs5.promises.readFile(credentialsPath, "utf-8");
+      const raw = await fs6.promises.readFile(credentialsPath, "utf-8");
       existing = JSON.parse(raw);
       const token = existing?.["access_token"];
       if (token && !opts?.forceRefresh) {
@@ -89465,12 +89465,12 @@ var require_src5 = __commonJS({
     var _GoogleToken_requestToken;
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.GoogleToken = void 0;
-    var fs5 = __require("fs");
+    var fs6 = __require("fs");
     var gaxios_1 = require_src2();
     var jws = require_jws();
     var path8 = __require("path");
     var util_1 = __require("util");
-    var readFile2 = fs5.readFile ? (0, util_1.promisify)(fs5.readFile) : async () => {
+    var readFile2 = fs6.readFile ? (0, util_1.promisify)(fs6.readFile) : async () => {
       throw new ErrorWithCode("use key rather than keyFile.", "MISSING_CREDENTIALS");
     };
     var GOOGLE_TOKEN_URL = "https://www.googleapis.com/oauth2/v4/token";
@@ -91027,12 +91027,12 @@ var require_filesubjecttokensupplier = __commonJS({
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.FileSubjectTokenSupplier = void 0;
     var util_1 = __require("util");
-    var fs5 = __require("fs");
-    var readFile2 = (0, util_1.promisify)((_a3 = fs5.readFile) !== null && _a3 !== void 0 ? _a3 : (() => {
+    var fs6 = __require("fs");
+    var readFile2 = (0, util_1.promisify)((_a3 = fs6.readFile) !== null && _a3 !== void 0 ? _a3 : (() => {
     }));
-    var realpath3 = (0, util_1.promisify)((_b = fs5.realpath) !== null && _b !== void 0 ? _b : (() => {
+    var realpath3 = (0, util_1.promisify)((_b = fs6.realpath) !== null && _b !== void 0 ? _b : (() => {
     }));
-    var lstat2 = (0, util_1.promisify)((_c = fs5.lstat) !== null && _c !== void 0 ? _c : (() => {
+    var lstat2 = (0, util_1.promisify)((_c = fs6.lstat) !== null && _c !== void 0 ? _c : (() => {
     }));
     var FileSubjectTokenSupplier = class {
       /**
@@ -91750,7 +91750,7 @@ var require_pluggable_auth_handler = __commonJS({
     var pluggable_auth_client_1 = require_pluggable_auth_client();
     var executable_response_1 = require_executable_response();
     var childProcess = __require("child_process");
-    var fs5 = __require("fs");
+    var fs6 = __require("fs");
     var PluggableAuthHandler = class _PluggableAuthHandler {
       /**
        * Instantiates a PluggableAuthHandler instance using the provided
@@ -91820,14 +91820,14 @@ var require_pluggable_auth_handler = __commonJS({
         }
         let filePath;
         try {
-          filePath = await fs5.promises.realpath(this.outputFile);
+          filePath = await fs6.promises.realpath(this.outputFile);
         } catch (_a3) {
           return void 0;
         }
-        if (!(await fs5.promises.lstat(filePath)).isFile()) {
+        if (!(await fs6.promises.lstat(filePath)).isFile()) {
           return void 0;
         }
-        const responseString = await fs5.promises.readFile(filePath, {
+        const responseString = await fs6.promises.readFile(filePath, {
           encoding: "utf8"
         });
         if (responseString === "") {
@@ -92248,7 +92248,7 @@ var require_googleauth = __commonJS({
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.GoogleAuth = exports.GoogleAuthExceptionMessages = exports.CLOUD_SDK_CLIENT_ID = void 0;
     var child_process_1 = __require("child_process");
-    var fs5 = __require("fs");
+    var fs6 = __require("fs");
     var gcpMetadata = require_src4();
     var os2 = __require("os");
     var path8 = __require("path");
@@ -92517,7 +92517,7 @@ var require_googleauth = __commonJS({
         }
         if (location) {
           location = path8.join(location, "gcloud", "application_default_credentials.json");
-          if (!fs5.existsSync(location)) {
+          if (!fs6.existsSync(location)) {
             location = null;
           }
         }
@@ -92538,8 +92538,8 @@ var require_googleauth = __commonJS({
           throw new Error("The file path is invalid.");
         }
         try {
-          filePath = fs5.realpathSync(filePath);
-          if (!fs5.lstatSync(filePath).isFile()) {
+          filePath = fs6.realpathSync(filePath);
+          if (!fs6.lstatSync(filePath).isFile()) {
             throw new Error();
           }
         } catch (err) {
@@ -92548,7 +92548,7 @@ var require_googleauth = __commonJS({
           }
           throw err;
         }
-        const readStream = fs5.createReadStream(filePath);
+        const readStream = fs6.createReadStream(filePath);
         return this.fromStream(readStream, options);
       }
       /**
@@ -92935,7 +92935,7 @@ var require_googleauth = __commonJS({
         return this._cacheClientFromJSON(this.jsonContent, this.clientOptions);
       } else if (this.keyFilename) {
         const filePath = path8.resolve(this.keyFilename);
-        const stream = fs5.createReadStream(filePath);
+        const stream = fs6.createReadStream(filePath);
         return await this.fromStreamAsync(stream, this.clientOptions);
       } else if (this.apiKey) {
         const client = await this.fromAPIKey(this.apiKey, this.clientOptions);
@@ -93422,6 +93422,7 @@ var import_express30 = __toESM(require_express2(), 1);
 var import_cors = __toESM(require_lib3(), 1);
 var import_cookie_parser = __toESM(require_cookie_parser(), 1);
 var import_pino_http = __toESM(require_logger(), 1);
+import fs5 from "node:fs";
 import path7 from "node:path";
 
 // src/routes/index.ts
@@ -125105,6 +125106,27 @@ function isDecorativeLabel(text2) {
 
 // src/routes/community.ts
 var router10 = (0, import_express10.Router)();
+function looksLikeUrl(value) {
+  const v = value.trim().toLowerCase();
+  if (!v) return false;
+  if (/^https?:\/\//i.test(v)) return true;
+  if (v.startsWith("www.")) return true;
+  return /^[a-z0-9][a-z0-9.-]*\.[a-z]{2,}(\/.*)?$/i.test(v);
+}
+function normalizeWebsiteUrl(raw) {
+  const trimmed = raw.trim();
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  return `https://${trimmed.replace(/^\/+/, "")}`;
+}
+function normalizeSkillTag(raw) {
+  const t = raw.trim();
+  if (!t) return "";
+  const key = t.toLowerCase().replace(/[\s_]+/g, "-");
+  if (key === "b-b" || key === "b2b" || key === "b-to-b") return "B2B";
+  if (key === "b-c" || key === "b2c") return "B2C";
+  if (key === "ai" || key === "a-i") return "AI";
+  return t;
+}
 var ensurePerkColumns = once(async () => {
   await db.execute(sql`ALTER TABLE perks ADD COLUMN IF NOT EXISTS category text`);
   await db.execute(sql`ALTER TABLE perks ADD COLUMN IF NOT EXISTS badge text`);
@@ -125290,7 +125312,12 @@ router10.get("/members", requireAuth, async (_req, res) => {
       members: listed.map((u) => {
         const title = isDecorativeLabel(u.title) ? null : u.title?.trim() || null;
         const companyRaw = u.company?.trim() || null;
-        const company = companyRaw && !["\u2014", "-", "n/a", "na"].includes(companyRaw.toLowerCase()) ? companyRaw : null;
+        let company = companyRaw && !["\u2014", "-", "n/a", "na"].includes(companyRaw.toLowerCase()) ? companyRaw : null;
+        let website = null;
+        if (company && looksLikeUrl(company)) {
+          website = normalizeWebsiteUrl(company);
+          company = null;
+        }
         let skills = [];
         if (u.skills) {
           try {
@@ -125302,6 +125329,7 @@ router10.get("/members", requireAuth, async (_req, res) => {
             skills = u.skills.split(",").map((s) => s.trim()).filter(Boolean);
           }
         }
+        skills = skills.map(normalizeSkillTag).filter(Boolean);
         const block = new Set(
           [title, company, u.persona].filter((x) => Boolean(x && String(x).trim())).map((x) => x.trim().toLowerCase())
         );
@@ -125312,6 +125340,7 @@ router10.get("/members", requireAuth, async (_req, res) => {
           initials: initialsFromName(u.name),
           title: title ?? (u.role === "admin" ? "Admin" : ""),
           company: company ?? "",
+          website,
           bio: u.bio ?? "",
           tags,
           linkedin: u.linkedin,
@@ -127878,6 +127907,61 @@ router21.get("/social-preview", requireAuth, async (req, res) => {
     res.status(422).json({ error: err.message ?? "\xD6nizleme al\u0131namad\u0131" });
   }
 });
+async function loadPublishedProduct(productId, userId) {
+  await ensureStageSchema();
+  const [row] = await db.select({
+    product: stageProductsTable,
+    authorName: usersTable.name,
+    authorHandle: usersTable.handle
+  }).from(stageProductsTable).leftJoin(usersTable, eq(usersTable.id, stageProductsTable.userId)).where(and(eq(stageProductsTable.id, productId), eq(stageProductsTable.status, "published"))).limit(1);
+  if (!row) return null;
+  const [voteRow] = await db.select({ n: sql`coalesce(count(${stageVotesTable.id}), 0)::int` }).from(stageVotesTable).where(eq(stageVotesTable.productId, productId));
+  const votes = Number(voteRow?.n) || 0;
+  let myVote = false;
+  if (userId != null) {
+    const [mine] = await db.select({ id: stageVotesTable.id }).from(stageVotesTable).where(and(eq(stageVotesTable.productId, productId), eq(stageVotesTable.userId, userId))).limit(1);
+    myVote = Boolean(mine);
+  }
+  return mapProduct(row.product, votes, myVote, {
+    name: row.authorName ?? "",
+    handle: row.authorHandle
+  });
+}
+router21.get("/stage/products/:id", requireAuth, async (req, res) => {
+  try {
+    const productId = Number(req.params.id);
+    if (!Number.isFinite(productId)) {
+      res.status(400).json({ error: "Ge\xE7ersiz \xFCr\xFCn" });
+      return;
+    }
+    const product = await loadPublishedProduct(productId, req.user.id);
+    if (!product) {
+      res.status(404).json({ error: "\xDCr\xFCn bulunamad\u0131" });
+      return;
+    }
+    res.json({ product });
+  } catch (err) {
+    res.status(500).json({ error: err.message ?? "\xDCr\xFCn al\u0131namad\u0131" });
+  }
+});
+router21.get("/public/stage/:id", async (req, res) => {
+  try {
+    const productId = Number(req.params.id);
+    if (!Number.isFinite(productId)) {
+      res.status(400).json({ error: "Ge\xE7ersiz \xFCr\xFCn" });
+      return;
+    }
+    const product = await loadPublishedProduct(productId, null);
+    if (!product) {
+      res.status(404).json({ error: "\xDCr\xFCn bulunamad\u0131" });
+      return;
+    }
+    const { myVote: _myVote, userId: _userId, status: _status, ...kunye } = product;
+    res.json({ product: kunye });
+  } catch (err) {
+    res.status(500).json({ error: err.message ?? "K\xFCnye al\u0131namad\u0131" });
+  }
+});
 router21.get("/stage/products", requireAuth, async (req, res) => {
   try {
     await ensureStageSchema();
@@ -129699,9 +129783,37 @@ app.use(import_express30.default.urlencoded({ extended: true }));
 app.use((0, import_cookie_parser.default)());
 app.use(attachUser);
 app.use("/api", routes_default);
-var frontendDist = path7.join(__dirname, "..", "..", "inner-hub", "dist");
-app.use(import_express30.default.static(frontendDist));
-app.get(/^(?!\/api).*/, (_req, res) => {
+var frontendDist = path7.resolve(
+  path7.join(__dirname, "..", "..", "inner-hub", "dist")
+);
+function prerenderIndex(pathname) {
+  let decoded = pathname;
+  try {
+    decoded = decodeURIComponent(pathname);
+  } catch {
+  }
+  const segments = decoded.split("/").filter(Boolean);
+  if (segments.length === 0 || !segments.every((s) => s !== ".." && !s.includes("\0"))) {
+    return null;
+  }
+  const file2 = path7.resolve(frontendDist, ...segments, "index.html");
+  if (!file2.startsWith(frontendDist + path7.sep) || !fs5.existsSync(file2)) {
+    return null;
+  }
+  return file2;
+}
+app.use((req, res, next) => {
+  if (req.method !== "GET" && req.method !== "HEAD") return next();
+  if (req.path.length <= 1 || !req.path.endsWith("/")) return next();
+  const bare = req.path.replace(/\/+$/, "") || "/";
+  if (!prerenderIndex(bare)) return next();
+  const qs = req.url.includes("?") ? req.url.slice(req.url.indexOf("?")) : "";
+  return res.redirect(301, bare + qs);
+});
+app.use(import_express30.default.static(frontendDist, { redirect: false }));
+app.get(/^(?!\/api).*/, (req, res) => {
+  const prerendered = prerenderIndex(req.path);
+  if (prerendered) return res.sendFile(prerendered);
   res.sendFile(path7.join(frontendDist, "index.html"));
 });
 var app_default = app;

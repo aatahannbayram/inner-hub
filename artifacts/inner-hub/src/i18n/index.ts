@@ -5,4 +5,13 @@ export { I18nProvider, useI18n, useT, useLocale } from "./I18nProvider";
 
 /** Compact EN/TR toggle for public chrome */
 export { LocaleToggle } from "./LocaleToggle";
+export { LocalePathSync } from "./LocalePathSync";
 export { LocaleSyncFromSettings } from "./LocaleSyncFromSettings";
+export { useLocalizedHref } from "./useLocalizedHref";
+export {
+  isLocaleAgnosticPath,
+  localeFromPath,
+  localizedPath,
+  stripLocalePrefix,
+  swapLocalePath,
+} from "./localePath";
