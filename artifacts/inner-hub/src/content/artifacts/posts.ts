@@ -76,11 +76,11 @@ export const SEO_POSTS: Artifact[] = [
       description:
         "İstanbul neden AI kurucuları için erken buluşma noktası olabilir? inner.hub’ın yerel derinlik + global erişim stratejisi ve davetiye ile büyüme modeli.",
       answer:
-        "İstanbul’dan global bir AI kurucu ağı, yerel derinlik ve seçici davetiye ile kurulur. Önce otuz dört kişilik kurucu çember; sonra aynı standartla genişleyen global katman. inner.hub bu yolu seçer.",
+        "İstanbul’dan global bir AI kurucu ağı, yerel derinlik ve seçici davetiye ile kurulur. Önce küçük bir kurucu çember; sonra aynı standartla genişleyen global katman. inner.hub bu yolu seçer.",
       body: [
         "Birçok ağ ters sırayla büyür: önce global marka, sonra yerel içerik. Bu yaklaşım hızlı görünür ama kök tutmaz. inner.hub tersini yapar - İstanbul’da gerçek bir çember, ardından global yayılım.",
         "İstanbul’un avantajı coğrafya değil; yoğunluktur. Kurucular, yatırımcılar ve builder’lar aynı şehirde erken buluşabilir. Bu fiziksel yakınlık, dijital araçlarla birleşince sinyal hızlanır.",
-        "Kurucu çember (ilk 34) bilinçli olarak küçüktür. Amaç, “herkes” olmak değil; standardı taşıyan bir çekirdek oluşturmaktır. Her yeni üye bu çekirdeğin itibarını miras alır.",
+        "Kurucu çember bilinçli olarak küçüktür. Amaç, “herkes” olmak değil; standardı taşıyan bir çekirdek oluşturmaktır. Her yeni üye bu çekirdeğin itibarını miras alır.",
         "Global katman, yerel kaliteyi sulandırmadan eklenir. Aynı davetiye mantığı, aynı uyum kriteri, aynı gathering disiplini. Farklı şehirler, aynı bar.",
         "AI özelinde hız kritiktir. Model, ürün ve sermaye döngüleri kısadır. Erken doğru insanlarla aynı odada olmak, altı ay sonra “keşke” dememek demektir.",
         "inner.hub platform katmanları - signal, match, capital, vault - bu ağın üzerine oturur. Ağ sosyal bir sohbet değil; iş üreten bir altyapıdır.",
@@ -103,11 +103,11 @@ export const SEO_POSTS: Artifact[] = [
       description:
         "Why İstanbul can be an early meeting point for AI founders - inner.hub’s local depth + global reach strategy and invitation-led growth.",
       answer:
-        "A global AI founder network from İstanbul is built with local depth and selective invitations. First a founding circle of thirty-four; then a global layer on the same standard. That is the inner.hub path.",
+        "A global AI founder network from İstanbul is built with local depth and selective invitations. First a small founding circle; then a global layer on the same standard. That is the inner.hub path.",
       body: [
         "Many networks grow backwards: global brand first, local substance later. It looks fast and rarely roots. inner.hub does the opposite - a real circle in İstanbul, then global expansion.",
         "İstanbul’s edge is density, not geography. Founders, investors, and builders can meet early in one city. Physical proximity plus digital tools speeds signal.",
-        "The founding circle (first 34) is intentionally small. The goal is not “everyone” - it is a core that carries the standard. Every new member inherits that reputation.",
+        "The founding circle is intentionally small. The goal is not “everyone” - it is a core that carries the standard. Every new member inherits that reputation.",
         "The global layer is added without diluting local quality. Same invitation logic, same fit bar, same gathering discipline. Different cities, same standard.",
         "In AI, speed matters. Model, product, and capital cycles are short. Being in the right room early beats saying “if only” six months later.",
         "inner.hub’s platform layers - signal, match, capital, vault - sit on top of this network. It is infrastructure for work, not a chat club.",
@@ -142,11 +142,11 @@ export const SEO_POSTS: Artifact[] = [
       body: [
         "Konferanslar ölçek için tasarlanır: sahne, sponsor, bilet, networking cocktail. Bu formatın değeri vardır - ama erken aşama güven ve deal flow için çoğu zaman fazla gürültülüdür.",
         "Gathering tersine çevrilmiş bir odadır. Katılımcı sayısı düşüktür. Herkes davetiye ile gelir. Program, “konuşmacı dinle” değil “birlikte çalış” mantığındadır.",
-        "inner.hub gathering’inde otuz dört kişi bir araya gelir. Bu sayı tesadüf değildir: yeterince çeşitli, yeterince yoğun, yeterince yönetilebilir. Kalabalık değil; çember.",
+        "inner.hub gathering’inde küçük bir grup bir araya gelir. Sayı bilinçlidir: yeterince çeşitli, yeterince yoğun, yeterince yönetilebilir. Kalabalık değil; çember.",
         "Gündem, ürün demoları, sermaye konuşmaları ve eşleşme üzerine kurulur. Sahne show’u değil, iş masası. Kayıtlar ve erişim davetiye sürecinin içinde kalır.",
         "Konferansta kartvizit değişir. Gathering’de itibar değişir. Bir üyenin önerdiği isim, çemberin ortak belleğine girer.",
         "Bu yüzden gathering SEO ve AEO açısından da net bir cevap üretir: “inner.hub gathering nedir?” sorusunun yanıtı “özel bir çalışma buluşması”dır - genel etkinlik değil.",
-        "İstanbul Eylül 2026 gathering’i bu modelin ilk kamusal ifadesidir. Sonraki buluşmalar aynı disiplini taşır: kapalı, seçili, iş odaklı.",
+        "İstanbul gathering’leri bu modelin kamusal ifadesidir. Sonraki buluşmalar aynı disiplini taşır: kapalı, seçili, iş odaklı.",
       ],
       tags: ["gathering", "konferans", "etkinlik", "İstanbul", "çember"],
       faq: [
@@ -169,11 +169,11 @@ export const SEO_POSTS: Artifact[] = [
       body: [
         "Conferences are built for scale: stage, sponsors, tickets, networking cocktails. Valuable - and often too noisy for early trust and deal flow.",
         "A gathering inverts the room. Attendance is small. Everyone is invited. The program is “work together,” not “watch speakers.”",
-        "At an inner.hub gathering, thirty-four people meet. That number is intentional: diverse enough, dense enough, manageable enough. Not a crowd - a circle.",
+        "At an inner.hub gathering, a small group meets. That size is intentional: diverse enough, dense enough, manageable enough. Not a crowd - a circle.",
         "The agenda centers product, capital conversations, and matching. Work table, not stage show. Access stays inside the invitation flow.",
         "At conferences, business cards move. At gatherings, reputation moves. A name referred by a member enters the circle’s shared memory.",
         "That is why gathering also answers SEO/AEO cleanly: “What is an inner.hub gathering?” - a private working meetup, not a generic event.",
-        "The İstanbul September 2026 gathering is the first public expression of this model. Later gatherings carry the same discipline: closed, selective, work-first.",
+        "İstanbul gatherings are the public expression of this model. Later gatherings carry the same discipline: closed, selective, work-first.",
       ],
       tags: ["gathering", "conference", "event", "Istanbul", "circle"],
       faq: [

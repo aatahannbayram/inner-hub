@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect } from "react";
 import {
   Zap,
   Users,
@@ -8,9 +8,8 @@ import {
   Fingerprint,
   Code2,
   Target,
-  ArrowUpRight,
 } from "lucide-react";
-import { motion, useInView, useScroll } from "framer-motion";
+import { motion, useScroll } from "framer-motion";
 import { FadeIn } from "@/components/FadeIn";
 import { WordsPullUp } from "@/components/WordsPullUp";
 import { ScrollTextReveal } from "@/components/ScrollTextReveal";
@@ -19,7 +18,6 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { useLocale, useT, localizedPath } from "@/i18n";
 import { Grain } from "@/components/Grain";
 import { IndexRail } from "@/components/IndexRail";
-import { DiagramCircle } from "@/components/DiagramCircle";
 import { Preloader } from "@/components/Preloader";
 import { PlatformFeatures, type PlatformFeature } from "@/components/PlatformFeatures";
 import { HeroVideo } from "@/components/HeroVideo";
@@ -27,46 +25,6 @@ import { WhatsNextCinematic } from "@/components/WhatsNextCinematic";
 import { HomeOpening } from "@/components/HomeOpening";
 import { useLenis } from "@/hooks/useLenis";
 import { useSeo, organizationJsonLd, websiteJsonLd } from "@/lib/seo";
-
-// ─── Animated counter ─────────────────────────────────────────────────────────
-function Counter({ to, suffix = "" }: { to: number; suffix?: string }) {
-  const ref = useRef<HTMLSpanElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-80px" });
-  // Always start at target so Lenis/inView failures never flash "0".
-  const [val, setVal] = useState(to);
-  const [played, setPlayed] = useState(false);
-
-  useEffect(() => {
-    setVal(to);
-    setPlayed(false);
-  }, [to]);
-
-  useEffect(() => {
-    if (!inView || played) return;
-    if (typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      setVal(to);
-      setPlayed(true);
-      return;
-    }
-    setPlayed(true);
-    let start = 0;
-    setVal(0);
-    const step = Math.max(1, Math.ceil(to / 48));
-    const id = setInterval(() => {
-      start = Math.min(start + step, to);
-      setVal(start);
-      if (start >= to) clearInterval(id);
-    }, 20);
-    return () => clearInterval(id);
-  }, [inView, to, played]);
-
-  return (
-    <span ref={ref}>
-      {val}
-      {suffix}
-    </span>
-  );
-}
 
 // ─── Platform module media (copy comes from i18n) ─────────────────────────────
 const FEATURE_MEDIA = {
@@ -127,7 +85,7 @@ function buildHomeModules(t: (key: string) => string): HomeModule[] {
       desc: t("home.modVaultDesc"),
       icon: BookOpen,
       tag: t("home.modVaultTag"),
-      phase: "roadmap",
+      phase: "live",
     },
     {
       id: "id",
@@ -135,7 +93,7 @@ function buildHomeModules(t: (key: string) => string): HomeModule[] {
       desc: t("home.modIdDesc"),
       icon: Fingerprint,
       tag: t("home.modIdTag"),
-      phase: "roadmap",
+      phase: "live",
     },
     {
       id: "api",
@@ -143,7 +101,7 @@ function buildHomeModules(t: (key: string) => string): HomeModule[] {
       desc: t("home.modApiDesc"),
       icon: Code2,
       tag: t("home.modApiTag"),
-      phase: "roadmap",
+      phase: "live",
     },
     {
       id: "bounty",
@@ -158,7 +116,7 @@ function buildHomeModules(t: (key: string) => string): HomeModule[] {
 
 function buildPlatformFeatures(modules: HomeModule[]): PlatformFeature[] {
   return modules
-    .filter((m) => m.phase === "live")
+    .filter((m) => m.phase === "live" && m.id in FEATURE_MEDIA)
     .map((m) => ({
       id: m.id,
       name: m.name,
@@ -242,18 +200,6 @@ function ScrollProgress() {
   );
 }
 
-// ─── Stat card ────────────────────────────────────────────────────────────────
-function StatItem({ n, label, suffix = "" }: { n: number; label: string; suffix?: string }) {
-  return (
-    <div className="flex flex-col items-start">
-      <span className="font-display font-serif italic text-4xl leading-none mb-2 text-[var(--bone-fixed)] sm:mb-3 sm:text-5xl md:text-7xl">
-        <Counter to={n} suffix={suffix} />
-      </span>
-      <span className="font-mono text-[9px] uppercase tracking-widest opacity-40 text-[var(--bone-fixed)] sm:text-label">{label}</span>
-    </div>
-  );
-}
-
 // ─── Main ─────────────────────────────────────────────────────────────────────
 export default function Home() {
   useLenis(true);
@@ -261,7 +207,9 @@ export default function Home() {
   const { locale } = useLocale();
   const modules = buildHomeModules(t);
   const platformFeatures = buildPlatformFeatures(modules);
-  const liveCount = modules.filter((m) => m.phase === "live").length;
+  const liveExtraModules = modules.filter(
+    (m) => m.phase === "live" && !(m.id in FEATURE_MEDIA),
+  );
   const septemberModules = modules.filter((m) => m.phase === "september");
   const roadmapModules = modules.filter((m) => m.phase === "roadmap");
 
@@ -303,6 +251,7 @@ export default function Home() {
         <section id="section-03">
           <PlatformFeatures
             features={platformFeatures}
+            liveExtraModules={liveExtraModules}
             septemberModules={septemberModules}
             roadmapModules={roadmapModules}
           />
@@ -367,53 +316,7 @@ export default function Home() {
           </section>
         </div>
 
-        {/* ── 06 · The gathering (ink bridge into cinematic) ── */}
-        <section
-          id="section-06"
-          className="relative overflow-hidden border-t border-border/15 bg-[var(--ink-fixed)] px-4 py-20 text-[var(--bone-fixed)] transition-colors duration-700 sm:px-6 sm:py-32 md:px-12 md:py-48 lg:px-[10%]"
-        >
-          <div className="pointer-events-none absolute -right-24 top-0 size-[520px] bg-[var(--inner-green)]/[0.04] blur-3xl" />
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[var(--ink-fixed)]/40 to-transparent" />
-
-          <FadeIn>
-            <div className="mb-12 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 border-b border-white/15 pb-5 font-mono text-[10px] uppercase tracking-widest opacity-60 sm:mb-20 sm:gap-6 sm:pb-6 sm:text-xs">
-              <span className="min-w-0">{t("home.gatheringEyebrow")}</span>
-              <span className="shrink-0">{t("home.gatheringDate")}</span>
-            </div>
-          </FadeIn>
-          <WordsPullUp
-            text={t("home.gatheringTitle")}
-            className="mb-12 max-w-3xl text-balance font-display font-serif italic text-3xl sm:mb-20 sm:text-4xl md:mb-24 md:text-5xl lg:text-6xl"
-          />
-
-          <div className="mb-12 flex flex-col gap-12 sm:mb-20 sm:gap-16 lg:mb-24 lg:flex-row lg:items-center">
-            <div className="grid min-w-0 grid-cols-3 gap-3 sm:gap-6 md:gap-10 lg:flex-1">
-              <StatItem n={34} label={t("home.people")} />
-              <StatItem n={2} label={t("home.days")} />
-              <StatItem n={liveCount} label={t("home.modules")} />
-            </div>
-            <FadeIn delay={0.2} className="flex-shrink-0">
-              <DiagramCircle />
-            </FadeIn>
-          </div>
-
-          <FadeIn delay={0.15}>
-            <div className="flex flex-col gap-6 sm:gap-8 md:flex-row md:items-end md:justify-between">
-              <p className="max-w-2xl text-balance font-serif text-xl opacity-80 sm:text-2xl md:text-3xl">
-                {t("home.gatheringLine")}
-              </p>
-              <a
-                href="#section-07"
-                className="group inline-flex min-h-11 items-center justify-center gap-2 border border-white/25 px-5 py-3 font-mono text-xs uppercase tracking-widest text-[var(--bone-fixed)] transition-colors hover:border-white/60 hover:bg-white hover:text-black sm:min-h-0 sm:justify-start"
-              >
-                {t("home.whatsNext")}
-                <ArrowUpRight className="size-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-              </a>
-            </div>
-          </FadeIn>
-        </section>
-
-        {/* ── 07 · What's next (cinematic) ── */}
+        {/* ── 06 · What's next (cinematic) ── */}
         <WhatsNextCinematic />
 
       </main>

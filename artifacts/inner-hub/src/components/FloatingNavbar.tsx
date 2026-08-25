@@ -9,8 +9,7 @@ const LINK_KEYS = [
   { key: "idea", href: "/#section-01" },
   { key: "circle", href: "/#section-02" },
   { key: "platform", href: "/#section-03" },
-  { key: "gathering", href: "/#section-06" },
-  { key: "artifacts", href: "/haberler" }, // eski "Sıradaki" → Haberler
+  { key: "artifacts", href: "/haberler" },
 ] as const;
 
 const EASE = [0.16, 1, 0.3, 1] as const;
@@ -39,13 +38,11 @@ export function FloatingNavbar({ placement = "overlay" }: { placement?: "overlay
   const ideaHref = useLocalizedHref("/#section-01");
   const circleHref = useLocalizedHref("/#section-02");
   const platformHref = useLocalizedHref("/#section-03");
-  const gatheringHref = useLocalizedHref("/#section-06");
   const artifactsHref = useLocalizedHref("/haberler");
   const localizedByKey = {
     idea: ideaHref,
     circle: circleHref,
     platform: platformHref,
-    gathering: gatheringHref,
     artifacts: artifactsHref,
   } as const;
   const links = LINK_KEYS.map((link) => ({

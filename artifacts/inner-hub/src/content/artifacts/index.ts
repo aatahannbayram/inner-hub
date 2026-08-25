@@ -53,43 +53,6 @@ export const ARTIFACTS: Artifact[] = [
       ],
     },
   },
-  {
-    slug: "istanbul-gathering-2026",
-    kind: "video",
-    publishedAt: "2026-07-22",
-    author: { name: "inner hub", url: "https://inner.digital" },
-    coverImage: "/posters/courses-hero.jpg",
-    coverAlt: "İstanbul gathering visual",
-    video: {
-      src: "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260406_133058_0504132a-0cf3-4450-a370-8ea3b05c95d4.mp4",
-      durationSeconds: 18,
-      thumbnail: "/posters/gathering.jpg",
-    },
-    tr: {
-      title: "İstanbul gathering · Eylül 2026",
-      description:
-        "İlk inner.hub buluşması: otuz dört kişi, iki gün, bir çember. İstanbul, Eylül 2026 kısa video özeti.",
-      answer:
-        "İlk inner.hub gathering İstanbul’da, Eylül 2026’da. Otuz dört kişi, iki gün, bir çember - birçoklarının ilki.",
-      body: [
-        "Buluşma bir konferans değil; kapalı bir çalışma alanı. Sinyal, sermaye ve inşa aynı masada.",
-        "Kayıt ve detaylar davetiye sürecinin içinde ilerler. Genel bilet satışı yok.",
-      ],
-      tags: ["gathering", "İstanbul", "video"],
-    },
-    en: {
-      title: "İstanbul gathering · September 2026",
-      description:
-        "The first inner.hub gathering: thirty-four people, two days, one circle. Short video brief for September 2026 in İstanbul.",
-      answer:
-        "The first inner.hub gathering is in İstanbul, September 2026. Thirty-four people, two days, one circle - the first of many.",
-      body: [
-        "It is not a conference. It is a closed working room where signal, capital, and builders meet.",
-        "Access stays inside the invitation flow. There is no public ticket sale.",
-      ],
-      tags: ["gathering", "Istanbul", "video"],
-    },
-  },
   ...SEO_POSTS,
 ];
 

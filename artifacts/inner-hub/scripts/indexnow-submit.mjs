@@ -13,7 +13,6 @@ const urls = [
   "https://inner.digital/haberler",
   "https://inner.digital/haberler/gathering-vs-konferans",
   "https://inner.digital/haberler/istanbul-ai-kurucu-agi",
-  "https://inner.digital/haberler/istanbul-gathering-2026",
   "https://inner.digital/haberler/kapali-cember-deal-flow",
   "https://inner.digital/haberler/inner-hub-neden-davetiye",
   "https://inner.digital/haberler/aeo-icin-net-cevaplar",

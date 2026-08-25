@@ -9,14 +9,12 @@ export function SiteFooter() {
   const haberlerHref = useLocalizedHref("/haberler");
   const inviteHref = useLocalizedHref("/invitation");
   const faqHref = useLocalizedHref("/sss");
-  const gatheringHref = useLocalizedHref("/haberler/istanbul-gathering-2026");
   const whyInviteHref = useLocalizedHref("/haberler/inner-hub-neden-davetiye");
 
   const navLinks = [
     { label: t("publicNav.invitation"), href: inviteHref },
     { label: t("publicNav.artifacts"), href: haberlerHref },
     { label: t("sss.nav"), href: faqHref },
-    { label: t("publicNav.gathering"), href: gatheringHref },
     { label: t("publicNav.whyInvite"), href: whyInviteHref },
   ];
 

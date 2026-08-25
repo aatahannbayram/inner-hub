@@ -40,7 +40,7 @@ export function organizationJsonLd() {
       "invite-only membership",
       "AI founders",
       "angel investors",
-      "İstanbul gathering",
+      "closed circle",
     ],
   };
 }

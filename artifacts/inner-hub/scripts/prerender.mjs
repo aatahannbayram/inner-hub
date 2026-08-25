@@ -25,23 +25,6 @@ const ARTIFACTS = [
       "inner.hub davetiye ile girilir çünkü çember kalabalık değil uyum ister. Üyeler içeriden önerilir, özenle değerlendirilir ve kişisel olarak davet edilir.",
   },
   {
-    slug: "istanbul-gathering-2026",
-    title: "İstanbul gathering · Eylül 2026 · inner.hub",
-    description:
-      "İlk inner.hub buluşması: otuz dört kişi, iki gün, bir çember. İstanbul, Eylül 2026 kısa video özeti.",
-    type: "video.other",
-    ogImage: "https://inner.digital/posters/courses-hero.jpg",
-    publishedAt: "2026-07-22",
-    answer:
-      "İlk inner.hub gathering İstanbul’da, Eylül 2026’da. Otuz dört kişi, iki gün, bir çember - birçoklarının ilki.",
-    video: {
-      contentUrl:
-        "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260406_133058_0504132a-0cf3-4450-a370-8ea3b05c95d4.mp4",
-      thumbnail: "https://inner.digital/posters/gathering.jpg",
-      durationSeconds: 18,
-    },
-  },
-  {
     slug: "kapali-cember-deal-flow",
     title: "Kapalı çember deal flow’u nasıl hızlandırır? · inner.hub",
     description:
@@ -168,7 +151,7 @@ pages.push(
   writePage("index.html", "/", {
     title: "inner.hub | İstanbul’da davetli kurucu ağı",
     description:
-      "inner.hub (inner.digital): İstanbul merkezli davetli üyelik. Kurucular, mühendisler ve yatırımcılar Eylül 2026 gathering’inden önce erken buluşur. 34 koltuk. Davetiye isteyin.",
+      "inner.hub (inner.digital): İstanbul merkezli davetli üyelik. Kurucular, mühendisler ve yatırımcılar için erken sinyal ve güven temelli çember. Davetiye isteyin.",
     canonical: "https://inner.digital/",
     ogType: "website",
     ogImage: "https://inner.digital/inner-og.png",
@@ -223,7 +206,7 @@ pages.push(
   writePage("en/index.html", "/en", {
     title: "inner.hub | Invite-only founder network in İstanbul",
     description:
-      "inner.hub (inner.digital) is an invite-only circle in İstanbul for founders, engineers, and investors. 34 founding seats. First gathering: September 2026. Request an invitation.",
+      "inner.hub (inner.digital) is an invite-only circle in İstanbul for founders, engineers, and investors. Early signal, trusted introductions. Request an invitation.",
     canonical: "https://inner.digital/en",
     ogType: "website",
     ogImage: "https://inner.digital/inner-og.png",
@@ -341,9 +324,9 @@ pages.push(
 
 pages.push(
   writePage("haberler/index.html", "/haberler", {
-    title: "Haberler | inner.hub davetiye, gathering ve üyelik",
+    title: "Haberler | inner.hub davetiye ve üyelik",
     description:
-      "inner.hub haberleri: davetiye ile üyelik, İstanbul gathering (Eylül 2026) ve kapalı çember deal flow üzerine yazı ve video.",
+      "inner.hub haberleri: davetiye ile üyelik ve kapalı çember deal flow üzerine yazı ve video.",
     canonical: "https://inner.digital/haberler",
     ogType: "website",
     ogImage: "https://inner.digital/inner-og.png",
@@ -360,9 +343,9 @@ pages.push(
 
 pages.push(
   writePage("en/haberler/index.html", "/en/haberler", {
-    title: "News | inner.hub invitations, gathering, membership",
+    title: "News | inner.hub invitations and membership",
     description:
-      "inner.hub news: invitation-only membership, the İstanbul gathering (September 2026), and how a closed circle compounds deal flow.",
+      "inner.hub news: invitation-only membership and how a closed circle compounds deal flow.",
     canonical: "https://inner.digital/en/haberler",
     ogType: "website",
     ogImage: "https://inner.digital/inner-og.png",

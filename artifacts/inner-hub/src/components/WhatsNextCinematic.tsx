@@ -59,7 +59,7 @@ export function WhatsNextCinematic() {
 
   return (
     <section
-      id="section-07"
+      id="section-06"
       className="relative flex min-h-svh flex-col justify-end overflow-hidden bg-black px-4 pb-12 text-white sm:px-6 sm:pb-16 md:px-12 md:pb-24 lg:px-[10%]"
     >
       <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">

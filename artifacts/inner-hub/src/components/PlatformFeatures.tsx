@@ -69,10 +69,12 @@ function FeatureCard({
 
 export function PlatformFeatures({
   features,
+  liveExtraModules = [],
   septemberModules = [],
   roadmapModules = [],
 }: {
   features: PlatformFeature[];
+  liveExtraModules?: { id: string; name: string; desc: string; icon: LucideIcon; tag: string }[];
   septemberModules?: { id: string; name: string; desc: string; icon: LucideIcon; tag: string }[];
   roadmapModules?: { id: string; name: string; desc: string; icon: LucideIcon; tag: string }[];
 }) {
@@ -247,6 +249,7 @@ export function PlatformFeatures({
             />
           ))}
 
+          {renderModuleGrid(liveExtraModules, t("home.modulesLiveEyebrow"))}
           {renderModuleGrid(septemberModules, t("home.modulesSeptemberEyebrow"))}
           {renderModuleGrid(roadmapModules, t("home.modulesRoadmapEyebrow"))}
         </div>
