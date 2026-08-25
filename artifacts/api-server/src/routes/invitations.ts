@@ -18,6 +18,7 @@ import {
 import { fetchLinkPreview } from "../lib/linkPreview";
 import { once } from "../lib/ensureSchema";
 import { logger } from "../lib/logger";
+import { normalizePhone } from "../lib/phone";
 
 const router: IRouter = Router();
 
@@ -48,6 +49,7 @@ const ensureOrgColumns = once(async () => {
   await db.execute(sql`ALTER TABLE invitation_requests ADD COLUMN IF NOT EXISTS organization_domain text`);
   await db.execute(sql`ALTER TABLE invitation_requests ADD COLUMN IF NOT EXISTS organization_logo text`);
   await db.execute(sql`ALTER TABLE invitation_requests ADD COLUMN IF NOT EXISTS organization_description text`);
+  await db.execute(sql`ALTER TABLE invitation_requests ADD COLUMN IF NOT EXISTS phone text`);
 });
 
 /**
@@ -97,6 +99,7 @@ router.post("/request", async (req, res) => {
   const {
     name,
     email,
+    phone,
     role,
     linkedin,
     whoYouAre,
@@ -119,6 +122,12 @@ router.post("/request", async (req, res) => {
   // Honeypot (legacy `company` + new `fax`)
   if ((company && company.trim().length > 0) || (fax && fax.trim().length > 0)) {
     res.status(201).json({ message: "Received." });
+    return;
+  }
+
+  const phoneNorm = normalizePhone(phone);
+  if (!phoneNorm.ok) {
+    res.status(400).json({ error: phoneNorm.error });
     return;
   }
 
@@ -161,6 +170,7 @@ router.post("/request", async (req, res) => {
   await db.insert(invitationRequestsTable).values({
     name: trimmedName,
     email: trimmedEmail,
+    phone: phoneNorm.phone,
     role: trimmedRole,
     linkedin: trimmedLinkedin,
     whoYouAre: trimmedWhoYouAre,

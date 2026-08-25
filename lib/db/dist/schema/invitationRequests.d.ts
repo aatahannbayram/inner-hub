@@ -207,6 +207,23 @@ export declare const invitationRequestsTable: import("drizzle-orm/pg-core").PgTa
             identity: undefined;
             generated: undefined;
         }, {}, {}>;
+        phone: import("drizzle-orm/pg-core").PgColumn<{
+            name: "phone";
+            tableName: "invitation_requests";
+            dataType: "string";
+            columnType: "PgText";
+            data: string;
+            driverParam: string;
+            notNull: false;
+            hasDefault: false;
+            isPrimaryKey: false;
+            isAutoincrement: false;
+            hasRuntimeDefault: false;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+            identity: undefined;
+            generated: undefined;
+        }, {}, {}>;
         ipAddress: import("drizzle-orm/pg-core").PgColumn<{
             name: "ip_address";
             tableName: "invitation_requests";
@@ -256,6 +273,7 @@ export declare const insertInvitationRequestSchema: z.ZodObject<{
     organizationDomain: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     organizationLogo: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     organizationDescription: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    phone: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     ipAddress: z.ZodOptional<z.ZodNullable<z.ZodString>>;
 }, {
     out: {};
@@ -451,6 +469,23 @@ export declare const selectInvitationRequestSchema: import("drizzle-zod").BuildS
     }, {}, {}>;
     organizationDescription: import("drizzle-orm/pg-core").PgColumn<{
         name: "organization_description";
+        tableName: "invitation_requests";
+        dataType: "string";
+        columnType: "PgText";
+        data: string;
+        driverParam: string;
+        notNull: false;
+        hasDefault: false;
+        isPrimaryKey: false;
+        isAutoincrement: false;
+        hasRuntimeDefault: false;
+        enumValues: [string, ...string[]];
+        baseColumn: never;
+        identity: undefined;
+        generated: undefined;
+    }, {}, {}>;
+    phone: import("drizzle-orm/pg-core").PgColumn<{
+        name: "phone";
         tableName: "invitation_requests";
         dataType: "string";
         columnType: "PgText";

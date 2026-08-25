@@ -53849,6 +53849,7 @@ var init_invitationRequests = __esm({
       organizationDomain: text("organization_domain"),
       organizationLogo: text("organization_logo"),
       organizationDescription: text("organization_description"),
+      phone: text("phone"),
       ipAddress: text("ip_address"),
       createdAt: timestamp("created_at").defaultNow().notNull()
     });
@@ -53908,6 +53909,8 @@ var init_users = __esm({
       twitter: text("twitter"),
       /** JSON: { id, label, url }[] — üyenin serbest profil linkleri */
       profileLinks: text("profile_links"),
+      /** Public kart görünümü: { accent, bg, layout } */
+      cardTheme: text("card_theme"),
       skills: text("skills"),
       visibility: text("visibility").default("members"),
       settingsPrefs: text("settings_prefs"),
@@ -97336,6 +97339,7 @@ var HealthCheckResponse = objectType({
 var SubmitRequestBody = objectType({
   "name": stringType().min(1),
   "email": stringType().email(),
+  "phone": stringType().min(10).max(40),
   "role": unionType([literalType("builder"), literalType("investor"), literalType("founder"), literalType("company"), literalType("operator"), literalType(null)]).nullish(),
   "linkedin": stringType().nullish(),
   "whoYouAre": stringType().min(1),
@@ -98000,6 +98004,7 @@ var ensureUserProfileColumns = once(async () => {
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS twitter text`);
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS profile_links text`);
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS show_phone_on_card boolean NOT NULL DEFAULT false`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS card_theme text`);
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS skills text`);
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS visibility text`);
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS settings_prefs text`);
@@ -99509,6 +99514,19 @@ async function fetchLinkPreview(rawUrl) {
   };
 }
 
+// src/lib/phone.ts
+function normalizePhone(raw) {
+  if (typeof raw !== "string") {
+    return { ok: false, error: "Telefon zorunlu" };
+  }
+  const phone = raw.trim().slice(0, 40);
+  const digits = phone.replace(/\D/g, "");
+  if (digits.length < 10) {
+    return { ok: false, error: "Ge\xE7erli bir telefon gir (en az 10 rakam)" };
+  }
+  return { ok: true, phone };
+}
+
 // src/routes/invitations.ts
 var router3 = (0, import_express3.Router)();
 var rateLimitMap = /* @__PURE__ */ new Map();
@@ -99535,6 +99553,7 @@ var ensureOrgColumns = once(async () => {
   await db.execute(sql`ALTER TABLE invitation_requests ADD COLUMN IF NOT EXISTS organization_domain text`);
   await db.execute(sql`ALTER TABLE invitation_requests ADD COLUMN IF NOT EXISTS organization_logo text`);
   await db.execute(sql`ALTER TABLE invitation_requests ADD COLUMN IF NOT EXISTS organization_description text`);
+  await db.execute(sql`ALTER TABLE invitation_requests ADD COLUMN IF NOT EXISTS phone text`);
 });
 router3.get("/org-logo", async (req, res) => {
   const domain2 = normalizeDomain(String(req.query.domain ?? ""));
@@ -99572,6 +99591,7 @@ router3.post("/request", async (req, res) => {
   const {
     name,
     email: email3,
+    phone,
     role,
     linkedin,
     whoYouAre,
@@ -99586,6 +99606,11 @@ router3.post("/request", async (req, res) => {
   } = parsed.data;
   if (company && company.trim().length > 0 || fax && fax.trim().length > 0) {
     res.status(201).json({ message: "Received." });
+    return;
+  }
+  const phoneNorm = normalizePhone(phone);
+  if (!phoneNorm.ok) {
+    res.status(400).json({ error: phoneNorm.error });
     return;
   }
   const ip = getClientIp(req);
@@ -99618,6 +99643,7 @@ router3.post("/request", async (req, res) => {
   await db.insert(invitationRequestsTable).values({
     name: trimmedName,
     email: trimmedEmail,
+    phone: phoneNorm.phone,
     role: trimmedRole,
     linkedin: trimmedLinkedin,
     whoYouAre: trimmedWhoYouAre,
@@ -118010,11 +118036,20 @@ import crypto10 from "node:crypto";
 init_schema2();
 
 // src/lib/profileLinks.ts
-var MAX_LINKS = 40;
+var MAX_LINKS = 12;
+var MAX_FEATURED = 2;
 var MAX_LABEL = 48;
 var MAX_URL = 500;
 function newId() {
   return crypto.randomUUID().slice(0, 8);
+}
+function parseIso(raw) {
+  if (typeof raw !== "string") return null;
+  const s = raw.trim();
+  if (!s) return null;
+  const t = Date.parse(s);
+  if (Number.isNaN(t)) return null;
+  return new Date(t).toISOString();
 }
 function parseProfileLinks(raw) {
   if (!raw) return [];
@@ -118030,6 +118065,7 @@ function sanitizeProfileLinks(input) {
   if (!Array.isArray(input)) return [];
   const out = [];
   const seen = /* @__PURE__ */ new Set();
+  let featuredCount = 0;
   for (const row of input) {
     if (out.length >= MAX_LINKS) break;
     if (!row || typeof row !== "object") continue;
@@ -118041,9 +118077,46 @@ function sanitizeProfileLinks(input) {
     seen.add(key);
     const id = typeof rec.id === "string" && /^[a-zA-Z0-9_-]{4,24}$/.test(rec.id) ? rec.id : newId();
     const label = typeof rec.label === "string" ? rec.label.trim().slice(0, MAX_LABEL) : "";
-    out.push({ id, label, url: url2.slice(0, MAX_URL) });
+    const sortOrder = typeof rec.sortOrder === "number" && Number.isFinite(rec.sortOrder) ? Math.max(0, Math.min(999, Math.floor(rec.sortOrder))) : out.length;
+    let featured = rec.featured === true;
+    if (featured) {
+      if (featuredCount >= MAX_FEATURED) featured = false;
+      else featuredCount += 1;
+    }
+    const scheduledFrom = parseIso(rec.scheduledFrom);
+    const scheduledTo = parseIso(rec.scheduledTo);
+    const icon = typeof rec.icon === "string" && rec.icon.trim() ? rec.icon.trim().slice(0, 40) : null;
+    out.push({
+      id,
+      label,
+      url: url2.slice(0, MAX_URL),
+      sortOrder,
+      featured,
+      scheduledFrom,
+      scheduledTo,
+      icon
+    });
   }
-  return out;
+  out.sort((a, b) => a.sortOrder - b.sortOrder || a.id.localeCompare(b.id));
+  return out.map((l, i) => ({ ...l, sortOrder: i }));
+}
+function publicProfileLinks(links, now = /* @__PURE__ */ new Date()) {
+  const t = now.getTime();
+  const active = links.filter((l) => {
+    if (l.scheduledFrom) {
+      const from = Date.parse(l.scheduledFrom);
+      if (!Number.isNaN(from) && t < from) return false;
+    }
+    if (l.scheduledTo) {
+      const to = Date.parse(l.scheduledTo);
+      if (!Number.isNaN(to) && t > to) return false;
+    }
+    return true;
+  });
+  return [...active].sort((a, b) => {
+    if (a.featured !== b.featured) return a.featured ? -1 : 1;
+    return a.sortOrder - b.sortOrder || a.id.localeCompare(b.id);
+  });
 }
 function normalizeHttpUrl(raw) {
   const trimmed = raw.trim();
@@ -118056,6 +118129,38 @@ function normalizeHttpUrl(raw) {
   } catch {
     return null;
   }
+}
+
+// src/lib/cardTheme.ts
+var CARD_THEME_PRESETS = [
+  { id: "ink", theme: { accent: "#0A0A0A", bg: "#F4F1EC", layout: "stack" } },
+  { id: "green", theme: { accent: "#18FF85", bg: "#F4F1EC", layout: "stack" } },
+  { id: "slate", theme: { accent: "#1F2937", bg: "#EEF1F4", layout: "card" } },
+  { id: "olive", theme: { accent: "#3D4A2E", bg: "#F2EFE6", layout: "stack" } },
+  { id: "navy", theme: { accent: "#0B1F33", bg: "#E8EEF2", layout: "card" } },
+  { id: "sand", theme: { accent: "#5C4A32", bg: "#F6F0E6", layout: "stack" } }
+];
+var HEX = /^#([0-9a-fA-F]{6})$/;
+function defaultCardTheme() {
+  return { ...CARD_THEME_PRESETS[0].theme };
+}
+function parseCardTheme(raw) {
+  if (!raw) return defaultCardTheme();
+  try {
+    const parsed = JSON.parse(raw);
+    return sanitizeCardTheme(parsed);
+  } catch {
+    return defaultCardTheme();
+  }
+}
+function sanitizeCardTheme(input) {
+  const base = defaultCardTheme();
+  if (!input || typeof input !== "object") return base;
+  const rec = input;
+  const accent = typeof rec.accent === "string" && HEX.test(rec.accent.trim()) ? rec.accent.trim().toUpperCase() : base.accent;
+  const bg = typeof rec.bg === "string" && HEX.test(rec.bg.trim()) ? rec.bg.trim().toUpperCase() : base.bg;
+  const layout = rec.layout === "card" ? "card" : "stack";
+  return { accent, bg, layout };
 }
 
 // src/lib/inviteCodes.ts
@@ -118174,13 +118279,15 @@ async function profileSeedFromInviteRequest(invitationRequestId) {
     organization: invitationRequestsTable2.organization,
     linkedin: invitationRequestsTable2.linkedin,
     link: invitationRequestsTable2.link,
-    role: invitationRequestsTable2.role
+    role: invitationRequestsTable2.role,
+    phone: invitationRequestsTable2.phone
   }).from(invitationRequestsTable2).where(eq(invitationRequestsTable2.id, invitationRequestId)).limit(1);
   if (!inv) return {};
   const bio = (inv.whoYouAre ?? "").trim().slice(0, 1600);
   const company = (inv.organization ?? "").trim().slice(0, 120) || void 0;
   const linkedin = (inv.linkedin ?? "").trim().slice(0, 240) || void 0;
   const website = (inv.link ?? "").trim().slice(0, 240) || void 0;
+  const phone = (inv.phone ?? "").trim().slice(0, 40) || void 0;
   const role = (inv.role ?? "").trim().toLowerCase();
   const titleByRole = {
     founder: "Founder",
@@ -118195,6 +118302,7 @@ async function profileSeedFromInviteRequest(invitationRequestId) {
     ...company ? { company } : {},
     ...linkedin ? { linkedin } : {},
     ...website ? { website } : {},
+    ...phone ? { phone } : {},
     ...title ? { title } : {}
   };
 }
@@ -118204,7 +118312,10 @@ async function hydrateUserProfileFromInvite(user) {
   const needsLinkedin = !(user.linkedin ?? "").trim();
   const needsWebsite = !(user.website ?? "").trim();
   const needsTitle = !(user.title ?? "").trim();
-  if (!needsBio && !needsCompany && !needsLinkedin && !needsWebsite && !needsTitle) return null;
+  const needsPhone = !(user.phone ?? "").trim();
+  if (!needsBio && !needsCompany && !needsLinkedin && !needsWebsite && !needsTitle && !needsPhone) {
+    return null;
+  }
   const { invitationRequestsTable: invitationRequestsTable2, usersTable: usersTable2 } = await Promise.resolve().then(() => (init_schema2(), schema_exports));
   let invitationRequestId = null;
   const [codeRow] = await db.select({ invitationRequestId: inviteCodesTable.invitationRequestId }).from(inviteCodesTable).where(eq(inviteCodesTable.usedByUserId, user.id)).limit(1);
@@ -118215,13 +118326,16 @@ async function hydrateUserProfileFromInvite(user) {
     if (byEmail) invitationRequestId = byEmail.id;
   }
   const seed = await profileSeedFromInviteRequest(invitationRequestId);
-  if (!seed.bio && !seed.company && !seed.linkedin && !seed.website && !seed.title) return null;
+  if (!seed.bio && !seed.company && !seed.linkedin && !seed.website && !seed.title && !seed.phone) {
+    return null;
+  }
   const nextBio = needsBio && seed.bio ? seed.bio : user.bio;
   const nextCompany = needsCompany && seed.company ? seed.company : user.company;
   const nextLinkedin = needsLinkedin && seed.linkedin ? seed.linkedin : user.linkedin;
   const nextWebsite = needsWebsite && seed.website ? seed.website : user.website;
   const nextTitle = needsTitle && seed.title ? seed.title : user.title ?? null;
-  if (nextBio === user.bio && nextCompany === user.company && nextLinkedin === user.linkedin && nextWebsite === user.website && nextTitle === (user.title ?? null)) {
+  const nextPhone = needsPhone && seed.phone ? seed.phone : user.phone ?? null;
+  if (nextBio === user.bio && nextCompany === user.company && nextLinkedin === user.linkedin && nextWebsite === user.website && nextTitle === (user.title ?? null) && nextPhone === (user.phone ?? null)) {
     return null;
   }
   let pct = user.profileCompletionPct ?? 0;
@@ -118234,6 +118348,7 @@ async function hydrateUserProfileFromInvite(user) {
     linkedin: nextLinkedin,
     website: nextWebsite,
     title: nextTitle,
+    phone: nextPhone,
     profileCompletionPct: pct
   }).where(eq(usersTable2.id, user.id)).returning();
   return updated ?? null;
@@ -118549,13 +118664,18 @@ router6.post("/linkedin/disconnect", requireAuth, async (req, res) => {
 });
 router6.post("/register", async (req, res) => {
   try {
-    const { email: email3, password, name, inviteCode } = req.body;
+    const { email: email3, password, name, inviteCode, phone } = req.body;
     if (!email3 || !password || !name) {
       res.status(400).json({ error: "Ad, e-posta ve \u015Fifre zorunlu" });
       return;
     }
     if (password.length < 8) {
       res.status(400).json({ error: "\u015Eifre en az 8 karakter olmal\u0131" });
+      return;
+    }
+    const phoneNorm = normalizePhone(phone);
+    if (!phoneNorm.ok) {
+      res.status(400).json({ error: phoneNorm.error });
       return;
     }
     const normalizedEmail = normalizeEmail(email3);
@@ -118597,6 +118717,7 @@ router6.post("/register", async (req, res) => {
       linkedin: seed.linkedin,
       website: seed.website,
       title: seed.title,
+      phone: phoneNorm.phone || seed.phone || null,
       profileCompletionPct
     }).returning();
     await consumeInviteCode(invite.id, user.id);
@@ -118740,7 +118861,7 @@ router6.post("/google", async (req, res) => {
       res.status(503).json({ error: "Google ile giri\u015F hen\xFCz yap\u0131land\u0131r\u0131lmad\u0131" });
       return;
     }
-    const { credential, inviteCode } = req.body;
+    const { credential, inviteCode, phone } = req.body;
     if (!credential) {
       res.status(400).json({ error: "Google credential eksik" });
       return;
@@ -118763,9 +118884,15 @@ router6.post("/google", async (req, res) => {
         res.status(403).json({ error: invite.error });
         return;
       }
+      const phoneNorm = normalizePhone(phone);
+      const seed = await profileSeedFromInviteRequest(invite.invitationRequestId);
+      const resolvedPhone = phoneNorm.ok ? phoneNorm.phone : seed.phone;
+      if (!resolvedPhone) {
+        res.status(400).json({ error: "Telefon zorunlu" });
+        return;
+      }
       await ensureUserMembershipColumns();
       const persona = await personaFromInviteRequest(invite.invitationRequestId);
-      const seed = await profileSeedFromInviteRequest(invite.invitationRequestId);
       const displayName = payload.name ?? normalizedEmail;
       const profileCompletionPct = calcCompletion({
         name: displayName,
@@ -118792,6 +118919,7 @@ router6.post("/google", async (req, res) => {
         linkedin: seed.linkedin,
         website: seed.website,
         title: seed.title,
+        phone: resolvedPhone,
         profileCompletionPct
       }).returning();
       await consumeInviteCode(invite.id, user.id);
@@ -118832,6 +118960,7 @@ router6.get("/me", async (req, res) => {
         ...publicUser(user),
         skills: parseSkills2(user.skills),
         profileLinks: parseProfileLinks(user.profileLinks),
+        cardTheme: parseCardTheme(user.cardTheme),
         resolvedAvatarUrl: resolveAvatarUrl(user),
         org: org ? {
           id: org.id,
@@ -118891,6 +119020,7 @@ router6.patch("/me", requireAuth, async (req, res) => {
     const visibility = body.visibility === "public" || body.visibility === "private" || body.visibility === "members" ? body.visibility : "members";
     const skills = Array.isArray(body.skills) ? body.skills.filter((s) => typeof s === "string").map((s) => s.trim()).filter(Boolean).slice(0, 10) : [];
     const profileLinks = Array.isArray(body.profileLinks) ? sanitizeProfileLinks(body.profileLinks) : void 0;
+    const cardTheme = body.cardTheme !== void 0 ? sanitizeCardTheme(body.cardTheme) : void 0;
     if (handle) {
       const [taken] = await db.select({ id: usersTable.id }).from(usersTable).where(and(eq(usersTable.handle, handle), ne(usersTable.id, userId))).limit(1);
       if (taken) {
@@ -118936,6 +119066,7 @@ router6.patch("/me", requireAuth, async (req, res) => {
       ...avatarStyle ? { avatarStyle: nextAvatarStyle } : {},
       skills: JSON.stringify(skills),
       ...profileLinks !== void 0 ? { profileLinks: JSON.stringify(profileLinks) } : {},
+      ...cardTheme !== void 0 ? { cardTheme: JSON.stringify(cardTheme) } : {},
       visibility,
       profileCompletionPct
     }).where(eq(usersTable.id, userId)).returning();
@@ -118945,6 +119076,7 @@ router6.patch("/me", requireAuth, async (req, res) => {
         ...publicUser(updated),
         skills: parseSkills2(updated.skills),
         profileLinks: parseProfileLinks(updated.profileLinks),
+        cardTheme: parseCardTheme(updated.cardTheme),
         resolvedAvatarUrl: resolveAvatarUrl(updated),
         org: org ? { id: org.id, name: org.name, slug: org.slug, logoUrl: org.logoUrl, type: org.type } : null
       }
@@ -118966,6 +119098,7 @@ router6.post("/me/avatar", requireAuth, async (req, res) => {
           ...publicUser(updated2),
           skills: parseSkills2(updated2.skills),
           profileLinks: parseProfileLinks(updated2.profileLinks),
+          cardTheme: parseCardTheme(updated2.cardTheme),
           resolvedAvatarUrl: resolveAvatarUrl(updated2)
         }
       });
@@ -118985,6 +119118,7 @@ router6.post("/me/avatar", requireAuth, async (req, res) => {
         ...publicUser(updated),
         skills: parseSkills2(updated.skills),
         profileLinks: parseProfileLinks(updated.profileLinks),
+        cardTheme: parseCardTheme(updated.cardTheme),
         resolvedAvatarUrl: resolveAvatarUrl(updated)
       }
     });
@@ -127368,27 +127502,66 @@ async function ensureProfileCardEventsSchema() {
     )
   `);
   await db.execute(sql`
+    ALTER TABLE profile_card_events ADD COLUMN IF NOT EXISTS referrer text
+  `);
+  await db.execute(sql`
+    ALTER TABLE profile_card_events ADD COLUMN IF NOT EXISTS device text
+  `);
+  await db.execute(sql`
     CREATE INDEX IF NOT EXISTS profile_card_events_handle_created_idx
       ON profile_card_events (handle, created_at)
   `);
   ensured = true;
 }
-async function recordCardEvent(handle, eventType, linkKey) {
+function deviceFromUa(ua) {
+  if (!ua) return "unknown";
+  const s = ua.toLowerCase();
+  if (/ipad|tablet/.test(s)) return "tablet";
+  if (/mobi|iphone|android/.test(s)) return "mobile";
+  return "desktop";
+}
+function hostLabel(ref) {
+  if (!ref) return "(direct)";
+  try {
+    const u = new URL(ref);
+    return u.hostname.replace(/^www\./, "") || "(direct)";
+  } catch {
+    return "(direct)";
+  }
+}
+async function recordCardEvent(handle, eventType, opts) {
   await ensureProfileCardEventsSchema();
   const h = handle.trim().toLowerCase().replace(/[^a-z0-9_]/g, "").slice(0, 20);
   if (!h) return;
-  const key = linkKey?.trim().slice(0, 80) || null;
+  const key = opts?.linkKey?.trim().slice(0, 80) || null;
+  const referrer = opts?.referrer?.trim().slice(0, 500) || null;
+  const device = deviceFromUa(opts?.userAgent);
   await db.execute(sql`
-    INSERT INTO profile_card_events (handle, event_type, link_key)
-    VALUES (${h}, ${eventType}, ${key})
+    INSERT INTO profile_card_events (handle, event_type, link_key, referrer, device)
+    VALUES (${h}, ${eventType}, ${key}, ${referrer}, ${device})
   `);
+}
+function emptyStats() {
+  return {
+    views7d: 0,
+    views30d: 0,
+    vcards7d: 0,
+    links7d: 0,
+    qr7d: 0,
+    shares7d: 0,
+    viewsTotal: 0,
+    linkClicks: [],
+    devices: [],
+    topReferrers: []
+  };
+}
+function asRows(raw) {
+  return Array.isArray(raw) ? raw : raw.rows ?? [];
 }
 async function getCardStatsForHandle(handle) {
   await ensureProfileCardEventsSchema();
   const h = handle.trim().toLowerCase().replace(/[^a-z0-9_]/g, "").slice(0, 20);
-  if (!h) {
-    return { views7d: 0, vcards7d: 0, links7d: 0, qr7d: 0, shares7d: 0, viewsTotal: 0 };
-  }
+  if (!h) return emptyStats();
   const weekRaw = await db.execute(sql`
     SELECT event_type, COUNT(*)::int AS n
     FROM profile_card_events
@@ -127396,24 +127569,71 @@ async function getCardStatsForHandle(handle) {
       AND created_at >= now() - interval '7 days'
     GROUP BY event_type
   `);
-  const weekRows = Array.isArray(weekRaw) ? weekRaw : weekRaw.rows ?? [];
+  const weekRows = asRows(weekRaw);
+  const monthViewsRaw = await db.execute(sql`
+    SELECT COUNT(*)::int AS n
+    FROM profile_card_events
+    WHERE handle = ${h}
+      AND event_type = 'view'
+      AND created_at >= now() - interval '30 days'
+  `);
+  const monthViews = asRows(monthViewsRaw);
   const totalRaw = await db.execute(sql`
     SELECT COUNT(*)::int AS n
     FROM profile_card_events
     WHERE handle = ${h} AND event_type = 'view'
   `);
-  const totalRows = Array.isArray(totalRaw) ? totalRaw : totalRaw.rows ?? [];
+  const totalRows = asRows(totalRaw);
+  const linkRaw = await db.execute(sql`
+    SELECT COALESCE(link_key, '(other)') AS key, COUNT(*)::int AS n
+    FROM profile_card_events
+    WHERE handle = ${h}
+      AND event_type = 'link'
+      AND created_at >= now() - interval '30 days'
+    GROUP BY 1
+    ORDER BY n DESC
+    LIMIT 12
+  `);
+  const linkRows = asRows(linkRaw);
+  const deviceRaw = await db.execute(sql`
+    SELECT COALESCE(device, 'unknown') AS device, COUNT(*)::int AS n
+    FROM profile_card_events
+    WHERE handle = ${h}
+      AND event_type = 'view'
+      AND created_at >= now() - interval '30 days'
+    GROUP BY 1
+    ORDER BY n DESC
+  `);
+  const deviceRows = asRows(deviceRaw);
+  const refRaw = await db.execute(sql`
+    SELECT referrer, COUNT(*)::int AS n
+    FROM profile_card_events
+    WHERE handle = ${h}
+      AND event_type = 'view'
+      AND created_at >= now() - interval '30 days'
+    GROUP BY referrer
+    ORDER BY n DESC
+    LIMIT 8
+  `);
+  const refRows = asRows(refRaw);
   const counts = {};
   for (const row of weekRows) {
     counts[row.event_type] = Number(row.n) || 0;
   }
   return {
     views7d: counts.view ?? 0,
+    views30d: Number(monthViews[0]?.n) || 0,
     vcards7d: counts.vcard ?? 0,
     links7d: counts.link ?? 0,
     qr7d: counts.qr ?? 0,
     shares7d: counts.share ?? 0,
-    viewsTotal: Number(totalRows[0]?.n) || 0
+    viewsTotal: Number(totalRows[0]?.n) || 0,
+    linkClicks: linkRows.map((r) => ({ key: r.key, n: Number(r.n) || 0 })),
+    devices: deviceRows.map((r) => ({ device: r.device, n: Number(r.n) || 0 })),
+    topReferrers: refRows.map((r) => ({
+      referrer: hostLabel(r.referrer),
+      n: Number(r.n) || 0
+    }))
   };
 }
 
@@ -127463,7 +127683,8 @@ function publicPayload(user) {
     twitter: user.twitter,
     instagram: user.instagram ?? null,
     behance: user.behance ?? null,
-    profileLinks: parseProfileLinks(user.profileLinks),
+    profileLinks: publicProfileLinks(parseProfileLinks(user.profileLinks)),
+    cardTheme: parseCardTheme(user.cardTheme),
     showPhoneOnCard: Boolean(user.showPhoneOnCard),
     phone: user.showPhoneOnCard && user.phone ? user.phone : null,
     visibility: user.visibility ?? "members",
@@ -127630,7 +127851,9 @@ router16.post("/public/profile/:handle/event", async (req, res) => {
       return;
     }
     const linkKey = typeof req.body?.linkKey === "string" ? req.body.linkKey : null;
-    await recordCardEvent(handle, eventType, linkKey);
+    const referrer = typeof req.body?.referrer === "string" ? req.body.referrer : typeof req.get("referer") === "string" ? req.get("referer") : null;
+    const userAgent = req.get("user-agent") ?? null;
+    await recordCardEvent(handle, eventType, { linkKey, referrer, userAgent });
     res.status(204).end();
   } catch (err) {
     res.status(500).json({ error: err.message ?? "error" });
@@ -127646,7 +127869,18 @@ router16.get("/me/id/stats", async (req, res) => {
     const [user] = await db.select().from(usersTable).where(eq(usersTable.id, req.user.id)).limit(1);
     if (!user?.handle) {
       res.json({
-        stats: { views7d: 0, vcards7d: 0, links7d: 0, qr7d: 0, shares7d: 0, viewsTotal: 0 }
+        stats: {
+          views7d: 0,
+          views30d: 0,
+          vcards7d: 0,
+          links7d: 0,
+          qr7d: 0,
+          shares7d: 0,
+          viewsTotal: 0,
+          linkClicks: [],
+          devices: [],
+          topReferrers: []
+        }
       });
       return;
     }
@@ -127964,7 +128198,7 @@ function rateLimitCollect(ip, limit3 = 120) {
   row.n += 1;
   return true;
 }
-function deviceFromUa(ua) {
+function deviceFromUa2(ua) {
   if (!ua) return "unknown";
   const s = ua.toLowerCase();
   if (/ipad|tablet/.test(s)) return "tablet";
@@ -127978,7 +128212,7 @@ function normalizePath(raw) {
   if (p.startsWith("/panel") || p.startsWith("/requests")) return null;
   return p;
 }
-function hostLabel(ref) {
+function hostLabel2(ref) {
   if (!ref) return "(direct)";
   try {
     const u = new URL(ref);
@@ -128040,7 +128274,7 @@ router17.post("/analytics/collect", async (req, res) => {
       referrer,
       sessionId,
       locale,
-      device: deviceFromUa(ua ?? void 0),
+      device: deviceFromUa2(ua ?? void 0),
       userAgent: ua
     });
     res.status(204).end();
@@ -128083,7 +128317,7 @@ router17.get("/analytics/web", requireAuth, requireAdmin, async (req, res) => {
     }).from(analyticsEventsTable).where(and(eq(analyticsEventsTable.eventName, "page_view"), gte(analyticsEventsTable.createdAt, since))).groupBy(analyticsEventsTable.referrer).orderBy(desc(countDistinct(analyticsEventsTable.sessionId))).limit(40);
     const refMap = /* @__PURE__ */ new Map();
     for (const r of refRaw) {
-      const label = hostLabel(r.referrer);
+      const label = hostLabel2(r.referrer);
       refMap.set(label, (refMap.get(label) ?? 0) + Number(r.visitors));
     }
     const topReferrers = [...refMap.entries()].map(([source, n]) => ({ source, visitors: n })).sort((a, b) => b.visitors - a.visitors).slice(0, 8);

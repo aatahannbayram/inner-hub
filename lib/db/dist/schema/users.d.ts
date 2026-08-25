@@ -345,6 +345,23 @@ export declare const usersTable: import("drizzle-orm/pg-core").PgTableWithColumn
             identity: undefined;
             generated: undefined;
         }, {}, {}>;
+        showPhoneOnCard: import("drizzle-orm/pg-core").PgColumn<{
+            name: "show_phone_on_card";
+            tableName: "users";
+            dataType: "boolean";
+            columnType: "PgBoolean";
+            data: boolean;
+            driverParam: boolean;
+            notNull: true;
+            hasDefault: true;
+            isPrimaryKey: false;
+            isAutoincrement: false;
+            hasRuntimeDefault: false;
+            enumValues: undefined;
+            baseColumn: never;
+            identity: undefined;
+            generated: undefined;
+        }, {}, {}>;
         whatsappOptIn: import("drizzle-orm/pg-core").PgColumn<{
             name: "whatsapp_opt_in";
             tableName: "users";
@@ -449,6 +466,40 @@ export declare const usersTable: import("drizzle-orm/pg-core").PgTableWithColumn
         }, {}, {}>;
         twitter: import("drizzle-orm/pg-core").PgColumn<{
             name: "twitter";
+            tableName: "users";
+            dataType: "string";
+            columnType: "PgText";
+            data: string;
+            driverParam: string;
+            notNull: false;
+            hasDefault: false;
+            isPrimaryKey: false;
+            isAutoincrement: false;
+            hasRuntimeDefault: false;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+            identity: undefined;
+            generated: undefined;
+        }, {}, {}>;
+        profileLinks: import("drizzle-orm/pg-core").PgColumn<{
+            name: "profile_links";
+            tableName: "users";
+            dataType: "string";
+            columnType: "PgText";
+            data: string;
+            driverParam: string;
+            notNull: false;
+            hasDefault: false;
+            isPrimaryKey: false;
+            isAutoincrement: false;
+            hasRuntimeDefault: false;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+            identity: undefined;
+            generated: undefined;
+        }, {}, {}>;
+        cardTheme: import("drizzle-orm/pg-core").PgColumn<{
+            name: "card_theme";
             tableName: "users";
             dataType: "string";
             columnType: "PgText";
@@ -638,12 +689,14 @@ export declare const usersTable: import("drizzle-orm/pg-core").PgTableWithColumn
     dialect: "pg";
 }>;
 export declare const insertUserSchema: z.ZodObject<{
+    name: z.ZodString;
+    email: z.ZodString;
     role: z.ZodOptional<z.ZodEnum<{
         member: "member";
         admin: "admin";
     }>>;
-    email: z.ZodString;
-    name: z.ZodString;
+    linkedin: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    phone: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     avatarUrl: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     avatarStyle: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     persona: z.ZodOptional<z.ZodNullable<z.ZodString>>;
@@ -657,9 +710,8 @@ export declare const insertUserSchema: z.ZodObject<{
     university: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     behance: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     instagram: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-    linkedin: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     linkedinLogoUrl: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-    phone: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    showPhoneOnCard: z.ZodOptional<z.ZodBoolean>;
     whatsappOptIn: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     handle: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     github: z.ZodOptional<z.ZodNullable<z.ZodString>>;
@@ -667,6 +719,8 @@ export declare const insertUserSchema: z.ZodObject<{
     website: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     websiteLogoUrl: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     twitter: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    profileLinks: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    cardTheme: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     skills: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     visibility: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     settingsPrefs: z.ZodOptional<z.ZodNullable<z.ZodString>>;
@@ -1021,6 +1075,23 @@ export declare const selectUserSchema: import("drizzle-zod").BuildSchema<"select
         identity: undefined;
         generated: undefined;
     }, {}, {}>;
+    showPhoneOnCard: import("drizzle-orm/pg-core").PgColumn<{
+        name: "show_phone_on_card";
+        tableName: "users";
+        dataType: "boolean";
+        columnType: "PgBoolean";
+        data: boolean;
+        driverParam: boolean;
+        notNull: true;
+        hasDefault: true;
+        isPrimaryKey: false;
+        isAutoincrement: false;
+        hasRuntimeDefault: false;
+        enumValues: undefined;
+        baseColumn: never;
+        identity: undefined;
+        generated: undefined;
+    }, {}, {}>;
     whatsappOptIn: import("drizzle-orm/pg-core").PgColumn<{
         name: "whatsapp_opt_in";
         tableName: "users";
@@ -1125,6 +1196,40 @@ export declare const selectUserSchema: import("drizzle-zod").BuildSchema<"select
     }, {}, {}>;
     twitter: import("drizzle-orm/pg-core").PgColumn<{
         name: "twitter";
+        tableName: "users";
+        dataType: "string";
+        columnType: "PgText";
+        data: string;
+        driverParam: string;
+        notNull: false;
+        hasDefault: false;
+        isPrimaryKey: false;
+        isAutoincrement: false;
+        hasRuntimeDefault: false;
+        enumValues: [string, ...string[]];
+        baseColumn: never;
+        identity: undefined;
+        generated: undefined;
+    }, {}, {}>;
+    profileLinks: import("drizzle-orm/pg-core").PgColumn<{
+        name: "profile_links";
+        tableName: "users";
+        dataType: "string";
+        columnType: "PgText";
+        data: string;
+        driverParam: string;
+        notNull: false;
+        hasDefault: false;
+        isPrimaryKey: false;
+        isAutoincrement: false;
+        hasRuntimeDefault: false;
+        enumValues: [string, ...string[]];
+        baseColumn: never;
+        identity: undefined;
+        generated: undefined;
+    }, {}, {}>;
+    cardTheme: import("drizzle-orm/pg-core").PgColumn<{
+        name: "card_theme";
         tableName: "users";
         dataType: "string";
         columnType: "PgText";

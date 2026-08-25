@@ -43,6 +43,8 @@ export const usersTable = pgTable("users", {
   twitter: text("twitter"),
   /** JSON: { id, label, url }[] — üyenin serbest profil linkleri */
   profileLinks: text("profile_links"),
+  /** Public kart görünümü: { accent, bg, layout } */
+  cardTheme: text("card_theme"),
   skills: text("skills"),
   visibility: text("visibility").default("members"),
   settingsPrefs: text("settings_prefs"),

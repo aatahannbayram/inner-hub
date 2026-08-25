@@ -32,6 +32,7 @@ export const ensureUserProfileColumns = once(async () => {
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS twitter text`);
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS profile_links text`);
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS show_phone_on_card boolean NOT NULL DEFAULT false`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS card_theme text`);
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS skills text`);
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS visibility text`);
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS settings_prefs text`);

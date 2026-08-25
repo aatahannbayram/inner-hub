@@ -178,6 +178,7 @@ export async function profileSeedFromInviteRequest(
   linkedin?: string;
   website?: string;
   title?: string;
+  phone?: string;
 }> {
   if (invitationRequestId == null || invitationRequestId < 0) return {};
   const { invitationRequestsTable } = await import("@workspace/db/schema");
@@ -188,6 +189,7 @@ export async function profileSeedFromInviteRequest(
       linkedin: invitationRequestsTable.linkedin,
       link: invitationRequestsTable.link,
       role: invitationRequestsTable.role,
+      phone: invitationRequestsTable.phone,
     })
     .from(invitationRequestsTable)
     .where(eq(invitationRequestsTable.id, invitationRequestId))
@@ -198,6 +200,7 @@ export async function profileSeedFromInviteRequest(
   const company = (inv.organization ?? "").trim().slice(0, 120) || undefined;
   const linkedin = (inv.linkedin ?? "").trim().slice(0, 240) || undefined;
   const website = (inv.link ?? "").trim().slice(0, 240) || undefined;
+  const phone = (inv.phone ?? "").trim().slice(0, 40) || undefined;
   const role = (inv.role ?? "").trim().toLowerCase();
   const titleByRole: Record<string, string> = {
     founder: "Founder",
@@ -213,6 +216,7 @@ export async function profileSeedFromInviteRequest(
     ...(company ? { company } : {}),
     ...(linkedin ? { linkedin } : {}),
     ...(website ? { website } : {}),
+    ...(phone ? { phone } : {}),
     ...(title ? { title } : {}),
   };
 }
@@ -229,6 +233,7 @@ export async function hydrateUserProfileFromInvite(user: {
   linkedin: string | null;
   website: string | null;
   title?: string | null;
+  phone?: string | null;
   profileCompletionPct: number | null;
 }): Promise<{
   id: number;
@@ -238,6 +243,7 @@ export async function hydrateUserProfileFromInvite(user: {
   linkedin: string | null;
   website: string | null;
   title?: string | null;
+  phone?: string | null;
   profileCompletionPct: number | null;
 } | null> {
   const needsBio = !(user.bio ?? "").trim();
@@ -245,7 +251,10 @@ export async function hydrateUserProfileFromInvite(user: {
   const needsLinkedin = !(user.linkedin ?? "").trim();
   const needsWebsite = !(user.website ?? "").trim();
   const needsTitle = !(user.title ?? "").trim();
-  if (!needsBio && !needsCompany && !needsLinkedin && !needsWebsite && !needsTitle) return null;
+  const needsPhone = !(user.phone ?? "").trim();
+  if (!needsBio && !needsCompany && !needsLinkedin && !needsWebsite && !needsTitle && !needsPhone) {
+    return null;
+  }
 
   const { invitationRequestsTable, usersTable } = await import("@workspace/db/schema");
 
@@ -267,20 +276,24 @@ export async function hydrateUserProfileFromInvite(user: {
   }
 
   const seed = await profileSeedFromInviteRequest(invitationRequestId);
-  if (!seed.bio && !seed.company && !seed.linkedin && !seed.website && !seed.title) return null;
+  if (!seed.bio && !seed.company && !seed.linkedin && !seed.website && !seed.title && !seed.phone) {
+    return null;
+  }
 
   const nextBio = needsBio && seed.bio ? seed.bio : user.bio;
   const nextCompany = needsCompany && seed.company ? seed.company : user.company;
   const nextLinkedin = needsLinkedin && seed.linkedin ? seed.linkedin : user.linkedin;
   const nextWebsite = needsWebsite && seed.website ? seed.website : user.website;
   const nextTitle = needsTitle && seed.title ? seed.title : user.title ?? null;
+  const nextPhone = needsPhone && seed.phone ? seed.phone : user.phone ?? null;
 
   if (
     nextBio === user.bio &&
     nextCompany === user.company &&
     nextLinkedin === user.linkedin &&
     nextWebsite === user.website &&
-    nextTitle === (user.title ?? null)
+    nextTitle === (user.title ?? null) &&
+    nextPhone === (user.phone ?? null)
   ) {
     return null;
   }
@@ -298,6 +311,7 @@ export async function hydrateUserProfileFromInvite(user: {
       linkedin: nextLinkedin,
       website: nextWebsite,
       title: nextTitle,
+      phone: nextPhone,
       profileCompletionPct: pct,
     })
     .where(eq(usersTable.id, user.id))

@@ -2,7 +2,8 @@ import { Router } from "express";
 import { eq } from "drizzle-orm";
 import { db } from "@workspace/db";
 import { usersTable } from "@workspace/db/schema";
-import { parseProfileLinks } from "../lib/profileLinks";
+import { parseProfileLinks, publicProfileLinks } from "../lib/profileLinks";
+import { parseCardTheme } from "../lib/cardTheme";
 import { ensureUserProfileColumns } from "../lib/ensureSchema";
 import { resolveAvatarUrl } from "../lib/identity";
 import { renderProfileQrSvg } from "../lib/qrSvg";
@@ -83,7 +84,8 @@ function publicPayload(user: typeof usersTable.$inferSelect) {
     twitter: user.twitter,
     instagram: user.instagram ?? null,
     behance: user.behance ?? null,
-    profileLinks: parseProfileLinks(user.profileLinks),
+    profileLinks: publicProfileLinks(parseProfileLinks(user.profileLinks)),
+    cardTheme: parseCardTheme(user.cardTheme),
     showPhoneOnCard: Boolean(user.showPhoneOnCard),
     phone: user.showPhoneOnCard && user.phone ? user.phone : null,
     visibility: user.visibility ?? "members",
@@ -272,7 +274,14 @@ router.post("/public/profile/:handle/event", async (req, res) => {
       return;
     }
     const linkKey = typeof req.body?.linkKey === "string" ? req.body.linkKey : null;
-    await recordCardEvent(handle, eventType, linkKey);
+    const referrer =
+      typeof req.body?.referrer === "string"
+        ? req.body.referrer
+        : typeof req.get("referer") === "string"
+          ? req.get("referer")
+          : null;
+    const userAgent = req.get("user-agent") ?? null;
+    await recordCardEvent(handle, eventType, { linkKey, referrer, userAgent });
     res.status(204).end();
   } catch (err: any) {
     res.status(500).json({ error: err.message ?? "error" });
@@ -294,7 +303,18 @@ router.get("/me/id/stats", async (req, res) => {
       .limit(1);
     if (!user?.handle) {
       res.json({
-        stats: { views7d: 0, vcards7d: 0, links7d: 0, qr7d: 0, shares7d: 0, viewsTotal: 0 },
+        stats: {
+          views7d: 0,
+          views30d: 0,
+          vcards7d: 0,
+          links7d: 0,
+          qr7d: 0,
+          shares7d: 0,
+          viewsTotal: 0,
+          linkClicks: [],
+          devices: [],
+          topReferrers: [],
+        },
       });
       return;
     }

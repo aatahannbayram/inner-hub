@@ -6,6 +6,7 @@ import { OAuth2Client } from "google-auth-library";
 import { db } from "@workspace/db";
 import { passwordResetTokensTable, usersTable } from "@workspace/db/schema";
 import { parseProfileLinks, sanitizeProfileLinks } from "../lib/profileLinks";
+import { parseCardTheme, sanitizeCardTheme } from "../lib/cardTheme";
 import {
   SESSION_COOKIE,
   sessionCookieOptions,
@@ -28,6 +29,7 @@ import {
   hydrateUserProfileFromInvite,
   validateInviteCodeForEmail,
 } from "../lib/inviteCodes";
+import { normalizePhone } from "../lib/phone";
 import { getPrimaryOrgForUser, isAvatarStyle, resolveAvatarUrl } from "../lib/identity";
 import { notifyPasswordReset } from "../lib/mail";
 import { appBaseUrl, mailProviderStatus, sendTransactionalMail } from "../lib/mail/transport";
@@ -277,11 +279,12 @@ router.post("/linkedin/disconnect", requireAuth, async (req, res) => {
 // ─── POST /api/auth/register ──────────────────────────────────────────────────
 router.post("/register", async (req, res) => {
   try {
-    const { email, password, name, inviteCode } = req.body as {
+    const { email, password, name, inviteCode, phone } = req.body as {
       email?: string;
       password?: string;
       name?: string;
       inviteCode?: string;
+      phone?: string;
     };
 
     if (!email || !password || !name) {
@@ -290,6 +293,11 @@ router.post("/register", async (req, res) => {
     }
     if (password.length < 8) {
       res.status(400).json({ error: "Şifre en az 8 karakter olmalı" });
+      return;
+    }
+    const phoneNorm = normalizePhone(phone);
+    if (!phoneNorm.ok) {
+      res.status(400).json({ error: phoneNorm.error });
       return;
     }
 
@@ -342,6 +350,7 @@ router.post("/register", async (req, res) => {
         linkedin: seed.linkedin,
         website: seed.website,
         title: seed.title,
+        phone: phoneNorm.phone || seed.phone || null,
         profileCompletionPct,
       })
       .returning();
@@ -551,9 +560,10 @@ router.post("/google", async (req, res) => {
       return;
     }
 
-    const { credential, inviteCode } = req.body as {
+    const { credential, inviteCode, phone } = req.body as {
       credential?: string;
       inviteCode?: string;
+      phone?: string;
     };
     if (!credential) {
       res.status(400).json({ error: "Google credential eksik" });
@@ -584,9 +594,15 @@ router.post("/google", async (req, res) => {
         res.status(403).json({ error: invite.error });
         return;
       }
+      const phoneNorm = normalizePhone(phone);
+      const seed = await profileSeedFromInviteRequest(invite.invitationRequestId);
+      const resolvedPhone = phoneNorm.ok ? phoneNorm.phone : seed.phone;
+      if (!resolvedPhone) {
+        res.status(400).json({ error: "Telefon zorunlu" });
+        return;
+      }
       await ensureUserMembershipColumns();
       const persona = await personaFromInviteRequest(invite.invitationRequestId);
-      const seed = await profileSeedFromInviteRequest(invite.invitationRequestId);
       const displayName = payload.name ?? normalizedEmail;
       const profileCompletionPct = calcCompletion({
         name: displayName,
@@ -615,6 +631,7 @@ router.post("/google", async (req, res) => {
           linkedin: seed.linkedin,
           website: seed.website,
           title: seed.title,
+          phone: resolvedPhone,
           profileCompletionPct,
         })
         .returning();
@@ -673,6 +690,7 @@ router.get("/me", async (req, res) => {
         ...publicUser(user),
         skills: parseSkills(user.skills),
         profileLinks: parseProfileLinks(user.profileLinks),
+        cardTheme: parseCardTheme(user.cardTheme),
         resolvedAvatarUrl: resolveAvatarUrl(user),
         org: org
           ? {
@@ -776,6 +794,8 @@ router.patch("/me", requireAuth, async (req, res) => {
       : [];
     const profileLinks =
       Array.isArray(body.profileLinks) ? sanitizeProfileLinks(body.profileLinks) : undefined;
+    const cardTheme =
+      body.cardTheme !== undefined ? sanitizeCardTheme(body.cardTheme) : undefined;
 
     if (handle) {
       const [taken] = await db
@@ -842,6 +862,7 @@ router.patch("/me", requireAuth, async (req, res) => {
         ...(avatarStyle ? { avatarStyle: nextAvatarStyle } : {}),
         skills: JSON.stringify(skills),
         ...(profileLinks !== undefined ? { profileLinks: JSON.stringify(profileLinks) } : {}),
+        ...(cardTheme !== undefined ? { cardTheme: JSON.stringify(cardTheme) } : {}),
         visibility,
         profileCompletionPct,
       })
@@ -854,6 +875,7 @@ router.patch("/me", requireAuth, async (req, res) => {
         ...publicUser(updated),
         skills: parseSkills(updated.skills),
         profileLinks: parseProfileLinks(updated.profileLinks),
+        cardTheme: parseCardTheme(updated.cardTheme),
         resolvedAvatarUrl: resolveAvatarUrl(updated),
         org: org
           ? { id: org.id, name: org.name, slug: org.slug, logoUrl: org.logoUrl, type: org.type }
@@ -884,6 +906,7 @@ router.post("/me/avatar", requireAuth, async (req, res) => {
           ...publicUser(updated!),
           skills: parseSkills(updated!.skills),
           profileLinks: parseProfileLinks(updated!.profileLinks),
+          cardTheme: parseCardTheme(updated!.cardTheme),
           resolvedAvatarUrl: resolveAvatarUrl(updated!),
         },
       });
@@ -910,6 +933,7 @@ router.post("/me/avatar", requireAuth, async (req, res) => {
         ...publicUser(updated!),
         skills: parseSkills(updated!.skills),
         profileLinks: parseProfileLinks(updated!.profileLinks),
+        cardTheme: parseCardTheme(updated!.cardTheme),
         resolvedAvatarUrl: resolveAvatarUrl(updated!),
       },
     });

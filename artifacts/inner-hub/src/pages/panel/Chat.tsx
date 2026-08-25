@@ -199,7 +199,7 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="-mx-4 -my-6 flex h-[calc(100svh-60px)] min-h-0 min-w-0 flex-col overflow-x-hidden sm:-mx-6 lg:-mx-8 lg:-my-8">
+    <div className="flex h-full min-h-0 min-w-0 flex-col overflow-x-clip">
       <div className="flex min-h-0 flex-1">
         <aside className="panel-glass-strong hidden w-[220px] shrink-0 flex-col border-r border-[var(--ink)]/[0.08] md:flex">
           <div className="border-b border-[var(--ink)]/[0.08] px-4 py-3">
@@ -229,7 +229,7 @@ export default function ChatPage() {
           </div>
         </aside>
 
-        <div className="flex min-w-0 flex-1 flex-col">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
           <div className="flex h-[52px] min-w-0 items-center justify-between gap-2 border-b border-[var(--ink)]/[0.08] px-4">
             <div className="flex min-w-0 items-center gap-2">
               {channel.type === "announcement" ? (

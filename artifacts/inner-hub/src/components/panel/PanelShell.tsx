@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "wouter";
 import { useQueryClient } from "@tanstack/react-query";
-import { Menu, X, Bell, ChevronLeft, ChevronRight, Sparkles, CalendarDays, TrendingUp, UserPlus, Zap, Search, BookOpen, ArrowUpRight } from "lucide-react";
+import { Menu, X, Bell, ChevronLeft, ChevronRight, Sparkles, CalendarDays, TrendingUp, UserPlus, Zap, Search, BookOpen, ArrowUpRight, LayoutDashboard, MessageSquare, Mic2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { PanelNav } from "./PanelNav";
@@ -152,7 +152,7 @@ function NotifPanel({
         role="dialog"
         aria-modal="true"
         aria-label={t("shell.notifications")}
-        className="panel-glass-strong fixed inset-x-0 bottom-0 z-[110] flex max-h-[min(88dvh,640px)] flex-col overflow-hidden border border-[var(--ink)]/10 shadow-2xl dark:border-white/10 sm:inset-x-auto sm:bottom-auto sm:right-3 sm:top-[64px] sm:w-[min(100vw-1.5rem,24rem)] sm:max-h-[min(70vh,520px)]"
+        className="panel-glass-strong fixed inset-x-0 bottom-0 z-[110] flex max-h-[min(88dvh,640px)] flex-col overflow-hidden rounded-t-2xl border border-[var(--ink)]/10 shadow-2xl dark:border-white/10 sm:inset-x-auto sm:bottom-auto sm:right-3 sm:top-[64px] sm:w-[min(100%-1.5rem,24rem)] sm:max-h-[min(70vh,520px)] sm:rounded-none"
       >
         <div className="flex shrink-0 items-center justify-between gap-3 border-b border-[var(--ink)]/[0.08] px-4 py-3 dark:border-white/10">
           <div className="min-w-0">
@@ -310,6 +310,7 @@ export type PanelUser = {
   avatarUrl?: string;
   profileCompletionPct?: number;
   notificationCount?: number;
+  phone?: string | null;
 };
 
 type PanelShellProps = {
@@ -459,7 +460,7 @@ function MobileDrawer({
             animate={{ x: 0 }}
             exit={{ x: "-100%" }}
             transition={{ type: "spring", stiffness: 380, damping: 36 }}
-            className="panel-glass-strong fixed inset-y-0 left-0 z-[75] flex w-[min(280px,85vw)] flex-col border-r border-[var(--ink)]/[0.08] lg:hidden"
+            className="panel-glass-strong fixed inset-y-0 left-0 z-[75] flex w-[min(280px,85vw)] flex-col border-r border-[var(--ink)]/[0.08] pt-[env(safe-area-inset-top)] lg:hidden"
           >
             <div className="flex h-[60px] items-center justify-between border-b border-[var(--ink)]/[0.08] px-4">
               <BrandMark collapsed={false} />
@@ -474,7 +475,7 @@ function MobileDrawer({
               </button>
             </div>
             <div
-              className="min-h-0 flex-1 overflow-y-auto p-2 pb-4"
+              className="min-h-0 flex-1 overflow-y-auto p-2 pb-[max(1rem,env(safe-area-inset-bottom))]"
               style={{
                 maskImage:
                   "linear-gradient(to bottom, transparent 0, #000 12px, #000 calc(100% - 12px), transparent 100%)",
@@ -502,6 +503,72 @@ if (typeof window !== "undefined") {
   window.addEventListener("popstate", () => {
     isPopNavigation = true;
   });
+}
+
+// ─── Mobile tab bar (app chrome) ──────────────────────────────────────────────
+const TAB_ITEMS = [
+  { href: "/panel", labelKey: "nav.dashboard", icon: LayoutDashboard, exact: true },
+  { href: "/panel/chat", labelKey: "nav.community", icon: MessageSquare },
+  { href: "/panel/courses", labelKey: "nav.courses", icon: BookOpen },
+  { href: "/panel/stage", labelKey: "nav.stage", icon: Mic2 },
+] as const;
+
+function MobileTabBar({
+  onOpenMenu,
+  menuOpen,
+}: {
+  onOpenMenu: () => void;
+  menuOpen: boolean;
+}) {
+  const t = useT();
+  const [location] = useLocation();
+
+  const isTabActive = (href: string, exact?: boolean) => {
+    if (exact) return location === href;
+    if (href === "/panel/courses" && location.startsWith("/panel/courses/admin")) return false;
+    return location === href || location.startsWith(`${href}/`);
+  };
+
+  const tabClass = (on: boolean) =>
+    cn(
+      "flex min-h-[52px] flex-col items-center justify-center gap-1 px-1 pt-1.5 font-mono text-[9px] uppercase tracking-[0.08em]",
+      on
+        ? "font-semibold text-[var(--ink)] dark:text-[#F4F1EC]"
+        : "text-[var(--ink-muted)] dark:text-white/45",
+    );
+
+  return (
+    <nav
+      aria-label={t("nav.sectionMain")}
+      className="grid shrink-0 grid-cols-5 border-t border-[var(--ink)]/[0.08] bg-[var(--bone)]/92 pb-[max(0.35rem,env(safe-area-inset-bottom))] backdrop-blur-xl dark:border-white/10 dark:bg-[#0A0A0A]/92 lg:hidden"
+    >
+      {TAB_ITEMS.map((item) => {
+        const active = isTabActive(item.href, "exact" in item && item.exact);
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            aria-current={active ? "page" : undefined}
+            className={tabClass(active)}
+          >
+            <item.icon className="size-5" strokeWidth={active ? 2.1 : 1.7} />
+            <span className="max-w-full truncate">{t(item.labelKey)}</span>
+          </Link>
+        );
+      })}
+      <button
+        type="button"
+        onClick={onOpenMenu}
+        aria-expanded={menuOpen}
+        aria-label={t("shell.openMenu")}
+        data-onboarding="nav"
+        className={tabClass(menuOpen)}
+      >
+        <Menu className="size-5" strokeWidth={menuOpen ? 2.1 : 1.7} />
+        <span className="max-w-full truncate">{t("nav.more")}</span>
+      </button>
+    </nav>
+  );
 }
 
 function ShellInner({ user, children, onLogout }: PanelShellProps) {
@@ -543,7 +610,7 @@ function ShellInner({ user, children, onLogout }: PanelShellProps) {
   }, [location]);
 
   return (
-    <div className="relative flex h-svh overflow-hidden bg-[var(--bone)] text-[var(--ink)] dark:bg-transparent">
+    <div className="relative flex h-dvh max-h-dvh overflow-hidden overflow-x-clip bg-[var(--bone)] text-[var(--ink)] dark:bg-transparent">
       <PanelAmbient />
       <LocaleSyncFromSettings />
       <ThemeSyncFromSettings />
@@ -561,20 +628,10 @@ function ShellInner({ user, children, onLogout }: PanelShellProps) {
       />
 
       <div className="relative z-[1] flex min-h-0 min-w-0 flex-1 flex-col">
-        {/* Top bar — mobilde sabit 44px hedefler, hit-40 yok (çakışma yapıyordu) */}
-        <header className="relative z-40 flex h-14 shrink-0 items-center gap-1 border-b border-[var(--ink)]/[0.08] panel-glass-strong px-2 sm:h-[60px] sm:gap-2 sm:px-5 lg:px-6 dark:border-white/10">
-          <HeaderIconButton
-            label={t("shell.openMenu")}
-            onClick={() => setMobileOpen(true)}
-            className="lg:hidden text-[var(--ink-body)] hover:text-[var(--ink)]"
-            data-onboarding="nav"
-          >
-            <Menu className="size-5" />
-          </HeaderIconButton>
-
-          <div className="min-w-0 shrink lg:hidden">
-            <BrandMark collapsed={false} />
-          </div>
+        <header className="relative z-40 flex h-[calc(3.5rem+env(safe-area-inset-top))] shrink-0 items-center gap-1 border-b border-[var(--ink)]/[0.08] panel-glass-strong px-2 pt-[env(safe-area-inset-top)] sm:gap-2 sm:px-5 lg:h-[60px] lg:px-6 lg:pt-0 dark:border-white/10">
+          <Link href="/panel" className="flex min-w-0 items-center px-1 lg:hidden" aria-label="inner.hub">
+            <BrandMark collapsed />
+          </Link>
 
           <div className="mx-auto hidden min-w-0 flex-1 justify-center px-4 lg:flex">
             <SearchTriggerBar onClick={openSearch} />
@@ -623,16 +680,38 @@ function ShellInner({ user, children, onLogout }: PanelShellProps) {
           </div>
         </header>
 
-        {/* Main content - tek scroll container */}
+        {/* Main content - tek scroll container; chat tam yükseklik (app) */}
         <main
           id="panel-main"
           ref={mainRef}
           tabIndex={-1}
           data-onboarding="main"
-          className="min-h-0 min-w-0 flex-1 overflow-y-auto px-3 py-5 outline-none sm:px-5 sm:py-6 lg:px-8 lg:py-8 dark:[scrollbar-color:rgba(255,255,255,0.15)_transparent]"
+          className={cn(
+            "min-h-0 min-w-0 flex-1 overflow-x-clip outline-none dark:[scrollbar-color:rgba(255,255,255,0.15)_transparent]",
+            location === "/panel/chat" || location.startsWith("/panel/chat/")
+              ? "flex flex-col overflow-hidden p-0"
+              : "overflow-y-auto px-3 py-5 sm:px-5 sm:py-6 lg:px-8 lg:py-8",
+          )}
         >
+          {!user.phone?.trim() &&
+            location !== "/panel/profile" &&
+            location !== "/panel/chat" &&
+            !location.startsWith("/panel/chat/") && (
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border border-[var(--ink)]/15 bg-[var(--ink)]/[0.03] px-3 py-2.5">
+              <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
+                {t("shell.phoneNudge")}
+              </p>
+              <Link
+                href="/panel/profile"
+                className="font-mono text-label uppercase tracking-widest text-[var(--ink)] underline underline-offset-2"
+              >
+                {t("shell.phoneNudgeCta")}
+              </Link>
+            </div>
+          )}
           <PanelPageTransition>{children}</PanelPageTransition>
         </main>
+        <MobileTabBar menuOpen={mobileOpen} onOpenMenu={() => setMobileOpen(true)} />
       </div>
 
       <LegalAcceptModal />

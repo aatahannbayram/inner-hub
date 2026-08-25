@@ -27,6 +27,7 @@ export const HealthCheckResponse = zod.object({
 export const SubmitRequestBody = zod.object({
   "name": zod.string().min(1),
   "email": zod.string().email(),
+  "phone": zod.string().min(10).max(40),
   "role": zod.union([zod.literal('builder'),zod.literal('investor'),zod.literal('founder'),zod.literal('company'),zod.literal('operator'),zod.literal(null)]).nullish(),
   "linkedin": zod.string().nullish(),
   "whoYouAre": zod.string().min(1),

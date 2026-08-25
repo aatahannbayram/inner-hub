@@ -127,6 +127,7 @@ function PanelApp() {
             name: data.user.name,
             email: data.user.email,
             role: data.user.role,
+            phone: data.user.phone ?? null,
             profileCompletionPct: data.user.profileCompletionPct ?? 0,
             notificationCount: 0,
           });
@@ -145,6 +146,7 @@ function PanelApp() {
           ? {
               ...prev,
               name: user.name ?? prev.name,
+              phone: user.phone !== undefined ? user.phone : prev.phone,
               profileCompletionPct: user.profileCompletionPct ?? prev.profileCompletionPct ?? 0,
             }
           : prev,
@@ -156,11 +158,17 @@ function PanelApp() {
 
   if (!checked) return null;
 
-  const handleLogin = (u: { email: string; role: "member" | "admin"; name: string }) => {
+  const handleLogin = (u: {
+    email: string;
+    role: "member" | "admin";
+    name: string;
+    phone?: string | null;
+  }) => {
     setPanelUser({
       name: u.name,
       email: u.email,
       role: u.role,
+      phone: u.phone ?? null,
       profileCompletionPct: 0,
       notificationCount: 0,
     });

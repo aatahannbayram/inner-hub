@@ -19,6 +19,9 @@ import {
   Loader2,
   Plus,
   Trash2,
+  ChevronUp,
+  ChevronDown,
+  Star,
 } from "lucide-react";
 import { Link } from "wouter";
 import { useApiQuery } from "@/hooks/useApiQuery";
@@ -26,7 +29,34 @@ import { apiUrl } from "@/lib/api";
 import { ErrorState, LoadingBlock } from "@/components/panel/Skeletons";
 import { useLocale, useT } from "@/i18n";
 
-type CustomLink = { id: string; label: string; url: string };
+type CustomLink = {
+  id: string;
+  label: string;
+  url: string;
+  sortOrder: number;
+  featured: boolean;
+  scheduledFrom?: string | null;
+  scheduledTo?: string | null;
+  icon?: string | null;
+};
+
+type CardTheme = {
+  accent: string;
+  bg: string;
+  layout: "stack" | "card";
+};
+
+const CARD_THEME_PRESETS: { id: string; labelKey: string; theme: CardTheme }[] = [
+  { id: "ink", labelKey: "id.themeInk", theme: { accent: "#0A0A0A", bg: "#F4F1EC", layout: "stack" } },
+  { id: "green", labelKey: "id.themeGreen", theme: { accent: "#18FF85", bg: "#F4F1EC", layout: "stack" } },
+  { id: "slate", labelKey: "id.themeSlate", theme: { accent: "#1F2937", bg: "#EEF1F4", layout: "card" } },
+  { id: "olive", labelKey: "id.themeOlive", theme: { accent: "#3D4A2E", bg: "#F2EFE6", layout: "stack" } },
+  { id: "navy", labelKey: "id.themeNavy", theme: { accent: "#0B1F33", bg: "#E8EEF2", layout: "card" } },
+  { id: "sand", labelKey: "id.themeSand", theme: { accent: "#5C4A32", bg: "#F6F0E6", layout: "stack" } },
+];
+
+const MAX_CUSTOM_LINKS = 12;
+const MAX_FEATURED = 2;
 
 type ApiUser = {
   id: number;
@@ -46,9 +76,12 @@ type ApiUser = {
   linkedinLogoUrl?: string | null;
   githubLogoUrl?: string | null;
   twitter?: string | null;
+  instagram?: string | null;
+  behance?: string | null;
   phone?: string | null;
   showPhoneOnCard?: boolean | null;
   profileLinks?: CustomLink[];
+  cardTheme?: CardTheme | null;
   skills?: string[];
   visibility?: string | null;
   profileCompletionPct?: number;
@@ -168,8 +201,8 @@ function IdCard({
         }}
       />
 
-      <div className="relative flex items-start justify-between gap-4">
-        <div className="flex-1">
+      <div className="relative flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
           <div className="mb-4 flex items-center gap-2">
             <span className="font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)]/47">
               <span lang="en">inner·id</span>
@@ -180,9 +213,9 @@ function IdCard({
             </span>
           </div>
 
-          <div className="mb-1 flex items-center gap-2">
+          <div className="mb-1 flex items-start gap-2">
             <span
-              className="font-serif text-3xl text-[var(--bone-fixed)]"
+              className="min-w-0 break-words font-serif text-2xl text-[var(--bone-fixed)] sm:text-3xl"
               style={{ fontWeight: 600 }}
             >
               {user.name}
@@ -190,7 +223,7 @@ function IdCard({
             <CheckCircle2 className="size-4 shrink-0 text-[var(--success-ink)]" />
           </div>
 
-          <p className="mb-4 font-mono text-caption text-[var(--bone-fixed)]/57">
+          <p className="mb-4 break-words font-mono text-caption text-[var(--bone-fixed)]/57">
             @{handle}
             {user.title || user.company
               ? ` · ${[user.title, user.company].filter(Boolean).join(", ")}`
@@ -553,11 +586,15 @@ function PrintCardPanel({ handle }: { handle: string }) {
 
 type CardStats = {
   views7d: number;
+  views30d: number;
   vcards7d: number;
   links7d: number;
   qr7d: number;
   shares7d: number;
   viewsTotal: number;
+  linkClicks?: { key: string; n: number }[];
+  devices?: { device: string; n: number }[];
+  topReferrers?: { referrer: string; n: number }[];
 };
 
 function CardStatsPanel() {
@@ -568,10 +605,10 @@ function CardStatsPanel() {
   if (!s) return null;
 
   const items = [
-    { label: t("id.statViews"), value: s.views7d },
-    { label: t("id.statVcards"), value: s.vcards7d },
+    { label: t("id.statViews7"), value: s.views7d },
+    { label: t("id.statViews30"), value: s.views30d },
     { label: t("id.statLinks"), value: s.links7d },
-    { label: t("id.statQr"), value: s.qr7d },
+    { label: t("id.statVcards"), value: s.vcards7d },
   ];
 
   return (
@@ -589,6 +626,59 @@ function CardStatsPanel() {
           </div>
         ))}
       </div>
+      {(s.linkClicks?.length ?? 0) > 0 && (
+        <div className="mt-3 border-t border-[var(--ink)]/[0.06] pt-3">
+          <p className="mb-1.5 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
+            {t("id.statPerLink")}
+          </p>
+          <ul className="space-y-1">
+            {s.linkClicks!.map((row) => (
+              <li
+                key={row.key}
+                className="flex items-center justify-between gap-3 font-mono text-caption text-[var(--ink-body)]"
+              >
+                <span className="truncate">{row.key}</span>
+                <span className="tabular-nums text-[var(--ink)]">{row.n}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {(s.devices?.length ?? 0) > 0 && (
+        <div className="mt-3 border-t border-[var(--ink)]/[0.06] pt-3">
+          <p className="mb-1.5 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
+            {t("id.statDevices")}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {s.devices!.map((d) => (
+              <span
+                key={d.device}
+                className="border border-[var(--ink)]/10 px-2 py-1 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]"
+              >
+                {d.device} · {d.n}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+      {(s.topReferrers?.length ?? 0) > 0 && (
+        <div className="mt-3 border-t border-[var(--ink)]/[0.06] pt-3">
+          <p className="mb-1.5 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
+            {t("id.statReferrers")}
+          </p>
+          <ul className="space-y-1">
+            {s.topReferrers!.slice(0, 5).map((r) => (
+              <li
+                key={r.referrer}
+                className="flex items-center justify-between gap-3 font-mono text-caption text-[var(--ink-body)]"
+              >
+                <span className="truncate">{r.referrer}</span>
+                <span className="tabular-nums text-[var(--ink)]">{r.n}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
       <p className="mt-2 font-mono text-caption text-[var(--ink-subtle)]">
         {t("id.statTotal", { n: String(s.viewsTotal) })}
       </p>
@@ -943,6 +1033,40 @@ function PlatformBindRow({
   );
 }
 
+function isoToLocalInput(iso: string | null | undefined): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function localInputToIso(raw: string): string | null {
+  const s = raw.trim();
+  if (!s) return null;
+  const t = Date.parse(s);
+  if (Number.isNaN(t)) return null;
+  return new Date(t).toISOString();
+}
+
+function normalizeLinks(links: CustomLink[]): CustomLink[] {
+  return links
+    .map((l, i) => ({
+      ...l,
+      sortOrder: i,
+      featured: Boolean(l.featured),
+      scheduledFrom: l.scheduledFrom ?? null,
+      scheduledTo: l.scheduledTo ?? null,
+    }))
+    .map((l, i, arr) => {
+      const featuredBefore = arr.slice(0, i).filter((x) => x.featured).length;
+      return {
+        ...l,
+        featured: l.featured && featuredBefore < MAX_FEATURED,
+      };
+    });
+}
+
 function CustomLinksEditor({
   links,
   onSave,
@@ -955,7 +1079,27 @@ function CustomLinksEditor({
   const [draftLabel, setDraftLabel] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const atLimit = links.length >= 40;
+  const ordered = useMemo(
+    () =>
+      normalizeLinks(
+        [...links].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0) || a.id.localeCompare(b.id)),
+      ),
+    [links],
+  );
+  const atLimit = ordered.length >= MAX_CUSTOM_LINKS;
+  const featuredCount = ordered.filter((l) => l.featured).length;
+
+  const persist = async (next: CustomLink[]) => {
+    setBusy(true);
+    setError(null);
+    try {
+      await onSave(normalizeLinks(next));
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : t("id.saveFailed"));
+    } finally {
+      setBusy(false);
+    }
+  };
 
   const add = async () => {
     const url = draftUrl.trim();
@@ -964,37 +1108,63 @@ function CustomLinksEditor({
       setError(t("id.linkLimit"));
       return;
     }
-    setBusy(true);
-    setError(null);
-    try {
-      await onSave([
-        ...links,
-        {
-          id: crypto.randomUUID().slice(0, 8),
-          label: draftLabel.trim(),
-          url,
-        },
-      ]);
-      setDraftUrl("");
-      setDraftLabel("");
-    } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : t("id.saveFailed"));
-    } finally {
-      setBusy(false);
-    }
+    await persist([
+      ...ordered,
+      {
+        id: crypto.randomUUID().slice(0, 8),
+        label: draftLabel.trim(),
+        url,
+        sortOrder: ordered.length,
+        featured: false,
+        scheduledFrom: null,
+        scheduledTo: null,
+      },
+    ]);
+    setDraftUrl("");
+    setDraftLabel("");
   };
 
   const remove = async (id: string) => {
     if (busy) return;
-    setBusy(true);
-    setError(null);
-    try {
-      await onSave(links.filter((l) => l.id !== id));
-    } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : t("id.saveFailed"));
-    } finally {
-      setBusy(false);
+    await persist(ordered.filter((l) => l.id !== id));
+  };
+
+  const move = async (id: string, dir: -1 | 1) => {
+    if (busy) return;
+    const idx = ordered.findIndex((l) => l.id === id);
+    const swap = idx + dir;
+    if (idx < 0 || swap < 0 || swap >= ordered.length) return;
+    const next = [...ordered];
+    const tmp = next[idx]!;
+    next[idx] = next[swap]!;
+    next[swap] = tmp;
+    await persist(next);
+  };
+
+  const toggleFeatured = async (id: string) => {
+    if (busy) return;
+    const target = ordered.find((l) => l.id === id);
+    if (!target) return;
+    if (!target.featured && featuredCount >= MAX_FEATURED) {
+      setError(t("id.featuredLimit"));
+      return;
     }
+    await persist(
+      ordered.map((l) => (l.id === id ? { ...l, featured: !l.featured } : l)),
+    );
+  };
+
+  const setSchedule = async (
+    id: string,
+    field: "scheduledFrom" | "scheduledTo",
+    value: string,
+  ) => {
+    if (busy) return;
+    await persist(
+      ordered.map((l) =>
+        l.id === id ? { ...l, [field]: localInputToIso(value) } : l,
+      ),
+    );
   };
 
   return (
@@ -1005,33 +1175,97 @@ function CustomLinksEditor({
             {t("id.moreLinks")}
           </p>
           <p className="font-mono text-label tabular-nums text-[var(--ink-subtle)]">
-            {links.length}/40
+            {ordered.length}/{MAX_CUSTOM_LINKS}
           </p>
         </div>
         <p className="mt-0.5 text-xs text-[var(--ink-muted)]">{t("id.moreLinksHint")}</p>
       </div>
       <div className="space-y-2">
-        {links.length > 0 && (
-          <div className={links.length > 6 ? "max-h-72 space-y-2 overflow-y-auto pr-0.5" : "space-y-2"}>
-            {links.map((link) => (
+        {ordered.length > 0 && (
+          <div className={ordered.length > 4 ? "max-h-[28rem] space-y-2 overflow-y-auto pr-0.5" : "space-y-2"}>
+            {ordered.map((link, idx) => (
               <div
                 key={link.id}
-                className="flex items-center gap-2 panel-glass px-3 py-2.5 transition-colors hover:border-[var(--ink)]/25"
+                className={[
+                  "panel-glass space-y-2 px-3 py-2.5 transition-colors hover:border-[var(--ink)]/25",
+                  link.featured ? "border-[var(--ink)]/35 bg-[var(--ink)]/[0.03]" : "",
+                ].join(" ")}
               >
-                <Globe className="size-3.5 shrink-0 text-[var(--ink-muted)]" />
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm text-[var(--ink)]">{link.label || link.url}</p>
-                  <p className="truncate font-mono text-label text-[var(--ink-muted)]">{link.url}</p>
+                <div className="flex items-center gap-2">
+                  <div className="flex shrink-0 flex-col gap-0.5">
+                    <button
+                      type="button"
+                      disabled={busy || idx === 0}
+                      onClick={() => void move(link.id, -1)}
+                      className="p-0.5 text-[var(--ink-muted)] disabled:opacity-30 hover:text-[var(--ink)]"
+                      aria-label={t("id.moveUp")}
+                    >
+                      <ChevronUp className="size-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      disabled={busy || idx === ordered.length - 1}
+                      onClick={() => void move(link.id, 1)}
+                      className="p-0.5 text-[var(--ink-muted)] disabled:opacity-30 hover:text-[var(--ink)]"
+                      aria-label={t("id.moveDown")}
+                    >
+                      <ChevronDown className="size-3.5" />
+                    </button>
+                  </div>
+                  <Globe className="size-3.5 shrink-0 text-[var(--ink-muted)]" />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm text-[var(--ink)]">{link.label || link.url}</p>
+                    <p className="truncate font-mono text-label text-[var(--ink-muted)]">{link.url}</p>
+                  </div>
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() => void toggleFeatured(link.id)}
+                    className={[
+                      "shrink-0 p-2",
+                      link.featured ? "text-[var(--ink)]" : "text-[var(--ink-muted)] hover:text-[var(--ink)]",
+                    ].join(" ")}
+                    aria-label={t("id.featured")}
+                    title={t("id.featured")}
+                  >
+                    <Star className={`size-3.5 ${link.featured ? "fill-current" : ""}`} />
+                  </button>
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() => void remove(link.id)}
+                    className="shrink-0 p-2 text-[var(--ink-muted)] hover:text-[var(--error-ink)]"
+                    aria-label={t("common.delete")}
+                  >
+                    <Trash2 className="size-3.5" />
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  disabled={busy}
-                  onClick={() => void remove(link.id)}
-                  className="shrink-0 p-2 text-[var(--ink-muted)] hover:text-[var(--error-ink)]"
-                  aria-label={t("common.delete")}
-                >
-                  <Trash2 className="size-3.5" />
-                </button>
+                <div className="grid gap-2 sm:grid-cols-2 pl-8">
+                  <label>
+                    <span className="mb-0.5 block font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)]">
+                      {t("id.scheduleFrom")}
+                    </span>
+                    <input
+                      type="datetime-local"
+                      value={isoToLocalInput(link.scheduledFrom)}
+                      disabled={busy}
+                      onChange={(e) => void setSchedule(link.id, "scheduledFrom", e.target.value)}
+                      className="h-8 w-full bg-transparent font-mono text-caption text-[var(--ink)] outline-none"
+                    />
+                  </label>
+                  <label>
+                    <span className="mb-0.5 block font-mono text-label uppercase tracking-widest text-[var(--ink-subtle)]">
+                      {t("id.scheduleTo")}
+                    </span>
+                    <input
+                      type="datetime-local"
+                      value={isoToLocalInput(link.scheduledTo)}
+                      disabled={busy}
+                      onChange={(e) => void setSchedule(link.id, "scheduledTo", e.target.value)}
+                      className="h-8 w-full bg-transparent font-mono text-caption text-[var(--ink)] outline-none"
+                    />
+                  </label>
+                </div>
               </div>
             ))}
           </div>
@@ -1098,6 +1332,69 @@ function CustomLinksEditor({
   );
 }
 
+function CardThemeStudio({
+  theme,
+  onSave,
+}: {
+  theme: CardTheme;
+  onSave: (next: CardTheme) => Promise<void>;
+}) {
+  const t = useT();
+  const [busy, setBusy] = useState(false);
+  const current = theme ?? CARD_THEME_PRESETS[0]!.theme;
+
+  const apply = async (next: CardTheme) => {
+    setBusy(true);
+    try {
+      await onSave(next);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <section>
+      <div className="mb-3 border-t border-[var(--ink)]/[0.08] pt-3">
+        <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
+          {t("id.cardTheme")}
+        </p>
+        <p className="mt-0.5 text-xs text-[var(--ink-muted)]">{t("id.cardThemeHint")}</p>
+      </div>
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+        {CARD_THEME_PRESETS.map((p) => {
+          const active =
+            p.theme.accent.toUpperCase() === current.accent.toUpperCase() &&
+            p.theme.bg.toUpperCase() === current.bg.toUpperCase() &&
+            p.theme.layout === current.layout;
+          return (
+            <button
+              key={p.id}
+              type="button"
+              disabled={busy}
+              onClick={() => void apply(p.theme)}
+              className={[
+                "border px-3 py-3 text-left transition-colors",
+                active
+                  ? "border-[var(--ink)] bg-[var(--ink)]/[0.04]"
+                  : "border-[var(--ink)]/10 hover:border-[var(--ink)]/30",
+              ].join(" ")}
+            >
+              <span className="mb-2 flex gap-1.5">
+                <span className="size-4 border border-[var(--ink)]/15" style={{ background: p.theme.accent }} />
+                <span className="size-4 border border-[var(--ink)]/15" style={{ background: p.theme.bg }} />
+              </span>
+              <span className="block font-mono text-label uppercase tracking-widest text-[var(--ink)]">
+                {t(p.labelKey)}
+              </span>
+              <span className="font-mono text-caption text-[var(--ink-muted)]">{p.theme.layout}</span>
+            </button>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 export default function InnerId() {
   const t = useT();
   const queryClient = useQueryClient();
@@ -1148,6 +1445,7 @@ export default function InnerId() {
         phone: user.phone ?? "",
         showPhoneOnCard: Boolean(user.showPhoneOnCard),
         profileLinks: Array.isArray(user.profileLinks) ? user.profileLinks : [],
+        cardTheme: user.cardTheme ?? CARD_THEME_PRESETS[0]!.theme,
         visibility:
           user.visibility === "public" || user.visibility === "private" || user.visibility === "members"
             ? user.visibility
@@ -1482,6 +1780,11 @@ export default function InnerId() {
           />
         </div>
       </section>
+
+      <CardThemeStudio
+        theme={user.cardTheme ?? CARD_THEME_PRESETS[0]!.theme}
+        onSave={(next) => patchProfile({ cardTheme: next })}
+      />
 
       <CustomLinksEditor
         links={Array.isArray(user.profileLinks) ? user.profileLinks : []}

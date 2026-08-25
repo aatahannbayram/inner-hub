@@ -11,6 +11,8 @@ export interface InvitationInput {
   /** @minLength 1 */
   name: string;
   email: string;
+  /** @minLength 10 @maxLength 40 */
+  phone: string;
   /** @nullable */
   role?: InvitationInputRole;
   /** @nullable */

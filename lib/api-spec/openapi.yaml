@@ -98,6 +98,7 @@ components:
       required:
         - name
         - email
+        - phone
         - whoYouAre
       properties:
         name:
@@ -106,6 +107,11 @@ components:
         email:
           type: string
           format: email
+        phone:
+          type: string
+          minLength: 10
+          maxLength: 40
+          description: Mobile phone (E.164-ish); required for membership ops
         role:
           type: ["string", "null"]
           enum: ["builder", "investor", "founder", "company", "operator", null]

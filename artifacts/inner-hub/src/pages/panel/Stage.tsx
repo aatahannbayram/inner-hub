@@ -367,14 +367,14 @@ function RankBadge({ rank }: { rank: number }) {
 
 function StageStat({ value, label }: { value: string | number; label: string }) {
   return (
-    <div className="panel-glass px-4 py-3">
+    <div className="panel-glass px-2 py-3 sm:px-4">
       <p
-        className="font-display font-serif text-2xl leading-none text-[var(--ink)]"
+        className="font-display font-serif text-xl leading-none text-[var(--ink)] sm:text-2xl"
         style={{ fontWeight: 500 }}
       >
         {value}
       </p>
-      <p className="mt-1.5 font-mono text-[9px] uppercase tracking-widest text-[var(--ink-muted)]">
+      <p className="mt-1.5 font-mono text-[8px] uppercase leading-tight tracking-wider text-[var(--ink-muted)] sm:text-[9px] sm:tracking-widest">
         {label}
       </p>
     </div>
@@ -491,7 +491,7 @@ function ProductCard({
           <div className="pointer-events-none absolute inset-x-0 bottom-0 p-4">
             <div className="flex flex-wrap items-center gap-1.5">
               <p
-                className="font-serif text-lg text-white"
+                className="min-w-0 break-words font-serif text-lg text-white"
                 style={{ textShadow: "0 1px 10px rgba(0,0,0,0.55)" }}
               >
                 {product.title}
@@ -576,7 +576,7 @@ function ProductCard({
         </div>
 
         {isAdmin && (
-          <div className="mt-3 flex items-center gap-1.5 border-t border-[var(--ink)]/[0.08] pt-3">
+          <div className="mt-3 flex flex-wrap items-center gap-1.5 border-t border-[var(--ink)]/[0.08] pt-3">
           <button
             type="button"
             disabled={adminBusy}
@@ -1347,7 +1347,7 @@ export default function Stage() {
           : t("stage.periodAll");
 
   return (
-    <div className="min-w-0 max-w-2xl space-y-8">
+    <div className="min-w-0 max-w-2xl space-y-8 overflow-x-clip">
       <FadeIn>
         <div>
           <div className="mb-2 flex flex-wrap items-center gap-2">
@@ -1364,14 +1364,14 @@ export default function Stage() {
       </FadeIn>
 
       <FadeIn delay={0.01}>
-        <div className="flex flex-wrap gap-1 border border-[var(--ink)]/10 p-0.5">
+        <div className="-mx-3 flex gap-1 overflow-x-auto border border-[var(--ink)]/10 p-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:flex-wrap sm:overflow-visible">
           {PERIODS.map((p) => (
             <button
               key={p}
               type="button"
               onClick={() => setPeriod(p)}
               className={[
-                "flex-1 px-3 py-2 font-mono text-[10px] uppercase tracking-widest transition-colors sm:flex-none",
+                "shrink-0 px-3 py-2.5 font-mono text-[10px] uppercase tracking-widest transition-colors sm:flex-1 sm:flex-none",
                 period === p
                   ? "bg-[var(--ink)] text-[var(--bone)]"
                   : "text-[var(--ink-muted)] hover:text-[var(--ink)]",
@@ -1443,7 +1443,7 @@ export default function Stage() {
                 <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
                   {t("stage.allProducts")}
                 </p>
-                <div className="flex items-center gap-2">
+                <div className="flex min-w-0 flex-wrap items-center gap-2">
                   {productList.length > 0 && (
                     <div className="flex border border-[var(--ink)]/10">
                       <button

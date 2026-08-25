@@ -187,7 +187,7 @@ function MarqueeStrip({ modules }: { modules: HomeModule[] }) {
         className="pointer-events-none absolute inset-y-0 right-0 z-10 w-12 bg-gradient-to-l from-[var(--ink-fixed)] to-transparent sm:w-20"
       />
 
-      <div className="relative mx-auto max-w-[100vw] overflow-hidden border-y border-white/10 bg-[var(--ink-fixed)] py-3.5 sm:py-4">
+      <div className="relative w-full overflow-hidden border-y border-white/10 bg-[var(--ink-fixed)] py-3.5 sm:py-4">
         <motion.div
           className="flex w-max items-center gap-0"
           animate={{ x: ["0%", "-33.333%"] }}
@@ -376,9 +376,9 @@ export default function Home() {
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[var(--ink-fixed)]/40 to-transparent" />
 
           <FadeIn>
-            <div className="mb-12 flex items-baseline justify-between gap-3 border-b border-white/15 pb-5 font-mono text-[10px] uppercase tracking-widest opacity-60 sm:mb-20 sm:gap-6 sm:pb-6 sm:text-xs">
-              <span>{t("home.gatheringEyebrow")}</span>
-              <span className="whitespace-nowrap">{t("home.gatheringDate")}</span>
+            <div className="mb-12 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 border-b border-white/15 pb-5 font-mono text-[10px] uppercase tracking-widest opacity-60 sm:mb-20 sm:gap-6 sm:pb-6 sm:text-xs">
+              <span className="min-w-0">{t("home.gatheringEyebrow")}</span>
+              <span className="shrink-0">{t("home.gatheringDate")}</span>
             </div>
           </FadeIn>
           <WordsPullUp

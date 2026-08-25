@@ -1,4 +1,5 @@
 import { useLocation } from "wouter";
+import { cn } from "@/lib/utils";
 import { useLocale } from "./I18nProvider";
 import { isLocaleAgnosticPath, swapLocalePath } from "./localePath";
 import type { Locale } from "./types";
@@ -49,9 +50,11 @@ export function LocaleToggle({
     <div
       role="group"
       aria-label="Language"
-      className={`inline-flex items-center border ${
-        tone === "dark" ? "border-white/15" : "border-[var(--ink)]/15"
-      } ${className}`}
+      className={cn(
+        "items-center border",
+        tone === "dark" ? "border-white/15" : "border-[var(--ink)]/15",
+        className || "inline-flex",
+      )}
     >
       {btn("tr", "TR")}
       {btn("en", "EN")}

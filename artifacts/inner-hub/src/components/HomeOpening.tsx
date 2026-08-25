@@ -40,7 +40,7 @@ function HeroInset() {
   const inviteHref = useLocalizedHref("/invitation");
   return (
     <section
-      className="relative h-[100svh] p-2 sm:p-3 md:p-5 lg:p-6"
+      className="relative h-[100dvh] max-h-[100dvh] overflow-hidden p-0 sm:p-3 md:p-5 lg:p-6"
       style={{ backgroundColor: "var(--ink-fixed)" }}
     >
       <div
@@ -66,7 +66,7 @@ function HeroInset() {
 
         <FloatingNavbar />
 
-        <div className="absolute inset-x-0 bottom-0 z-10 px-3 pb-[max(1rem,env(safe-area-inset-bottom))] pt-16 sm:px-5 sm:pb-6 md:px-8 md:pb-9 lg:px-10">
+        <div className="absolute inset-x-0 bottom-0 z-10 px-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-20 sm:px-5 sm:pb-6 md:px-8 md:pb-9 lg:px-10">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -147,7 +147,7 @@ function AboutIdea() {
           </p>
 
           <WordsPullUpMultiStyle
-            className="mx-auto max-w-3xl justify-center text-3xl leading-[0.95] text-[var(--bone-fixed)] sm:text-4xl sm:leading-[0.9] md:text-5xl lg:text-6xl xl:text-7xl"
+            className="mx-auto max-w-3xl justify-center overflow-hidden text-3xl leading-[0.95] text-[var(--bone-fixed)] sm:text-4xl sm:leading-[0.9] md:text-5xl lg:text-6xl xl:text-7xl"
             segments={[
               { text: t("home.ideaLine1"), className: "font-normal" },
               {

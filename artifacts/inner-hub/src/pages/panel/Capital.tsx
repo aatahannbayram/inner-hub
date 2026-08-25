@@ -947,7 +947,7 @@ export default function Capital() {
       {/* Pipeline view */}
       <div id="deal-pipeline" className="scroll-mt-6">
         {view === "pipeline" ? (
-          <div className="-mx-4 flex gap-4 overflow-x-auto px-4 pb-2 snap-x snap-mandatory sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 sm:pb-0 sm:snap-none lg:grid-cols-4">
+          <div className="-mx-3 flex gap-4 overflow-x-auto px-3 pb-2 snap-x snap-mandatory sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 sm:pb-0 sm:snap-none lg:grid-cols-4">
             {STAGES.map((stage) => {
               const stageDeals = filtered.filter((d) => d.stage === stage);
               const cfg = STAGE_CONFIG[stage];

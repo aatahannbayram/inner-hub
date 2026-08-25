@@ -8,6 +8,7 @@ import { Lockup } from "@/components/Lockup";
 import { LocaleToggle, useLocale, useLocalizedHref, useT } from "@/i18n";
 import { localizedPath } from "@/i18n/localePath";
 import { useSeo } from "@/lib/seo";
+import { isValidPhone, normalizePhoneInput } from "@/lib/phone";
 import { useSubmitRequest } from "@workspace/api-client-react";
 import { trackEvent } from "@/lib/analytics";
 
@@ -105,6 +106,7 @@ export default function Invitation() {
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [role, setRole] = useState<Role | null>(null);
   const [linkedin, setLinkedin] = useState("");
   const [organization, setOrganization] = useState("");
@@ -226,7 +228,7 @@ export default function Invitation() {
 
   const canNext = (() => {
     if (step === 0) return role != null;
-    if (step === 1) return name.trim().length > 1 && email.includes("@");
+    if (step === 1) return name.trim().length > 1 && email.includes("@") && isValidPhone(phone);
     if (step === 2) {
       if (orgRequired) return organization.trim().length > 1;
       return true;
@@ -252,6 +254,7 @@ export default function Invitation() {
       data: {
         name: name.trim(),
         email: email.trim(),
+        phone: normalizePhoneInput(phone),
         role,
         linkedin: linkedin || null,
         whoYouAre: whoYouAre.trim(),
@@ -507,6 +510,17 @@ export default function Invitation() {
                             autoComplete="email"
                           />
                         </Field>
+                        <Field label={t("invite.phone")} required>
+                          <input
+                            type="tel"
+                            value={phone}
+                            onChange={(e) => setPhone(e.target.value)}
+                            placeholder={t("invite.phPhone")}
+                            className={fieldClass}
+                            autoComplete="tel"
+                            maxLength={40}
+                          />
+                        </Field>
                       </div>
                     )}
 
@@ -627,6 +641,7 @@ export default function Invitation() {
                             <SummaryRow label={t("invite.howEnter")} value={roles.find((r) => r.value === role)?.label ?? "·"} />
                             <SummaryRow label="İsim" value={name || "·"} />
                             <SummaryRow label="Email" value={email || "·"} />
+                            <SummaryRow label={t("invite.phone")} value={phone || "·"} />
                             {linkedin ? <SummaryRow label="LinkedIn" value={linkedin} /> : null}
                           </dl>
                         </div>

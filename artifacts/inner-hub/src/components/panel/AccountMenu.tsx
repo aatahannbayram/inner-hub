@@ -136,7 +136,7 @@ export function AccountMenu({ user, onLogout }: AccountMenuProps) {
               // Mobil: alt sheet (parmakla kolay)
               "inset-x-0 bottom-0 max-h-[min(88dvh,560px)] rounded-t-2xl",
               // Masaüstü: sağ üst avatar altına popover
-              "sm:inset-x-auto sm:bottom-auto sm:right-3 sm:top-[64px] sm:w-[min(100vw-1.5rem,20.5rem)] sm:max-h-[min(70vh,520px)] sm:rounded-xl",
+              "sm:inset-x-auto sm:bottom-auto sm:right-3 sm:top-[64px] sm:w-[min(100%-1.5rem,20.5rem)] sm:max-h-[min(70vh,520px)] sm:rounded-xl",
             )}
           >
             {/* Mobil tutamak */}

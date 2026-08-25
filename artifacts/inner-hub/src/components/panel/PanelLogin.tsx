@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Lockup } from "@/components/Lockup";
 import { apiUrl } from "@/lib/api";
+import { isValidPhone, normalizePhoneInput } from "@/lib/phone";
 import { posterForVideo } from "@/lib/videoPosters";
 import { useScrubVideo } from "@/hooks/useScrubVideo";
 import { useTypewriter } from "@/hooks/useTypewriter";
@@ -11,7 +12,7 @@ import { useT } from "@/i18n";
 const LOGIN_VIDEO_SRC =
   "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260530_042513_df96a13b-6155-4f6e-8b93-c9dee66fba08.mp4";
 
-type SessionUser = { email: string; role: "member" | "admin"; name: string };
+type SessionUser = { email: string; role: "member" | "admin"; name: string; phone?: string | null };
 type AuthMode = "login" | "register" | "forgot" | "reset";
 
 type PanelLoginProps = {
@@ -114,6 +115,7 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [resetToken] = useState(initialReset ?? "");
   const [inviteCode, setInviteCode] = useState(initialInvite?.invite ?? "");
+  const [phone, setPhone] = useState("");
   const inviteFromLink = Boolean(initialInvite?.invite);
   const [error, setError] = useState("");
   const [info, setInfo] = useState("");
@@ -122,6 +124,7 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
   const [emailCopied, setEmailCopied] = useState(false);
   const googleButtonRef = useRef<HTMLDivElement>(null);
   const inviteCodeRef = useRef(inviteCode);
+  const phoneRef = useRef(phone);
   const modeRef = useRef(mode);
   const scrubVideoRef = useScrubVideo();
   const { displayed: typedIntro, done: typedDone } = useTypewriter(t("login.typewriter"));
@@ -142,6 +145,10 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
   useEffect(() => {
     inviteCodeRef.current = inviteCode;
   }, [inviteCode]);
+
+  useEffect(() => {
+    phoneRef.current = phone;
+  }, [phone]);
 
   useEffect(() => {
     modeRef.current = mode;
@@ -174,7 +181,11 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
             try {
               const body: Record<string, string> = { credential: response.credential };
               if (modeRef.current === "register") {
+                if (!isValidPhone(phoneRef.current)) {
+                  throw new Error(t("login.phoneInvalid"));
+                }
                 body.inviteCode = inviteCodeRef.current.trim();
+                body.phone = normalizePhoneInput(phoneRef.current);
               }
               const { user } = await apiRequest("google", body);
               onLogin(user);
@@ -217,6 +228,12 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
         return;
       }
 
+      if (mode === "register") {
+        if (!isValidPhone(phone)) {
+          throw new Error(t("login.phoneInvalid"));
+        }
+      }
+
       if (mode === "reset") {
         if (password !== passwordConfirm) {
           throw new Error(t("login.passwordMismatch"));
@@ -239,6 +256,7 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
               email,
               password,
               name,
+              phone: normalizePhoneInput(phone),
               inviteCode: inviteCode.trim(),
             });
       onLogin(user);
@@ -453,6 +471,22 @@ export function PanelLogin({ onLogin }: PanelLoginProps) {
                       className={fieldClass}
                       required
                       autoComplete="name"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="font-mono text-[10px] uppercase tracking-widest text-white/65 sm:text-[11px]">
+                      {t("login.phone")}
+                      <span className="text-[var(--inner-green)]"> *</span>
+                    </label>
+                    <input
+                      type="tel"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      placeholder={t("login.phonePlaceholder")}
+                      className={fieldClass}
+                      required
+                      autoComplete="tel"
+                      maxLength={40}
                     />
                   </div>
                 </>

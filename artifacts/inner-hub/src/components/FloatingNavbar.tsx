@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Lockup } from "@/components/Lockup";
 import { LocaleToggle, useLocalizedHref, useT } from "@/i18n";
+import { cn } from "@/lib/utils";
 
 const LINK_KEYS = [
   { key: "idea", href: "/#section-01" },
@@ -23,6 +25,15 @@ export const HERO_CHROME = "#0A0A0A";
 export function FloatingNavbar({ placement = "overlay" }: { placement?: "overlay" | "static" }) {
   const t = useT();
   const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [open]);
   const homeHref = useLocalizedHref("/");
   const inviteHref = useLocalizedHref("/invitation");
   const ideaHref = useLocalizedHref("/#section-01");
@@ -47,16 +58,17 @@ export function FloatingNavbar({ placement = "overlay" }: { placement?: "overlay
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.7, ease: EASE, delay: 0.15 }}
-      className={
+      className={cn(
         placement === "static"
-          ? "sticky top-0 z-50 border-b border-white/10"
-          : "absolute inset-x-0 top-0 z-50"
-      }
+          ? "sticky top-0 border-b border-white/10 pt-[env(safe-area-inset-top)]"
+          : "absolute inset-x-0 top-0 pt-[env(safe-area-inset-top)]",
+        open ? "z-[80]" : "z-50",
+      )}
       style={{ backgroundColor: HERO_CHROME }}
     >
-      <div className="flex h-[56px] items-center justify-between gap-3 px-3 py-2.5 sm:h-auto sm:gap-4 sm:px-5 sm:py-3.5 md:px-6">
-        <a href={homeHref} aria-label="inner hub home" className="inline-flex shrink-0">
-          <Lockup className="text-[var(--bone-fixed)]" fontSize="clamp(22px, 5.2vw, 32px)" pulse />
+      <div className="flex h-14 items-center justify-between gap-3 px-3 sm:h-auto sm:gap-4 sm:px-5 sm:py-3.5 md:px-6">
+        <a href={homeHref} aria-label="inner hub home" className="inline-flex min-w-0 shrink-0">
+          <Lockup className="text-[var(--bone-fixed)]" fontSize="clamp(20px, 5.2vw, 32px)" pulse />
         </a>
 
         <nav
@@ -78,8 +90,8 @@ export function FloatingNavbar({ placement = "overlay" }: { placement?: "overlay
           ))}
         </nav>
 
-        <div className="flex items-center gap-2">
-          <LocaleToggle tone="dark" className="hidden sm:inline-flex" />
+        <div className="flex shrink-0 items-center gap-2">
+          <LocaleToggle tone="dark" className="hidden md:inline-flex" />
           <a
             href={inviteHref}
             className="hidden items-center gap-2.5 bg-[var(--bone-fixed)] px-4 py-2 font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--ink-fixed)] transition-colors hover:bg-white sm:inline-flex lg:px-5 lg:text-[11px]"
@@ -93,7 +105,7 @@ export function FloatingNavbar({ placement = "overlay" }: { placement?: "overlay
             aria-label={open ? t("publicNav.closeMenu") : t("publicNav.openMenu")}
             aria-expanded={open}
             onClick={() => setOpen((v) => !v)}
-            className="flex items-center justify-center p-1.5 md:hidden"
+            className="relative z-[70] flex size-11 items-center justify-center md:hidden"
           >
             <span className="relative flex h-3.5 w-4 flex-col justify-between">
               <span
@@ -115,46 +127,56 @@ export function FloatingNavbar({ placement = "overlay" }: { placement?: "overlay
         </div>
       </div>
 
-      <AnimatePresence>
-        {open ? (
-          <motion.div
-            initial={{ opacity: 0, y: -6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -6 }}
-            transition={{ duration: 0.25, ease: EASE }}
-            className="border-t border-white/10 md:hidden"
-            style={{ backgroundColor: HERO_CHROME }}
-          >
-            <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
-              <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--bone-fixed)]/50">
-                {t("home.langSwitch")}
-              </span>
-              <LocaleToggle tone="dark" />
-            </div>
-            {links.map((link, i) => (
-              <a
-                key={link.href}
-                href={link.href}
-                onClick={() => setOpen(false)}
-                className="flex items-center justify-between border-b border-white/10 px-4 py-3.5 font-mono text-xs uppercase tracking-widest text-[var(--bone-fixed)]/80 transition-colors last:border-b-0 hover:text-[var(--bone-fixed)]"
-              >
-                <span>{link.label}</span>
-                <span className="font-mono text-[10px] text-[var(--bone-fixed)]/30">
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-              </a>
-            ))}
-            <a
-              href={inviteHref}
-              onClick={() => setOpen(false)}
-              className="flex items-center justify-between bg-[var(--bone-fixed)] px-4 py-3.5 font-mono text-xs uppercase tracking-widest text-[var(--ink-fixed)]"
-            >
-              {t("publicNav.requestInvitation")}
-              <span className="size-1.5 bg-[var(--inner-green)]" aria-hidden />
-            </a>
-          </motion.div>
-        ) : null}
-      </AnimatePresence>
+      {typeof document !== "undefined"
+        ? createPortal(
+            <AnimatePresence>
+              {open ? (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.22, ease: EASE }}
+                  className="fixed inset-0 z-[60] flex flex-col md:hidden"
+                  style={{
+                    backgroundColor: HERO_CHROME,
+                    paddingTop: "calc(3.5rem + env(safe-area-inset-top))",
+                  }}
+                >
+                  <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
+                    <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--bone-fixed)]/50">
+                      {t("home.langSwitch")}
+                    </span>
+                    <LocaleToggle tone="dark" />
+                  </div>
+                  <nav className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+                    {links.map((link, i) => (
+                      <a
+                        key={link.href}
+                        href={link.href}
+                        onClick={() => setOpen(false)}
+                        className="flex min-h-12 items-center justify-between border-b border-white/10 px-4 py-3.5 font-mono text-xs uppercase tracking-widest text-[var(--bone-fixed)]/80 transition-colors hover:text-[var(--bone-fixed)]"
+                      >
+                        <span>{link.label}</span>
+                        <span className="font-mono text-[10px] text-[var(--bone-fixed)]/30">
+                          {String(i + 1).padStart(2, "0")}
+                        </span>
+                      </a>
+                    ))}
+                  </nav>
+                  <a
+                    href={inviteHref}
+                    onClick={() => setOpen(false)}
+                    className="flex min-h-12 items-center justify-between bg-[var(--bone-fixed)] px-4 py-3.5 font-mono text-xs uppercase tracking-widest text-[var(--ink-fixed)] pb-[max(0.875rem,env(safe-area-inset-bottom))]"
+                  >
+                    {t("publicNav.requestInvitation")}
+                    <span className="size-1.5 bg-[var(--inner-green)]" aria-hidden />
+                  </a>
+                </motion.div>
+              ) : null}
+            </AnimatePresence>,
+            document.body,
+          )
+        : null}
     </motion.header>
   );
 }

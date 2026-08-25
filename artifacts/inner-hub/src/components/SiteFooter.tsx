@@ -23,7 +23,7 @@ export function SiteFooter() {
   return (
     <footer
       id="site-footer"
-      className="relative overflow-hidden border-t border-white/10 bg-[var(--ink-fixed)] px-4 pb-8 pt-12 text-[var(--bone-fixed)] sm:px-6 sm:pt-16 md:px-12 md:pt-20 lg:px-[10%]"
+      className="relative overflow-x-clip border-t border-white/10 bg-[var(--ink-fixed)] px-4 pb-[max(2rem,env(safe-area-inset-bottom))] pt-12 text-[var(--bone-fixed)] sm:px-6 sm:pt-16 md:px-12 md:pt-20 lg:px-[10%]"
     >
       <div className="pointer-events-none absolute -left-20 top-10 size-72 bg-[var(--inner-green)]/[0.05] blur-3xl" />
 
@@ -91,8 +91,8 @@ export function SiteFooter() {
             {t("home.footerPrivacy")}
           </a>
         </div>
-        <div className="leading-none text-[var(--bone-fixed)]" aria-hidden="true">
-          <Lockup fontSize="clamp(2.75rem, 10vw, 7.5rem)" />
+        <div className="max-w-full overflow-hidden leading-none text-[var(--bone-fixed)]" aria-hidden="true">
+          <Lockup fontSize="clamp(2.25rem, 18vw, 7.5rem)" />
         </div>
       </div>
       <span className="sr-only">inner hub</span>
