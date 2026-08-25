@@ -76,6 +76,16 @@ app.use(attachUser);
 
 app.use("/api", router);
 
+// Kısa NFC / kartvizit URL: /@handle → /u/handle
+app.use((req, res, next) => {
+  if (req.method !== "GET" && req.method !== "HEAD") return next();
+  const m = /^\/@([a-zA-Z0-9_]{1,20})\/?$/.exec(req.path);
+  if (!m) return next();
+  const handle = m[1]!.toLowerCase();
+  const qs = req.url.includes("?") ? req.url.slice(req.url.indexOf("?")) : "";
+  res.redirect(302, `/u/${handle}${qs}`);
+});
+
 // Tek süreç hem API'yi hem de önceden derlenmiş inner-hub SPA'sını sunar
 // (Hostinger'da ayrı bir statik site hosting'i yok, tek Node app var).
 const frontendDist = path.resolve(

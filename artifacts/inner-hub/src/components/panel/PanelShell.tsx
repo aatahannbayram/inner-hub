@@ -3,10 +3,11 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "wouter";
 import { useQueryClient } from "@tanstack/react-query";
-import { LogOut, Menu, X, Bell, ChevronLeft, ChevronRight, Sparkles, CalendarDays, TrendingUp, UserPlus, Zap, Search, BookOpen, ArrowUpRight } from "lucide-react";
+import { Menu, X, Bell, ChevronLeft, ChevronRight, Sparkles, CalendarDays, TrendingUp, UserPlus, Zap, Search, BookOpen, ArrowUpRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { PanelNav } from "./PanelNav";
+import { AccountMenu } from "./AccountMenu";
 import { PanelPageTransition } from "./PanelPageTransition";
 import { PanelOnboarding } from "./PanelOnboarding";
 import { LegalAcceptModal } from "./LegalAcceptModal";
@@ -287,83 +288,17 @@ function BrandMark({ collapsed }: { collapsed: boolean }) {
   return <Lockup className="text-[var(--ink)]" fontSize="20px" />;
 }
 
-// ─── Sidebar footer ───────────────────────────────────────────────────────────
+// ─── Sidebar footer (çıkış + hesap sağ üst menüde) ─────────────────────────────
 function SidebarFooter({
-  user,
   collapsed,
-  onLogout,
 }: {
-  user: PanelUser & { profileCompletionPct: number };
   collapsed: boolean;
-  onLogout?: () => void;
 }) {
-  const t = useT();
-  if (collapsed) {
-    return (
-      <button
-        type="button"
-        onClick={onLogout}
-        className="flex w-full justify-center p-2 text-[var(--ink-body)] transition-colors hover:text-[var(--ink)]"
-        title={t("common.logoutLong")}
-      >
-        <LogOut className="size-4" />
-      </button>
-    );
-  }
+  if (collapsed) return null;
   return (
-    <div className="space-y-3">
-          <div className="space-y-0.5">
-        <p className="truncate text-sm font-medium text-[var(--ink)] dark:text-[#F4F1EC]">{user.name}</p>
-        <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)] dark:text-white/45">
-          {user.role === "admin" ? (
-            // "Admin" İngilizce ödünç kelime; html[lang="tr"] mirası CSS
-            // uppercase'i "i" harfini "İ" yapıyordu (S-03). lang="en" ile
-            // dotless-I korunuyor — bkz. ProductLabel'daki aynı desen.
-            <span lang="en">{t("common.admin")}</span>
-          ) : (
-            t("common.member")
-          )}
-        </p>
-      </div>
-      {user.profileCompletionPct === 0 ? (
-        // %0'da boş bir çubuk + "%0" yazısı hiçbir bilgi/aksiyon taşımıyordu
-        // (S-04) — yerine doğrudan aksiyon veren tek satır.
-        <Link
-          href="/panel/profile"
-          className="flex items-center gap-1 font-mono text-label font-semibold uppercase tracking-widest text-[var(--inner-green)] hover:underline"
-        >
-          {t("shell.createProfile")}
-          <ArrowUpRight className="size-3" />
-        </Link>
-      ) : (
-        user.profileCompletionPct < 100 && (
-          <div className="space-y-1.5">
-            <div className="flex justify-between">
-              <span className="font-mono text-label font-semibold uppercase tracking-widest text-[var(--ink-strong)] dark:text-white/55">
-                {t("shell.profileCompletion")}
-              </span>
-              <span className="font-mono text-label font-semibold tabular-nums text-[var(--ink-strong)] dark:text-white/55">
-                %{user.profileCompletionPct}
-              </span>
-            </div>
-            <div className="relative h-1 w-full overflow-visible bg-[var(--ink)]/10 dark:bg-white/10">
-              <div
-                className="h-full bg-[var(--inner-green)] shadow-[0_0_6px_var(--inner-green)] transition-all duration-700"
-                style={{ width: `${user.profileCompletionPct}%` }}
-              />
-            </div>
-          </div>
-        )
-      )}
-      <button
-        type="button"
-        onClick={onLogout}
-        className="hit-40 relative flex items-center gap-1.5 text-[var(--ink-body)] transition-colors hover:text-[var(--ink)] dark:text-white/50 dark:hover:text-white"
-      >
-        <LogOut className="size-3.5" />
-        <span className="font-mono text-label uppercase tracking-widest">{t("common.logoutLong")}</span>
-      </button>
-    </div>
+    <p className="px-1 font-mono text-[9px] uppercase tracking-[0.18em] text-[var(--ink-muted)] dark:text-white/30">
+      inner.hub
+    </p>
   );
 }
 
@@ -384,7 +319,7 @@ type PanelShellProps = {
 };
 
 // ─── Desktop sidebar ──────────────────────────────────────────────────────────
-function DesktopSidebar({ user, onLogout }: { user: PanelUser; onLogout?: () => void }) {
+function DesktopSidebar({ user }: { user: PanelUser }) {
   const { collapsed, toggle } = useSidebar();
 
   return (
@@ -420,8 +355,7 @@ function DesktopSidebar({ user, onLogout }: { user: PanelUser; onLogout?: () => 
         </button>
       </div>
 
-      {/* Nav — kaydırılabilir (Ana + Platform), üst/alt kenarda fade ile
-          daha fazla içerik olduğu ipucu veriyor (S-01) */}
+      {/* Nav — kaydırılabilir (Ana + Platform + Admin) */}
       <div
         className="min-h-0 flex-1 overflow-y-auto p-2"
         style={{
@@ -431,28 +365,14 @@ function DesktopSidebar({ user, onLogout }: { user: PanelUser; onLogout?: () => 
             "linear-gradient(to bottom, transparent 0, #000 12px, #000 calc(100% - 12px), transparent 100%)",
         }}
       >
-        <PanelNav role={user.role} collapsed={collapsed} variant="scroll" />
+        <PanelNav role={user.role} collapsed={collapsed} />
       </div>
 
-      {/* Hesap — scroll alanının dışında sabit, her zaman erişilebilir (S-01) */}
-      <div
-        className={cn(
-          "shrink-0 border-t border-[var(--ink)]/[0.08] p-2 dark:border-white/10",
-          collapsed && "px-0",
-        )}
-      >
-        <PanelNav role={user.role} collapsed={collapsed} variant="pinned" />
-      </div>
-
-      {/* Footer */}
-      <div
-        className={cn(
-          "border-t border-[var(--ink)]/[0.08] p-4 dark:border-white/10",
-          collapsed && "flex justify-center p-2",
-        )}
-      >
-        <SidebarFooter user={{ ...user, profileCompletionPct: user.profileCompletionPct ?? 0 }} collapsed={collapsed} onLogout={onLogout} />
-      </div>
+      {!collapsed ? (
+        <div className="shrink-0 border-t border-[var(--ink)]/[0.08] px-4 py-3 dark:border-white/10">
+          <SidebarFooter collapsed={collapsed} />
+        </div>
+      ) : null}
     </aside>
   );
 }
@@ -462,12 +382,10 @@ function MobileDrawer({
   open,
   onClose,
   user,
-  onLogout,
 }: {
   open: boolean;
   onClose: () => void;
   user: PanelUser;
-  onLogout?: () => void;
 }) {
   const t = useT();
   const asideRef = useRef<HTMLElement>(null);
@@ -556,7 +474,7 @@ function MobileDrawer({
               </button>
             </div>
             <div
-              className="min-h-0 flex-1 overflow-y-auto p-2"
+              className="min-h-0 flex-1 overflow-y-auto p-2 pb-4"
               style={{
                 maskImage:
                   "linear-gradient(to bottom, transparent 0, #000 12px, #000 calc(100% - 12px), transparent 100%)",
@@ -567,13 +485,7 @@ function MobileDrawer({
                 if ((e.target as HTMLElement).closest("a[href]")) onClose();
               }}
             >
-              <PanelNav role={user.role} collapsed={false} variant="scroll" />
-            </div>
-            <div className="shrink-0 border-t border-[var(--ink)]/[0.08] p-2" onClick={onClose}>
-              <PanelNav role={user.role} collapsed={false} variant="pinned" />
-            </div>
-            <div className="border-t border-[var(--ink)]/[0.08] p-4">
-              <SidebarFooter user={{ ...user, profileCompletionPct: user.profileCompletionPct ?? 0 }} collapsed={false} onLogout={onLogout} />
+              <PanelNav role={user.role} collapsed={false} />
             </div>
           </motion.aside>
         </>
@@ -641,12 +553,11 @@ function ShellInner({ user, children, onLogout }: PanelShellProps) {
       >
         {t("common.skipToContent")}
       </a>
-      <DesktopSidebar user={user} onLogout={onLogout} />
+      <DesktopSidebar user={user} />
       <MobileDrawer
         open={mobileOpen}
         onClose={() => setMobileOpen(false)}
         user={user}
-        onLogout={onLogout}
       />
 
       <div className="relative z-[1] flex min-h-0 min-w-0 flex-1 flex-col">
@@ -676,7 +587,9 @@ function ShellInner({ user, children, onLogout }: PanelShellProps) {
             <div className="relative">
               <HeaderIconButton
                 label={t("shell.notifications")}
-                onClick={() => setNotifOpen((o) => !o)}
+                onClick={() => {
+                  setNotifOpen((o) => !o);
+                }}
                 data-onboarding="notifications"
               >
                 <span className="relative inline-flex">
@@ -706,20 +619,7 @@ function ShellInner({ user, children, onLogout }: PanelShellProps) {
                 />
               )}
             </div>
-            {user.avatarUrl ? (
-              <img
-                src={user.avatarUrl}
-                alt=""
-                className="ml-0.5 size-9 object-cover sm:size-8"
-              />
-            ) : (
-              <div
-                className="ml-0.5 flex size-9 items-center justify-center border border-[var(--ink)]/15 bg-[var(--ink)] font-mono text-label uppercase text-[var(--bone)] sm:size-8 dark:border-white/10 dark:bg-white/10 dark:text-[#F4F1EC]"
-                aria-hidden
-              >
-                {user.name.slice(0, 2)}
-              </div>
-            )}
+            <AccountMenu user={user} onLogout={onLogout} />
           </div>
         </header>
 

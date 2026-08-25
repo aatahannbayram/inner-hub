@@ -5134,7 +5134,7 @@ var require_lib = __commonJS({
     module.exports.encodings = null;
     module.exports.defaultCharUnicode = "\uFFFD";
     module.exports.defaultCharSingleByte = "?";
-    module.exports.encode = function encode3(str, encoding, options) {
+    module.exports.encode = function encode4(str, encoding, options) {
       str = "" + (str || "");
       var encoder2 = module.exports.getEncoder(encoding, options);
       var res = encoder2.write(str);
@@ -17591,7 +17591,7 @@ var require_utils2 = __commonJS({
       }
     };
     var limit3 = 1024;
-    var encode3 = function encode4(str, defaultEncoder, charset, kind, format) {
+    var encode4 = function encode5(str, defaultEncoder, charset, kind, format) {
       if (str.length === 0) {
         return str;
       }
@@ -17693,7 +17693,7 @@ var require_utils2 = __commonJS({
       combine,
       compact,
       decode,
-      encode: encode3,
+      encode: encode4,
       isBuffer,
       isOverflow,
       isRegExp,
@@ -20123,9 +20123,9 @@ var require_dist2 = __commonJS({
       return new TokenData(consumeUntil(""), str);
     }
     function compile(path8, options = {}) {
-      const { encode: encode3 = encodeURIComponent, delimiter: delimiter2 = DEFAULT_DELIMITER } = options;
+      const { encode: encode4 = encodeURIComponent, delimiter: delimiter2 = DEFAULT_DELIMITER } = options;
       const data = typeof path8 === "object" ? path8 : parse5(path8, options);
-      const fn = tokensToFunction(data.tokens, delimiter2, encode3);
+      const fn = tokensToFunction(data.tokens, delimiter2, encode4);
       return function path9(params = {}) {
         const missing = [];
         const path10 = fn(params, missing);
@@ -20135,8 +20135,8 @@ var require_dist2 = __commonJS({
         return path10;
       };
     }
-    function tokensToFunction(tokens2, delimiter2, encode3) {
-      const encoders = tokens2.map((token) => tokenToFunction(token, delimiter2, encode3));
+    function tokensToFunction(tokens2, delimiter2, encode4) {
+      const encoders = tokens2.map((token) => tokenToFunction(token, delimiter2, encode4));
       return (data, missing) => {
         let result = "";
         for (const encoder2 of encoders) {
@@ -20145,11 +20145,11 @@ var require_dist2 = __commonJS({
         return result;
       };
     }
-    function tokenToFunction(token, delimiter2, encode3) {
+    function tokenToFunction(token, delimiter2, encode4) {
       if (token.type === "text")
         return () => token.value;
       if (token.type === "group") {
-        const fn = tokensToFunction(token.tokens, delimiter2, encode3);
+        const fn = tokensToFunction(token.tokens, delimiter2, encode4);
         return (data, missing) => {
           const len = missing.length;
           const value = fn(data, missing);
@@ -20159,8 +20159,8 @@ var require_dist2 = __commonJS({
           return "";
         };
       }
-      const encodeValue = encode3 || NOOP_VALUE;
-      if (token.type === "wildcard" && encode3 !== false) {
+      const encodeValue = encode4 || NOOP_VALUE;
+      if (token.type === "wildcard" && encode4 !== false) {
         return (data, missing) => {
           const value = data[token.name];
           if (value == null) {
@@ -53895,6 +53895,8 @@ var init_users = __esm({
       /** LinkedIn profil görseli (link preview / OAuth) */
       linkedinLogoUrl: text("linkedin_logo_url"),
       phone: text("phone"),
+      /** Public kartta telefon / WhatsApp göster (default kapalı) */
+      showPhoneOnCard: boolean("show_phone_on_card").default(false).notNull(),
       whatsappOptIn: text("whatsapp_opt_in"),
       handle: text("handle"),
       github: text("github"),
@@ -53904,6 +53906,8 @@ var init_users = __esm({
       /** Kişisel site favicon / og:image (link preview) */
       websiteLogoUrl: text("website_logo_url"),
       twitter: text("twitter"),
+      /** JSON: { id, label, url }[] — üyenin serbest profil linkleri */
+      profileLinks: text("profile_links"),
       skills: text("skills"),
       visibility: text("visibility").default("members"),
       settingsPrefs: text("settings_prefs"),
@@ -54221,6 +54225,14 @@ var init_hub = __esm({
       phVotesCount: integer("ph_votes_count"),
       phSyncedAt: timestamp("ph_synced_at"),
       youtubeUrl: text("youtube_url"),
+      /** Canlı demo / app store / sandbox */
+      demoUrl: text("demo_url"),
+      /** Pitch deck (PDF, DocSend, Notion, Drive…) */
+      pitchDeckUrl: text("pitch_deck_url"),
+      /** Virgülle veya JSON dizi: "B2B SaaS, AI" */
+      tags: text("tags"),
+      /** Çemberden ne bekliyor: feedback, yatırımcı, beta… */
+      lookingFor: text("looking_for"),
       createdAt: timestamp("created_at").defaultNow().notNull()
     });
     stageVotesTable = pgTable("stage_votes", {
@@ -54585,7 +54597,7 @@ var require_punycode = __commonJS({
       }
       return String.fromCodePoint(...output);
     };
-    var encode3 = function(input) {
+    var encode4 = function(input) {
       const output = [];
       input = ucs2decode(input);
       const inputLength = input.length;
@@ -54649,7 +54661,7 @@ var require_punycode = __commonJS({
     };
     var toASCII = function(input) {
       return mapDomain(input, function(string4) {
-        return regexNonASCII.test(string4) ? "xn--" + encode3(string4) : string4;
+        return regexNonASCII.test(string4) ? "xn--" + encode4(string4) : string4;
       });
     };
     var punycode = {
@@ -54671,7 +54683,7 @@ var require_punycode = __commonJS({
         encode: ucs2encode
       },
       decode,
-      encode: encode3,
+      encode: encode4,
       toASCII,
       toUnicode
     };
@@ -57974,7 +57986,7 @@ var require_base64 = __commonJS({
   "../../node_modules/.pnpm/nodemailer@9.0.3/node_modules/nodemailer/lib/base64/index.js"(exports, module) {
     "use strict";
     var { Transform } = __require("stream");
-    function encode3(buffer) {
+    function encode4(buffer) {
       if (typeof buffer === "string") {
         buffer = Buffer.from(buffer, "utf-8");
       }
@@ -58027,7 +58039,7 @@ var require_base64 = __commonJS({
         } else {
           this._remainingBytes = false;
         }
-        let b64 = this._curLine + encode3(chunk);
+        let b64 = this._curLine + encode4(chunk);
         if (this.options.lineLength) {
           b64 = wrap(b64, this.options.lineLength);
           const lastLF = b64.lastIndexOf("\n");
@@ -58049,7 +58061,7 @@ var require_base64 = __commonJS({
       }
       _flush(done) {
         if (this._remainingBytes && this._remainingBytes.length) {
-          this._curLine += encode3(this._remainingBytes);
+          this._curLine += encode4(this._remainingBytes);
         }
         if (this._curLine) {
           this._curLine = wrap(this._curLine, this.options.lineLength);
@@ -58061,7 +58073,7 @@ var require_base64 = __commonJS({
       }
     };
     module.exports = {
-      encode: encode3,
+      encode: encode4,
       wrap,
       Encoder
     };
@@ -58085,7 +58097,7 @@ var require_qp = __commonJS({
       [62, 126]
       // >?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}
     ];
-    function encode3(buffer) {
+    function encode4(buffer) {
       if (typeof buffer === "string") {
         buffer = Buffer.from(buffer, "utf-8");
       }
@@ -58199,7 +58211,7 @@ var require_qp = __commonJS({
         }
         this.inputBytes += chunk.length;
         if (this.options.lineLength) {
-          qp = this._curLine + encode3(chunk);
+          qp = this._curLine + encode4(chunk);
           qp = wrap(qp, this.options.lineLength);
           qp = qp.replace(/(^|\n)([^\n]*)$/, (match, lineBreak, lastLine) => {
             this._curLine = lastLine;
@@ -58210,7 +58222,7 @@ var require_qp = __commonJS({
             this.push(qp);
           }
         } else {
-          qp = encode3(chunk);
+          qp = encode4(chunk);
           this.outputBytes += qp.length;
           this.push(qp, "ascii");
         }
@@ -58225,7 +58237,7 @@ var require_qp = __commonJS({
       }
     };
     module.exports = {
-      encode: encode3,
+      encode: encode4,
       wrap,
       Encoder
     };
@@ -69946,10 +69958,10 @@ var require_base642 = __commonJS({
     );
     exports.Coder = Coder;
     var stdCoder = new Coder();
-    function encode3(data) {
+    function encode4(data) {
       return stdCoder.encode(data);
     }
-    exports.encode = encode3;
+    exports.encode = encode4;
     function decode(s) {
       return stdCoder.decode(s);
     }
@@ -84688,7 +84700,7 @@ var require_bignumber = __commonJS({
   "../../node_modules/.pnpm/bignumber.js@9.3.1/node_modules/bignumber.js/bignumber.js"(exports, module) {
     (function(globalObject) {
       "use strict";
-      var BigNumber, isNumeric = /^-?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?$/i, mathceil = Math.ceil, mathfloor = Math.floor, bignumberError = "[BigNumber Error] ", tooManyDigits = bignumberError + "Number primitive has more than 15 significant digits: ", BASE = 1e14, LOG_BASE = 14, MAX_SAFE_INTEGER = 9007199254740991, POWS_TEN = [1, 10, 100, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1e10, 1e11, 1e12, 1e13], SQRT_BASE = 1e7, MAX = 1e9;
+      var BigNumber, isNumeric2 = /^-?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?$/i, mathceil = Math.ceil, mathfloor = Math.floor, bignumberError = "[BigNumber Error] ", tooManyDigits = bignumberError + "Number primitive has more than 15 significant digits: ", BASE = 1e14, LOG_BASE = 14, MAX_SAFE_INTEGER = 9007199254740991, POWS_TEN = [1, 10, 100, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1e10, 1e11, 1e12, 1e13], SQRT_BASE = 1e7, MAX = 1e9;
       function clone2(configObject) {
         var div, convertBase, parseNumeric, P = BigNumber2.prototype = { constructor: BigNumber2, toString: null, valueOf: null }, ONE = new BigNumber2(1), DECIMAL_PLACES = 20, ROUNDING_MODE = 4, TO_EXP_NEG = -7, TO_EXP_POS = 21, MIN_EXP = -1e7, MAX_EXP = 1e7, CRYPTO = false, MODULO_MODE = 1, POW_PRECISION = 0, FORMAT = {
           prefix: "",
@@ -84731,7 +84743,7 @@ var require_bignumber = __commonJS({
               }
               str = String(v);
             } else {
-              if (!isNumeric.test(str = String(v))) return parseNumeric(x, str, isNum);
+              if (!isNumeric2.test(str = String(v))) return parseNumeric(x, str, isNum);
               x.s = str.charCodeAt(0) == 45 ? (str = str.slice(1), -1) : 1;
             }
             if ((e = str.indexOf(".")) > -1) str = str.replace(".", "");
@@ -88070,8 +88082,8 @@ var require_oauth2client = __commonJS({
       ClientAuthentication2["None"] = "None";
     })(ClientAuthentication || (exports.ClientAuthentication = ClientAuthentication = {}));
     var OAuth2Client2 = class _OAuth2Client extends authclient_1.AuthClient {
-      constructor(optionsOrClientId, clientSecret2, redirectUri) {
-        const opts = optionsOrClientId && typeof optionsOrClientId === "object" ? optionsOrClientId : { clientId: optionsOrClientId, clientSecret: clientSecret2, redirectUri };
+      constructor(optionsOrClientId, clientSecret, redirectUri) {
+        const opts = optionsOrClientId && typeof optionsOrClientId === "object" ? optionsOrClientId : { clientId: optionsOrClientId, clientSecret, redirectUri };
         super(opts);
         this.certificateCache = {};
         this.certificateExpiry = null;
@@ -90131,10 +90143,10 @@ var require_refreshclient = __commonJS({
     var querystring_1 = __require("querystring");
     exports.USER_REFRESH_ACCOUNT_TYPE = "authorized_user";
     var UserRefreshClient = class _UserRefreshClient extends oauth2client_1.OAuth2Client {
-      constructor(optionsOrClientId, clientSecret2, refreshToken, eagerRefreshThresholdMillis, forceRefreshOnFailure) {
+      constructor(optionsOrClientId, clientSecret, refreshToken, eagerRefreshThresholdMillis, forceRefreshOnFailure) {
         const opts = optionsOrClientId && typeof optionsOrClientId === "object" ? optionsOrClientId : {
           clientId: optionsOrClientId,
-          clientSecret: clientSecret2,
+          clientSecret,
           refreshToken,
           eagerRefreshThresholdMillis,
           forceRefreshOnFailure
@@ -90456,9 +90468,9 @@ var require_oauth2common = __commonJS({
           });
         } else if (((_a3 = this.clientAuthentication) === null || _a3 === void 0 ? void 0 : _a3.confidentialClientType) === "basic") {
           opts.headers = opts.headers || {};
-          const clientId2 = this.clientAuthentication.clientId;
-          const clientSecret2 = this.clientAuthentication.clientSecret || "";
-          const base64EncodedCreds = this.crypto.encodeBase64StringUtf8(`${clientId2}:${clientSecret2}`);
+          const clientId = this.clientAuthentication.clientId;
+          const clientSecret = this.clientAuthentication.clientSecret || "";
+          const base64EncodedCreds = this.crypto.encodeBase64StringUtf8(`${clientId}:${clientSecret}`);
           Object.assign(opts.headers, {
             Authorization: `Basic ${base64EncodedCreds}`
           });
@@ -90707,8 +90719,8 @@ var require_baseexternalclient = __commonJS({
         if (type2 && type2 !== exports.EXTERNAL_ACCOUNT_TYPE) {
           throw new Error(`Expected "${exports.EXTERNAL_ACCOUNT_TYPE}" type but received "${options.type}"`);
         }
-        const clientId2 = opts.get("client_id");
-        const clientSecret2 = opts.get("client_secret");
+        const clientId = opts.get("client_id");
+        const clientSecret = opts.get("client_secret");
         const tokenUrl = (_a3 = opts.get("token_url")) !== null && _a3 !== void 0 ? _a3 : DEFAULT_TOKEN_URL.replace("{universeDomain}", this.universeDomain);
         const subjectTokenType = opts.get("subject_token_type");
         const workforcePoolUserProject = opts.get("workforce_pool_user_project");
@@ -90716,11 +90728,11 @@ var require_baseexternalclient = __commonJS({
         const serviceAccountImpersonation = opts.get("service_account_impersonation");
         const serviceAccountImpersonationLifetime = (0, util_1.originalOrCamelOptions)(serviceAccountImpersonation).get("token_lifetime_seconds");
         this.cloudResourceManagerURL = new URL(opts.get("cloud_resource_manager_url") || `https://cloudresourcemanager.${this.universeDomain}/v1/projects/`);
-        if (clientId2) {
+        if (clientId) {
           this.clientAuth = {
             confidentialClientType: "basic",
-            clientId: clientId2,
-            clientSecret: clientSecret2
+            clientId,
+            clientSecret
           };
         }
         this.stsCredential = new sts.StsCredentials(tokenUrl, this.clientAuth);
@@ -97986,6 +97998,8 @@ var ensureUserProfileColumns = once(async () => {
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS linkedin_logo_url text`);
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS github_logo_url text`);
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS twitter text`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS profile_links text`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS show_phone_on_card boolean NOT NULL DEFAULT false`);
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS skills text`);
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS visibility text`);
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS settings_prefs text`);
@@ -98199,6 +98213,10 @@ var ensureStageSchema = once(async () => {
   await db.execute(sql`ALTER TABLE stage_products ADD COLUMN IF NOT EXISTS ph_votes_count integer`);
   await db.execute(sql`ALTER TABLE stage_products ADD COLUMN IF NOT EXISTS ph_synced_at timestamp`);
   await db.execute(sql`ALTER TABLE stage_products ADD COLUMN IF NOT EXISTS youtube_url text`);
+  await db.execute(sql`ALTER TABLE stage_products ADD COLUMN IF NOT EXISTS demo_url text`);
+  await db.execute(sql`ALTER TABLE stage_products ADD COLUMN IF NOT EXISTS pitch_deck_url text`);
+  await db.execute(sql`ALTER TABLE stage_products ADD COLUMN IF NOT EXISTS tags text`);
+  await db.execute(sql`ALTER TABLE stage_products ADD COLUMN IF NOT EXISTS looking_for text`);
 });
 var ensureMatchAndFaqSchema = once(async () => {
   await db.execute(sql`
@@ -98572,16 +98590,16 @@ function renderInnerEmailLayout(input) {
     bodyHtml,
     cta,
     footerNote = "Bu ileti inner\xB7hub ba\u015Fvuru s\xFCrecinle ilgili otomatik bir bilgilendirmedir.",
-    appUrl: appUrl3,
+    appUrl: appUrl2,
     bannerUrl,
     unsubscribeUrl,
     physicalAddress
   } = input;
-  const imageSrc = bannerUrl === null ? null : escapeHtml(bannerUrl ?? `${appUrl3.replace(/\/$/, "")}${MAIL_BANNER_PATH}`);
+  const imageSrc = bannerUrl === null ? null : escapeHtml(bannerUrl ?? `${appUrl2.replace(/\/$/, "")}${MAIL_BANNER_PATH}`);
   const bannerBlock = imageSrc ? `
                 <tr>
                   <td style="padding:0;line-height:0;font-size:0;border-bottom:1px solid ${LINE_SOFT};">
-                    <a href="${escapeHtml(appUrl3)}" style="display:block;text-decoration:none;">
+                    <a href="${escapeHtml(appUrl2)}" style="display:block;text-decoration:none;">
                       <img src="${imageSrc}"
                            width="560"
                            alt="inner hub"
@@ -98667,7 +98685,7 @@ function renderInnerEmailLayout(input) {
                       ${escapeHtml(footerNote)}
                     </p>
                     <p style="margin:0;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:10px;letter-spacing:0.04em;color:${FAINT};">
-                      <a href="${escapeHtml(appUrl3)}" style="color:${BONE};text-decoration:none;text-transform:none;">inner.digital</a>
+                      <a href="${escapeHtml(appUrl2)}" style="color:${BONE};text-decoration:none;text-transform:none;">inner.digital</a>
                       &nbsp;\xB7&nbsp;
                       <a href="mailto:support@inner.digital" style="color:${MUTED};text-decoration:none;text-transform:none;">support@inner.digital</a>
                     </p>
@@ -98702,7 +98720,7 @@ function roleLine(roleLabel) {
   return `<p style="margin:16px 0 0;">Ba\u015Fvuru kap\u0131s\u0131: <strong style="color:#F4F1EC;font-weight:500;">${escapeHtml(roleLabel)}</strong></p>`;
 }
 function invitationReceivedMail(ctx) {
-  const appUrl3 = appBaseUrl();
+  const appUrl2 = appBaseUrl();
   const name = firstName(ctx.name);
   const subject = "inner hub \xB7 talebin elimize ula\u015Ft\u0131";
   const text2 = [
@@ -98720,10 +98738,10 @@ function invitationReceivedMail(ctx) {
     "\u015Eimdilik senden ek bir \u015Fey gerekmiyor. Akl\u0131na tak\u0131lan olursa: support@inner.digital",
     "",
     "inner hub",
-    appUrl3
+    appUrl2
   ].join("\n");
   const html = renderInnerEmailLayout({
-    appUrl: appUrl3,
+    appUrl: appUrl2,
     preheader: "Talebin elimize ula\u015Ft\u0131. \u0130ncelemeyi bitirince yine buradan yazaca\u011F\u0131z.",
     eyebrow: "Davetiye \xB7 al\u0131nd\u0131",
     title: `${name}, talebin elimizde.`,
@@ -98747,16 +98765,16 @@ function invitationReceivedMail(ctx) {
       <p style="margin:0;font-size:13px;color:rgba(244,241,236,0.45);">\u015Eimdilik ek bir \u015Fey gerekmiyor. Akl\u0131na tak\u0131lan olursa <a href="mailto:support@inner.digital" style="color:#F4F1EC;">support@inner.digital</a>.</p>
       ${roleLine(ctx.roleLabel)}
     `,
-    cta: { label: "inner.digital", href: appUrl3 },
+    cta: { label: "inner.digital", href: appUrl2 },
     footerNote: "Bu ileti, yapt\u0131\u011F\u0131n davet talebine yan\u0131t olarak otomatik g\xF6nderildi."
   });
   return { subject, text: text2, html, kind: "invite.received" };
 }
 function invitationApprovedMail(ctx) {
-  const appUrl3 = appBaseUrl();
+  const appUrl2 = appBaseUrl();
   const setPasswordUrl = ctx.setPasswordUrl?.trim() || "";
   const inviteCode = ctx.inviteCode?.trim() || "";
-  const panelUrl = setPasswordUrl ? setPasswordUrl : inviteCode ? `${appUrl3}/panel?invite=${encodeURIComponent(inviteCode)}&email=${encodeURIComponent(ctx.email)}` : `${appUrl3}/panel`;
+  const panelUrl = setPasswordUrl ? setPasswordUrl : inviteCode ? `${appUrl2}/panel?invite=${encodeURIComponent(inviteCode)}&email=${encodeURIComponent(ctx.email)}` : `${appUrl2}/panel`;
   const name = firstName(ctx.name);
   const subject = setPasswordUrl ? "inner hub \xB7 hesab\u0131n haz\u0131r \xB7 \u015Fifreni belirle" : "inner hub \xB7 davetin onayland\u0131 \xB7 panele gir";
   if (setPasswordUrl) {
@@ -98772,10 +98790,10 @@ function invitationApprovedMail(ctx) {
       "Sorun: support@inner.digital",
       "",
       "inner hub",
-      appUrl3
+      appUrl2
     ].join("\n");
     const html2 = renderInnerEmailLayout({
-      appUrl: appUrl3,
+      appUrl: appUrl2,
       preheader: "Hesab\u0131n haz\u0131r. \u015Eifreni belirle ve panele gir.",
       eyebrow: "Davetiye \xB7 hesap haz\u0131r",
       title: "Hesab\u0131n haz\u0131r.",
@@ -98811,7 +98829,7 @@ function invitationApprovedMail(ctx) {
     "Link a\xE7\u0131lmazsa kodu elle girebilirsin. Sorun: support@inner.digital",
     "",
     "inner hub",
-    appUrl3
+    appUrl2
   ].filter((line2) => line2 !== null).join("\n");
   const primaryCta = `
       <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 24px;">
@@ -98842,7 +98860,7 @@ function invitationApprovedMail(ctx) {
       <p style="margin:0;">Panele gidip hesab\u0131n\u0131 olu\u015Ftur. Davet kodu i\xE7in <a href="mailto:support@inner.digital" style="color:#F4F1EC;">support@inner.digital</a> yaz.</p>
     `;
   const html = renderInnerEmailLayout({
-    appUrl: appUrl3,
+    appUrl: appUrl2,
     preheader: inviteCode ? `Davetin onayland\u0131. Panele git \xB7 kod: ${inviteCode}` : "Davetin onayland\u0131. Panele ge\xE7ebilirsin.",
     eyebrow: "Davetiye \xB7 onay",
     title: "\xC7embere ho\u015F geldin.",
@@ -98857,7 +98875,7 @@ function invitationApprovedMail(ctx) {
   return { subject, text: text2, html, kind: "invite.approved" };
 }
 function invitationRejectedMail(ctx) {
-  const appUrl3 = appBaseUrl();
+  const appUrl2 = appBaseUrl();
   const name = firstName(ctx.name);
   const subject = "inner hub \xB7 davet talebi hakk\u0131nda";
   const text2 = [
@@ -98868,10 +98886,10 @@ function invitationRejectedMail(ctx) {
     "Sorular\u0131n i\xE7in: support@inner.digital",
     "",
     "inner hub",
-    appUrl3
+    appUrl2
   ].join("\n");
   const html = renderInnerEmailLayout({
-    appUrl: appUrl3,
+    appUrl: appUrl2,
     preheader: "Bu turda talebini olumlu sonu\xE7land\u0131ramad\u0131k.",
     eyebrow: "Davetiye \xB7 bilgilendirme",
     title: "Bu turda yer a\xE7amad\u0131k.",
@@ -98879,14 +98897,14 @@ function invitationRejectedMail(ctx) {
       <p style="margin:0 0 12px;">Merhaba ${escapeHtml(name)}. Ba\u015Fvurunu dikkatle okuduk; bu d\xF6nemde \xE7embere yeni bir yer a\xE7am\u0131yoruz.</p>
       <p style="margin:0;">Bu karar nihai bir yasak de\u011Fil; inner\xB7hub bilerek yava\u015F b\xFCy\xFCr. \u0130leride yeniden yazabilirsin. Sorun olursa <a href="mailto:support@inner.digital" style="color:#F4F1EC;">support@inner.digital</a>.</p>
     `,
-    cta: { label: "inner.digital", href: appUrl3 },
+    cta: { label: "inner.digital", href: appUrl2 },
     footerNote: "Bu ileti, davet talebinin sonucu hakk\u0131nda otomatik g\xF6nderildi."
   });
   return { subject, text: text2, html, kind: "invite.rejected" };
 }
 function adminNewRequestMail(payload) {
-  const appUrl3 = appBaseUrl();
-  const requestsUrl = `${appUrl3}/requests`;
+  const appUrl2 = appBaseUrl();
+  const requestsUrl = `${appUrl2}/requests`;
   const role = payload.role ?? "\xB7";
   const subject = `inner hub \xB7 yeni \xFCyelik talebi: ${payload.name}`;
   const lines = [
@@ -98905,7 +98923,7 @@ function adminNewRequestMail(payload) {
   ].filter(Boolean);
   const text2 = lines.join("\n");
   const html = renderInnerEmailLayout({
-    appUrl: appUrl3,
+    appUrl: appUrl2,
     preheader: `Yeni talep: ${payload.name}`,
     eyebrow: "Admin \xB7 yeni talep",
     title: payload.name,
@@ -98922,7 +98940,7 @@ function adminNewRequestMail(payload) {
   return { subject, text: text2, html, kind: "admin.new_request" };
 }
 function passwordResetMail(ctx) {
-  const appUrl3 = appBaseUrl();
+  const appUrl2 = appBaseUrl();
   const name = firstName(ctx.name);
   const subject = "inner hub \xB7 \u015Fifre s\u0131f\u0131rlama";
   const text2 = [
@@ -98936,10 +98954,10 @@ function passwordResetMail(ctx) {
     "Bu talebi sen yapmad\u0131ysan bu iletiyi yok sayabilirsin. \u015Eifren de\u011Fi\u015Fmez.",
     "",
     "inner hub",
-    appUrl3
+    appUrl2
   ].join("\n");
   const html = renderInnerEmailLayout({
-    appUrl: appUrl3,
+    appUrl: appUrl2,
     preheader: "\u015Eifreni s\u0131f\u0131rlamak i\xE7in ba\u011Flant\u0131 \xB7 1 saat ge\xE7erli.",
     eyebrow: "Hesap \xB7 \u015Fifre s\u0131f\u0131rlama",
     title: `${name}, \u015Fifreni yenile.`,
@@ -98954,11 +98972,11 @@ function passwordResetMail(ctx) {
   return { subject, text: text2, html, kind: "auth.password_reset" };
 }
 function liveSessionReminderMail(ctx) {
-  const appUrl3 = appBaseUrl();
+  const appUrl2 = appBaseUrl();
   const name = firstName(ctx.name);
   const when = ctx.startsAt ? ctx.startsAt.toLocaleString("tr-TR", { timeZone: "Europe/Istanbul" }) : null;
   const panelPath = ctx.refType === "course" ? "/panel/courses" : "/panel/events";
-  const panelUrl = `${appUrl3}${panelPath}`;
+  const panelUrl = `${appUrl2}${panelPath}`;
   const subject = `inner hub \xB7 canl\u0131 hat\u0131rlatma: ${ctx.sessionTitle}`;
   const lead = ctx.lead?.trim() || `${ctx.sessionTitle} canl\u0131 oturumu yakla\u015F\u0131yor.`;
   const text2 = [
@@ -98969,10 +98987,10 @@ function liveSessionReminderMail(ctx) {
     ctx.meetUrl ? `Kat\u0131l\u0131m: ${ctx.meetUrl}` : `Panel: ${panelUrl}`,
     "",
     "inner hub",
-    appUrl3
+    appUrl2
   ].filter(Boolean).join("\n");
   const html = renderInnerEmailLayout({
-    appUrl: appUrl3,
+    appUrl: appUrl2,
     preheader: lead,
     eyebrow: "Canl\u0131 oturum \xB7 hat\u0131rlatma",
     title: ctx.sessionTitle,
@@ -99006,7 +99024,7 @@ function itemCard(title, meta, body) {
     </table>`;
 }
 function weeklyDigestMail(ctx) {
-  const appUrl3 = appBaseUrl();
+  const appUrl2 = appBaseUrl();
   const name = firstName(ctx.name);
   const matchCount = ctx.matches.length;
   const subject = matchCount > 0 ? `inner hub \xB7 bu hafta \xB7 ${matchCount} e\u015Fle\u015Fme` : "inner hub \xB7 bu hafta";
@@ -99037,13 +99055,13 @@ function weeklyDigestMail(ctx) {
     ) : "",
     ctx.deals.length ? ["Capital", ...ctx.deals.map((d) => `\xB7 ${d.company} \u2014 ${d.stage}
   ${d.note}`), ""].join("\n") : "",
-    `Panel: ${appUrl3}/panel`,
+    `Panel: ${appUrl2}/panel`,
     `Abonelikten \xE7\u0131k: ${ctx.unsubscribeUrl}`,
     "",
     "inner hub"
   ].filter(Boolean);
   const html = renderInnerEmailLayout({
-    appUrl: appUrl3,
+    appUrl: appUrl2,
     preheader: matchCount > 0 ? `Bu hafta ${matchCount} e\u015Fle\u015Fme ve \xE7ember notlar\u0131.` : "Bu haftan\u0131n \xE7ember notlar\u0131.",
     eyebrow: `Haftal\u0131k not \xB7 ${ctx.weekLabel}`,
     title: `${name}, bu hafta.`,
@@ -99051,7 +99069,7 @@ function weeklyDigestMail(ctx) {
       <p style="margin:0 0 8px;">\xC7emberden se\xE7ilmi\u015F, sana \xF6zel bir \xF6zet. Tek mail, Pazartesi.</p>
       ${matchHtml}${eventHtml}${dealHtml}
     `,
-    cta: { label: "Panele git", href: `${appUrl3}/panel` },
+    cta: { label: "Panele git", href: `${appUrl2}/panel` },
     footerNote: "Bu ileti, a\xE7\u0131k olan haftal\u0131k digest tercihine g\xF6re g\xF6nderildi.",
     unsubscribeUrl: ctx.unsubscribeUrl,
     physicalAddress: mailPhysicalAddress()
@@ -99066,7 +99084,7 @@ function weeklyDigestMail(ctx) {
   };
 }
 function matchIntroReceivedMail(ctx) {
-  const appUrl3 = appBaseUrl();
+  const appUrl2 = appBaseUrl();
   const name = firstName(ctx.name);
   const subject = "inner hub \xB7 tan\u0131\u015Fma talebin al\u0131nd\u0131";
   const typeLine = ctx.matchType ? `T\xFCr: ${ctx.matchType}` : null;
@@ -99077,27 +99095,27 @@ function matchIntroReceivedMail(ctx) {
     typeLine,
     "",
     "K\u0131sa s\xFCrede d\xF6n\xFC\u015F yap\u0131l\u0131r. Durumu paneldeki Match sayfas\u0131ndan takip edebilirsin.",
-    `${appUrl3}/panel/match`,
+    `${appUrl2}/panel/match`,
     "",
     "inner hub"
   ].filter(Boolean).join("\n");
   const html = renderInnerEmailLayout({
-    appUrl: appUrl3,
+    appUrl: appUrl2,
     preheader: `${ctx.targetName} i\xE7in talebin ekibe d\xFC\u015Ft\xFC.`,
     eyebrow: "Match \xB7 tan\u0131\u015Fma",
     title: "Talebin al\u0131nd\u0131.",
     bodyHtml: `
       <p style="margin:0 0 12px;">Merhaba ${escapeHtml(name)}, ${escapeHtml(ctx.targetName)} i\xE7in tan\u0131\u015Fma talebin inner ekibine iletildi.</p>
       <p style="margin:0;">Warm intro s\xFCrecini ekip y\xFCr\xFCt\xFCr; senin ekstra bir ad\u0131m\u0131n yok. Durum
-      <a href="${escapeHtml(`${appUrl3}/panel/match`)}" style="color:#F4F1EC;">Match</a> sayfas\u0131nda g\xF6r\xFCn\xFCr.</p>
+      <a href="${escapeHtml(`${appUrl2}/panel/match`)}" style="color:#F4F1EC;">Match</a> sayfas\u0131nda g\xF6r\xFCn\xFCr.</p>
     `,
-    cta: { label: "Match'i a\xE7", href: `${appUrl3}/panel/match` },
+    cta: { label: "Match'i a\xE7", href: `${appUrl2}/panel/match` },
     footerNote: "Bu ileti, yapt\u0131\u011F\u0131n tan\u0131\u015Fma talebine yan\u0131t olarak otomatik g\xF6nderildi."
   });
   return { subject, text: text2, html, kind: "match.intro_received" };
 }
 function matchIntroAdminMail(ctx) {
-  const appUrl3 = appBaseUrl();
+  const appUrl2 = appBaseUrl();
   const subject = `inner hub \xB7 tan\u0131\u015Fma talebi: ${ctx.fromName} \u2192 ${ctx.targetName}`;
   const text2 = [
     `G\xF6nderen: ${ctx.fromName} <${ctx.fromEmail}>`,
@@ -99106,10 +99124,10 @@ function matchIntroAdminMail(ctx) {
     ctx.score != null ? `Skor: ${ctx.score}` : null,
     ctx.reason ? `Gerek\xE7e: ${ctx.reason}` : null,
     "",
-    `${appUrl3}/panel/applications`
+    `${appUrl2}/panel/applications`
   ].filter(Boolean).join("\n");
   const html = renderInnerEmailLayout({
-    appUrl: appUrl3,
+    appUrl: appUrl2,
     preheader: `${ctx.fromName} \u2192 ${ctx.targetName}`,
     eyebrow: "Admin \xB7 tan\u0131\u015Fma talebi",
     title: ctx.targetName,
@@ -99118,13 +99136,13 @@ function matchIntroAdminMail(ctx) {
       <p style="margin:0 0 12px;">${escapeHtml(ctx.targetName)}${ctx.targetCompany ? ` \xB7 ${escapeHtml(ctx.targetCompany)}` : ""}${ctx.matchType ? ` \xB7 ${escapeHtml(ctx.matchType)}` : ""}</p>
       ${ctx.reason ? `<p style="margin:0;white-space:pre-wrap;">${escapeHtml(ctx.reason)}</p>` : ""}
     `,
-    cta: { label: "Ba\u015Fvurular\u0131 a\xE7", href: `${appUrl3}/panel/applications` },
+    cta: { label: "Ba\u015Fvurular\u0131 a\xE7", href: `${appUrl2}/panel/applications` },
     footerNote: "\u0130\xE7 bildirim; yaln\u0131zca ekip adresine gider."
   });
   return { subject, text: text2, html, kind: "match.intro_admin" };
 }
 function eventRegisteredMail(ctx) {
-  const appUrl3 = appBaseUrl();
+  const appUrl2 = appBaseUrl();
   const name = firstName(ctx.name);
   const when = ctx.startsAt ? ctx.startsAt.toLocaleString("tr-TR", { timeZone: "Europe/Istanbul" }) : null;
   const subject = `inner hub \xB7 kayd\u0131n al\u0131nd\u0131 \xB7 ${ctx.title}`;
@@ -99134,12 +99152,12 @@ function eventRegisteredMail(ctx) {
     `${ctx.title} kayd\u0131n al\u0131nd\u0131.`,
     when ? `Tarih: ${when}` : null,
     ctx.location ? `Yer: ${ctx.location}` : null,
-    ctx.meetUrl ? `Kat\u0131l\u0131m: ${ctx.meetUrl}` : `Panel: ${appUrl3}/panel/events`,
+    ctx.meetUrl ? `Kat\u0131l\u0131m: ${ctx.meetUrl}` : `Panel: ${appUrl2}/panel/events`,
     "",
     "inner hub"
   ].filter(Boolean).join("\n");
   const html = renderInnerEmailLayout({
-    appUrl: appUrl3,
+    appUrl: appUrl2,
     preheader: `${ctx.title} kayd\u0131n al\u0131nd\u0131.`,
     eyebrow: "Etkinlik \xB7 kay\u0131t",
     title: ctx.title,
@@ -99150,14 +99168,14 @@ function eventRegisteredMail(ctx) {
     `,
     cta: {
       label: ctx.meetUrl ? "Kat\u0131l\u0131m linki" : "Etkinlikler",
-      href: ctx.meetUrl || `${appUrl3}/panel/events`
+      href: ctx.meetUrl || `${appUrl2}/panel/events`
     },
     footerNote: "Bu ileti, etkinlik kayd\u0131na yan\u0131t olarak otomatik g\xF6nderildi."
   });
   return { subject, text: text2, html, kind: "event.registered" };
 }
 function courseEnrolledMail(ctx) {
-  const appUrl3 = appBaseUrl();
+  const appUrl2 = appBaseUrl();
   const name = firstName(ctx.name);
   const when = ctx.startsAt ? ctx.startsAt.toLocaleString("tr-TR", { timeZone: "Europe/Istanbul" }) : null;
   const subject = `inner hub \xB7 kurs kayd\u0131n al\u0131nd\u0131 \xB7 ${ctx.title}`;
@@ -99166,12 +99184,12 @@ function courseEnrolledMail(ctx) {
     "",
     `${ctx.title} kursuna kayd\u0131n tamamland\u0131.`,
     when ? `Canl\u0131 oturum: ${when}` : null,
-    `${appUrl3}/panel/courses`,
+    `${appUrl2}/panel/courses`,
     "",
     "inner hub"
   ].filter(Boolean).join("\n");
   const html = renderInnerEmailLayout({
-    appUrl: appUrl3,
+    appUrl: appUrl2,
     preheader: `${ctx.title} kayd\u0131n tamamland\u0131.`,
     eyebrow: "Kurs \xB7 kay\u0131t",
     title: ctx.title,
@@ -99179,7 +99197,7 @@ function courseEnrolledMail(ctx) {
       <p style="margin:0 0 12px;">Merhaba ${escapeHtml(name)}, ${escapeHtml(ctx.title)} kursuna kayd\u0131n tamamland\u0131.</p>
       ${when ? `<p style="margin:0;">Canl\u0131 oturum: <strong style="color:#F4F1EC;font-weight:500;">${escapeHtml(when)}</strong></p>` : `<p style="margin:0;">\u0130\xE7erik panele d\xFC\u015Ft\xFC; diledi\u011Fin zaman a\xE7abilirsin.</p>`}
     `,
-    cta: { label: "Kursa git", href: `${appUrl3}/panel/courses` },
+    cta: { label: "Kursa git", href: `${appUrl2}/panel/courses` },
     footerNote: "Bu ileti, kurs kayd\u0131na yan\u0131t olarak otomatik g\xF6nderildi."
   });
   return { subject, text: text2, html, kind: "course.enrolled" };
@@ -99919,7 +99937,7 @@ function valueToString(value) {
 }
 function stringifyRequestData(data) {
   const pairs = [];
-  function encode3(key, value) {
+  function encode4(key, value) {
     if (value === void 0) {
       return;
     }
@@ -99930,18 +99948,18 @@ function stringifyRequestData(data) {
     if (Array.isArray(value)) {
       for (let i = 0; i < value.length; i++) {
         if (value[i] !== void 0) {
-          encode3(key + "[" + i + "]", value[i]);
+          encode4(key + "[" + i + "]", value[i]);
         }
       }
       return;
     }
     for (const k of Object.keys(value)) {
-      encode3(key + "[" + k + "]", value[k]);
+      encode4(key + "[" + k + "]", value[k]);
     }
   }
   if (typeof data === "object" && data !== null) {
     for (const key of Object.keys(data)) {
-      encode3(key, data[key]);
+      encode4(key, data[key]);
     }
   }
   return pairs.join("&");
@@ -101654,8 +101672,8 @@ var StripeResource = class {
   }
   _makeRequest(method, path8, params, options, spec) {
     const requestMethod = method.toUpperCase();
-    const encode3 = spec?.encode || ((data2) => data2);
-    const data = encode3(params ? { ...params } : {});
+    const encode4 = spec?.encode || ((data2) => data2);
+    const data = encode4(params ? { ...params } : {});
     const processed = processOptions(options);
     const apiBase = processed.apiBase || spec?.apiBase || null;
     const host = apiBase ? this._stripe.resolveBaseAddress(apiBase) : null;
@@ -116848,8 +116866,8 @@ var Stripe = class _Stripe {
       return accum;
     }, {});
   }
-  setClientId(clientId2) {
-    this._clientId = clientId2;
+  setClientId(clientId) {
+    this._clientId = clientId;
   }
   getClientId() {
     return this._clientId;
@@ -117991,66 +118009,53 @@ var import_google_auth_library = __toESM(require_src6(), 1);
 import crypto10 from "node:crypto";
 init_schema2();
 
-// src/lib/linkedin.ts
-var clientId = process.env.LINKEDIN_CLIENT_ID;
-var clientSecret = process.env.LINKEDIN_CLIENT_SECRET;
-var linkedinEnabled = Boolean(clientId && clientSecret);
-function appUrl() {
-  return (process.env.APP_URL ?? "https://inner.digital").replace(/\/$/, "");
+// src/lib/profileLinks.ts
+var MAX_LINKS = 40;
+var MAX_LABEL = 48;
+var MAX_URL = 500;
+function newId() {
+  return crypto.randomUUID().slice(0, 8);
 }
-function linkedinRedirectUri() {
-  return `${appUrl()}/api/auth/linkedin/callback`;
+function parseProfileLinks(raw) {
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return sanitizeProfileLinks(parsed);
+  } catch {
+    return [];
+  }
 }
-function linkedinAuthorizeUrl(state) {
-  const params = new URLSearchParams({
-    response_type: "code",
-    client_id: clientId ?? "",
-    redirect_uri: linkedinRedirectUri(),
-    state,
-    scope: "openid profile email"
-  });
-  return `https://www.linkedin.com/oauth/v2/authorization?${params.toString()}`;
+function sanitizeProfileLinks(input) {
+  if (!Array.isArray(input)) return [];
+  const out = [];
+  const seen = /* @__PURE__ */ new Set();
+  for (const row of input) {
+    if (out.length >= MAX_LINKS) break;
+    if (!row || typeof row !== "object") continue;
+    const rec = row;
+    const url2 = normalizeHttpUrl(typeof rec.url === "string" ? rec.url : "");
+    if (!url2) continue;
+    const key = url2.replace(/\/+$/, "").toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    const id = typeof rec.id === "string" && /^[a-zA-Z0-9_-]{4,24}$/.test(rec.id) ? rec.id : newId();
+    const label = typeof rec.label === "string" ? rec.label.trim().slice(0, MAX_LABEL) : "";
+    out.push({ id, label, url: url2.slice(0, MAX_URL) });
+  }
+  return out;
 }
-async function fetchLinkedinProfile(code) {
-  if (!clientId || !clientSecret) {
-    throw new Error("LinkedIn yap\u0131land\u0131r\u0131lmad\u0131");
+function normalizeHttpUrl(raw) {
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+  try {
+    const u = new URL(trimmed.includes("://") ? trimmed : `https://${trimmed}`);
+    if (u.protocol !== "http:" && u.protocol !== "https:") return null;
+    if (!u.hostname.includes(".")) return null;
+    return u.toString();
+  } catch {
+    return null;
   }
-  const tokenRes = await fetch("https://www.linkedin.com/oauth/v2/accessToken", {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({
-      grant_type: "authorization_code",
-      code,
-      redirect_uri: linkedinRedirectUri(),
-      client_id: clientId,
-      client_secret: clientSecret
-    }),
-    signal: AbortSignal.timeout(8e3)
-  });
-  if (!tokenRes.ok) {
-    throw new Error(`LinkedIn token exchange ba\u015Far\u0131s\u0131z (${tokenRes.status})`);
-  }
-  const tokenJson = await tokenRes.json();
-  if (!tokenJson.access_token) {
-    throw new Error("LinkedIn access_token al\u0131namad\u0131");
-  }
-  const infoRes = await fetch("https://api.linkedin.com/v2/userinfo", {
-    headers: { Authorization: `Bearer ${tokenJson.access_token}` },
-    signal: AbortSignal.timeout(8e3)
-  });
-  if (!infoRes.ok) {
-    throw new Error(`LinkedIn userinfo ba\u015Far\u0131s\u0131z (${infoRes.status})`);
-  }
-  const info = await infoRes.json();
-  if (!info.sub) {
-    throw new Error("LinkedIn kimli\u011Fi al\u0131namad\u0131");
-  }
-  return {
-    sub: info.sub,
-    name: info.name ?? null,
-    email: info.email ?? null,
-    picture: info.picture ?? null
-  };
 }
 
 // src/lib/inviteCodes.ts
@@ -118826,6 +118831,7 @@ router6.get("/me", async (req, res) => {
       user: {
         ...publicUser(user),
         skills: parseSkills2(user.skills),
+        profileLinks: parseProfileLinks(user.profileLinks),
         resolvedAvatarUrl: resolveAvatarUrl(user),
         org: org ? {
           id: org.id,
@@ -118879,10 +118885,12 @@ router6.patch("/me", requireAuth, async (req, res) => {
     const behance = typeof body.behance === "string" ? body.behance.trim().slice(0, 120) : "";
     const instagram = typeof body.instagram === "string" ? body.instagram.trim().slice(0, 120) : "";
     const phone = typeof body.phone === "string" ? body.phone.trim().slice(0, 40) : "";
+    const showPhoneOnCard = body.showPhoneOnCard === true || body.showPhoneOnCard === "true" ? true : body.showPhoneOnCard === false || body.showPhoneOnCard === "false" ? false : void 0;
     const whatsappOptIn = body.whatsappOptIn === true || body.whatsappOptIn === "true" ? "true" : body.whatsappOptIn === false || body.whatsappOptIn === "false" ? "false" : void 0;
     const avatarStyle = isAvatarStyle(body.avatarStyle) ? body.avatarStyle : void 0;
     const visibility = body.visibility === "public" || body.visibility === "private" || body.visibility === "members" ? body.visibility : "members";
     const skills = Array.isArray(body.skills) ? body.skills.filter((s) => typeof s === "string").map((s) => s.trim()).filter(Boolean).slice(0, 10) : [];
+    const profileLinks = Array.isArray(body.profileLinks) ? sanitizeProfileLinks(body.profileLinks) : void 0;
     if (handle) {
       const [taken] = await db.select({ id: usersTable.id }).from(usersTable).where(and(eq(usersTable.handle, handle), ne(usersTable.id, userId))).limit(1);
       if (taken) {
@@ -118923,9 +118931,11 @@ router6.patch("/me", requireAuth, async (req, res) => {
       behance: behance || null,
       instagram: instagram || null,
       phone: phone || null,
+      ...showPhoneOnCard !== void 0 ? { showPhoneOnCard } : {},
       ...whatsappOptIn !== void 0 ? { whatsappOptIn } : {},
       ...avatarStyle ? { avatarStyle: nextAvatarStyle } : {},
       skills: JSON.stringify(skills),
+      ...profileLinks !== void 0 ? { profileLinks: JSON.stringify(profileLinks) } : {},
       visibility,
       profileCompletionPct
     }).where(eq(usersTable.id, userId)).returning();
@@ -118934,6 +118944,7 @@ router6.patch("/me", requireAuth, async (req, res) => {
       user: {
         ...publicUser(updated),
         skills: parseSkills2(updated.skills),
+        profileLinks: parseProfileLinks(updated.profileLinks),
         resolvedAvatarUrl: resolveAvatarUrl(updated),
         org: org ? { id: org.id, name: org.name, slug: org.slug, logoUrl: org.logoUrl, type: org.type } : null
       }
@@ -118954,6 +118965,7 @@ router6.post("/me/avatar", requireAuth, async (req, res) => {
         user: {
           ...publicUser(updated2),
           skills: parseSkills2(updated2.skills),
+          profileLinks: parseProfileLinks(updated2.profileLinks),
           resolvedAvatarUrl: resolveAvatarUrl(updated2)
         }
       });
@@ -118972,6 +118984,7 @@ router6.post("/me/avatar", requireAuth, async (req, res) => {
       user: {
         ...publicUser(updated),
         skills: parseSkills2(updated.skills),
+        profileLinks: parseProfileLinks(updated.profileLinks),
         resolvedAvatarUrl: resolveAvatarUrl(updated)
       }
     });
@@ -124739,9 +124752,9 @@ router8.post("/lessons/:id/complete", requireAuth, async (req, res) => {
 router8.post("/mux/uploads", requireAuth, requireAdmin, async (req, res) => {
   try {
     const mux = getMux();
-    const appUrl3 = (process.env.APP_URL ?? "https://inner.digital").replace(/\/$/, "");
+    const appUrl2 = (process.env.APP_URL ?? "https://inner.digital").replace(/\/$/, "");
     const upload = await mux.video.uploads.create({
-      cors_origin: appUrl3,
+      cors_origin: appUrl2,
       new_asset_settings: { playback_policies: ["public"] }
     });
     res.json({ uploadId: upload.id, uploadUrl: upload.url });
@@ -126520,7 +126533,895 @@ var pulse_default = router15;
 var import_express16 = __toESM(require_express2(), 1);
 init_drizzle_orm();
 init_schema2();
+
+// src/lib/uqr.mjs
+var QrCodeDataType = /* @__PURE__ */ ((QrCodeDataType2) => {
+  QrCodeDataType2[QrCodeDataType2["Border"] = -1] = "Border";
+  QrCodeDataType2[QrCodeDataType2["Data"] = 0] = "Data";
+  QrCodeDataType2[QrCodeDataType2["Function"] = 1] = "Function";
+  QrCodeDataType2[QrCodeDataType2["Position"] = 2] = "Position";
+  QrCodeDataType2[QrCodeDataType2["Timing"] = 3] = "Timing";
+  QrCodeDataType2[QrCodeDataType2["Alignment"] = 4] = "Alignment";
+  return QrCodeDataType2;
+})(QrCodeDataType || {});
+var __defProp2 = Object.defineProperty;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp2(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __publicField = (obj, key, value) => {
+  __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
+  return value;
+};
+var LOW = [0, 1];
+var MEDIUM = [1, 0];
+var QUARTILE = [2, 3];
+var HIGH = [3, 2];
+var EccMap = {
+  L: LOW,
+  M: MEDIUM,
+  Q: QUARTILE,
+  H: HIGH
+};
+var NUMERIC_REGEX = /^[0-9]*$/;
+var ALPHANUMERIC_REGEX = /^[A-Z0-9 $%*+.\/:-]*$/;
+var ALPHANUMERIC_CHARSET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:";
+var MIN_VERSION = 1;
+var MAX_VERSION = 40;
+var PENALTY_N1 = 3;
+var PENALTY_N2 = 3;
+var PENALTY_N3 = 40;
+var PENALTY_N4 = 10;
+var ECC_CODEWORDS_PER_BLOCK = [
+  // Version: (note that index 0 is for padding, and is set to an illegal value)
+  // 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40    Error correction level
+  [-1, 7, 10, 15, 20, 26, 18, 20, 24, 30, 18, 20, 24, 26, 30, 22, 24, 28, 30, 28, 28, 28, 28, 30, 30, 26, 28, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30],
+  // Low
+  [-1, 10, 16, 26, 18, 24, 16, 18, 22, 22, 26, 30, 22, 22, 24, 24, 28, 28, 26, 26, 26, 26, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28],
+  // Medium
+  [-1, 13, 22, 18, 26, 18, 24, 18, 22, 20, 24, 28, 26, 24, 20, 30, 24, 28, 28, 26, 30, 28, 30, 30, 30, 30, 28, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30],
+  // Quartile
+  [-1, 17, 28, 22, 16, 22, 28, 26, 26, 24, 28, 24, 28, 22, 24, 24, 30, 28, 28, 26, 28, 30, 24, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30]
+  // High
+];
+var NUM_ERROR_CORRECTION_BLOCKS = [
+  // Version: (note that index 0 is for padding, and is set to an illegal value)
+  // 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40    Error correction level
+  [-1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 4, 4, 4, 4, 4, 6, 6, 6, 6, 7, 8, 8, 9, 9, 10, 12, 12, 12, 13, 14, 15, 16, 17, 18, 19, 19, 20, 21, 22, 24, 25],
+  // Low
+  [-1, 1, 1, 1, 2, 2, 4, 4, 4, 5, 5, 5, 8, 9, 9, 10, 10, 11, 13, 14, 16, 17, 17, 18, 20, 21, 23, 25, 26, 28, 29, 31, 33, 35, 37, 38, 40, 43, 45, 47, 49],
+  // Medium
+  [-1, 1, 1, 2, 2, 4, 4, 6, 6, 8, 8, 8, 10, 12, 16, 12, 17, 16, 18, 21, 20, 23, 23, 25, 27, 29, 34, 34, 35, 38, 40, 43, 45, 48, 51, 53, 56, 59, 62, 65, 68],
+  // Quartile
+  [-1, 1, 1, 2, 4, 4, 4, 5, 6, 8, 8, 11, 11, 16, 16, 18, 16, 19, 21, 25, 25, 25, 34, 30, 32, 35, 37, 40, 42, 45, 48, 51, 54, 57, 60, 63, 66, 70, 74, 77, 81]
+  // High
+];
+var QrCode = class {
+  /* -- Constructor (low level) and fields -- */
+  // Creates a new QR Code with the given version number,
+  // error correction level, data codeword bytes, and mask number.
+  // This is a low-level API that most users should not use directly.
+  // A mid-level API is the encodeSegments() function.
+  constructor(version5, ecc, dataCodewords, msk) {
+    this.version = version5;
+    this.ecc = ecc;
+    __publicField(this, "size");
+    __publicField(this, "mask");
+    __publicField(this, "modules", []);
+    __publicField(this, "types", []);
+    if (version5 < MIN_VERSION || version5 > MAX_VERSION)
+      throw new RangeError("Version value out of range");
+    if (msk < -1 || msk > 7)
+      throw new RangeError("Mask value out of range");
+    this.size = version5 * 4 + 17;
+    const row = Array.from({ length: this.size }, () => false);
+    for (let i = 0; i < this.size; i++) {
+      this.modules.push(row.slice());
+      this.types.push(row.map(() => 0));
+    }
+    this.drawFunctionPatterns();
+    const allCodewords = this.addEccAndInterleave(dataCodewords);
+    this.drawCodewords(allCodewords);
+    if (msk === -1) {
+      let minPenalty = 1e9;
+      for (let i = 0; i < 8; i++) {
+        this.applyMask(i);
+        this.drawFormatBits(i);
+        const penalty = this.getPenaltyScore();
+        if (penalty < minPenalty) {
+          msk = i;
+          minPenalty = penalty;
+        }
+        this.applyMask(i);
+      }
+    }
+    this.mask = msk;
+    this.applyMask(msk);
+    this.drawFormatBits(msk);
+  }
+  /* -- Accessor methods -- */
+  // Returns the color of the module (pixel) at the given coordinates, which is false
+  // for light or true for dark. The top left corner has the coordinates (x=0, y=0).
+  // If the given coordinates are out of bounds, then false (light) is returned.
+  getModule(x, y) {
+    return x >= 0 && x < this.size && y >= 0 && y < this.size && this.modules[y][x];
+  }
+  /* -- Private helper methods for constructor: Drawing function modules -- */
+  // Reads this object's version field, and draws and marks all function modules.
+  drawFunctionPatterns() {
+    for (let i = 0; i < this.size; i++) {
+      this.setFunctionModule(6, i, i % 2 === 0, QrCodeDataType.Timing);
+      this.setFunctionModule(i, 6, i % 2 === 0, QrCodeDataType.Timing);
+    }
+    this.drawFinderPattern(3, 3);
+    this.drawFinderPattern(this.size - 4, 3);
+    this.drawFinderPattern(3, this.size - 4);
+    const alignPatPos = this.getAlignmentPatternPositions();
+    const numAlign = alignPatPos.length;
+    for (let i = 0; i < numAlign; i++) {
+      for (let j = 0; j < numAlign; j++) {
+        if (!(i === 0 && j === 0 || i === 0 && j === numAlign - 1 || i === numAlign - 1 && j === 0))
+          this.drawAlignmentPattern(alignPatPos[i], alignPatPos[j]);
+      }
+    }
+    this.drawFormatBits(0);
+    this.drawVersion();
+  }
+  // Draws two copies of the format bits (with its own error correction code)
+  // based on the given mask and this object's error correction level field.
+  drawFormatBits(mask) {
+    const data = this.ecc[1] << 3 | mask;
+    let rem = data;
+    for (let i = 0; i < 10; i++)
+      rem = rem << 1 ^ (rem >>> 9) * 1335;
+    const bits = (data << 10 | rem) ^ 21522;
+    for (let i = 0; i <= 5; i++)
+      this.setFunctionModule(8, i, getBit(bits, i));
+    this.setFunctionModule(8, 7, getBit(bits, 6));
+    this.setFunctionModule(8, 8, getBit(bits, 7));
+    this.setFunctionModule(7, 8, getBit(bits, 8));
+    for (let i = 9; i < 15; i++)
+      this.setFunctionModule(14 - i, 8, getBit(bits, i));
+    for (let i = 0; i < 8; i++)
+      this.setFunctionModule(this.size - 1 - i, 8, getBit(bits, i));
+    for (let i = 8; i < 15; i++)
+      this.setFunctionModule(8, this.size - 15 + i, getBit(bits, i));
+    this.setFunctionModule(8, this.size - 8, true);
+  }
+  // Draws two copies of the version bits (with its own error correction code),
+  // based on this object's version field, iff 7 <= version <= 40.
+  drawVersion() {
+    if (this.version < 7)
+      return;
+    let rem = this.version;
+    for (let i = 0; i < 12; i++)
+      rem = rem << 1 ^ (rem >>> 11) * 7973;
+    const bits = this.version << 12 | rem;
+    for (let i = 0; i < 18; i++) {
+      const color = getBit(bits, i);
+      const a = this.size - 11 + i % 3;
+      const b = Math.floor(i / 3);
+      this.setFunctionModule(a, b, color);
+      this.setFunctionModule(b, a, color);
+    }
+  }
+  // Draws a 9*9 finder pattern including the border separator,
+  // with the center module at (x, y). Modules can be out of bounds.
+  drawFinderPattern(x, y) {
+    for (let dy = -4; dy <= 4; dy++) {
+      for (let dx = -4; dx <= 4; dx++) {
+        const dist = Math.max(Math.abs(dx), Math.abs(dy));
+        const xx = x + dx;
+        const yy = y + dy;
+        if (xx >= 0 && xx < this.size && yy >= 0 && yy < this.size)
+          this.setFunctionModule(xx, yy, dist !== 2 && dist !== 4, QrCodeDataType.Position);
+      }
+    }
+  }
+  // Draws a 5*5 alignment pattern, with the center module
+  // at (x, y). All modules must be in bounds.
+  drawAlignmentPattern(x, y) {
+    for (let dy = -2; dy <= 2; dy++) {
+      for (let dx = -2; dx <= 2; dx++) {
+        this.setFunctionModule(
+          x + dx,
+          y + dy,
+          Math.max(Math.abs(dx), Math.abs(dy)) !== 1,
+          QrCodeDataType.Alignment
+        );
+      }
+    }
+  }
+  // Sets the color of a module and marks it as a function module.
+  // Only used by the constructor. Coordinates must be in bounds.
+  setFunctionModule(x, y, isDark, type2 = QrCodeDataType.Function) {
+    this.modules[y][x] = isDark;
+    this.types[y][x] = type2;
+  }
+  /* -- Private helper methods for constructor: Codewords and masking -- */
+  // Returns a new byte string representing the given data with the appropriate error correction
+  // codewords appended to it, based on this object's version and error correction level.
+  addEccAndInterleave(data) {
+    const ver = this.version;
+    const ecl = this.ecc;
+    if (data.length !== getNumDataCodewords(ver, ecl))
+      throw new RangeError("Invalid argument");
+    const numBlocks = NUM_ERROR_CORRECTION_BLOCKS[ecl[0]][ver];
+    const blockEccLen = ECC_CODEWORDS_PER_BLOCK[ecl[0]][ver];
+    const rawCodewords = Math.floor(getNumRawDataModules(ver) / 8);
+    const numShortBlocks = numBlocks - rawCodewords % numBlocks;
+    const shortBlockLen = Math.floor(rawCodewords / numBlocks);
+    const blocks = [];
+    const rsDiv = reedSolomonComputeDivisor(blockEccLen);
+    for (let i = 0, k = 0; i < numBlocks; i++) {
+      const dat = data.slice(k, k + shortBlockLen - blockEccLen + (i < numShortBlocks ? 0 : 1));
+      k += dat.length;
+      const ecc = reedSolomonComputeRemainder(dat, rsDiv);
+      if (i < numShortBlocks)
+        dat.push(0);
+      blocks.push(dat.concat(ecc));
+    }
+    const result = [];
+    for (let i = 0; i < blocks[0].length; i++) {
+      blocks.forEach((block, j) => {
+        if (i !== shortBlockLen - blockEccLen || j >= numShortBlocks)
+          result.push(block[i]);
+      });
+    }
+    return result;
+  }
+  // Draws the given sequence of 8-bit codewords (data and error correction) onto the entire
+  // data area of this QR Code. Function modules need to be marked off before this is called.
+  drawCodewords(data) {
+    if (data.length !== Math.floor(getNumRawDataModules(this.version) / 8))
+      throw new RangeError("Invalid argument");
+    let i = 0;
+    for (let right = this.size - 1; right >= 1; right -= 2) {
+      if (right === 6)
+        right = 5;
+      for (let vert = 0; vert < this.size; vert++) {
+        for (let j = 0; j < 2; j++) {
+          const x = right - j;
+          const upward = (right + 1 & 2) === 0;
+          const y = upward ? this.size - 1 - vert : vert;
+          if (!this.types[y][x] && i < data.length * 8) {
+            this.modules[y][x] = getBit(data[i >>> 3], 7 - (i & 7));
+            i++;
+          }
+        }
+      }
+    }
+  }
+  // XORs the codeword modules in this QR Code with the given mask pattern.
+  // The function modules must be marked and the codeword bits must be drawn
+  // before masking. Due to the arithmetic of XOR, calling applyMask() with
+  // the same mask value a second time will undo the mask. A final well-formed
+  // QR Code needs exactly one (not zero, two, etc.) mask applied.
+  applyMask(mask) {
+    if (mask < 0 || mask > 7)
+      throw new RangeError("Mask value out of range");
+    for (let y = 0; y < this.size; y++) {
+      for (let x = 0; x < this.size; x++) {
+        let invert;
+        switch (mask) {
+          case 0:
+            invert = (x + y) % 2 === 0;
+            break;
+          case 1:
+            invert = y % 2 === 0;
+            break;
+          case 2:
+            invert = x % 3 === 0;
+            break;
+          case 3:
+            invert = (x + y) % 3 === 0;
+            break;
+          case 4:
+            invert = (Math.floor(x / 3) + Math.floor(y / 2)) % 2 === 0;
+            break;
+          case 5:
+            invert = x * y % 2 + x * y % 3 === 0;
+            break;
+          case 6:
+            invert = (x * y % 2 + x * y % 3) % 2 === 0;
+            break;
+          case 7:
+            invert = ((x + y) % 2 + x * y % 3) % 2 === 0;
+            break;
+          default:
+            throw new Error("Unreachable");
+        }
+        if (!this.types[y][x] && invert)
+          this.modules[y][x] = !this.modules[y][x];
+      }
+    }
+  }
+  // Calculates and returns the penalty score based on state of this QR Code's current modules.
+  // This is used by the automatic mask choice algorithm to find the mask pattern that yields the lowest score.
+  getPenaltyScore() {
+    let result = 0;
+    for (let y = 0; y < this.size; y++) {
+      let runColor = false;
+      let runX = 0;
+      const runHistory = [0, 0, 0, 0, 0, 0, 0];
+      for (let x = 0; x < this.size; x++) {
+        if (this.modules[y][x] === runColor) {
+          runX++;
+          if (runX === 5)
+            result += PENALTY_N1;
+          else if (runX > 5)
+            result++;
+        } else {
+          this.finderPenaltyAddHistory(runX, runHistory);
+          if (!runColor)
+            result += this.finderPenaltyCountPatterns(runHistory) * PENALTY_N3;
+          runColor = this.modules[y][x];
+          runX = 1;
+        }
+      }
+      result += this.finderPenaltyTerminateAndCount(runColor, runX, runHistory) * PENALTY_N3;
+    }
+    for (let x = 0; x < this.size; x++) {
+      let runColor = false;
+      let runY = 0;
+      const runHistory = [0, 0, 0, 0, 0, 0, 0];
+      for (let y = 0; y < this.size; y++) {
+        if (this.modules[y][x] === runColor) {
+          runY++;
+          if (runY === 5)
+            result += PENALTY_N1;
+          else if (runY > 5)
+            result++;
+        } else {
+          this.finderPenaltyAddHistory(runY, runHistory);
+          if (!runColor)
+            result += this.finderPenaltyCountPatterns(runHistory) * PENALTY_N3;
+          runColor = this.modules[y][x];
+          runY = 1;
+        }
+      }
+      result += this.finderPenaltyTerminateAndCount(runColor, runY, runHistory) * PENALTY_N3;
+    }
+    for (let y = 0; y < this.size - 1; y++) {
+      for (let x = 0; x < this.size - 1; x++) {
+        const color = this.modules[y][x];
+        if (color === this.modules[y][x + 1] && color === this.modules[y + 1][x] && color === this.modules[y + 1][x + 1])
+          result += PENALTY_N2;
+      }
+    }
+    let dark = 0;
+    for (const row of this.modules)
+      dark = row.reduce((sum, color) => sum + (color ? 1 : 0), dark);
+    const total = this.size * this.size;
+    const k = Math.ceil(Math.abs(dark * 20 - total * 10) / total) - 1;
+    result += k * PENALTY_N4;
+    return result;
+  }
+  /* -- Private helper functions -- */
+  // Returns an ascending list of positions of alignment patterns for this version number.
+  // Each position is in the range [0,177), and are used on both the x and y axes.
+  // This could be implemented as lookup table of 40 variable-length lists of integers.
+  getAlignmentPatternPositions() {
+    if (this.version === 1) {
+      return [];
+    } else {
+      const numAlign = Math.floor(this.version / 7) + 2;
+      const step = this.version === 32 ? 26 : Math.ceil((this.version * 4 + 4) / (numAlign * 2 - 2)) * 2;
+      const result = [6];
+      for (let pos = this.size - 7; result.length < numAlign; pos -= step)
+        result.splice(1, 0, pos);
+      return result;
+    }
+  }
+  // Can only be called immediately after a light run is added, and
+  // returns either 0, 1, or 2. A helper function for getPenaltyScore().
+  finderPenaltyCountPatterns(runHistory) {
+    const n = runHistory[1];
+    const core = n > 0 && runHistory[2] === n && runHistory[3] === n * 3 && runHistory[4] === n && runHistory[5] === n;
+    return (core && runHistory[0] >= n * 4 && runHistory[6] >= n ? 1 : 0) + (core && runHistory[6] >= n * 4 && runHistory[0] >= n ? 1 : 0);
+  }
+  // Must be called at the end of a line (row or column) of modules. A helper function for getPenaltyScore().
+  finderPenaltyTerminateAndCount(currentRunColor, currentRunLength, runHistory) {
+    if (currentRunColor) {
+      this.finderPenaltyAddHistory(currentRunLength, runHistory);
+      currentRunLength = 0;
+    }
+    currentRunLength += this.size;
+    this.finderPenaltyAddHistory(currentRunLength, runHistory);
+    return this.finderPenaltyCountPatterns(runHistory);
+  }
+  // Pushes the given value to the front and drops the last value. A helper function for getPenaltyScore().
+  finderPenaltyAddHistory(currentRunLength, runHistory) {
+    if (runHistory[0] === 0)
+      currentRunLength += this.size;
+    runHistory.pop();
+    runHistory.unshift(currentRunLength);
+  }
+};
+function appendBits(val, len, bb) {
+  if (len < 0 || len > 31 || val >>> len !== 0)
+    throw new RangeError("Value out of range");
+  for (let i = len - 1; i >= 0; i--)
+    bb.push(val >>> i & 1);
+}
+function getBit(x, i) {
+  return (x >>> i & 1) !== 0;
+}
+var QrSegment = class {
+  // Creates a new QR Code segment with the given attributes and data.
+  // The character count (numChars) must agree with the mode and the bit buffer length,
+  // but the constraint isn't checked. The given bit buffer is cloned and stored.
+  constructor(mode, numChars, bitData) {
+    this.mode = mode;
+    this.numChars = numChars;
+    this.bitData = bitData;
+    if (numChars < 0)
+      throw new RangeError("Invalid argument");
+    this.bitData = bitData.slice();
+  }
+  /* -- Methods -- */
+  // Returns a new copy of the data bits of this segment.
+  getData() {
+    return this.bitData.slice();
+  }
+};
+var MODE_NUMERIC = [1, 10, 12, 14];
+var MODE_ALPHANUMERIC = [2, 9, 11, 13];
+var MODE_BYTE = [4, 8, 16, 16];
+function numCharCountBits(mode, ver) {
+  return mode[Math.floor((ver + 7) / 17) + 1];
+}
+function makeBytes(data) {
+  const bb = [];
+  for (const b of data)
+    appendBits(b, 8, bb);
+  return new QrSegment(MODE_BYTE, data.length, bb);
+}
+function makeNumeric(digits) {
+  if (!isNumeric(digits))
+    throw new RangeError("String contains non-numeric characters");
+  const bb = [];
+  for (let i = 0; i < digits.length; ) {
+    const n = Math.min(digits.length - i, 3);
+    appendBits(Number.parseInt(digits.substring(i, i + n), 10), n * 3 + 1, bb);
+    i += n;
+  }
+  return new QrSegment(MODE_NUMERIC, digits.length, bb);
+}
+function makeAlphanumeric(text2) {
+  if (!isAlphanumeric(text2))
+    throw new RangeError("String contains unencodable characters in alphanumeric mode");
+  const bb = [];
+  let i;
+  for (i = 0; i + 2 <= text2.length; i += 2) {
+    let temp = ALPHANUMERIC_CHARSET.indexOf(text2.charAt(i)) * 45;
+    temp += ALPHANUMERIC_CHARSET.indexOf(text2.charAt(i + 1));
+    appendBits(temp, 11, bb);
+  }
+  if (i < text2.length)
+    appendBits(ALPHANUMERIC_CHARSET.indexOf(text2.charAt(i)), 6, bb);
+  return new QrSegment(MODE_ALPHANUMERIC, text2.length, bb);
+}
+function makeSegments(text2) {
+  if (text2 === "")
+    return [];
+  else if (isNumeric(text2))
+    return [makeNumeric(text2)];
+  else if (isAlphanumeric(text2))
+    return [makeAlphanumeric(text2)];
+  else
+    return [makeBytes(toUtf8ByteArray(text2))];
+}
+function isNumeric(text2) {
+  return NUMERIC_REGEX.test(text2);
+}
+function isAlphanumeric(text2) {
+  return ALPHANUMERIC_REGEX.test(text2);
+}
+function getTotalBits(segs, version5) {
+  let result = 0;
+  for (const seg of segs) {
+    const ccbits = numCharCountBits(seg.mode, version5);
+    if (seg.numChars >= 1 << ccbits)
+      return Number.POSITIVE_INFINITY;
+    result += 4 + ccbits + seg.bitData.length;
+  }
+  return result;
+}
+function toUtf8ByteArray(str) {
+  str = encodeURI(str);
+  const result = [];
+  for (let i = 0; i < str.length; i++) {
+    if (str.charAt(i) !== "%") {
+      result.push(str.charCodeAt(i));
+    } else {
+      result.push(Number.parseInt(str.substring(i + 1, i + 3), 16));
+      i += 2;
+    }
+  }
+  return result;
+}
+function getNumRawDataModules(ver) {
+  if (ver < MIN_VERSION || ver > MAX_VERSION)
+    throw new RangeError("Version number out of range");
+  let result = (16 * ver + 128) * ver + 64;
+  if (ver >= 2) {
+    const numAlign = Math.floor(ver / 7) + 2;
+    result -= (25 * numAlign - 10) * numAlign - 55;
+    if (ver >= 7)
+      result -= 36;
+  }
+  return result;
+}
+function getNumDataCodewords(ver, ecl) {
+  return Math.floor(getNumRawDataModules(ver) / 8) - ECC_CODEWORDS_PER_BLOCK[ecl[0]][ver] * NUM_ERROR_CORRECTION_BLOCKS[ecl[0]][ver];
+}
+function reedSolomonComputeDivisor(degree) {
+  if (degree < 1 || degree > 255)
+    throw new RangeError("Degree out of range");
+  const result = [];
+  for (let i = 0; i < degree - 1; i++)
+    result.push(0);
+  result.push(1);
+  let root = 1;
+  for (let i = 0; i < degree; i++) {
+    for (let j = 0; j < result.length; j++) {
+      result[j] = reedSolomonMultiply(result[j], root);
+      if (j + 1 < result.length)
+        result[j] ^= result[j + 1];
+    }
+    root = reedSolomonMultiply(root, 2);
+  }
+  return result;
+}
+function reedSolomonComputeRemainder(data, divisor) {
+  const result = divisor.map((_) => 0);
+  for (const b of data) {
+    const factor = b ^ result.shift();
+    result.push(0);
+    divisor.forEach((coef, i) => result[i] ^= reedSolomonMultiply(coef, factor));
+  }
+  return result;
+}
+function reedSolomonMultiply(x, y) {
+  if (x >>> 8 !== 0 || y >>> 8 !== 0)
+    throw new RangeError("Byte out of range");
+  let z = 0;
+  for (let i = 7; i >= 0; i--) {
+    z = z << 1 ^ (z >>> 7) * 285;
+    z ^= (y >>> i & 1) * x;
+  }
+  return z;
+}
+function encodeSegments(segs, ecl, minVersion = 1, maxVersion = 40, mask = -1, boostEcl = true) {
+  if (!(MIN_VERSION <= minVersion && minVersion <= maxVersion && maxVersion <= MAX_VERSION) || mask < -1 || mask > 7)
+    throw new RangeError("Invalid value");
+  let version5;
+  let dataUsedBits;
+  for (version5 = minVersion; ; version5++) {
+    const dataCapacityBits2 = getNumDataCodewords(version5, ecl) * 8;
+    const usedBits = getTotalBits(segs, version5);
+    if (usedBits <= dataCapacityBits2) {
+      dataUsedBits = usedBits;
+      break;
+    }
+    if (version5 >= maxVersion)
+      throw new RangeError("Data too long");
+  }
+  for (const newEcl of [MEDIUM, QUARTILE, HIGH]) {
+    if (boostEcl && dataUsedBits <= getNumDataCodewords(version5, newEcl) * 8)
+      ecl = newEcl;
+  }
+  const bb = [];
+  for (const seg of segs) {
+    appendBits(seg.mode[0], 4, bb);
+    appendBits(seg.numChars, numCharCountBits(seg.mode, version5), bb);
+    for (const b of seg.getData())
+      bb.push(b);
+  }
+  const dataCapacityBits = getNumDataCodewords(version5, ecl) * 8;
+  appendBits(0, Math.min(4, dataCapacityBits - bb.length), bb);
+  appendBits(0, (8 - bb.length % 8) % 8, bb);
+  for (let padByte = 236; bb.length < dataCapacityBits; padByte ^= 236 ^ 17)
+    appendBits(padByte, 8, bb);
+  const dataCodewords = Array.from({ length: Math.ceil(bb.length / 8) }, () => 0);
+  bb.forEach((b, i) => dataCodewords[i >>> 3] |= b << 7 - (i & 7));
+  return new QrCode(version5, ecl, dataCodewords, mask);
+}
+function encode3(data, options) {
+  const {
+    ecc = "L",
+    boostEcc = false,
+    minVersion = 1,
+    maxVersion = 40,
+    maskPattern = -1,
+    border = 1
+  } = options || {};
+  const segment = typeof data === "string" ? makeSegments(data) : Array.isArray(data) ? [makeBytes(data)] : void 0;
+  if (!segment)
+    throw new Error(`uqr only supports encoding string and binary data, but got: ${typeof data}`);
+  const qr = encodeSegments(
+    segment,
+    EccMap[ecc],
+    minVersion,
+    maxVersion,
+    maskPattern,
+    boostEcc
+  );
+  const result = addBorder({
+    version: qr.version,
+    maskPattern: qr.mask,
+    size: qr.size,
+    data: qr.modules,
+    types: qr.types
+  }, border);
+  if (options?.invert)
+    result.data = result.data.map((row) => row.map((mod) => !mod));
+  options?.onEncoded?.(result);
+  return result;
+}
+function addBorder(input, border = 1) {
+  if (!border)
+    return input;
+  const { size } = input;
+  const newSize = size + border * 2;
+  input.size = newSize;
+  input.data.forEach((row) => {
+    for (let i = 0; i < border; i++) {
+      row.unshift(false);
+      row.push(false);
+    }
+  });
+  for (let i = 0; i < border; i++) {
+    input.data.unshift(Array.from({ length: newSize }, (_) => false));
+    input.data.push(Array.from({ length: newSize }, (_) => false));
+  }
+  const b = QrCodeDataType.Border;
+  input.types.forEach((row) => {
+    for (let i = 0; i < border; i++) {
+      row.unshift(b);
+      row.push(b);
+    }
+  });
+  for (let i = 0; i < border; i++) {
+    input.types.unshift(Array.from({ length: newSize }, (_) => b));
+    input.types.push(Array.from({ length: newSize }, (_) => b));
+  }
+  return input;
+}
+function renderSVG(data, options = {}) {
+  const result = encode3(data, options);
+  const {
+    pixelSize = 10,
+    whiteColor = "white",
+    blackColor = "black"
+  } = options;
+  const height = result.size * pixelSize;
+  const width = result.size * pixelSize;
+  let svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}">`;
+  const pathes = [];
+  for (let row = 0; row < result.size; row++) {
+    for (let col = 0; col < result.size; col++) {
+      const x = col * pixelSize;
+      const y = row * pixelSize;
+      if (result.data[row][col])
+        pathes.push(`M${x},${y}h${pixelSize}v${pixelSize}h-${pixelSize}z`);
+    }
+  }
+  svg += `<rect fill="${whiteColor}" width="${width}" height="${height}"/>`;
+  svg += `<path fill="${blackColor}" d="${pathes.join("")}"/>`;
+  svg += "</svg>";
+  return svg;
+}
+
+// src/lib/qrSvg.ts
+function renderProfileQrSvg(url2, opts) {
+  return renderSVG(url2, {
+    ecc: "M",
+    border: 2,
+    pixelSize: opts?.pixelSize ?? 8,
+    whiteColor: "#F4F1EC",
+    blackColor: "#0A0A0A"
+  });
+}
+
+// src/lib/vcard.ts
+function escapeVCard(value) {
+  return value.replace(/\\/g, "\\\\").replace(/\n/g, "\\n").replace(/;/g, "\\;").replace(/,/g, "\\,");
+}
+function foldLine(line2) {
+  if (line2.length <= 75) return line2;
+  const parts = [];
+  let rest = line2;
+  parts.push(rest.slice(0, 75));
+  rest = rest.slice(75);
+  while (rest.length > 0) {
+    parts.push(` ${rest.slice(0, 74)}`);
+    rest = rest.slice(74);
+  }
+  return parts.join("\r\n");
+}
+function absUrl(raw, kind) {
+  if (!raw?.trim()) return null;
+  const v = raw.trim();
+  if (/^https?:\/\//i.test(v)) return v;
+  if (kind === "linkedin") return `https://linkedin.com/in/${v.replace(/^\/+/, "")}`;
+  if (kind === "github") return `https://github.com/${v.replace(/^\/+/, "")}`;
+  if (kind === "instagram") return `https://instagram.com/${v.replace(/^@/, "").replace(/^\/+/, "")}`;
+  if (kind === "twitter") return `https://x.com/${v.replace(/^@/, "").replace(/^\/+/, "")}`;
+  return `https://${v.replace(/^\/+/, "")}`;
+}
+function buildVCard(input) {
+  const parts = input.name.trim().split(/\s+/).filter(Boolean);
+  const first = parts[0] ?? input.name;
+  const last = parts.slice(1).join(" ");
+  const lines = [
+    "BEGIN:VCARD",
+    "VERSION:3.0",
+    `FN:${escapeVCard(input.name)}`,
+    `N:${escapeVCard(last)};${escapeVCard(first)};;;`
+  ];
+  if (input.company?.trim()) lines.push(`ORG:${escapeVCard(input.company.trim())}`);
+  if (input.title?.trim()) lines.push(`TITLE:${escapeVCard(input.title.trim())}`);
+  if (input.phone?.trim()) lines.push(`TEL;TYPE=CELL:${escapeVCard(input.phone.trim())}`);
+  lines.push(`URL:${escapeVCard(input.profileUrl)}`);
+  const extras = [
+    absUrl(input.website, "website"),
+    absUrl(input.linkedin, "linkedin"),
+    absUrl(input.github, "github"),
+    absUrl(input.twitter, "twitter"),
+    absUrl(input.instagram, "instagram")
+  ].filter((u) => Boolean(u));
+  for (const u of extras) {
+    if (u !== input.profileUrl) lines.push(`URL:${escapeVCard(u)}`);
+  }
+  if (input.bio?.trim()) lines.push(`NOTE:${escapeVCard(input.bio.trim().slice(0, 500))}`);
+  if (input.photoUrl?.trim() && /^https?:\/\//i.test(input.photoUrl.trim())) {
+    lines.push(`PHOTO;VALUE=URI:${escapeVCard(input.photoUrl.trim())}`);
+  }
+  lines.push(`X-SOCIALPROFILE;TYPE=innerhub:${escapeVCard(input.profileUrl)}`);
+  lines.push("END:VCARD");
+  return lines.map(foldLine).join("\r\n") + "\r\n";
+}
+
+// src/lib/cardPrint.ts
+function escapeXml(s) {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+function qrModulesPath(text2, originX, originY, boxSize) {
+  const result = encode3(text2, { ecc: "M", border: 1 });
+  const cell = boxSize / result.size;
+  const parts = [];
+  for (let row = 0; row < result.size; row++) {
+    for (let col = 0; col < result.size; col++) {
+      if (!result.data[row][col]) continue;
+      const x = +(originX + col * cell).toFixed(2);
+      const y = +(originY + row * cell).toFixed(2);
+      const s = +cell.toFixed(2);
+      parts.push(`M${x},${y}h${s}v${s}h-${s}z`);
+    }
+  }
+  return parts.join("");
+}
+function renderCardFrontSvg(input) {
+  const name = escapeXml(input.name.slice(0, 42));
+  const handle = escapeXml(`@${input.handle}`);
+  const line2 = escapeXml(
+    [input.title, input.company].filter(Boolean).join(" \xB7 ").slice(0, 56) || "inner\xB7hub member"
+  );
+  const qr = qrModulesPath(input.profileUrl, 248, 48, 72);
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="85mm" height="55mm" viewBox="0 0 340 220" role="img" aria-label="inner\xB7id card front">
+  <rect width="340" height="220" fill="#0A0A0A"/>
+  <rect x="0" y="0" width="6" height="220" fill="#18FF85"/>
+  <text x="24" y="36" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" letter-spacing="0.18em" fill="rgba(244,241,236,0.45)">INNER\xB7ID</text>
+  <text x="24" y="88" font-family="Georgia, 'Times New Roman', serif" font-size="28" font-weight="600" fill="#F4F1EC">${name}</text>
+  <text x="24" y="116" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" fill="rgba(244,241,236,0.55)">${handle}</text>
+  <text x="24" y="140" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="rgba(244,241,236,0.4)">${line2}</text>
+  <rect x="244" y="44" width="80" height="80" fill="#F4F1EC"/>
+  <path fill="#0A0A0A" d="${qr}"/>
+  <text x="24" y="198" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="rgba(244,241,236,0.35)">inner.digital</text>
+</svg>`;
+}
+function renderCardBackSvg(input) {
+  const handle = escapeXml(`@${input.handle}`);
+  const shortUrl = escapeXml(`inner.digital/@${input.handle}`);
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="85mm" height="55mm" viewBox="0 0 340 220" role="img" aria-label="inner\xB7id card back">
+  <rect width="340" height="220" fill="#F4F1EC"/>
+  <rect x="334" y="0" width="6" height="220" fill="#18FF85"/>
+  <text x="170" y="88" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="32" font-weight="600" fill="#0A0A0A">${handle}</text>
+  <text x="170" y="122" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="13" fill="rgba(10,10,10,0.45)">${shortUrl}</text>
+  <text x="170" y="188" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" letter-spacing="0.2em" fill="rgba(10,10,10,0.3)">INNER\xB7HUB</text>
+</svg>`;
+}
+function renderMiniCardSvg(input) {
+  const name = escapeXml(input.name.slice(0, 28));
+  const handle = escapeXml(`@${input.handle}`);
+  const line2 = escapeXml(
+    [input.title, input.company].filter(Boolean).join(" \xB7 ").slice(0, 40) || "inner\xB7hub"
+  );
+  const href = escapeXml(input.profileUrl);
+  const avatar = input.avatarUrl?.startsWith("https://") ? `<image href="${escapeXml(input.avatarUrl)}" x="16" y="20" width="56" height="56" preserveAspectRatio="xMidYMid slice"/>` : `<rect x="16" y="20" width="56" height="56" fill="#E8E4DC"/><text x="44" y="54" text-anchor="middle" font-family="Georgia, serif" font-size="22" fill="#0A0A0A">${escapeXml(input.name.slice(0, 1))}</text>`;
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="320" height="96" viewBox="0 0 320 96" role="img" aria-label="${name} \xB7 inner\xB7id">
+  <a href="${href}" target="_blank" rel="noopener">
+    <rect width="320" height="96" fill="#0A0A0A"/>
+    <rect x="0" y="0" width="4" height="96" fill="#18FF85"/>
+    ${avatar}
+    <text x="86" y="38" font-family="Georgia, 'Times New Roman', serif" font-size="18" font-weight="600" fill="#F4F1EC">${name}</text>
+    <text x="86" y="58" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="rgba(244,241,236,0.55)">${handle}</text>
+    <text x="86" y="76" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="rgba(244,241,236,0.35)">${line2}</text>
+  </a>
+</svg>`;
+}
+
+// src/lib/profileCardEvents.ts
+init_drizzle_orm();
+var ensured = false;
+async function ensureProfileCardEventsSchema() {
+  if (ensured) return;
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS profile_card_events (
+      id serial PRIMARY KEY,
+      handle text NOT NULL,
+      event_type text NOT NULL,
+      link_key text,
+      created_at timestamp NOT NULL DEFAULT now()
+    )
+  `);
+  await db.execute(sql`
+    CREATE INDEX IF NOT EXISTS profile_card_events_handle_created_idx
+      ON profile_card_events (handle, created_at)
+  `);
+  ensured = true;
+}
+async function recordCardEvent(handle, eventType, linkKey) {
+  await ensureProfileCardEventsSchema();
+  const h = handle.trim().toLowerCase().replace(/[^a-z0-9_]/g, "").slice(0, 20);
+  if (!h) return;
+  const key = linkKey?.trim().slice(0, 80) || null;
+  await db.execute(sql`
+    INSERT INTO profile_card_events (handle, event_type, link_key)
+    VALUES (${h}, ${eventType}, ${key})
+  `);
+}
+async function getCardStatsForHandle(handle) {
+  await ensureProfileCardEventsSchema();
+  const h = handle.trim().toLowerCase().replace(/[^a-z0-9_]/g, "").slice(0, 20);
+  if (!h) {
+    return { views7d: 0, vcards7d: 0, links7d: 0, qr7d: 0, shares7d: 0, viewsTotal: 0 };
+  }
+  const weekRaw = await db.execute(sql`
+    SELECT event_type, COUNT(*)::int AS n
+    FROM profile_card_events
+    WHERE handle = ${h}
+      AND created_at >= now() - interval '7 days'
+    GROUP BY event_type
+  `);
+  const weekRows = Array.isArray(weekRaw) ? weekRaw : weekRaw.rows ?? [];
+  const totalRaw = await db.execute(sql`
+    SELECT COUNT(*)::int AS n
+    FROM profile_card_events
+    WHERE handle = ${h} AND event_type = 'view'
+  `);
+  const totalRows = Array.isArray(totalRaw) ? totalRaw : totalRaw.rows ?? [];
+  const counts = {};
+  for (const row of weekRows) {
+    counts[row.event_type] = Number(row.n) || 0;
+  }
+  return {
+    views7d: counts.view ?? 0,
+    vcards7d: counts.vcard ?? 0,
+    links7d: counts.link ?? 0,
+    qr7d: counts.qr ?? 0,
+    shares7d: counts.share ?? 0,
+    viewsTotal: Number(totalRows[0]?.n) || 0
+  };
+}
+
+// src/routes/publicId.ts
 var router16 = (0, import_express16.Router)();
+function appBaseUrl2() {
+  return (process.env.APP_URL ?? "https://inner.digital").replace(/\/$/, "");
+}
 function parseSkills3(raw) {
   if (!raw) return [];
   try {
@@ -126535,7 +127436,7 @@ function parseSkills3(raw) {
 function normalizeHandle(raw) {
   return raw.trim().toLowerCase().replace(/[^a-z0-9_]/g, "").slice(0, 20);
 }
-function escapeXml(s) {
+function escapeXml2(s) {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&apos;");
 }
 async function findByHandle(handle) {
@@ -126552,6 +127453,7 @@ function publicPayload(user) {
     company: user.company,
     bio: user.bio,
     skills: parseSkills3(user.skills),
+    avatarUrl: resolveAvatarUrl(user),
     linkedin: user.linkedin,
     linkedinLogoUrl: user.linkedinLogoUrl ?? null,
     github: user.github,
@@ -126559,6 +127461,11 @@ function publicPayload(user) {
     website: user.website,
     websiteLogoUrl: user.websiteLogoUrl ?? null,
     twitter: user.twitter,
+    instagram: user.instagram ?? null,
+    behance: user.behance ?? null,
+    profileLinks: parseProfileLinks(user.profileLinks),
+    showPhoneOnCard: Boolean(user.showPhoneOnCard),
+    phone: user.showPhoneOnCard && user.phone ? user.phone : null,
     visibility: user.visibility ?? "members",
     role: user.role,
     profileCompletionPct: user.profileCompletionPct,
@@ -126567,9 +127474,120 @@ function publicPayload(user) {
     tier: user.role === "admin" ? "Kurucu \xDCye" : "\xDCye"
   };
 }
-router16.get("/public/profile/:handle", async (req, res) => {
+function profilePublicUrl(handle) {
+  return `${appBaseUrl2()}/u/${handle}`;
+}
+async function sendVCard(handle, res) {
+  const user = await findByHandle(handle);
+  if (!user || (user.visibility ?? "members") !== "public") {
+    res.status(404).type("text/plain").send("not found");
+    return;
+  }
+  const vcf = buildVCard({
+    name: user.name,
+    handle,
+    title: user.title,
+    company: user.company,
+    bio: user.bio,
+    website: user.website,
+    linkedin: user.linkedin,
+    github: user.github,
+    twitter: user.twitter,
+    instagram: user.instagram,
+    photoUrl: resolveAvatarUrl(user),
+    profileUrl: profilePublicUrl(handle),
+    phone: user.showPhoneOnCard ? user.phone : null
+  });
+  res.setHeader("Content-Type", "text/vcard; charset=utf-8");
+  res.setHeader("Content-Disposition", `attachment; filename="${handle}.vcf"`);
+  res.setHeader("Cache-Control", "public, max-age=120");
+  res.send(vcf);
+  void recordCardEvent(handle, "vcard").catch(() => {
+  });
+}
+async function sendPublicQr(handle, res) {
+  const user = await findByHandle(handle);
+  if (!user || (user.visibility ?? "members") !== "public") {
+    res.status(404).type("text/plain").send("not found");
+    return;
+  }
+  const svg = renderProfileQrSvg(profilePublicUrl(handle));
+  res.setHeader("Content-Type", "image/svg+xml; charset=utf-8");
+  res.setHeader("Cache-Control", "public, max-age=300");
+  res.send(svg);
+  void recordCardEvent(handle, "qr").catch(() => {
+  });
+}
+router16.get("/public/profile/:handle/qr.svg", async (req, res) => {
   try {
     const handle = normalizeHandle(String(req.params.handle ?? ""));
+    if (!handle) {
+      res.status(400).type("text/plain").send("invalid handle");
+      return;
+    }
+    await sendPublicQr(handle, res);
+  } catch (err) {
+    res.status(500).type("text/plain").send(err.message ?? "error");
+  }
+});
+router16.get("/public/profile/:handle.vcf", async (req, res) => {
+  try {
+    const handle = normalizeHandle(String(req.params.handle ?? ""));
+    if (!handle) {
+      res.status(400).type("text/plain").send("invalid handle");
+      return;
+    }
+    await sendVCard(handle, res);
+  } catch (err) {
+    res.status(500).type("text/plain").send(err.message ?? "error");
+  }
+});
+router16.get("/public/profile/:handle/vcard", async (req, res) => {
+  try {
+    const handle = normalizeHandle(String(req.params.handle ?? ""));
+    if (!handle) {
+      res.status(400).type("text/plain").send("invalid handle");
+      return;
+    }
+    await sendVCard(handle, res);
+  } catch (err) {
+    res.status(500).type("text/plain").send(err.message ?? "error");
+  }
+});
+router16.get("/me/id/qr.svg", async (req, res) => {
+  try {
+    if (!req.user) {
+      res.status(401).type("text/plain").send("unauthorized");
+      return;
+    }
+    await ensureUserProfileColumns();
+    const [user] = await db.select().from(usersTable).where(eq(usersTable.id, req.user.id)).limit(1);
+    if (!user) {
+      res.status(404).type("text/plain").send("not found");
+      return;
+    }
+    const handle = normalizeHandle(user.handle ?? "") || `u${user.id}`;
+    const svg = renderProfileQrSvg(profilePublicUrl(handle));
+    res.setHeader("Content-Type", "image/svg+xml; charset=utf-8");
+    res.setHeader("Cache-Control", "private, no-store");
+    res.send(svg);
+  } catch (err) {
+    res.status(500).type("text/plain").send(err.message ?? "error");
+  }
+});
+router16.get("/public/profile/:handle", async (req, res) => {
+  try {
+    const raw = String(req.params.handle ?? "");
+    if (/\.vcf$/i.test(raw)) {
+      const handle2 = normalizeHandle(raw.replace(/\.vcf$/i, ""));
+      if (!handle2) {
+        res.status(400).type("text/plain").send("invalid handle");
+        return;
+      }
+      await sendVCard(handle2, res);
+      return;
+    }
+    const handle = normalizeHandle(raw);
     if (!handle) {
       res.status(400).json({ error: "Ge\xE7ersiz handle" });
       return;
@@ -126597,6 +127615,126 @@ router16.get("/public/profile/:handle", async (req, res) => {
     res.status(500).json({ error: err.message ?? "Profil y\xFCklenemedi" });
   }
 });
+var CARD_EVENTS = /* @__PURE__ */ new Set(["view", "vcard", "link", "qr", "share"]);
+router16.post("/public/profile/:handle/event", async (req, res) => {
+  try {
+    const handle = normalizeHandle(String(req.params.handle ?? ""));
+    const eventType = String(req.body?.type ?? "");
+    if (!handle || !CARD_EVENTS.has(eventType)) {
+      res.status(400).json({ error: "Ge\xE7ersiz olay" });
+      return;
+    }
+    const user = await findByHandle(handle);
+    if (!user || (user.visibility ?? "members") !== "public") {
+      res.status(404).json({ error: "not found" });
+      return;
+    }
+    const linkKey = typeof req.body?.linkKey === "string" ? req.body.linkKey : null;
+    await recordCardEvent(handle, eventType, linkKey);
+    res.status(204).end();
+  } catch (err) {
+    res.status(500).json({ error: err.message ?? "error" });
+  }
+});
+router16.get("/me/id/stats", async (req, res) => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ error: "unauthorized" });
+      return;
+    }
+    await ensureUserProfileColumns();
+    const [user] = await db.select().from(usersTable).where(eq(usersTable.id, req.user.id)).limit(1);
+    if (!user?.handle) {
+      res.json({
+        stats: { views7d: 0, vcards7d: 0, links7d: 0, qr7d: 0, shares7d: 0, viewsTotal: 0 }
+      });
+      return;
+    }
+    const stats = await getCardStatsForHandle(user.handle);
+    res.json({ stats });
+  } catch (err) {
+    res.status(500).json({ error: err.message ?? "error" });
+  }
+});
+function printCardInput(user, handle) {
+  return {
+    name: user.name,
+    handle,
+    title: user.title,
+    company: user.company,
+    profileUrl: profilePublicUrl(handle)
+  };
+}
+router16.get("/me/id/card-front.svg", async (req, res) => {
+  try {
+    if (!req.user) {
+      res.status(401).type("text/plain").send("unauthorized");
+      return;
+    }
+    await ensureUserProfileColumns();
+    const [user] = await db.select().from(usersTable).where(eq(usersTable.id, req.user.id)).limit(1);
+    if (!user) {
+      res.status(404).type("text/plain").send("not found");
+      return;
+    }
+    const handle = normalizeHandle(user.handle ?? "") || `u${user.id}`;
+    res.setHeader("Content-Type", "image/svg+xml; charset=utf-8");
+    res.setHeader("Cache-Control", "private, no-store");
+    res.send(renderCardFrontSvg(printCardInput(user, handle)));
+  } catch (err) {
+    res.status(500).type("text/plain").send(err.message ?? "error");
+  }
+});
+router16.get("/me/id/card-back.svg", async (req, res) => {
+  try {
+    if (!req.user) {
+      res.status(401).type("text/plain").send("unauthorized");
+      return;
+    }
+    await ensureUserProfileColumns();
+    const [user] = await db.select().from(usersTable).where(eq(usersTable.id, req.user.id)).limit(1);
+    if (!user) {
+      res.status(404).type("text/plain").send("not found");
+      return;
+    }
+    const handle = normalizeHandle(user.handle ?? "") || `u${user.id}`;
+    res.setHeader("Content-Type", "image/svg+xml; charset=utf-8");
+    res.setHeader("Cache-Control", "private, no-store");
+    res.send(renderCardBackSvg(printCardInput(user, handle)));
+  } catch (err) {
+    res.status(500).type("text/plain").send(err.message ?? "error");
+  }
+});
+router16.get("/public/profile/:handle/card-front.svg", async (req, res) => {
+  try {
+    const handle = normalizeHandle(String(req.params.handle ?? ""));
+    const user = await findByHandle(handle);
+    if (!user || (user.visibility ?? "members") !== "public") {
+      res.status(404).type("text/plain").send("not found");
+      return;
+    }
+    res.setHeader("Content-Type", "image/svg+xml; charset=utf-8");
+    res.setHeader("Cache-Control", "public, max-age=300");
+    res.send(renderCardFrontSvg(printCardInput(user, handle)));
+  } catch (err) {
+    res.status(500).type("text/plain").send(err.message ?? "error");
+  }
+});
+router16.get("/public/profile/:handle/card-back.svg", async (req, res) => {
+  try {
+    const handle = normalizeHandle(String(req.params.handle ?? ""));
+    const user = await findByHandle(handle);
+    if (!user || (user.visibility ?? "members") !== "public") {
+      res.status(404).type("text/plain").send("not found");
+      return;
+    }
+    res.setHeader("Content-Type", "image/svg+xml; charset=utf-8");
+    res.setHeader("Cache-Control", "public, max-age=300");
+    res.send(renderCardBackSvg(printCardInput(user, handle)));
+  } catch (err) {
+    res.status(500).type("text/plain").send(err.message ?? "error");
+  }
+});
 router16.get("/badge/:handle.svg", async (req, res) => {
   try {
     const handle = normalizeHandle(String(req.params.handle ?? ""));
@@ -126610,16 +127748,39 @@ router16.get("/badge/:handle.svg", async (req, res) => {
       return;
     }
     const label = "inner\xB7hub";
-    const name = escapeXml(user.name.split(/\s+/)[0] || handle);
-    const handleLabel = escapeXml(`@${handle}`);
+    const name = escapeXml2(user.name.split(/\s+/)[0] || handle);
+    const handleLabel = escapeXml2(`@${handle}`);
     const svg = `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="168" height="28" role="img" aria-label="${label} member">
   <title>${label} \xB7 ${handleLabel}</title>
   <rect width="168" height="28" fill="#0A0A0A"/>
   <rect x="0" y="0" width="3" height="28" fill="#18FF85"/>
-  <text x="12" y="18" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#F4F1EC">${escapeXml(label)}</text>
+  <text x="12" y="18" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#F4F1EC">${escapeXml2(label)}</text>
   <text x="78" y="18" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#18FF85">${name}</text>
 </svg>`;
+    res.setHeader("Content-Type", "image/svg+xml; charset=utf-8");
+    res.setHeader("Cache-Control", "public, max-age=300");
+    res.send(svg);
+  } catch (err) {
+    res.status(500).type("text/plain").send(err.message ?? "error");
+  }
+});
+router16.get("/badge/:handle/card.svg", async (req, res) => {
+  try {
+    const handle = normalizeHandle(String(req.params.handle ?? ""));
+    if (!handle) {
+      res.status(400).type("text/plain").send("invalid handle");
+      return;
+    }
+    const user = await findByHandle(handle);
+    if (!user || (user.visibility ?? "members") === "private") {
+      res.status(404).type("text/plain").send("not found");
+      return;
+    }
+    const svg = renderMiniCardSvg({
+      ...printCardInput(user, handle),
+      avatarUrl: resolveAvatarUrl(user)
+    });
     res.setHeader("Content-Type", "image/svg+xml; charset=utf-8");
     res.setHeader("Cache-Control", "public, max-age=300");
     res.send(svg);
@@ -127776,6 +128937,37 @@ function periodStart(period) {
   if (period === "month") return new Date(now - 30 * 24 * 60 * 60 * 1e3);
   return new Date(now - 365 * 24 * 60 * 60 * 1e3);
 }
+function parseTags3(raw) {
+  if (!raw?.trim()) return [];
+  const s = raw.trim();
+  if (s.startsWith("[")) {
+    try {
+      const parsed = JSON.parse(s);
+      if (Array.isArray(parsed)) {
+        return parsed.filter((x) => typeof x === "string").map((x) => x.trim()).filter(Boolean).slice(0, 8);
+      }
+    } catch {
+    }
+  }
+  return s.split(/[,;\n]/).map((x) => x.trim()).filter(Boolean).slice(0, 8);
+}
+function serializeTags(tags) {
+  if (!tags.length) return null;
+  return JSON.stringify(tags);
+}
+function normalizeOptionalHttpUrl(raw, max = 500) {
+  const u = (raw ?? "").trim();
+  if (!u) return null;
+  if (u.length > max) return null;
+  try {
+    const withProto = /^https?:\/\//i.test(u) ? u : `https://${u}`;
+    const parsed = new URL(withProto);
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return null;
+    return parsed.toString();
+  } catch {
+    return null;
+  }
+}
 function mapProduct(product, voteCount, myVote, author) {
   const ytId = product.youtubeUrl ? parseYoutubeId(product.youtubeUrl) : null;
   return {
@@ -127791,6 +128983,10 @@ function mapProduct(product, voteCount, myVote, author) {
     phVotesCount: product.phVotesCount ?? null,
     youtubeUrl: product.youtubeUrl ?? null,
     youtubeThumbnail: ytId ? youtubeThumbnailUrl(ytId) : null,
+    demoUrl: product.demoUrl ?? null,
+    pitchDeckUrl: product.pitchDeckUrl ?? null,
+    tags: parseTags3(product.tags),
+    lookingFor: product.lookingFor ?? null,
     createdAt: product.createdAt.toISOString(),
     userId: product.userId,
     authorName: author?.name ?? null,
@@ -127977,7 +129173,7 @@ router21.post("/stage/products", requireAuth, async (req, res) => {
   try {
     await ensureStageSchema();
     const userId = req.user.id;
-    const { title, url: url2, pitch, imageUrl, productHuntUrl, youtubeUrl } = req.body;
+    const { title, url: url2, pitch, imageUrl, productHuntUrl, youtubeUrl, demoUrl, pitchDeckUrl, tags, lookingFor } = req.body;
     const t = title?.trim() ?? "";
     const u = url2?.trim() ?? "";
     const p = pitch?.trim() ?? "";
@@ -128011,6 +129207,18 @@ router21.post("/stage/products", requireAuth, async (req, res) => {
       ytCanonical = youtubeWatchUrl(ytId);
       if (!img) img = youtubeThumbnailUrl(ytId);
     }
+    const demo = normalizeOptionalHttpUrl(demoUrl);
+    const deck = normalizeOptionalHttpUrl(pitchDeckUrl);
+    if (demoUrl?.trim() && !demo) {
+      res.status(400).json({ error: "Ge\xE7ersiz demo linki" });
+      return;
+    }
+    if (pitchDeckUrl?.trim() && !deck) {
+      res.status(400).json({ error: "Ge\xE7ersiz pitch deck linki" });
+      return;
+    }
+    const tagList = Array.isArray(tags) ? tags.filter((x) => typeof x === "string").map((x) => x.trim()).filter(Boolean).slice(0, 8) : parseTags3(typeof tags === "string" ? tags : "");
+    const looking = (lookingFor ?? "").trim().slice(0, 120) || null;
     const [created] = await db.insert(stageProductsTable).values({
       userId,
       title: t,
@@ -128022,7 +129230,11 @@ router21.post("/stage/products", requireAuth, async (req, res) => {
       productHuntId: ph?.productHuntId ?? null,
       phVotesCount: ph?.phVotesCount ?? null,
       phSyncedAt: ph?.phSyncedAt ?? null,
-      youtubeUrl: ytCanonical
+      youtubeUrl: ytCanonical,
+      demoUrl: demo,
+      pitchDeckUrl: deck,
+      tags: serializeTags(tagList),
+      lookingFor: looking
     }).returning();
     res.status(201).json(
       mapProduct(created, 0, false, {
@@ -129051,7 +130263,8 @@ router25.delete("/account", requireAuth, async (req, res) => {
       behance: null,
       instagram: null,
       university: null,
-      skills: "[]"
+      skills: "[]",
+      profileLinks: "[]"
     }).where(eq(usersTable.id, userId));
     const sessionId = req.cookies?.[SESSION_COOKIE];
     if (sessionId) await destroySession(sessionId);
@@ -129744,7 +130957,7 @@ app.use(
     }
   })
 );
-var appUrl2 = (process.env.APP_URL ?? "https://inner.digital").replace(/\/$/, "");
+var appUrl = (process.env.APP_URL ?? "https://inner.digital").replace(/\/$/, "");
 function corsOrigins(canonical) {
   const origins = /* @__PURE__ */ new Set([
     canonical,
@@ -129767,7 +130980,7 @@ function corsOrigins(canonical) {
 }
 app.use(
   (0, import_cors.default)({
-    origin: corsOrigins(appUrl2),
+    origin: corsOrigins(appUrl),
     credentials: true
   })
 );
@@ -129783,6 +130996,14 @@ app.use(import_express30.default.urlencoded({ extended: true }));
 app.use((0, import_cookie_parser.default)());
 app.use(attachUser);
 app.use("/api", routes_default);
+app.use((req, res, next) => {
+  if (req.method !== "GET" && req.method !== "HEAD") return next();
+  const m = /^\/@([a-zA-Z0-9_]{1,20})\/?$/.exec(req.path);
+  if (!m) return next();
+  const handle = m[1].toLowerCase();
+  const qs = req.url.includes("?") ? req.url.slice(req.url.indexOf("?")) : "";
+  res.redirect(302, `/u/${handle}${qs}`);
+});
 var frontendDist = path7.resolve(
   path7.join(__dirname, "..", "..", "inner-hub", "dist")
 );

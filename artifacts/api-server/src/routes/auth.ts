@@ -5,7 +5,7 @@ import { and, eq, isNull, ne } from "drizzle-orm";
 import { OAuth2Client } from "google-auth-library";
 import { db } from "@workspace/db";
 import { passwordResetTokensTable, usersTable } from "@workspace/db/schema";
-import { linkedinEnabled, linkedinAuthorizeUrl, fetchLinkedinProfile } from "../lib/linkedin";
+import { parseProfileLinks, sanitizeProfileLinks } from "../lib/profileLinks";
 import {
   SESSION_COOKIE,
   sessionCookieOptions,
@@ -672,6 +672,7 @@ router.get("/me", async (req, res) => {
       user: {
         ...publicUser(user),
         skills: parseSkills(user.skills),
+        profileLinks: parseProfileLinks(user.profileLinks),
         resolvedAvatarUrl: resolveAvatarUrl(user),
         org: org
           ? {
@@ -753,6 +754,12 @@ router.patch("/me", requireAuth, async (req, res) => {
     const behance = typeof body.behance === "string" ? body.behance.trim().slice(0, 120) : "";
     const instagram = typeof body.instagram === "string" ? body.instagram.trim().slice(0, 120) : "";
     const phone = typeof body.phone === "string" ? body.phone.trim().slice(0, 40) : "";
+    const showPhoneOnCard =
+      body.showPhoneOnCard === true || body.showPhoneOnCard === "true"
+        ? true
+        : body.showPhoneOnCard === false || body.showPhoneOnCard === "false"
+          ? false
+          : undefined;
     const whatsappOptIn =
       body.whatsappOptIn === true || body.whatsappOptIn === "true"
         ? "true"
@@ -767,6 +774,8 @@ router.patch("/me", requireAuth, async (req, res) => {
     const skills = Array.isArray(body.skills)
       ? body.skills.filter((s: unknown) => typeof s === "string").map((s: string) => s.trim()).filter(Boolean).slice(0, 10)
       : [];
+    const profileLinks =
+      Array.isArray(body.profileLinks) ? sanitizeProfileLinks(body.profileLinks) : undefined;
 
     if (handle) {
       const [taken] = await db
@@ -828,9 +837,11 @@ router.patch("/me", requireAuth, async (req, res) => {
         behance: behance || null,
         instagram: instagram || null,
         phone: phone || null,
+        ...(showPhoneOnCard !== undefined ? { showPhoneOnCard } : {}),
         ...(whatsappOptIn !== undefined ? { whatsappOptIn } : {}),
         ...(avatarStyle ? { avatarStyle: nextAvatarStyle } : {}),
         skills: JSON.stringify(skills),
+        ...(profileLinks !== undefined ? { profileLinks: JSON.stringify(profileLinks) } : {}),
         visibility,
         profileCompletionPct,
       })
@@ -842,6 +853,7 @@ router.patch("/me", requireAuth, async (req, res) => {
       user: {
         ...publicUser(updated),
         skills: parseSkills(updated.skills),
+        profileLinks: parseProfileLinks(updated.profileLinks),
         resolvedAvatarUrl: resolveAvatarUrl(updated),
         org: org
           ? { id: org.id, name: org.name, slug: org.slug, logoUrl: org.logoUrl, type: org.type }
@@ -871,6 +883,7 @@ router.post("/me/avatar", requireAuth, async (req, res) => {
         user: {
           ...publicUser(updated!),
           skills: parseSkills(updated!.skills),
+          profileLinks: parseProfileLinks(updated!.profileLinks),
           resolvedAvatarUrl: resolveAvatarUrl(updated!),
         },
       });
@@ -896,6 +909,7 @@ router.post("/me/avatar", requireAuth, async (req, res) => {
       user: {
         ...publicUser(updated!),
         skills: parseSkills(updated!.skills),
+        profileLinks: parseProfileLinks(updated!.profileLinks),
         resolvedAvatarUrl: resolveAvatarUrl(updated!),
       },
     });

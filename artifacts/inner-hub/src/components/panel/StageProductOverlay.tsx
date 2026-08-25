@@ -5,9 +5,12 @@ import {
   Check,
   Copy,
   ExternalLink,
+  FileText,
+  Globe,
   Maximize2,
   Minimize2,
   Play,
+  Rocket,
   Share2,
   Star,
   ThumbsUp,
@@ -32,6 +35,10 @@ export type StageOverlayProduct = {
   phVotesCount: number | null;
   youtubeUrl: string | null;
   youtubeThumbnail: string | null;
+  demoUrl?: string | null;
+  pitchDeckUrl?: string | null;
+  tags?: string[];
+  lookingFor?: string | null;
   authorName: string | null;
   authorHandle: string | null;
   createdAt: string;
@@ -276,8 +283,67 @@ function StageProductOverlayPanel({
         {product.pitch}
       </p>
 
-      {(product.productHuntUrl || product.youtubeUrl) && (
+      {(product.tags?.length || product.lookingFor) && (
+        <div className="space-y-2">
+          {product.lookingFor ? (
+            <p className="text-xs text-[var(--ink-muted)]">
+              <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-subtle)]">
+                {t("stage.lookingForLabel")}
+              </span>
+              <span className="mt-1 block text-sm text-[var(--ink)]">{product.lookingFor}</span>
+            </p>
+          ) : null}
+          {product.tags && product.tags.length > 0 ? (
+            <div className="flex flex-wrap gap-1.5">
+              {product.tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="border border-[var(--ink)]/12 px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest text-[var(--ink-muted)]"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          ) : null}
+        </div>
+      )}
+
+      <div className="space-y-2">
+        <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-muted)]">
+          {t("stage.linksSection")}
+        </p>
         <div className="flex flex-wrap gap-2">
+          <a
+            href={product.url}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1.5 border border-[var(--ink)]/12 bg-[var(--ink)]/[0.03] px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-widest text-[var(--ink)] transition-colors hover:border-[var(--ink)]/30"
+          >
+            <Globe className="size-3.5" />
+            {t("stage.openWebsite")}
+          </a>
+          {product.demoUrl && (
+            <a
+              href={product.demoUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1.5 border border-[var(--ink)]/12 bg-[var(--ink)]/[0.03] px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-widest text-[var(--ink)] transition-colors hover:border-[var(--ink)]/30"
+            >
+              <Rocket className="size-3.5" />
+              {t("stage.openDemo")}
+            </a>
+          )}
+          {product.pitchDeckUrl && (
+            <a
+              href={product.pitchDeckUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1.5 border border-[var(--ink)]/12 bg-[var(--ink)]/[0.03] px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-widest text-[var(--ink)] transition-colors hover:border-[var(--ink)]/30"
+            >
+              <FileText className="size-3.5" />
+              {t("stage.openPitchDeck")}
+            </a>
+          )}
           {product.productHuntUrl && (
             <a
               href={product.productHuntUrl}
@@ -303,7 +369,7 @@ function StageProductOverlayPanel({
             </a>
           )}
         </div>
-      )}
+      </div>
 
       {isAdmin && (
         <div className="space-y-2 border-t border-[var(--ink)]/[0.08] pt-5">

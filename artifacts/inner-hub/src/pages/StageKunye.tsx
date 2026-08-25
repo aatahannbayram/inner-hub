@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "wouter";
-import { Check, Copy, ExternalLink, Play, Share2, Star, ThumbsUp } from "lucide-react";
+import { Check, Copy, ExternalLink, FileText, Globe, Play, Rocket, Share2, Star, ThumbsUp } from "lucide-react";
 import { FadeIn } from "@/components/FadeIn";
 import { Lockup } from "@/components/Lockup";
 import { apiUrl } from "@/lib/api";
@@ -19,6 +19,10 @@ type KunyeProduct = {
   phVotesCount: number | null;
   youtubeUrl: string | null;
   youtubeThumbnail: string | null;
+  demoUrl?: string | null;
+  pitchDeckUrl?: string | null;
+  tags?: string[];
+  lookingFor?: string | null;
   authorName: string | null;
   authorHandle: string | null;
   createdAt: string;
@@ -191,6 +195,94 @@ export default function StageKunyePage() {
                     </p>
                   </div>
                   <p className="whitespace-pre-line text-sm leading-relaxed text-white/70">{product.pitch}</p>
+
+                  {(product.tags?.length || product.lookingFor) && (
+                    <div className="space-y-2">
+                      {product.lookingFor ? (
+                        <p className="text-xs text-white/55">
+                          <span className="font-mono text-[10px] uppercase tracking-widest text-white/35">
+                            {t("stage.lookingForLabel")}
+                          </span>
+                          <span className="mt-1 block text-sm text-white/80">{product.lookingFor}</span>
+                        </p>
+                      ) : null}
+                      {product.tags && product.tags.length > 0 ? (
+                        <div className="flex flex-wrap gap-1.5">
+                          {product.tags.map((tag) => (
+                            <span
+                              key={tag}
+                              className="border border-white/15 px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest text-white/55"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      ) : null}
+                    </div>
+                  )}
+
+                  <div className="space-y-2">
+                    <p className="font-mono text-[10px] uppercase tracking-widest text-white/40">
+                      {t("stage.linksSection")}
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      <a
+                        href={product.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1.5 border border-white/15 px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-widest text-white/80 hover:border-white/35"
+                      >
+                        <Globe className="size-3.5" />
+                        {t("stage.openWebsite")}
+                      </a>
+                      {product.demoUrl && (
+                        <a
+                          href={product.demoUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1.5 border border-white/15 px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-widest text-white/80 hover:border-white/35"
+                        >
+                          <Rocket className="size-3.5" />
+                          {t("stage.openDemo")}
+                        </a>
+                      )}
+                      {product.pitchDeckUrl && (
+                        <a
+                          href={product.pitchDeckUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1.5 border border-white/15 px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-widest text-white/80 hover:border-white/35"
+                        >
+                          <FileText className="size-3.5" />
+                          {t("stage.openPitchDeck")}
+                        </a>
+                      )}
+                      {product.productHuntUrl && (
+                        <a
+                          href={product.productHuntUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1.5 border border-[#DA552F]/40 px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-widest text-[#DA552F]"
+                        >
+                          {product.phVotesCount != null
+                            ? t("stage.phVotes", { n: product.phVotesCount })
+                            : t("stage.openPh")}
+                        </a>
+                      )}
+                      {product.youtubeUrl && (
+                        <a
+                          href={product.youtubeUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1.5 border border-white/15 px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-widest text-white/80"
+                        >
+                          <Play className="size-3.5" />
+                          {t("stage.watchVideo")}
+                        </a>
+                      )}
+                    </div>
+                  </div>
+
                   <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-white/50">
                     <ThumbsUp className="size-3.5" />
                     {product.votes}
@@ -206,6 +298,17 @@ export default function StageKunyePage() {
                     {t("stage.visitProduct")}
                     <ExternalLink className="size-3.5" />
                   </a>
+                  {product.pitchDeckUrl && (
+                    <a
+                      href={product.pitchDeckUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex items-center justify-between border border-white/15 px-4 py-3 font-mono text-label uppercase tracking-widest text-[var(--bone-fixed)] hover:border-white/35"
+                    >
+                      {t("stage.openPitchDeck")}
+                      <FileText className="size-3.5" />
+                    </a>
+                  )}
                   <div className="grid grid-cols-2 gap-2">
                     {canShare && (
                       <button

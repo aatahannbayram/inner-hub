@@ -6,9 +6,9 @@ import { AmbientCardBackground } from "@/components/panel/AmbientCardBackground"
 import {
   CheckCircle2,
   Copy,
+  Download,
   ExternalLink,
   Shield,
-  QrCode,
   Globe,
   Github,
   Linkedin,
@@ -17,12 +17,16 @@ import {
   X,
   Link2,
   Loader2,
+  Plus,
+  Trash2,
 } from "lucide-react";
 import { Link } from "wouter";
 import { useApiQuery } from "@/hooks/useApiQuery";
 import { apiUrl } from "@/lib/api";
 import { ErrorState, LoadingBlock } from "@/components/panel/Skeletons";
 import { useLocale, useT } from "@/i18n";
+
+type CustomLink = { id: string; label: string; url: string };
 
 type ApiUser = {
   id: number;
@@ -42,6 +46,9 @@ type ApiUser = {
   linkedinLogoUrl?: string | null;
   githubLogoUrl?: string | null;
   twitter?: string | null;
+  phone?: string | null;
+  showPhoneOnCard?: boolean | null;
+  profileLinks?: CustomLink[];
   skills?: string[];
   visibility?: string | null;
   profileCompletionPct?: number;
@@ -103,23 +110,32 @@ function formatMemberSince(iso: string | undefined, locale: string, noneLabel: s
 
 function buildSnippets(handle: string, name: string, badgeAlt: string) {
   const profile = `https://inner.digital/u/${handle}`;
+  const short = `https://inner.digital/@${handle}`;
   const badge = `https://inner.digital/api/badge/${handle}.svg`;
+  const card = `https://inner.digital/api/badge/${handle}/card.svg`;
   return {
     html: `<a href="${profile}" target="_blank" rel="noopener">
   <img src="${badge}" alt="${badgeAlt}" height="28" />
 </a>`,
-    markdown: `[![${badgeAlt}](${badge})](${profile})`,
+    card: `<a href="${profile}" target="_blank" rel="noopener">
+  <img src="${card}" alt="${name} · inner·id" width="320" height="96" />
+</a>`,
+    markdown: `[![${badgeAlt}](${badge})](${profile})
+
+[![${name}](${card})](${profile})`,
     json: `{
   "name": ${JSON.stringify(name)},
   "handle": ${JSON.stringify(handle)},
   "verified": true,
   "profile": ${JSON.stringify(profile)},
-  "badge": ${JSON.stringify(badge)}
+  "short": ${JSON.stringify(short)},
+  "badge": ${JSON.stringify(badge)},
+  "card": ${JSON.stringify(card)}
 }`,
   } as const;
 }
 
-type SnippetTab = "html" | "markdown" | "json";
+type SnippetTab = "html" | "card" | "markdown" | "json";
 
 function IdCard({
   user,
@@ -194,8 +210,18 @@ function IdCard({
         </div>
 
         <div className="flex shrink-0 flex-col items-end gap-3">
-          <div className="flex size-16 items-center justify-center border border-[var(--bone-fixed)]/15 bg-[var(--bone-fixed)]/5">
-            <QrCode className="size-8 text-[var(--bone-fixed)]/42" />
+          <div className="size-16 overflow-hidden border border-[var(--bone-fixed)]/15 bg-[var(--bone-fixed)]">
+            <img
+              src={apiUrl(`/api/me/id/qr.svg?t=${user.id}`)}
+              alt=""
+              width={64}
+              height={64}
+              className="size-full object-cover"
+              onError={(e) => {
+                e.currentTarget.style.display = "none";
+                e.currentTarget.parentElement?.classList.add("flex", "items-center", "justify-center");
+              }}
+            />
           </div>
           <span className="border border-[var(--inner-green)]/40 bg-[var(--inner-green)]/10 px-2.5 py-1 font-mono text-label uppercase tracking-widest text-[var(--success-ink)]">
             {tier}
@@ -216,6 +242,356 @@ function IdCard({
           })}
         </p>
       </div>
+    </div>
+  );
+}
+
+type Visibility = "public" | "members" | "private";
+
+function CardStudio({
+  handle,
+  visibility,
+  onVisibility,
+  saving,
+  phone,
+  showPhoneOnCard,
+  onShowPhone,
+}: {
+  handle: string;
+  visibility: Visibility;
+  onVisibility: (v: Visibility) => Promise<void>;
+  saving: boolean;
+  phone: string;
+  showPhoneOnCard: boolean;
+  onShowPhone: (v: boolean) => Promise<void>;
+}) {
+  const t = useT();
+  const isPublic = visibility === "public";
+  const qrSrc = apiUrl(`/api/me/id/qr.svg`);
+  const options: { value: Visibility; label: string; desc: string }[] = [
+    {
+      value: "public",
+      label: t("id.visibilityPublic"),
+      desc: t("id.visibilityPublicDesc").replace("{handle}", handle || "…"),
+    },
+    {
+      value: "members",
+      label: t("id.visibilityMembers"),
+      desc: t("id.visibilityMembersDesc"),
+    },
+    {
+      value: "private",
+      label: t("id.visibilityPrivate"),
+      desc: t("id.visibilityPrivateDesc"),
+    },
+  ];
+
+  const downloadSvg = async () => {
+    const res = await fetch(qrSrc, { credentials: "include" });
+    if (!res.ok) return;
+    const blob = await res.blob();
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `inner-id-${handle || "card"}.svg`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  };
+
+  const downloadPng = async () => {
+    const res = await fetch(qrSrc, { credentials: "include" });
+    if (!res.ok) return;
+    const svgText = await res.text();
+    const img = new Image();
+    const svgUrl = URL.createObjectURL(new Blob([svgText], { type: "image/svg+xml" }));
+    await new Promise<void>((resolve, reject) => {
+      img.onload = () => resolve();
+      img.onerror = () => reject(new Error("png"));
+      img.src = svgUrl;
+    });
+    const canvas = document.createElement("canvas");
+    const size = 512;
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    ctx.fillStyle = "#F4F1EC";
+    ctx.fillRect(0, 0, size, size);
+    ctx.drawImage(img, 0, 0, size, size);
+    URL.revokeObjectURL(svgUrl);
+    const a = document.createElement("a");
+    a.href = canvas.toDataURL("image/png");
+    a.download = `inner-id-${handle || "card"}.png`;
+    a.click();
+  };
+
+  return (
+    <section className="space-y-4">
+      <div className="border-t border-[var(--ink)]/[0.08] pt-3">
+        <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
+          {t("id.cardStudio")}
+        </p>
+        <p className="mt-0.5 text-xs text-[var(--ink-muted)]">{t("id.cardStudioHint")}</p>
+      </div>
+
+      <div className="flex flex-col gap-1.5" role="radiogroup" aria-label={t("id.cardStudio")}>
+        {options.map((opt) => {
+          const active = visibility === opt.value;
+          return (
+            <button
+              key={opt.value}
+              type="button"
+              role="radio"
+              aria-checked={active}
+              disabled={saving}
+              onClick={() => void onVisibility(opt.value)}
+              className={[
+                "flex items-start gap-3 border px-3 py-3 text-left transition-colors",
+                active
+                  ? "border-[var(--ink)] bg-[var(--ink)]/[0.04]"
+                  : "border-[var(--ink)]/[0.08] hover:border-[var(--ink)]/25",
+              ].join(" ")}
+            >
+              <span
+                className={[
+                  "mt-0.5 flex size-3.5 shrink-0 items-center justify-center border",
+                  active ? "border-[var(--ink)] bg-[var(--ink)]" : "border-[var(--ink)]/30",
+                ].join(" ")}
+              >
+                {active && <span className="size-1.5 bg-[var(--bone)]" />}
+              </span>
+              <span className="min-w-0">
+                <span className="block font-mono text-label uppercase tracking-widest text-[var(--ink)]">
+                  {opt.label}
+                </span>
+                <span className="mt-0.5 block text-xs text-[var(--ink-muted)]">{opt.desc}</span>
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      <button
+        type="button"
+        role="switch"
+        aria-checked={showPhoneOnCard}
+        disabled={saving || !phone}
+        onClick={() => void onShowPhone(!showPhoneOnCard)}
+        className={[
+          "flex w-full items-start gap-3 border px-3 py-3 text-left transition-colors",
+          showPhoneOnCard
+            ? "border-[var(--ink)] bg-[var(--ink)]/[0.04]"
+            : "border-[var(--ink)]/[0.08] hover:border-[var(--ink)]/25",
+          !phone ? "opacity-60" : "",
+        ].join(" ")}
+      >
+        <span
+          className={[
+            "mt-0.5 flex h-4 w-7 shrink-0 items-center border px-0.5 transition-colors",
+            showPhoneOnCard ? "border-[var(--ink)] bg-[var(--ink)] justify-end" : "border-[var(--ink)]/30 justify-start",
+          ].join(" ")}
+        >
+          <span className="size-2.5 bg-[var(--bone)]" />
+        </span>
+        <span className="min-w-0">
+          <span className="block font-mono text-label uppercase tracking-widest text-[var(--ink)]">
+            {t("id.showPhone")}
+          </span>
+          <span className="mt-0.5 block text-xs text-[var(--ink-muted)]">
+            {phone ? t("id.showPhoneDesc") : t("id.phoneMissing")}
+            {phone ? ` · ${phone}` : ""}
+          </span>
+        </span>
+      </button>
+
+      {!isPublic && (
+        <div className="flex flex-col gap-2 border border-[var(--ink)]/10 bg-[var(--ink)]/[0.02] px-3 py-3 sm:flex-row sm:items-center sm:justify-between">
+          <p className="font-mono text-label text-[var(--ink-muted)]">{t("id.qrNeedsPublic")}</p>
+          <button
+            type="button"
+            disabled={saving}
+            onClick={() => void onVisibility("public")}
+            className="shrink-0 border border-[var(--ink)] bg-[var(--ink)] px-3 py-2 font-mono text-label uppercase tracking-widest text-[var(--bone)]"
+          >
+            {t("id.makePublic")}
+          </button>
+        </div>
+      )}
+
+      <div className="panel-glass p-4">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+          <div className="mx-auto size-36 shrink-0 overflow-hidden border border-[var(--ink)]/10 bg-[var(--bone)] sm:mx-0">
+            <img src={qrSrc} alt="" width={144} height={144} className="size-full object-cover" />
+          </div>
+          <div className="min-w-0 flex-1 space-y-3">
+            <div>
+              <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
+                {t("id.qrTitle")}
+              </p>
+              <p className="mt-1 text-xs text-[var(--ink-muted)]">
+                {t("id.qrHint").replace("{handle}", handle || "…")}
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => void downloadSvg()}
+                className="flex items-center gap-1.5 border border-[var(--ink)]/15 px-3 py-2 font-mono text-label uppercase tracking-widest text-[var(--ink-body)] hover:border-[var(--ink)]/40"
+              >
+                <Download className="size-3" />
+                {t("id.qrDownloadSvg")}
+              </button>
+              <button
+                type="button"
+                onClick={() => void downloadPng()}
+                className="flex items-center gap-1.5 border border-[var(--ink)]/15 px-3 py-2 font-mono text-label uppercase tracking-widest text-[var(--ink-body)] hover:border-[var(--ink)]/40"
+              >
+                <Download className="size-3" />
+                {t("id.qrDownloadPng")}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <PrintCardPanel handle={handle} />
+      <CardStatsPanel />
+    </section>
+  );
+}
+
+function downloadNamedSvg(url: string, filename: string) {
+  return fetch(url, { credentials: "include" })
+    .then((res) => (res.ok ? res.blob() : null))
+    .then((blob) => {
+      if (!blob) return;
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    });
+}
+
+function PrintCardPanel({ handle }: { handle: string }) {
+  const t = useT();
+  const frontSrc = apiUrl("/api/me/id/card-front.svg");
+  const backSrc = apiUrl("/api/me/id/card-back.svg");
+  const shortUrl = handle ? `inner.digital/@${handle}` : "inner.digital/@…";
+
+  const printBoth = () => {
+    const w = window.open("", "_blank", "noopener,noreferrer,width=900,height=700");
+    if (!w) return;
+    w.document.write(`<!doctype html><html><head><title>inner·id card</title>
+<style>
+  @page { size: auto; margin: 12mm; }
+  body { margin: 0; font-family: ui-monospace, monospace; background: #fff; color: #0a0a0a; }
+  .sheet { display: flex; flex-direction: column; gap: 16mm; align-items: center; padding: 12mm; }
+  img { width: 85mm; height: 55mm; border: 0.2mm solid #ccc; }
+  p { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #666; }
+  @media print { p { display: none; } }
+</style></head><body>
+<div class="sheet">
+  <p>Front · 85×55mm</p>
+  <img src="${frontSrc}" alt="front" />
+  <p>Back · NFC: ${shortUrl}</p>
+  <img src="${backSrc}" alt="back" />
+</div>
+<script>window.onload=()=>{setTimeout(()=>window.print(),200)}</script>
+</body></html>`);
+    w.document.close();
+  };
+
+  return (
+    <div className="panel-glass space-y-3 p-4">
+      <div>
+        <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
+          {t("id.printCard")}
+        </p>
+        <p className="mt-1 text-xs text-[var(--ink-muted)]">{t("id.printCardHint")}</p>
+        <p className="mt-1 font-mono text-caption text-[var(--ink-subtle)]">{shortUrl}</p>
+      </div>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
+        <img
+          src={frontSrc}
+          alt=""
+          className="w-full max-w-[220px] border border-[var(--ink)]/10 bg-[var(--ink)]"
+        />
+        <img
+          src={backSrc}
+          alt=""
+          className="w-full max-w-[220px] border border-[var(--ink)]/10 bg-[var(--bone)]"
+        />
+      </div>
+      <div className="flex flex-wrap gap-2">
+        <button
+          type="button"
+          onClick={() => void downloadNamedSvg(frontSrc, `inner-id-${handle || "card"}-front.svg`)}
+          className="flex items-center gap-1.5 border border-[var(--ink)]/15 px-3 py-2 font-mono text-label uppercase tracking-widest text-[var(--ink-body)] hover:border-[var(--ink)]/40"
+        >
+          <Download className="size-3" />
+          {t("id.printFront")}
+        </button>
+        <button
+          type="button"
+          onClick={() => void downloadNamedSvg(backSrc, `inner-id-${handle || "card"}-back.svg`)}
+          className="flex items-center gap-1.5 border border-[var(--ink)]/15 px-3 py-2 font-mono text-label uppercase tracking-widest text-[var(--ink-body)] hover:border-[var(--ink)]/40"
+        >
+          <Download className="size-3" />
+          {t("id.printBack")}
+        </button>
+        <button
+          type="button"
+          onClick={printBoth}
+          className="flex items-center gap-1.5 border border-[var(--ink)] bg-[var(--ink)] px-3 py-2 font-mono text-label uppercase tracking-widest text-[var(--bone)]"
+        >
+          {t("id.printNow")}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+type CardStats = {
+  views7d: number;
+  vcards7d: number;
+  links7d: number;
+  qr7d: number;
+  shares7d: number;
+  viewsTotal: number;
+};
+
+function CardStatsPanel() {
+  const t = useT();
+  const { data } = useApiQuery<{ stats: CardStats }>(["id-card-stats"], "/api/me/id/stats");
+  const s = data?.stats;
+
+  if (!s) return null;
+
+  const items = [
+    { label: t("id.statViews"), value: s.views7d },
+    { label: t("id.statVcards"), value: s.vcards7d },
+    { label: t("id.statLinks"), value: s.links7d },
+    { label: t("id.statQr"), value: s.qr7d },
+  ];
+
+  return (
+    <div className="border border-[var(--ink)]/[0.08] px-4 py-3">
+      <p className="mb-2 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
+        {t("id.statTitle")}
+      </p>
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {items.map((it) => (
+          <div key={it.label}>
+            <p className="font-mono text-xl text-[var(--ink)]">{it.value}</p>
+            <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
+              {it.label}
+            </p>
+          </div>
+        ))}
+      </div>
+      <p className="mt-2 font-mono text-caption text-[var(--ink-subtle)]">
+        {t("id.statTotal", { n: String(s.viewsTotal) })}
+      </p>
     </div>
   );
 }
@@ -567,6 +943,161 @@ function PlatformBindRow({
   );
 }
 
+function CustomLinksEditor({
+  links,
+  onSave,
+}: {
+  links: CustomLink[];
+  onSave: (next: CustomLink[]) => Promise<void>;
+}) {
+  const t = useT();
+  const [draftUrl, setDraftUrl] = useState("");
+  const [draftLabel, setDraftLabel] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const atLimit = links.length >= 40;
+
+  const add = async () => {
+    const url = draftUrl.trim();
+    if (!url || busy) return;
+    if (atLimit) {
+      setError(t("id.linkLimit"));
+      return;
+    }
+    setBusy(true);
+    setError(null);
+    try {
+      await onSave([
+        ...links,
+        {
+          id: crypto.randomUUID().slice(0, 8),
+          label: draftLabel.trim(),
+          url,
+        },
+      ]);
+      setDraftUrl("");
+      setDraftLabel("");
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : t("id.saveFailed"));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const remove = async (id: string) => {
+    if (busy) return;
+    setBusy(true);
+    setError(null);
+    try {
+      await onSave(links.filter((l) => l.id !== id));
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : t("id.saveFailed"));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <section>
+      <div className="mb-3 border-t border-[var(--ink)]/[0.08] pt-3">
+        <div className="flex items-baseline justify-between gap-3">
+          <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
+            {t("id.moreLinks")}
+          </p>
+          <p className="font-mono text-label tabular-nums text-[var(--ink-subtle)]">
+            {links.length}/40
+          </p>
+        </div>
+        <p className="mt-0.5 text-xs text-[var(--ink-muted)]">{t("id.moreLinksHint")}</p>
+      </div>
+      <div className="space-y-2">
+        {links.length > 0 && (
+          <div className={links.length > 6 ? "max-h-72 space-y-2 overflow-y-auto pr-0.5" : "space-y-2"}>
+            {links.map((link) => (
+              <div
+                key={link.id}
+                className="flex items-center gap-2 panel-glass px-3 py-2.5 transition-colors hover:border-[var(--ink)]/25"
+              >
+                <Globe className="size-3.5 shrink-0 text-[var(--ink-muted)]" />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm text-[var(--ink)]">{link.label || link.url}</p>
+                  <p className="truncate font-mono text-label text-[var(--ink-muted)]">{link.url}</p>
+                </div>
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => void remove(link.id)}
+                  className="shrink-0 p-2 text-[var(--ink-muted)] hover:text-[var(--error-ink)]"
+                  aria-label={t("common.delete")}
+                >
+                  <Trash2 className="size-3.5" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+        {atLimit ? (
+          <p className="font-mono text-label text-[var(--ink-muted)]">{t("id.linkLimit")}</p>
+        ) : (
+          <div className="flex flex-col gap-2 panel-glass p-3 sm:flex-row sm:items-end">
+            <label className="min-w-0 flex-1">
+              <span className="mb-1 block font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
+                {t("id.linkUrl")}
+              </span>
+              <input
+                type="url"
+                value={draftUrl}
+                onChange={(e) => setDraftUrl(e.target.value)}
+                placeholder={t("id.linkUrlPlaceholder")}
+                className="h-10 w-full bg-transparent text-sm text-[var(--ink)] outline-none placeholder:text-[var(--ink-subtle)]"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    void add();
+                  }
+                }}
+              />
+            </label>
+            <label className="min-w-0 sm:w-40">
+              <span className="mb-1 block font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
+                {t("id.linkLabel")}
+              </span>
+              <input
+                type="text"
+                value={draftLabel}
+                onChange={(e) => setDraftLabel(e.target.value)}
+                placeholder={t("id.linkLabelPlaceholder")}
+                maxLength={48}
+                className="h-10 w-full bg-transparent text-sm text-[var(--ink)] outline-none placeholder:text-[var(--ink-subtle)]"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    void add();
+                  }
+                }}
+              />
+            </label>
+            <button
+              type="button"
+              disabled={busy || !draftUrl.trim()}
+              onClick={() => void add()}
+              className="inline-flex min-h-10 items-center justify-center gap-1.5 bg-[var(--ink)] px-3 font-mono text-label uppercase tracking-widest text-[var(--bone)] disabled:opacity-40"
+            >
+              {busy ? <Loader2 className="size-3.5 animate-spin" /> : <Plus className="size-3.5" />}
+              {t("id.addLink")}
+            </button>
+          </div>
+        )}
+        {error && (
+          <p className="font-mono text-label text-[var(--error-ink)]" role="alert">
+            {error}
+          </p>
+        )}
+      </div>
+    </section>
+  );
+}
+
 export default function InnerId() {
   const t = useT();
   const queryClient = useQueryClient();
@@ -576,6 +1107,7 @@ export default function InnerId() {
   );
   const user = data?.user;
   const [copiedUrl, setCopiedUrl] = useState(false);
+  const [visibilitySaving, setVisibilitySaving] = useState(false);
 
   const handle = user ? handleFromUser(user) : "";
   const skills = Array.isArray(user?.skills) ? user!.skills! : [];
@@ -586,6 +1118,10 @@ export default function InnerId() {
   const linkedinLogoUrl = user?.linkedinLogoUrl ?? null;
   const githubLogoUrl = user?.githubLogoUrl ?? null;
   const publicUrl = handle ? `inner.digital/u/${handle}` : "inner.digital/u/…";
+  const visibility: Visibility =
+    user?.visibility === "public" || user?.visibility === "private" || user?.visibility === "members"
+      ? user.visibility
+      : "members";
 
   const patchProfile = async (fields: Record<string, unknown>) => {
     if (!user) return;
@@ -609,6 +1145,9 @@ export default function InnerId() {
         linkedinLogoUrl: linkedinLogoUrl ?? "",
         githubLogoUrl: githubLogoUrl ?? "",
         twitter: stripPrefix(user.twitter ?? "", ["https://", "http://", "www.", "x.com/", "twitter.com/"]),
+        phone: user.phone ?? "",
+        showPhoneOnCard: Boolean(user.showPhoneOnCard),
+        profileLinks: Array.isArray(user.profileLinks) ? user.profileLinks : [],
         visibility:
           user.visibility === "public" || user.visibility === "private" || user.visibility === "members"
             ? user.visibility
@@ -620,6 +1159,24 @@ export default function InnerId() {
     if (!res.ok) throw new Error(json.error ?? t("id.saveFailed"));
     await queryClient.invalidateQueries({ queryKey: ["auth-me"] });
     window.dispatchEvent(new CustomEvent("inner-profile-updated", { detail: json.user }));
+  };
+
+  const setVisibility = async (next: Visibility) => {
+    setVisibilitySaving(true);
+    try {
+      await patchProfile({ visibility: next });
+    } finally {
+      setVisibilitySaving(false);
+    }
+  };
+
+  const setShowPhone = async (next: boolean) => {
+    setVisibilitySaving(true);
+    try {
+      await patchProfile({ showPhoneOnCard: next });
+    } finally {
+      setVisibilitySaving(false);
+    }
   };
 
   const patchLinks = async (
@@ -735,6 +1292,26 @@ export default function InnerId() {
           </a>
           </div>
         </div>
+        {handle && (
+          <p className="mt-2 font-mono text-label text-[var(--ink-muted)]">
+            {t("id.shortUrl")}:{" "}
+            <button
+              type="button"
+              className="underline underline-offset-2 hover:text-[var(--ink)]"
+              onClick={async () => {
+                try {
+                  await navigator.clipboard.writeText(`https://inner.digital/@${handle}`);
+                  setCopiedUrl(true);
+                  setTimeout(() => setCopiedUrl(false), 2000);
+                } catch {
+                  /* ignore */
+                }
+              }}
+            >
+              inner.digital/@{handle}
+            </button>
+          </p>
+        )}
         {!user.handle && (
           <p className="mt-2 font-mono text-label text-[var(--ink-muted)]">
             <Link href="/panel/profile" className="underline underline-offset-2">
@@ -743,6 +1320,16 @@ export default function InnerId() {
           </p>
         )}
       </div>
+
+      <CardStudio
+        handle={handle}
+        visibility={visibility}
+        onVisibility={setVisibility}
+        saving={visibilitySaving}
+        phone={(user.phone ?? "").trim()}
+        showPhoneOnCard={Boolean(user.showPhoneOnCard)}
+        onShowPhone={setShowPhone}
+      />
 
       <div>
         <p className="mb-2 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
@@ -895,6 +1482,11 @@ export default function InnerId() {
           />
         </div>
       </section>
+
+      <CustomLinksEditor
+        links={Array.isArray(user.profileLinks) ? user.profileLinks : []}
+        onSave={(next) => patchProfile({ profileLinks: next })}
+      />
 
       <section>
         <div className="mb-3 border-t border-[var(--ink)]/[0.08] pt-3">

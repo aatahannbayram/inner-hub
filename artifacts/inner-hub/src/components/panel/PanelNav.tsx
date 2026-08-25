@@ -9,11 +9,9 @@ import {
   CalendarDays,
   Users,
   Gift,
-  HelpCircle,
   BarChart3,
   ClipboardList,
   Settings,
-  CreditCard,
   Zap,
   Sparkles,
   TrendingUp,
@@ -21,7 +19,6 @@ import {
   Activity,
   Fingerprint,
   Webhook,
-  UserCircle,
   Newspaper,
   Mic2,
   Building2,
@@ -101,15 +98,6 @@ const SECTION_DEFS: NavSection[] = [
       { href: "/panel/api", labelKey: "nav.dashboard", mark: "api", icon: Webhook },
     ],
   },
-  {
-    id: "account",
-    titleKey: "nav.sectionAccount",
-    items: [
-      { href: "/panel/profile", labelKey: "nav.profile", icon: UserCircle },
-      { href: "/panel/membership", labelKey: "nav.membership", icon: CreditCard },
-      { href: "/panel/faq", labelKey: "nav.faq", icon: HelpCircle },
-    ],
-  },
 ];
 
 const ADMIN_SECTION: NavSection = {
@@ -128,13 +116,6 @@ const ADMIN_SECTION: NavSection = {
 type PanelNavProps = {
   role?: "member" | "admin";
   collapsed?: boolean;
-  /**
-   * "scroll": Ana + Platform (+ admin varsa) — sidebar'ın kaydırılabilir orta
-   * bölgesine gider. "pinned": Hesap — scroll alanının dışında, footer'ın
-   * hemen üstünde her zaman görünür kalır (S-01: kullanıcı profiline/üyeliğine
-   * her zaman erişebilmeli, scroll etmeye bağlı olmamalı).
-   */
-  variant?: "scroll" | "pinned";
 };
 
 /** /panel/members vs /panel/membership gibi prefix çakışmalarını önler. */
@@ -298,20 +279,13 @@ function Section({ section, collapsed }: { section: NavSection; collapsed: boole
   );
 }
 
-export function PanelNav({ role = "member", collapsed = false, variant = "scroll" }: PanelNavProps) {
+export function PanelNav({ role = "member", collapsed = false }: PanelNavProps) {
   const t = useT();
-  const scrollSections =
-    role === "admin"
-      ? [...SECTION_DEFS.filter((s) => s.id !== "account"), ADMIN_SECTION]
-      : SECTION_DEFS.filter((s) => s.id !== "account");
-  const pinnedSections = SECTION_DEFS.filter((s) => s.id === "account");
-  const sections = variant === "pinned" ? pinnedSections : scrollSections;
+  const sections =
+    role === "admin" ? [...SECTION_DEFS, ADMIN_SECTION] : SECTION_DEFS;
 
   return (
-    <nav
-      className="flex flex-col"
-      aria-label={t(variant === "pinned" ? "nav.sectionAccount" : "nav.sectionMain")}
-    >
+    <nav className="flex flex-col" aria-label={t("nav.sectionMain")}>
       {sections.map((section) => (
         <Section key={section.id} section={section} collapsed={collapsed} />
       ))}

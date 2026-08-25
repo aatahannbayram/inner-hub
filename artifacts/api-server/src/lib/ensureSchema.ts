@@ -30,6 +30,8 @@ export const ensureUserProfileColumns = once(async () => {
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS linkedin_logo_url text`);
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS github_logo_url text`);
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS twitter text`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS profile_links text`);
+  await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS show_phone_on_card boolean NOT NULL DEFAULT false`);
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS skills text`);
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS visibility text`);
   await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS settings_prefs text`);
@@ -256,6 +258,10 @@ export const ensureStageSchema = once(async () => {
   await db.execute(sql`ALTER TABLE stage_products ADD COLUMN IF NOT EXISTS ph_votes_count integer`);
   await db.execute(sql`ALTER TABLE stage_products ADD COLUMN IF NOT EXISTS ph_synced_at timestamp`);
   await db.execute(sql`ALTER TABLE stage_products ADD COLUMN IF NOT EXISTS youtube_url text`);
+  await db.execute(sql`ALTER TABLE stage_products ADD COLUMN IF NOT EXISTS demo_url text`);
+  await db.execute(sql`ALTER TABLE stage_products ADD COLUMN IF NOT EXISTS pitch_deck_url text`);
+  await db.execute(sql`ALTER TABLE stage_products ADD COLUMN IF NOT EXISTS tags text`);
+  await db.execute(sql`ALTER TABLE stage_products ADD COLUMN IF NOT EXISTS looking_for text`);
 });
 
 /** Tanışma talepleri + FAQ kategori kolonu. */

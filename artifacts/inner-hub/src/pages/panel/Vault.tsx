@@ -123,6 +123,15 @@ const TYPE_ICONS: Record<DocType, React.ComponentType<{ className?: string }>> =
   "Rapor": FileText,
 };
 
+const TYPE_COVERS: Record<DocType, string> = {
+  "Pitch Deck": "/editorial/vault/pitch.jpg",
+  "Araştırma": "/editorial/vault/research.jpg",
+  "Not": "/editorial/vault/note.jpg",
+  "Şablon": "/editorial/vault/template.jpg",
+  "Kod": "/editorial/vault/code.jpg",
+  "Rapor": "/editorial/vault/report.jpg",
+};
+
 const ACCESS_STYLE: Record<AccessLevel, { icon: React.ComponentType<{ className?: string }>; color: string; labelKey: string }> = {
   özel: { icon: Lock, color: "text-[var(--error-ink)]", labelKey: "vault.private" },
   topluluk: { icon: Users, color: "text-[var(--ink-body)]", labelKey: "vault.community" },
@@ -731,6 +740,7 @@ export default function Vault() {
             <CarouselContent className="-ml-3">
               {docs.slice(0, 5).map((doc, i) => {
                 const Icon = TYPE_ICONS[doc.type] ?? FileText;
+                const cover = TYPE_COVERS[doc.type];
                 return (
                   <CarouselItem key={doc.id} className="basis-[78%] pl-3 sm:basis-[45%] md:basis-[38%]">
                     <motion.button
@@ -739,31 +749,48 @@ export default function Vault() {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: i * 0.05, duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-                      className="group relative h-40 w-full overflow-hidden border border-white/10 bg-[var(--ink-fixed)] text-left"
+                      className="group relative h-44 w-full overflow-hidden border border-white/10 bg-[var(--ink-fixed)] text-left sm:h-52"
                     >
+                      {cover ? (
+                        <img
+                          src={cover}
+                          alt=""
+                          className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.04]"
+                        />
+                      ) : (
+                        <div
+                          className="absolute inset-0"
+                          style={{
+                            background:
+                              i % 2 === 0
+                                ? "radial-gradient(circle at 20% 20%, rgba(24,255,133,0.18), transparent 45%), linear-gradient(135deg, #0A0A0A, #1a1a1a)"
+                                : "radial-gradient(circle at 80% 30%, rgba(244,241,236,0.12), transparent 40%), linear-gradient(160deg, #111, #0A0A0A)",
+                          }}
+                        />
+                      )}
                       <div
-                        className="absolute inset-0 opacity-90 transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.03]"
-                        style={{
-                          background:
-                            i % 2 === 0
-                              ? "radial-gradient(circle at 20% 20%, rgba(24,255,133,0.18), transparent 45%), linear-gradient(135deg, #0A0A0A, #1a1a1a)"
-                              : "radial-gradient(circle at 80% 30%, rgba(244,241,236,0.12), transparent 40%), linear-gradient(160deg, #111, #0A0A0A)",
-                        }}
+                        aria-hidden
+                        className="absolute inset-0 bg-[var(--ink-fixed)]/25"
+                      />
+                      <div
+                        aria-hidden
+                        className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 to-black/15"
                       />
                       <div className="relative flex h-full flex-col justify-between p-4">
                         <div className="flex items-center gap-2">
-                          <Icon className="size-3.5 text-white/50" />
-                          <span className="font-mono text-label uppercase tracking-widest text-white/57">
+                          <Icon className="size-3.5 text-white/70" />
+                          <span className="font-mono text-label uppercase tracking-widest text-white/75">
                             {doc.type === "Pitch Deck" ? <span lang="en">{docTypeLabel(doc.type, t)}</span> : docTypeLabel(doc.type, t)}
                           </span>
                         </div>
                         <div>
-                          <p className="line-clamp-2 font-serif text-lg leading-snug text-white"
+                          <p
+                            className="line-clamp-2 font-serif text-lg leading-snug text-white [text-shadow:0_1px_12px_rgba(0,0,0,0.7)]"
                             style={{ fontWeight: 600 }}
                           >
                             {cleanDisplayText(doc.title)}
                           </p>
-                          <p className="mt-1 font-mono text-label uppercase tracking-widest text-white/52">
+                          <p className="mt-1 font-mono text-label uppercase tracking-widest text-white/70">
                             {doc.author}
                           </p>
                         </div>

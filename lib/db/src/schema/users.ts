@@ -30,6 +30,8 @@ export const usersTable = pgTable("users", {
   /** LinkedIn profil görseli (link preview / OAuth) */
   linkedinLogoUrl: text("linkedin_logo_url"),
   phone: text("phone"),
+  /** Public kartta telefon / WhatsApp göster (default kapalı) */
+  showPhoneOnCard: boolean("show_phone_on_card").default(false).notNull(),
   whatsappOptIn: text("whatsapp_opt_in"),
   handle: text("handle"),
   github: text("github"),
@@ -39,6 +41,8 @@ export const usersTable = pgTable("users", {
   /** Kişisel site favicon / og:image (link preview) */
   websiteLogoUrl: text("website_logo_url"),
   twitter: text("twitter"),
+  /** JSON: { id, label, url }[] — üyenin serbest profil linkleri */
+  profileLinks: text("profile_links"),
   skills: text("skills"),
   visibility: text("visibility").default("members"),
   settingsPrefs: text("settings_prefs"),

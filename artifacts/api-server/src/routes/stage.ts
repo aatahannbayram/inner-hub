@@ -35,6 +35,49 @@ function periodStart(period: StagePeriod): Date | null {
   return new Date(now - 365 * 24 * 60 * 60 * 1000);
 }
 
+function parseTags(raw: string | null | undefined): string[] {
+  if (!raw?.trim()) return [];
+  const s = raw.trim();
+  if (s.startsWith("[")) {
+    try {
+      const parsed = JSON.parse(s);
+      if (Array.isArray(parsed)) {
+        return parsed
+          .filter((x): x is string => typeof x === "string")
+          .map((x) => x.trim())
+          .filter(Boolean)
+          .slice(0, 8);
+      }
+    } catch {
+      /* fall through */
+    }
+  }
+  return s
+    .split(/[,;\n]/)
+    .map((x) => x.trim())
+    .filter(Boolean)
+    .slice(0, 8);
+}
+
+function serializeTags(tags: string[]): string | null {
+  if (!tags.length) return null;
+  return JSON.stringify(tags);
+}
+
+function normalizeOptionalHttpUrl(raw: string | undefined | null, max = 500): string | null {
+  const u = (raw ?? "").trim();
+  if (!u) return null;
+  if (u.length > max) return null;
+  try {
+    const withProto = /^https?:\/\//i.test(u) ? u : `https://${u}`;
+    const parsed = new URL(withProto);
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return null;
+    return parsed.toString();
+  } catch {
+    return null;
+  }
+}
+
 function mapProduct(
   product: typeof stageProductsTable.$inferSelect,
   voteCount: number,
@@ -55,6 +98,10 @@ function mapProduct(
     phVotesCount: product.phVotesCount ?? null,
     youtubeUrl: product.youtubeUrl ?? null,
     youtubeThumbnail: ytId ? youtubeThumbnailUrl(ytId) : null,
+    demoUrl: product.demoUrl ?? null,
+    pitchDeckUrl: product.pitchDeckUrl ?? null,
+    tags: parseTags(product.tags),
+    lookingFor: product.lookingFor ?? null,
     createdAt: product.createdAt.toISOString(),
     userId: product.userId,
     authorName: author?.name ?? null,
@@ -305,14 +352,19 @@ router.post("/stage/products", requireAuth, async (req, res) => {
   try {
     await ensureStageSchema();
     const userId = req.user!.id;
-    const { title, url, pitch, imageUrl, productHuntUrl, youtubeUrl } = req.body as {
-      title?: string;
-      url?: string;
-      pitch?: string;
-      imageUrl?: string;
-      productHuntUrl?: string;
-      youtubeUrl?: string;
-    };
+    const { title, url, pitch, imageUrl, productHuntUrl, youtubeUrl, demoUrl, pitchDeckUrl, tags, lookingFor } =
+      req.body as {
+        title?: string;
+        url?: string;
+        pitch?: string;
+        imageUrl?: string;
+        productHuntUrl?: string;
+        youtubeUrl?: string;
+        demoUrl?: string;
+        pitchDeckUrl?: string;
+        tags?: string | string[];
+        lookingFor?: string;
+      };
 
     const t = title?.trim() ?? "";
     const u = url?.trim() ?? "";
@@ -364,6 +416,26 @@ router.post("/stage/products", requireAuth, async (req, res) => {
       if (!img) img = youtubeThumbnailUrl(ytId);
     }
 
+    const demo = normalizeOptionalHttpUrl(demoUrl);
+    const deck = normalizeOptionalHttpUrl(pitchDeckUrl);
+    if (demoUrl?.trim() && !demo) {
+      res.status(400).json({ error: "Geçersiz demo linki" });
+      return;
+    }
+    if (pitchDeckUrl?.trim() && !deck) {
+      res.status(400).json({ error: "Geçersiz pitch deck linki" });
+      return;
+    }
+
+    const tagList = Array.isArray(tags)
+      ? tags
+          .filter((x): x is string => typeof x === "string")
+          .map((x) => x.trim())
+          .filter(Boolean)
+          .slice(0, 8)
+      : parseTags(typeof tags === "string" ? tags : "");
+    const looking = (lookingFor ?? "").trim().slice(0, 120) || null;
+
     const [created] = await db
       .insert(stageProductsTable)
       .values({
@@ -378,6 +450,10 @@ router.post("/stage/products", requireAuth, async (req, res) => {
         phVotesCount: ph?.phVotesCount ?? null,
         phSyncedAt: ph?.phSyncedAt ?? null,
         youtubeUrl: ytCanonical,
+        demoUrl: demo,
+        pitchDeckUrl: deck,
+        tags: serializeTags(tagList),
+        lookingFor: looking,
       })
       .returning();
 

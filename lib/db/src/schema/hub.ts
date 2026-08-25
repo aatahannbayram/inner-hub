@@ -379,6 +379,14 @@ export const stageProductsTable = pgTable("stage_products", {
   phVotesCount: integer("ph_votes_count"),
   phSyncedAt: timestamp("ph_synced_at"),
   youtubeUrl: text("youtube_url"),
+  /** Canlı demo / app store / sandbox */
+  demoUrl: text("demo_url"),
+  /** Pitch deck (PDF, DocSend, Notion, Drive…) */
+  pitchDeckUrl: text("pitch_deck_url"),
+  /** Virgülle veya JSON dizi: "B2B SaaS, AI" */
+  tags: text("tags"),
+  /** Çemberden ne bekliyor: feedback, yatırımcı, beta… */
+  lookingFor: text("looking_for"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

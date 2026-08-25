@@ -13,6 +13,7 @@ import {
   Trash2,
   Upload,
   X,
+  FileText,
 } from "lucide-react";
 import { FadeIn } from "@/components/FadeIn";
 import { Lockup } from "@/components/Lockup";
@@ -52,6 +53,10 @@ type StageProduct = {
   phVotesCount: number | null;
   youtubeUrl: string | null;
   youtubeThumbnail: string | null;
+  demoUrl?: string | null;
+  pitchDeckUrl?: string | null;
+  tags?: string[];
+  lookingFor?: string | null;
   authorName: string | null;
   authorHandle: string | null;
   createdAt: string;
@@ -608,7 +613,7 @@ function ProductCard({
   );
 }
 
-const STAGE_DRAFT_KEY = "inner_stage_submit_draft_v1";
+const STAGE_DRAFT_KEY = "inner_stage_submit_draft_v2";
 
 type StageSubmitDraft = {
   title: string;
@@ -617,6 +622,10 @@ type StageSubmitDraft = {
   phPath: string;
   youtubePath: string;
   coverPath: string;
+  demoPath: string;
+  deckPath: string;
+  tags: string;
+  lookingFor: string;
 };
 
 function readStageDraft(): StageSubmitDraft | null {
@@ -632,6 +641,10 @@ function readStageDraft(): StageSubmitDraft | null {
       phPath: typeof parsed.phPath === "string" ? parsed.phPath : "",
       youtubePath: typeof parsed.youtubePath === "string" ? parsed.youtubePath : "",
       coverPath: typeof parsed.coverPath === "string" ? parsed.coverPath : "",
+      demoPath: typeof parsed.demoPath === "string" ? parsed.demoPath : "",
+      deckPath: typeof parsed.deckPath === "string" ? parsed.deckPath : "",
+      tags: typeof parsed.tags === "string" ? parsed.tags : "",
+      lookingFor: typeof parsed.lookingFor === "string" ? parsed.lookingFor : "",
     };
   } catch {
     return null;
@@ -646,7 +659,11 @@ function writeStageDraft(draft: StageSubmitDraft) {
       !draft.pitch.trim() &&
       !draft.phPath.trim() &&
       !draft.youtubePath.trim() &&
-      !draft.coverPath.trim();
+      !draft.coverPath.trim() &&
+      !draft.demoPath.trim() &&
+      !draft.deckPath.trim() &&
+      !draft.tags.trim() &&
+      !draft.lookingFor.trim();
     if (empty) localStorage.removeItem(STAGE_DRAFT_KEY);
     else localStorage.setItem(STAGE_DRAFT_KEY, JSON.stringify(draft));
   } catch {
@@ -679,6 +696,10 @@ function SubmitDialog({
   const [youtubePath, setYoutubePath] = useState("");
   const [coverPath, setCoverPath] = useState("");
   const [coverUpload, setCoverUpload] = useState<string | null>(null);
+  const [demoPath, setDemoPath] = useState("");
+  const [deckPath, setDeckPath] = useState("");
+  const [tags, setTags] = useState("");
+  const [lookingFor, setLookingFor] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [titleTouched, setTitleTouched] = useState(false);
@@ -726,6 +747,10 @@ function SubmitDialog({
       phPath.trim() ||
       youtubePath.trim() ||
       coverPath.trim() ||
+      demoPath.trim() ||
+      deckPath.trim() ||
+      tags.trim() ||
+      lookingFor.trim() ||
       coverUpload;
     if (hasLocal) {
       setDraftNotice("draft");
@@ -735,7 +760,16 @@ function SubmitDialog({
     const draft = readStageDraft();
     if (
       draft &&
-      (draft.title || draft.urlPath || draft.pitch || draft.phPath || draft.youtubePath || draft.coverPath)
+      (draft.title ||
+        draft.urlPath ||
+        draft.pitch ||
+        draft.phPath ||
+        draft.youtubePath ||
+        draft.coverPath ||
+        draft.demoPath ||
+        draft.deckPath ||
+        draft.tags ||
+        draft.lookingFor)
     ) {
       setTitle(draft.title);
       setUrlPath(draft.urlPath);
@@ -743,6 +777,10 @@ function SubmitDialog({
       setPhPath(draft.phPath);
       setYoutubePath(draft.youtubePath);
       setCoverPath(draft.coverPath);
+      setDemoPath(draft.demoPath);
+      setDeckPath(draft.deckPath);
+      setTags(draft.tags);
+      setLookingFor(draft.lookingFor);
       setDraftNotice("draft");
       return;
     }
@@ -774,10 +812,21 @@ function SubmitDialog({
   useEffect(() => {
     if (!open) return;
     const timer = window.setTimeout(() => {
-      writeStageDraft({ title, urlPath, pitch, phPath, youtubePath, coverPath });
+      writeStageDraft({
+        title,
+        urlPath,
+        pitch,
+        phPath,
+        youtubePath,
+        coverPath,
+        demoPath,
+        deckPath,
+        tags,
+        lookingFor,
+      });
     }, 350);
     return () => window.clearTimeout(timer);
-  }, [open, title, urlPath, pitch, phPath, youtubePath, coverPath]);
+  }, [open, title, urlPath, pitch, phPath, youtubePath, coverPath, demoPath, deckPath, tags, lookingFor]);
 
   // Ürün URL → başlık, pitch, kapak; PH ise PH alanını da doldur
   useEffect(() => {
@@ -864,6 +913,10 @@ function SubmitDialog({
     setYoutubePath("");
     setCoverPath("");
     setCoverUpload(null);
+    setDemoPath("");
+    setDeckPath("");
+    setTags("");
+    setLookingFor("");
     setPreview(null);
     setTitleTouched(false);
     setPitchTouched(false);
@@ -886,6 +939,8 @@ function SubmitDialog({
       const phAbsolute = toHttpsUrl(phPath);
       const youtubeAbsolute = toHttpsUrl(youtubePath);
       const coverAbsolute = toHttpsUrl(coverPath);
+      const demoAbsolute = toHttpsUrl(demoPath);
+      const deckAbsolute = toHttpsUrl(deckPath);
       const res = await fetch(apiUrl("/api/stage/products"), {
         method: "POST",
         credentials: "include",
@@ -897,6 +952,10 @@ function SubmitDialog({
           imageUrl: coverUpload || coverAbsolute || preview?.image || null,
           productHuntUrl: phAbsolute || undefined,
           youtubeUrl: youtubeAbsolute || undefined,
+          demoUrl: demoAbsolute || undefined,
+          pitchDeckUrl: deckAbsolute || undefined,
+          tags: tags.trim() || undefined,
+          lookingFor: lookingFor.trim() || undefined,
         }),
       });
       const json = await res.json().catch(() => ({}));
@@ -918,19 +977,34 @@ function SubmitDialog({
     pitch.trim() ||
     phPath.trim() ||
     youtubePath.trim() ||
-    coverPath.trim();
+    coverPath.trim() ||
+    demoPath.trim() ||
+    deckPath.trim() ||
+    tags.trim() ||
+    lookingFor.trim();
 
   return (
     <Dialog
       open={open}
       onOpenChange={(v) => {
         if (!v) {
-          writeStageDraft({ title, urlPath, pitch, phPath, youtubePath, coverPath });
+          writeStageDraft({
+            title,
+            urlPath,
+            pitch,
+            phPath,
+            youtubePath,
+            coverPath,
+            demoPath,
+            deckPath,
+            tags,
+            lookingFor,
+          });
           onClose();
         }
       }}
     >
-      <DialogContent className="max-h-[min(92dvh,680px)] w-[calc(100%-1.5rem)] max-w-md gap-0 overflow-y-auto rounded-none border-[var(--ink)]/10 bg-[var(--bone)] p-0 dark:border-white/12 dark:bg-[#141414] sm:rounded-none">
+      <DialogContent className="max-h-[min(92dvh,780px)] w-[calc(100%-1.5rem)] max-w-md gap-0 overflow-y-auto rounded-none border-[var(--ink)]/10 bg-[var(--bone)] p-0 dark:border-white/12 dark:bg-[#141414] sm:rounded-none">
         <DialogHeader className="space-y-1 border-b border-[var(--ink)]/[0.08] px-5 py-4 text-left dark:border-white/10">
           <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
             <span lang="en">inner·stage</span>
@@ -1077,6 +1151,22 @@ function SubmitDialog({
           />
 
           <PrefixedUrlField
+            label={t("stage.fieldDemo")}
+            mark={<Rocket className="size-3 shrink-0" />}
+            value={demoPath}
+            onChange={setDemoPath}
+            placeholder={t("stage.demoPlaceholder")}
+          />
+
+          <PrefixedUrlField
+            label={t("stage.fieldPitchDeck")}
+            mark={<FileText className="size-3 shrink-0" />}
+            value={deckPath}
+            onChange={setDeckPath}
+            placeholder={t("stage.pitchDeckPlaceholder")}
+          />
+
+          <PrefixedUrlField
             label={t("stage.fieldPh")}
             mark={<ProductHuntMark className="size-3.5 shrink-0" />}
             value={phPath}
@@ -1084,6 +1174,30 @@ function SubmitDialog({
             placeholder={t("stage.phPlaceholder")}
             loading={phPreviewLoading}
           />
+
+          <label className="block space-y-1.5">
+            <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-muted)]">
+              {t("stage.fieldTags")}
+            </span>
+            <input
+              value={tags}
+              onChange={(e) => setTags(e.target.value)}
+              placeholder={t("stage.tagsPlaceholder")}
+              className={STAGE_FIELD}
+            />
+          </label>
+
+          <label className="block space-y-1.5">
+            <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--ink-muted)]">
+              {t("stage.fieldLookingFor")}
+            </span>
+            <input
+              value={lookingFor}
+              onChange={(e) => setLookingFor(e.target.value.slice(0, 120))}
+              placeholder={t("stage.lookingForPlaceholder")}
+              className={STAGE_FIELD}
+            />
+          </label>
 
           {error && <p className="text-xs text-[var(--error-ink)]">{error}</p>}
           <button

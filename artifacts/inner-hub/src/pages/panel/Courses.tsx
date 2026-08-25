@@ -256,8 +256,12 @@ function CourseCard({
               <span lang="en" className="panel-glass px-1.5 py-0.5 font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
                 {course.tag}
               </span>
-              <span lang="en" className="panel-glass px-1.5 py-0.5 font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
-                {course.format}
+              <span className="panel-glass px-1.5 py-0.5 font-mono text-label uppercase tracking-widest text-[var(--ink-body)]">
+                {course.format === "live"
+                  ? t("courses.formatLive")
+                  : course.format === "hybrid"
+                    ? t("courses.formatHybrid")
+                    : t("courses.formatVod")}
               </span>
               {!course.isEnrolled && (
                 <span className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">
@@ -409,77 +413,74 @@ function CoursesHero({
 }) {
   const t = useT();
   return (
-    <div
-      className="relative -mx-4 -mt-6 overflow-hidden sm:-mx-6 lg:-mx-8 lg:-mt-8"
-      style={{ height: "min(70vh, 620px)", minHeight: 440 }}
-    >
-      <HeroVideo
-        src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260406_094145_4a271a6c-3869-4f1c-8aa7-aeb0cb227994.mp4"
-        poster="/posters/courses-hero.jpg"
-        className="absolute inset-0 h-full w-full object-cover"
-      />
-      {/* backdrop-blur-xl yerine deterministik gradient scrim - altta duran
-          metin için yeterli kontrast, blur'un sürekli GPU maliyeti olmadan. */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-[1] bg-[var(--ink-fixed)]/40"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-t from-[var(--ink-fixed)]/85 via-[var(--ink-fixed)]/25 to-transparent"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-r from-[var(--ink-fixed)]/55 via-transparent to-transparent"
-      />
+    <div className="relative -mx-3 -mt-5 overflow-hidden sm:-mx-5 sm:-mt-6 lg:-mx-8 lg:-mt-8">
+      <div className="relative min-h-[min(78vh,640px)]">
+        <HeroVideo
+          src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260406_094145_4a271a6c-3869-4f1c-8aa7-aeb0cb227994.mp4"
+          poster="/posters/courses-hero.jpg"
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 z-[1] bg-[var(--ink-fixed)]/40"
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-t from-[var(--ink-fixed)]/90 via-[var(--ink-fixed)]/30 to-transparent"
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-r from-[var(--ink-fixed)]/55 via-transparent to-transparent"
+        />
 
-      <div className="relative z-10 flex h-full flex-col justify-end px-6 pb-10 md:px-12 md:pb-14">
-        <div className="lg:grid lg:grid-cols-2 lg:items-end lg:gap-10">
-          <div>
-            <p className="mb-3 font-mono text-label uppercase tracking-widest text-white/60 [text-shadow:0_1px_12px_rgba(0,0,0,0.6)]">
-              {t("courses.heroEyebrow")}
-            </p>
-            <AnimatedHeading
-              text={t("courses.heroHeadline")}
-              className="mb-4 font-display font-serif italic text-4xl leading-[1.1] text-white [text-shadow:0_2px_24px_rgba(0,0,0,0.55)] md:text-5xl lg:text-6xl"
-            />
-            <FadeIn delay={0.8}>
-              <p className="mb-6 max-w-[46ch] text-base text-white/75 [text-shadow:0_1px_12px_rgba(0,0,0,0.6)] md:text-lg">
-                {t("courses.heroBody")}
+        <div className="relative z-10 flex min-h-[min(78vh,640px)] flex-col justify-end px-4 pb-8 pt-28 sm:px-6 sm:pb-10 md:px-10 md:pb-12 lg:px-8 lg:pb-14">
+          <div className="grid items-end gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(16rem,0.8fr)] lg:gap-12">
+            <div className="min-w-0">
+              <p className="mb-3 font-mono text-label uppercase tracking-widest text-white/60 [text-shadow:0_1px_12px_rgba(0,0,0,0.6)]">
+                {t("courses.heroEyebrow")}
               </p>
-            </FadeIn>
-            <FadeIn delay={1.2}>
-              <div className="flex flex-wrap gap-3 sm:gap-4">
-                {hasEnrolled && (
+              <AnimatedHeading
+                text={t("courses.heroHeadline")}
+                className="mb-4 font-display font-serif italic text-[clamp(1.75rem,6vw,3.75rem)] leading-[1.12] text-white [text-shadow:0_2px_24px_rgba(0,0,0,0.55)]"
+              />
+              <FadeIn delay={0.8}>
+                <p className="mb-6 max-w-[42ch] text-sm leading-relaxed text-white/80 [text-shadow:0_1px_12px_rgba(0,0,0,0.6)] sm:text-base md:text-lg">
+                  {t("courses.heroBody")}
+                </p>
+              </FadeIn>
+              <FadeIn delay={1.2}>
+                <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:flex-wrap sm:gap-4">
+                  {hasEnrolled && (
+                    <button
+                      onClick={() => scrollToId("courses-enrolled")}
+                      className="group inline-flex min-h-11 w-full items-center justify-center gap-2 bg-[var(--bone-fixed)] px-6 py-3 font-mono text-sm uppercase tracking-widest text-[var(--ink-fixed)] transition-opacity hover:opacity-90 sm:w-auto sm:px-8"
+                    >
+                      {t("courses.continueCta")}
+                      <ChevronRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
+                    </button>
+                  )}
                   <button
-                    onClick={() => scrollToId("courses-enrolled")}
-                    className="group inline-flex min-h-11 items-center gap-2 bg-[var(--bone-fixed)] px-6 py-3 font-mono text-sm uppercase tracking-widest text-[var(--ink-fixed)] transition-opacity hover:opacity-90 sm:px-8"
+                    onClick={() => scrollToId("courses-available")}
+                    className={
+                      hasEnrolled
+                        ? "group inline-flex min-h-11 w-full items-center justify-center gap-2 border border-[var(--bone-fixed)]/45 bg-transparent px-6 py-3 font-mono text-sm uppercase tracking-widest text-[var(--bone-fixed)] transition-colors hover:border-[var(--bone-fixed)] hover:bg-[var(--bone-fixed)] hover:text-[var(--ink-fixed)] sm:w-auto sm:px-8"
+                        : "group inline-flex min-h-11 w-full items-center justify-center gap-2 bg-[var(--bone-fixed)] px-6 py-3 font-mono text-sm uppercase tracking-widest text-[var(--ink-fixed)] transition-opacity hover:opacity-90 sm:w-auto sm:px-8"
+                    }
                   >
-                    {t("courses.continueCta")}
+                    {t("courses.exploreCta")}
                     <ChevronRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
                   </button>
-                )}
-                <button
-                  onClick={() => scrollToId("courses-available")}
-                  className={
-                    hasEnrolled
-                      ? "liquid-glass group inline-flex min-h-11 items-center gap-2 border border-[var(--bone-fixed)]/25 px-6 py-3 font-mono text-sm uppercase tracking-widest text-[var(--bone-fixed)] transition-colors hover:bg-[var(--bone-fixed)] hover:text-[var(--ink-fixed)] sm:px-8"
-                      : "group inline-flex min-h-11 items-center gap-2 bg-[var(--bone-fixed)] px-6 py-3 font-mono text-sm uppercase tracking-widest text-[var(--ink-fixed)] transition-opacity hover:opacity-90 sm:px-8"
-                  }
-                >
-                  {t("courses.exploreCta")}
-                  <ChevronRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
-                </button>
-              </div>
-            </FadeIn>
-          </div>
+                </div>
+              </FadeIn>
+            </div>
 
-          <div className="mt-8 flex items-end justify-start lg:mt-0 lg:justify-end">
-            <HeroQuickStat
-              value={totalCount > 0 ? `${enrolledCount}/${totalCount}` : "-"}
-              label={t("courses.heroStat")}
-              tagline={t("courses.heroTagline")}
-            />
+            <div className="hidden min-w-0 justify-self-start lg:flex lg:justify-self-end">
+              <HeroQuickStat
+                value={totalCount > 0 ? `${enrolledCount}/${totalCount}` : "-"}
+                label={t("courses.heroStat")}
+                tagline={t("courses.heroTagline")}
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -499,18 +500,18 @@ function CoursesStat({
   icon: React.ComponentType<{ className?: string }>;
 }) {
   return (
-    <div className="panel-glass p-4">
-      <div className="mb-2 flex items-center justify-between">
-        <p className="font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">{label}</p>
-        <Icon className="size-3.5 text-[var(--ink-subtle)]" />
+    <div className="panel-glass min-w-0 p-3 sm:p-4">
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <p className="truncate font-mono text-label uppercase tracking-widest text-[var(--ink-muted)]">{label}</p>
+        <Icon className="size-3.5 shrink-0 text-[var(--ink-subtle)]" />
       </div>
       <p
-        className="font-serif text-2xl text-[var(--ink)]"
+        className="font-serif text-xl text-[var(--ink)] sm:text-2xl"
         style={{ fontWeight: 600 }}
       >
         {value}
       </p>
-      <p className="mt-1 font-mono text-label text-[var(--ink-muted)]">{sub}</p>
+      <p className="mt-1 truncate font-mono text-label text-[var(--ink-muted)]">{sub}</p>
     </div>
   );
 }
@@ -604,24 +605,24 @@ export default function CoursesPage() {
   const closeLesson = () => setLocation("/panel/courses");
 
   return (
-    <div className="min-w-0 space-y-8 max-w-4xl overflow-x-hidden">
-      {/* Hero */}
+    <div className="min-w-0 overflow-x-hidden">
       <CoursesHero
         hasEnrolled={enrolled.length > 0}
         enrolledCount={enrolled.length}
         totalCount={courses.length}
       />
 
-      <FadeIn delay={0.01}>
-        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-          <div className="flex w-full max-w-xs panel-glass sm:w-auto">
+      <div className="mt-6 space-y-8 sm:mt-8">
+        <FadeIn delay={0.01}>
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex w-full panel-glass sm:w-auto">
             {(["mine", "all"] as RoomFilter[]).map((r) => (
               <button
                 key={r}
                 type="button"
                 onClick={() => setRoom(r)}
                 className={[
-                  "min-h-10 flex-1 px-4 py-2 font-mono text-label uppercase tracking-widest transition-colors sm:flex-none",
+                  "min-h-10 flex-1 px-4 py-2 font-mono text-label uppercase tracking-widest transition-colors sm:flex-none sm:px-5",
                   room === r
                     ? "bg-[var(--ink)] text-[var(--bone)]"
                     : "text-[var(--ink-body)] hover:text-[var(--ink)]",
@@ -632,24 +633,20 @@ export default function CoursesPage() {
             ))}
           </div>
           {hasCategoryField ? (
-            <div className="flex flex-wrap gap-1.5">
+            <div className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               {COURSE_CATEGORIES.map((c) => (
                 <button
                   key={c}
                   type="button"
                   onClick={() => setCategory(c)}
                   className={[
-                    "border px-2.5 py-1.5 font-mono text-label uppercase tracking-widest transition-colors",
+                    "shrink-0 border px-2.5 py-1.5 font-mono text-label uppercase tracking-widest transition-colors",
                     category === c
                       ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--bone)]"
                       : "border-[var(--ink)]/15 text-[var(--ink-muted)] hover:text-[var(--ink)]",
                   ].join(" ")}
                 >
-                  {c === "all" ? (
-                    t("common.all")
-                  ) : (
-                    <span lang="en">{t(`courses.category.${c}`)}</span>
-                  )}
+                  {c === "all" ? t("courses.categoryAll") : t(`courses.category.${c}`)}
                 </button>
               ))}
             </div>
@@ -659,7 +656,7 @@ export default function CoursesPage() {
 
       {!loading && !isError && courses.length > 0 && (
         <FadeIn delay={0.02}>
-          <div className="grid grid-cols-2 gap-2 sm:gap-3 sm:grid-cols-4">
+          <div className="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4">
             <CoursesStat label={t("courses.statEnrolled")} value={String(enrolled.length)} sub={t("courses.statEnrolledSub")} icon={GraduationCap} />
             <CoursesStat label={t("courses.statProgress")} value={avgProgress !== null ? `%${avgProgress}` : "·"} sub={t("courses.statProgressSub")} icon={TrendingUp} />
             <CoursesStat label={t("courses.statOther")} value={String(available.length)} sub={t("courses.statOtherSub")} icon={BookOpen} />
@@ -755,6 +752,7 @@ export default function CoursesPage() {
           onCompleted={() => void queryClient.invalidateQueries({ queryKey: ["courses"] })}
         />
       )}
+      </div>
     </div>
   );
 }

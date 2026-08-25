@@ -195,6 +195,12 @@ function RedirectArtifactsSlug() {
 }
 
 /** Public marketing routes — nested under `/en` for English shareable URLs. */
+function AtHandleRedirect() {
+  const params = useParams<{ handle: string }>();
+  const h = (params.handle ?? "").replace(/^@/, "").toLowerCase().replace(/[^a-z0-9_]/g, "");
+  return <Redirect to={`/u/${h || ""}`} />;
+}
+
 function PublicRoutes() {
   return (
     <Switch>
@@ -208,6 +214,7 @@ function PublicRoutes() {
       <Route path="/privacy" component={PrivacyPage} />
       <Route path="/sss" component={PublicFaqPage} />
       <Route path="/u/:handle" component={PublicProfile} />
+      <Route path="/@:handle" component={AtHandleRedirect} />
       <Route path="/s/:id" component={StageKunyePage} />
       <Route component={NotFound} />
     </Switch>

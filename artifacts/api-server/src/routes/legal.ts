@@ -146,6 +146,7 @@ router.delete("/account", requireAuth, async (req, res) => {
         instagram: null,
         university: null,
         skills: "[]",
+        profileLinks: "[]",
       })
       .where(eq(usersTable.id, userId));
 
